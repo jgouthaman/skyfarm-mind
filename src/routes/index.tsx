@@ -433,6 +433,7 @@ function Landing() {
             <div className="font-display mb-3">Contact</div>
             <ul className="space-y-2 text-muted-foreground">
               <li>hello@agrisky.in</li>
+              <li>Gouthaman — +91 99402 63589</li>
               <li>Arunamangala, India</li>
             </ul>
           </div>
