@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { Plane, Mail, Lock, ArrowRight, Shield } from "lucide-react";
+import { Plane, Smartphone, ArrowRight, Shield, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,13 +19,57 @@ export const Route = createFileRoute("/control-center/login")({
 
 function LoginPage() {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("operator@atomsky.in");
-  const [password, setPassword] = useState("");
+  const [mobile, setMobile] = useState("");
+  const [otp, setOtp] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const isMobileValid = /^\d{10}$/.test(mobile);
+  const isOtpValid = /^\d{5}$/.test(otp);
+
+  const handleSendOtp = (e: React.FormEvent) => {
     e.preventDefault();
-    toast.success("Welcome to AtomSky Control Center");
-    setTimeout(() => navigate({ to: "/control-center" }), 300);
+    if (!isMobileValid) {
+      toast.error("Please enter a valid 10-digit mobile number.");
+      return;
+    }
+    setOtpSent(true);
+    setOtp("");
+    toast.success("Demo OTP sent");
+  };
+
+  const handleVerifyOtp = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!isOtpValid) {
+      toast.error("Please enter a valid 5-digit OTP.");
+      return;
+    }
+
+    const expectedOtp = mobile.slice(-5);
+    if (otp === expectedOtp) {
+      toast.success("Welcome to AtomSky Control Center");
+      setTimeout(() => navigate({ to: "/control-center" }), 300);
+    } else {
+      toast.error("Invalid OTP. Please enter the last 5 digits of your mobile number.");
+    }
+  };
+
+  const handleMobileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const digitsOnly = e.target.value.replace(/\D/g, "");
+    if (digitsOnly.length <= 10) {
+      setMobile(digitsOnly);
+    }
+  };
+
+  const handleOtpChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const digitsOnly = e.target.value.replace(/\D/g, "");
+    if (digitsOnly.length <= 5) {
+      setOtp(digitsOnly);
+    }
+  };
+
+  const handleBackToMobile = () => {
+    setOtpSent(false);
+    setOtp("");
   };
 
   return (
@@ -54,36 +98,74 @@ function LoginPage() {
           </p>
         </div>
 
-        <form onSubmit={handleLogin} className="rounded-2xl border border-border/60 bg-card/60 backdrop-blur p-6 shadow-card space-y-5">
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="pl-9" placeholder="you@company.com" />
+        {!otpSent ? (
+          <form onSubmit={handleSendOtp} className="rounded-2xl border border-border/60 bg-card/60 backdrop-blur p-6 shadow-card space-y-5">
+            <div className="space-y-2">
+              <Label htmlFor="mobile">Mobile Number</Label>
+              <div className="relative">
+                <Smartphone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="mobile"
+                  type="tel"
+                  inputMode="numeric"
+                  maxLength={10}
+                  required
+                  value={mobile}
+                  onChange={handleMobileChange}
+                  className="pl-9"
+                  placeholder="9876543210"
+                  autoFocus
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">Enter your 10-digit mobile number to receive a demo OTP.</p>
             </div>
-          </div>
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="password">Password</Label>
-              <button type="button" onClick={() => toast("Password reset link sent")} className="text-xs text-primary hover:underline">Forgot Password?</button>
-            </div>
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input id="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} className="pl-9" placeholder="••••••••" />
-            </div>
-          </div>
 
-          <Button type="submit" className="w-full bg-gradient-primary text-primary-foreground hover:opacity-90 shadow-glow">
-            Login <ArrowRight className="ml-1 h-4 w-4" />
-          </Button>
-          <Button type="button" variant="outline" className="w-full" onClick={() => toast.success("Access request submitted")}>
-            Request Access
-          </Button>
+            <Button type="submit" className="w-full bg-gradient-primary text-primary-foreground hover:opacity-90 shadow-glow">
+              Send OTP <ArrowRight className="ml-1 h-4 w-4" />
+            </Button>
 
-          <p className="text-center text-xs text-muted-foreground pt-2">
-            Protected by AtomSky aerospace-grade access controls.
-          </p>
-        </form>
+            <p className="text-center text-xs text-muted-foreground pt-2">
+              Protected by AtomSky aerospace-grade access controls.
+            </p>
+          </form>
+        ) : (
+          <form onSubmit={handleVerifyOtp} className="rounded-2xl border border-border/60 bg-card/60 backdrop-blur p-6 shadow-card space-y-5">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="otp">Enter OTP</Label>
+                <button type="button" onClick={handleBackToMobile} className="text-xs text-primary hover:underline flex items-center gap-1">
+                  <ArrowLeft className="h-3 w-3" /> Change number
+                </button>
+              </div>
+              <div className="relative">
+                <Shield className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="otp"
+                  type="tel"
+                  inputMode="numeric"
+                  maxLength={5}
+                  required
+                  value={otp}
+                  onChange={handleOtpChange}
+                  className="pl-9 tracking-[0.3em] text-center font-mono text-lg"
+                  placeholder="• • • • •"
+                  autoFocus
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Enter the last 5 digits of your mobile number ({mobile}) as the demo OTP.
+              </p>
+            </div>
+
+            <Button type="submit" className="w-full bg-gradient-primary text-primary-foreground hover:opacity-90 shadow-glow">
+              Verify & Login <ArrowRight className="ml-1 h-4 w-4" />
+            </Button>
+
+            <p className="text-center text-xs text-muted-foreground pt-2">
+              Demo mode — no real SMS is sent.
+            </p>
+          </form>
+        )}
       </main>
     </div>
   );
