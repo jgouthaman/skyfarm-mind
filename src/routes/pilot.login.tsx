@@ -38,7 +38,7 @@ function PilotLogin() {
     }
     pilotStore.login(name, mobile);
     toast.success(`Welcome ${name}`);
-    setTimeout(() => navigate({ to: "/pilot" }), 250);
+    setTimeout(() => navigate({ to: "/field" }), 250);
   };
 
   return (
