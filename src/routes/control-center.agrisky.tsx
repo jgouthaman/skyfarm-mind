@@ -529,14 +529,24 @@ function InputLoading() {
 }
 
 /* ---------- SPRAYING ---------- */
-function Spraying() {
+function Spraying({ onOpenMission }: { onOpenMission: (id: string) => void }) {
   return (
     <>
       <PageHeader
         title="Spraying Missions"
         subtitle="Schedule, monitor, and complete drone spraying missions for selected zones."
-        action={<Button className="bg-gradient-agri text-primary-foreground" onClick={() => toast.success("Spraying mission created")}><Plus className="h-4 w-4 mr-1" /> New Mission</Button>}
+        action={
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" onClick={() => onOpenMission(ACTIVE_MISSION_ID)}>
+              <Smartphone className="h-4 w-4 mr-1" /> Open Mission Detail
+            </Button>
+            <Button className="bg-gradient-agri text-primary-foreground" onClick={() => toast.success("Spraying mission created")}>
+              <Plus className="h-4 w-4 mr-1" /> New Mission
+            </Button>
+          </div>
+        }
       />
+
 
       <div className="grid lg:grid-cols-3 gap-5">
         <div className="lg:col-span-2 rounded-2xl border border-border/60 bg-gradient-card p-5 shadow-card">
