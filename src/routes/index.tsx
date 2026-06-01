@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import {
   Plane, Leaf, Droplets, ScanLine, Sprout, Map as MapIcon, Brain, FileText,
