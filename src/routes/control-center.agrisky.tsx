@@ -4,8 +4,9 @@ import {
   Plane, Leaf, LayoutDashboard, Tractor, ScanLine, Map as MapIcon, Droplets,
   Sprout, Activity, FileText, Settings, Bell, Search, ChevronDown, Plus,
   Upload, CheckCircle2, AlertTriangle, Clock, Play, Pause, X as XIcon,
-  Download, Share2, Eye, PencilLine, Users, Package,
+  Download, Share2, Eye, PencilLine, Users, Package, Smartphone, RadioTower,
 } from "lucide-react";
+import { FieldSyncMonitor, MissionDetail, ACTIVE_MISSION_ID } from "@/components/agrisky/field-sync";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -22,7 +23,7 @@ export const Route = createFileRoute("/control-center/agrisky")({
 
 type TabId =
   | "overview" | "farms" | "survey" | "boundary" | "input"
-  | "spraying" | "activity" | "reports" | "settings";
+  | "spraying" | "field-sync" | "activity" | "reports" | "settings";
 
 const navItems: { id: TabId; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
@@ -31,6 +32,7 @@ const navItems: { id: TabId; label: string; icon: React.ComponentType<{ classNam
   { id: "boundary", label: "Boundary Mapping", icon: MapIcon },
   { id: "input", label: "Input Loading", icon: Droplets },
   { id: "spraying", label: "Spraying Missions", icon: Sprout },
+  { id: "field-sync", label: "Field Sync Monitor", icon: RadioTower },
   { id: "activity", label: "Activity Log", icon: Activity },
   { id: "reports", label: "Reports", icon: FileText },
   { id: "settings", label: "Settings", icon: Settings },
@@ -38,6 +40,8 @@ const navItems: { id: TabId; label: string; icon: React.ComponentType<{ classNam
 
 function AgriSky() {
   const [tab, setTab] = useState<TabId>("overview");
+  const [openMission, setOpenMission] = useState<string | null>(null);
+  const goMission = (id: string) => { setOpenMission(id); setTab("spraying"); };
 
   return (
     <div className="min-h-screen bg-background text-foreground flex">
@@ -129,7 +133,10 @@ function AgriSky() {
           {tab === "survey" && <Survey />}
           {tab === "boundary" && <Boundary />}
           {tab === "input" && <InputLoading />}
-          {tab === "spraying" && <Spraying />}
+          {tab === "spraying" && (openMission
+            ? <MissionDetail missionId={openMission} onBack={() => setOpenMission(null)} />
+            : <Spraying onOpenMission={goMission} />)}
+          {tab === "field-sync" && <FieldSyncMonitor onOpenMission={goMission} />}
           {tab === "activity" && <ActivityLog />}
           {tab === "reports" && <Reports />}
           {tab === "settings" && <SettingsPage />}
@@ -522,14 +529,24 @@ function InputLoading() {
 }
 
 /* ---------- SPRAYING ---------- */
-function Spraying() {
+function Spraying({ onOpenMission }: { onOpenMission: (id: string) => void }) {
   return (
     <>
       <PageHeader
         title="Spraying Missions"
         subtitle="Schedule, monitor, and complete drone spraying missions for selected zones."
-        action={<Button className="bg-gradient-agri text-primary-foreground" onClick={() => toast.success("Spraying mission created")}><Plus className="h-4 w-4 mr-1" /> New Mission</Button>}
+        action={
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" onClick={() => onOpenMission(ACTIVE_MISSION_ID)}>
+              <Smartphone className="h-4 w-4 mr-1" /> Open Mission Detail
+            </Button>
+            <Button className="bg-gradient-agri text-primary-foreground" onClick={() => toast.success("Spraying mission created")}>
+              <Plus className="h-4 w-4 mr-1" /> New Mission
+            </Button>
+          </div>
+        }
       />
+
 
       <div className="grid lg:grid-cols-3 gap-5">
         <div className="lg:col-span-2 rounded-2xl border border-border/60 bg-gradient-card p-5 shadow-card">
