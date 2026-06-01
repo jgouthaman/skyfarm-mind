@@ -23,12 +23,13 @@ function PilotLayout() {
   const pilot = usePilotStore((s) => s.pilot);
   const online = usePilotStore((s) => s.online);
 
-  useEffect(() => {
-    if (!pilot && pathname.startsWith("/pilot") && pathname !== "/pilot/login") {
-      navigate({ to: "/pilot/login" });
-    }
-  }, [pilot, pathname, navigate]);
+  const isLogin = pathname === "/pilot/login";
 
+  useEffect(() => {
+    if (!pilot && !isLogin) navigate({ to: "/pilot/login" });
+  }, [pilot, isLogin, navigate]);
+
+  if (isLogin) return <Outlet />;
   if (!pilot) return null;
 
   return (
