@@ -1,11 +1,10 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { usePilotStore } from "@/lib/pilot-store";
-import { Battery, MapPin, Wifi, WifiOff, Leaf, Camera, ArrowRight, CheckCircle2, Clock, Loader2 } from "lucide-react";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/pilot/")({
-  head: () => ({ meta: [{ title: "AgriSky Pilot — Dashboard" }] }),
-  component: Dashboard,
+  beforeLoad: () => { throw redirect({ to: "/field" }); },
+  component: () => null,
 });
+
 
 function statusBadge(s: string) {
   const map: Record<string, string> = {
