@@ -10,11 +10,17 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ControlCenterIndexRouteImport } from './routes/control-center.index'
 import { Route as ControlCenterLoginRouteImport } from './routes/control-center.login'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ControlCenterIndexRoute = ControlCenterIndexRouteImport.update({
+  id: '/control-center/',
+  path: '/control-center/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ControlCenterLoginRoute = ControlCenterLoginRouteImport.update({
@@ -26,27 +32,31 @@ const ControlCenterLoginRoute = ControlCenterLoginRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/control-center/login': typeof ControlCenterLoginRoute
+  '/control-center/': typeof ControlCenterIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/control-center/login': typeof ControlCenterLoginRoute
+  '/control-center': typeof ControlCenterIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/control-center/login': typeof ControlCenterLoginRoute
+  '/control-center/': typeof ControlCenterIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/control-center/login'
+  fullPaths: '/' | '/control-center/login' | '/control-center/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/control-center/login'
-  id: '__root__' | '/' | '/control-center/login'
+  to: '/' | '/control-center/login' | '/control-center'
+  id: '__root__' | '/' | '/control-center/login' | '/control-center/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ControlCenterLoginRoute: typeof ControlCenterLoginRoute
+  ControlCenterIndexRoute: typeof ControlCenterIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -56,6 +66,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/control-center/': {
+      id: '/control-center/'
+      path: '/control-center'
+      fullPath: '/control-center/'
+      preLoaderRoute: typeof ControlCenterIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/control-center/login': {
@@ -71,6 +88,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ControlCenterLoginRoute: ControlCenterLoginRoute,
+  ControlCenterIndexRoute: ControlCenterIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
