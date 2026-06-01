@@ -152,9 +152,6 @@ function LoginPage() {
                   autoFocus
                 />
               </div>
-              <p className="text-xs text-muted-foreground">
-                Enter the last 5 digits of your mobile number ({mobile}) as the demo OTP.
-              </p>
             </div>
 
             <Button type="submit" className="w-full bg-gradient-primary text-primary-foreground hover:opacity-90 shadow-glow">
