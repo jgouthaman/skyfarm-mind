@@ -5,7 +5,7 @@ import {
   CheckCircle2, ArrowRight, ShieldCheck, Activity, Sparkles,
   Mail, Phone, MapPin, Menu, X, Satellite, Cpu, Radar, Building2,
   Cog, Camera, Layers, BarChart3, Rocket, Wrench, Compass, Eye,
-  GitBranch, Users, FlaskConical, Globe2, Zap,
+  GitBranch, Users, FlaskConical, Globe2, Zap, GraduationCap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,6 +38,7 @@ const nav = [
   { label: "AgriSky", href: "#agrisky" },
   { label: "Technology", href: "#technology" },
   { label: "Pilots", href: "#pilots" },
+  { label: "Academy", href: "#academy" },
   { label: "Contact", href: "#contact" },
 ];
 
@@ -116,7 +117,7 @@ function Landing() {
             </div>
             <div className="mt-10 grid grid-cols-3 gap-6 max-w-md">
               {[
-                { k: "5", v: "Verticals" },
+              { k: "6", v: "Verticals" },
                 { k: "AI", v: "Analytics core" },
                 { k: "R&D", v: "Custom UAVs" },
               ].map((s) => (
