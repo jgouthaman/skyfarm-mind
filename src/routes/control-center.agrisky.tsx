@@ -40,6 +40,8 @@ const navItems: { id: TabId; label: string; icon: React.ComponentType<{ classNam
 
 function AgriSky() {
   const [tab, setTab] = useState<TabId>("overview");
+  const [openMission, setOpenMission] = useState<string | null>(null);
+  const goMission = (id: string) => { setOpenMission(id); setTab("spraying"); };
 
   return (
     <div className="min-h-screen bg-background text-foreground flex">
