@@ -14,6 +14,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as PilotIndexRouteImport } from './routes/pilot.index'
 import { Route as ControlCenterIndexRouteImport } from './routes/control-center.index'
 import { Route as PilotTrackingRouteImport } from './routes/pilot.tracking'
+import { Route as PilotSyncRouteImport } from './routes/pilot.sync'
 import { Route as PilotLoginRouteImport } from './routes/pilot.login'
 import { Route as ControlCenterLoginRouteImport } from './routes/control-center.login'
 import { Route as ControlCenterAgriskyRouteImport } from './routes/control-center.agrisky'
@@ -43,6 +44,11 @@ const ControlCenterIndexRoute = ControlCenterIndexRouteImport.update({
 const PilotTrackingRoute = PilotTrackingRouteImport.update({
   id: '/tracking',
   path: '/tracking',
+  getParentRoute: () => PilotRoute,
+} as any)
+const PilotSyncRoute = PilotSyncRouteImport.update({
+  id: '/sync',
+  path: '/sync',
   getParentRoute: () => PilotRoute,
 } as any)
 const PilotLoginRoute = PilotLoginRouteImport.update({
@@ -77,6 +83,7 @@ export interface FileRoutesByFullPath {
   '/control-center/agrisky': typeof ControlCenterAgriskyRoute
   '/control-center/login': typeof ControlCenterLoginRoute
   '/pilot/login': typeof PilotLoginRoute
+  '/pilot/sync': typeof PilotSyncRoute
   '/pilot/tracking': typeof PilotTrackingRoute
   '/control-center/': typeof ControlCenterIndexRoute
   '/pilot/': typeof PilotIndexRoute
@@ -88,6 +95,7 @@ export interface FileRoutesByTo {
   '/control-center/agrisky': typeof ControlCenterAgriskyRoute
   '/control-center/login': typeof ControlCenterLoginRoute
   '/pilot/login': typeof PilotLoginRoute
+  '/pilot/sync': typeof PilotSyncRoute
   '/pilot/tracking': typeof PilotTrackingRoute
   '/control-center': typeof ControlCenterIndexRoute
   '/pilot': typeof PilotIndexRoute
@@ -101,6 +109,7 @@ export interface FileRoutesById {
   '/control-center/agrisky': typeof ControlCenterAgriskyRoute
   '/control-center/login': typeof ControlCenterLoginRoute
   '/pilot/login': typeof PilotLoginRoute
+  '/pilot/sync': typeof PilotSyncRoute
   '/pilot/tracking': typeof PilotTrackingRoute
   '/control-center/': typeof ControlCenterIndexRoute
   '/pilot/': typeof PilotIndexRoute
@@ -115,6 +124,7 @@ export interface FileRouteTypes {
     | '/control-center/agrisky'
     | '/control-center/login'
     | '/pilot/login'
+    | '/pilot/sync'
     | '/pilot/tracking'
     | '/control-center/'
     | '/pilot/'
@@ -126,6 +136,7 @@ export interface FileRouteTypes {
     | '/control-center/agrisky'
     | '/control-center/login'
     | '/pilot/login'
+    | '/pilot/sync'
     | '/pilot/tracking'
     | '/control-center'
     | '/pilot'
@@ -138,6 +149,7 @@ export interface FileRouteTypes {
     | '/control-center/agrisky'
     | '/control-center/login'
     | '/pilot/login'
+    | '/pilot/sync'
     | '/pilot/tracking'
     | '/control-center/'
     | '/pilot/'
@@ -190,6 +202,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PilotTrackingRouteImport
       parentRoute: typeof PilotRoute
     }
+    '/pilot/sync': {
+      id: '/pilot/sync'
+      path: '/sync'
+      fullPath: '/pilot/sync'
+      preLoaderRoute: typeof PilotSyncRouteImport
+      parentRoute: typeof PilotRoute
+    }
     '/pilot/login': {
       id: '/pilot/login'
       path: '/login'
@@ -230,6 +249,7 @@ declare module '@tanstack/react-router' {
 
 interface PilotRouteChildren {
   PilotLoginRoute: typeof PilotLoginRoute
+  PilotSyncRoute: typeof PilotSyncRoute
   PilotTrackingRoute: typeof PilotTrackingRoute
   PilotIndexRoute: typeof PilotIndexRoute
   PilotMissionsIdRoute: typeof PilotMissionsIdRoute
@@ -238,6 +258,7 @@ interface PilotRouteChildren {
 
 const PilotRouteChildren: PilotRouteChildren = {
   PilotLoginRoute: PilotLoginRoute,
+  PilotSyncRoute: PilotSyncRoute,
   PilotTrackingRoute: PilotTrackingRoute,
   PilotIndexRoute: PilotIndexRoute,
   PilotMissionsIdRoute: PilotMissionsIdRoute,
