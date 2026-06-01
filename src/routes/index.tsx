@@ -5,7 +5,7 @@ import {
   CheckCircle2, ArrowRight, ShieldCheck, Activity, Sparkles,
   Mail, Phone, MapPin, Menu, X, Satellite, Cpu, Radar, Building2,
   Cog, Camera, Layers, BarChart3, Rocket, Wrench, Compass, Eye,
-  GitBranch, Users, FlaskConical, Globe2, Zap,
+  GitBranch, Users, FlaskConical, Globe2, Zap, GraduationCap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,6 +38,7 @@ const nav = [
   { label: "AgriSky", href: "#agrisky" },
   { label: "Technology", href: "#technology" },
   { label: "Pilots", href: "#pilots" },
+  { label: "Academy", href: "#academy" },
   { label: "Contact", href: "#contact" },
 ];
 
@@ -116,7 +117,7 @@ function Landing() {
             </div>
             <div className="mt-10 grid grid-cols-3 gap-6 max-w-md">
               {[
-                { k: "5", v: "Verticals" },
+              { k: "6", v: "Verticals" },
                 { k: "AI", v: "Analytics core" },
                 { k: "R&D", v: "Custom UAVs" },
               ].map((s) => (
@@ -186,7 +187,7 @@ function Landing() {
       {/* VERTICALS */}
       <Section id="verticals" eyebrow="Verticals" title="Built for multiple industries">
         <p className="text-muted-foreground max-w-3xl">
-          Five focused service lines, one unified aerospace and AI platform underneath.
+          Six focused service lines, one unified aerospace and AI platform underneath.
         </p>
         <div className="mt-10 grid md:grid-cols-2 lg:grid-cols-3 gap-5">
           <VerticalCard accent="agri" tag="Agriculture" icon={<Sprout className="h-5 w-5" />} title="AgriSky" subtitle="Agriculture Drone Intelligence" desc="Drone-based farm monitoring, crop health analysis, irrigation insights, organic farming advisory, and future precision spraying support." href="#agrisky" />
@@ -194,6 +195,7 @@ function Landing() {
           <VerticalCard tag="Mapping" icon={<Map className="h-5 w-5" />} title="GeoSky" subtitle="Mapping & Survey Intelligence" desc="Aerial mapping, land survey, site progress monitoring, GIS data capture, and terrain intelligence." />
           <VerticalCard tag="Surveillance" icon={<Eye className="h-5 w-5" />} title="GuardSky" subtitle="Security & Surveillance" desc="Aerial monitoring for campuses, industrial sites, events, emergency response, and perimeter surveillance." />
           <VerticalCard tag="R&D" icon={<FlaskConical className="h-5 w-5" />} title="AtomSky Labs" subtitle="Custom UAV R&D" desc="Custom drone design, payload integration, flight testing, aerospace research, and prototype development for specialized use cases." />
+          <VerticalCard tag="Training" icon={<GraduationCap className="h-5 w-5" />} title="AtomSky Academy" subtitle="Drone Pilot Training & Certification Support" desc="Practical drone pilot training, safety procedures, mission planning, agri-drone operations, mapping workflows, and certification support for students, farmers, drone operators, SHGs, FPOs, and professionals." href="#academy" />
           <div className="rounded-2xl p-6 bg-gradient-primary text-primary-foreground shadow-soft flex flex-col justify-between">
             <div>
               <Rocket className="h-6 w-6" />
@@ -342,6 +344,34 @@ function Landing() {
               <p className="font-medium">{c.t}</p>
             </Card>
           ))}
+        </div>
+      </Section>
+
+      {/* ACADEMY */}
+      <Section id="academy" eyebrow="AtomSky Academy" title="Training the next generation of drone pilots and aerial intelligence professionals">
+        <p className="text-muted-foreground max-w-3xl">
+          AtomSky Academy provides hands-on drone pilot training and certification support for students, farmers, rural entrepreneurs, SHGs, FPOs, and professionals. The program focuses on safe drone operations, mission planning, field applications, agri-drone workflows, mapping basics, maintenance awareness, and real-world drone service readiness.
+        </p>
+        <div className="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {[
+            { i: <Plane />, t: "Drone Pilot Training", d: "Learn drone basics, flight safety, controls, emergency handling, and field operations." },
+            { i: <Sprout />, t: "Agri-Drone Operations", d: "Learn drone usage for farm monitoring, crop imaging, spraying workflows, and precision agriculture services." },
+            { i: <Map />, t: "Mapping & Survey Training", d: "Learn aerial mapping basics, mission planning, data capture, and reporting workflows." },
+            { i: <Wrench />, t: "Drone Maintenance Basics", d: "Understand batteries, propellers, motors, payloads, pre-flight checks, and post-flight maintenance." },
+            { i: <CheckCircle2 />, t: "Certification Support", d: "Guidance and preparation support for drone pilot licensing and certification pathways through authorized channels." },
+            { i: <Users />, t: "Career & Entrepreneurship Pathway", d: "Support for students, operators, SHGs, FPOs, and rural entrepreneurs to start drone-based service businesses." },
+          ].map((c) => (
+            <Card key={c.t}>
+              <IconBubble>{c.i}</IconBubble>
+              <h3 className="mt-4 text-base font-semibold">{c.t}</h3>
+              <p className="mt-1.5 text-sm text-muted-foreground">{c.d}</p>
+            </Card>
+          ))}
+        </div>
+        <div className="mt-10 flex justify-center">
+          <Button asChild size="lg" className="bg-gradient-primary text-primary-foreground hover:opacity-90 shadow-glow">
+            <a href="#contact">Join Drone Training Program <ArrowRight className="ml-1 h-4 w-4" /></a>
+          </Button>
         </div>
       </Section>
 
@@ -510,6 +540,8 @@ function ContactForm() {
             <SelectItem value="geosky">GeoSky — mapping & survey</SelectItem>
             <SelectItem value="guardsky">GuardSky — surveillance</SelectItem>
             <SelectItem value="rd">Custom UAV R&D</SelectItem>
+            <SelectItem value="academy">AtomSky Academy — drone training</SelectItem>
+            <SelectItem value="certification">Drone pilot certification support</SelectItem>
             <SelectItem value="invest">Investment / incubation</SelectItem>
             <SelectItem value="partner">Partnership</SelectItem>
           </SelectContent>
