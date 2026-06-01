@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { Button } from "@/components/ui/button";
 import { Plane, Leaf, Shield } from "lucide-react";
 import { pilotStore } from "@/lib/pilot-store";
+import { getPilotByPhone } from "@/lib/cloud-api";
 
 export const Route = createFileRoute("/pilot/login")({
   head: () => ({ meta: [{ title: "AgriSky Pilot — Login" }] }),
