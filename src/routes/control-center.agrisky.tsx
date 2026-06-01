@@ -133,7 +133,10 @@ function AgriSky() {
           {tab === "survey" && <Survey />}
           {tab === "boundary" && <Boundary />}
           {tab === "input" && <InputLoading />}
-          {tab === "spraying" && <Spraying />}
+          {tab === "spraying" && (openMission
+            ? <MissionDetail missionId={openMission} onBack={() => setOpenMission(null)} />
+            : <Spraying onOpenMission={goMission} />)}
+          {tab === "field-sync" && <FieldSyncMonitor onOpenMission={goMission} />}
           {tab === "activity" && <ActivityLog />}
           {tab === "reports" && <Reports />}
           {tab === "settings" && <SettingsPage />}
