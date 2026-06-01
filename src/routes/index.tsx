@@ -161,7 +161,7 @@ function Landing() {
             { i: <Wrench />, t: "Manual inspections are slow and risky" },
             { i: <Leaf />, t: "Farm and field issues are detected late" },
             { i: <Building2 />, t: "Infrastructure monitoring lacks real-time visibility" },
-            { i: <Map />, t: "Mapping and surveying are time-consuming" },
+            { i: <MapIcon />, t: "Mapping and surveying are time-consuming" },
             { i: <Brain />, t: "Drone data is rarely converted into actionable intelligence" },
             { i: <Cog />, t: "Industry-specific drone customization is limited" },
           ].map((c) => (
@@ -204,7 +204,7 @@ function Landing() {
         <div className="mt-10 grid md:grid-cols-2 lg:grid-cols-3 gap-5">
           <VerticalCard accent="agri" tag="Agriculture" icon={<Sprout className="h-5 w-5" />} title="AgriSky" subtitle="Agriculture Drone Intelligence" desc="Drone-based farm monitoring, crop health analysis, irrigation insights, organic farming advisory, and future precision spraying support." href="#agrisky" />
           <VerticalCard tag="Infrastructure" icon={<Building2 className="h-5 w-5" />} title="InfraSky" subtitle="Infrastructure Inspection" desc="Drone-based inspection for roads, bridges, buildings, telecom towers, solar farms, and industrial assets." />
-          <VerticalCard tag="Mapping" icon={<Map className="h-5 w-5" />} title="GeoSky" subtitle="Mapping & Survey Intelligence" desc="Aerial mapping, land survey, site progress monitoring, GIS data capture, and terrain intelligence." />
+          <VerticalCard tag="Mapping" icon={<MapIcon className="h-5 w-5" />} title="GeoSky" subtitle="Mapping & Survey Intelligence" desc="Aerial mapping, land survey, site progress monitoring, GIS data capture, and terrain intelligence." />
           <VerticalCard tag="Surveillance" icon={<Eye className="h-5 w-5" />} title="GuardSky" subtitle="Security & Surveillance" desc="Aerial monitoring for campuses, industrial sites, events, emergency response, and perimeter surveillance." />
           <VerticalCard tag="R&D" icon={<FlaskConical className="h-5 w-5" />} title="AtomSky Labs" subtitle="Custom UAV R&D" desc="Custom drone design, payload integration, flight testing, aerospace research, and prototype development for specialized use cases." />
           <VerticalCard tag="Training" icon={<GraduationCap className="h-5 w-5" />} title="AtomSky Academy" subtitle="Drone Pilot Training & Certification Support" desc="Practical drone pilot training, safety procedures, mission planning, agri-drone operations, mapping workflows, and certification support for students, farmers, drone operators, SHGs, FPOs, and professionals." href="#academy" />
@@ -243,7 +243,7 @@ function Landing() {
               {[
                 { i: <Camera />, t: "Drone-based farm monitoring" },
                 { i: <Activity />, t: "Crop health & stress detection" },
-                { i: <Map />, t: "Farm zone mapping" },
+                { i: <MapIcon />, t: "Farm zone mapping" },
                 { i: <Droplets />, t: "Irrigation & organic input advisory" },
                 { i: <FileText />, t: "Farmer-friendly reports" },
                 { i: <Sparkles />, t: "Future precision spraying support" },
@@ -296,7 +296,7 @@ function Landing() {
             { i: <Cpu />, t: "Payload Integration" },
             { i: <Compass />, t: "Drone Mission Planning" },
             { i: <ScanLine />, t: "AI Image Analysis" },
-            { i: <Map />, t: "Aerial Mapping" },
+            { i: <MapIcon />, t: "Aerial Mapping" },
             { i: <Sprout />, t: "Crop Intelligence" },
             { i: <Building2 />, t: "Infrastructure Inspection" },
             { i: <Eye />, t: "Surveillance Workflows" },
@@ -368,7 +368,7 @@ function Landing() {
           {[
             { i: <Plane />, t: "Drone Pilot Training", d: "Learn drone basics, flight safety, controls, emergency handling, and field operations." },
             { i: <Sprout />, t: "Agri-Drone Operations", d: "Learn drone usage for farm monitoring, crop imaging, spraying workflows, and precision agriculture services." },
-            { i: <Map />, t: "Mapping & Survey Training", d: "Learn aerial mapping basics, mission planning, data capture, and reporting workflows." },
+            { i: <MapIcon />, t: "Mapping & Survey Training", d: "Learn aerial mapping basics, mission planning, data capture, and reporting workflows." },
             { i: <Wrench />, t: "Drone Maintenance Basics", d: "Understand batteries, propellers, motors, payloads, pre-flight checks, and post-flight maintenance." },
             { i: <CheckCircle2 />, t: "Certification Support", d: "Guidance and preparation support for drone pilot licensing and certification pathways through authorized channels." },
             { i: <Users />, t: "Career & Entrepreneurship Pathway", d: "Support for students, operators, SHGs, FPOs, and rural entrepreneurs to start drone-based service businesses." },
