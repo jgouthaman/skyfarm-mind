@@ -1,11 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import {
-  Plane, Leaf, Droplets, ScanLine, Sprout, Map, Brain, FileText,
+  Plane, Leaf, Droplets, ScanLine, Sprout, Map as MapIcon, Brain, FileText,
   CheckCircle2, ArrowRight, ShieldCheck, Activity, Sparkles,
   Mail, Phone, MapPin, Menu, X, Satellite, Cpu, Radar, Building2,
   Cog, Camera, Layers, BarChart3, Rocket, Wrench, Compass, Eye,
   GitBranch, Users, FlaskConical, Globe2, Zap, GraduationCap,
+  Flame, Bell, Package, Sun,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,6 +37,7 @@ const nav = [
   { label: "Home", href: "#home" },
   { label: "Solutions", href: "#solutions" },
   { label: "AgriSky", href: "#agrisky" },
+  { label: "GuardSky", href: "#guardsky" },
   { label: "Technology", href: "#technology" },
   { label: "Pilots", href: "#pilots" },
   { label: "Academy", href: "#academy" },
@@ -160,7 +162,7 @@ function Landing() {
             { i: <Wrench />, t: "Manual inspections are slow and risky" },
             { i: <Leaf />, t: "Farm and field issues are detected late" },
             { i: <Building2 />, t: "Infrastructure monitoring lacks real-time visibility" },
-            { i: <Map />, t: "Mapping and surveying are time-consuming" },
+            { i: <MapIcon />, t: "Mapping and surveying are time-consuming" },
             { i: <Brain />, t: "Drone data is rarely converted into actionable intelligence" },
             { i: <Cog />, t: "Industry-specific drone customization is limited" },
           ].map((c) => (
@@ -203,8 +205,8 @@ function Landing() {
         <div className="mt-10 grid md:grid-cols-2 lg:grid-cols-3 gap-5">
           <VerticalCard accent="agri" tag="Agriculture" icon={<Sprout className="h-5 w-5" />} title="AgriSky" subtitle="Agriculture Drone Intelligence" desc="Drone-based farm monitoring, crop health analysis, irrigation insights, organic farming advisory, and future precision spraying support." href="#agrisky" />
           <VerticalCard tag="Infrastructure" icon={<Building2 className="h-5 w-5" />} title="InfraSky" subtitle="Infrastructure Inspection" desc="Drone-based inspection for roads, bridges, buildings, telecom towers, solar farms, and industrial assets." />
-          <VerticalCard tag="Mapping" icon={<Map className="h-5 w-5" />} title="GeoSky" subtitle="Mapping & Survey Intelligence" desc="Aerial mapping, land survey, site progress monitoring, GIS data capture, and terrain intelligence." />
-          <VerticalCard tag="Surveillance" icon={<Eye className="h-5 w-5" />} title="GuardSky" subtitle="Security & Surveillance" desc="Aerial monitoring for campuses, industrial sites, events, emergency response, and perimeter surveillance." />
+          <VerticalCard tag="Mapping" icon={<MapIcon className="h-5 w-5" />} title="GeoSky" subtitle="Mapping & Survey Intelligence" desc="Aerial mapping, land survey, site progress monitoring, GIS data capture, and terrain intelligence." />
+          <VerticalCard tag="Surveillance" icon={<Eye className="h-5 w-5" />} title="GuardSky" subtitle="Aerial Surveillance & Early Fire Response" desc="Drone-based real-time monitoring, smoke/fire detection support, live aerial visibility, rapid alerts, and targeted first-response payload deployment for farms, industrial sites, campuses, remote facilities, and critical assets." href="#guardsky" />
           <VerticalCard tag="R&D" icon={<FlaskConical className="h-5 w-5" />} title="AtomSky Labs" subtitle="Custom UAV R&D" desc="Custom drone design, payload integration, flight testing, aerospace research, and prototype development for specialized use cases." />
           <VerticalCard tag="Training" icon={<GraduationCap className="h-5 w-5" />} title="AtomSky Academy" subtitle="Drone Pilot Training & Certification Support" desc="Practical drone pilot training, safety procedures, mission planning, agri-drone operations, mapping workflows, and certification support for students, farmers, drone operators, SHGs, FPOs, and professionals." href="#academy" />
           <div className="rounded-2xl p-6 bg-gradient-primary text-primary-foreground shadow-soft flex flex-col justify-between">
@@ -242,7 +244,7 @@ function Landing() {
               {[
                 { i: <Camera />, t: "Drone-based farm monitoring" },
                 { i: <Activity />, t: "Crop health & stress detection" },
-                { i: <Map />, t: "Farm zone mapping" },
+                { i: <MapIcon />, t: "Farm zone mapping" },
                 { i: <Droplets />, t: "Irrigation & organic input advisory" },
                 { i: <FileText />, t: "Farmer-friendly reports" },
                 { i: <Sparkles />, t: "Future precision spraying support" },
@@ -255,9 +257,66 @@ function Landing() {
             </div>
           </div>
         </div>
-      </section>
+  </section>
 
-      {/* TECHNOLOGY */}
+  {/* GUARDSKY */}
+  <section id="guardsky" className="relative py-20 sm:py-28 overflow-hidden">
+    <div className="absolute inset-0 bg-gradient-primary opacity-[0.06] pointer-events-none" />
+    <div className="mx-auto max-w-7xl px-5 lg:px-8 relative">
+      <div className="grid lg:grid-cols-12 gap-10 items-start">
+        <div className="lg:col-span-5">
+          <span className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-primary/90 bg-primary/10 border border-primary/20 px-3 py-1.5 rounded-full">
+            <Flame className="h-3.5 w-3.5" /> Prototype vertical
+          </span>
+          <h2 className="mt-5 text-3xl sm:text-4xl font-semibold">GuardSky</h2>
+          <p className="mt-2 text-lg text-muted-foreground">Aerial surveillance and early fire response by AtomSky</p>
+          <p className="mt-5 text-muted-foreground">
+            GuardSky is a prototype drone-based surveillance and emergency-support solution designed to monitor critical areas, detect possible fire or smoke incidents, provide real-time aerial visibility, alert operators, and support rapid intervention through targeted deployment of fire suppression payloads near the incident zone.
+          </p>
+          <Button asChild size="lg" className="mt-7 bg-gradient-primary text-primary-foreground hover:opacity-90 shadow-glow">
+            <a href="#contact">Explore GuardSky <ArrowRight className="ml-1 h-4 w-4" /></a>
+          </Button>
+        </div>
+        <div className="lg:col-span-7 grid sm:grid-cols-2 gap-4">
+          {[
+            { i: <Eye />, t: "Real-time aerial surveillance" },
+            { i: <Flame />, t: "Smoke and fire detection support" },
+            { i: <Bell />, t: "Live monitoring and alerting" },
+            { i: <Zap />, t: "Rapid first-response support" },
+            { i: <Package />, t: "Payload deployment prototype" },
+            { i: <Radar />, t: "Remote area and asset monitoring" },
+          ].map((c) => (
+            <Card key={c.t}>
+              <IconBubble>{c.i}</IconBubble>
+              <p className="mt-4 font-medium">{c.t}</p>
+            </Card>
+          ))}
+        </div>
+      </div>
+
+      <div className="mt-16">
+        <h3 className="text-xl font-semibold mb-6">Use cases</h3>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[
+            { i: <Building2 />, t: "Industrial sites" },
+            { i: <Building2 />, t: "Warehouses" },
+            { i: <Sun />, t: "Solar farms" },
+            { i: <Sprout />, t: "Farms and rural land" },
+            { i: <GraduationCap />, t: "Campuses and institutions" },
+            { i: <MapIcon />, t: "Remote infrastructure" },
+            { i: <Globe2 />, t: "Resorts and retreat properties" },
+          ].map((c) => (
+            <Card key={c.t} className="text-center items-center flex flex-col">
+              <IconBubble>{c.i}</IconBubble>
+              <p className="mt-3 text-sm font-medium">{c.t}</p>
+            </Card>
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* TECHNOLOGY */}
       <Section id="technology" eyebrow="Technology" title="A modular aerial intelligence stack" muted>
         <p className="text-muted-foreground max-w-3xl">
           AtomSky's technology is built as a reusable platform that powers multiple industries — from a single mission to enterprise-grade aerial operations.
@@ -295,7 +354,7 @@ function Landing() {
             { i: <Cpu />, t: "Payload Integration" },
             { i: <Compass />, t: "Drone Mission Planning" },
             { i: <ScanLine />, t: "AI Image Analysis" },
-            { i: <Map />, t: "Aerial Mapping" },
+            { i: <MapIcon />, t: "Aerial Mapping" },
             { i: <Sprout />, t: "Crop Intelligence" },
             { i: <Building2 />, t: "Infrastructure Inspection" },
             { i: <Eye />, t: "Surveillance Workflows" },
@@ -367,7 +426,7 @@ function Landing() {
           {[
             { i: <Plane />, t: "Drone Pilot Training", d: "Learn drone basics, flight safety, controls, emergency handling, and field operations." },
             { i: <Sprout />, t: "Agri-Drone Operations", d: "Learn drone usage for farm monitoring, crop imaging, spraying workflows, and precision agriculture services." },
-            { i: <Map />, t: "Mapping & Survey Training", d: "Learn aerial mapping basics, mission planning, data capture, and reporting workflows." },
+            { i: <MapIcon />, t: "Mapping & Survey Training", d: "Learn aerial mapping basics, mission planning, data capture, and reporting workflows." },
             { i: <Wrench />, t: "Drone Maintenance Basics", d: "Understand batteries, propellers, motors, payloads, pre-flight checks, and post-flight maintenance." },
             { i: <CheckCircle2 />, t: "Certification Support", d: "Guidance and preparation support for drone pilot licensing and certification pathways through authorized channels." },
             { i: <Users />, t: "Career & Entrepreneurship Pathway", d: "Support for students, operators, SHGs, FPOs, and rural entrepreneurs to start drone-based service businesses." },
@@ -427,8 +486,10 @@ function Landing() {
               <li><a href="#home" className="hover:text-foreground">Home</a></li>
               <li><a href="#solutions" className="hover:text-foreground">Solutions</a></li>
               <li><a href="#agrisky" className="hover:text-foreground">AgriSky</a></li>
+              <li><a href="#guardsky" className="hover:text-foreground">GuardSky</a></li>
               <li><a href="#technology" className="hover:text-foreground">Technology</a></li>
               <li><a href="#pilots" className="hover:text-foreground">Pilot Programs</a></li>
+              <li><a href="#academy" className="hover:text-foreground">Academy</a></li>
               <li><a href="#contact" className="hover:text-foreground">Contact</a></li>
             </ul>
           </div>
@@ -549,7 +610,7 @@ function ContactForm() {
             <SelectItem value="agrisky">AgriSky — agriculture solution</SelectItem>
             <SelectItem value="infrasky">InfraSky — infrastructure inspection</SelectItem>
             <SelectItem value="geosky">GeoSky — mapping & survey</SelectItem>
-            <SelectItem value="guardsky">GuardSky — surveillance</SelectItem>
+            <SelectItem value="guardsky">GuardSky — aerial surveillance &amp; early fire response</SelectItem>
             <SelectItem value="rd">Custom UAV R&D</SelectItem>
             <SelectItem value="academy">AtomSky Academy — drone training</SelectItem>
             <SelectItem value="certification">Drone pilot certification support</SelectItem>
