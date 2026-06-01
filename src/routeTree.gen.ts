@@ -13,6 +13,7 @@ import { Route as PilotRouteImport } from './routes/pilot'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PilotIndexRouteImport } from './routes/pilot.index'
 import { Route as ControlCenterIndexRouteImport } from './routes/control-center.index'
+import { Route as PilotTrackingRouteImport } from './routes/pilot.tracking'
 import { Route as PilotLoginRouteImport } from './routes/pilot.login'
 import { Route as ControlCenterLoginRouteImport } from './routes/control-center.login'
 import { Route as ControlCenterAgriskyRouteImport } from './routes/control-center.agrisky'
@@ -38,6 +39,11 @@ const ControlCenterIndexRoute = ControlCenterIndexRouteImport.update({
   id: '/control-center/',
   path: '/control-center/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const PilotTrackingRoute = PilotTrackingRouteImport.update({
+  id: '/tracking',
+  path: '/tracking',
+  getParentRoute: () => PilotRoute,
 } as any)
 const PilotLoginRoute = PilotLoginRouteImport.update({
   id: '/login',
@@ -71,6 +77,7 @@ export interface FileRoutesByFullPath {
   '/control-center/agrisky': typeof ControlCenterAgriskyRoute
   '/control-center/login': typeof ControlCenterLoginRoute
   '/pilot/login': typeof PilotLoginRoute
+  '/pilot/tracking': typeof PilotTrackingRoute
   '/control-center/': typeof ControlCenterIndexRoute
   '/pilot/': typeof PilotIndexRoute
   '/pilot/missions/$id': typeof PilotMissionsIdRoute
@@ -81,6 +88,7 @@ export interface FileRoutesByTo {
   '/control-center/agrisky': typeof ControlCenterAgriskyRoute
   '/control-center/login': typeof ControlCenterLoginRoute
   '/pilot/login': typeof PilotLoginRoute
+  '/pilot/tracking': typeof PilotTrackingRoute
   '/control-center': typeof ControlCenterIndexRoute
   '/pilot': typeof PilotIndexRoute
   '/pilot/missions/$id': typeof PilotMissionsIdRoute
@@ -93,6 +101,7 @@ export interface FileRoutesById {
   '/control-center/agrisky': typeof ControlCenterAgriskyRoute
   '/control-center/login': typeof ControlCenterLoginRoute
   '/pilot/login': typeof PilotLoginRoute
+  '/pilot/tracking': typeof PilotTrackingRoute
   '/control-center/': typeof ControlCenterIndexRoute
   '/pilot/': typeof PilotIndexRoute
   '/pilot/missions/$id': typeof PilotMissionsIdRoute
@@ -106,6 +115,7 @@ export interface FileRouteTypes {
     | '/control-center/agrisky'
     | '/control-center/login'
     | '/pilot/login'
+    | '/pilot/tracking'
     | '/control-center/'
     | '/pilot/'
     | '/pilot/missions/$id'
@@ -116,6 +126,7 @@ export interface FileRouteTypes {
     | '/control-center/agrisky'
     | '/control-center/login'
     | '/pilot/login'
+    | '/pilot/tracking'
     | '/control-center'
     | '/pilot'
     | '/pilot/missions/$id'
@@ -127,6 +138,7 @@ export interface FileRouteTypes {
     | '/control-center/agrisky'
     | '/control-center/login'
     | '/pilot/login'
+    | '/pilot/tracking'
     | '/control-center/'
     | '/pilot/'
     | '/pilot/missions/$id'
@@ -171,6 +183,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ControlCenterIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/pilot/tracking': {
+      id: '/pilot/tracking'
+      path: '/tracking'
+      fullPath: '/pilot/tracking'
+      preLoaderRoute: typeof PilotTrackingRouteImport
+      parentRoute: typeof PilotRoute
+    }
     '/pilot/login': {
       id: '/pilot/login'
       path: '/login'
@@ -211,6 +230,7 @@ declare module '@tanstack/react-router' {
 
 interface PilotRouteChildren {
   PilotLoginRoute: typeof PilotLoginRoute
+  PilotTrackingRoute: typeof PilotTrackingRoute
   PilotIndexRoute: typeof PilotIndexRoute
   PilotMissionsIdRoute: typeof PilotMissionsIdRoute
   PilotMissionsIndexRoute: typeof PilotMissionsIndexRoute
@@ -218,6 +238,7 @@ interface PilotRouteChildren {
 
 const PilotRouteChildren: PilotRouteChildren = {
   PilotLoginRoute: PilotLoginRoute,
+  PilotTrackingRoute: PilotTrackingRoute,
   PilotIndexRoute: PilotIndexRoute,
   PilotMissionsIdRoute: PilotMissionsIdRoute,
   PilotMissionsIndexRoute: PilotMissionsIndexRoute,
