@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import {
   Plane, Leaf, Droplets, ScanLine, Sprout, Map as MapIcon, Brain, FileText,
@@ -66,6 +66,9 @@ function Landing() {
             ))}
           </nav>
           <div className="hidden md:flex items-center gap-2">
+            <Button asChild size="sm" variant="outline" className="border-border/80 bg-card/40 backdrop-blur hover:bg-card">
+              <Link to="/control-center/login">Control Center Login</Link>
+            </Button>
             <Button asChild size="sm" className="bg-gradient-primary text-primary-foreground hover:opacity-90">
               <a href="#contact">Partner with us</a>
             </Button>
@@ -86,7 +89,10 @@ function Landing() {
                   {n.label}
                 </a>
               ))}
-              <Button asChild size="sm" className="bg-gradient-primary text-primary-foreground mt-2">
+              <Button asChild size="sm" variant="outline" className="mt-2">
+                <Link to="/control-center/login" onClick={() => setOpen(false)}>Control Center Login</Link>
+              </Button>
+              <Button asChild size="sm" className="bg-gradient-primary text-primary-foreground">
                 <a href="#contact" onClick={() => setOpen(false)}>Partner with us</a>
               </Button>
             </div>
