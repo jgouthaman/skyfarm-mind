@@ -1,0 +1,20 @@
+{
+  "name": "AtomSky Control Center",
+  "short_name": "AtomSky",
+  "description": "AtomSky aerial intelligence — Control Center & AgriSky Pilot field app.",
+  "start_url": "/control-center",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0a0f1c",
+  "theme_color": "#0a0f1c",
+  "icons": [
+    { "src": "/app-icon.png", "sizes": "1024x1024", "type": "image/png", "purpose": "any" },
+    { "src": "/app-icon.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/app-icon.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Pilot App", "url": "/pilot", "description": "AgriSky field pilot app" },
+    { "name": "AgriSky Control", "url": "/control-center/agrisky", "description": "AgriSky Control Center" }
+  ]
+}
