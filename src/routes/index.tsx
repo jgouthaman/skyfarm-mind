@@ -1,9 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import {
-  Plane, Leaf, Droplets, ScanLine, Sprout, Radio, Map, Brain, FileText,
-  CheckCircle2, ArrowRight, ShieldCheck, Languages, Activity, Sparkles,
-  Mail, Phone, MapPin, Menu, X,
+  Plane, Leaf, Droplets, ScanLine, Sprout, Map, Brain, FileText,
+  CheckCircle2, ArrowRight, ShieldCheck, Activity, Sparkles,
+  Mail, Phone, MapPin, Menu, X, Satellite, Cpu, Radar, Building2,
+  Cog, Camera, Layers, BarChart3, Rocket, Wrench, Compass, Eye,
+  GitBranch, Users, FlaskConical, Globe2, Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,16 +16,16 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
-import heroDrone from "@/assets/hero-drone.jpg";
+import heroImg from "@/assets/atomsky-hero.jpg";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "AgriSky — AI-powered drone intelligence for smarter farms" },
-      { name: "description", content: "AgriSky turns drone imagery into actionable crop health, irrigation and farm advisory insights for Indian farms, FPOs and agri partners." },
-      { property: "og:title", content: "AgriSky — Drone-powered intelligence for smarter farms" },
-      { property: "og:description", content: "AI crop health, irrigation advisory and precision spraying — built for Indian agriculture." },
-      { property: "og:image", content: heroDrone },
+      { title: "AtomSky — Engineering the future of aerial intelligence" },
+      { name: "description", content: "AtomSky builds AI-powered drone systems, custom UAVs, and aerial intelligence solutions for agriculture (AgriSky), infrastructure, mapping, surveillance, and industrial applications." },
+      { property: "og:title", content: "AtomSky — Aerospace & Drone Intelligence" },
+      { property: "og:description", content: "Custom UAV engineering and AI aerial analytics across agriculture, infrastructure, mapping, surveillance and R&D." },
+      { property: "og:image", content: heroImg },
       { property: "og:type", content: "website" },
     ],
   }),
@@ -32,9 +34,10 @@ export const Route = createFileRoute("/")({
 
 const nav = [
   { label: "Home", href: "#home" },
-  { label: "Solution", href: "#solution" },
-  { label: "Products", href: "#products" },
-  { label: "Pilot", href: "#pilot" },
+  { label: "Solutions", href: "#solutions" },
+  { label: "AgriSky", href: "#agrisky" },
+  { label: "Technology", href: "#technology" },
+  { label: "Pilots", href: "#pilots" },
   { label: "Contact", href: "#contact" },
 ];
 
@@ -42,430 +45,437 @@ function Landing() {
   const [open, setOpen] = useState(false);
   return (
     <div id="home" className="min-h-screen bg-background text-foreground">
-      <Toaster richColors position="top-center" />
+      <Toaster richColors position="top-center" theme="dark" />
 
       {/* NAV */}
-      <header className="fixed top-0 inset-x-0 z-50 backdrop-blur-md bg-background/75 border-b border-border/60">
+      <header className="fixed top-0 inset-x-0 z-50 backdrop-blur-xl bg-background/70 border-b border-border/60">
         <div className="mx-auto max-w-7xl px-5 lg:px-8 h-16 flex items-center justify-between">
           <a href="#home" className="flex items-center gap-2 font-display font-semibold text-lg">
-            <span className="grid place-items-center h-9 w-9 rounded-xl bg-primary text-primary-foreground shadow-[var(--shadow-soft)]">
-              <Plane className="h-4 w-4" />
+            <span className="grid place-items-center h-8 w-8 rounded-lg bg-gradient-primary shadow-glow">
+              <Plane className="h-4 w-4 text-primary-foreground" />
             </span>
-            AgriSky
+            <span>AtomSky</span>
           </a>
-          <nav className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
+          <nav className="hidden md:flex items-center gap-7 text-sm text-muted-foreground">
             {nav.map((n) => (
-              <a key={n.href} href={n.href} className="hover:text-foreground transition-colors">{n.label}</a>
+              <a key={n.href} href={n.href} className="hover:text-foreground transition-colors">
+                {n.label}
+              </a>
             ))}
           </nav>
-          <a href="#contact" className="hidden md:inline-flex">
-            <Button size="sm" className="rounded-full px-5">Join Pilot</Button>
-          </a>
-          <button className="md:hidden p-2" onClick={() => setOpen(!open)} aria-label="Menu">
+          <div className="hidden md:flex items-center gap-2">
+            <Button asChild size="sm" className="bg-gradient-primary text-primary-foreground hover:opacity-90">
+              <a href="#contact">Partner with us</a>
+            </Button>
+          </div>
+          <button
+            className="md:hidden p-2 rounded-md hover:bg-muted"
+            onClick={() => setOpen(!open)}
+            aria-label="Toggle menu"
+          >
             {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
         </div>
         {open && (
-          <div className="md:hidden border-t border-border bg-background">
-            <div className="px-5 py-4 flex flex-col gap-3 text-sm">
+          <div className="md:hidden border-t border-border bg-background/95 backdrop-blur">
+            <div className="px-5 py-4 flex flex-col gap-3">
               {nav.map((n) => (
-                <a key={n.href} href={n.href} onClick={() => setOpen(false)} className="py-1">{n.label}</a>
+                <a key={n.href} href={n.href} onClick={() => setOpen(false)} className="text-sm text-muted-foreground hover:text-foreground">
+                  {n.label}
+                </a>
               ))}
-              <a href="#contact" onClick={() => setOpen(false)}>
-                <Button size="sm" className="w-full rounded-full mt-2">Join Pilot</Button>
-              </a>
+              <Button asChild size="sm" className="bg-gradient-primary text-primary-foreground mt-2">
+                <a href="#contact" onClick={() => setOpen(false)}>Partner with us</a>
+              </Button>
             </div>
           </div>
         )}
       </header>
 
       {/* HERO */}
-      <section className="relative pt-32 pb-20 lg:pt-40 lg:pb-28 overflow-hidden">
-        <div
-          aria-hidden
-          className="absolute inset-0 -z-10"
-          style={{ background: "var(--gradient-soft)" }}
-        />
-        <div className="absolute -z-10 top-20 right-[-10%] h-[420px] w-[420px] rounded-full blur-3xl opacity-50"
-          style={{ background: "radial-gradient(circle, oklch(0.72 0.12 230 / 0.35), transparent 70%)" }} />
-        <div className="absolute -z-10 bottom-0 left-[-10%] h-[420px] w-[420px] rounded-full blur-3xl opacity-50"
-          style={{ background: "radial-gradient(circle, oklch(0.5 0.14 150 / 0.3), transparent 70%)" }} />
-
-        <div className="mx-auto max-w-7xl px-5 lg:px-8 grid lg:grid-cols-12 gap-12 items-center">
+      <section className="relative pt-28 lg:pt-36 pb-20 overflow-hidden bg-gradient-hero">
+        <div className="absolute inset-0 grid-bg opacity-40 pointer-events-none" />
+        <div className="mx-auto max-w-7xl px-5 lg:px-8 grid lg:grid-cols-12 gap-10 items-center relative">
           <div className="lg:col-span-6">
-            <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card/70 px-3 py-1 text-xs text-muted-foreground mb-6">
-              <Sparkles className="h-3.5 w-3.5 text-primary" />
-              Agri-drone intelligence • Made for India
-            </div>
-            <h1 className="text-5xl lg:text-7xl font-semibold tracking-tight leading-[1.05]">
-              AgriSky
+            <span className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-primary/90 bg-primary/10 border border-primary/20 px-3 py-1.5 rounded-full">
+              <Satellite className="h-3.5 w-3.5" /> Aerospace · Drones · AI
+            </span>
+            <h1 className="mt-5 text-4xl sm:text-5xl lg:text-6xl font-semibold leading-[1.05]">
+              Engineering the future of <span className="bg-gradient-primary bg-clip-text text-transparent">aerial intelligence</span>
             </h1>
-            <p className="mt-4 text-xl lg:text-2xl text-foreground/80 font-display">
-              AI-powered drone intelligence for smarter farms
-            </p>
-            <p className="mt-6 text-base lg:text-lg text-muted-foreground max-w-xl leading-relaxed">
-              AgriSky helps farmers monitor crop health, detect stress early, plan irrigation, and enable
-              precision farming using drone imagery and AI-based farm advisory.
+            <p className="mt-6 text-lg text-muted-foreground max-w-xl">
+              AI-powered drone systems, custom UAV engineering, and aerial intelligence solutions for agriculture, infrastructure, mapping, surveillance, and industrial applications.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <a href="#contact"><Button size="lg" className="rounded-full px-7 h-12 shadow-[var(--shadow-soft)]">
-                Join Pilot Program <ArrowRight className="ml-1 h-4 w-4" />
-              </Button></a>
-              <a href="#products"><Button size="lg" variant="outline" className="rounded-full px-7 h-12 border-foreground/15">
-                Explore Technology
-              </Button></a>
+              <Button asChild size="lg" className="bg-gradient-primary text-primary-foreground hover:opacity-90 shadow-glow">
+                <a href="#solutions">Explore Solutions <ArrowRight className="ml-1 h-4 w-4" /></a>
+              </Button>
+              <Button asChild size="lg" variant="outline" className="border-border/80 bg-card/40 backdrop-blur hover:bg-card">
+                <a href="#contact">Partner With Us</a>
+              </Button>
             </div>
             <div className="mt-10 grid grid-cols-3 gap-6 max-w-md">
               {[
-                { k: "10×", v: "Faster scouting" },
-                { k: "30%", v: "Water saved" },
-                { k: "24h", v: "AI report turnaround" },
+                { k: "5", v: "Verticals" },
+                { k: "AI", v: "Analytics core" },
+                { k: "R&D", v: "Custom UAVs" },
               ].map((s) => (
                 <div key={s.v}>
-                  <div className="text-2xl font-display font-semibold text-primary">{s.k}</div>
+                  <div className="text-2xl font-display font-semibold text-foreground">{s.k}</div>
                   <div className="text-xs text-muted-foreground mt-1">{s.v}</div>
                 </div>
               ))}
             </div>
           </div>
-
           <div className="lg:col-span-6 relative">
-            <div className="relative rounded-3xl overflow-hidden shadow-[var(--shadow-soft)] border border-border/60">
-              <img
-                src={heroDrone}
-                alt="Agricultural drone flying over Indian farmland at sunrise"
-                width={1600}
-                height={1100}
-                className="w-full h-[460px] lg:h-[560px] object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-foreground/30 via-transparent to-transparent" />
-
-              {/* Floating dashboard cards */}
-              <div className="absolute top-5 left-5 rounded-2xl bg-card/95 backdrop-blur p-3 shadow-[var(--shadow-card)] border border-border/60 w-44">
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <Activity className="h-3.5 w-3.5 text-primary" /> Crop Health
-                </div>
-                <div className="mt-1 text-2xl font-display font-semibold">NDVI 0.78</div>
-                <div className="mt-2 h-1.5 rounded-full bg-muted overflow-hidden">
-                  <div className="h-full w-[78%] bg-primary" />
-                </div>
-                <div className="text-[10px] mt-1 text-primary">Healthy canopy</div>
-              </div>
-
-              <div className="absolute bottom-5 right-5 rounded-2xl bg-card/95 backdrop-blur p-3 shadow-[var(--shadow-card)] border border-border/60 w-52">
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <Droplets className="h-3.5 w-3.5 text-sky" /> Irrigation Zone B
-                </div>
-                <div className="mt-1 text-sm font-medium">Soil moisture low</div>
-                <div className="text-[11px] text-muted-foreground mt-0.5">Recommend 18 mm in next 24h</div>
-              </div>
-
-              <div className="absolute bottom-5 left-5 rounded-full bg-card/95 backdrop-blur px-3 py-1.5 shadow-[var(--shadow-card)] border border-border/60 text-xs flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-primary animate-pulse" />
-                Live scan • 4.2 ha
-              </div>
+            <div className="relative rounded-3xl overflow-hidden shadow-soft border border-border/60">
+              <img src={heroImg} alt="AtomSky drone with AI overlays across agriculture, infrastructure and solar terrain" width={1920} height={1080} className="w-full h-auto" />
+              <div className="absolute inset-0 bg-gradient-to-tr from-background/60 via-transparent to-transparent" />
             </div>
+            <FloatingCard className="absolute -left-4 top-8 hidden sm:block" icon={<Activity className="h-4 w-4 text-accent" />} title="Crop Health" value="NDVI 0.78" tone="agri" />
+            <FloatingCard className="absolute -right-4 bottom-10 hidden sm:block" icon={<ShieldCheck className="h-4 w-4 text-primary" />} title="Inspection" value="2 alerts" />
           </div>
         </div>
       </section>
 
       {/* PROBLEM */}
-      <Section id="problem" eyebrow="The Problem" title="Farming decisions need better visibility">
-        <p className="text-muted-foreground max-w-2xl mb-12">
-          Across Indian farms, critical decisions are still made on guesswork. By the time problems show up to the naked eye, yield and income are already lost.
+      <Section id="problem" eyebrow="The problem" title="Industries need smarter aerial visibility">
+        <p className="text-muted-foreground max-w-3xl">
+          Many industries still depend on manual inspection, delayed field reporting, fragmented data collection, and expensive monitoring workflows. From farms to infrastructure sites, decision-makers need faster, safer, and more intelligent aerial insights.
         </p>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {[
-            { i: ScanLine, t: "Crop disease detected late", d: "Visible symptoms appear only after significant damage has spread across the field." },
-            { i: Droplets, t: "Water stress missed early", d: "Irrigation is scheduled by calendar, not by what the crop actually needs." },
-            { i: Sprout, t: "Manual spraying is slow", d: "Labour-dependent, inconsistent coverage, and rising costs every season." },
-            { i: Map, t: "No zone-wise insight", d: "Farms are treated as one unit, ignoring stress hotspots and yield variation." },
-            { i: ShieldCheck, t: "Drones feel out of reach", d: "Small and marginal farms cannot afford enterprise drone systems on their own." },
-            { i: Leaf, t: "Generic organic advice", d: "Recommendations are not personalised to soil, crop stage or local conditions." },
-          ].map(({ i: Icon, t, d }) => (
-            <div key={t} className="group rounded-2xl border border-border bg-card p-6 hover:border-primary/40 transition-colors shadow-[var(--shadow-card)]">
-              <div className="h-10 w-10 rounded-xl bg-destructive/10 text-destructive grid place-items-center mb-4">
-                <Icon className="h-5 w-5" />
-              </div>
-              <h3 className="font-display text-lg font-medium">{t}</h3>
-              <p className="text-sm text-muted-foreground mt-2 leading-relaxed">{d}</p>
-            </div>
+            { i: <Wrench />, t: "Manual inspections are slow and risky" },
+            { i: <Leaf />, t: "Farm and field issues are detected late" },
+            { i: <Building2 />, t: "Infrastructure monitoring lacks real-time visibility" },
+            { i: <Map />, t: "Mapping and surveying are time-consuming" },
+            { i: <Brain />, t: "Drone data is rarely converted into actionable intelligence" },
+            { i: <Cog />, t: "Industry-specific drone customization is limited" },
+          ].map((c) => (
+            <Card key={c.t}>
+              <IconBubble>{c.i}</IconBubble>
+              <p className="mt-4 font-medium">{c.t}</p>
+            </Card>
           ))}
         </div>
       </Section>
 
       {/* SOLUTION */}
-      <section id="solution" className="py-24 lg:py-32 relative overflow-hidden">
-        <div className="absolute inset-0 -z-10" style={{ background: "var(--gradient-soft)" }} />
-        <div className="mx-auto max-w-7xl px-5 lg:px-8 grid lg:grid-cols-2 gap-14 items-center">
-          <div>
-            <Eyebrow>The Solution</Eyebrow>
-            <h2 className="text-4xl lg:text-5xl font-semibold tracking-tight mt-3">
-              From sky view to <span className="text-primary">farm action</span>
-            </h2>
-            <p className="mt-6 text-muted-foreground leading-relaxed">
-              AgriSky converts high-resolution drone imagery into clear, zone-wise insights on crop health, irrigation
-              and farm advisory. Every flight becomes a recommendation the farmer can act on the same day —
-              in the dashboard, as a PDF report, or on WhatsApp in the local language.
-            </p>
-            <div className="mt-8 space-y-4">
-              {[
-                "Multispectral and RGB imagery from agri-grade drones",
-                "AI models trained for Indian crops and growing conditions",
-                "Actionable advisory, not raw data dumps",
-                "Built for farmers, FPOs, agri colleges and drone operators",
-              ].map((p) => (
-                <div key={p} className="flex items-start gap-3">
-                  <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
-                  <span className="text-sm">{p}</span>
-                </div>
-              ))}
+      <Section id="solutions" eyebrow="The solution" title="Drones, data, and intelligence in one platform" muted>
+        <p className="text-muted-foreground max-w-3xl">
+          AtomSky combines aerospace engineering, custom UAV systems, aerial imaging, AI analytics, and domain-specific workflows to convert drone missions into actionable business intelligence.
+        </p>
+        <div className="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {[
+            { i: <Plane />, t: "Custom drone systems", d: "Purpose-built UAVs engineered for specific industry missions." },
+            { i: <Brain />, t: "AI-powered aerial analytics", d: "Computer vision models that turn imagery into decisions." },
+            { i: <Layers />, t: "Industry-specific verticals", d: "Tailored workflows for agriculture, infra, mapping and more." },
+            { i: <Compass />, t: "Mission planning & reporting", d: "From flight plan to PDF — operations end-to-end." },
+            { i: <GitBranch />, t: "Scalable drone operations", d: "Repeatable processes from a single farm to enterprise fleets." },
+            { i: <FlaskConical />, t: "Research & prototyping", d: "Rapid prototyping of payloads and aerospace experiments." },
+          ].map((c) => (
+            <Card key={c.t}>
+              <IconBubble>{c.i}</IconBubble>
+              <h3 className="mt-4 text-lg font-semibold">{c.t}</h3>
+              <p className="mt-1.5 text-sm text-muted-foreground">{c.d}</p>
+            </Card>
+          ))}
+        </div>
+      </Section>
+
+      {/* VERTICALS */}
+      <Section id="verticals" eyebrow="Verticals" title="Built for multiple industries">
+        <p className="text-muted-foreground max-w-3xl">
+          Five focused service lines, one unified aerospace and AI platform underneath.
+        </p>
+        <div className="mt-10 grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <VerticalCard accent="agri" tag="Agriculture" icon={<Sprout className="h-5 w-5" />} title="AgriSky" subtitle="Agriculture Drone Intelligence" desc="Drone-based farm monitoring, crop health analysis, irrigation insights, organic farming advisory, and future precision spraying support." href="#agrisky" />
+          <VerticalCard tag="Infrastructure" icon={<Building2 className="h-5 w-5" />} title="InfraSky" subtitle="Infrastructure Inspection" desc="Drone-based inspection for roads, bridges, buildings, telecom towers, solar farms, and industrial assets." />
+          <VerticalCard tag="Mapping" icon={<Map className="h-5 w-5" />} title="GeoSky" subtitle="Mapping & Survey Intelligence" desc="Aerial mapping, land survey, site progress monitoring, GIS data capture, and terrain intelligence." />
+          <VerticalCard tag="Surveillance" icon={<Eye className="h-5 w-5" />} title="GuardSky" subtitle="Security & Surveillance" desc="Aerial monitoring for campuses, industrial sites, events, emergency response, and perimeter surveillance." />
+          <VerticalCard tag="R&D" icon={<FlaskConical className="h-5 w-5" />} title="AtomSky Labs" subtitle="Custom UAV R&D" desc="Custom drone design, payload integration, flight testing, aerospace research, and prototype development for specialized use cases." />
+          <div className="rounded-2xl p-6 bg-gradient-primary text-primary-foreground shadow-soft flex flex-col justify-between">
+            <div>
+              <Rocket className="h-6 w-6" />
+              <h3 className="mt-4 text-xl font-display font-semibold">One platform. Many missions.</h3>
+              <p className="mt-2 text-sm opacity-90">Every vertical shares the same modular UAV, data, and AI stack — engineered once, deployed everywhere.</p>
             </div>
+            <a href="#technology" className="mt-6 inline-flex items-center gap-1.5 text-sm font-medium hover:gap-2.5 transition-all">
+              See the stack <ArrowRight className="h-4 w-4" />
+            </a>
           </div>
-          <div className="relative">
-            <div className="rounded-3xl border border-border bg-card p-6 shadow-[var(--shadow-soft)]">
-              <div className="grid grid-cols-2 gap-4">
-                {[
-                  { i: Plane, t: "Capture", c: "primary" },
-                  { i: Brain, t: "Analyse", c: "sky" },
-                  { i: FileText, t: "Advise", c: "earth" },
-                  { i: Radio, t: "Deliver", c: "primary" },
-                ].map(({ i: Icon, t, c }) => (
-                  <div key={t} className="rounded-2xl border border-border p-5 bg-background">
-                    <div
-                      className="h-10 w-10 rounded-xl grid place-items-center mb-3"
-                      style={{ background: `color-mix(in oklab, var(--${c}) 15%, transparent)`, color: `var(--${c})` }}
-                    >
-                      <Icon className="h-5 w-5" />
-                    </div>
-                    <div className="font-display font-medium">{t}</div>
-                    <div className="text-xs text-muted-foreground mt-1">Drone → AI → Farm</div>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-5 rounded-2xl p-4 text-sm" style={{ background: "var(--gradient-hero)", color: "white" }}>
-                <div className="font-display text-base">Sky view → Field action</div>
-                <div className="opacity-80 text-xs mt-1">One platform from image to insight to outcome.</div>
-              </div>
+        </div>
+      </Section>
+
+      {/* FLAGSHIP AGRISKY */}
+      <section id="agrisky" className="relative py-20 sm:py-28 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-agri opacity-[0.08] pointer-events-none" />
+        <div className="mx-auto max-w-7xl px-5 lg:px-8 relative">
+          <div className="grid lg:grid-cols-12 gap-10 items-start">
+            <div className="lg:col-span-5">
+              <span className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-accent bg-accent/10 border border-accent/20 px-3 py-1.5 rounded-full">
+                <Leaf className="h-3.5 w-3.5" /> Flagship vertical
+              </span>
+              <h2 className="mt-5 text-3xl sm:text-4xl font-semibold">Flagship vertical: <span className="bg-gradient-agri bg-clip-text text-transparent">AgriSky</span></h2>
+              <p className="mt-2 text-lg text-muted-foreground">Agriculture drone intelligence by AtomSky</p>
+              <p className="mt-5 text-muted-foreground">
+                AgriSky helps farmers and agri-organizations monitor crop health, detect stress early, plan irrigation, and enable precision farming using drone imagery and AI-based farm advisory.
+              </p>
+              <Button asChild size="lg" className="mt-7 bg-gradient-agri text-primary-foreground hover:opacity-90 shadow-soft">
+                <a href="#contact">Explore AgriSky <ArrowRight className="ml-1 h-4 w-4" /></a>
+              </Button>
+            </div>
+            <div className="lg:col-span-7 grid sm:grid-cols-2 gap-4">
+              {[
+                { i: <Camera />, t: "Drone-based farm monitoring" },
+                { i: <Activity />, t: "Crop health & stress detection" },
+                { i: <Map />, t: "Farm zone mapping" },
+                { i: <Droplets />, t: "Irrigation & organic input advisory" },
+                { i: <FileText />, t: "Farmer-friendly reports" },
+                { i: <Sparkles />, t: "Future precision spraying support" },
+              ].map((c) => (
+                <Card key={c.t}>
+                  <IconBubble tone="agri">{c.i}</IconBubble>
+                  <p className="mt-4 font-medium">{c.t}</p>
+                </Card>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
-      {/* PRODUCTS */}
-      <Section id="products" eyebrow="Product Modules" title="A platform across the farm intelligence stack">
-        <div className="grid md:grid-cols-2 gap-5 mt-4">
+      {/* TECHNOLOGY */}
+      <Section id="technology" eyebrow="Technology" title="A modular aerial intelligence stack" muted>
+        <p className="text-muted-foreground max-w-3xl">
+          AtomSky's technology is built as a reusable platform that powers multiple industries — from a single mission to enterprise-grade aerial operations.
+        </p>
+        <div className="mt-12 grid md:grid-cols-2 lg:grid-cols-5 gap-4">
           {[
-            { i: Plane, name: "AgriSky Scout", tag: "Drone Hardware",
-              d: "Custom-built monitoring drone for farm mapping, scouting and high-resolution imagery capture across small and mid-size farms." },
-            { i: Brain, name: "AgriSky Vision", tag: "AI Platform",
-              d: "Computer-vision platform that analyses drone imagery for NDVI, crop stress, pest hotspots and growth-stage insights." },
-            { i: FileText, name: "AgriSky Advisory", tag: "Recommendation Engine",
-              d: "Generates irrigation, pest, disease and organic input recommendations personalised to crop, stage and zone." },
-            { i: Droplets, name: "AgriSky Spray", tag: "Coming Soon",
-              d: "Future precision spraying drone for variable-rate application of bio-inputs and crop protection products." },
-          ].map(({ i: Icon, name, tag, d }) => (
-            <div key={name} className="group relative rounded-3xl border border-border bg-card p-7 hover:shadow-[var(--shadow-soft)] hover:-translate-y-0.5 transition-all overflow-hidden">
-              <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary via-sky to-earth opacity-0 group-hover:opacity-100 transition-opacity" />
-              <div className="flex items-start justify-between mb-5">
-                <div className="h-12 w-12 rounded-2xl bg-primary/10 text-primary grid place-items-center">
-                  <Icon className="h-6 w-6" />
+            { n: "01", i: <Plane />, t: "Drone Mission", d: "Custom UAV or partner drone captures aerial data." },
+            { n: "02", i: <Radar />, t: "Data Capture", d: "RGB, thermal, multispectral, LiDAR, or sensor-based data." },
+            { n: "03", i: <Brain />, t: "AI Analysis", d: "Vision models detect patterns, risks, defects, stress, and changes." },
+            { n: "04", i: <FileText />, t: "Actionable Reports", d: "Dashboards, PDF reports, alerts and recommendations." },
+            { n: "05", i: <Zap />, t: "Operational Intelligence", d: "Insights for inspection, advisory, planning and automation." },
+          ].map((s, idx) => (
+            <div key={s.n} className="relative">
+              <Card className="h-full">
+                <div className="flex items-center justify-between">
+                  <IconBubble>{s.i}</IconBubble>
+                  <span className="text-xs font-mono text-muted-foreground">{s.n}</span>
                 </div>
-                <span className="text-[10px] uppercase tracking-wider rounded-full border border-border px-2.5 py-1 text-muted-foreground">
-                  {tag}
-                </span>
-              </div>
-              <h3 className="font-display text-xl font-semibold">{name}</h3>
-              <p className="text-sm text-muted-foreground mt-2 leading-relaxed">{d}</p>
+                <h3 className="mt-4 text-base font-semibold">{s.t}</h3>
+                <p className="mt-1.5 text-sm text-muted-foreground">{s.d}</p>
+              </Card>
+              {idx < 4 && (
+                <ArrowRight className="hidden lg:block absolute top-1/2 -right-3 -translate-y-1/2 h-4 w-4 text-primary/60" />
+              )}
             </div>
           ))}
         </div>
       </Section>
 
-      {/* HOW IT WORKS */}
-      <section className="py-24 lg:py-32 bg-foreground text-background relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10 -z-0"
-          style={{ backgroundImage: "radial-gradient(circle at 1px 1px, white 1px, transparent 0)", backgroundSize: "32px 32px" }} />
-        <div className="mx-auto max-w-7xl px-5 lg:px-8 relative">
-          <Eyebrow className="text-background/70 border-background/20">How It Works</Eyebrow>
-          <h2 className="text-4xl lg:text-5xl font-semibold tracking-tight mt-3 max-w-2xl">
-            Four steps from drone flight to farmer decision
-          </h2>
-          <div className="mt-14 grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[
-              { n: "01", i: Plane, t: "Drone captures farm images", d: "AgriSky Scout flies a pre-planned mission and captures high-resolution farm imagery." },
-              { n: "02", i: Brain, t: "AI analyses crop health", d: "Vision models process imagery into NDVI, stress and zone-wise health maps." },
-              { n: "03", i: Sparkles, t: "Advisory generates actions", d: "Advisory engine turns analysis into irrigation, input and intervention recommendations." },
-              { n: "04", i: Radio, t: "Farmer gets the report", d: "Delivered as a dashboard, downloadable PDF or local-language WhatsApp report." },
-            ].map(({ n, i: Icon, t, d }) => (
-              <div key={n} className="relative rounded-2xl border border-background/15 bg-background/5 p-6 backdrop-blur">
-                <div className="text-xs font-mono text-background/60">{n}</div>
-                <div className="h-10 w-10 rounded-xl bg-background/10 grid place-items-center my-3">
-                  <Icon className="h-5 w-5" />
-                </div>
-                <div className="font-display text-lg">{t}</div>
-                <div className="text-sm text-background/70 mt-2 leading-relaxed">{d}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* PILOT */}
-      <Section id="pilot" eyebrow="Pilot Program" title="Starting with the Arunamangala Pilot">
-        <div className="grid lg:grid-cols-5 gap-10 items-center">
-          <div className="lg:col-span-3">
-            <p className="text-muted-foreground leading-relaxed">
-              AgriSky begins with a live farm pilot at Arunamangala to validate the full intelligence loop —
-              drone image capture, farm zone mapping, AI crop health reports, and farmer-friendly recommendations.
-              The pilot is our proving ground for accuracy, usability, and on-ground value before scaling to
-              FPOs and partner farms across the region.
-            </p>
-            <div className="mt-8 grid sm:grid-cols-2 gap-4">
-              {[
-                "Drone image capture across multiple growth stages",
-                "Zone-wise farm mapping and health benchmarks",
-                "AI-generated reports validated with agronomists",
-                "Local-language farmer feedback loop",
-              ].map((p) => (
-                <div key={p} className="flex gap-3 items-start rounded-xl border border-border bg-card p-4">
-                  <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
-                  <span className="text-sm">{p}</span>
-                </div>
-              ))}
-            </div>
-            <div className="mt-8">
-              <a href="#contact"><Button size="lg" className="rounded-full px-7">Apply to be a pilot partner <ArrowRight className="ml-1 h-4 w-4" /></Button></a>
-            </div>
-          </div>
-          <div className="lg:col-span-2">
-            <div className="rounded-3xl p-8 text-primary-foreground relative overflow-hidden shadow-[var(--shadow-soft)]"
-              style={{ background: "var(--gradient-hero)" }}>
-              <MapPin className="h-7 w-7 mb-4 opacity-90" />
-              <div className="text-sm opacity-80">Pilot Location</div>
-              <div className="font-display text-3xl mt-1">Arunamangala</div>
-              <div className="text-sm opacity-80 mt-1">India • Live farm validation</div>
-              <div className="mt-6 grid grid-cols-2 gap-4">
-                {[
-                  { k: "Phase 01", v: "Image capture" },
-                  { k: "Phase 02", v: "AI mapping" },
-                  { k: "Phase 03", v: "Advisory" },
-                  { k: "Phase 04", v: "Farmer reports" },
-                ].map((p) => (
-                  <div key={p.k} className="rounded-xl bg-white/15 backdrop-blur p-3">
-                    <div className="text-[10px] opacity-80 uppercase tracking-wider">{p.k}</div>
-                    <div className="text-sm font-medium mt-0.5">{p.v}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+      {/* PRODUCTS / CAPABILITIES */}
+      <Section id="products" eyebrow="Products & capabilities" title="What AtomSky builds">
+        <div className="mt-10 grid sm:grid-cols-2 lg:grid-cols-5 gap-4">
+          {[
+            { i: <Plane />, t: "Custom UAV Design" },
+            { i: <Cpu />, t: "Payload Integration" },
+            { i: <Compass />, t: "Drone Mission Planning" },
+            { i: <ScanLine />, t: "AI Image Analysis" },
+            { i: <Map />, t: "Aerial Mapping" },
+            { i: <Sprout />, t: "Crop Intelligence" },
+            { i: <Building2 />, t: "Infrastructure Inspection" },
+            { i: <Eye />, t: "Surveillance Workflows" },
+            { i: <BarChart3 />, t: "Reporting Dashboards" },
+            { i: <Cog />, t: "Drone Service Operations" },
+          ].map((c) => (
+            <Card key={c.t} className="text-center items-center flex flex-col">
+              <IconBubble>{c.i}</IconBubble>
+              <p className="mt-3 text-sm font-medium">{c.t}</p>
+            </Card>
+          ))}
         </div>
       </Section>
 
-      {/* BENEFITS */}
-      <Section id="benefits" eyebrow="Benefits" title="Built for outcomes farmers can feel">
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      {/* PILOTS */}
+      <Section id="pilots" eyebrow="Pilots" title="Pilot programs and partnerships" muted>
+        <p className="text-muted-foreground max-w-3xl">
+          AtomSky is building pilot programs with agriculture farms, infrastructure owners, drone operators, academic institutions, FPOs, and industry partners.
+        </p>
+        <div className="mt-10 grid md:grid-cols-3 gap-5">
           {[
-            { i: Activity, t: "Early crop stress detection", d: "Spot stress days before it shows to the eye and act before yield is lost." },
-            { i: Droplets, t: "Better irrigation decisions", d: "Zone-wise moisture and stress mapping cuts water use without hurting yield." },
-            { i: ScanLine, t: "Lower manual inspection", d: "Cover acres in minutes instead of days, with fewer field walks." },
-            { i: Sprout, t: "Precision spraying support", d: "Variable-rate spraying reduces input cost and chemical load on the soil." },
-            { i: Leaf, t: "Organic farming guidance", d: "Personalised bio-input recommendations based on real field signals." },
-            { i: Languages, t: "Local-language reports", d: "WhatsApp and PDF reports in the language farmers actually use." },
-          ].map(({ i: Icon, t, d }) => (
-            <div key={t} className="rounded-2xl bg-card border border-border p-6 hover:border-primary/40 transition-colors">
-              <div className="h-11 w-11 rounded-2xl bg-primary/10 text-primary grid place-items-center mb-4">
-                <Icon className="h-5 w-5" />
+            { tag: "Agriculture", icon: <Sprout className="h-5 w-5" />, tone: "agri" as const, title: "AgriSky Farm Pilot", desc: "Drone imagery and AI-based crop health reports for farms." },
+            { tag: "Infrastructure", icon: <Building2 className="h-5 w-5" />, tone: "primary" as const, title: "InfraSky Inspection Pilot", desc: "Drone-based inspection and reporting for infrastructure and industrial assets." },
+            { tag: "R&D", icon: <FlaskConical className="h-5 w-5" />, tone: "primary" as const, title: "Custom UAV R&D Pilot", desc: "Prototype development and payload testing for specialized aerospace use cases." },
+          ].map((p) => (
+            <Card key={p.title}>
+              <div className="flex items-center justify-between">
+                <IconBubble tone={p.tone}>{p.icon}</IconBubble>
+                <span className="text-[10px] uppercase tracking-widest text-muted-foreground">{p.tag}</span>
               </div>
-              <h3 className="font-display text-lg font-medium">{t}</h3>
-              <p className="text-sm text-muted-foreground mt-2 leading-relaxed">{d}</p>
-            </div>
+              <h3 className="mt-4 text-lg font-semibold">{p.title}</h3>
+              <p className="mt-1.5 text-sm text-muted-foreground">{p.desc}</p>
+              <a href="#contact" className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:gap-2.5 transition-all">
+                Apply for pilot <ArrowRight className="h-4 w-4" />
+              </a>
+            </Card>
+          ))}
+        </div>
+      </Section>
+
+      {/* TEAM */}
+      <Section id="team" eyebrow="Team" title="Built by aerospace and software engineering minds">
+        <p className="text-muted-foreground max-w-3xl">
+          AtomSky brings together aerospace engineers, software engineering, AI, drone systems, and field-domain expertise to build practical aerial intelligence solutions for real-world industries.
+        </p>
+        <div className="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {[
+            { i: <Rocket />, t: "Aerospace engineering" },
+            { i: <Plane />, t: "UAV design" },
+            { i: <Cpu />, t: "Flight systems" },
+            { i: <Brain />, t: "AI & software platforms" },
+            { i: <Users />, t: "Field pilots" },
+            { i: <Globe2 />, t: "Industry partnerships" },
+          ].map((c) => (
+            <Card key={c.t} className="flex-row items-center gap-4 flex">
+              <IconBubble>{c.i}</IconBubble>
+              <p className="font-medium">{c.t}</p>
+            </Card>
           ))}
         </div>
       </Section>
 
       {/* CONTACT */}
-      <section id="contact" className="py-24 lg:py-32 relative overflow-hidden">
-        <div className="absolute inset-0 -z-10" style={{ background: "var(--gradient-soft)" }} />
-        <div className="mx-auto max-w-6xl px-5 lg:px-8 grid lg:grid-cols-5 gap-12">
-          <div className="lg:col-span-2">
-            <Eyebrow>Join Pilot</Eyebrow>
-            <h2 className="text-4xl lg:text-5xl font-semibold tracking-tight mt-3">
-              Bring AgriSky to your farm
-            </h2>
-            <p className="mt-5 text-muted-foreground">
-              Farmers, FPOs, agri colleges, drone operators, incubators, investors — share your details and our team will get in touch.
+      <section id="contact" className="relative py-20 sm:py-28 bg-gradient-hero">
+        <div className="absolute inset-0 grid-bg opacity-30 pointer-events-none" />
+        <div className="mx-auto max-w-7xl px-5 lg:px-8 relative grid lg:grid-cols-12 gap-10">
+          <div className="lg:col-span-5">
+            <span className="text-xs uppercase tracking-[0.2em] text-primary/90">Get in touch</span>
+            <h2 className="mt-3 text-3xl sm:text-4xl font-semibold">Partner with AtomSky</h2>
+            <p className="mt-4 text-muted-foreground">
+              Whether you are a farmer, infrastructure company, drone operator, investor, institution, or industry partner — AtomSky is open to pilots, partnerships, and custom drone intelligence projects.
             </p>
-            <div className="mt-8 space-y-4 text-sm">
-              <div className="flex items-center gap-3 text-muted-foreground"><Mail className="h-4 w-4 text-primary" /> hello@agrisky.in</div>
-              <div className="flex items-center gap-3 text-muted-foreground"><Phone className="h-4 w-4 text-primary" /> Gouthaman — +91 99402 63589</div>
-              <div className="flex items-center gap-3 text-muted-foreground"><MapPin className="h-4 w-4 text-primary" /> Arunamangala, India</div>
-            </div>
+            <ul className="mt-8 space-y-4 text-sm">
+              <li className="flex items-center gap-3"><Phone className="h-4 w-4 text-primary" /> Gouthaman — +91 99402 63589</li>
+              <li className="flex items-center gap-3"><Mail className="h-4 w-4 text-primary" /> hello@atomsky.in</li>
+              <li className="flex items-center gap-3"><MapPin className="h-4 w-4 text-primary" /> India</li>
+            </ul>
           </div>
-          <div className="lg:col-span-3">
+          <Card className="lg:col-span-7">
             <ContactForm />
-          </div>
+          </Card>
         </div>
       </section>
 
       {/* FOOTER */}
-      <footer className="border-t border-border bg-card/40">
-        <div className="mx-auto max-w-7xl px-5 lg:px-8 py-12 grid md:grid-cols-3 gap-8 items-start">
-          <div>
+      <footer className="border-t border-border bg-background">
+        <div className="mx-auto max-w-7xl px-5 lg:px-8 py-12 grid md:grid-cols-4 gap-8">
+          <div className="md:col-span-2">
             <div className="flex items-center gap-2 font-display font-semibold text-lg">
-              <span className="grid place-items-center h-9 w-9 rounded-xl bg-primary text-primary-foreground">
-                <Plane className="h-4 w-4" />
+              <span className="grid place-items-center h-8 w-8 rounded-lg bg-gradient-primary shadow-glow">
+                <Plane className="h-4 w-4 text-primary-foreground" />
               </span>
-              AgriSky
+              AtomSky
             </div>
-            <p className="text-sm text-muted-foreground mt-3 max-w-xs">
-              Drone-powered intelligence for smarter farms.
-            </p>
+            <p className="mt-3 text-sm text-muted-foreground max-w-sm">Engineering the future of aerial intelligence.</p>
+            <p className="mt-2 text-xs text-muted-foreground">AgriSky is a flagship service vertical of AtomSky.</p>
           </div>
-          <div className="text-sm">
-            <div className="font-display mb-3">Explore</div>
-            <ul className="space-y-2 text-muted-foreground">
-              {nav.map((n) => <li key={n.href}><a href={n.href} className="hover:text-foreground">{n.label}</a></li>)}
+          <div>
+            <h4 className="font-display font-semibold text-sm">Explore</h4>
+            <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
+              <li><a href="#home" className="hover:text-foreground">Home</a></li>
+              <li><a href="#solutions" className="hover:text-foreground">Solutions</a></li>
+              <li><a href="#agrisky" className="hover:text-foreground">AgriSky</a></li>
+              <li><a href="#technology" className="hover:text-foreground">Technology</a></li>
+              <li><a href="#pilots" className="hover:text-foreground">Pilot Programs</a></li>
+              <li><a href="#contact" className="hover:text-foreground">Contact</a></li>
             </ul>
           </div>
-          <div className="text-sm">
-            <div className="font-display mb-3">Contact</div>
-            <ul className="space-y-2 text-muted-foreground">
-              <li>hello@agrisky.in</li>
+          <div>
+            <h4 className="font-display font-semibold text-sm">Contact</h4>
+            <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
               <li>Gouthaman — +91 99402 63589</li>
-              <li>Arunamangala, India</li>
+              <li>hello@atomsky.in</li>
+              <li>India</li>
             </ul>
           </div>
         </div>
-        <div className="border-t border-border py-5 text-center text-xs text-muted-foreground">
-          © {new Date().getFullYear()} AgriSky. All rights reserved.
+        <div className="border-t border-border">
+          <div className="mx-auto max-w-7xl px-5 lg:px-8 py-6 text-xs text-muted-foreground flex flex-wrap justify-between gap-3">
+            <span>© {new Date().getFullYear()} AtomSky. All rights reserved.</span>
+            <span>Aerospace · Drones · AI</span>
+          </div>
         </div>
       </footer>
     </div>
   );
 }
 
-function Eyebrow({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+/* ---------- Building blocks ---------- */
+
+function Section({
+  id, eyebrow, title, children, muted = false,
+}: { id?: string; eyebrow?: string; title: string; children: React.ReactNode; muted?: boolean; }) {
   return (
-    <span className={`inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs uppercase tracking-wider text-muted-foreground ${className}`}>
-      <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-      {children}
-    </span>
+    <section id={id} className={`py-20 sm:py-28 ${muted ? "bg-muted/30" : ""}`}>
+      <div className="mx-auto max-w-7xl px-5 lg:px-8">
+        {eyebrow && <span className="text-xs uppercase tracking-[0.2em] text-primary/90">{eyebrow}</span>}
+        <h2 className="mt-3 text-3xl sm:text-4xl font-semibold max-w-3xl">{title}</h2>
+        {children}
+      </div>
+    </section>
   );
 }
 
-function Section({
-  id, eyebrow, title, children,
-}: { id?: string; eyebrow: string; title: string; children: React.ReactNode }) {
+function Card({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return (
-    <section id={id} className="py-24 lg:py-32">
-      <div className="mx-auto max-w-7xl px-5 lg:px-8">
-        <Eyebrow>{eyebrow}</Eyebrow>
-        <h2 className="text-4xl lg:text-5xl font-semibold tracking-tight mt-3 max-w-3xl">{title}</h2>
-        <div className="mt-12">{children}</div>
+    <div className={`rounded-2xl p-6 bg-gradient-card border border-border/60 shadow-card hover:border-primary/40 hover:shadow-soft transition-all ${className}`}>
+      {children}
+    </div>
+  );
+}
+
+function IconBubble({ children, tone = "primary" }: { children: React.ReactNode; tone?: "primary" | "agri" }) {
+  const cls = tone === "agri"
+    ? "bg-accent/15 text-accent border-accent/30"
+    : "bg-primary/15 text-primary border-primary/30";
+  return (
+    <div className={`inline-grid place-items-center h-10 w-10 rounded-xl border ${cls} [&>svg]:h-5 [&>svg]:w-5`}>
+      {children}
+    </div>
+  );
+}
+
+function FloatingCard({
+  icon, title, value, className = "", tone = "primary",
+}: { icon: React.ReactNode; title: string; value: string; className?: string; tone?: "primary" | "agri" }) {
+  return (
+    <div className={`rounded-xl bg-card/90 backdrop-blur border border-border shadow-card px-4 py-3 ${className}`}>
+      <div className="flex items-center gap-2 text-xs text-muted-foreground">{icon}{title}</div>
+      <div className={`mt-1 text-sm font-semibold ${tone === "agri" ? "text-accent" : "text-primary"}`}>{value}</div>
+    </div>
+  );
+}
+
+function VerticalCard({
+  tag, icon, title, subtitle, desc, accent, href,
+}: { tag: string; icon: React.ReactNode; title: string; subtitle: string; desc: string; accent?: "agri"; href?: string; }) {
+  const isAgri = accent === "agri";
+  return (
+    <div className={`rounded-2xl p-6 border shadow-card transition-all hover:-translate-y-0.5 ${isAgri ? "bg-gradient-card border-accent/40 hover:shadow-soft" : "bg-gradient-card border-border/60 hover:border-primary/40 hover:shadow-soft"}`}>
+      <div className="flex items-center justify-between">
+        <IconBubble tone={isAgri ? "agri" : "primary"}>{icon}</IconBubble>
+        <span className="text-[10px] uppercase tracking-widest text-muted-foreground">{tag}</span>
       </div>
-    </section>
+      <h3 className="mt-5 text-xl font-display font-semibold">{title}</h3>
+      <p className={`mt-1 text-sm font-medium ${isAgri ? "text-accent" : "text-primary"}`}>{subtitle}</p>
+      <p className="mt-3 text-sm text-muted-foreground">{desc}</p>
+      {href && (
+        <a href={href} className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-accent hover:gap-2.5 transition-all">
+          Explore AgriSky <ArrowRight className="h-4 w-4" />
+        </a>
+      )}
+    </div>
   );
 }
 
@@ -479,44 +489,51 @@ function ContactForm() {
         setSubmitting(true);
         setTimeout(() => {
           setSubmitting(false);
+          toast.success("Thanks! We'll reach out shortly.");
           (e.target as HTMLFormElement).reset();
           setInterest("");
-          toast.success("Thanks! We'll be in touch shortly.");
-        }, 700);
+        }, 600);
       }}
-      className="rounded-3xl bg-card border border-border p-6 lg:p-8 shadow-[var(--shadow-soft)] space-y-4"
+      className="grid sm:grid-cols-2 gap-4"
     >
-      <div className="grid sm:grid-cols-2 gap-4">
-        <Field label="Name"><Input required name="name" placeholder="Your name" /></Field>
-        <Field label="Phone"><Input required name="phone" type="tel" placeholder="+91" /></Field>
-        <Field label="Email"><Input required name="email" type="email" placeholder="you@farm.in" /></Field>
-        <Field label="Location"><Input required name="location" placeholder="Village, District" /></Field>
-        <Field label="Farm size"><Input name="size" placeholder="e.g. 4 acres" /></Field>
-        <Field label="Crop type"><Input name="crop" placeholder="e.g. Paddy, Cotton" /></Field>
-      </div>
-      <Field label="Interested in">
-        <Select value={interest} onValueChange={setInterest}>
+      <Field label="Name" required><Input name="name" required placeholder="Your full name" /></Field>
+      <Field label="Phone" required><Input name="phone" required type="tel" placeholder="+91 ..." /></Field>
+      <Field label="Email" required><Input name="email" required type="email" placeholder="you@company.com" /></Field>
+      <Field label="Organization"><Input name="org" placeholder="Company / FPO / Institution" /></Field>
+      <Field label="Location"><Input name="location" placeholder="City, State" /></Field>
+      <Field label="Interested in" required>
+        <Select value={interest} onValueChange={setInterest} required>
           <SelectTrigger><SelectValue placeholder="Select an option" /></SelectTrigger>
           <SelectContent>
-            {["Drone Survey", "AI Crop Report", "Spraying Service", "Partnership", "Investment"].map((o) => (
-              <SelectItem key={o} value={o}>{o}</SelectItem>
-            ))}
+            <SelectItem value="agrisky">AgriSky — agriculture solution</SelectItem>
+            <SelectItem value="infrasky">InfraSky — infrastructure inspection</SelectItem>
+            <SelectItem value="geosky">GeoSky — mapping & survey</SelectItem>
+            <SelectItem value="guardsky">GuardSky — surveillance</SelectItem>
+            <SelectItem value="rd">Custom UAV R&D</SelectItem>
+            <SelectItem value="invest">Investment / incubation</SelectItem>
+            <SelectItem value="partner">Partnership</SelectItem>
           </SelectContent>
         </Select>
       </Field>
-      <Field label="Message"><Textarea name="message" placeholder="Tell us about your farm or interest" rows={4} /></Field>
-      <Button type="submit" disabled={submitting} size="lg" className="w-full rounded-full h-12">
-        {submitting ? "Submitting…" : "Submit Interest"}
-      </Button>
+      <div className="sm:col-span-2">
+        <Field label="Message"><Textarea name="message" rows={4} placeholder="Tell us briefly about your interest…" /></Field>
+      </div>
+      <div className="sm:col-span-2">
+        <Button type="submit" size="lg" disabled={submitting} className="w-full bg-gradient-primary text-primary-foreground hover:opacity-90 shadow-glow">
+          {submitting ? "Submitting…" : "Submit Interest"}
+          <ArrowRight className="ml-1 h-4 w-4" />
+        </Button>
+        <p className="mt-3 text-xs text-muted-foreground flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-accent" /> We typically respond within 1–2 business days.</p>
+      </div>
     </form>
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
   return (
-    <div className="space-y-1.5">
-      <Label className="text-xs text-muted-foreground">{label}</Label>
-      {children}
+    <div>
+      <Label className="text-xs uppercase tracking-wider text-muted-foreground">{label}{required && " *"}</Label>
+      <div className="mt-1.5">{children}</div>
     </div>
   );
 }
