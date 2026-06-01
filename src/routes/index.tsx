@@ -574,7 +574,7 @@ function VerticalCard({
       <p className="mt-3 text-sm text-muted-foreground">{desc}</p>
       {href && (
         <a href={href} className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-accent hover:gap-2.5 transition-all">
-          Explore AgriSky <ArrowRight className="h-4 w-4" />
+          Explore {title} <ArrowRight className="h-4 w-4" />
         </a>
       )}
     </div>
