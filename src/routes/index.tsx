@@ -1,11 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import {
-  Plane, Leaf, Droplets, ScanLine, Sprout, Map, Brain, FileText,
+  Plane, Leaf, Droplets, ScanLine, Sprout, Map as MapIcon, Brain, FileText,
   CheckCircle2, ArrowRight, ShieldCheck, Activity, Sparkles,
   Mail, Phone, MapPin, Menu, X, Satellite, Cpu, Radar, Building2,
   Cog, Camera, Layers, BarChart3, Rocket, Wrench, Compass, Eye,
   GitBranch, Users, FlaskConical, Globe2, Zap, GraduationCap,
+  Flame, Bell, Package, Sun,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
