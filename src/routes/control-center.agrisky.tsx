@@ -132,7 +132,8 @@ function AgriSky() {
 
         <main className="flex-1 p-5 lg:p-8 max-w-[1400px] w-full mx-auto">
           {tab === "overview" && <Overview />}
-          {tab === "farms" && <Farms />}
+          {tab === "farms" && <FarmsCloudSection />}
+          {tab === "pilots" && <PilotsSection />}
           {tab === "survey" && <Survey />}
           {tab === "boundary" && <Boundary />}
           {tab === "input" && <InputLoading />}
