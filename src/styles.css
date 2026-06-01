@@ -88,7 +88,7 @@
 .bg-gradient-hero { background: var(--gradient-hero); }
 .bg-gradient-card { background: var(--gradient-card); }
 .bg-gradient-primary { background: var(--gradient-primary); }
-.bg-gradient-agri { background: var(--gradient-agri); }
+.bg-gradient-agri { background-image: var(--gradient-agri); }
 .shadow-soft { box-shadow: var(--shadow-soft); }
 .shadow-card { box-shadow: var(--shadow-card); }
 .shadow-glow { box-shadow: var(--shadow-glow); }
