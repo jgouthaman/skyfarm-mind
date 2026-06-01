@@ -7,6 +7,8 @@ import {
   Download, Share2, Eye, PencilLine, Users, Package, Smartphone, RadioTower,
 } from "lucide-react";
 import { FieldSyncMonitor, MissionDetail, ACTIVE_MISSION_ID } from "@/components/agrisky/field-sync";
+import { PilotsSection } from "@/components/agrisky/pilots-section";
+import { FarmsCloudSection } from "@/components/agrisky/farms-cloud";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -22,12 +24,13 @@ export const Route = createFileRoute("/control-center/agrisky")({
 });
 
 type TabId =
-  | "overview" | "farms" | "survey" | "boundary" | "input"
+  | "overview" | "farms" | "pilots" | "survey" | "boundary" | "input"
   | "spraying" | "field-sync" | "activity" | "reports" | "settings";
 
 const navItems: { id: TabId; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
   { id: "farms", label: "Farms", icon: Tractor },
+  { id: "pilots", label: "Pilots", icon: Users },
   { id: "survey", label: "Aerial Survey", icon: ScanLine },
   { id: "boundary", label: "Boundary Mapping", icon: MapIcon },
   { id: "input", label: "Input Loading", icon: Droplets },
@@ -129,7 +132,8 @@ function AgriSky() {
 
         <main className="flex-1 p-5 lg:p-8 max-w-[1400px] w-full mx-auto">
           {tab === "overview" && <Overview />}
-          {tab === "farms" && <Farms />}
+          {tab === "farms" && <FarmsCloudSection />}
+          {tab === "pilots" && <PilotsSection />}
           {tab === "survey" && <Survey />}
           {tab === "boundary" && <Boundary />}
           {tab === "input" && <InputLoading />}
