@@ -9,13 +9,13 @@ export const Route = createFileRoute("/pilot")({
   component: PilotLayout,
 });
 
-const nav = [
+const nav: { to: "/pilot" | "/pilot/missions" | "/pilot/tracking" | "/pilot/sync" | "/pilot/profile"; label: string; icon: typeof LayoutDashboard; exact?: boolean }[] = [
   { to: "/pilot", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { to: "/pilot/missions", label: "Missions", icon: ListChecks },
   { to: "/pilot/tracking", label: "Tracking", icon: Radar },
   { to: "/pilot/sync", label: "Sync", icon: RefreshCw },
   { to: "/pilot/profile", label: "Profile", icon: User2 },
-] as const;
+];
 
 function PilotLayout() {
   const navigate = useNavigate();
