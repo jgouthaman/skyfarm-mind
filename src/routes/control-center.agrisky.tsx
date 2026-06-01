@@ -23,7 +23,7 @@ export const Route = createFileRoute("/control-center/agrisky")({
 
 type TabId =
   | "overview" | "farms" | "survey" | "boundary" | "input"
-  | "spraying" | "activity" | "reports" | "settings";
+  | "spraying" | "field-sync" | "activity" | "reports" | "settings";
 
 const navItems: { id: TabId; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
@@ -32,6 +32,7 @@ const navItems: { id: TabId; label: string; icon: React.ComponentType<{ classNam
   { id: "boundary", label: "Boundary Mapping", icon: MapIcon },
   { id: "input", label: "Input Loading", icon: Droplets },
   { id: "spraying", label: "Spraying Missions", icon: Sprout },
+  { id: "field-sync", label: "Field Sync Monitor", icon: RadioTower },
   { id: "activity", label: "Activity Log", icon: Activity },
   { id: "reports", label: "Reports", icon: FileText },
   { id: "settings", label: "Settings", icon: Settings },
