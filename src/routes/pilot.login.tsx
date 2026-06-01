@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { Button } from "@/components/ui/button";
 import { Plane, Leaf, Shield } from "lucide-react";
 import { pilotStore } from "@/lib/pilot-store";
+import { getPilotByPhone } from "@/lib/cloud-api";
 
 export const Route = createFileRoute("/pilot/login")({
   head: () => ({ meta: [{ title: "AgriSky Pilot — Login" }] }),
@@ -22,11 +23,21 @@ function PilotLogin() {
     setSent(true);
     toast.success("Demo OTP sent");
   };
-  const verify = () => {
+  const verify = async () => {
     if (otp.length !== 5) return toast.error("OTP must be exactly 5 digits");
     if (otp !== mobile.slice(-5)) return toast.error("Invalid OTP. Please enter the last 5 digits of your mobile number.");
-    pilotStore.login("Arun K.", mobile);
-    toast.success("Login successful");
+    let name = "Pilot";
+    try {
+      const p = await getPilotByPhone(mobile);
+      if (!p) {
+        return toast.error("No pilot registered with this mobile number. Ask Control Center to add you first.");
+      }
+      name = p.name;
+    } catch (e) {
+      return toast.error((e as Error).message);
+    }
+    pilotStore.login(name, mobile);
+    toast.success(`Welcome ${name}`);
     setTimeout(() => navigate({ to: "/pilot" }), 250);
   };
 
