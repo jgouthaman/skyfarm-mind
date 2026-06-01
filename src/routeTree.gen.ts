@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ControlCenterIndexRouteImport } from './routes/control-center.index'
 import { Route as ControlCenterLoginRouteImport } from './routes/control-center.login'
+import { Route as ControlCenterAgriskyRouteImport } from './routes/control-center.agrisky'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -28,33 +29,55 @@ const ControlCenterLoginRoute = ControlCenterLoginRouteImport.update({
   path: '/control-center/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ControlCenterAgriskyRoute = ControlCenterAgriskyRouteImport.update({
+  id: '/control-center/agrisky',
+  path: '/control-center/agrisky',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/control-center/agrisky': typeof ControlCenterAgriskyRoute
   '/control-center/login': typeof ControlCenterLoginRoute
   '/control-center/': typeof ControlCenterIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/control-center/agrisky': typeof ControlCenterAgriskyRoute
   '/control-center/login': typeof ControlCenterLoginRoute
   '/control-center': typeof ControlCenterIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/control-center/agrisky': typeof ControlCenterAgriskyRoute
   '/control-center/login': typeof ControlCenterLoginRoute
   '/control-center/': typeof ControlCenterIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/control-center/login' | '/control-center/'
+  fullPaths:
+    | '/'
+    | '/control-center/agrisky'
+    | '/control-center/login'
+    | '/control-center/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/control-center/login' | '/control-center'
-  id: '__root__' | '/' | '/control-center/login' | '/control-center/'
+  to:
+    | '/'
+    | '/control-center/agrisky'
+    | '/control-center/login'
+    | '/control-center'
+  id:
+    | '__root__'
+    | '/'
+    | '/control-center/agrisky'
+    | '/control-center/login'
+    | '/control-center/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ControlCenterAgriskyRoute: typeof ControlCenterAgriskyRoute
   ControlCenterLoginRoute: typeof ControlCenterLoginRoute
   ControlCenterIndexRoute: typeof ControlCenterIndexRoute
 }
@@ -82,11 +105,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ControlCenterLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/control-center/agrisky': {
+      id: '/control-center/agrisky'
+      path: '/control-center/agrisky'
+      fullPath: '/control-center/agrisky'
+      preLoaderRoute: typeof ControlCenterAgriskyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ControlCenterAgriskyRoute: ControlCenterAgriskyRoute,
   ControlCenterLoginRoute: ControlCenterLoginRoute,
   ControlCenterIndexRoute: ControlCenterIndexRoute,
 }
