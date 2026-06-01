@@ -551,7 +551,7 @@ function ContactForm() {
             <SelectItem value="agrisky">AgriSky — agriculture solution</SelectItem>
             <SelectItem value="infrasky">InfraSky — infrastructure inspection</SelectItem>
             <SelectItem value="geosky">GeoSky — mapping & survey</SelectItem>
-            <SelectItem value="guardsky">GuardSky — surveillance</SelectItem>
+            <SelectItem value="guardsky">GuardSky — aerial surveillance &amp; early fire response</SelectItem>
             <SelectItem value="rd">Custom UAV R&D</SelectItem>
             <SelectItem value="academy">AtomSky Academy — drone training</SelectItem>
             <SelectItem value="certification">Drone pilot certification support</SelectItem>
