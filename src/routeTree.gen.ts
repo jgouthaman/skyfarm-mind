@@ -9,20 +9,58 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as PilotRouteImport } from './routes/pilot'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PilotIndexRouteImport } from './routes/pilot.index'
 import { Route as ControlCenterIndexRouteImport } from './routes/control-center.index'
+import { Route as PilotTrackingRouteImport } from './routes/pilot.tracking'
+import { Route as PilotSyncRouteImport } from './routes/pilot.sync'
+import { Route as PilotProfileRouteImport } from './routes/pilot.profile'
+import { Route as PilotLoginRouteImport } from './routes/pilot.login'
 import { Route as ControlCenterLoginRouteImport } from './routes/control-center.login'
 import { Route as ControlCenterAgriskyRouteImport } from './routes/control-center.agrisky'
+import { Route as PilotMissionsIndexRouteImport } from './routes/pilot.missions.index'
+import { Route as PilotMissionsIdRouteImport } from './routes/pilot.missions.$id'
 
+const PilotRoute = PilotRouteImport.update({
+  id: '/pilot',
+  path: '/pilot',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PilotIndexRoute = PilotIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => PilotRoute,
+} as any)
 const ControlCenterIndexRoute = ControlCenterIndexRouteImport.update({
   id: '/control-center/',
   path: '/control-center/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const PilotTrackingRoute = PilotTrackingRouteImport.update({
+  id: '/tracking',
+  path: '/tracking',
+  getParentRoute: () => PilotRoute,
+} as any)
+const PilotSyncRoute = PilotSyncRouteImport.update({
+  id: '/sync',
+  path: '/sync',
+  getParentRoute: () => PilotRoute,
+} as any)
+const PilotProfileRoute = PilotProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => PilotRoute,
+} as any)
+const PilotLoginRoute = PilotLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => PilotRoute,
 } as any)
 const ControlCenterLoginRoute = ControlCenterLoginRouteImport.update({
   id: '/control-center/login',
@@ -34,49 +72,106 @@ const ControlCenterAgriskyRoute = ControlCenterAgriskyRouteImport.update({
   path: '/control-center/agrisky',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PilotMissionsIndexRoute = PilotMissionsIndexRouteImport.update({
+  id: '/missions/',
+  path: '/missions/',
+  getParentRoute: () => PilotRoute,
+} as any)
+const PilotMissionsIdRoute = PilotMissionsIdRouteImport.update({
+  id: '/missions/$id',
+  path: '/missions/$id',
+  getParentRoute: () => PilotRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/pilot': typeof PilotRouteWithChildren
   '/control-center/agrisky': typeof ControlCenterAgriskyRoute
   '/control-center/login': typeof ControlCenterLoginRoute
+  '/pilot/login': typeof PilotLoginRoute
+  '/pilot/profile': typeof PilotProfileRoute
+  '/pilot/sync': typeof PilotSyncRoute
+  '/pilot/tracking': typeof PilotTrackingRoute
   '/control-center/': typeof ControlCenterIndexRoute
+  '/pilot/': typeof PilotIndexRoute
+  '/pilot/missions/$id': typeof PilotMissionsIdRoute
+  '/pilot/missions/': typeof PilotMissionsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/control-center/agrisky': typeof ControlCenterAgriskyRoute
   '/control-center/login': typeof ControlCenterLoginRoute
+  '/pilot/login': typeof PilotLoginRoute
+  '/pilot/profile': typeof PilotProfileRoute
+  '/pilot/sync': typeof PilotSyncRoute
+  '/pilot/tracking': typeof PilotTrackingRoute
   '/control-center': typeof ControlCenterIndexRoute
+  '/pilot': typeof PilotIndexRoute
+  '/pilot/missions/$id': typeof PilotMissionsIdRoute
+  '/pilot/missions': typeof PilotMissionsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/pilot': typeof PilotRouteWithChildren
   '/control-center/agrisky': typeof ControlCenterAgriskyRoute
   '/control-center/login': typeof ControlCenterLoginRoute
+  '/pilot/login': typeof PilotLoginRoute
+  '/pilot/profile': typeof PilotProfileRoute
+  '/pilot/sync': typeof PilotSyncRoute
+  '/pilot/tracking': typeof PilotTrackingRoute
   '/control-center/': typeof ControlCenterIndexRoute
+  '/pilot/': typeof PilotIndexRoute
+  '/pilot/missions/$id': typeof PilotMissionsIdRoute
+  '/pilot/missions/': typeof PilotMissionsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/pilot'
     | '/control-center/agrisky'
     | '/control-center/login'
+    | '/pilot/login'
+    | '/pilot/profile'
+    | '/pilot/sync'
+    | '/pilot/tracking'
     | '/control-center/'
+    | '/pilot/'
+    | '/pilot/missions/$id'
+    | '/pilot/missions/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/control-center/agrisky'
     | '/control-center/login'
+    | '/pilot/login'
+    | '/pilot/profile'
+    | '/pilot/sync'
+    | '/pilot/tracking'
     | '/control-center'
+    | '/pilot'
+    | '/pilot/missions/$id'
+    | '/pilot/missions'
   id:
     | '__root__'
     | '/'
+    | '/pilot'
     | '/control-center/agrisky'
     | '/control-center/login'
+    | '/pilot/login'
+    | '/pilot/profile'
+    | '/pilot/sync'
+    | '/pilot/tracking'
     | '/control-center/'
+    | '/pilot/'
+    | '/pilot/missions/$id'
+    | '/pilot/missions/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  PilotRoute: typeof PilotRouteWithChildren
   ControlCenterAgriskyRoute: typeof ControlCenterAgriskyRoute
   ControlCenterLoginRoute: typeof ControlCenterLoginRoute
   ControlCenterIndexRoute: typeof ControlCenterIndexRoute
@@ -84,6 +179,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/pilot': {
+      id: '/pilot'
+      path: '/pilot'
+      fullPath: '/pilot'
+      preLoaderRoute: typeof PilotRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -91,12 +193,47 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/pilot/': {
+      id: '/pilot/'
+      path: '/'
+      fullPath: '/pilot/'
+      preLoaderRoute: typeof PilotIndexRouteImport
+      parentRoute: typeof PilotRoute
+    }
     '/control-center/': {
       id: '/control-center/'
       path: '/control-center'
       fullPath: '/control-center/'
       preLoaderRoute: typeof ControlCenterIndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/pilot/tracking': {
+      id: '/pilot/tracking'
+      path: '/tracking'
+      fullPath: '/pilot/tracking'
+      preLoaderRoute: typeof PilotTrackingRouteImport
+      parentRoute: typeof PilotRoute
+    }
+    '/pilot/sync': {
+      id: '/pilot/sync'
+      path: '/sync'
+      fullPath: '/pilot/sync'
+      preLoaderRoute: typeof PilotSyncRouteImport
+      parentRoute: typeof PilotRoute
+    }
+    '/pilot/profile': {
+      id: '/pilot/profile'
+      path: '/profile'
+      fullPath: '/pilot/profile'
+      preLoaderRoute: typeof PilotProfileRouteImport
+      parentRoute: typeof PilotRoute
+    }
+    '/pilot/login': {
+      id: '/pilot/login'
+      path: '/login'
+      fullPath: '/pilot/login'
+      preLoaderRoute: typeof PilotLoginRouteImport
+      parentRoute: typeof PilotRoute
     }
     '/control-center/login': {
       id: '/control-center/login'
@@ -112,11 +249,48 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ControlCenterAgriskyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/pilot/missions/': {
+      id: '/pilot/missions/'
+      path: '/missions'
+      fullPath: '/pilot/missions/'
+      preLoaderRoute: typeof PilotMissionsIndexRouteImport
+      parentRoute: typeof PilotRoute
+    }
+    '/pilot/missions/$id': {
+      id: '/pilot/missions/$id'
+      path: '/missions/$id'
+      fullPath: '/pilot/missions/$id'
+      preLoaderRoute: typeof PilotMissionsIdRouteImport
+      parentRoute: typeof PilotRoute
+    }
   }
 }
 
+interface PilotRouteChildren {
+  PilotLoginRoute: typeof PilotLoginRoute
+  PilotProfileRoute: typeof PilotProfileRoute
+  PilotSyncRoute: typeof PilotSyncRoute
+  PilotTrackingRoute: typeof PilotTrackingRoute
+  PilotIndexRoute: typeof PilotIndexRoute
+  PilotMissionsIdRoute: typeof PilotMissionsIdRoute
+  PilotMissionsIndexRoute: typeof PilotMissionsIndexRoute
+}
+
+const PilotRouteChildren: PilotRouteChildren = {
+  PilotLoginRoute: PilotLoginRoute,
+  PilotProfileRoute: PilotProfileRoute,
+  PilotSyncRoute: PilotSyncRoute,
+  PilotTrackingRoute: PilotTrackingRoute,
+  PilotIndexRoute: PilotIndexRoute,
+  PilotMissionsIdRoute: PilotMissionsIdRoute,
+  PilotMissionsIndexRoute: PilotMissionsIndexRoute,
+}
+
+const PilotRouteWithChildren = PilotRoute._addFileChildren(PilotRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  PilotRoute: PilotRouteWithChildren,
   ControlCenterAgriskyRoute: ControlCenterAgriskyRoute,
   ControlCenterLoginRoute: ControlCenterLoginRoute,
   ControlCenterIndexRoute: ControlCenterIndexRoute,
