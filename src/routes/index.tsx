@@ -102,7 +102,18 @@ function Landing() {
               <Satellite className="h-3.5 w-3.5" /> Aerospace · Drones · AI
             </span>
             <h1 className="mt-5 text-4xl sm:text-5xl lg:text-6xl font-semibold leading-[1.05]">
-              Engineering the future of <span className="bg-gradient-primary bg-clip-text text-transparent">aerial intelligence</span>
+              Engineering the future of{" "}
+              <span
+                className="bg-gradient-primary"
+                style={{
+                  WebkitBackgroundClip: "text",
+                  backgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  color: "transparent",
+                }}
+              >
+                aerial intelligence
+              </span>
             </h1>
             <p className="mt-6 text-lg text-muted-foreground max-w-xl">
               AI-powered drone systems, custom UAV engineering, and aerial intelligence solutions for agriculture, infrastructure, mapping, surveillance, and industrial applications.
