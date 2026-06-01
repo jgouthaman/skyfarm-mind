@@ -540,6 +540,8 @@ function ContactForm() {
             <SelectItem value="geosky">GeoSky — mapping & survey</SelectItem>
             <SelectItem value="guardsky">GuardSky — surveillance</SelectItem>
             <SelectItem value="rd">Custom UAV R&D</SelectItem>
+            <SelectItem value="academy">AtomSky Academy — drone training</SelectItem>
+            <SelectItem value="certification">Drone pilot certification support</SelectItem>
             <SelectItem value="invest">Investment / incubation</SelectItem>
             <SelectItem value="partner">Partnership</SelectItem>
           </SelectContent>
