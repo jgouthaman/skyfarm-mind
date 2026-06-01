@@ -71,10 +71,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   head: () => ({
     meta: [
       { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
       { title: "AtomSky — Engineering the future of aerial intelligence" },
       { name: "description", content: "AtomSky builds AI-powered drone systems, custom UAVs, and aerial intelligence solutions across agriculture (AgriSky), infrastructure, mapping, surveillance, and R&D." },
       { name: "author", content: "AtomSky" },
+      { name: "theme-color", content: "#0a0f1c" },
+      // iOS Add to Home Screen
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
+      { name: "apple-mobile-web-app-title", content: "AtomSky" },
       { property: "og:title", content: "AtomSky — Aerospace & Drone Intelligence" },
       { property: "og:description", content: "Custom UAV engineering and AI aerial analytics across agriculture, infrastructure, mapping, surveillance and R&D." },
       { property: "og:type", content: "website" },
@@ -87,6 +93,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" },
       { rel: "stylesheet", href: appCss },
+      { rel: "manifest", href: "/manifest.json" },
+      { rel: "apple-touch-icon", href: "/app-icon.png" },
+      { rel: "icon", href: "/app-icon.png", type: "image/png" },
     ],
   }),
   shellComponent: RootShell,
