@@ -14,7 +14,169 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      farms: {
+        Row: {
+          created_at: string
+          crop: string | null
+          farmer: string | null
+          id: string
+          location: string | null
+          name: string
+          service_needed: string | null
+          size_acres: number | null
+        }
+        Insert: {
+          created_at?: string
+          crop?: string | null
+          farmer?: string | null
+          id?: string
+          location?: string | null
+          name: string
+          service_needed?: string | null
+          size_acres?: number | null
+        }
+        Update: {
+          created_at?: string
+          crop?: string | null
+          farmer?: string | null
+          id?: string
+          location?: string | null
+          name?: string
+          service_needed?: string | null
+          size_acres?: number | null
+        }
+        Relationships: []
+      }
+      field_uploads: {
+        Row: {
+          caption: string | null
+          captured_at: string
+          created_at: string
+          farm_id: string | null
+          id: string
+          image_url: string
+          lat: number | null
+          lng: number | null
+          mission_id: string | null
+          pilot_id: string | null
+        }
+        Insert: {
+          caption?: string | null
+          captured_at?: string
+          created_at?: string
+          farm_id?: string | null
+          id?: string
+          image_url: string
+          lat?: number | null
+          lng?: number | null
+          mission_id?: string | null
+          pilot_id?: string | null
+        }
+        Update: {
+          caption?: string | null
+          captured_at?: string
+          created_at?: string
+          farm_id?: string | null
+          id?: string
+          image_url?: string
+          lat?: number | null
+          lng?: number | null
+          mission_id?: string | null
+          pilot_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "field_uploads_farm_id_fkey"
+            columns: ["farm_id"]
+            isOneToOne: false
+            referencedRelation: "farms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "field_uploads_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "missions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "field_uploads_pilot_id_fkey"
+            columns: ["pilot_id"]
+            isOneToOne: false
+            referencedRelation: "pilots"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      missions: {
+        Row: {
+          created_at: string
+          farm_id: string
+          id: string
+          notes: string | null
+          pilot_id: string | null
+          service: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          farm_id: string
+          id?: string
+          notes?: string | null
+          pilot_id?: string | null
+          service: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          farm_id?: string
+          id?: string
+          notes?: string | null
+          pilot_id?: string | null
+          service?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "missions_farm_id_fkey"
+            columns: ["farm_id"]
+            isOneToOne: false
+            referencedRelation: "farms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "missions_pilot_id_fkey"
+            columns: ["pilot_id"]
+            isOneToOne: false
+            referencedRelation: "pilots"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pilots: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          phone: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          phone: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          phone?: string
+          status?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
