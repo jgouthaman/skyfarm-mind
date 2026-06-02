@@ -10,7 +10,7 @@ import { Toaster } from "@/components/ui/sonner";
 export const Route = createFileRoute("/control-center/login")({
   head: () => ({
     meta: [
-      { title: "AtomSky Control Center — Login" },
+      { title: "AeroSpawn Control Center — Login" },
       { name: "description", content: "Secure access for drone operations and aerial intelligence." },
     ],
   }),
@@ -46,7 +46,7 @@ function LoginPage() {
 
     const expectedOtp = mobile.slice(-5);
     if (otp === expectedOtp) {
-      toast.success("Welcome to AtomSky Control Center");
+      toast.success("Welcome to AeroSpawn Control Center");
       setTimeout(() => navigate({ to: "/control-center" }), 300);
     } else {
       toast.error("Invalid OTP. Please enter the last 5 digits of your mobile number.");
@@ -82,7 +82,7 @@ function LoginPage() {
           <span className="grid place-items-center h-8 w-8 rounded-lg bg-gradient-primary shadow-glow">
             <Plane className="h-4 w-4 text-primary-foreground" />
           </span>
-          <span>AtomSky</span>
+          <span>AeroSpawn</span>
         </Link>
         <Link to="/" className="text-sm text-muted-foreground hover:text-foreground">← Back to site</Link>
       </header>
@@ -92,7 +92,7 @@ function LoginPage() {
           <span className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-primary/90 bg-primary/10 border border-primary/20 px-3 py-1.5 rounded-full">
             <Shield className="h-3.5 w-3.5" /> Secure access
           </span>
-          <h1 className="mt-5 text-3xl sm:text-4xl font-semibold">AtomSky Control Center</h1>
+          <h1 className="mt-5 text-3xl sm:text-4xl font-semibold">AeroSpawn Control Center</h1>
           <p className="mt-3 text-sm text-muted-foreground">
             Secure access for drone operations, aerial intelligence, and vertical-specific mission control.
           </p>
@@ -125,7 +125,7 @@ function LoginPage() {
             </Button>
 
             <p className="text-center text-xs text-muted-foreground pt-2">
-              Protected by AtomSky aerospace-grade access controls.
+              Protected by AeroSpawn aerospace-grade access controls.
             </p>
           </form>
         ) : (

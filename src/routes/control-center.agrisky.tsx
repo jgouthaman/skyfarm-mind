@@ -19,7 +19,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/control-center/agrisky")({
-  head: () => ({ meta: [{ title: "AgriSky Control Center — AtomSky" }] }),
+  head: () => ({ meta: [{ title: "AgriSky Control Center — AeroSpawn" }] }),
   component: AgriSky,
 });
 
@@ -80,7 +80,7 @@ function AgriSky() {
         </nav>
         <div className="p-3 border-t border-border/60">
           <Link to="/control-center" className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground px-3 py-2">
-            <Plane className="h-3.5 w-3.5" /> Back to AtomSky Hub
+            <Plane className="h-3.5 w-3.5" /> Back to AeroSpawn Hub
           </Link>
         </div>
       </aside>
