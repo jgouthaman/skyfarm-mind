@@ -5,7 +5,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/control-center/")({
-  head: () => ({ meta: [{ title: "AtomSky Control Center" }] }),
+  head: () => ({ meta: [{ title: "AeroSpawn Control Center" }] }),
   component: Hub,
 });
 
@@ -22,7 +22,7 @@ const verticals = [
   { id: "geosky", name: "GeoSky", tag: "Mapping & Survey Intelligence", status: "Coming Soon", tone: "soon",
     desc: "Aerial mapping, land survey, GIS data capture, and terrain intelligence.",
     icon: MapIcon, cta: "Coming Soon" },
-  { id: "academy", name: "AtomSky Academy", tag: "Drone Training & Certification Support", status: "Coming Soon", tone: "soon",
+  { id: "academy", name: "AeroSpawn Academy", tag: "Drone Training & Certification Support", status: "Coming Soon", tone: "soon",
     desc: "Drone pilot training, mission planning, agri-drone operations, mapping basics, and certification support.",
     icon: GraduationCap, cta: "Coming Soon" },
 ];
@@ -44,7 +44,7 @@ function Hub() {
             <span className="grid place-items-center h-8 w-8 rounded-lg bg-gradient-primary shadow-glow">
               <Plane className="h-4 w-4 text-primary-foreground" />
             </span>
-            <span>AtomSky <span className="text-muted-foreground font-normal">Control Center</span></span>
+            <span>AeroSpawn <span className="text-muted-foreground font-normal">Control Center</span></span>
           </Link>
           <div className="flex items-center gap-2">
             <button className="p-2 rounded-md hover:bg-muted relative" onClick={() => toast("No new notifications")}>
@@ -60,7 +60,7 @@ function Hub() {
 
       <main className="mx-auto max-w-7xl px-5 lg:px-8 py-10">
         <div className="max-w-3xl">
-          <h1 className="text-3xl sm:text-4xl font-semibold">AtomSky Control Center</h1>
+          <h1 className="text-3xl sm:text-4xl font-semibold">AeroSpawn Control Center</h1>
           <p className="mt-3 text-muted-foreground">
             Manage drone operations, aerial intelligence workflows, and vertical-specific control centers.
           </p>

@@ -17,14 +17,14 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
-import heroImg from "@/assets/atomsky-hero.jpg";
+import heroImg from "@/assets/aerospawn-hero.jpg";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "AtomSky — Engineering the future of aerial intelligence" },
-      { name: "description", content: "AtomSky builds AI-powered drone systems, custom UAVs, and aerial intelligence solutions for agriculture (AgriSky), infrastructure, mapping, surveillance, and industrial applications." },
-      { property: "og:title", content: "AtomSky — Aerospace & Drone Intelligence" },
+      { title: "AeroSpawn — Engineering the future of aerial intelligence" },
+      { name: "description", content: "AeroSpawn builds AI-powered drone systems, custom UAVs, and aerial intelligence solutions for agriculture (AgriSky), infrastructure, mapping, surveillance, and industrial applications." },
+      { property: "og:title", content: "AeroSpawn — Aerospace & Drone Intelligence" },
       { property: "og:description", content: "Custom UAV engineering and AI aerial analytics across agriculture, infrastructure, mapping, surveillance and R&D." },
       { property: "og:image", content: heroImg },
       { property: "og:type", content: "website" },
@@ -56,7 +56,7 @@ function Landing() {
             <span className="grid place-items-center h-8 w-8 rounded-lg bg-gradient-primary shadow-glow">
               <Plane className="h-4 w-4 text-primary-foreground" />
             </span>
-            <span>AtomSky</span>
+            <span>AeroSpawn</span>
           </a>
           <nav className="hidden md:flex items-center gap-7 text-sm text-muted-foreground">
             {nav.map((n) => (
@@ -148,7 +148,7 @@ function Landing() {
           </div>
           <div className="lg:col-span-6 relative">
             <div className="relative rounded-3xl overflow-hidden shadow-soft border border-border/60">
-              <img src={heroImg} alt="AtomSky drone with AI overlays across agriculture, infrastructure and solar terrain" width={1920} height={1080} className="w-full h-auto" />
+              <img src={heroImg} alt="AeroSpawn drone with AI overlays across agriculture, infrastructure and solar terrain" width={1920} height={1080} className="w-full h-auto" />
               <div className="absolute inset-0 bg-gradient-to-tr from-background/60 via-transparent to-transparent" />
             </div>
             <FloatingCard className="absolute -left-4 top-8 hidden sm:block" icon={<Activity className="h-4 w-4 text-accent" />} title="Crop Health" value="NDVI 0.78" tone="agri" />
@@ -182,7 +182,7 @@ function Landing() {
       {/* SOLUTION */}
       <Section id="solutions" eyebrow="The solution" title="Drones, data, and intelligence in one platform" muted>
         <p className="text-muted-foreground max-w-3xl">
-          AtomSky combines aerospace engineering, custom UAV systems, aerial imaging, AI analytics, and domain-specific workflows to convert drone missions into actionable business intelligence.
+          AeroSpawn combines aerospace engineering, custom UAV systems, aerial imaging, AI analytics, and domain-specific workflows to convert drone missions into actionable business intelligence.
         </p>
         <div className="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {[
@@ -212,8 +212,8 @@ function Landing() {
           <VerticalCard tag="Infrastructure" icon={<Building2 className="h-5 w-5" />} title="InfraSky" subtitle="Infrastructure Inspection" desc="Drone-based inspection for roads, bridges, buildings, telecom towers, solar farms, and industrial assets." />
           <VerticalCard tag="Mapping" icon={<MapIcon className="h-5 w-5" />} title="GeoSky" subtitle="Mapping & Survey Intelligence" desc="Aerial mapping, land survey, site progress monitoring, GIS data capture, and terrain intelligence." />
           <VerticalCard tag="Surveillance" icon={<Eye className="h-5 w-5" />} title="GuardSky" subtitle="Aerial Surveillance & Early Fire Response" desc="Drone-based real-time monitoring, smoke/fire detection support, live aerial visibility, rapid alerts, and targeted first-response payload deployment for farms, industrial sites, campuses, remote facilities, and critical assets." href="#guardsky" />
-          <VerticalCard tag="R&D" icon={<FlaskConical className="h-5 w-5" />} title="AtomSky Labs" subtitle="Custom UAV R&D" desc="Custom drone design, payload integration, flight testing, aerospace research, and prototype development for specialized use cases." />
-          <VerticalCard tag="Training" icon={<GraduationCap className="h-5 w-5" />} title="AtomSky Academy" subtitle="Drone Pilot Training & Certification Support" desc="Practical drone pilot training, safety procedures, mission planning, agri-drone operations, mapping workflows, and certification support for students, farmers, drone operators, SHGs, FPOs, and professionals." href="#academy" />
+          <VerticalCard tag="R&D" icon={<FlaskConical className="h-5 w-5" />} title="AeroSpawn Labs" subtitle="Custom UAV R&D" desc="Custom drone design, payload integration, flight testing, aerospace research, and prototype development for specialized use cases." />
+          <VerticalCard tag="Training" icon={<GraduationCap className="h-5 w-5" />} title="AeroSpawn Academy" subtitle="Drone Pilot Training & Certification Support" desc="Practical drone pilot training, safety procedures, mission planning, agri-drone operations, mapping workflows, and certification support for students, farmers, drone operators, SHGs, FPOs, and professionals." href="#academy" />
           <div className="rounded-2xl p-6 bg-gradient-primary text-primary-foreground shadow-soft flex flex-col justify-between">
             <div>
               <Rocket className="h-6 w-6" />
@@ -237,7 +237,7 @@ function Landing() {
                 <Leaf className="h-3.5 w-3.5" /> Flagship vertical
               </span>
               <h2 className="mt-5 text-3xl sm:text-4xl font-semibold">Flagship vertical: <span className="bg-gradient-agri bg-clip-text text-transparent">AgriSky</span></h2>
-              <p className="mt-2 text-lg text-muted-foreground">Agriculture drone intelligence by AtomSky</p>
+              <p className="mt-2 text-lg text-muted-foreground">Agriculture drone intelligence by AeroSpawn</p>
               <p className="mt-5 text-muted-foreground">
                 AgriSky helps farmers and agri-organizations monitor crop health, detect stress early, plan irrigation, and enable precision farming using drone imagery and AI-based farm advisory.
               </p>
@@ -274,7 +274,7 @@ function Landing() {
             <Flame className="h-3.5 w-3.5" /> Prototype vertical
           </span>
           <h2 className="mt-5 text-3xl sm:text-4xl font-semibold">GuardSky</h2>
-          <p className="mt-2 text-lg text-muted-foreground">Aerial surveillance and early fire response by AtomSky</p>
+          <p className="mt-2 text-lg text-muted-foreground">Aerial surveillance and early fire response by AeroSpawn</p>
           <p className="mt-5 text-muted-foreground">
             GuardSky is a prototype drone-based surveillance and emergency-support solution designed to monitor critical areas, detect possible fire or smoke incidents, provide real-time aerial visibility, alert operators, and support rapid intervention through targeted deployment of fire suppression payloads near the incident zone.
           </p>
@@ -324,7 +324,7 @@ function Landing() {
   {/* TECHNOLOGY */}
       <Section id="technology" eyebrow="Technology" title="A modular aerial intelligence stack" muted>
         <p className="text-muted-foreground max-w-3xl">
-          AtomSky's technology is built as a reusable platform that powers multiple industries — from a single mission to enterprise-grade aerial operations.
+          AeroSpawn's technology is built as a reusable platform that powers multiple industries — from a single mission to enterprise-grade aerial operations.
         </p>
         <div className="mt-12 grid md:grid-cols-2 lg:grid-cols-5 gap-4">
           {[
@@ -352,7 +352,7 @@ function Landing() {
       </Section>
 
       {/* PRODUCTS / CAPABILITIES */}
-      <Section id="products" eyebrow="Products & capabilities" title="What AtomSky builds">
+      <Section id="products" eyebrow="Products & capabilities" title="What AeroSpawn builds">
         <div className="mt-10 grid sm:grid-cols-2 lg:grid-cols-5 gap-4">
           {[
             { i: <Plane />, t: "Custom UAV Design" },
@@ -377,7 +377,7 @@ function Landing() {
       {/* PILOTS */}
       <Section id="pilots" eyebrow="Pilots" title="Pilot programs and partnerships" muted>
         <p className="text-muted-foreground max-w-3xl">
-          AtomSky is building pilot programs with agriculture farms, infrastructure owners, drone operators, academic institutions, FPOs, and industry partners.
+          AeroSpawn is building pilot programs with agriculture farms, infrastructure owners, drone operators, academic institutions, FPOs, and industry partners.
         </p>
         <div className="mt-10 grid md:grid-cols-3 gap-5">
           {[
@@ -403,7 +403,7 @@ function Landing() {
       {/* TEAM */}
       <Section id="team" eyebrow="Team" title="Built by aerospace and software engineering minds">
         <p className="text-muted-foreground max-w-3xl">
-          AtomSky brings together aerospace engineers, software engineering, AI, drone systems, and field-domain expertise to build practical aerial intelligence solutions for real-world industries.
+          AeroSpawn brings together aerospace engineers, software engineering, AI, drone systems, and field-domain expertise to build practical aerial intelligence solutions for real-world industries.
         </p>
         <div className="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {[
@@ -423,9 +423,9 @@ function Landing() {
       </Section>
 
       {/* ACADEMY */}
-      <Section id="academy" eyebrow="AtomSky Academy" title="Training the next generation of drone pilots and aerial intelligence professionals">
+      <Section id="academy" eyebrow="AeroSpawn Academy" title="Training the next generation of drone pilots and aerial intelligence professionals">
         <p className="text-muted-foreground max-w-3xl">
-          AtomSky Academy provides hands-on drone pilot training and certification support for students, farmers, rural entrepreneurs, SHGs, FPOs, and professionals. The program focuses on safe drone operations, mission planning, field applications, agri-drone workflows, mapping basics, maintenance awareness, and real-world drone service readiness.
+          AeroSpawn Academy provides hands-on drone pilot training and certification support for students, farmers, rural entrepreneurs, SHGs, FPOs, and professionals. The program focuses on safe drone operations, mission planning, field applications, agri-drone workflows, mapping basics, maintenance awareness, and real-world drone service readiness.
         </p>
         <div className="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {[
@@ -456,13 +456,13 @@ function Landing() {
         <div className="mx-auto max-w-7xl px-5 lg:px-8 relative grid lg:grid-cols-12 gap-10">
           <div className="lg:col-span-5">
             <span className="text-xs uppercase tracking-[0.2em] text-primary/90">Get in touch</span>
-            <h2 className="mt-3 text-3xl sm:text-4xl font-semibold">Partner with AtomSky</h2>
+            <h2 className="mt-3 text-3xl sm:text-4xl font-semibold">Partner with AeroSpawn</h2>
             <p className="mt-4 text-muted-foreground">
-              Whether you are a farmer, infrastructure company, drone operator, investor, institution, or industry partner — AtomSky is open to pilots, partnerships, and custom drone intelligence projects.
+              Whether you are a farmer, infrastructure company, drone operator, investor, institution, or industry partner — AeroSpawn is open to pilots, partnerships, and custom drone intelligence projects.
             </p>
             <ul className="mt-8 space-y-4 text-sm">
               <li className="flex items-center gap-3"><Phone className="h-4 w-4 text-primary" /> Gouthaman — +91 99402 63589</li>
-              <li className="flex items-center gap-3"><Mail className="h-4 w-4 text-primary" /> hello@atomsky.in</li>
+              <li className="flex items-center gap-3"><Mail className="h-4 w-4 text-primary" /> hello@aerospawn.in</li>
               <li className="flex items-center gap-3"><MapPin className="h-4 w-4 text-primary" /> India</li>
             </ul>
           </div>
@@ -480,10 +480,10 @@ function Landing() {
               <span className="grid place-items-center h-8 w-8 rounded-lg bg-gradient-primary shadow-glow">
                 <Plane className="h-4 w-4 text-primary-foreground" />
               </span>
-              AtomSky
+              AeroSpawn
             </div>
             <p className="mt-3 text-sm text-muted-foreground max-w-sm">Engineering the future of aerial intelligence.</p>
-            <p className="mt-2 text-xs text-muted-foreground">AgriSky is a flagship service vertical of AtomSky.</p>
+            <p className="mt-2 text-xs text-muted-foreground">AgriSky is a flagship service vertical of AeroSpawn.</p>
           </div>
           <div>
             <h4 className="font-display font-semibold text-sm">Explore</h4>
@@ -502,14 +502,14 @@ function Landing() {
             <h4 className="font-display font-semibold text-sm">Contact</h4>
             <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
               <li>Gouthaman — +91 99402 63589</li>
-              <li>hello@atomsky.in</li>
+              <li>hello@aerospawn.in</li>
               <li>India</li>
             </ul>
           </div>
         </div>
         <div className="border-t border-border">
           <div className="mx-auto max-w-7xl px-5 lg:px-8 py-6 text-xs text-muted-foreground flex flex-wrap justify-between gap-3">
-            <span>© {new Date().getFullYear()} AtomSky. All rights reserved.</span>
+            <span>© {new Date().getFullYear()} AeroSpawn. All rights reserved.</span>
             <span>Aerospace · Drones · AI</span>
           </div>
         </div>
@@ -617,7 +617,7 @@ function ContactForm() {
             <SelectItem value="geosky">GeoSky — mapping & survey</SelectItem>
             <SelectItem value="guardsky">GuardSky — aerial surveillance &amp; early fire response</SelectItem>
             <SelectItem value="rd">Custom UAV R&D</SelectItem>
-            <SelectItem value="academy">AtomSky Academy — drone training</SelectItem>
+            <SelectItem value="academy">AeroSpawn Academy — drone training</SelectItem>
             <SelectItem value="certification">Drone pilot certification support</SelectItem>
             <SelectItem value="invest">Investment / incubation</SelectItem>
             <SelectItem value="partner">Partnership</SelectItem>
