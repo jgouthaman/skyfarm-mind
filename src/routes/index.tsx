@@ -640,14 +640,14 @@ function ContactForm() {
       }}
       className="grid sm:grid-cols-2 gap-4"
     >
-      <Field label="Name" required><Input name="name" required placeholder="Your full name" /></Field>
-      <Field label="Phone" required><Input name="phone" required type="tel" placeholder="+91 ..." /></Field>
-      <Field label="Email" required><Input name="email" required type="email" placeholder="you@company.com" /></Field>
-      <Field label="Organization"><Input name="org" placeholder="Company / FPO / Institution" /></Field>
-      <Field label="Location"><Input name="location" placeholder="City, State" /></Field>
-      <Field label="Interested in" required>
+      <Field id="cf-name" label="Name" required><Input id="cf-name" name="name" required placeholder="Your full name" /></Field>
+      <Field id="cf-phone" label="Phone" required><Input id="cf-phone" name="phone" required type="tel" placeholder="+91 ..." /></Field>
+      <Field id="cf-email" label="Email" required><Input id="cf-email" name="email" required type="email" placeholder="you@company.com" /></Field>
+      <Field id="cf-org" label="Organization"><Input id="cf-org" name="org" placeholder="Company / FPO / Institution" /></Field>
+      <Field id="cf-location" label="Location"><Input id="cf-location" name="location" placeholder="City, State" /></Field>
+      <Field id="cf-interest" label="Interested in" required>
         <Select value={interest} onValueChange={setInterest} required>
-          <SelectTrigger><SelectValue placeholder="Select an option" /></SelectTrigger>
+          <SelectTrigger id="cf-interest" aria-label="Interested in"><SelectValue placeholder="Select an option" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="agrisky">AgriSky — agriculture solution</SelectItem>
             <SelectItem value="infrasky">InfraSky — infrastructure inspection</SelectItem>
@@ -662,7 +662,7 @@ function ContactForm() {
         </Select>
       </Field>
       <div className="sm:col-span-2">
-        <Field label="Message"><Textarea name="message" rows={4} placeholder="Tell us briefly about your interest…" /></Field>
+        <Field id="cf-message" label="Message"><Textarea id="cf-message" name="message" rows={4} placeholder="Tell us briefly about your interest…" /></Field>
       </div>
       <div className="sm:col-span-2">
         <Button type="submit" size="lg" disabled={submitting} className="w-full bg-gradient-primary text-primary-foreground hover:opacity-90 shadow-glow">
@@ -675,10 +675,10 @@ function ContactForm() {
   );
 }
 
-function Field({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
+function Field({ id, label, required, children }: { id?: string; label: string; required?: boolean; children: React.ReactNode }) {
   return (
     <div>
-      <Label className="text-xs uppercase tracking-wider text-muted-foreground">{label}{required && " *"}</Label>
+      <Label htmlFor={id} className="text-xs uppercase tracking-wider text-muted-foreground">{label}{required && " *"}</Label>
       <div className="mt-1.5">{children}</div>
     </div>
   );
