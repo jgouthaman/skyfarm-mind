@@ -4,7 +4,7 @@ import { useCurrentProject } from "@/lib/design-studio/store";
 import { Button } from "@/components/ui/button";
 import { Disclaimer } from "@/components/design-studio/sidebar";
 import { riskColor } from "@/lib/design-studio/engine";
-import { buildComplianceReport } from "@/lib/design-studio/compliance";
+
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/control-center/aerospawn-design-studio/report")({
