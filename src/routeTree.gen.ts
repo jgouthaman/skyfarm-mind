@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as PilotRouteImport } from './routes/pilot'
 import { Route as FieldRouteImport } from './routes/field'
 import { Route as IndexRouteImport } from './routes/index'
@@ -34,6 +35,11 @@ import { Route as ControlCenterAerospawnDesignStudioComponentsRouteImport } from
 import { Route as ControlCenterAerospawnDesignStudioComplianceRouteImport } from './routes/control-center.aerospawn-design-studio.compliance'
 import { Route as ControlCenterAerospawnDesignStudioAdvisorRouteImport } from './routes/control-center.aerospawn-design-studio.advisor'
 
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PilotRoute = PilotRouteImport.update({
   id: '/pilot',
   path: '/pilot',
@@ -170,6 +176,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/field': typeof FieldRoute
   '/pilot': typeof PilotRouteWithChildren
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/control-center/aerospawn-design-studio': typeof ControlCenterAerospawnDesignStudioRouteWithChildren
   '/control-center/agrisky': typeof ControlCenterAgriskyRoute
   '/control-center/login': typeof ControlCenterLoginRoute
@@ -195,6 +202,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/field': typeof FieldRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/control-center/agrisky': typeof ControlCenterAgriskyRoute
   '/control-center/login': typeof ControlCenterLoginRoute
   '/pilot/login': typeof PilotLoginRoute
@@ -221,6 +229,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/field': typeof FieldRoute
   '/pilot': typeof PilotRouteWithChildren
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/control-center/aerospawn-design-studio': typeof ControlCenterAerospawnDesignStudioRouteWithChildren
   '/control-center/agrisky': typeof ControlCenterAgriskyRoute
   '/control-center/login': typeof ControlCenterLoginRoute
@@ -249,6 +258,7 @@ export interface FileRouteTypes {
     | '/'
     | '/field'
     | '/pilot'
+    | '/sitemap.xml'
     | '/control-center/aerospawn-design-studio'
     | '/control-center/agrisky'
     | '/control-center/login'
@@ -274,6 +284,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/field'
+    | '/sitemap.xml'
     | '/control-center/agrisky'
     | '/control-center/login'
     | '/pilot/login'
@@ -299,6 +310,7 @@ export interface FileRouteTypes {
     | '/'
     | '/field'
     | '/pilot'
+    | '/sitemap.xml'
     | '/control-center/aerospawn-design-studio'
     | '/control-center/agrisky'
     | '/control-center/login'
@@ -326,6 +338,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   FieldRoute: typeof FieldRoute
   PilotRoute: typeof PilotRouteWithChildren
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ControlCenterAerospawnDesignStudioRoute: typeof ControlCenterAerospawnDesignStudioRouteWithChildren
   ControlCenterAgriskyRoute: typeof ControlCenterAgriskyRoute
   ControlCenterLoginRoute: typeof ControlCenterLoginRoute
@@ -334,6 +347,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/pilot': {
       id: '/pilot'
       path: '/pilot'
@@ -573,6 +593,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   FieldRoute: FieldRoute,
   PilotRoute: PilotRouteWithChildren,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   ControlCenterAerospawnDesignStudioRoute:
     ControlCenterAerospawnDesignStudioRouteWithChildren,
   ControlCenterAgriskyRoute: ControlCenterAgriskyRoute,
