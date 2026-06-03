@@ -272,11 +272,26 @@ function FarmDetail({ farm, onBack }: { farm: Farm; onBack: () => void }) {
               )}
             </div>
             <div className="space-y-1.5">
+              <Label>Drone</Label>
+              {drones.length === 0 ? (
+                <p className="text-xs text-destructive">No drones onboarded. Add a drone first in the Drones tab.</p>
+              ) : (
+                <Select value={droneId} onValueChange={setDroneId}>
+                  <SelectTrigger><SelectValue placeholder="Map a drone" /></SelectTrigger>
+                  <SelectContent>{drones.map((d: Drone) => <SelectItem key={d.id} value={d.id}>{d.name}{d.model ? ` · ${d.model}` : ""}</SelectItem>)}</SelectContent>
+                </Select>
+              )}
+            </div>
+            <div className="space-y-1.5">
               <Label>Service</Label>
               <Select value={service} onValueChange={setService}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>{SERVICES.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
               </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label>Scheduled at (optional)</Label>
+              <Input type="datetime-local" value={scheduledAt} onChange={(e) => setScheduledAt(e.target.value)} />
             </div>
             <div className="space-y-1.5">
               <Label>Notes (optional)</Label>
@@ -288,13 +303,22 @@ function FarmDetail({ farm, onBack }: { farm: Farm; onBack: () => void }) {
             <Button
               onClick={() => {
                 if (!pilotId) return toast.error("Pick a pilot");
-                create.mutate({ farm_id: farm.id, pilot_id: pilotId, service, notes: notes || undefined });
+                if (!droneId) return toast.error("Map a drone");
+                create.mutate({
+                  farm_id: farm.id,
+                  pilot_id: pilotId,
+                  drone_id: droneId,
+                  service,
+                  notes: notes || undefined,
+                  scheduled_at: scheduledAt ? new Date(scheduledAt).toISOString() : null,
+                });
               }}
-              disabled={create.isPending || pilots.length === 0}
+              disabled={create.isPending || pilots.length === 0 || drones.length === 0}
               className="bg-gradient-agri text-primary-foreground"
             >
               {create.isPending ? "Assigning…" : <><CheckCircle2 className="h-4 w-4 mr-1" /> Create Mission</>}
             </Button>
+
           </DialogFooter>
         </DialogContent>
       </Dialog>
