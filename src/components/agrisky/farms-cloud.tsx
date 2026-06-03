@@ -14,9 +14,10 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import {
   listFarms, createFarm, listPilots, createMission, listMissionsForFarm,
-  listFieldUploadsForFarm, SERVICES,
-  type Farm, type Pilot, type Mission, type FieldUpload,
+  listFieldUploadsForFarm, listDrones, SERVICES,
+  type Farm, type Pilot, type Mission, type FieldUpload, type Drone,
 } from "@/lib/cloud-api";
+
 
 export function FarmsCloudSection() {
   const [selected, setSelected] = useState<Farm | null>(null);
