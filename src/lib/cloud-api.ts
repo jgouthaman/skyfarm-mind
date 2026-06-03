@@ -1,4 +1,6 @@
-import { supabase } from "@/integrations/supabase/client";
+import { supabase as _supabase } from "@/integrations/supabase/client";
+// Cast to any until generated types include the new agrisky_* tables.
+const supabase = _supabase as any;
 
 export interface Pilot {
   id: string;
