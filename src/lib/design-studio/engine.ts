@@ -59,52 +59,56 @@ export function generateDroneDesign(req: DroneRequirement, purpose: string): Dro
     flightController, gps, payloadSystem, estimatedFlightTime, estimatedCost, riskLevel, notes };
 }
 
+const robu = (q: string) => `https://robu.in/?s=${encodeURIComponent(q)}&post_type=product`;
+const SRC = "robu.in";
+
 export function generateComponentList(design: DroneDesign, req: DroneRequirement, purpose: string): ComponentItem[] {
   const motorCount = design.droneType === "Quadcopter" ? 4 : design.droneType === "Hexacopter" ? 6 : 8;
   const heavyMission = /spraying|fire/i.test(purpose);
   const advanced = req.budgetRange === "Premium" || req.budgetRange === "R&D prototype";
 
+  // All prices are indicative INR from robu.in catalog. sourceUrl points to a robu.in product search.
   const list: ComponentItem[] = [
-    { category: "Frame", name: `${design.droneType} frame`, specification: design.frameSize, quantity: 1, estimatedCost: 350, priority: "Mandatory" },
-    { category: "Motors", name: design.motorClass, specification: `${design.escRating} class brushless`, quantity: motorCount, estimatedCost: 120, priority: "Mandatory" },
-    { category: "ESCs", name: "Electronic Speed Controllers", specification: design.escRating, quantity: motorCount, estimatedCost: 60, priority: "Mandatory" },
-    { category: "Propellers", name: "Carbon-fibre propellers", specification: design.propellerSize, quantity: motorCount * 2, estimatedCost: 25, priority: "Mandatory" },
-    { category: "Battery", name: "LiPo battery pack", specification: design.battery, quantity: 1, estimatedCost: 320, priority: "Mandatory" },
-    { category: "Power distribution board", name: "PDB", specification: `${design.escRating} rated`, quantity: 1, estimatedCost: 45, priority: "Mandatory" },
-    { category: "Flight controller", name: design.flightController, specification: "ArduPilot / PX4 compatible", quantity: 1, estimatedCost: advanced ? 480 : 220, priority: "Mandatory" },
-    { category: "GPS module", name: design.gps, specification: "u-blox / RTK", quantity: design.gps.includes("Dual") ? 2 : 1, estimatedCost: design.gps.includes("RTK") ? 380 : 90, priority: "Mandatory" },
-    { category: "Telemetry module", name: "Long-range telemetry radio", specification: "915/433 MHz, 1W", quantity: 1, estimatedCost: 110, priority: "Recommended" },
-    { category: "Remote controller", name: "Hand-held RC", specification: "16-ch, 2.4 GHz", quantity: 1, estimatedCost: 220, priority: "Mandatory" },
-    { category: "Landing gear", name: "Reinforced landing gear", specification: design.droneType === "Octocopter" ? "Heavy-duty" : "Standard", quantity: 1, estimatedCost: 75, priority: "Mandatory" },
-    { category: "Wiring", name: "Wiring harness", specification: "14AWG silicone", quantity: 1, estimatedCost: 30, priority: "Mandatory" },
-    { category: "Connectors", name: "XT60 / XT90 connectors", specification: "Set", quantity: 1, estimatedCost: 20, priority: "Mandatory" },
-    { category: "Safety buzzer", name: "Low-voltage buzzer", specification: "Audible alarm", quantity: 1, estimatedCost: 12, priority: "Mandatory" },
-    { category: "Voltage monitor", name: "Battery monitor", specification: "Cell-level sense", quantity: 1, estimatedCost: 25, priority: "Mandatory" },
+    { category: "Frame", name: `${design.droneType} frame`, specification: design.frameSize, quantity: 1, estimatedCost: 9000, priority: "Mandatory", sourceName: SRC, sourceUrl: robu(`${design.droneType} carbon fiber frame ${design.frameSize}`) },
+    { category: "Motors", name: design.motorClass, specification: `${design.escRating} class brushless`, quantity: motorCount, estimatedCost: 3500, priority: "Mandatory", sourceName: SRC, sourceUrl: robu(`${design.motorClass} brushless motor`) },
+    { category: "ESCs", name: "Electronic Speed Controllers", specification: design.escRating, quantity: motorCount, estimatedCost: 2200, priority: "Mandatory", sourceName: SRC, sourceUrl: robu(`${design.escRating} ESC brushless`) },
+    { category: "Propellers", name: "Carbon-fibre propellers", specification: design.propellerSize, quantity: motorCount * 2, estimatedCost: 350, priority: "Mandatory", sourceName: SRC, sourceUrl: robu(`carbon fiber propeller ${design.propellerSize}`) },
+    { category: "Battery", name: "LiPo battery pack", specification: design.battery, quantity: 1, estimatedCost: 18000, priority: "Mandatory", sourceName: SRC, sourceUrl: robu(`LiPo battery ${design.battery}`) },
+    { category: "Power distribution board", name: "PDB", specification: `${design.escRating} rated`, quantity: 1, estimatedCost: 1200, priority: "Mandatory", sourceName: SRC, sourceUrl: robu("power distribution board PDB drone") },
+    { category: "Flight controller", name: design.flightController, specification: "ArduPilot / PX4 compatible", quantity: 1, estimatedCost: advanced ? 35000 : 15000, priority: "Mandatory", sourceName: SRC, sourceUrl: robu(design.flightController) },
+    { category: "GPS module", name: design.gps, specification: "u-blox / RTK", quantity: design.gps.includes("Dual") ? 2 : 1, estimatedCost: design.gps.includes("RTK") ? 28000 : 3500, priority: "Mandatory", sourceName: SRC, sourceUrl: robu(`${design.gps} GPS`) },
+    { category: "Telemetry module", name: "Long-range telemetry radio", specification: "915/433 MHz, 1W", quantity: 1, estimatedCost: 6500, priority: "Recommended", sourceName: SRC, sourceUrl: robu("telemetry radio 915 MHz 1W") },
+    { category: "Remote controller", name: "Hand-held RC", specification: "16-ch, 2.4 GHz", quantity: 1, estimatedCost: 16000, priority: "Mandatory", sourceName: SRC, sourceUrl: robu("RC transmitter 16 channel 2.4GHz") },
+    { category: "Landing gear", name: "Reinforced landing gear", specification: design.droneType === "Octocopter" ? "Heavy-duty" : "Standard", quantity: 1, estimatedCost: 2500, priority: "Mandatory", sourceName: SRC, sourceUrl: robu("drone landing gear carbon fiber") },
+    { category: "Wiring", name: "Wiring harness", specification: "14AWG silicone", quantity: 1, estimatedCost: 800, priority: "Mandatory", sourceName: SRC, sourceUrl: robu("14 AWG silicone wire") },
+    { category: "Connectors", name: "XT60 / XT90 connectors", specification: "Set", quantity: 1, estimatedCost: 500, priority: "Mandatory", sourceName: SRC, sourceUrl: robu("XT60 XT90 connector") },
+    { category: "Safety buzzer", name: "Low-voltage buzzer", specification: "Audible alarm", quantity: 1, estimatedCost: 250, priority: "Mandatory", sourceName: SRC, sourceUrl: robu("low voltage buzzer lipo") },
+    { category: "Voltage monitor", name: "Battery monitor", specification: "Cell-level sense", quantity: 1, estimatedCost: 600, priority: "Mandatory", sourceName: SRC, sourceUrl: robu("lipo battery cell voltage monitor") },
   ];
 
   if (heavyMission) {
     list.push(
-      { category: "Tank", name: "Spray tank", specification: `${req.payloadDetails.tankCapacity ?? 10}L`, quantity: 1, estimatedCost: 140, priority: "Mandatory" },
-      { category: "Pump", name: "Diaphragm pump", specification: "12V high-pressure", quantity: 1, estimatedCost: 95, priority: "Mandatory" },
-      { category: "Nozzles", name: "Spray nozzles", specification: "Fan-jet", quantity: motorCount, estimatedCost: 8, priority: "Mandatory" },
-      { category: "Spray system", name: "Spray controller", specification: "PWM regulated", quantity: 1, estimatedCost: 110, priority: "Recommended" },
+      { category: "Tank", name: "Spray tank", specification: `${req.payloadDetails.tankCapacity ?? 10}L`, quantity: 1, estimatedCost: 3500, priority: "Mandatory", sourceName: SRC, sourceUrl: robu(`agriculture spray tank ${req.payloadDetails.tankCapacity ?? 10}L`) },
+      { category: "Pump", name: "Diaphragm pump", specification: "12V high-pressure", quantity: 1, estimatedCost: 2200, priority: "Mandatory", sourceName: SRC, sourceUrl: robu("12V diaphragm pump high pressure") },
+      { category: "Nozzles", name: "Spray nozzles", specification: "Fan-jet", quantity: motorCount, estimatedCost: 150, priority: "Mandatory", sourceName: SRC, sourceUrl: robu("agriculture drone spray nozzle") },
+      { category: "Spray system", name: "Spray controller", specification: "PWM regulated", quantity: 1, estimatedCost: 2800, priority: "Recommended", sourceName: SRC, sourceUrl: robu("PWM spray controller drone") },
     );
   }
 
   if (/survey|monitor|surveillance|detection/i.test(purpose)) {
     list.push(
-      { category: "Camera module", name: "Imaging payload", specification: String(req.payloadDetails.cameraType ?? "RGB camera"), quantity: 1, estimatedCost: 650, priority: "Mandatory" },
-      { category: "Payload module", name: "3-axis gimbal", specification: "Brushless gimbal", quantity: 1, estimatedCost: 320, priority: "Recommended" },
+      { category: "Camera module", name: "Imaging payload", specification: String(req.payloadDetails.cameraType ?? "RGB camera"), quantity: 1, estimatedCost: 35000, priority: "Mandatory", sourceName: SRC, sourceUrl: robu(`${req.payloadDetails.cameraType ?? "RGB"} camera drone`) },
+      { category: "Payload module", name: "3-axis gimbal", specification: "Brushless gimbal", quantity: 1, estimatedCost: 18000, priority: "Recommended", sourceName: SRC, sourceUrl: robu("3 axis brushless gimbal") },
     );
   }
 
   if (req.safetyRequirements.obstacleAvoidance) {
-    list.push({ category: "Obstacle sensor", name: "360° LiDAR / ultrasonic array", specification: "5-15m range", quantity: 1, estimatedCost: 280, priority: advanced ? "Mandatory" : "Recommended" });
+    list.push({ category: "Obstacle sensor", name: "360° LiDAR / ultrasonic array", specification: "5-15m range", quantity: 1, estimatedCost: 22000, priority: advanced ? "Mandatory" : "Recommended", sourceName: SRC, sourceUrl: robu("LiDAR obstacle avoidance drone") });
   }
   if (req.safetyRequirements.parachute) {
-    list.push({ category: "Parachute", name: "Auto-deploy parachute", specification: "Up to 25 kg", quantity: 1, estimatedCost: 480, priority: "Recommended" });
+    list.push({ category: "Parachute", name: "Auto-deploy parachute", specification: "Up to 25 kg", quantity: 1, estimatedCost: 28000, priority: "Recommended", sourceName: SRC, sourceUrl: robu("drone parachute auto deploy") });
   }
-  list.push({ category: "Carrying case", name: "Hard-shell case", specification: "Foam-lined", quantity: 1, estimatedCost: 180, priority: "Optional" });
+  list.push({ category: "Carrying case", name: "Hard-shell case", specification: "Foam-lined", quantity: 1, estimatedCost: 6500, priority: "Optional", sourceName: SRC, sourceUrl: robu("drone hard case foam") });
 
   return list;
 }

@@ -41,9 +41,11 @@ export interface ComponentItem {
   name: string;
   specification: string;
   quantity: number;
-  estimatedCost: number;
+  estimatedCost: number; // INR — indicative pricing from robu.in
   priority: "Mandatory" | "Recommended" | "Optional" | "Advanced";
   notes?: string;
+  sourceUrl?: string;
+  sourceName?: string;
 }
 
 export interface SimulationParameters {
