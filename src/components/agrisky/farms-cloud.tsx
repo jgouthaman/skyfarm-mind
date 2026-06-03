@@ -14,9 +14,10 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import {
   listFarms, createFarm, listPilots, createMission, listMissionsForFarm,
-  listFieldUploadsForFarm, SERVICES,
-  type Farm, type Pilot, type Mission, type FieldUpload,
+  listFieldUploadsForFarm, listDrones, SERVICES,
+  type Farm, type Pilot, type Mission, type FieldUpload, type Drone,
 } from "@/lib/cloud-api";
+
 
 export function FarmsCloudSection() {
   const [selected, setSelected] = useState<Farm | null>(null);
@@ -130,6 +131,7 @@ function FarmsList({ onOpen }: { onOpen: (f: Farm) => void }) {
 function FarmDetail({ farm, onBack }: { farm: Farm; onBack: () => void }) {
   const qc = useQueryClient();
   const { data: pilots = [] } = useQuery({ queryKey: ["pilots"], queryFn: listPilots });
+  const { data: drones = [] } = useQuery({ queryKey: ["drones"], queryFn: listDrones });
   const { data: missions = [], refetch: refetchMissions } = useQuery({
     queryKey: ["missions", farm.id],
     queryFn: () => listMissionsForFarm(farm.id),
@@ -141,8 +143,11 @@ function FarmDetail({ farm, onBack }: { farm: Farm; onBack: () => void }) {
 
   const [assignOpen, setAssignOpen] = useState(false);
   const [pilotId, setPilotId] = useState<string>("");
+  const [droneId, setDroneId] = useState<string>("");
   const [service, setService] = useState<string>(farm.service_needed || SERVICES[0]);
+  const [scheduledAt, setScheduledAt] = useState<string>("");
   const [notes, setNotes] = useState("");
+
 
   // Realtime: new uploads for this farm
   useEffect(() => {
@@ -239,13 +244,16 @@ function FarmDetail({ farm, onBack }: { farm: Farm; onBack: () => void }) {
                     <span className="text-xs px-2 py-0.5 rounded-full border bg-primary/10 text-primary border-primary/30 capitalize">{m.status.replace("_", " ")}</span>
                   </div>
                   <p className="text-xs text-muted-foreground mt-1">Pilot: {assignedPilot(m.pilot_id)}</p>
-                  <p className="text-xs text-muted-foreground">{new Date(m.created_at).toLocaleString()}</p>
+                  <p className="text-xs text-muted-foreground">Drone: {drones.find((d: Drone) => d.id === m.drone_id)?.name || "—"}</p>
+                  {m.scheduled_at && <p className="text-xs text-muted-foreground">Scheduled: {new Date(m.scheduled_at).toLocaleString()}</p>}
+                  <p className="text-xs text-muted-foreground">Created: {new Date(m.created_at).toLocaleString()}</p>
                   {m.notes && <p className="text-xs mt-1">{m.notes}</p>}
                 </li>
               ))}
             </ul>
           )}
         </div>
+
       </div>
 
       <Dialog open={assignOpen} onOpenChange={setAssignOpen}>
@@ -264,11 +272,26 @@ function FarmDetail({ farm, onBack }: { farm: Farm; onBack: () => void }) {
               )}
             </div>
             <div className="space-y-1.5">
+              <Label>Drone</Label>
+              {drones.length === 0 ? (
+                <p className="text-xs text-destructive">No drones onboarded. Add a drone first in the Drones tab.</p>
+              ) : (
+                <Select value={droneId} onValueChange={setDroneId}>
+                  <SelectTrigger><SelectValue placeholder="Map a drone" /></SelectTrigger>
+                  <SelectContent>{drones.map((d: Drone) => <SelectItem key={d.id} value={d.id}>{d.name}{d.model ? ` · ${d.model}` : ""}</SelectItem>)}</SelectContent>
+                </Select>
+              )}
+            </div>
+            <div className="space-y-1.5">
               <Label>Service</Label>
               <Select value={service} onValueChange={setService}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>{SERVICES.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
               </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label>Scheduled at (optional)</Label>
+              <Input type="datetime-local" value={scheduledAt} onChange={(e) => setScheduledAt(e.target.value)} />
             </div>
             <div className="space-y-1.5">
               <Label>Notes (optional)</Label>
@@ -280,13 +303,22 @@ function FarmDetail({ farm, onBack }: { farm: Farm; onBack: () => void }) {
             <Button
               onClick={() => {
                 if (!pilotId) return toast.error("Pick a pilot");
-                create.mutate({ farm_id: farm.id, pilot_id: pilotId, service, notes: notes || undefined });
+                if (!droneId) return toast.error("Map a drone");
+                create.mutate({
+                  farm_id: farm.id,
+                  pilot_id: pilotId,
+                  drone_id: droneId,
+                  service,
+                  notes: notes || undefined,
+                  scheduled_at: scheduledAt ? new Date(scheduledAt).toISOString() : null,
+                });
               }}
-              disabled={create.isPending || pilots.length === 0}
+              disabled={create.isPending || pilots.length === 0 || drones.length === 0}
               className="bg-gradient-agri text-primary-foreground"
             >
               {create.isPending ? "Assigning…" : <><CheckCircle2 className="h-4 w-4 mr-1" /> Create Mission</>}
             </Button>
+
           </DialogFooter>
         </DialogContent>
       </Dialog>

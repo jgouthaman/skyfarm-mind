@@ -23,11 +23,25 @@ export interface Mission {
   id: string;
   farm_id: string;
   pilot_id: string | null;
+  drone_id: string | null;
   service: string;
+  status: string;
+  notes: string | null;
+  scheduled_at: string | null;
+  created_at: string;
+}
+
+export interface Drone {
+  id: string;
+  name: string;
+  model: string | null;
+  serial_no: string | null;
+  capacity_litres: number | null;
   status: string;
   notes: string | null;
   created_at: string;
 }
+
 
 export interface FieldUpload {
   id: string;
@@ -152,8 +166,10 @@ export async function listMissionsForFarm(farmId: string) {
 export async function createMission(input: {
   farm_id: string;
   pilot_id: string;
+  drone_id?: string | null;
   service: string;
   notes?: string;
+  scheduled_at?: string | null;
 }) {
   const { data, error } = await supabase
     .from("missions")
@@ -163,6 +179,43 @@ export async function createMission(input: {
   if (error) throw error;
   return data as Mission;
 }
+
+// ---------- Drones ----------
+export async function listDrones() {
+  const { data, error } = await supabase
+    .from("drones")
+    .select("*")
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return (data ?? []) as Drone[];
+}
+
+export async function createDrone(input: {
+  name: string;
+  model?: string;
+  serial_no?: string;
+  capacity_litres?: number;
+  notes?: string;
+}) {
+  const { data, error } = await supabase
+    .from("drones")
+    .insert({ ...input, status: "available" })
+    .select()
+    .single();
+  if (error) throw error;
+  return data as Drone;
+}
+
+export async function listMissionsForDrone(droneId: string) {
+  const { data, error } = await supabase
+    .from("missions")
+    .select("*")
+    .eq("drone_id", droneId)
+    .order("scheduled_at", { ascending: true, nullsFirst: false });
+  if (error) throw error;
+  return (data ?? []) as Mission[];
+}
+
 
 // ---------- Field uploads ----------
 export async function listFieldUploadsForFarm(farmId: string) {
