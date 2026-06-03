@@ -116,28 +116,6 @@ function Report() {
           </ul>
         </Section>
 
-        <Section title="11. DGCA & NPNT Compliance">
-          {(() => {
-            const c = buildComplianceReport(project);
-            return (
-              <div className="space-y-2 text-sm">
-                <div className="grid sm:grid-cols-2 gap-2">
-                  <KV k="DGCA category" v={`${c.category} (${c.weightBand})`} />
-                  <KV k="All-up weight" v={`${c.allUpWeightKg.toFixed(2)} kg`} />
-                  <KV k="NPNT compliance" v={c.npntRequired ? "Required" : "Exempt"} />
-                  <KV k="UIN" v={c.uinRequired ? "Required" : "Not required"} />
-                  <KV k="Remote Pilot Certificate" v={c.rpcRequired ? "Required" : "Not required"} />
-                  <KV k="Type Certificate" v={c.typeCertRequired ? "Required" : "Not required"} />
-                  <KV k="Third-party insurance" v={c.thirdPartyInsuranceRequired ? "Mandatory" : "Recommended"} />
-                  <KV k="Altitude ceiling" v={`${c.maxAltitudeFtAgl} ft AGL`} />
-                </div>
-                <ul className="list-disc list-inside text-xs text-muted-foreground space-y-1 pt-2">
-                  {c.notes.map((n, i) => <li key={i}>{n}</li>)}
-                </ul>
-              </div>
-            );
-          })()}
-        </Section>
 
         <Section title="12. Next Steps">
           <ol className="list-decimal list-inside text-sm text-muted-foreground space-y-1">
