@@ -241,6 +241,7 @@ function Capture({ pilot, mission, onBack }: { pilot: Pilot; mission: Mission; o
   return (
     <div className="space-y-4 pt-2 pb-8">
       <button onClick={onBack} className="text-xs text-muted-foreground flex items-center gap-1"><ArrowLeft className="h-3 w-3" /> Back to missions</button>
+      <h1 className="text-xl font-semibold">Field Photo Capture</h1>
 
       <div className="rounded-2xl border border-border/60 bg-gradient-card p-4 shadow-card">
         <div className="text-[11px] text-muted-foreground">{mission.service}</div>
@@ -259,7 +260,7 @@ function Capture({ pilot, mission, onBack }: { pilot: Pilot; mission: Mission; o
         />
         {preview ? (
           <div className="space-y-3">
-            <img src={preview} alt="preview" className="w-full rounded-lg border border-border/60" />
+            <img src={preview} alt="Captured field photo preview" className="w-full rounded-lg border border-border/60" />
             <div className="grid grid-cols-2 gap-2">
               <Button variant="outline" onClick={() => { setFile(null); setPreview(null); }}>Retake</Button>
               <Button onClick={() => up.mutate()} disabled={up.isPending} className="bg-gradient-agri text-primary-foreground">
