@@ -26,13 +26,14 @@ export const Route = createFileRoute("/control-center/agrisky")({
 });
 
 type TabId =
-  | "overview" | "farms" | "pilots" | "survey" | "boundary" | "input"
+  | "overview" | "farms" | "pilots" | "drones" | "survey" | "boundary" | "input"
   | "spraying" | "field-sync" | "activity" | "reports" | "settings";
 
 const navItems: { id: TabId; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
   { id: "farms", label: "Farms", icon: Tractor },
   { id: "pilots", label: "Pilots", icon: Users },
+  { id: "drones", label: "Drones", icon: Plane },
   { id: "survey", label: "Aerial Survey", icon: ScanLine },
   { id: "boundary", label: "Boundary Mapping", icon: MapIcon },
   { id: "input", label: "Input Loading", icon: Droplets },
@@ -42,6 +43,7 @@ const navItems: { id: TabId; label: string; icon: React.ComponentType<{ classNam
   { id: "reports", label: "Reports", icon: FileText },
   { id: "settings", label: "Settings", icon: Settings },
 ];
+
 
 function AgriSky() {
   const [tab, setTab] = useState<TabId>("overview");
