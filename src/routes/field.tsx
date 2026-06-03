@@ -21,6 +21,7 @@ export const Route = createFileRoute("/field")({
       { name: "description", content: "AgriSky Field for pilots. View missions, capture GPS-tagged farm photos, and sync data to the Control Center." },
       { property: "og:title", content: "AgriSky Field — Pilot" },
       { property: "og:description", content: "AgriSky Field for pilots. View missions, capture GPS-tagged farm photos, and sync data to the Control Center." },
+      { property: "og:url", content: "/field" },
     ],
     links: [
       { rel: "canonical", href: "/field" },
