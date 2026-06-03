@@ -19,6 +19,7 @@ import { Route as PilotTrackingRouteImport } from './routes/pilot.tracking'
 import { Route as PilotSyncRouteImport } from './routes/pilot.sync'
 import { Route as PilotProfileRouteImport } from './routes/pilot.profile'
 import { Route as PilotLoginRouteImport } from './routes/pilot.login'
+import { Route as ControlCenterUsersRouteImport } from './routes/control-center.users'
 import { Route as ControlCenterLoginRouteImport } from './routes/control-center.login'
 import { Route as ControlCenterAgriskyRouteImport } from './routes/control-center.agrisky'
 import { Route as ControlCenterAerospawnDesignStudioRouteImport } from './routes/control-center.aerospawn-design-studio'
@@ -84,6 +85,11 @@ const PilotLoginRoute = PilotLoginRouteImport.update({
   id: '/login',
   path: '/login',
   getParentRoute: () => PilotRoute,
+} as any)
+const ControlCenterUsersRoute = ControlCenterUsersRouteImport.update({
+  id: '/control-center/users',
+  path: '/control-center/users',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ControlCenterLoginRoute = ControlCenterLoginRouteImport.update({
   id: '/control-center/login',
@@ -180,6 +186,7 @@ export interface FileRoutesByFullPath {
   '/control-center/aerospawn-design-studio': typeof ControlCenterAerospawnDesignStudioRouteWithChildren
   '/control-center/agrisky': typeof ControlCenterAgriskyRoute
   '/control-center/login': typeof ControlCenterLoginRoute
+  '/control-center/users': typeof ControlCenterUsersRoute
   '/pilot/login': typeof PilotLoginRoute
   '/pilot/profile': typeof PilotProfileRoute
   '/pilot/sync': typeof PilotSyncRoute
@@ -205,6 +212,7 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/control-center/agrisky': typeof ControlCenterAgriskyRoute
   '/control-center/login': typeof ControlCenterLoginRoute
+  '/control-center/users': typeof ControlCenterUsersRoute
   '/pilot/login': typeof PilotLoginRoute
   '/pilot/profile': typeof PilotProfileRoute
   '/pilot/sync': typeof PilotSyncRoute
@@ -233,6 +241,7 @@ export interface FileRoutesById {
   '/control-center/aerospawn-design-studio': typeof ControlCenterAerospawnDesignStudioRouteWithChildren
   '/control-center/agrisky': typeof ControlCenterAgriskyRoute
   '/control-center/login': typeof ControlCenterLoginRoute
+  '/control-center/users': typeof ControlCenterUsersRoute
   '/pilot/login': typeof PilotLoginRoute
   '/pilot/profile': typeof PilotProfileRoute
   '/pilot/sync': typeof PilotSyncRoute
@@ -262,6 +271,7 @@ export interface FileRouteTypes {
     | '/control-center/aerospawn-design-studio'
     | '/control-center/agrisky'
     | '/control-center/login'
+    | '/control-center/users'
     | '/pilot/login'
     | '/pilot/profile'
     | '/pilot/sync'
@@ -287,6 +297,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/control-center/agrisky'
     | '/control-center/login'
+    | '/control-center/users'
     | '/pilot/login'
     | '/pilot/profile'
     | '/pilot/sync'
@@ -314,6 +325,7 @@ export interface FileRouteTypes {
     | '/control-center/aerospawn-design-studio'
     | '/control-center/agrisky'
     | '/control-center/login'
+    | '/control-center/users'
     | '/pilot/login'
     | '/pilot/profile'
     | '/pilot/sync'
@@ -342,6 +354,7 @@ export interface RootRouteChildren {
   ControlCenterAerospawnDesignStudioRoute: typeof ControlCenterAerospawnDesignStudioRouteWithChildren
   ControlCenterAgriskyRoute: typeof ControlCenterAgriskyRoute
   ControlCenterLoginRoute: typeof ControlCenterLoginRoute
+  ControlCenterUsersRoute: typeof ControlCenterUsersRoute
   ControlCenterIndexRoute: typeof ControlCenterIndexRoute
 }
 
@@ -416,6 +429,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/pilot/login'
       preLoaderRoute: typeof PilotLoginRouteImport
       parentRoute: typeof PilotRoute
+    }
+    '/control-center/users': {
+      id: '/control-center/users'
+      path: '/control-center/users'
+      fullPath: '/control-center/users'
+      preLoaderRoute: typeof ControlCenterUsersRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/control-center/login': {
       id: '/control-center/login'
@@ -598,6 +618,7 @@ const rootRouteChildren: RootRouteChildren = {
     ControlCenterAerospawnDesignStudioRouteWithChildren,
   ControlCenterAgriskyRoute: ControlCenterAgriskyRoute,
   ControlCenterLoginRoute: ControlCenterLoginRoute,
+  ControlCenterUsersRoute: ControlCenterUsersRoute,
   ControlCenterIndexRoute: ControlCenterIndexRoute,
 }
 export const routeTree = rootRouteImport
