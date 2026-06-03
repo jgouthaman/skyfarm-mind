@@ -1,9 +1,22 @@
 export type Vertical = "AgriSky" | "GuardSky" | "DeliverySky" | "TrainSky" | "Custom Drone Lab";
 export type Purpose =
-  | "Agriculture spraying" | "Farm aerial survey" | "Crop monitoring"
-  | "Surveillance" | "Fire detection" | "Fire extinguisher ball dropping"
-  | "Payload delivery" | "Training drone" | "Custom research drone";
-export type UserType = "Farmer" | "Drone engineer" | "Student" | "Trainer" | "Enterprise client" | "Investor demo" | "Internal R&D";
+  | "Agriculture spraying"
+  | "Farm aerial survey"
+  | "Crop monitoring"
+  | "Surveillance"
+  | "Fire detection"
+  | "Fire extinguisher ball dropping"
+  | "Payload delivery"
+  | "Training drone"
+  | "Custom research drone";
+export type UserType =
+  | "Farmer"
+  | "Drone Pilot"
+  | "Student"
+  | "Trainer"
+  | "Enterprise client"
+  | "Investor demo"
+  | "Internal R&D";
 export type RiskLevel = "Safe" | "Warning" | "Unsafe";
 
 export interface DroneRequirement {
