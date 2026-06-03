@@ -27,6 +27,7 @@ export const Route = createFileRoute("/control-center/agrisky")({
       { name: "description", content: "AgriSky Control Center — manage farm surveys, crop monitoring, spraying missions, and drone operations from one dashboard." },
       { property: "og:title", content: "AgriSky Control Center — AeroSpawn" },
       { property: "og:description", content: "AgriSky Control Center — manage farm surveys, crop monitoring, spraying missions, and drone operations from one dashboard." },
+      { property: "og:url", content: "/control-center/agrisky" },
     ],
     links: [
       { rel: "canonical", href: "/control-center/agrisky" },
