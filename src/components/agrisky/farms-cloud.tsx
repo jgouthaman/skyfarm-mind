@@ -131,6 +131,7 @@ function FarmsList({ onOpen }: { onOpen: (f: Farm) => void }) {
 function FarmDetail({ farm, onBack }: { farm: Farm; onBack: () => void }) {
   const qc = useQueryClient();
   const { data: pilots = [] } = useQuery({ queryKey: ["pilots"], queryFn: listPilots });
+  const { data: drones = [] } = useQuery({ queryKey: ["drones"], queryFn: listDrones });
   const { data: missions = [], refetch: refetchMissions } = useQuery({
     queryKey: ["missions", farm.id],
     queryFn: () => listMissionsForFarm(farm.id),
@@ -142,8 +143,11 @@ function FarmDetail({ farm, onBack }: { farm: Farm; onBack: () => void }) {
 
   const [assignOpen, setAssignOpen] = useState(false);
   const [pilotId, setPilotId] = useState<string>("");
+  const [droneId, setDroneId] = useState<string>("");
   const [service, setService] = useState<string>(farm.service_needed || SERVICES[0]);
+  const [scheduledAt, setScheduledAt] = useState<string>("");
   const [notes, setNotes] = useState("");
+
 
   // Realtime: new uploads for this farm
   useEffect(() => {
