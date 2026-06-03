@@ -16,7 +16,14 @@ function load(): State {
 }
 
 let state: State = { projects: [], selectedId: null };
+let hydrated = false;
 const listeners = new Set<() => void>();
+
+function hydrateOnce() {
+  if (hydrated || typeof window === "undefined") return;
+  hydrated = true;
+  state = load();
+}
 
 function persist() {
   if (typeof window === "undefined") return;
@@ -26,19 +33,23 @@ function persist() {
 }
 function emit() { listeners.forEach((l) => l()); }
 
-function subscribe(l: () => void) { listeners.add(l); return () => listeners.delete(l); }
+function subscribe(l: () => void) {
+  hydrateOnce();
+  listeners.add(l);
+  return () => listeners.delete(l);
+}
 function getSnap(): State { return state; }
 const empty: State = { projects: [], selectedId: null };
 function getServer(): State { return empty; }
 
-let hydrated = false;
 export function useStudioStore() {
   const s = useSyncExternalStore(subscribe, getSnap, getServer);
   useEffect(() => {
-    if (!hydrated) { hydrated = true; state = load(); emit(); }
+    if (!hydrated) { hydrateOnce(); emit(); }
   }, []);
   return s;
 }
+
 
 export function useCurrentProject(): DroneProject | null {
   const s = useStudioStore();
