@@ -1,11 +1,15 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
-import { Plane, Smartphone, ArrowRight, Shield, ArrowLeft } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { Plane, Smartphone, ArrowRight, Shield, Lock, KeyRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { phoneToEmail, isValidPhone } from "@/lib/phone-email";
+import { adminBootstrapAvailable, bootstrapAdmin } from "@/lib/admin.functions";
 
 export const Route = createFileRoute("/control-center/login")({
   head: () => ({
@@ -19,57 +23,68 @@ export const Route = createFileRoute("/control-center/login")({
 
 function LoginPage() {
   const navigate = useNavigate();
+  const checkBootstrap = useServerFn(adminBootstrapAvailable);
+  const runBootstrap = useServerFn(bootstrapAdmin);
+
   const [mobile, setMobile] = useState("");
-  const [otp, setOtp] = useState("");
-  const [otpSent, setOtpSent] = useState(false);
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [mode, setMode] = useState<"signin" | "setup">("signin");
+  const [bootstrapPhone, setBootstrapPhone] = useState("9940263589");
+  const [setupAvailable, setSetupAvailable] = useState(false);
 
-  const isMobileValid = /^\d{10}$/.test(mobile);
-  const isOtpValid = /^\d{5}$/.test(otp);
+  useEffect(() => {
+    checkBootstrap()
+      .then((r) => {
+        setSetupAvailable(r.available);
+        setBootstrapPhone(r.bootstrapPhone);
+        if (r.available) setMode("setup");
+      })
+      .catch(() => {});
+  }, [checkBootstrap]);
 
-  const handleSendOtp = (e: React.FormEvent) => {
+  const handleDigits = (setter: (v: string) => void) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    const d = e.target.value.replace(/\D/g, "");
+    if (d.length <= 10) setter(d);
+  };
+
+  const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isMobileValid) {
-      toast.error("Please enter a valid 10-digit mobile number.");
-      return;
-    }
-    setOtpSent(true);
-    setOtp("");
-    toast.success("Demo OTP sent");
+    if (!isValidPhone(mobile)) return toast.error("Enter a valid 10-digit mobile number.");
+    if (!password) return toast.error("Enter your password.");
+    setLoading(true);
+    const { error } = await supabase.auth.signInWithPassword({
+      email: phoneToEmail(mobile),
+      password,
+    });
+    setLoading(false);
+    if (error) return toast.error(error.message || "Invalid mobile number or password.");
+    toast.success("Welcome to AeroSpawn Control Center");
+    setTimeout(() => navigate({ to: "/control-center" }), 200);
   };
 
-  const handleVerifyOtp = (e: React.FormEvent) => {
+  const handleSetup = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isOtpValid) {
-      toast.error("Please enter a valid 5-digit OTP.");
-      return;
+    if (mobile !== bootstrapPhone) return toast.error(`Setup is only available for ${bootstrapPhone}.`);
+    if (password.length < 8) return toast.error("Password must be at least 8 characters.");
+    if (password !== confirm) return toast.error("Passwords do not match.");
+    setLoading(true);
+    try {
+      await runBootstrap({ data: { phone: mobile, password, fullName: "Administrator" } });
+      // Sign in immediately
+      const { error } = await supabase.auth.signInWithPassword({
+        email: phoneToEmail(mobile),
+        password,
+      });
+      if (error) throw error;
+      toast.success("Admin account ready — signed in.");
+      setTimeout(() => navigate({ to: "/control-center" }), 200);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Setup failed.");
+    } finally {
+      setLoading(false);
     }
-
-    const expectedOtp = mobile.slice(-5);
-    if (otp === expectedOtp) {
-      toast.success("Welcome to AeroSpawn Control Center");
-      setTimeout(() => navigate({ to: "/control-center" }), 300);
-    } else {
-      toast.error("Invalid OTP. Please enter the last 5 digits of your mobile number.");
-    }
-  };
-
-  const handleMobileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const digitsOnly = e.target.value.replace(/\D/g, "");
-    if (digitsOnly.length <= 10) {
-      setMobile(digitsOnly);
-    }
-  };
-
-  const handleOtpChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const digitsOnly = e.target.value.replace(/\D/g, "");
-    if (digitsOnly.length <= 5) {
-      setOtp(digitsOnly);
-    }
-  };
-
-  const handleBackToMobile = () => {
-    setOtpSent(false);
-    setOtp("");
   };
 
   return (
@@ -94,75 +109,95 @@ function LoginPage() {
           </span>
           <h1 className="mt-5 text-3xl sm:text-4xl font-semibold">AeroSpawn Control Center</h1>
           <p className="mt-3 text-sm text-muted-foreground">
-            Secure access for drone operations, aerial intelligence, and vertical-specific mission control.
+            {mode === "setup"
+              ? `First-time setup for the admin account (${bootstrapPhone}). Choose a strong password.`
+              : "Sign in with your mobile number and password."}
           </p>
         </div>
 
-        {!otpSent ? (
-          <form onSubmit={handleSendOtp} className="rounded-2xl border border-border/60 bg-card/60 backdrop-blur p-6 shadow-card space-y-5">
+        <form
+          onSubmit={mode === "setup" ? handleSetup : handleSignIn}
+          className="rounded-2xl border border-border/60 bg-card/60 backdrop-blur p-6 shadow-card space-y-5"
+        >
+          <div className="space-y-2">
+            <Label htmlFor="mobile">Mobile Number</Label>
+            <div className="relative">
+              <Smartphone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                id="mobile"
+                type="tel"
+                inputMode="numeric"
+                maxLength={10}
+                required
+                value={mobile}
+                onChange={handleDigits(setMobile)}
+                className="pl-9"
+                placeholder="9876543210"
+                autoFocus
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="password">Password</Label>
+            <div className="relative">
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                id="password"
+                type="password"
+                required
+                minLength={8}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="pl-9"
+                placeholder="••••••••"
+              />
+            </div>
+          </div>
+
+          {mode === "setup" && (
             <div className="space-y-2">
-              <Label htmlFor="mobile">Mobile Number</Label>
+              <Label htmlFor="confirm">Confirm Password</Label>
               <div className="relative">
-                <Smartphone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  id="mobile"
-                  type="tel"
-                  inputMode="numeric"
-                  maxLength={10}
+                  id="confirm"
+                  type="password"
                   required
-                  value={mobile}
-                  onChange={handleMobileChange}
+                  minLength={8}
+                  value={confirm}
+                  onChange={(e) => setConfirm(e.target.value)}
                   className="pl-9"
-                  placeholder="9876543210"
-                  autoFocus
-                />
-              </div>
-              <p className="text-xs text-muted-foreground">Enter your 10-digit mobile number to receive a demo OTP.</p>
-            </div>
-
-            <Button type="submit" className="w-full bg-gradient-primary text-primary-foreground hover:opacity-90 shadow-glow">
-              Send OTP <ArrowRight className="ml-1 h-4 w-4" />
-            </Button>
-
-            <p className="text-center text-xs text-muted-foreground pt-2">
-              Protected by AeroSpawn aerospace-grade access controls.
-            </p>
-          </form>
-        ) : (
-          <form onSubmit={handleVerifyOtp} className="rounded-2xl border border-border/60 bg-card/60 backdrop-blur p-6 shadow-card space-y-5">
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="otp">Enter OTP</Label>
-                <button type="button" onClick={handleBackToMobile} className="text-xs text-primary hover:underline flex items-center gap-1">
-                  <ArrowLeft className="h-3 w-3" /> Change number
-                </button>
-              </div>
-              <div className="relative">
-                <Shield className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="otp"
-                  type="tel"
-                  inputMode="numeric"
-                  maxLength={5}
-                  required
-                  value={otp}
-                  onChange={handleOtpChange}
-                  className="pl-9 tracking-[0.3em] text-center font-mono text-lg"
-                  placeholder="• • • • •"
-                  autoFocus
+                  placeholder="••••••••"
                 />
               </div>
             </div>
+          )}
 
-            <Button type="submit" className="w-full bg-gradient-primary text-primary-foreground hover:opacity-90 shadow-glow">
-              Verify & Login <ArrowRight className="ml-1 h-4 w-4" />
-            </Button>
+          <Button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-gradient-primary text-primary-foreground hover:opacity-90 shadow-glow"
+          >
+            {loading ? "Please wait…" : mode === "setup" ? "Set password & sign in" : "Sign in"}
+            <ArrowRight className="ml-1 h-4 w-4" />
+          </Button>
 
-            <p className="text-center text-xs text-muted-foreground pt-2">
-              Demo mode — no real SMS is sent.
-            </p>
-          </form>
-        )}
+          {setupAvailable && mode === "signin" && (
+            <button type="button" onClick={() => setMode("setup")} className="block w-full text-center text-xs text-primary hover:underline">
+              First-time admin setup ({bootstrapPhone})
+            </button>
+          )}
+          {!setupAvailable && mode === "setup" && (
+            <button type="button" onClick={() => setMode("signin")} className="block w-full text-center text-xs text-primary hover:underline">
+              Back to sign in
+            </button>
+          )}
+
+          <p className="text-center text-xs text-muted-foreground pt-2">
+            Accounts are managed by an admin. Contact your administrator if you need access.
+          </p>
+        </form>
       </main>
     </div>
   );
