@@ -2,7 +2,8 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { LayoutDashboard, FilePlus, ClipboardList, Cpu, ListChecks, FlaskConical, Sparkles, FileText, History, ArrowLeft, Plane } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const items = [
+type Item = { to: string; label: string; icon: typeof LayoutDashboard; exact?: boolean };
+const items: Item[] = [
   { to: "/control-center/aerospawn-design-studio", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { to: "/control-center/aerospawn-design-studio/new", label: "New Design", icon: FilePlus },
   { to: "/control-center/aerospawn-design-studio/requirements", label: "Requirement Intake", icon: ClipboardList },
@@ -12,7 +13,7 @@ const items = [
   { to: "/control-center/aerospawn-design-studio/advisor", label: "AI Advisor", icon: Sparkles },
   { to: "/control-center/aerospawn-design-studio/report", label: "Reports", icon: FileText },
   { to: "/control-center/aerospawn-design-studio/history", label: "Project History", icon: History },
-] as const;
+];
 
 export function StudioSidebar() {
   const path = useRouterState({ select: (r) => r.location.pathname });
