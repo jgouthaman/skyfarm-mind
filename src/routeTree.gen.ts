@@ -20,8 +20,18 @@ import { Route as PilotProfileRouteImport } from './routes/pilot.profile'
 import { Route as PilotLoginRouteImport } from './routes/pilot.login'
 import { Route as ControlCenterLoginRouteImport } from './routes/control-center.login'
 import { Route as ControlCenterAgriskyRouteImport } from './routes/control-center.agrisky'
+import { Route as ControlCenterAerospawnDesignStudioRouteImport } from './routes/control-center.aerospawn-design-studio'
 import { Route as PilotMissionsIndexRouteImport } from './routes/pilot.missions.index'
+import { Route as ControlCenterAerospawnDesignStudioIndexRouteImport } from './routes/control-center.aerospawn-design-studio.index'
 import { Route as PilotMissionsIdRouteImport } from './routes/pilot.missions.$id'
+import { Route as ControlCenterAerospawnDesignStudioSimulationRouteImport } from './routes/control-center.aerospawn-design-studio.simulation'
+import { Route as ControlCenterAerospawnDesignStudioRequirementsRouteImport } from './routes/control-center.aerospawn-design-studio.requirements'
+import { Route as ControlCenterAerospawnDesignStudioReportRouteImport } from './routes/control-center.aerospawn-design-studio.report'
+import { Route as ControlCenterAerospawnDesignStudioNewRouteImport } from './routes/control-center.aerospawn-design-studio.new'
+import { Route as ControlCenterAerospawnDesignStudioHistoryRouteImport } from './routes/control-center.aerospawn-design-studio.history'
+import { Route as ControlCenterAerospawnDesignStudioDesignRouteImport } from './routes/control-center.aerospawn-design-studio.design'
+import { Route as ControlCenterAerospawnDesignStudioComponentsRouteImport } from './routes/control-center.aerospawn-design-studio.components'
+import { Route as ControlCenterAerospawnDesignStudioAdvisorRouteImport } from './routes/control-center.aerospawn-design-studio.advisor'
 
 const PilotRoute = PilotRouteImport.update({
   id: '/pilot',
@@ -78,21 +88,82 @@ const ControlCenterAgriskyRoute = ControlCenterAgriskyRouteImport.update({
   path: '/control-center/agrisky',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ControlCenterAerospawnDesignStudioRoute =
+  ControlCenterAerospawnDesignStudioRouteImport.update({
+    id: '/control-center/aerospawn-design-studio',
+    path: '/control-center/aerospawn-design-studio',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const PilotMissionsIndexRoute = PilotMissionsIndexRouteImport.update({
   id: '/missions/',
   path: '/missions/',
   getParentRoute: () => PilotRoute,
 } as any)
+const ControlCenterAerospawnDesignStudioIndexRoute =
+  ControlCenterAerospawnDesignStudioIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => ControlCenterAerospawnDesignStudioRoute,
+  } as any)
 const PilotMissionsIdRoute = PilotMissionsIdRouteImport.update({
   id: '/missions/$id',
   path: '/missions/$id',
   getParentRoute: () => PilotRoute,
 } as any)
+const ControlCenterAerospawnDesignStudioSimulationRoute =
+  ControlCenterAerospawnDesignStudioSimulationRouteImport.update({
+    id: '/simulation',
+    path: '/simulation',
+    getParentRoute: () => ControlCenterAerospawnDesignStudioRoute,
+  } as any)
+const ControlCenterAerospawnDesignStudioRequirementsRoute =
+  ControlCenterAerospawnDesignStudioRequirementsRouteImport.update({
+    id: '/requirements',
+    path: '/requirements',
+    getParentRoute: () => ControlCenterAerospawnDesignStudioRoute,
+  } as any)
+const ControlCenterAerospawnDesignStudioReportRoute =
+  ControlCenterAerospawnDesignStudioReportRouteImport.update({
+    id: '/report',
+    path: '/report',
+    getParentRoute: () => ControlCenterAerospawnDesignStudioRoute,
+  } as any)
+const ControlCenterAerospawnDesignStudioNewRoute =
+  ControlCenterAerospawnDesignStudioNewRouteImport.update({
+    id: '/new',
+    path: '/new',
+    getParentRoute: () => ControlCenterAerospawnDesignStudioRoute,
+  } as any)
+const ControlCenterAerospawnDesignStudioHistoryRoute =
+  ControlCenterAerospawnDesignStudioHistoryRouteImport.update({
+    id: '/history',
+    path: '/history',
+    getParentRoute: () => ControlCenterAerospawnDesignStudioRoute,
+  } as any)
+const ControlCenterAerospawnDesignStudioDesignRoute =
+  ControlCenterAerospawnDesignStudioDesignRouteImport.update({
+    id: '/design',
+    path: '/design',
+    getParentRoute: () => ControlCenterAerospawnDesignStudioRoute,
+  } as any)
+const ControlCenterAerospawnDesignStudioComponentsRoute =
+  ControlCenterAerospawnDesignStudioComponentsRouteImport.update({
+    id: '/components',
+    path: '/components',
+    getParentRoute: () => ControlCenterAerospawnDesignStudioRoute,
+  } as any)
+const ControlCenterAerospawnDesignStudioAdvisorRoute =
+  ControlCenterAerospawnDesignStudioAdvisorRouteImport.update({
+    id: '/advisor',
+    path: '/advisor',
+    getParentRoute: () => ControlCenterAerospawnDesignStudioRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/field': typeof FieldRoute
   '/pilot': typeof PilotRouteWithChildren
+  '/control-center/aerospawn-design-studio': typeof ControlCenterAerospawnDesignStudioRouteWithChildren
   '/control-center/agrisky': typeof ControlCenterAgriskyRoute
   '/control-center/login': typeof ControlCenterLoginRoute
   '/pilot/login': typeof PilotLoginRoute
@@ -101,7 +172,16 @@ export interface FileRoutesByFullPath {
   '/pilot/tracking': typeof PilotTrackingRoute
   '/control-center/': typeof ControlCenterIndexRoute
   '/pilot/': typeof PilotIndexRoute
+  '/control-center/aerospawn-design-studio/advisor': typeof ControlCenterAerospawnDesignStudioAdvisorRoute
+  '/control-center/aerospawn-design-studio/components': typeof ControlCenterAerospawnDesignStudioComponentsRoute
+  '/control-center/aerospawn-design-studio/design': typeof ControlCenterAerospawnDesignStudioDesignRoute
+  '/control-center/aerospawn-design-studio/history': typeof ControlCenterAerospawnDesignStudioHistoryRoute
+  '/control-center/aerospawn-design-studio/new': typeof ControlCenterAerospawnDesignStudioNewRoute
+  '/control-center/aerospawn-design-studio/report': typeof ControlCenterAerospawnDesignStudioReportRoute
+  '/control-center/aerospawn-design-studio/requirements': typeof ControlCenterAerospawnDesignStudioRequirementsRoute
+  '/control-center/aerospawn-design-studio/simulation': typeof ControlCenterAerospawnDesignStudioSimulationRoute
   '/pilot/missions/$id': typeof PilotMissionsIdRoute
+  '/control-center/aerospawn-design-studio/': typeof ControlCenterAerospawnDesignStudioIndexRoute
   '/pilot/missions/': typeof PilotMissionsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -115,7 +195,16 @@ export interface FileRoutesByTo {
   '/pilot/tracking': typeof PilotTrackingRoute
   '/control-center': typeof ControlCenterIndexRoute
   '/pilot': typeof PilotIndexRoute
+  '/control-center/aerospawn-design-studio/advisor': typeof ControlCenterAerospawnDesignStudioAdvisorRoute
+  '/control-center/aerospawn-design-studio/components': typeof ControlCenterAerospawnDesignStudioComponentsRoute
+  '/control-center/aerospawn-design-studio/design': typeof ControlCenterAerospawnDesignStudioDesignRoute
+  '/control-center/aerospawn-design-studio/history': typeof ControlCenterAerospawnDesignStudioHistoryRoute
+  '/control-center/aerospawn-design-studio/new': typeof ControlCenterAerospawnDesignStudioNewRoute
+  '/control-center/aerospawn-design-studio/report': typeof ControlCenterAerospawnDesignStudioReportRoute
+  '/control-center/aerospawn-design-studio/requirements': typeof ControlCenterAerospawnDesignStudioRequirementsRoute
+  '/control-center/aerospawn-design-studio/simulation': typeof ControlCenterAerospawnDesignStudioSimulationRoute
   '/pilot/missions/$id': typeof PilotMissionsIdRoute
+  '/control-center/aerospawn-design-studio': typeof ControlCenterAerospawnDesignStudioIndexRoute
   '/pilot/missions': typeof PilotMissionsIndexRoute
 }
 export interface FileRoutesById {
@@ -123,6 +212,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/field': typeof FieldRoute
   '/pilot': typeof PilotRouteWithChildren
+  '/control-center/aerospawn-design-studio': typeof ControlCenterAerospawnDesignStudioRouteWithChildren
   '/control-center/agrisky': typeof ControlCenterAgriskyRoute
   '/control-center/login': typeof ControlCenterLoginRoute
   '/pilot/login': typeof PilotLoginRoute
@@ -131,7 +221,16 @@ export interface FileRoutesById {
   '/pilot/tracking': typeof PilotTrackingRoute
   '/control-center/': typeof ControlCenterIndexRoute
   '/pilot/': typeof PilotIndexRoute
+  '/control-center/aerospawn-design-studio/advisor': typeof ControlCenterAerospawnDesignStudioAdvisorRoute
+  '/control-center/aerospawn-design-studio/components': typeof ControlCenterAerospawnDesignStudioComponentsRoute
+  '/control-center/aerospawn-design-studio/design': typeof ControlCenterAerospawnDesignStudioDesignRoute
+  '/control-center/aerospawn-design-studio/history': typeof ControlCenterAerospawnDesignStudioHistoryRoute
+  '/control-center/aerospawn-design-studio/new': typeof ControlCenterAerospawnDesignStudioNewRoute
+  '/control-center/aerospawn-design-studio/report': typeof ControlCenterAerospawnDesignStudioReportRoute
+  '/control-center/aerospawn-design-studio/requirements': typeof ControlCenterAerospawnDesignStudioRequirementsRoute
+  '/control-center/aerospawn-design-studio/simulation': typeof ControlCenterAerospawnDesignStudioSimulationRoute
   '/pilot/missions/$id': typeof PilotMissionsIdRoute
+  '/control-center/aerospawn-design-studio/': typeof ControlCenterAerospawnDesignStudioIndexRoute
   '/pilot/missions/': typeof PilotMissionsIndexRoute
 }
 export interface FileRouteTypes {
@@ -140,6 +239,7 @@ export interface FileRouteTypes {
     | '/'
     | '/field'
     | '/pilot'
+    | '/control-center/aerospawn-design-studio'
     | '/control-center/agrisky'
     | '/control-center/login'
     | '/pilot/login'
@@ -148,7 +248,16 @@ export interface FileRouteTypes {
     | '/pilot/tracking'
     | '/control-center/'
     | '/pilot/'
+    | '/control-center/aerospawn-design-studio/advisor'
+    | '/control-center/aerospawn-design-studio/components'
+    | '/control-center/aerospawn-design-studio/design'
+    | '/control-center/aerospawn-design-studio/history'
+    | '/control-center/aerospawn-design-studio/new'
+    | '/control-center/aerospawn-design-studio/report'
+    | '/control-center/aerospawn-design-studio/requirements'
+    | '/control-center/aerospawn-design-studio/simulation'
     | '/pilot/missions/$id'
+    | '/control-center/aerospawn-design-studio/'
     | '/pilot/missions/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -162,13 +271,23 @@ export interface FileRouteTypes {
     | '/pilot/tracking'
     | '/control-center'
     | '/pilot'
+    | '/control-center/aerospawn-design-studio/advisor'
+    | '/control-center/aerospawn-design-studio/components'
+    | '/control-center/aerospawn-design-studio/design'
+    | '/control-center/aerospawn-design-studio/history'
+    | '/control-center/aerospawn-design-studio/new'
+    | '/control-center/aerospawn-design-studio/report'
+    | '/control-center/aerospawn-design-studio/requirements'
+    | '/control-center/aerospawn-design-studio/simulation'
     | '/pilot/missions/$id'
+    | '/control-center/aerospawn-design-studio'
     | '/pilot/missions'
   id:
     | '__root__'
     | '/'
     | '/field'
     | '/pilot'
+    | '/control-center/aerospawn-design-studio'
     | '/control-center/agrisky'
     | '/control-center/login'
     | '/pilot/login'
@@ -177,7 +296,16 @@ export interface FileRouteTypes {
     | '/pilot/tracking'
     | '/control-center/'
     | '/pilot/'
+    | '/control-center/aerospawn-design-studio/advisor'
+    | '/control-center/aerospawn-design-studio/components'
+    | '/control-center/aerospawn-design-studio/design'
+    | '/control-center/aerospawn-design-studio/history'
+    | '/control-center/aerospawn-design-studio/new'
+    | '/control-center/aerospawn-design-studio/report'
+    | '/control-center/aerospawn-design-studio/requirements'
+    | '/control-center/aerospawn-design-studio/simulation'
     | '/pilot/missions/$id'
+    | '/control-center/aerospawn-design-studio/'
     | '/pilot/missions/'
   fileRoutesById: FileRoutesById
 }
@@ -185,6 +313,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   FieldRoute: typeof FieldRoute
   PilotRoute: typeof PilotRouteWithChildren
+  ControlCenterAerospawnDesignStudioRoute: typeof ControlCenterAerospawnDesignStudioRouteWithChildren
   ControlCenterAgriskyRoute: typeof ControlCenterAgriskyRoute
   ControlCenterLoginRoute: typeof ControlCenterLoginRoute
   ControlCenterIndexRoute: typeof ControlCenterIndexRoute
@@ -269,6 +398,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ControlCenterAgriskyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/control-center/aerospawn-design-studio': {
+      id: '/control-center/aerospawn-design-studio'
+      path: '/control-center/aerospawn-design-studio'
+      fullPath: '/control-center/aerospawn-design-studio'
+      preLoaderRoute: typeof ControlCenterAerospawnDesignStudioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/pilot/missions/': {
       id: '/pilot/missions/'
       path: '/missions'
@@ -276,12 +412,75 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PilotMissionsIndexRouteImport
       parentRoute: typeof PilotRoute
     }
+    '/control-center/aerospawn-design-studio/': {
+      id: '/control-center/aerospawn-design-studio/'
+      path: '/'
+      fullPath: '/control-center/aerospawn-design-studio/'
+      preLoaderRoute: typeof ControlCenterAerospawnDesignStudioIndexRouteImport
+      parentRoute: typeof ControlCenterAerospawnDesignStudioRoute
+    }
     '/pilot/missions/$id': {
       id: '/pilot/missions/$id'
       path: '/missions/$id'
       fullPath: '/pilot/missions/$id'
       preLoaderRoute: typeof PilotMissionsIdRouteImport
       parentRoute: typeof PilotRoute
+    }
+    '/control-center/aerospawn-design-studio/simulation': {
+      id: '/control-center/aerospawn-design-studio/simulation'
+      path: '/simulation'
+      fullPath: '/control-center/aerospawn-design-studio/simulation'
+      preLoaderRoute: typeof ControlCenterAerospawnDesignStudioSimulationRouteImport
+      parentRoute: typeof ControlCenterAerospawnDesignStudioRoute
+    }
+    '/control-center/aerospawn-design-studio/requirements': {
+      id: '/control-center/aerospawn-design-studio/requirements'
+      path: '/requirements'
+      fullPath: '/control-center/aerospawn-design-studio/requirements'
+      preLoaderRoute: typeof ControlCenterAerospawnDesignStudioRequirementsRouteImport
+      parentRoute: typeof ControlCenterAerospawnDesignStudioRoute
+    }
+    '/control-center/aerospawn-design-studio/report': {
+      id: '/control-center/aerospawn-design-studio/report'
+      path: '/report'
+      fullPath: '/control-center/aerospawn-design-studio/report'
+      preLoaderRoute: typeof ControlCenterAerospawnDesignStudioReportRouteImport
+      parentRoute: typeof ControlCenterAerospawnDesignStudioRoute
+    }
+    '/control-center/aerospawn-design-studio/new': {
+      id: '/control-center/aerospawn-design-studio/new'
+      path: '/new'
+      fullPath: '/control-center/aerospawn-design-studio/new'
+      preLoaderRoute: typeof ControlCenterAerospawnDesignStudioNewRouteImport
+      parentRoute: typeof ControlCenterAerospawnDesignStudioRoute
+    }
+    '/control-center/aerospawn-design-studio/history': {
+      id: '/control-center/aerospawn-design-studio/history'
+      path: '/history'
+      fullPath: '/control-center/aerospawn-design-studio/history'
+      preLoaderRoute: typeof ControlCenterAerospawnDesignStudioHistoryRouteImport
+      parentRoute: typeof ControlCenterAerospawnDesignStudioRoute
+    }
+    '/control-center/aerospawn-design-studio/design': {
+      id: '/control-center/aerospawn-design-studio/design'
+      path: '/design'
+      fullPath: '/control-center/aerospawn-design-studio/design'
+      preLoaderRoute: typeof ControlCenterAerospawnDesignStudioDesignRouteImport
+      parentRoute: typeof ControlCenterAerospawnDesignStudioRoute
+    }
+    '/control-center/aerospawn-design-studio/components': {
+      id: '/control-center/aerospawn-design-studio/components'
+      path: '/components'
+      fullPath: '/control-center/aerospawn-design-studio/components'
+      preLoaderRoute: typeof ControlCenterAerospawnDesignStudioComponentsRouteImport
+      parentRoute: typeof ControlCenterAerospawnDesignStudioRoute
+    }
+    '/control-center/aerospawn-design-studio/advisor': {
+      id: '/control-center/aerospawn-design-studio/advisor'
+      path: '/advisor'
+      fullPath: '/control-center/aerospawn-design-studio/advisor'
+      preLoaderRoute: typeof ControlCenterAerospawnDesignStudioAdvisorRouteImport
+      parentRoute: typeof ControlCenterAerospawnDesignStudioRoute
     }
   }
 }
@@ -308,10 +507,51 @@ const PilotRouteChildren: PilotRouteChildren = {
 
 const PilotRouteWithChildren = PilotRoute._addFileChildren(PilotRouteChildren)
 
+interface ControlCenterAerospawnDesignStudioRouteChildren {
+  ControlCenterAerospawnDesignStudioAdvisorRoute: typeof ControlCenterAerospawnDesignStudioAdvisorRoute
+  ControlCenterAerospawnDesignStudioComponentsRoute: typeof ControlCenterAerospawnDesignStudioComponentsRoute
+  ControlCenterAerospawnDesignStudioDesignRoute: typeof ControlCenterAerospawnDesignStudioDesignRoute
+  ControlCenterAerospawnDesignStudioHistoryRoute: typeof ControlCenterAerospawnDesignStudioHistoryRoute
+  ControlCenterAerospawnDesignStudioNewRoute: typeof ControlCenterAerospawnDesignStudioNewRoute
+  ControlCenterAerospawnDesignStudioReportRoute: typeof ControlCenterAerospawnDesignStudioReportRoute
+  ControlCenterAerospawnDesignStudioRequirementsRoute: typeof ControlCenterAerospawnDesignStudioRequirementsRoute
+  ControlCenterAerospawnDesignStudioSimulationRoute: typeof ControlCenterAerospawnDesignStudioSimulationRoute
+  ControlCenterAerospawnDesignStudioIndexRoute: typeof ControlCenterAerospawnDesignStudioIndexRoute
+}
+
+const ControlCenterAerospawnDesignStudioRouteChildren: ControlCenterAerospawnDesignStudioRouteChildren =
+  {
+    ControlCenterAerospawnDesignStudioAdvisorRoute:
+      ControlCenterAerospawnDesignStudioAdvisorRoute,
+    ControlCenterAerospawnDesignStudioComponentsRoute:
+      ControlCenterAerospawnDesignStudioComponentsRoute,
+    ControlCenterAerospawnDesignStudioDesignRoute:
+      ControlCenterAerospawnDesignStudioDesignRoute,
+    ControlCenterAerospawnDesignStudioHistoryRoute:
+      ControlCenterAerospawnDesignStudioHistoryRoute,
+    ControlCenterAerospawnDesignStudioNewRoute:
+      ControlCenterAerospawnDesignStudioNewRoute,
+    ControlCenterAerospawnDesignStudioReportRoute:
+      ControlCenterAerospawnDesignStudioReportRoute,
+    ControlCenterAerospawnDesignStudioRequirementsRoute:
+      ControlCenterAerospawnDesignStudioRequirementsRoute,
+    ControlCenterAerospawnDesignStudioSimulationRoute:
+      ControlCenterAerospawnDesignStudioSimulationRoute,
+    ControlCenterAerospawnDesignStudioIndexRoute:
+      ControlCenterAerospawnDesignStudioIndexRoute,
+  }
+
+const ControlCenterAerospawnDesignStudioRouteWithChildren =
+  ControlCenterAerospawnDesignStudioRoute._addFileChildren(
+    ControlCenterAerospawnDesignStudioRouteChildren,
+  )
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   FieldRoute: FieldRoute,
   PilotRoute: PilotRouteWithChildren,
+  ControlCenterAerospawnDesignStudioRoute:
+    ControlCenterAerospawnDesignStudioRouteWithChildren,
   ControlCenterAgriskyRoute: ControlCenterAgriskyRoute,
   ControlCenterLoginRoute: ControlCenterLoginRoute,
   ControlCenterIndexRoute: ControlCenterIndexRoute,
