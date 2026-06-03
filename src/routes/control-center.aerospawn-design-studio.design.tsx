@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Disclaimer } from "@/components/design-studio/sidebar";
 import { riskColor } from "@/lib/design-studio/engine";
-import { buildComplianceReport, classifyDrone } from "@/lib/design-studio/compliance";
+import { buildComplianceReport } from "@/lib/design-studio/compliance";
 import { ListChecks, FlaskConical, Sparkles, FileText, ShieldAlert, CheckCircle2, XCircle } from "lucide-react";
 import { StudioStepNav } from "@/components/design-studio/step-nav";
 
