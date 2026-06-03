@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Cpu, ListChecks, FlaskConical, Sparkles, FileText } from "lucide-react";
+import { Cpu, ListChecks, FlaskConical, Sparkles, FileText, ShieldAlert } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const steps = [
@@ -7,6 +7,7 @@ const steps = [
   { to: "/control-center/aerospawn-design-studio/components", label: "Components", icon: ListChecks },
   { to: "/control-center/aerospawn-design-studio/simulation", label: "Simulation", icon: FlaskConical },
   { to: "/control-center/aerospawn-design-studio/advisor", label: "Advisor", icon: Sparkles },
+  { to: "/control-center/aerospawn-design-studio/compliance", label: "Compliance", icon: ShieldAlert },
   { to: "/control-center/aerospawn-design-studio/report", label: "Report", icon: FileText },
 ] as const;
 
