@@ -9,6 +9,8 @@ import {
 import { FieldSyncMonitor, MissionDetail, ACTIVE_MISSION_ID } from "@/components/agrisky/field-sync";
 import { PilotsSection } from "@/components/agrisky/pilots-section";
 import { FarmsCloudSection } from "@/components/agrisky/farms-cloud";
+import { DronesSection } from "@/components/agrisky/drones-section";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
