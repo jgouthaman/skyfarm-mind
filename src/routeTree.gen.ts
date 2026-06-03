@@ -20,6 +20,7 @@ import { Route as PilotProfileRouteImport } from './routes/pilot.profile'
 import { Route as PilotLoginRouteImport } from './routes/pilot.login'
 import { Route as ControlCenterLoginRouteImport } from './routes/control-center.login'
 import { Route as ControlCenterAgriskyRouteImport } from './routes/control-center.agrisky'
+import { Route as ControlCenterAerospawnDesignStudioRouteImport } from './routes/control-center.aerospawn-design-studio'
 import { Route as PilotMissionsIndexRouteImport } from './routes/pilot.missions.index'
 import { Route as PilotMissionsIdRouteImport } from './routes/pilot.missions.$id'
 
@@ -78,6 +79,12 @@ const ControlCenterAgriskyRoute = ControlCenterAgriskyRouteImport.update({
   path: '/control-center/agrisky',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ControlCenterAerospawnDesignStudioRoute =
+  ControlCenterAerospawnDesignStudioRouteImport.update({
+    id: '/control-center/aerospawn-design-studio',
+    path: '/control-center/aerospawn-design-studio',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const PilotMissionsIndexRoute = PilotMissionsIndexRouteImport.update({
   id: '/missions/',
   path: '/missions/',
@@ -93,6 +100,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/field': typeof FieldRoute
   '/pilot': typeof PilotRouteWithChildren
+  '/control-center/aerospawn-design-studio': typeof ControlCenterAerospawnDesignStudioRoute
   '/control-center/agrisky': typeof ControlCenterAgriskyRoute
   '/control-center/login': typeof ControlCenterLoginRoute
   '/pilot/login': typeof PilotLoginRoute
@@ -107,6 +115,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/field': typeof FieldRoute
+  '/control-center/aerospawn-design-studio': typeof ControlCenterAerospawnDesignStudioRoute
   '/control-center/agrisky': typeof ControlCenterAgriskyRoute
   '/control-center/login': typeof ControlCenterLoginRoute
   '/pilot/login': typeof PilotLoginRoute
@@ -123,6 +132,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/field': typeof FieldRoute
   '/pilot': typeof PilotRouteWithChildren
+  '/control-center/aerospawn-design-studio': typeof ControlCenterAerospawnDesignStudioRoute
   '/control-center/agrisky': typeof ControlCenterAgriskyRoute
   '/control-center/login': typeof ControlCenterLoginRoute
   '/pilot/login': typeof PilotLoginRoute
@@ -140,6 +150,7 @@ export interface FileRouteTypes {
     | '/'
     | '/field'
     | '/pilot'
+    | '/control-center/aerospawn-design-studio'
     | '/control-center/agrisky'
     | '/control-center/login'
     | '/pilot/login'
@@ -154,6 +165,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/field'
+    | '/control-center/aerospawn-design-studio'
     | '/control-center/agrisky'
     | '/control-center/login'
     | '/pilot/login'
@@ -169,6 +181,7 @@ export interface FileRouteTypes {
     | '/'
     | '/field'
     | '/pilot'
+    | '/control-center/aerospawn-design-studio'
     | '/control-center/agrisky'
     | '/control-center/login'
     | '/pilot/login'
@@ -185,6 +198,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   FieldRoute: typeof FieldRoute
   PilotRoute: typeof PilotRouteWithChildren
+  ControlCenterAerospawnDesignStudioRoute: typeof ControlCenterAerospawnDesignStudioRoute
   ControlCenterAgriskyRoute: typeof ControlCenterAgriskyRoute
   ControlCenterLoginRoute: typeof ControlCenterLoginRoute
   ControlCenterIndexRoute: typeof ControlCenterIndexRoute
@@ -269,6 +283,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ControlCenterAgriskyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/control-center/aerospawn-design-studio': {
+      id: '/control-center/aerospawn-design-studio'
+      path: '/control-center/aerospawn-design-studio'
+      fullPath: '/control-center/aerospawn-design-studio'
+      preLoaderRoute: typeof ControlCenterAerospawnDesignStudioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/pilot/missions/': {
       id: '/pilot/missions/'
       path: '/missions'
@@ -312,6 +333,8 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   FieldRoute: FieldRoute,
   PilotRoute: PilotRouteWithChildren,
+  ControlCenterAerospawnDesignStudioRoute:
+    ControlCenterAerospawnDesignStudioRoute,
   ControlCenterAgriskyRoute: ControlCenterAgriskyRoute,
   ControlCenterLoginRoute: ControlCenterLoginRoute,
   ControlCenterIndexRoute: ControlCenterIndexRoute,
