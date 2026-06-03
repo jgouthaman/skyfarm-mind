@@ -37,6 +37,22 @@ function statusClasses(tone: string) {
 }
 
 function Hub() {
+  const auth = useControlAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!auth.loading && !auth.userId) navigate({ to: "/control-center/login" });
+  }, [auth.loading, auth.userId, navigate]);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    navigate({ to: "/control-center/login" });
+  };
+
+  if (auth.loading || !auth.userId) {
+    return <div className="min-h-screen grid place-items-center text-muted-foreground">Loading…</div>;
+  }
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Toaster richColors position="top-center" theme="dark" />
@@ -50,12 +66,22 @@ function Hub() {
             <span>AeroSpawn <span className="text-muted-foreground font-normal">Control Center</span></span>
           </Link>
           <div className="flex items-center gap-2">
+            {auth.phone && (
+              <span className="hidden sm:inline text-xs text-muted-foreground mr-2">
+                {auth.phone}{auth.isAdmin ? " · admin" : auth.roles[0] ? ` · ${auth.roles[0]}` : ""}
+              </span>
+            )}
+            {auth.isAdmin && (
+              <Button asChild variant="outline" size="sm">
+                <Link to="/control-center/users"><Users className="h-4 w-4 mr-1" /> Users</Link>
+              </Button>
+            )}
             <button className="p-2 rounded-md hover:bg-muted relative" onClick={() => toast("No new notifications")}>
               <Bell className="h-4 w-4" />
               <span className="absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full bg-accent" />
             </button>
-            <Button asChild variant="ghost" size="sm">
-              <Link to="/control-center/login"><LogOut className="h-4 w-4 mr-1" /> Sign out</Link>
+            <Button variant="ghost" size="sm" onClick={handleSignOut}>
+              <LogOut className="h-4 w-4 mr-1" /> Sign out
             </Button>
           </div>
         </div>
