@@ -1,8 +1,11 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { Plane, Leaf, Flame, Truck, GraduationCap, Sparkles, ArrowRight, Bell, LogOut } from "lucide-react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
+import { Plane, Leaf, Flame, Truck, GraduationCap, Sparkles, ArrowRight, Bell, LogOut, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useControlAuth } from "@/hooks/useControlAuth";
 
 export const Route = createFileRoute("/control-center/")({
   head: () => ({ meta: [{ title: "AeroSpawn Control Center" }] }),
