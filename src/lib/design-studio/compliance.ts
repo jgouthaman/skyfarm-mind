@@ -74,13 +74,13 @@ export function classifyDrone(allUpWeightKg: number): { category: DgcaCategory; 
   return { category: "Large", band: "> 150 kg" };
 }
 
-export function buildComplianceReport(project: DroneProject): ComplianceReport {
+export function buildComplianceReport(project: DroneProject, auwOverride?: number): ComplianceReport {
   // Best-effort weight estimate from simulation or requirements.
   const sim = project.simulationResults;
   const params = project.simulationParameters;
   const payload = project.requirements?.payloadWeight ?? 0;
-  const allUp = sim?.totalWeight
-    ?? (params ? (params.frameWeight + payload + (params.batteryCapacity / 200)) : Math.max(0.5, payload + 2));
+  const allUp = auwOverride ?? (sim?.totalWeight
+    ?? (params ? (params.frameWeight + payload + (params.batteryCapacity / 200)) : Math.max(0.5, payload + 2)));
 
   const { category, band } = classifyDrone(allUp);
 
