@@ -58,6 +58,7 @@ export function useCurrentProject(): DroneProject | null {
 
 export const studioActions = {
   create(input: Omit<DroneProject, "id" | "createdAt" | "updatedAt" | "status">): DroneProject {
+    hydrateOnce();
     const now = new Date().toISOString();
     const project: DroneProject = { ...input, id: crypto.randomUUID(), status: "Draft", createdAt: now, updatedAt: now };
     state = { ...state, projects: [project, ...state.projects], selectedId: project.id };
