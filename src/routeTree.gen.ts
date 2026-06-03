@@ -31,6 +31,7 @@ import { Route as ControlCenterAerospawnDesignStudioNewRouteImport } from './rou
 import { Route as ControlCenterAerospawnDesignStudioHistoryRouteImport } from './routes/control-center.aerospawn-design-studio.history'
 import { Route as ControlCenterAerospawnDesignStudioDesignRouteImport } from './routes/control-center.aerospawn-design-studio.design'
 import { Route as ControlCenterAerospawnDesignStudioComponentsRouteImport } from './routes/control-center.aerospawn-design-studio.components'
+import { Route as ControlCenterAerospawnDesignStudioComplianceRouteImport } from './routes/control-center.aerospawn-design-studio.compliance'
 import { Route as ControlCenterAerospawnDesignStudioAdvisorRouteImport } from './routes/control-center.aerospawn-design-studio.advisor'
 
 const PilotRoute = PilotRouteImport.update({
@@ -152,6 +153,12 @@ const ControlCenterAerospawnDesignStudioComponentsRoute =
     path: '/components',
     getParentRoute: () => ControlCenterAerospawnDesignStudioRoute,
   } as any)
+const ControlCenterAerospawnDesignStudioComplianceRoute =
+  ControlCenterAerospawnDesignStudioComplianceRouteImport.update({
+    id: '/compliance',
+    path: '/compliance',
+    getParentRoute: () => ControlCenterAerospawnDesignStudioRoute,
+  } as any)
 const ControlCenterAerospawnDesignStudioAdvisorRoute =
   ControlCenterAerospawnDesignStudioAdvisorRouteImport.update({
     id: '/advisor',
@@ -173,6 +180,7 @@ export interface FileRoutesByFullPath {
   '/control-center/': typeof ControlCenterIndexRoute
   '/pilot/': typeof PilotIndexRoute
   '/control-center/aerospawn-design-studio/advisor': typeof ControlCenterAerospawnDesignStudioAdvisorRoute
+  '/control-center/aerospawn-design-studio/compliance': typeof ControlCenterAerospawnDesignStudioComplianceRoute
   '/control-center/aerospawn-design-studio/components': typeof ControlCenterAerospawnDesignStudioComponentsRoute
   '/control-center/aerospawn-design-studio/design': typeof ControlCenterAerospawnDesignStudioDesignRoute
   '/control-center/aerospawn-design-studio/history': typeof ControlCenterAerospawnDesignStudioHistoryRoute
@@ -196,6 +204,7 @@ export interface FileRoutesByTo {
   '/control-center': typeof ControlCenterIndexRoute
   '/pilot': typeof PilotIndexRoute
   '/control-center/aerospawn-design-studio/advisor': typeof ControlCenterAerospawnDesignStudioAdvisorRoute
+  '/control-center/aerospawn-design-studio/compliance': typeof ControlCenterAerospawnDesignStudioComplianceRoute
   '/control-center/aerospawn-design-studio/components': typeof ControlCenterAerospawnDesignStudioComponentsRoute
   '/control-center/aerospawn-design-studio/design': typeof ControlCenterAerospawnDesignStudioDesignRoute
   '/control-center/aerospawn-design-studio/history': typeof ControlCenterAerospawnDesignStudioHistoryRoute
@@ -222,6 +231,7 @@ export interface FileRoutesById {
   '/control-center/': typeof ControlCenterIndexRoute
   '/pilot/': typeof PilotIndexRoute
   '/control-center/aerospawn-design-studio/advisor': typeof ControlCenterAerospawnDesignStudioAdvisorRoute
+  '/control-center/aerospawn-design-studio/compliance': typeof ControlCenterAerospawnDesignStudioComplianceRoute
   '/control-center/aerospawn-design-studio/components': typeof ControlCenterAerospawnDesignStudioComponentsRoute
   '/control-center/aerospawn-design-studio/design': typeof ControlCenterAerospawnDesignStudioDesignRoute
   '/control-center/aerospawn-design-studio/history': typeof ControlCenterAerospawnDesignStudioHistoryRoute
@@ -249,6 +259,7 @@ export interface FileRouteTypes {
     | '/control-center/'
     | '/pilot/'
     | '/control-center/aerospawn-design-studio/advisor'
+    | '/control-center/aerospawn-design-studio/compliance'
     | '/control-center/aerospawn-design-studio/components'
     | '/control-center/aerospawn-design-studio/design'
     | '/control-center/aerospawn-design-studio/history'
@@ -272,6 +283,7 @@ export interface FileRouteTypes {
     | '/control-center'
     | '/pilot'
     | '/control-center/aerospawn-design-studio/advisor'
+    | '/control-center/aerospawn-design-studio/compliance'
     | '/control-center/aerospawn-design-studio/components'
     | '/control-center/aerospawn-design-studio/design'
     | '/control-center/aerospawn-design-studio/history'
@@ -297,6 +309,7 @@ export interface FileRouteTypes {
     | '/control-center/'
     | '/pilot/'
     | '/control-center/aerospawn-design-studio/advisor'
+    | '/control-center/aerospawn-design-studio/compliance'
     | '/control-center/aerospawn-design-studio/components'
     | '/control-center/aerospawn-design-studio/design'
     | '/control-center/aerospawn-design-studio/history'
@@ -475,6 +488,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ControlCenterAerospawnDesignStudioComponentsRouteImport
       parentRoute: typeof ControlCenterAerospawnDesignStudioRoute
     }
+    '/control-center/aerospawn-design-studio/compliance': {
+      id: '/control-center/aerospawn-design-studio/compliance'
+      path: '/compliance'
+      fullPath: '/control-center/aerospawn-design-studio/compliance'
+      preLoaderRoute: typeof ControlCenterAerospawnDesignStudioComplianceRouteImport
+      parentRoute: typeof ControlCenterAerospawnDesignStudioRoute
+    }
     '/control-center/aerospawn-design-studio/advisor': {
       id: '/control-center/aerospawn-design-studio/advisor'
       path: '/advisor'
@@ -509,6 +529,7 @@ const PilotRouteWithChildren = PilotRoute._addFileChildren(PilotRouteChildren)
 
 interface ControlCenterAerospawnDesignStudioRouteChildren {
   ControlCenterAerospawnDesignStudioAdvisorRoute: typeof ControlCenterAerospawnDesignStudioAdvisorRoute
+  ControlCenterAerospawnDesignStudioComplianceRoute: typeof ControlCenterAerospawnDesignStudioComplianceRoute
   ControlCenterAerospawnDesignStudioComponentsRoute: typeof ControlCenterAerospawnDesignStudioComponentsRoute
   ControlCenterAerospawnDesignStudioDesignRoute: typeof ControlCenterAerospawnDesignStudioDesignRoute
   ControlCenterAerospawnDesignStudioHistoryRoute: typeof ControlCenterAerospawnDesignStudioHistoryRoute
@@ -523,6 +544,8 @@ const ControlCenterAerospawnDesignStudioRouteChildren: ControlCenterAerospawnDes
   {
     ControlCenterAerospawnDesignStudioAdvisorRoute:
       ControlCenterAerospawnDesignStudioAdvisorRoute,
+    ControlCenterAerospawnDesignStudioComplianceRoute:
+      ControlCenterAerospawnDesignStudioComplianceRoute,
     ControlCenterAerospawnDesignStudioComponentsRoute:
       ControlCenterAerospawnDesignStudioComponentsRoute,
     ControlCenterAerospawnDesignStudioDesignRoute:

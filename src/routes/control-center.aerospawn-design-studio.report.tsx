@@ -4,6 +4,7 @@ import { useCurrentProject } from "@/lib/design-studio/store";
 import { Button } from "@/components/ui/button";
 import { Disclaimer } from "@/components/design-studio/sidebar";
 import { riskColor } from "@/lib/design-studio/engine";
+import { buildComplianceReport } from "@/lib/design-studio/compliance";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/control-center/aerospawn-design-studio/report")({
@@ -115,17 +116,41 @@ function Report() {
           </ul>
         </Section>
 
-        <Section title="11. Next Steps">
+        <Section title="11. DGCA & NPNT Compliance">
+          {(() => {
+            const c = buildComplianceReport(project);
+            return (
+              <div className="space-y-2 text-sm">
+                <div className="grid sm:grid-cols-2 gap-2">
+                  <KV k="DGCA category" v={`${c.category} (${c.weightBand})`} />
+                  <KV k="All-up weight" v={`${c.allUpWeightKg.toFixed(2)} kg`} />
+                  <KV k="NPNT compliance" v={c.npntRequired ? "Required" : "Exempt"} />
+                  <KV k="UIN" v={c.uinRequired ? "Required" : "Not required"} />
+                  <KV k="Remote Pilot Certificate" v={c.rpcRequired ? "Required" : "Not required"} />
+                  <KV k="Type Certificate" v={c.typeCertRequired ? "Required" : "Not required"} />
+                  <KV k="Third-party insurance" v={c.thirdPartyInsuranceRequired ? "Mandatory" : "Recommended"} />
+                  <KV k="Altitude ceiling" v={`${c.maxAltitudeFtAgl} ft AGL`} />
+                </div>
+                <ul className="list-disc list-inside text-xs text-muted-foreground space-y-1 pt-2">
+                  {c.notes.map((n, i) => <li key={i}>{n}</li>)}
+                </ul>
+              </div>
+            );
+          })()}
+        </Section>
+
+        <Section title="12. Next Steps">
           <ol className="list-decimal list-inside text-sm text-muted-foreground space-y-1">
             <li>Procure BOM and assemble prototype.</li>
             <li>Conduct hover trial in controlled environment.</li>
             <li>Iterate on motor/propeller pairing based on real telemetry.</li>
             <li>Run mission rehearsal at planned site.</li>
+            <li>File DigitalSky permission and obtain state-level NOC before first outdoor flight.</li>
           </ol>
         </Section>
 
-        <Section title="12. Disclaimer">
-          <p className="text-xs text-muted-foreground">This portal provides design assistance and simulation estimates only. It does not certify that a drone is safe, legal, or flight-ready. Final design must be reviewed by qualified drone engineers and tested under safe and compliant conditions.</p>
+        <Section title="13. Disclaimer">
+          <p className="text-xs text-muted-foreground">This portal provides design assistance, simulation estimates, and indicative regulatory guidance only. It does not certify that a drone is safe, legal, or flight-ready. Final design must be reviewed by qualified drone engineers, and all flights must be cleared via the DGCA DigitalSky portal and relevant state authorities before take-off.</p>
         </Section>
       </article>
 
