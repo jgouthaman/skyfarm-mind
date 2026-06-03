@@ -118,7 +118,7 @@ export const studioActions = {
     if (patch.riskLevel !== undefined) projectFields.risk_level = patch.riskLevel;
     if (patch.advisorMessages !== undefined) projectFields.advisor_messages = patch.advisorMessages;
     projectFields.updated_at = new Date().toISOString();
-    await supabase.from("studio_projects").update(projectFields).eq("id", id);
+    await supabase.from("studio_projects").update(projectFields as any).eq("id", id);
 
     if (patch.requirements !== undefined) {
       await supabase.from("studio_requirements").upsert(
@@ -185,7 +185,7 @@ export const studioActions = {
       .from("studio_simulations").select("*")
       .eq("project_id", projectId)
       .order("created_at", { ascending: false });
-    return (data ?? []) as Array<{
+    return (data ?? []) as unknown as Array<{
       id: string; project_id: string; label: string | null;
       inputs: SimulationParameters; outcome: SimulationResult;
       risk_level: string | null; finalized: boolean; created_at: string;
