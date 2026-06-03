@@ -41,7 +41,7 @@ function Components() {
     const csv = [header, ...rows].map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(",")).join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
     const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob); a.download = `${project.projectName}-BOM.csv`; a.click();
+    a.href = URL.createObjectURL(blob); a.download = `${project!.projectName}-BOM.csv`; a.click();
     toast.success("BOM exported as CSV");
   }
 

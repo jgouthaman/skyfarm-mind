@@ -56,7 +56,7 @@ function RequirementsWizard() {
   function generate() {
     const design = generateDroneDesign(req, purpose);
     const components = generateComponentList(design, req, purpose);
-    studioActions.update(project.id, {
+    studioActions.update(project!.id, {
       requirements: req, recommendedDesign: design, componentList: components,
       riskLevel: design.riskLevel, status: "Designed",
     });
