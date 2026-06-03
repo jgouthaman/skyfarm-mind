@@ -23,11 +23,46 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "AeroSpawn — Engineering the future of aerial intelligence" },
-      { name: "description", content: "AeroSpawn builds AI-powered drone systems, custom UAVs, and aerial intelligence solutions for agriculture (AgriSky), infrastructure, mapping, surveillance, and industrial applications." },
+      { name: "description", content: "AeroSpawn builds AI-powered drone systems, custom UAVs, and aerial intelligence for agriculture, infrastructure, mapping, and surveillance." },
       { property: "og:title", content: "AeroSpawn — Aerospace & Drone Intelligence" },
       { property: "og:description", content: "Custom UAV engineering and AI aerial analytics across agriculture, infrastructure, mapping, surveillance and R&D." },
       { property: "og:image", content: heroImg },
       { property: "og:type", content: "website" },
+    ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          name: "AeroSpawn",
+          url: "https://aerospawn.com",
+          logo: "https://aerospawn.com/app-icon.png",
+          description: "AeroSpawn builds AI-powered drone systems, custom UAVs, and aerial intelligence solutions.",
+        }),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Service",
+          name: "AgriSky",
+          serviceType: "Agriculture Drone Intelligence",
+          provider: { "@type": "Organization", name: "AeroSpawn" },
+          description: "Drone-based farm monitoring, crop health analysis, irrigation insights, and precision farming.",
+        }),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Service",
+          name: "GuardSky",
+          serviceType: "Aerial Surveillance & Early Fire Response",
+          provider: { "@type": "Organization", name: "AeroSpawn" },
+          description: "Drone-based surveillance, smoke and fire detection, and rapid first-response payload deployment.",
+        }),
+      },
     ],
   }),
   component: Landing,
