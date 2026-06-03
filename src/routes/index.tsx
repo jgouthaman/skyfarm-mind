@@ -507,6 +507,7 @@ function Landing() {
           </Card>
         </div>
       </section>
+      </main>
 
       {/* FOOTER */}
       <footer className="border-t border-border bg-background">
