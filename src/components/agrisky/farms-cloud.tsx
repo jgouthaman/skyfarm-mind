@@ -155,7 +155,7 @@ function FarmDetail({ farm, onBack }: { farm: Farm; onBack: () => void }) {
       .channel(`farm-uploads-${farm.id}`)
       .on(
         "postgres_changes",
-        { event: "INSERT", schema: "public", table: "field_uploads", filter: `farm_id=eq.${farm.id}` },
+        { event: "INSERT", schema: "public", table: "agrisky_field_uploads", filter: `farm_id=eq.${farm.id}` },
         () => {
           toast.success("📸 New photo synced from the field");
           refetchUploads();
@@ -163,7 +163,7 @@ function FarmDetail({ farm, onBack }: { farm: Farm; onBack: () => void }) {
       )
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "missions", filter: `farm_id=eq.${farm.id}` },
+        { event: "*", schema: "public", table: "agrisky_missions", filter: `farm_id=eq.${farm.id}` },
         () => refetchMissions()
       )
       .subscribe();

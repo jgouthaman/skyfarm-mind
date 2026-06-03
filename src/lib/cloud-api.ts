@@ -67,7 +67,7 @@ export const SERVICES = [
 // ---------- Pilots ----------
 export async function listPilots() {
   const { data, error } = await supabase
-    .from("pilots")
+    .from("agrisky_pilots")
     .select("*")
     .order("created_at", { ascending: false });
   if (error) throw error;
@@ -77,7 +77,7 @@ export async function listPilots() {
 export async function createPilot(input: { name: string; phone: string }) {
   const phone = input.phone.replace(/\D/g, "").slice(-10);
   const { data, error } = await supabase
-    .from("pilots")
+    .from("agrisky_pilots")
     .insert({ name: input.name, phone, status: "active" })
     .select()
     .single();
@@ -88,7 +88,7 @@ export async function createPilot(input: { name: string; phone: string }) {
 export async function getPilotByPhone(phone: string) {
   const clean = phone.replace(/\D/g, "").slice(-10);
   const { data, error } = await supabase
-    .from("pilots")
+    .from("agrisky_pilots")
     .select("*")
     .eq("phone", clean)
     .maybeSingle();
@@ -99,7 +99,7 @@ export async function getPilotByPhone(phone: string) {
 // ---------- Farms ----------
 export async function listFarms() {
   const { data, error } = await supabase
-    .from("farms")
+    .from("agrisky_farms")
     .select("*")
     .order("created_at", { ascending: false });
   if (error) throw error;
@@ -108,7 +108,7 @@ export async function listFarms() {
 
 export async function getFarm(id: string) {
   const { data, error } = await supabase
-    .from("farms")
+    .from("agrisky_farms")
     .select("*")
     .eq("id", id)
     .maybeSingle();
@@ -125,7 +125,7 @@ export async function createFarm(input: {
   service_needed?: string;
 }) {
   const { data, error } = await supabase
-    .from("farms")
+    .from("agrisky_farms")
     .insert(input)
     .select()
     .single();
@@ -136,7 +136,7 @@ export async function createFarm(input: {
 // ---------- Missions ----------
 export async function listMissions() {
   const { data, error } = await supabase
-    .from("missions")
+    .from("agrisky_missions")
     .select("*")
     .order("created_at", { ascending: false });
   if (error) throw error;
@@ -145,7 +145,7 @@ export async function listMissions() {
 
 export async function listMissionsForPilot(pilotId: string) {
   const { data, error } = await supabase
-    .from("missions")
+    .from("agrisky_missions")
     .select("*")
     .eq("pilot_id", pilotId)
     .order("created_at", { ascending: false });
@@ -155,7 +155,7 @@ export async function listMissionsForPilot(pilotId: string) {
 
 export async function listMissionsForFarm(farmId: string) {
   const { data, error } = await supabase
-    .from("missions")
+    .from("agrisky_missions")
     .select("*")
     .eq("farm_id", farmId)
     .order("created_at", { ascending: false });
@@ -172,7 +172,7 @@ export async function createMission(input: {
   scheduled_at?: string | null;
 }) {
   const { data, error } = await supabase
-    .from("missions")
+    .from("agrisky_missions")
     .insert({ ...input, status: "assigned" })
     .select()
     .single();
@@ -183,7 +183,7 @@ export async function createMission(input: {
 // ---------- Drones ----------
 export async function listDrones() {
   const { data, error } = await supabase
-    .from("drones")
+    .from("agrisky_drones")
     .select("*")
     .order("created_at", { ascending: false });
   if (error) throw error;
@@ -198,7 +198,7 @@ export async function createDrone(input: {
   notes?: string;
 }) {
   const { data, error } = await supabase
-    .from("drones")
+    .from("agrisky_drones")
     .insert({ ...input, status: "available" })
     .select()
     .single();
@@ -208,7 +208,7 @@ export async function createDrone(input: {
 
 export async function listMissionsForDrone(droneId: string) {
   const { data, error } = await supabase
-    .from("missions")
+    .from("agrisky_missions")
     .select("*")
     .eq("drone_id", droneId)
     .order("scheduled_at", { ascending: true, nullsFirst: false });
@@ -220,7 +220,7 @@ export async function listMissionsForDrone(droneId: string) {
 // ---------- Field uploads ----------
 export async function listFieldUploadsForFarm(farmId: string) {
   const { data, error } = await supabase
-    .from("field_uploads")
+    .from("agrisky_field_uploads")
     .select("*")
     .eq("farm_id", farmId)
     .order("captured_at", { ascending: false });
@@ -230,7 +230,7 @@ export async function listFieldUploadsForFarm(farmId: string) {
 
 export async function listAllRecentUploads(limit = 24) {
   const { data, error } = await supabase
-    .from("field_uploads")
+    .from("agrisky_field_uploads")
     .select("*")
     .order("captured_at", { ascending: false })
     .limit(limit);
@@ -262,7 +262,7 @@ export async function uploadFieldPhoto(opts: {
   const publicUrl = pub.publicUrl;
 
   const { data, error } = await supabase
-    .from("field_uploads")
+    .from("agrisky_field_uploads")
     .insert({
       mission_id: opts.missionId,
       farm_id: opts.farmId,
@@ -279,7 +279,7 @@ export async function uploadFieldPhoto(opts: {
 
   // Mark mission in_progress on first upload
   await supabase
-    .from("missions")
+    .from("agrisky_missions")
     .update({ status: "in_progress" })
     .eq("id", opts.missionId)
     .eq("status", "assigned");
