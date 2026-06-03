@@ -455,7 +455,7 @@ export type Database = {
           {
             foreignKeyName: "studio_components_project_id_fkey"
             columns: ["project_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "studio_projects"
             referencedColumns: ["id"]
           },
@@ -484,7 +484,7 @@ export type Database = {
           {
             foreignKeyName: "studio_designs_project_id_fkey"
             columns: ["project_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "studio_projects"
             referencedColumns: ["id"]
           },
@@ -492,6 +492,7 @@ export type Database = {
       }
       studio_projects: {
         Row: {
+          advisor_messages: Json
           created_at: string
           id: string
           project_name: string
@@ -503,6 +504,7 @@ export type Database = {
           vertical: string
         }
         Insert: {
+          advisor_messages?: Json
           created_at?: string
           id?: string
           project_name: string
@@ -514,6 +516,7 @@ export type Database = {
           vertical: string
         }
         Update: {
+          advisor_messages?: Json
           created_at?: string
           id?: string
           project_name?: string
@@ -584,7 +587,7 @@ export type Database = {
           {
             foreignKeyName: "studio_requirements_project_id_fkey"
             columns: ["project_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "studio_projects"
             referencedColumns: ["id"]
           },
