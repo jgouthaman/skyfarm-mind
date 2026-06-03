@@ -73,7 +73,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
       { title: "AeroSpawn — Engineering the future of aerial intelligence" },
-      { name: "description", content: "AeroSpawn builds AI-powered drone systems, custom UAVs, and aerial intelligence solutions across agriculture (AgriSky), infrastructure, mapping, surveillance, and R&D." },
+      { name: "description", content: "AeroSpawn builds AI-powered drone systems, custom UAVs, and aerial intelligence for agriculture, infrastructure, mapping, and surveillance." },
       { name: "author", content: "AeroSpawn" },
       { name: "theme-color", content: "#0a0f1c" },
       // iOS Add to Home Screen
