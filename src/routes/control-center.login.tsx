@@ -18,6 +18,7 @@ export const Route = createFileRoute("/control-center/login")({
       { name: "description", content: "Secure login for AeroSpawn Control Center. Manage drone operations, aerial intelligence, and farm workflows." },
       { property: "og:title", content: "AeroSpawn Control Center — Login" },
       { property: "og:description", content: "Secure login for AeroSpawn Control Center. Manage drone operations, aerial intelligence, and farm workflows." },
+      { property: "og:url", content: "/control-center/login" },
     ],
     links: [
       { rel: "canonical", href: "/control-center/login" },
