@@ -132,7 +132,7 @@ function AgriSky() {
             </Select>
           </div>
           <div className="flex items-center gap-2">
-            <button className="p-2 rounded-md hover:bg-muted relative" onClick={() => toast("3 new activities")}>
+            <button className="p-2 rounded-md hover:bg-muted relative" onClick={() => toast("3 new activities")} aria-label="Notifications">
               <Bell className="h-4 w-4" />
               <span className="absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full bg-accent" />
             </button>

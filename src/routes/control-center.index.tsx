@@ -86,7 +86,7 @@ function Hub() {
                 <Link to="/control-center/users"><Users className="h-4 w-4 mr-1" /> Users</Link>
               </Button>
             )}
-            <button className="p-2 rounded-md hover:bg-muted relative" onClick={() => toast("No new notifications")}>
+            <button className="p-2 rounded-md hover:bg-muted relative" onClick={() => toast("No new notifications")} aria-label="Notifications">
               <Bell className="h-4 w-4" />
               <span className="absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full bg-accent" />
             </button>
@@ -116,7 +116,7 @@ function Hub() {
                   </span>
                   <span className={`text-xs px-2.5 py-1 rounded-full border ${statusClasses(v.tone)}`}>{v.status}</span>
                 </div>
-                <h3 className="mt-4 text-lg font-semibold">{v.name}</h3>
+                <h2 className="mt-4 text-lg font-semibold">{v.name}</h2>
                 <p className="text-xs text-muted-foreground">{v.tag}</p>
                 <p className="mt-3 text-sm text-muted-foreground flex-1">{v.desc}</p>
                 <div className="mt-5">
