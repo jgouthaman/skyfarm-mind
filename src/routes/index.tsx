@@ -22,12 +22,13 @@ import heroImg from "@/assets/aerospawn-hero.jpg";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "AeroSpawn — Engineering the future of aerial intelligence" },
-      { name: "description", content: "AeroSpawn builds AI-powered drone systems, custom UAVs, and aerial intelligence for agriculture, infrastructure, mapping, and surveillance." },
       { property: "og:title", content: "AeroSpawn — Aerospace & Drone Intelligence" },
       { property: "og:description", content: "Custom UAV engineering and AI aerial analytics across agriculture, infrastructure, mapping, surveillance and R&D." },
       { property: "og:image", content: heroImg },
       { property: "og:type", content: "website" },
+    ],
+    links: [
+      { rel: "canonical", href: "/" },
     ],
     scripts: [
       {

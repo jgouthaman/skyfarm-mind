@@ -11,7 +11,17 @@ import { useControlAuth } from "@/hooks/useControlAuth";
 import { createControlUser, listControlUsers, setUserPassword } from "@/lib/admin.functions";
 
 export const Route = createFileRoute("/control-center/users")({
-  head: () => ({ meta: [{ title: "AeroSpawn Control Center — Users" }] }),
+  head: () => ({
+    meta: [
+      { title: "AeroSpawn Control Center — Users" },
+      { name: "description", content: "Manage AeroSpawn Control Center users. Create SME and admin accounts, assign roles, and reset passwords." },
+      { property: "og:title", content: "AeroSpawn Control Center — Users" },
+      { property: "og:description", content: "Manage AeroSpawn Control Center users. Create SME and admin accounts, assign roles, and reset passwords." },
+    ],
+    links: [
+      { rel: "canonical", href: "/control-center/users" },
+    ],
+  }),
   component: UsersPage,
 });
 

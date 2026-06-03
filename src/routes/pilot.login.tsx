@@ -8,7 +8,17 @@ import { pilotStore } from "@/lib/pilot-store";
 import { getPilotByPhone } from "@/lib/cloud-api";
 
 export const Route = createFileRoute("/pilot/login")({
-  head: () => ({ meta: [{ title: "AgriSky Pilot — Login" }] }),
+  head: () => ({
+    meta: [
+      { title: "AgriSky Pilot — Login" },
+      { name: "description", content: "AgriSky pilot login. Verify your mobile to access farm missions, aerial surveys, and field operations." },
+      { property: "og:title", content: "AgriSky Pilot — Login" },
+      { property: "og:description", content: "AgriSky pilot login. Verify your mobile to access farm missions, aerial surveys, and field operations." },
+    ],
+    links: [
+      { rel: "canonical", href: "/pilot/login" },
+    ],
+  }),
   component: PilotLogin,
 });
 

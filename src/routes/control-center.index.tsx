@@ -8,7 +8,17 @@ import { supabase } from "@/integrations/supabase/client";
 import { useControlAuth } from "@/hooks/useControlAuth";
 
 export const Route = createFileRoute("/control-center/")({
-  head: () => ({ meta: [{ title: "AeroSpawn Control Center" }] }),
+  head: () => ({
+    meta: [
+      { title: "AeroSpawn Control Center" },
+      { name: "description", content: "AeroSpawn Control Center hub. Access AgriSky, GuardSky, and vertical dashboards to manage drone operations." },
+      { property: "og:title", content: "AeroSpawn Control Center" },
+      { property: "og:description", content: "AeroSpawn Control Center hub. Access AgriSky, GuardSky, and vertical dashboards to manage drone operations." },
+    ],
+    links: [
+      { rel: "canonical", href: "/control-center" },
+    ],
+  }),
   component: Hub,
 });
 

@@ -21,7 +21,17 @@ import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/control-center/agrisky")({
-  head: () => ({ meta: [{ title: "AgriSky Control Center — AeroSpawn" }] }),
+  head: () => ({
+    meta: [
+      { title: "AgriSky Control Center — AeroSpawn" },
+      { name: "description", content: "AgriSky Control Center — manage farm surveys, crop monitoring, spraying missions, and drone operations from one dashboard." },
+      { property: "og:title", content: "AgriSky Control Center — AeroSpawn" },
+      { property: "og:description", content: "AgriSky Control Center — manage farm surveys, crop monitoring, spraying missions, and drone operations from one dashboard." },
+    ],
+    links: [
+      { rel: "canonical", href: "/control-center/agrisky" },
+    ],
+  }),
   component: AgriSky,
 });
 

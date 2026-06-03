@@ -15,7 +15,17 @@ import {
 } from "@/lib/cloud-api";
 
 export const Route = createFileRoute("/field")({
-  head: () => ({ meta: [{ title: "AgriSky Field — Pilot" }] }),
+  head: () => ({
+    meta: [
+      { title: "AgriSky Field — Pilot" },
+      { name: "description", content: "AgriSky Field for pilots. View missions, capture GPS-tagged farm photos, and sync data to the Control Center." },
+      { property: "og:title", content: "AgriSky Field — Pilot" },
+      { property: "og:description", content: "AgriSky Field for pilots. View missions, capture GPS-tagged farm photos, and sync data to the Control Center." },
+    ],
+    links: [
+      { rel: "canonical", href: "/field" },
+    ],
+  }),
   component: FieldApp,
 });
 
