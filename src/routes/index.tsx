@@ -29,6 +29,7 @@ export const Route = createFileRoute("/")({
     ],
     links: [
       { rel: "canonical", href: "/" },
+      { rel: "preload", as: "image", href: heroImg, fetchpriority: "high" },
     ],
     scripts: [
       {
@@ -185,7 +186,7 @@ function Landing() {
           </div>
           <div className="lg:col-span-6 relative">
             <div className="relative rounded-3xl overflow-hidden shadow-soft border border-border/60">
-              <img src={heroImg} alt="AeroSpawn drone with AI overlays across agriculture, infrastructure and solar terrain" width={1920} height={1080} className="w-full h-auto" />
+              <img src={heroImg} alt="AeroSpawn drone with AI overlays across agriculture, infrastructure and solar terrain" width={1920} height={1080} fetchPriority="high" decoding="async" className="w-full h-auto" />
               <div className="absolute inset-0 bg-gradient-to-tr from-background/60 via-transparent to-transparent" />
             </div>
             <FloatingCard className="absolute -left-4 top-8 hidden sm:block" icon={<Activity className="h-4 w-4 text-accent" />} title="Crop Health" value="NDVI 0.78" tone="agri" />
