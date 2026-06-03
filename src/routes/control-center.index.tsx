@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Plane, Leaf, Flame, Building2, Map as MapIcon, GraduationCap, ArrowRight, Bell, LogOut } from "lucide-react";
+import { Plane, Leaf, Flame, Truck, GraduationCap, Sparkles, ArrowRight, Bell, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
@@ -10,21 +10,21 @@ export const Route = createFileRoute("/control-center/")({
 });
 
 const verticals = [
-  { id: "agrisky", name: "AgriSky", tag: "Agriculture Drone Intelligence", status: "Active", tone: "active",
+  { id: "agrisky", name: "AgriSky Control Center", tag: "Agriculture Drone Intelligence", status: "Active", tone: "active",
     desc: "Farm aerial survey, boundary mapping, crop zone monitoring, fertilizer/input loading, spraying mission view, and activity logs.",
     icon: Leaf, cta: "Open AgriSky", to: "/control-center/agrisky" as const },
-  { id: "guardsky", name: "GuardSky", tag: "Aerial Surveillance & Early Fire Response", status: "Prototype", tone: "proto",
+  { id: "guardsky", name: "GuardSky Control Center", tag: "Aerial Surveillance & Early Fire Response", status: "Prototype", tone: "proto",
     desc: "Live surveillance, smoke/fire detection support, alerting, and first-response payload deployment monitoring.",
     icon: Flame, cta: "Open GuardSky" },
-  { id: "infrasky", name: "InfraSky", tag: "Infrastructure Inspection", status: "Coming Soon", tone: "soon",
-    desc: "Inspection workflows for roads, bridges, towers, solar farms, buildings, and industrial assets.",
-    icon: Building2, cta: "Coming Soon" },
-  { id: "geosky", name: "GeoSky", tag: "Mapping & Survey Intelligence", status: "Coming Soon", tone: "soon",
-    desc: "Aerial mapping, land survey, GIS data capture, and terrain intelligence.",
-    icon: MapIcon, cta: "Coming Soon" },
-  { id: "academy", name: "AeroSpawn Academy", tag: "Drone Training & Certification Support", status: "Coming Soon", tone: "soon",
-    desc: "Drone pilot training, mission planning, agri-drone operations, mapping basics, and certification support.",
+  { id: "deliverysky", name: "DeliverySky Control Center", tag: "Autonomous Payload Delivery", status: "Coming Soon", tone: "soon",
+    desc: "Route planning, payload tracking, and last-mile drone delivery operations.",
+    icon: Truck, cta: "Coming Soon" },
+  { id: "trainsky", name: "TrainSky Control Center", tag: "Drone Pilot Training & Certification", status: "Coming Soon", tone: "soon",
+    desc: "Structured drone pilot training, mission rehearsal, and certification tracking.",
     icon: GraduationCap, cta: "Coming Soon" },
+  { id: "design-studio", name: "AeroSpawn Design Studio", tag: "AI-Powered Drone Design Studio", status: "New", tone: "active",
+    desc: "AI-powered drone design, component generation, simulation, and engineering advisory studio.",
+    icon: Sparkles, cta: "Open Design Studio", to: "/control-center/aerospawn-design-studio" as const },
 ];
 
 function statusClasses(tone: string) {
