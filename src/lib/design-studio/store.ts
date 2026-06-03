@@ -87,6 +87,7 @@ export const studioActions = {
     persist(); emit();
   },
   seedDemoIfEmpty() {
+    hydrateOnce();
     if (state.projects.length > 0) return;
     const demo: DroneProject[] = [
       { id: crypto.randomUUID(), projectName: "AgriSky 10L Spraying Drone", vertical: "AgriSky", purpose: "Agriculture spraying", userType: "Farmer", status: "Designed", riskLevel: "Safe", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
