@@ -23,11 +23,25 @@ export interface Mission {
   id: string;
   farm_id: string;
   pilot_id: string | null;
+  drone_id: string | null;
   service: string;
+  status: string;
+  notes: string | null;
+  scheduled_at: string | null;
+  created_at: string;
+}
+
+export interface Drone {
+  id: string;
+  name: string;
+  model: string | null;
+  serial_no: string | null;
+  capacity_litres: number | null;
   status: string;
   notes: string | null;
   created_at: string;
 }
+
 
 export interface FieldUpload {
   id: string;
