@@ -16,7 +16,14 @@ function load(): State {
 }
 
 let state: State = { projects: [], selectedId: null };
+let hydrated = false;
 const listeners = new Set<() => void>();
+
+function hydrateOnce() {
+  if (hydrated || typeof window === "undefined") return;
+  hydrated = true;
+  state = load();
+}
 
 function persist() {
   if (typeof window === "undefined") return;
@@ -26,19 +33,23 @@ function persist() {
 }
 function emit() { listeners.forEach((l) => l()); }
 
-function subscribe(l: () => void) { listeners.add(l); return () => listeners.delete(l); }
+function subscribe(l: () => void) {
+  hydrateOnce();
+  listeners.add(l);
+  return () => listeners.delete(l);
+}
 function getSnap(): State { return state; }
 const empty: State = { projects: [], selectedId: null };
 function getServer(): State { return empty; }
 
-let hydrated = false;
 export function useStudioStore() {
   const s = useSyncExternalStore(subscribe, getSnap, getServer);
   useEffect(() => {
-    if (!hydrated) { hydrated = true; state = load(); emit(); }
+    if (!hydrated) { hydrateOnce(); emit(); }
   }, []);
   return s;
 }
+
 
 export function useCurrentProject(): DroneProject | null {
   const s = useStudioStore();
@@ -47,6 +58,7 @@ export function useCurrentProject(): DroneProject | null {
 
 export const studioActions = {
   create(input: Omit<DroneProject, "id" | "createdAt" | "updatedAt" | "status">): DroneProject {
+    hydrateOnce();
     const now = new Date().toISOString();
     const project: DroneProject = { ...input, id: crypto.randomUUID(), status: "Draft", createdAt: now, updatedAt: now };
     state = { ...state, projects: [project, ...state.projects], selectedId: project.id };
@@ -75,6 +87,7 @@ export const studioActions = {
     persist(); emit();
   },
   seedDemoIfEmpty() {
+    hydrateOnce();
     if (state.projects.length > 0) return;
     const demo: DroneProject[] = [
       { id: crypto.randomUUID(), projectName: "AgriSky 10L Spraying Drone", vertical: "AgriSky", purpose: "Agriculture spraying", userType: "Farmer", status: "Designed", riskLevel: "Safe", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
