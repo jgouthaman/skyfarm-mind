@@ -17,6 +17,7 @@ export const Route = createFileRoute("/control-center/users")({
       { name: "description", content: "Manage AeroSpawn Control Center users. Create SME and admin accounts, assign roles, and reset passwords." },
       { property: "og:title", content: "AeroSpawn Control Center — Users" },
       { property: "og:description", content: "Manage AeroSpawn Control Center users. Create SME and admin accounts, assign roles, and reset passwords." },
+      { property: "og:url", content: "/control-center/users" },
     ],
     links: [
       { rel: "canonical", href: "/control-center/users" },
