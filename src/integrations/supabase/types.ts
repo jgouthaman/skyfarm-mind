@@ -14,6 +14,215 @@ export type Database = {
   }
   public: {
     Tables: {
+      agrisky_drones: {
+        Row: {
+          capacity_litres: number | null
+          created_at: string
+          id: string
+          model: string | null
+          name: string
+          notes: string | null
+          serial_no: string | null
+          status: string
+        }
+        Insert: {
+          capacity_litres?: number | null
+          created_at?: string
+          id?: string
+          model?: string | null
+          name: string
+          notes?: string | null
+          serial_no?: string | null
+          status?: string
+        }
+        Update: {
+          capacity_litres?: number | null
+          created_at?: string
+          id?: string
+          model?: string | null
+          name?: string
+          notes?: string | null
+          serial_no?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
+      agrisky_farms: {
+        Row: {
+          created_at: string
+          crop: string | null
+          farmer: string | null
+          id: string
+          location: string | null
+          name: string
+          service_needed: string | null
+          size_acres: number | null
+        }
+        Insert: {
+          created_at?: string
+          crop?: string | null
+          farmer?: string | null
+          id?: string
+          location?: string | null
+          name: string
+          service_needed?: string | null
+          size_acres?: number | null
+        }
+        Update: {
+          created_at?: string
+          crop?: string | null
+          farmer?: string | null
+          id?: string
+          location?: string | null
+          name?: string
+          service_needed?: string | null
+          size_acres?: number | null
+        }
+        Relationships: []
+      }
+      agrisky_field_uploads: {
+        Row: {
+          caption: string | null
+          captured_at: string
+          created_at: string
+          farm_id: string | null
+          id: string
+          image_url: string
+          lat: number | null
+          lng: number | null
+          mission_id: string | null
+          pilot_id: string | null
+        }
+        Insert: {
+          caption?: string | null
+          captured_at?: string
+          created_at?: string
+          farm_id?: string | null
+          id?: string
+          image_url: string
+          lat?: number | null
+          lng?: number | null
+          mission_id?: string | null
+          pilot_id?: string | null
+        }
+        Update: {
+          caption?: string | null
+          captured_at?: string
+          created_at?: string
+          farm_id?: string | null
+          id?: string
+          image_url?: string
+          lat?: number | null
+          lng?: number | null
+          mission_id?: string | null
+          pilot_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agrisky_field_uploads_farm_id_fkey"
+            columns: ["farm_id"]
+            isOneToOne: false
+            referencedRelation: "agrisky_farms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agrisky_field_uploads_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "agrisky_missions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agrisky_field_uploads_pilot_id_fkey"
+            columns: ["pilot_id"]
+            isOneToOne: false
+            referencedRelation: "agrisky_pilots"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agrisky_missions: {
+        Row: {
+          created_at: string
+          drone_id: string | null
+          farm_id: string
+          id: string
+          notes: string | null
+          pilot_id: string | null
+          scheduled_at: string | null
+          service: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          drone_id?: string | null
+          farm_id: string
+          id?: string
+          notes?: string | null
+          pilot_id?: string | null
+          scheduled_at?: string | null
+          service: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          drone_id?: string | null
+          farm_id?: string
+          id?: string
+          notes?: string | null
+          pilot_id?: string | null
+          scheduled_at?: string | null
+          service?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agrisky_missions_drone_id_fkey"
+            columns: ["drone_id"]
+            isOneToOne: false
+            referencedRelation: "agrisky_drones"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agrisky_missions_farm_id_fkey"
+            columns: ["farm_id"]
+            isOneToOne: false
+            referencedRelation: "agrisky_farms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agrisky_missions_pilot_id_fkey"
+            columns: ["pilot_id"]
+            isOneToOne: false
+            referencedRelation: "agrisky_pilots"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agrisky_pilots: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          phone: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          phone: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          phone?: string
+          status?: string
+        }
+        Relationships: []
+      }
       drones: {
         Row: {
           capacity_litres: number | null
@@ -222,6 +431,205 @@ export type Database = {
           status?: string
         }
         Relationships: []
+      }
+      studio_components: {
+        Row: {
+          created_at: string
+          id: string
+          payload: Json
+          project_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          payload?: Json
+          project_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          payload?: Json
+          project_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "studio_components_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "studio_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      studio_designs: {
+        Row: {
+          created_at: string
+          id: string
+          payload: Json
+          project_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          payload?: Json
+          project_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          payload?: Json
+          project_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "studio_designs_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "studio_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      studio_projects: {
+        Row: {
+          created_at: string
+          id: string
+          project_name: string
+          purpose: string | null
+          risk_level: string | null
+          status: string
+          updated_at: string
+          user_type: string | null
+          vertical: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          project_name: string
+          purpose?: string | null
+          risk_level?: string | null
+          status?: string
+          updated_at?: string
+          user_type?: string | null
+          vertical: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          project_name?: string
+          purpose?: string | null
+          risk_level?: string | null
+          status?: string
+          updated_at?: string
+          user_type?: string | null
+          vertical?: string
+        }
+        Relationships: []
+      }
+      studio_reports: {
+        Row: {
+          created_at: string
+          id: string
+          project_id: string
+          snapshot: Json
+          title: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          project_id: string
+          snapshot?: Json
+          title?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          project_id?: string
+          snapshot?: Json
+          title?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "studio_reports_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "studio_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      studio_requirements: {
+        Row: {
+          created_at: string
+          id: string
+          payload: Json
+          project_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          payload?: Json
+          project_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          payload?: Json
+          project_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "studio_requirements_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "studio_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      studio_simulations: {
+        Row: {
+          created_at: string
+          finalized: boolean
+          id: string
+          inputs: Json
+          label: string | null
+          outcome: Json
+          project_id: string
+          risk_level: string | null
+        }
+        Insert: {
+          created_at?: string
+          finalized?: boolean
+          id?: string
+          inputs?: Json
+          label?: string | null
+          outcome?: Json
+          project_id: string
+          risk_level?: string | null
+        }
+        Update: {
+          created_at?: string
+          finalized?: boolean
+          id?: string
+          inputs?: Json
+          label?: string | null
+          outcome?: Json
+          project_id?: string
+          risk_level?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "studio_simulations_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "studio_projects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
