@@ -138,6 +138,8 @@ function AgriSky() {
           {tab === "overview" && <Overview />}
           {tab === "farms" && <FarmsCloudSection />}
           {tab === "pilots" && <PilotsSection />}
+          {tab === "drones" && <DronesSection />}
+
           {tab === "survey" && <Survey />}
           {tab === "boundary" && <Boundary />}
           {tab === "input" && <InputLoading />}
