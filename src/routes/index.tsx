@@ -135,6 +135,7 @@ function Landing() {
         )}
       </header>
 
+      <main>
       {/* HERO */}
       <section className="relative pt-28 lg:pt-36 pb-20 overflow-hidden bg-gradient-hero">
         <div className="absolute inset-0 grid-bg opacity-40 pointer-events-none" />
