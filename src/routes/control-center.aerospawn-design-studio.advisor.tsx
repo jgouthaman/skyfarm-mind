@@ -101,6 +101,7 @@ function Advisor() {
           ))}
         </div>
       </div>
+      <StudioStepNav />
     </div>
   );
 }

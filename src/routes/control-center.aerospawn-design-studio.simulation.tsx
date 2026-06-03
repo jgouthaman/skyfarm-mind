@@ -141,6 +141,7 @@ function SimulationLab() {
           <Disclaimer />
         </div>
       </div>
+      <StudioStepNav />
     </div>
   );
 }

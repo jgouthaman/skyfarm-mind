@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { StudioStepNav } from "@/components/design-studio/step-nav";
 import { useMemo, useState } from "react";
 import { useCurrentProject } from "@/lib/design-studio/store";
 import { Button } from "@/components/ui/button";
@@ -88,6 +89,7 @@ function Components() {
           </table>
         </div>
       </div>
+      <StudioStepNav />
     </div>
   );
 }

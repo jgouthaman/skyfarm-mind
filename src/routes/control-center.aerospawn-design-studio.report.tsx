@@ -129,6 +129,7 @@ function Report() {
       </article>
 
       <div className="print:hidden"><Disclaimer /></div>
+      <div className="print:hidden"><StudioStepNav /></div>
     </div>
   );
 }
