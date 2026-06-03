@@ -26,6 +26,7 @@ export const Route = createFileRoute("/")({
       { property: "og:description", content: "Custom UAV engineering and AI aerial analytics across agriculture, infrastructure, mapping, surveillance and R&D." },
       { property: "og:image", content: heroImg },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: "/" },
     ],
     links: [
       { rel: "canonical", href: "/" },

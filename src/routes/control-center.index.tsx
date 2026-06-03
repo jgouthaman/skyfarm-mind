@@ -14,6 +14,7 @@ export const Route = createFileRoute("/control-center/")({
       { name: "description", content: "AeroSpawn Control Center hub. Access AgriSky, GuardSky, and vertical dashboards to manage drone operations." },
       { property: "og:title", content: "AeroSpawn Control Center" },
       { property: "og:description", content: "AeroSpawn Control Center hub. Access AgriSky, GuardSky, and vertical dashboards to manage drone operations." },
+      { property: "og:url", content: "/control-center" },
     ],
     links: [
       { rel: "canonical", href: "/control-center" },
