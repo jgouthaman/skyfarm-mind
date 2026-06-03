@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      drones: {
+        Row: {
+          capacity_litres: number | null
+          created_at: string
+          id: string
+          model: string | null
+          name: string
+          notes: string | null
+          serial_no: string | null
+          status: string
+        }
+        Insert: {
+          capacity_litres?: number | null
+          created_at?: string
+          id?: string
+          model?: string | null
+          name: string
+          notes?: string | null
+          serial_no?: string | null
+          status?: string
+        }
+        Update: {
+          capacity_litres?: number | null
+          created_at?: string
+          id?: string
+          model?: string | null
+          name?: string
+          notes?: string | null
+          serial_no?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
       farms: {
         Row: {
           created_at: string
@@ -111,32 +144,45 @@ export type Database = {
       missions: {
         Row: {
           created_at: string
+          drone_id: string | null
           farm_id: string
           id: string
           notes: string | null
           pilot_id: string | null
+          scheduled_at: string | null
           service: string
           status: string
         }
         Insert: {
           created_at?: string
+          drone_id?: string | null
           farm_id: string
           id?: string
           notes?: string | null
           pilot_id?: string | null
+          scheduled_at?: string | null
           service: string
           status?: string
         }
         Update: {
           created_at?: string
+          drone_id?: string | null
           farm_id?: string
           id?: string
           notes?: string | null
           pilot_id?: string | null
+          scheduled_at?: string | null
           service?: string
           status?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "missions_drone_id_fkey"
+            columns: ["drone_id"]
+            isOneToOne: false
+            referencedRelation: "drones"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "missions_farm_id_fkey"
             columns: ["farm_id"]
