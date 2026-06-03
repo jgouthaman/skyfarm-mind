@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { StudioStepNav } from "@/components/design-studio/step-nav";
 import { useMemo, useState } from "react";
 import { useCurrentProject, studioActions } from "@/lib/design-studio/store";
 import { runSimulation, riskColor } from "@/lib/design-studio/engine";

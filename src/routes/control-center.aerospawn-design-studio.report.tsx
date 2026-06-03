@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { StudioStepNav } from "@/components/design-studio/step-nav";
 import { useCurrentProject } from "@/lib/design-studio/store";
 import { Button } from "@/components/ui/button";
 import { Disclaimer } from "@/components/design-studio/sidebar";
