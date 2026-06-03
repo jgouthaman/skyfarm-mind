@@ -149,8 +149,8 @@ function Report() {
           </ol>
         </Section>
 
-        <Section title="12. Disclaimer">
-          <p className="text-xs text-muted-foreground">This portal provides design assistance and simulation estimates only. It does not certify that a drone is safe, legal, or flight-ready. Final design must be reviewed by qualified drone engineers and tested under safe and compliant conditions.</p>
+        <Section title="13. Disclaimer">
+          <p className="text-xs text-muted-foreground">This portal provides design assistance, simulation estimates, and indicative regulatory guidance only. It does not certify that a drone is safe, legal, or flight-ready. Final design must be reviewed by qualified drone engineers, and all flights must be cleared via the DGCA DigitalSky portal and relevant state authorities before take-off.</p>
         </Section>
       </article>
 
