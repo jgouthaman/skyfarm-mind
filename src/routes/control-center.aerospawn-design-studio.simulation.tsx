@@ -13,6 +13,7 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/control-center/aerospawn-design-studio/simulation")({
   component: SimulationLab,
+  ssr: false,
 });
 
 function SimulationLab() {
