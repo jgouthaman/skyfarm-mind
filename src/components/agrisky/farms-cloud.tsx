@@ -244,13 +244,16 @@ function FarmDetail({ farm, onBack }: { farm: Farm; onBack: () => void }) {
                     <span className="text-xs px-2 py-0.5 rounded-full border bg-primary/10 text-primary border-primary/30 capitalize">{m.status.replace("_", " ")}</span>
                   </div>
                   <p className="text-xs text-muted-foreground mt-1">Pilot: {assignedPilot(m.pilot_id)}</p>
-                  <p className="text-xs text-muted-foreground">{new Date(m.created_at).toLocaleString()}</p>
+                  <p className="text-xs text-muted-foreground">Drone: {drones.find((d: Drone) => d.id === m.drone_id)?.name || "—"}</p>
+                  {m.scheduled_at && <p className="text-xs text-muted-foreground">Scheduled: {new Date(m.scheduled_at).toLocaleString()}</p>}
+                  <p className="text-xs text-muted-foreground">Created: {new Date(m.created_at).toLocaleString()}</p>
                   {m.notes && <p className="text-xs mt-1">{m.notes}</p>}
                 </li>
               ))}
             </ul>
           )}
         </div>
+
       </div>
 
       <Dialog open={assignOpen} onOpenChange={setAssignOpen}>
