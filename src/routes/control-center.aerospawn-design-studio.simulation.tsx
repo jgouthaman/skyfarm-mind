@@ -11,6 +11,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Disclaimer } from "@/components/design-studio/sidebar";
 import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid, RadialBarChart, RadialBar } from "recharts";
 import { toast } from "sonner";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Info } from "lucide-react";
 
 export const Route = createFileRoute("/control-center/aerospawn-design-studio/simulation")({
   component: SimulationLab,
@@ -143,6 +146,55 @@ function SimulationLab() {
         </div>
       </div>
       <StudioStepNav />
+      <FormulaPopover />
+    </div>
+  );
+}
+
+function FormulaPopover() {
+  return (
+    <div className="fixed bottom-6 right-6 z-50">
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button size="sm" className="rounded-full shadow-lg bg-sky-500 hover:bg-sky-600 text-white gap-2">
+            <Info className="h-4 w-4" /> How it's calculated
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent side="top" align="end" className="w-[380px] p-0">
+          <ScrollArea className="max-h-[70vh] p-4">
+            <h3 className="font-semibold text-sm mb-1">Simulation formulas</h3>
+            <p className="text-xs text-muted-foreground mb-3">Empirical model used by the Simulation Lab.</p>
+            <div className="space-y-3 text-xs">
+              <F t="Battery weight (kg)" f="(capacity/1000) × k" d="k = 0.55 (4S), 0.8 (6S), 1.4 (12S), 1.7 (14S)" />
+              <F t="Payload system weight" f="tank>0 ? tank × 1.05 : 0.3" d="Liquid density + plumbing allowance." />
+              <F t="Total weight" f="frame + payload + battery + payloadSystem" />
+              <F t="Total thrust" f="numMotors × motorThrust" />
+              <F t="Thrust-to-weight (TWR)" f="totalThrust / totalWeight" d="Safe ≥ 2.0 · Warning 1.5–2.0 · Unsafe < 1.5" />
+              <F t="Pack energy (Wh)" f="(capacity/1000) × voltage" d="V = 14.8 / 22.2 / 44.4 / 51.8" />
+              <F t="Power draw (W)" f="totalWeight × 180 / max(TWR, 0.5)" />
+              <F t="Flight time (min)" f="(Wh × (1 − reserve%/100)) / power × 60" d="Floored at 2 min." />
+              <F t="Battery consumption (%)" f="(power × time/60) / Wh × 100" d="Capped at 100%." />
+              <F t="Motor load (%)" f="(totalWeight / totalThrust) × 100" d="100% = motors saturated." />
+              <F t="Payload safety margin (%)" f="(thrust − weight) / payload × 100" d="Negative = cannot lift." />
+              <F t="Wind stability (/100)" f="100 − wind×2 − (15 if weight > 0.7×thrust)" />
+              <F t="Coverage area (km²)" f="(time/60) × 25 × 0.5" d="25 km/h cruise · 0.5 km swath." />
+              <F t="Spray duration (min)" f="tankVolume / sprayFlowRate" />
+              <F t="Risk / feasibility" f="based on TWR" d="< 1.5 Unsafe · 1.5–2.0 Warning · ≥ 2.0 Safe" />
+            </div>
+            <p className="text-[10px] text-muted-foreground mt-4 italic">Indicative model for design exploration — validate with bench tests before flight.</p>
+          </ScrollArea>
+        </PopoverContent>
+      </Popover>
+    </div>
+  );
+}
+
+function F({ t, f, d }: { t: string; f: string; d?: string }) {
+  return (
+    <div className="border-l-2 border-sky-500/40 pl-2.5">
+      <div className="font-medium text-foreground">{t}</div>
+      <div className="font-mono text-[11px] text-sky-400 mt-0.5 break-words">{f}</div>
+      {d && <div className="text-muted-foreground mt-0.5">{d}</div>}
     </div>
   );
 }
