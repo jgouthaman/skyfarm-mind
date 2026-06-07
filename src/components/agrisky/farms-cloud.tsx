@@ -89,7 +89,7 @@ function FarmsList({ onOpen }: { onOpen: (f: Farm) => void }) {
                     <td className="px-4 py-3 text-muted-foreground">{f.location || "—"}</td>
                     <td className="px-4 py-3">{f.size_acres ? `${f.size_acres} ac` : "—"}</td>
                     <td className="px-4 py-3">{f.crop || "—"}</td>
-                    <td className="px-4 py-3">{f.service_needed ? <span className="text-xs px-2 py-0.5 rounded-full border bg-accent/10 text-accent border-accent/30">{f.service_needed}</span> : "—"}</td>
+                    <td className="px-4 py-3">{f.service_needed ? <span className="text-xs px-2 py-0.5 rounded-full border bg-accent/20 text-accent border-accent/50">{f.service_needed}</span> : "—"}</td>
                     <td className="px-4 py-3"><Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); onOpen(f); }}><Eye className="h-3.5 w-3.5" /></Button></td>
                   </tr>
                 ))}
@@ -192,7 +192,7 @@ function FarmDetail({ farm, onBack }: { farm: Farm; onBack: () => void }) {
             {farm.farmer && <span><Tractor className="inline h-3.5 w-3.5 mr-1" />{farm.farmer}</span>}
             {farm.location && <span><MapPin className="inline h-3.5 w-3.5 mr-1" />{farm.location}</span>}
             {farm.crop && <span><Sprout className="inline h-3.5 w-3.5 mr-1" />{farm.crop}</span>}
-            {farm.service_needed && <span className="text-xs px-2 py-0.5 rounded-full border bg-accent/10 text-accent border-accent/30">{farm.service_needed}</span>}
+            {farm.service_needed && <span className="text-xs px-2 py-0.5 rounded-full border bg-accent/20 text-accent border-accent/50">{farm.service_needed}</span>}
           </p>
         </div>
         <Button className="bg-gradient-agri text-primary-foreground" onClick={() => setAssignOpen(true)}>
@@ -241,7 +241,7 @@ function FarmDetail({ farm, onBack }: { farm: Farm; onBack: () => void }) {
                 <li key={m.id} className="rounded-lg border border-border/60 bg-card p-3 text-sm">
                   <div className="flex items-center justify-between">
                     <span className="font-medium">{m.service}</span>
-                    <span className="text-xs px-2 py-0.5 rounded-full border bg-primary/10 text-primary border-primary/30 capitalize">{m.status.replace("_", " ")}</span>
+                    <span className="text-xs px-2 py-0.5 rounded-full border bg-primary/20 text-primary border-primary/50 capitalize">{m.status.replace("_", " ")}</span>
                   </div>
                   <p className="text-xs text-muted-foreground mt-1">Pilot: {assignedPilot(m.pilot_id)}</p>
                   <p className="text-xs text-muted-foreground">Drone: {drones.find((d: Drone) => d.id === m.drone_id)?.name || "—"}</p>

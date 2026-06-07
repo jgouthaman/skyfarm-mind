@@ -160,7 +160,7 @@ function Landing() {
         <div className="absolute inset-0 grid-bg opacity-40 pointer-events-none" />
         <div className="mx-auto max-w-7xl px-5 lg:px-8 grid lg:grid-cols-12 gap-10 items-center relative">
           <div className="lg:col-span-6">
-            <span className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-primary/90 bg-primary/10 border border-primary/20 px-3 py-1.5 rounded-full">
+            <span className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-primary bg-primary/20 border border-primary/40 px-3 py-1.5 rounded-full">
               <Satellite className="h-3.5 w-3.5" /> Aerospace · Drones · AI
             </span>
             <h1 className="mt-5 text-4xl sm:text-5xl lg:text-6xl font-semibold leading-[1.05]">
@@ -288,7 +288,7 @@ function Landing() {
         <div className="mx-auto max-w-7xl px-5 lg:px-8 relative">
           <div className="grid lg:grid-cols-12 gap-10 items-start">
             <div className="lg:col-span-5">
-              <span className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-accent bg-accent/10 border border-accent/20 px-3 py-1.5 rounded-full">
+              <span className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-accent bg-accent/20 border border-accent/40 px-3 py-1.5 rounded-full">
                 <Leaf className="h-3.5 w-3.5" /> Flagship vertical
               </span>
               <h2 className="mt-5 text-3xl sm:text-4xl font-semibold">Flagship vertical: <span className="bg-gradient-agri bg-clip-text text-transparent">AgriSky</span></h2>
@@ -325,7 +325,7 @@ function Landing() {
     <div className="mx-auto max-w-7xl px-5 lg:px-8 relative">
       <div className="grid lg:grid-cols-12 gap-10 items-start">
         <div className="lg:col-span-5">
-          <span className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-primary/90 bg-primary/10 border border-primary/20 px-3 py-1.5 rounded-full">
+          <span className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-primary bg-primary/20 border border-primary/40 px-3 py-1.5 rounded-full">
             <Flame className="h-3.5 w-3.5" /> Prototype vertical
           </span>
           <h2 className="mt-5 text-3xl sm:text-4xl font-semibold">GuardSky</h2>
@@ -510,7 +510,7 @@ function Landing() {
         <div className="absolute inset-0 grid-bg opacity-30 pointer-events-none" />
         <div className="mx-auto max-w-7xl px-5 lg:px-8 relative grid lg:grid-cols-12 gap-10">
           <div className="lg:col-span-5">
-            <span className="text-xs uppercase tracking-[0.2em] text-primary/90">Get in touch</span>
+            <span className="text-xs uppercase tracking-[0.2em] text-primary">Get in touch</span>
             <h2 className="mt-3 text-3xl sm:text-4xl font-semibold">Partner with AeroSpawn</h2>
             <p className="mt-4 text-muted-foreground">
               Whether you are a farmer, infrastructure company, drone operator, investor, institution, or industry partner — AeroSpawn is open to pilots, partnerships, and custom drone intelligence projects.
@@ -582,7 +582,7 @@ function Section({
   return (
     <section id={id} className={`py-20 sm:py-28 ${muted ? "bg-muted/30" : ""}`}>
       <div className="mx-auto max-w-7xl px-5 lg:px-8">
-        {eyebrow && <span className="text-xs uppercase tracking-[0.2em] text-primary/90">{eyebrow}</span>}
+        {eyebrow && <span className="text-xs uppercase tracking-[0.2em] text-primary">{eyebrow}</span>}
         <h2 className="mt-3 text-3xl sm:text-4xl font-semibold max-w-3xl">{title}</h2>
         {children}
       </div>
@@ -600,8 +600,8 @@ function Card({ children, className = "" }: { children: React.ReactNode; classNa
 
 function IconBubble({ children, tone = "primary" }: { children: React.ReactNode; tone?: "primary" | "agri" }) {
   const cls = tone === "agri"
-    ? "bg-accent/15 text-accent border-accent/30"
-    : "bg-primary/15 text-primary border-primary/30";
+    ? "bg-accent/15 text-accent border-accent/50"
+    : "bg-primary/15 text-primary border-primary/50";
   return (
     <div className={`inline-grid place-items-center h-10 w-10 rounded-xl border ${cls} [&>svg]:h-5 [&>svg]:w-5`}>
       {children}

@@ -42,8 +42,8 @@ const verticals = [
 ];
 
 function statusClasses(tone: string) {
-  if (tone === "active") return "bg-accent/15 text-accent border-accent/30";
-  if (tone === "proto") return "bg-primary/15 text-primary border-primary/30";
+  if (tone === "active") return "bg-accent/15 text-accent border-accent/50";
+  if (tone === "proto") return "bg-primary/15 text-primary border-primary/50";
   return "bg-muted text-muted-foreground border-border";
 }
 
@@ -112,7 +112,7 @@ function Hub() {
             return (
               <div key={v.id} className="rounded-2xl border border-border/60 bg-gradient-card p-6 shadow-card flex flex-col">
                 <div className="flex items-center justify-between">
-                  <span className="grid place-items-center h-10 w-10 rounded-xl bg-primary/10 border border-primary/20">
+                  <span className="grid place-items-center h-10 w-10 rounded-xl bg-primary/20 border border-primary/40">
                     <Icon className="h-5 w-5 text-primary" />
                   </span>
                   <span className={`text-xs px-2.5 py-1 rounded-full border ${statusClasses(v.tone)}`}>{v.status}</span>

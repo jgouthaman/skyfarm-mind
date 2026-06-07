@@ -16,9 +16,9 @@ export const ACTIVE_MISSION_ID = "MSN-1042";
 
 function syncBadge(status: SyncStatus | "success" | "retrying" | "failed") {
   const map: Record<string, string> = {
-    synced: "bg-accent/15 text-accent border-accent/30",
-    success: "bg-accent/15 text-accent border-accent/30",
-    syncing: "bg-primary/15 text-primary border-primary/30",
+    synced: "bg-accent/15 text-accent border-accent/50",
+    success: "bg-accent/15 text-accent border-accent/50",
+    syncing: "bg-primary/15 text-primary border-primary/50",
     pending: "bg-yellow-500/15 text-yellow-400 border-yellow-500/30",
     retrying: "bg-yellow-500/15 text-yellow-400 border-yellow-500/30",
     failed: "bg-red-500/15 text-red-700 border-red-500/30",
@@ -138,7 +138,7 @@ export function FieldSyncMonitor({ onOpenMission }: { onOpenMission: (id: string
                 <span className={`absolute -left-[7px] top-1.5 h-3 w-3 rounded-full border-2 border-background ${a.source === "Mobile App" ? "bg-accent" : "bg-primary"}`} />
                 <div className="flex flex-wrap items-baseline gap-2">
                   <span className="text-xs text-muted-foreground">{formatRelative(a.timestamp)}</span>
-                  <span className={`text-[10px] px-1.5 py-0.5 rounded-full border ${a.source === "Mobile App" ? "bg-accent/10 text-accent border-accent/30" : "bg-primary/10 text-primary border-primary/30"}`}>{a.source}</span>
+                  <span className={`text-[10px] px-1.5 py-0.5 rounded-full border ${a.source === "Mobile App" ? "bg-accent/20 text-accent border-accent/50" : "bg-primary/20 text-primary border-primary/50"}`}>{a.source}</span>
                 </div>
                 <p className="text-sm mt-1">{a.description}</p>
                 <p className="text-xs text-muted-foreground">by {a.actor}</p>
@@ -226,7 +226,7 @@ export function FieldSyncMonitor({ onOpenMission }: { onOpenMission: (id: string
 function SyncStat({ label, value, hint, icon: Icon, tone = "primary" }: { label: string; value: string; hint?: string; icon: React.ComponentType<{ className?: string }>; tone?: "primary" | "agri" }) {
   return (
     <div className="rounded-2xl border border-border/60 bg-gradient-card p-5 shadow-card">
-      <span className={`grid place-items-center h-9 w-9 rounded-lg border ${tone === "agri" ? "bg-accent/10 border-accent/30 text-accent" : "bg-primary/10 border-primary/20 text-primary"}`}>
+      <span className={`grid place-items-center h-9 w-9 rounded-lg border ${tone === "agri" ? "bg-accent/20 border-accent/50 text-accent" : "bg-primary/20 border-primary/40 text-primary"}`}>
         <Icon className="h-4 w-4" />
       </span>
       <div className="mt-4 text-2xl font-display font-semibold">{value}</div>
@@ -295,7 +295,7 @@ export function MissionDetail({ missionId, onBack }: { missionId: string; onBack
           <h1 className="text-2xl sm:text-3xl font-semibold">Mission {missionId}</h1>
           <p className="mt-1 text-sm text-muted-foreground">Arunamangala Farm · Zone B · Leafy Greens · Spraying</p>
         </div>
-        <div className="rounded-xl border border-accent/30 bg-accent/5 px-4 py-3 text-sm">
+        <div className="rounded-xl border border-accent/50 bg-accent/5 px-4 py-3 text-sm">
           <div className="flex items-center gap-2 text-xs text-accent uppercase tracking-wider">
             <Smartphone className="h-3.5 w-3.5" /> Mobile App Sync
           </div>
@@ -344,7 +344,7 @@ function OverviewTab({ spray, tel, media, pilot, lastSync }: { spray: SprayLogT 
           <KV label="Telemetry" value={tel ? `${tel.battery}% · ${tel.progress}%` : "—"} />
         </div>
       </div>
-      <div className="rounded-2xl border border-accent/30 bg-accent/5 p-5 shadow-card">
+      <div className="rounded-2xl border border-accent/50 bg-accent/5 p-5 shadow-card">
         <div className="flex items-center gap-2 text-xs text-accent uppercase tracking-wider">
           <Smartphone className="h-3.5 w-3.5" /> Field data source
         </div>
@@ -363,7 +363,7 @@ function ImagesTab({ media }: { media: SurveyMedia[] }) {
             <img src={img.url} alt={img.tag} className="w-full h-full object-cover" loading="lazy" />
           </div>
           <div className="p-4 space-y-1.5 text-sm">
-            <p className="font-medium flex items-center gap-2"><span className="text-xs px-2 py-0.5 rounded-full border bg-accent/10 text-accent border-accent/30">{img.tag}</span></p>
+            <p className="font-medium flex items-center gap-2"><span className="text-xs px-2 py-0.5 rounded-full border bg-accent/20 text-accent border-accent/50">{img.tag}</span></p>
             <p className="text-xs text-muted-foreground flex items-center gap-1"><MapPin className="h-3 w-3" /> {img.lat.toFixed(5)}, {img.lng.toFixed(5)}</p>
             <p className="text-xs text-muted-foreground">Uploaded {formatRelative(img.uploadedAt)} · {img.pilotName}</p>
             <Button size="sm" variant="outline" className="w-full mt-2" onClick={() => toast(`Opening ${img.lat.toFixed(4)}, ${img.lng.toFixed(4)} on map`)}>
@@ -453,7 +453,7 @@ function ActivityTab({ activity }: { activity: ActivityEvent[] }) {
             <span className={`absolute -left-[7px] top-1.5 h-3 w-3 rounded-full border-2 border-background ${a.source === "Mobile App" ? "bg-accent" : "bg-primary"}`} />
             <div className="flex flex-wrap items-baseline gap-2">
               <span className="text-xs text-muted-foreground">{new Date(a.timestamp).toLocaleString()}</span>
-              <span className={`text-[10px] px-1.5 py-0.5 rounded-full border ${a.source === "Mobile App" ? "bg-accent/10 text-accent border-accent/30" : "bg-primary/10 text-primary border-primary/30"}`}>{a.source}</span>
+              <span className={`text-[10px] px-1.5 py-0.5 rounded-full border ${a.source === "Mobile App" ? "bg-accent/20 text-accent border-accent/50" : "bg-primary/20 text-primary border-primary/50"}`}>{a.source}</span>
             </div>
             <p className="text-sm mt-1">{a.description}</p>
             <p className="text-xs text-muted-foreground">by {a.actor}</p>
