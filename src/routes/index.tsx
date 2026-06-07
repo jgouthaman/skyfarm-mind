@@ -582,7 +582,7 @@ function Section({
   return (
     <section id={id} className={`py-20 sm:py-28 ${muted ? "bg-muted/30" : ""}`}>
       <div className="mx-auto max-w-7xl px-5 lg:px-8">
-        {eyebrow && <span className="text-xs uppercase tracking-[0.2em] text-primary">{eyebrow}</span>}
+        {eyebrow && <span className="inline-block text-xs font-bold uppercase tracking-[0.2em] text-primary-foreground bg-primary px-3 py-1 rounded-md shadow-glow">{eyebrow}</span>}
         <h2 className="mt-3 text-3xl sm:text-4xl font-semibold max-w-3xl">{title}</h2>
         {children}
       </div>
@@ -600,10 +600,10 @@ function Card({ children, className = "" }: { children: React.ReactNode; classNa
 
 function IconBubble({ children, tone = "primary" }: { children: React.ReactNode; tone?: "primary" | "agri" }) {
   const cls = tone === "agri"
-    ? "bg-accent/15 text-accent border-accent/50"
-    : "bg-primary/15 text-primary border-primary/50";
+    ? "bg-accent text-accent-foreground border-accent"
+    : "bg-primary text-primary-foreground border-primary";
   return (
-    <div className={`inline-grid place-items-center h-10 w-10 rounded-xl border ${cls} [&>svg]:h-5 [&>svg]:w-5`}>
+    <div className={`inline-grid place-items-center h-10 w-10 rounded-xl border shadow-glow ${cls} [&>svg]:h-5 [&>svg]:w-5`}>
       {children}
     </div>
   );
