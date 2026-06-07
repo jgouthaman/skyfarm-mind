@@ -600,10 +600,10 @@ function Card({ children, className = "" }: { children: React.ReactNode; classNa
 
 function IconBubble({ children, tone = "primary" }: { children: React.ReactNode; tone?: "primary" | "agri" }) {
   const cls = tone === "agri"
-    ? "bg-accent/15 text-accent border-accent/50"
-    : "bg-primary/15 text-primary border-primary/50";
+    ? "bg-accent text-accent-foreground border-accent"
+    : "bg-primary text-primary-foreground border-primary";
   return (
-    <div className={`inline-grid place-items-center h-10 w-10 rounded-xl border ${cls} [&>svg]:h-5 [&>svg]:w-5`}>
+    <div className={`inline-grid place-items-center h-10 w-10 rounded-xl border shadow-glow ${cls} [&>svg]:h-5 [&>svg]:w-5`}>
       {children}
     </div>
   );
