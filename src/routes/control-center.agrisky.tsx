@@ -84,7 +84,7 @@ function AgriSky() {
                 key={n.id}
                 onClick={() => setTab(n.id)}
                 className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
-                  active ? "bg-accent/15 text-accent border border-accent/30" : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  active ? "bg-accent/15 text-accent border border-accent/50" : "text-muted-foreground hover:text-foreground hover:bg-muted"
                 }`}
               >
                 <Icon className="h-4 w-4" />
@@ -184,7 +184,7 @@ function StatCard({ label, value, hint, icon: Icon, tone = "primary" }: { label:
   return (
     <div className="rounded-2xl border border-border/60 bg-gradient-card p-5 shadow-card">
       <div className="flex items-center justify-between">
-        <span className={`grid place-items-center h-9 w-9 rounded-lg border ${tone === "agri" ? "bg-accent/10 border-accent/30 text-accent" : "bg-primary/10 border-primary/20 text-primary"}`}>
+        <span className={`grid place-items-center h-9 w-9 rounded-lg border ${tone === "agri" ? "bg-accent/20 border-accent/50 text-accent" : "bg-primary/20 border-primary/40 text-primary"}`}>
           <Icon className="h-4 w-4" />
         </span>
       </div>
@@ -204,13 +204,13 @@ function Overview() {
         subtitle="Farm aerial survey, crop zone mapping, input loading, spraying missions, and operational activity logs."
       />
 
-      <div className="rounded-2xl border border-accent/30 bg-accent/5 p-5 mb-6 flex flex-wrap items-center gap-4 justify-between">
+      <div className="rounded-2xl border border-accent/50 bg-accent/5 p-5 mb-6 flex flex-wrap items-center gap-4 justify-between">
         <div>
           <p className="text-xs uppercase tracking-wider text-accent">Featured farm</p>
           <h3 className="mt-1 text-lg font-semibold">Arunamangala Farm · Gouthaman</h3>
           <p className="text-sm text-muted-foreground">Arunamangala, Tamil Nadu · 2 acres · Mixed vegetables and leafy greens</p>
         </div>
-        <span className="px-3 py-1.5 rounded-full text-xs bg-accent/15 text-accent border border-accent/30">Monitoring Active</span>
+        <span className="px-3 py-1.5 rounded-full text-xs bg-accent/15 text-accent border border-accent/50">Monitoring Active</span>
       </div>
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -246,9 +246,9 @@ const farmsData = [
 ];
 
 function statusPill(tone: string) {
-  if (tone === "active") return "bg-accent/15 text-accent border-accent/30";
+  if (tone === "active") return "bg-accent/15 text-accent border-accent/50";
   if (tone === "warn") return "bg-yellow-500/15 text-yellow-400 border-yellow-500/30";
-  if (tone === "info") return "bg-primary/15 text-primary border-primary/30";
+  if (tone === "info") return "bg-primary/15 text-primary border-primary/50";
   return "bg-muted text-muted-foreground border-border";
 }
 
@@ -339,7 +339,7 @@ function Survey() {
               <Button onClick={() => toast.success("Survey uploaded successfully")}><Upload className="h-4 w-4 mr-1" /> Upload Images</Button>
               <Button variant="outline" onClick={() => toast("Boundary tool opened")}><MapIcon className="h-4 w-4 mr-1" /> Mark Boundary</Button>
               <Button variant="outline" onClick={() => toast("Observation added")}><Plus className="h-4 w-4 mr-1" /> Add Observation</Button>
-              <Button variant="outline" className="bg-accent/10 border-accent/30 text-accent" onClick={() => toast.success("Survey saved")}><CheckCircle2 className="h-4 w-4 mr-1" /> Save Survey</Button>
+              <Button variant="outline" className="bg-accent/20 border-accent/50 text-accent" onClick={() => toast.success("Survey saved")}><CheckCircle2 className="h-4 w-4 mr-1" /> Save Survey</Button>
             </div>
           </div>
 
@@ -426,7 +426,7 @@ function Boundary() {
           </div>
           <div className="mt-4 flex flex-wrap gap-2">
             {zones.map(z => (
-              <button key={z.id} onClick={() => setSelected(z.id)} className={`px-3 py-1.5 rounded-lg text-xs border ${selected === z.id ? "border-accent bg-accent/10 text-accent" : "border-border text-muted-foreground hover:text-foreground"}`}>
+              <button key={z.id} onClick={() => setSelected(z.id)} className={`px-3 py-1.5 rounded-lg text-xs border ${selected === z.id ? "border-accent bg-accent/20 text-accent" : "border-border text-muted-foreground hover:text-foreground"}`}>
                 {z.name} · {z.crop}
               </button>
             ))}
@@ -594,7 +594,7 @@ function Spraying({ onOpenMission }: { onOpenMission: (id: string) => void }) {
           <div className="mt-4 flex flex-wrap gap-2">
             <Button className="bg-gradient-agri text-primary-foreground" onClick={() => toast.success("Mission started")}><Play className="h-4 w-4 mr-1" /> Start Mission</Button>
             <Button variant="outline" onClick={() => toast("Mission paused")}><Pause className="h-4 w-4 mr-1" /> Pause</Button>
-            <Button variant="outline" className="bg-accent/10 border-accent/30 text-accent" onClick={() => toast.success("Mission completed")}><CheckCircle2 className="h-4 w-4 mr-1" /> Complete</Button>
+            <Button variant="outline" className="bg-accent/20 border-accent/50 text-accent" onClick={() => toast.success("Mission completed")}><CheckCircle2 className="h-4 w-4 mr-1" /> Complete</Button>
             <Button variant="outline" onClick={() => toast("Mission cancelled")}><XIcon className="h-4 w-4 mr-1" /> Cancel</Button>
           </div>
         </div>
@@ -647,7 +647,7 @@ function Timeline({ limit }: { limit?: number }) {
           <span className="absolute -left-[7px] top-1.5 h-3 w-3 rounded-full bg-accent border-2 border-background" />
           <div className="flex flex-wrap items-baseline gap-2">
             <span className="text-xs text-muted-foreground">{a.time}</span>
-            <span className="text-xs px-2 py-0.5 rounded-full border bg-primary/10 text-primary border-primary/30">{a.type}</span>
+            <span className="text-xs px-2 py-0.5 rounded-full border bg-primary/20 text-primary border-primary/50">{a.type}</span>
           </div>
           <p className="text-sm mt-1">{a.desc}</p>
         </li>
@@ -722,7 +722,7 @@ function Reports() {
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {types.map(({ t, icon: Icon }) => (
           <div key={t} className="rounded-2xl border border-border/60 bg-gradient-card p-5 shadow-card">
-            <span className="grid place-items-center h-10 w-10 rounded-lg bg-accent/10 border border-accent/30 text-accent"><Icon className="h-4 w-4" /></span>
+            <span className="grid place-items-center h-10 w-10 rounded-lg bg-accent/20 border border-accent/50 text-accent"><Icon className="h-4 w-4" /></span>
             <h3 className="mt-3 font-semibold text-sm">{t}</h3>
             <Button size="sm" className="mt-3 w-full bg-gradient-agri text-primary-foreground" onClick={() => toast.success("Report generated")}>Generate Report</Button>
           </div>
@@ -764,7 +764,7 @@ function SettingsPage() {
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {sections.map(({ t, d, icon: Icon }) => (
           <div key={t} className="rounded-2xl border border-border/60 bg-gradient-card p-5 shadow-card">
-            <span className="grid place-items-center h-10 w-10 rounded-lg bg-primary/10 border border-primary/20 text-primary"><Icon className="h-4 w-4" /></span>
+            <span className="grid place-items-center h-10 w-10 rounded-lg bg-primary/20 border border-primary/40 text-primary"><Icon className="h-4 w-4" /></span>
             <h3 className="mt-3 font-semibold">{t}</h3>
             <p className="mt-1 text-sm text-muted-foreground">{d}</p>
             <Button size="sm" variant="outline" className="mt-4" onClick={() => toast(`${t} opened`)}>Manage</Button>
@@ -776,7 +776,7 @@ function SettingsPage() {
         <h3 className="font-semibold mb-3">User roles</h3>
         <div className="flex flex-wrap gap-2">
           {["Admin","Farm Manager","Drone Operator","Agronomist","Viewer"].map(r => (
-            <span key={r} className="text-xs px-2.5 py-1 rounded-full border bg-primary/10 text-primary border-primary/30">{r}</span>
+            <span key={r} className="text-xs px-2.5 py-1 rounded-full border bg-primary/20 text-primary border-primary/50">{r}</span>
           ))}
         </div>
       </div>

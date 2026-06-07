@@ -112,7 +112,7 @@ function LoginPage() {
 
       <main className="relative z-10 mx-auto max-w-md px-5 pt-10 pb-20">
         <div className="text-center mb-8">
-          <span className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-primary/90 bg-primary/10 border border-primary/20 px-3 py-1.5 rounded-full">
+          <span className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-primary bg-primary/20 border border-primary/40 px-3 py-1.5 rounded-full">
             <Shield className="h-3.5 w-3.5" /> Secure access
           </span>
           <h1 className="mt-5 text-3xl sm:text-4xl font-semibold">AeroSpawn Control Center</h1>

@@ -19,8 +19,8 @@ export function DronesSection() {
 }
 
 function statusTone(s: string) {
-  if (s === "available") return "bg-accent/15 text-accent border-accent/30";
-  if (s === "in_mission" || s === "assigned") return "bg-primary/15 text-primary border-primary/30";
+  if (s === "available") return "bg-accent/15 text-accent border-accent/50";
+  if (s === "in_mission" || s === "assigned") return "bg-primary/15 text-primary border-primary/50";
   if (s === "maintenance") return "bg-yellow-500/15 text-yellow-400 border-yellow-500/30";
   return "bg-muted text-muted-foreground border-border";
 }
@@ -147,7 +147,7 @@ function DroneDetail({ drone, onBack }: { drone: Drone; onBack: () => void }) {
             {drone.capacity_litres && <span>{drone.capacity_litres} L tank</span>}
           </p>
         </div>
-        <span className={`px-3 py-1.5 rounded-full text-xs border capitalize ${isBusy ? "bg-primary/15 text-primary border-primary/30" : "bg-accent/15 text-accent border-accent/30"}`}>
+        <span className={`px-3 py-1.5 rounded-full text-xs border capitalize ${isBusy ? "bg-primary/15 text-primary border-primary/50" : "bg-accent/15 text-accent border-accent/50"}`}>
           {isBusy ? "On mission" : "Available now"}
         </span>
       </div>
@@ -163,7 +163,7 @@ function DroneDetail({ drone, onBack }: { drone: Drone; onBack: () => void }) {
                 <li key={m.id} className="rounded-lg border border-border/60 bg-card p-3 text-sm">
                   <div className="flex items-center justify-between">
                     <span className="font-medium">{m.service} · {farmName(m.farm_id)}</span>
-                    <span className="text-xs px-2 py-0.5 rounded-full border bg-primary/10 text-primary border-primary/30 capitalize">{m.status.replace("_", " ")}</span>
+                    <span className="text-xs px-2 py-0.5 rounded-full border bg-primary/20 text-primary border-primary/50 capitalize">{m.status.replace("_", " ")}</span>
                   </div>
                   <p className="text-xs text-muted-foreground mt-1 flex items-center gap-2">
                     <Clock className="h-3 w-3" /> {m.scheduled_at ? new Date(m.scheduled_at).toLocaleString() : "Unscheduled"}
