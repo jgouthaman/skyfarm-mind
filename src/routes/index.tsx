@@ -160,7 +160,7 @@ function Landing() {
         <div className="absolute inset-0 grid-bg opacity-40 pointer-events-none" />
         <div className="mx-auto max-w-7xl px-5 lg:px-8 grid lg:grid-cols-12 gap-10 items-center relative">
           <div className="lg:col-span-6">
-            <span className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-primary bg-primary/20 border border-primary/40 px-3 py-1.5 rounded-full">
+            <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-primary-foreground bg-primary border border-primary px-3 py-1.5 rounded-full shadow-glow">
               <Satellite className="h-3.5 w-3.5" /> Aerospace · Drones · AI
             </span>
             <h1 className="mt-5 text-4xl sm:text-5xl lg:text-6xl font-semibold leading-[1.05]">
