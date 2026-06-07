@@ -156,8 +156,8 @@ export function calculateRiskLevel(r: SimulationResult): RiskLevel {
 }
 
 export function riskColor(level: RiskLevel | undefined) {
-  if (level === "Safe") return "text-emerald-500 bg-emerald-500/10 border-emerald-500/30";
-  if (level === "Warning") return "text-amber-500 bg-amber-500/10 border-amber-500/30";
-  if (level === "Unsafe") return "text-red-500 bg-red-500/10 border-red-500/30";
-  return "text-muted-foreground bg-muted/40 border-border";
+  if (level === "Safe") return "text-white bg-emerald-700 border-emerald-800 font-semibold";
+  if (level === "Warning") return "text-white bg-amber-600 border-amber-700 font-semibold";
+  if (level === "Unsafe") return "text-white bg-red-700 border-red-800 font-semibold";
+  return "text-foreground bg-muted/60 border-border";
 }
