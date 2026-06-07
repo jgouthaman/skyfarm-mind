@@ -126,21 +126,58 @@ function SimulationLab() {
           </div>
 
           <div className="grid lg:grid-cols-2 gap-4">
-            <Chart title="Payload vs Flight Time"><LineChart data={payloadCurve}><CartesianGrid strokeDasharray="3 3" opacity={0.2} /><XAxis dataKey="payload" stroke="#94a3b8" /><YAxis stroke="#94a3b8" /><Tooltip contentStyle={{ background: "hsl(220 20% 12%)", border: "1px solid hsl(220 10% 25%)" }} /><Line type="monotone" dataKey="flight" stroke="#38bdf8" strokeWidth={2} /></LineChart></Chart>
-            <Chart title="Battery Capacity vs Endurance"><LineChart data={batteryCurve}><CartesianGrid strokeDasharray="3 3" opacity={0.2} /><XAxis dataKey="capacity" stroke="#94a3b8" /><YAxis stroke="#94a3b8" /><Tooltip contentStyle={{ background: "hsl(220 20% 12%)", border: "1px solid hsl(220 10% 25%)" }} /><Line type="monotone" dataKey="endurance" stroke="#a78bfa" strokeWidth={2} /></LineChart></Chart>
-            <Chart title="Motor Load vs Payload"><LineChart data={payloadCurve}><CartesianGrid strokeDasharray="3 3" opacity={0.2} /><XAxis dataKey="payload" stroke="#94a3b8" /><YAxis stroke="#94a3b8" /><Tooltip contentStyle={{ background: "hsl(220 20% 12%)", border: "1px solid hsl(220 10% 25%)" }} /><Line type="monotone" dataKey="motorLoad" stroke="#f59e0b" strokeWidth={2} /></LineChart></Chart>
-            <Chart title="Wind Speed vs Stability"><LineChart data={windCurve}><CartesianGrid strokeDasharray="3 3" opacity={0.2} /><XAxis dataKey="wind" stroke="#94a3b8" /><YAxis stroke="#94a3b8" /><Tooltip contentStyle={{ background: "hsl(220 20% 12%)", border: "1px solid hsl(220 10% 25%)" }} /><Line type="monotone" dataKey="stability" stroke="#34d399" strokeWidth={2} /></LineChart></Chart>
-            <Chart title="Thrust-to-Weight Gauge">
-              <RadialBarChart innerRadius="65%" outerRadius="100%" data={[{ name: "TWR", value: Math.min(result.thrustToWeightRatio, 3), fill: result.riskLevel === "Safe" ? "#10b981" : result.riskLevel === "Warning" ? "#f59e0b" : "#ef4444" }]} startAngle={180} endAngle={0}>
-                <RadialBar background dataKey="value" />
-              </RadialBarChart>
+            <Chart title="Payload vs Flight Time">
+              <LineChart data={payloadCurve} margin={{ top: 8, right: 16, bottom: 28, left: 16 }}>
+                <CartesianGrid strokeDasharray="3 3" opacity={0.25} />
+                <XAxis dataKey="payload" stroke="#1e293b" tick={{ fill: "#1e293b", fontSize: 11 }} label={{ value: "Payload (kg)", position: "insideBottom", offset: -14, fill: "#1e293b", fontSize: 12 }} />
+                <YAxis stroke="#1e293b" tick={{ fill: "#1e293b", fontSize: 11 }} label={{ value: "Flight Time (min)", angle: -90, position: "insideLeft", fill: "#1e293b", fontSize: 12 }} />
+                <Tooltip contentStyle={{ background: "hsl(220 20% 12%)", border: "1px solid hsl(220 10% 25%)", color: "#fff" }} formatter={(v: number) => [`${v} min`, "Flight time"]} labelFormatter={(l) => `Payload: ${l} kg`} />
+                <Line type="monotone" dataKey="flight" stroke="#0369a1" strokeWidth={2.5} name="Flight time (min)" />
+              </LineChart>
             </Chart>
-            <div className="rounded-xl border border-border/60 bg-card/60 p-4 flex flex-col items-center justify-center">
-              <div className="text-xs uppercase tracking-wide text-muted-foreground">Risk Level</div>
-              <div className={`mt-2 text-3xl font-bold ${riskColor(result.riskLevel).split(" ")[0]}`}>{result.riskLevel}</div>
-              <div className="text-xs text-muted-foreground mt-1">Mission: {result.missionFeasibility}</div>
+            <Chart title="Battery Capacity vs Endurance">
+              <LineChart data={batteryCurve} margin={{ top: 8, right: 16, bottom: 28, left: 16 }}>
+                <CartesianGrid strokeDasharray="3 3" opacity={0.25} />
+                <XAxis dataKey="capacity" stroke="#1e293b" tick={{ fill: "#1e293b", fontSize: 11 }} label={{ value: "Battery Capacity (mAh)", position: "insideBottom", offset: -14, fill: "#1e293b", fontSize: 12 }} />
+                <YAxis stroke="#1e293b" tick={{ fill: "#1e293b", fontSize: 11 }} label={{ value: "Endurance (min)", angle: -90, position: "insideLeft", fill: "#1e293b", fontSize: 12 }} />
+                <Tooltip contentStyle={{ background: "hsl(220 20% 12%)", border: "1px solid hsl(220 10% 25%)", color: "#fff" }} formatter={(v: number) => [`${v} min`, "Endurance"]} labelFormatter={(l) => `Capacity: ${l} mAh`} />
+                <Line type="monotone" dataKey="endurance" stroke="#6d28d9" strokeWidth={2.5} name="Endurance (min)" />
+              </LineChart>
+            </Chart>
+            <Chart title="Motor Load vs Payload">
+              <LineChart data={payloadCurve} margin={{ top: 8, right: 16, bottom: 28, left: 16 }}>
+                <CartesianGrid strokeDasharray="3 3" opacity={0.25} />
+                <XAxis dataKey="payload" stroke="#1e293b" tick={{ fill: "#1e293b", fontSize: 11 }} label={{ value: "Payload (kg)", position: "insideBottom", offset: -14, fill: "#1e293b", fontSize: 12 }} />
+                <YAxis stroke="#1e293b" tick={{ fill: "#1e293b", fontSize: 11 }} label={{ value: "Motor Load (%)", angle: -90, position: "insideLeft", fill: "#1e293b", fontSize: 12 }} />
+                <Tooltip contentStyle={{ background: "hsl(220 20% 12%)", border: "1px solid hsl(220 10% 25%)", color: "#fff" }} formatter={(v: number) => [`${v}%`, "Motor load"]} labelFormatter={(l) => `Payload: ${l} kg`} />
+                <Line type="monotone" dataKey="motorLoad" stroke="#b45309" strokeWidth={2.5} name="Motor load (%)" />
+              </LineChart>
+            </Chart>
+            <Chart title="Wind Speed vs Stability">
+              <LineChart data={windCurve} margin={{ top: 8, right: 16, bottom: 28, left: 16 }}>
+                <CartesianGrid strokeDasharray="3 3" opacity={0.25} />
+                <XAxis dataKey="wind" stroke="#1e293b" tick={{ fill: "#1e293b", fontSize: 11 }} label={{ value: "Wind Speed (km/h)", position: "insideBottom", offset: -14, fill: "#1e293b", fontSize: 12 }} />
+                <YAxis stroke="#1e293b" tick={{ fill: "#1e293b", fontSize: 11 }} label={{ value: "Stability Score (/100)", angle: -90, position: "insideLeft", fill: "#1e293b", fontSize: 12 }} />
+                <Tooltip contentStyle={{ background: "hsl(220 20% 12%)", border: "1px solid hsl(220 10% 25%)", color: "#fff" }} formatter={(v: number) => [`${v}/100`, "Stability"]} labelFormatter={(l) => `Wind: ${l} km/h`} />
+                <Line type="monotone" dataKey="stability" stroke="#047857" strokeWidth={2.5} name="Stability (/100)" />
+              </LineChart>
+            </Chart>
+            <div className="rounded-xl border border-border/60 bg-card/60 p-4">
+              <div className="text-xs font-semibold mb-2 text-muted-foreground">Thrust-to-Weight Gauge</div>
+              <div className="h-36"><ResponsiveContainer width="100%" height="100%">
+                <RadialBarChart innerRadius="65%" outerRadius="100%" data={[{ name: "TWR", value: Math.min(result.thrustToWeightRatio, 3), fill: result.riskLevel === "Safe" ? "#047857" : result.riskLevel === "Warning" ? "#b45309" : "#b91c1c" }]} startAngle={180} endAngle={0}>
+                  <RadialBar background dataKey="value" />
+                </RadialBarChart>
+              </ResponsiveContainer></div>
+              <div className="text-center text-xs font-semibold text-foreground">TWR: {result.thrustToWeightRatio.toFixed(2)} (target ≥ 2.0)</div>
+            </div>
+            <div className={`rounded-xl border p-4 flex flex-col items-center justify-center ${riskColor(result.riskLevel)}`}>
+              <div className="text-xs uppercase tracking-wide opacity-90">Risk Level</div>
+              <div className="mt-2 text-3xl font-bold">{result.riskLevel}</div>
+              <div className="text-xs opacity-90 mt-1">Mission: {result.missionFeasibility}</div>
             </div>
           </div>
+
 
           <Disclaimer />
         </div>
