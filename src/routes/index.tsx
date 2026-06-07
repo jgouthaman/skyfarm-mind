@@ -288,7 +288,7 @@ function Landing() {
         <div className="mx-auto max-w-7xl px-5 lg:px-8 relative">
           <div className="grid lg:grid-cols-12 gap-10 items-start">
             <div className="lg:col-span-5">
-              <span className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-accent bg-accent/20 border border-accent/40 px-3 py-1.5 rounded-full">
+              <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-accent-foreground bg-accent border border-accent px-3 py-1.5 rounded-full shadow-glow">
                 <Leaf className="h-3.5 w-3.5" /> Flagship vertical
               </span>
               <h2 className="mt-5 text-3xl sm:text-4xl font-semibold">Flagship vertical: <span className="bg-gradient-agri bg-clip-text text-transparent">AgriSky</span></h2>
@@ -325,7 +325,7 @@ function Landing() {
     <div className="mx-auto max-w-7xl px-5 lg:px-8 relative">
       <div className="grid lg:grid-cols-12 gap-10 items-start">
         <div className="lg:col-span-5">
-          <span className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-primary bg-primary/20 border border-primary/40 px-3 py-1.5 rounded-full">
+          <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-primary-foreground bg-primary border border-primary px-3 py-1.5 rounded-full shadow-glow">
             <Flame className="h-3.5 w-3.5" /> Prototype vertical
           </span>
           <h2 className="mt-5 text-3xl sm:text-4xl font-semibold">GuardSky</h2>
