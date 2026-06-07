@@ -66,6 +66,22 @@ export const Route = createFileRoute("/")({
           description: "Drone-based surveillance, smoke and fire detection, and rapid first-response payload deployment.",
         }),
       },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "LocalBusiness",
+          name: "AeroSpawn",
+          telephone: "+91 99402 63589",
+          address: {
+            "@type": "PostalAddress",
+            addressCountry: "IN",
+            addressLocality: "India",
+          },
+          url: "https://aerospawn.com",
+          description: "AeroSpawn builds AI-powered drone systems, custom UAVs, and aerial intelligence solutions.",
+        }),
+      },
     ],
   }),
   component: Landing,
