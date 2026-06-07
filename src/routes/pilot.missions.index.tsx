@@ -13,7 +13,7 @@ const filters = ["ALL", "ASSIGNED", "IN_PROGRESS", "COMPLETED", "SYNC_PENDING"] 
 function statusBadge(s: string) {
   const map: Record<string, string> = {
     ASSIGNED: "bg-primary/15 text-primary border-primary/30",
-    IN_PROGRESS: "bg-amber-400/15 text-amber-300 border-amber-400/30",
+    IN_PROGRESS: "bg-amber-400/15 text-amber-700 border-amber-400/30",
     COMPLETED: "bg-accent/15 text-accent border-accent/30",
     SYNC_PENDING: "bg-destructive/15 text-destructive border-destructive/30",
   };

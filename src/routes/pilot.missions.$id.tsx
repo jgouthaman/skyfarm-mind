@@ -16,7 +16,7 @@ export const Route = createFileRoute("/pilot/missions/$id")({
 function statusBadge(s: string) {
   const map: Record<string, string> = {
     ASSIGNED: "bg-primary/15 text-primary border-primary/30",
-    IN_PROGRESS: "bg-amber-400/15 text-amber-300 border-amber-400/30",
+    IN_PROGRESS: "bg-amber-400/15 text-amber-700 border-amber-400/30",
     COMPLETED: "bg-accent/15 text-accent border-accent/30",
     SYNC_PENDING: "bg-destructive/15 text-destructive border-destructive/30",
   };
@@ -177,7 +177,7 @@ function SurveyPanel({ missionId, media }: { missionId: string; media: ReturnTyp
             <div className="text-[10px] text-muted-foreground">{m.gpsLat}, {m.gpsLng}</div>
             <div className="text-[10px] flex items-center justify-between mt-1">
               <span>{m.capturedAt}</span>
-              <span className={m.uploadStatus === "UPLOADED" ? "text-accent" : m.uploadStatus === "FAILED" ? "text-destructive" : "text-amber-300"}>{m.uploadStatus}</span>
+              <span className={m.uploadStatus === "UPLOADED" ? "text-accent" : m.uploadStatus === "FAILED" ? "text-destructive" : "text-amber-700"}>{m.uploadStatus}</span>
             </div>
           </div>
         ))}

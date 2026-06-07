@@ -39,7 +39,7 @@ function Compliance() {
     <div className="space-y-5 max-w-5xl">
       <header className="flex justify-between items-end flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-semibold flex items-center gap-2"><ShieldAlert className="h-6 w-6 text-sky-400" /> Compliance & Regulation</h1>
+          <h1 className="text-2xl font-semibold flex items-center gap-2"><ShieldAlert className="h-6 w-6 text-sky-700" /> Compliance & Regulation</h1>
           <p className="text-sm text-muted-foreground mt-1">DGCA + NPNT readiness check and state-wise fly-permission guidance for <span className="text-foreground font-medium">{project.projectName}</span>.</p>
         </div>
         <div className="flex gap-2">
@@ -63,13 +63,13 @@ function Compliance() {
           {report.checks.map((c) => (
             <li key={c.id} className="py-2.5 flex items-start gap-3">
               {c.ok
-                ? <CheckCircle2 className="h-5 w-5 text-emerald-400 mt-0.5 shrink-0" />
+                ? <CheckCircle2 className="h-5 w-5 text-emerald-700 mt-0.5 shrink-0" />
                 : <XCircle className="h-5 w-5 text-muted-foreground mt-0.5 shrink-0" />}
               <div className="flex-1">
                 <div className="text-sm font-medium">{c.label}</div>
                 <div className="text-xs text-muted-foreground">{c.detail}</div>
               </div>
-              <span className={`text-[10px] uppercase tracking-wider px-2 py-1 rounded-full border ${c.ok ? "border-emerald-500/40 text-emerald-400 bg-emerald-500/10" : "border-border text-muted-foreground"}`}>
+              <span className={`text-[10px] uppercase tracking-wider px-2 py-1 rounded-full border ${c.ok ? "border-emerald-500/40 text-emerald-700 bg-emerald-500/10" : "border-border text-muted-foreground"}`}>
                 {c.ok ? "Required" : "N/A"}
               </span>
             </li>
@@ -102,7 +102,7 @@ function Compliance() {
               <KV k="Known red zones" v={rule.knownRedZones.join(", ") || "—"} />
             </div>
             <div className="rounded-lg border border-sky-500/30 bg-sky-500/5 p-3 text-sm">
-              <div className="text-xs uppercase tracking-wider text-sky-400 mb-1">Recommendation for {rule.state}</div>
+              <div className="text-xs uppercase tracking-wider text-sky-700 mb-1">Recommendation for {rule.state}</div>
               {rule.recommendation}
             </div>
           </div>

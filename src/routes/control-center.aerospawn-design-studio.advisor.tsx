@@ -67,7 +67,7 @@ function Advisor() {
     <div className="space-y-5 max-w-4xl">
       <header className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold flex items-center gap-2"><Sparkles className="h-5 w-5 text-violet-400" /> AI Design Advisor</h1>
+          <h1 className="text-2xl font-semibold flex items-center gap-2"><Sparkles className="h-5 w-5 text-violet-700" /> AI Design Advisor</h1>
           <p className="text-sm text-muted-foreground mt-1">{project ? `${project.projectName} · ${project.vertical}` : "No active project"}</p>
         </div>
       </header>

@@ -193,7 +193,7 @@ function F({ t, f, d }: { t: string; f: string; d?: string }) {
   return (
     <div className="border-l-2 border-sky-500/40 pl-2.5">
       <div className="font-medium text-foreground">{t}</div>
-      <div className="font-mono text-[11px] text-sky-400 mt-0.5 break-words">{f}</div>
+      <div className="font-mono text-[11px] text-sky-700 mt-0.5 break-words">{f}</div>
       {d && <div className="text-muted-foreground mt-0.5">{d}</div>}
     </div>
   );
