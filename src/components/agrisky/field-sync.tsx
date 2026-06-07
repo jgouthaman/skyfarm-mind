@@ -21,7 +21,7 @@ function syncBadge(status: SyncStatus | "success" | "retrying" | "failed") {
     syncing: "bg-primary/15 text-primary border-primary/30",
     pending: "bg-yellow-500/15 text-yellow-400 border-yellow-500/30",
     retrying: "bg-yellow-500/15 text-yellow-400 border-yellow-500/30",
-    failed: "bg-red-500/15 text-red-400 border-red-500/30",
+    failed: "bg-red-500/15 text-red-700 border-red-500/30",
   };
   return map[status] ?? "bg-muted text-muted-foreground border-border";
 }

@@ -53,7 +53,7 @@ function Components() {
         <div>
           <h1 className="text-2xl font-semibold">Bill of Materials</h1>
           <p className="text-sm text-muted-foreground mt-1">{project.projectName} · {filtered.length} items · Est. total {inr(total)}</p>
-          <p className="text-xs text-muted-foreground mt-1">Indicative pricing in INR sourced from <a href="https://robu.in" target="_blank" rel="noreferrer" className="underline text-sky-400">robu.in</a>. Click any row's source link for the latest live price.</p>
+          <p className="text-xs text-muted-foreground mt-1">Indicative pricing in INR sourced from <a href="https://robu.in" target="_blank" rel="noreferrer" className="underline text-sky-700">robu.in</a>. Click any row's source link for the latest live price.</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <Button variant="outline" size="sm" onClick={exportCSV}>Export CSV</Button>
@@ -84,10 +84,10 @@ function Components() {
                   <td className="px-4 py-2.5">{c.quantity}</td>
                   <td className="px-4 py-2.5">{inr(c.estimatedCost)}</td>
                   <td className="px-4 py-2.5">{inr(c.quantity * c.estimatedCost)}</td>
-                  <td className="px-4 py-2.5"><span className={`text-xs px-2 py-0.5 rounded-full border ${c.priority === "Mandatory" ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30" : c.priority === "Recommended" ? "bg-sky-500/10 text-sky-400 border-sky-500/30" : c.priority === "Advanced" ? "bg-violet-500/10 text-violet-400 border-violet-500/30" : "bg-muted/40 text-muted-foreground border-border"}`}>{c.priority}</span></td>
+                  <td className="px-4 py-2.5"><span className={`text-xs px-2 py-0.5 rounded-full border ${c.priority === "Mandatory" ? "bg-emerald-500/10 text-emerald-700 border-emerald-500/30" : c.priority === "Recommended" ? "bg-sky-500/10 text-sky-700 border-sky-500/30" : c.priority === "Advanced" ? "bg-violet-500/10 text-violet-700 border-violet-500/30" : "bg-muted/40 text-muted-foreground border-border"}`}>{c.priority}</span></td>
                   <td className="px-4 py-2.5">
                     {c.sourceUrl ? (
-                      <a href={c.sourceUrl} target="_blank" rel="noreferrer" className="text-xs text-sky-400 hover:underline">{c.sourceName ?? "view"} ↗</a>
+                      <a href={c.sourceUrl} target="_blank" rel="noreferrer" className="text-xs text-sky-700 hover:underline">{c.sourceName ?? "view"} ↗</a>
                     ) : <span className="text-xs text-muted-foreground">—</span>}
                   </td>
                 </tr>

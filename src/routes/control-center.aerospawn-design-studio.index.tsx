@@ -22,12 +22,12 @@ function Dashboard() {
     const sims = projects.filter((p) => p.simulationResults).length;
     const ai = projects.reduce((n, p) => n + (p.advisorMessages?.length ?? 0), 0);
     return [
-      { label: "Total Drone Designs", value: projects.length, tone: "text-sky-400" },
-      { label: "Simulations Completed", value: sims, tone: "text-indigo-400" },
-      { label: "Safe Designs", value: safe, tone: "text-emerald-400" },
-      { label: "Warning Designs", value: warn, tone: "text-amber-400" },
-      { label: "Unsafe Designs", value: unsafe, tone: "text-red-400" },
-      { label: "AI Reviews Generated", value: ai, tone: "text-violet-400" },
+      { label: "Total Drone Designs", value: projects.length, tone: "text-sky-700" },
+      { label: "Simulations Completed", value: sims, tone: "text-indigo-700" },
+      { label: "Safe Designs", value: safe, tone: "text-emerald-700" },
+      { label: "Warning Designs", value: warn, tone: "text-amber-700" },
+      { label: "Unsafe Designs", value: unsafe, tone: "text-red-700" },
+      { label: "AI Reviews Generated", value: ai, tone: "text-violet-700" },
     ];
   }, [projects]);
 
