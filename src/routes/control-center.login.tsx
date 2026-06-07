@@ -39,6 +39,8 @@ function LoginPage() {
   const [mode, setMode] = useState<"signin" | "setup">("signin");
   const [bootstrapPhone, setBootstrapPhone] = useState("9940263589");
   const [setupAvailable, setSetupAvailable] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   useEffect(() => {
     checkBootstrap()
