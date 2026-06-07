@@ -162,12 +162,15 @@ function SimulationLab() {
                 <Line type="monotone" dataKey="stability" stroke="#047857" strokeWidth={2.5} name="Stability (/100)" />
               </LineChart>
             </Chart>
-            <Chart title="Thrust-to-Weight Gauge">
-              <RadialBarChart innerRadius="65%" outerRadius="100%" data={[{ name: "TWR", value: Math.min(result.thrustToWeightRatio, 3), fill: result.riskLevel === "Safe" ? "#047857" : result.riskLevel === "Warning" ? "#b45309" : "#b91c1c" }]} startAngle={180} endAngle={0}>
-                <RadialBar background dataKey="value" />
-              </RadialBarChart>
-              <div className="text-center text-xs text-foreground/80 -mt-2">TWR: {result.thrustToWeightRatio.toFixed(2)} (target ≥ 2.0)</div>
-            </Chart>
+            <div className="rounded-xl border border-border/60 bg-card/60 p-4">
+              <div className="text-xs font-semibold mb-2 text-muted-foreground">Thrust-to-Weight Gauge</div>
+              <div className="h-36"><ResponsiveContainer width="100%" height="100%">
+                <RadialBarChart innerRadius="65%" outerRadius="100%" data={[{ name: "TWR", value: Math.min(result.thrustToWeightRatio, 3), fill: result.riskLevel === "Safe" ? "#047857" : result.riskLevel === "Warning" ? "#b45309" : "#b91c1c" }]} startAngle={180} endAngle={0}>
+                  <RadialBar background dataKey="value" />
+                </RadialBarChart>
+              </ResponsiveContainer></div>
+              <div className="text-center text-xs font-semibold text-foreground">TWR: {result.thrustToWeightRatio.toFixed(2)} (target ≥ 2.0)</div>
+            </div>
             <div className={`rounded-xl border p-4 flex flex-col items-center justify-center ${riskColor(result.riskLevel)}`}>
               <div className="text-xs uppercase tracking-wide opacity-90">Risk Level</div>
               <div className="mt-2 text-3xl font-bold">{result.riskLevel}</div>
