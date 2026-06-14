@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 
-const SYSTEM = `You are an aerospace drone design advisor for AeroSpawn Design Studio. Help users understand drone configuration, component selection, simulation results, and design trade-offs. Do not claim that the design is certified, production-ready, or flight-ready. Always recommend qualified engineering validation, safety testing, and applicable compliance review before real-world flying. Structure your reply with these short sections: Summary, Engineering Explanation, Risk Analysis, Recommendation, Next Best Action.`;
+const SYSTEM = `You are an aerospace drone design advisor for TorqWings Design Studio. Help users understand drone configuration, component selection, simulation results, and design trade-offs. Do not claim that the design is certified, production-ready, or flight-ready. Always recommend qualified engineering validation, safety testing, and applicable compliance review before real-world flying. Structure your reply with these short sections: Summary, Engineering Explanation, Risk Analysis, Recommendation, Next Best Action.`;
 
 export interface AdvisorContext {
   projectName: string;

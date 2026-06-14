@@ -13,10 +13,10 @@ import { createControlUser, listControlUsers, setUserPassword } from "@/lib/admi
 export const Route = createFileRoute("/control-center/users")({
   head: () => ({
     meta: [
-      { title: "AeroSpawn Control Center — Users" },
-      { name: "description", content: "Manage AeroSpawn Control Center users. Create SME and admin accounts, assign roles, and reset passwords." },
-      { property: "og:title", content: "AeroSpawn Control Center — Users" },
-      { property: "og:description", content: "Manage AeroSpawn Control Center users. Create SME and admin accounts, assign roles, and reset passwords." },
+      { title: "TorqWings Control Center — Users" },
+      { name: "description", content: "Manage TorqWings Control Center users. Create SME and admin accounts, assign roles, and reset passwords." },
+      { property: "og:title", content: "TorqWings Control Center — Users" },
+      { property: "og:description", content: "Manage TorqWings Control Center users. Create SME and admin accounts, assign roles, and reset passwords." },
       { property: "og:url", content: "/control-center/users" },
     ],
     links: [
@@ -118,7 +118,7 @@ function UsersPage() {
             <span className="grid place-items-center h-8 w-8 rounded-lg bg-gradient-primary shadow-glow">
               <Plane className="h-4 w-4 text-primary-foreground" />
             </span>
-            <span>AeroSpawn <span className="text-muted-foreground font-normal">/ Users</span></span>
+            <span>TorqWings <span className="text-muted-foreground font-normal">/ Users</span></span>
           </Link>
           <Button asChild variant="ghost" size="sm">
             <Link to="/control-center"><ArrowLeft className="h-4 w-4 mr-1" /> Control Center</Link>

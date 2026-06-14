@@ -15,7 +15,7 @@ function History() {
     <div className="space-y-4">
       <header>
         <h1 className="text-2xl font-semibold">Project History</h1>
-        <p className="text-sm text-muted-foreground mt-1">All saved AeroSpawn Design Studio projects.</p>
+        <p className="text-sm text-muted-foreground mt-1">All saved TorqWings Design Studio projects.</p>
       </header>
       <div className="rounded-xl border border-border/60 bg-card/60 overflow-hidden">
         <div className="overflow-x-auto">

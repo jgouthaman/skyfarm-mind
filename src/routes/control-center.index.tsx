@@ -10,10 +10,10 @@ import { useControlAuth } from "@/hooks/useControlAuth";
 export const Route = createFileRoute("/control-center/")({
   head: () => ({
     meta: [
-      { title: "AeroSpawn Control Center" },
-      { name: "description", content: "AeroSpawn Control Center hub. Access AgriSky, GuardSky, and vertical dashboards to manage drone operations." },
-      { property: "og:title", content: "AeroSpawn Control Center" },
-      { property: "og:description", content: "AeroSpawn Control Center hub. Access AgriSky, GuardSky, and vertical dashboards to manage drone operations." },
+      { title: "TorqWings Control Center" },
+      { name: "description", content: "TorqWings Control Center hub. Access AgriSky, GuardSky, and vertical dashboards to manage drone operations." },
+      { property: "og:title", content: "TorqWings Control Center" },
+      { property: "og:description", content: "TorqWings Control Center hub. Access AgriSky, GuardSky, and vertical dashboards to manage drone operations." },
       { property: "og:url", content: "/control-center" },
     ],
     links: [
@@ -36,7 +36,7 @@ const verticals = [
   { id: "trainsky", name: "TrainSky Control Center", tag: "Drone Pilot Training & Certification", status: "Coming Soon", tone: "soon",
     desc: "Structured drone pilot training, mission rehearsal, and certification tracking.",
     icon: GraduationCap, cta: "Coming Soon" },
-  { id: "design-studio", name: "AeroSpawn Design Studio", tag: "AI-Powered Drone Design Studio", status: "New", tone: "active",
+  { id: "design-studio", name: "TorqWings Design Studio", tag: "AI-Powered Drone Design Studio", status: "New", tone: "active",
     desc: "AI-powered drone design, component generation, simulation, and engineering advisory studio.",
     icon: Sparkles, cta: "Open Design Studio", to: "/control-center/aerospawn-design-studio" as const },
 ];
@@ -74,7 +74,7 @@ function Hub() {
             <span className="grid place-items-center h-8 w-8 rounded-lg bg-gradient-primary shadow-glow">
               <Plane className="h-4 w-4 text-primary-foreground" />
             </span>
-            <span>AeroSpawn <span className="text-muted-foreground font-normal">Control Center</span></span>
+            <span>TorqWings <span className="text-muted-foreground font-normal">Control Center</span></span>
           </Link>
           <div className="flex items-center gap-2">
             {auth.phone && (
@@ -100,7 +100,7 @@ function Hub() {
 
       <main className="mx-auto max-w-7xl px-5 lg:px-8 py-10">
         <div className="max-w-3xl">
-          <h1 className="text-3xl sm:text-4xl font-semibold">AeroSpawn Control Center</h1>
+          <h1 className="text-3xl sm:text-4xl font-semibold">TorqWings Control Center</h1>
           <p className="mt-3 text-muted-foreground">
             Manage drone operations, aerial intelligence workflows, and vertical-specific control centers.
           </p>

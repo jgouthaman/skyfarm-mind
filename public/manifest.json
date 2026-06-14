@@ -1,7 +1,7 @@
 {
-  "name": "AeroSpawn Control Center",
-  "short_name": "AeroSpawn",
-  "description": "AeroSpawn aerial intelligence — Control Center & AgriSky Pilot field app.",
+  "name": "TorqWings Control Center",
+  "short_name": "TorqWings",
+  "description": "TorqWings aerial intelligence — Control Center & AgriSky Pilot field app.",
   "start_url": "/control-center",
   "scope": "/",
   "display": "standalone",

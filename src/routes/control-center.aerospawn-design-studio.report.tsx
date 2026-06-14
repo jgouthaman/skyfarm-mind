@@ -39,7 +39,7 @@ function Report() {
 
       <article className="rounded-xl border border-border/60 bg-card/60 p-8 space-y-6 print:bg-white print:text-black">
         <div className="border-b border-border/60 pb-4">
-          <div className="text-xs uppercase tracking-widest text-muted-foreground">AeroSpawn Design Studio Report</div>
+          <div className="text-xs uppercase tracking-widest text-muted-foreground">TorqWings Design Studio Report</div>
           <h2 className="text-2xl font-bold mt-1">{project.projectName}</h2>
           <div className="text-sm text-muted-foreground mt-1">{project.vertical} · {project.purpose} · {project.userType}</div>
         </div>
