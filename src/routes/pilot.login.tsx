@@ -61,7 +61,7 @@ function PilotLogin() {
             <Plane className="h-5 w-5 text-primary-foreground" />
           </span>
           <div className="text-left">
-            <div className="font-display font-semibold leading-none">AeroSpawn</div>
+            <div className="font-display font-semibold leading-none">TorqWings</div>
             <div className="text-xs text-muted-foreground">AgriSky Pilot App</div>
           </div>
         </div>

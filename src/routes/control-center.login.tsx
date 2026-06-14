@@ -14,10 +14,10 @@ import { adminBootstrapAvailable, bootstrapAdmin } from "@/lib/admin.functions";
 export const Route = createFileRoute("/control-center/login")({
   head: () => ({
     meta: [
-      { title: "AeroSpawn Control Center — Login" },
-      { name: "description", content: "Secure login for AeroSpawn Control Center. Manage drone operations, aerial intelligence, and farm workflows." },
-      { property: "og:title", content: "AeroSpawn Control Center — Login" },
-      { property: "og:description", content: "Secure login for AeroSpawn Control Center. Manage drone operations, aerial intelligence, and farm workflows." },
+      { title: "TorqWings Control Center — Login" },
+      { name: "description", content: "Secure login for TorqWings Control Center. Manage drone operations, aerial intelligence, and farm workflows." },
+      { property: "og:title", content: "TorqWings Control Center — Login" },
+      { property: "og:description", content: "Secure login for TorqWings Control Center. Manage drone operations, aerial intelligence, and farm workflows." },
       { property: "og:url", content: "/control-center/login" },
     ],
     links: [
@@ -68,7 +68,7 @@ function LoginPage() {
     });
     setLoading(false);
     if (error) return toast.error(error.message || "Invalid mobile number or password.");
-    toast.success("Welcome to AeroSpawn Control Center");
+    toast.success("Welcome to TorqWings Control Center");
     setTimeout(() => navigate({ to: "/control-center" }), 200);
   };
 
@@ -105,7 +105,7 @@ function LoginPage() {
           <span className="grid place-items-center h-8 w-8 rounded-lg bg-gradient-primary shadow-glow">
             <Plane className="h-4 w-4 text-primary-foreground" />
           </span>
-          <span>AeroSpawn</span>
+          <span>TorqWings</span>
         </Link>
         <Link to="/" className="text-sm text-muted-foreground hover:text-foreground">← Back to site</Link>
       </header>
@@ -115,7 +115,7 @@ function LoginPage() {
           <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-primary-foreground bg-primary border border-primary px-3 py-1.5 rounded-full shadow-glow">
             <Shield className="h-3.5 w-3.5" /> Secure access
           </span>
-          <h1 className="mt-5 text-3xl sm:text-4xl font-semibold">AeroSpawn Control Center</h1>
+          <h1 className="mt-5 text-3xl sm:text-4xl font-semibold">TorqWings Control Center</h1>
           <p className="mt-3 text-sm text-muted-foreground">
             {mode === "setup"
               ? `First-time setup for the admin account (${bootstrapPhone}). Choose a strong password.`

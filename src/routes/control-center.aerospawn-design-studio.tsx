@@ -5,7 +5,7 @@ import { useCurrentProject } from "@/lib/design-studio/store";
 import { Plane } from "lucide-react";
 
 export const Route = createFileRoute("/control-center/aerospawn-design-studio")({
-  head: () => ({ meta: [{ title: "AeroSpawn Design Studio" }] }),
+  head: () => ({ meta: [{ title: "TorqWings Design Studio" }] }),
   component: StudioLayout,
 });
 
@@ -19,7 +19,7 @@ function StudioLayout() {
         <header className="h-14 border-b border-border/60 bg-card/40 backdrop-blur sticky top-0 z-30 flex items-center justify-between px-6">
           <div className="flex items-center gap-2 text-sm">
             <Plane className="h-4 w-4 text-primary" />
-            <Link to="/control-center" className="text-muted-foreground hover:text-foreground">AeroSpawn Control Center</Link>
+            <Link to="/control-center" className="text-muted-foreground hover:text-foreground">TorqWings Control Center</Link>
             <span className="text-muted-foreground">/</span>
             <span className="font-medium">Design Studio</span>
             {project && <>

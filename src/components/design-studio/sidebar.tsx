@@ -24,7 +24,7 @@ export function StudioSidebar() {
           <Plane className="h-4 w-4 text-white" />
         </span>
         <div className="leading-tight">
-          <div className="text-sm font-semibold">AeroSpawn</div>
+          <div className="text-sm font-semibold">TorqWings</div>
           <div className="text-[10px] text-muted-foreground uppercase tracking-wider">Design Studio</div>
         </div>
       </Link>

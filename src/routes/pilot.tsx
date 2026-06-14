@@ -44,7 +44,7 @@ function PilotLayout() {
               </span>
               <div className="leading-none">
                 <div className="text-sm font-display font-semibold">AgriSky Pilot</div>
-                <div className="text-[10px] text-muted-foreground">AeroSpawn field gateway</div>
+                <div className="text-[10px] text-muted-foreground">TorqWings field gateway</div>
               </div>
             </Link>
             <button

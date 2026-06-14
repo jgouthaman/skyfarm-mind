@@ -34,7 +34,7 @@ function Dashboard() {
   return (
     <div className="space-y-8">
       <header>
-        <h1 className="text-3xl font-semibold">AeroSpawn Design Studio</h1>
+        <h1 className="text-3xl font-semibold">TorqWings Design Studio</h1>
         <p className="mt-1.5 text-sm text-muted-foreground max-w-2xl">
           Design drone architectures from mission requirements, simulate performance, and generate component lists.
         </p>
