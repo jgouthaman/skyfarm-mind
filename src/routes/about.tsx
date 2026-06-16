@@ -198,10 +198,9 @@ function AboutPage() {
               From graduation to <span className={SKY}>flight</span>.
             </h2>
 
-            {/* Desktop: horizontal */}
-            <div className="mt-12 hidden md:block relative">
-              <div className="absolute left-0 right-0 top-3 h-px bg-border" />
-              <div className="grid grid-cols-5 gap-4 relative">
+            {/* Desktop: horizontal cards */}
+            <div className="mt-12 hidden md:block">
+              <div className="grid grid-cols-5 gap-4">
                 {[
                   { y: "2025", t: "Founded in Chennai by 5 aerospace engineers", active: true },
                   { y: "2025", t: "AIDAT membership & TIDCO registration", active: true },
@@ -209,25 +208,34 @@ function AboutPage() {
                   { y: "2026", t: "AgriSky & InfraSky pilot programs active", active: false },
                   { y: "2026", t: "Seed funding & Sriperumbudur Aero Park presence", active: false },
                 ].map((m, idx) => (
-                  <div key={idx} className="flex flex-col items-center text-center px-2">
+                  <div
+                    key={idx}
+                    className={`rounded-2xl p-5 text-center border shadow-card transition-all hover:-translate-y-[3px] ${
+                      m.active
+                        ? "bg-gradient-card border-primary/40 hover:border-primary/60"
+                        : "bg-card/50 border-border/60 hover:border-primary/40"
+                    }`}
+                  >
                     <div
-                      className={`h-6 w-6 rounded-full border-2 ${
+                      className={`mx-auto h-4 w-4 rounded-full border-2 ${
                         m.active
                           ? "bg-primary border-primary shadow-glow"
                           : "bg-background border-border"
                       }`}
                     />
-                    <div className={`mt-4 text-sm font-display font-semibold ${m.active ? "text-primary" : "text-muted-foreground"}`}>
+                    <div className={`mt-4 text-lg font-display font-bold ${m.active ? "text-primary" : "text-muted-foreground"}`}>
                       {m.y}
                     </div>
-                    <p className="mt-2 text-xs text-muted-foreground leading-relaxed">{m.t}</p>
+                    <p className={`mt-3 text-sm leading-relaxed ${m.active ? "text-foreground" : "text-muted-foreground"}`}>
+                      {m.t}
+                    </p>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Mobile: vertical */}
-            <ol className="mt-10 md:hidden relative border-l border-border/60 ml-3 space-y-6">
+            {/* Mobile: vertical cards */}
+            <div className="mt-10 md:hidden grid gap-4">
               {[
                 { y: "2025", t: "Founded in Chennai by 5 aerospace engineers", active: true },
                 { y: "2025", t: "AIDAT membership & TIDCO registration", active: true },
@@ -235,19 +243,30 @@ function AboutPage() {
                 { y: "2026", t: "AgriSky & InfraSky pilot programs active", active: false },
                 { y: "2026", t: "Seed funding & Sriperumbudur Aero Park presence", active: false },
               ].map((m, idx) => (
-                <li key={idx} className="pl-6 relative">
-                  <span
-                    className={`absolute -left-[9px] top-1 h-4 w-4 rounded-full border-2 ${
-                      m.active ? "bg-primary border-primary" : "bg-background border-border"
-                    }`}
-                  />
-                  <div className={`text-sm font-display font-semibold ${m.active ? "text-primary" : "text-muted-foreground"}`}>
-                    {m.y}
+                <div
+                  key={idx}
+                  className={`rounded-2xl p-5 border shadow-card transition-all ${
+                    m.active
+                      ? "bg-gradient-card border-primary/40"
+                      : "bg-card/50 border-border/60"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <span
+                      className={`h-4 w-4 rounded-full border-2 shrink-0 ${
+                        m.active ? "bg-primary border-primary shadow-glow" : "bg-background border-border"
+                      }`}
+                    />
+                    <div className={`text-base font-display font-bold ${m.active ? "text-primary" : "text-muted-foreground"}`}>
+                      {m.y}
+                    </div>
                   </div>
-                  <p className="mt-1 text-sm text-muted-foreground">{m.t}</p>
-                </li>
+                  <p className={`mt-2 text-sm ${m.active ? "text-foreground" : "text-muted-foreground"}`}>
+                    {m.t}
+                  </p>
+                </div>
               ))}
-            </ol>
+            </div>
           </div>
         </section>
 
