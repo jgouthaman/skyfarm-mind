@@ -32,7 +32,8 @@ const nav = [
   { label: "Contact", href: "/#contact" },
 ];
 
-const SKY = "text-[#378ADD]";
+const SKY = "text-primary";
+const EYEBROW = "inline-block text-xs font-bold uppercase tracking-[0.2em] text-primary-foreground bg-primary px-3 py-1 rounded-md shadow-glow";
 
 function AboutPage() {
   const [open, setOpen] = useState(false);
