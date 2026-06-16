@@ -274,7 +274,7 @@ function AboutPage() {
         <section className="py-20 sm:py-28 bg-muted/30">
           <div className="mx-auto max-w-7xl px-5 lg:px-8 grid lg:grid-cols-12 gap-10">
             <div className="lg:col-span-4">
-              <span className={`text-xs uppercase tracking-[0.25em] ${SKY}`}>Our mission</span>
+              <span className={EYEBROW}>Our mission</span>
               <h2 className="mt-3 text-3xl sm:text-4xl font-semibold">
                 Engineering the future of aerial intelligence.
               </h2>
