@@ -120,7 +120,7 @@ function AboutPage() {
             </div>
 
             <div className="lg:col-span-5">
-              <div className="rounded-3xl p-6 sm:p-8 bg-[#1a2035] border border-white/10 shadow-card">
+              <div className="rounded-3xl p-6 sm:p-8 bg-gradient-card border border-border/60 shadow-card">
                 <div className="grid grid-cols-2 gap-5">
                   {[
                     { k: "5", v: "Aerospace engineers" },
@@ -128,13 +128,13 @@ function AboutPage() {
                     { k: "₹75K Cr", v: "TN aerospace target by 2032" },
                     { k: "1st", v: "AI drone platform from Chennai" },
                   ].map((s) => (
-                    <div key={s.v} className="rounded-2xl bg-white/[0.03] border border-white/10 p-4 hover:-translate-y-[3px] hover:border-white/20 transition-all">
+                    <div key={s.v} className="rounded-2xl bg-background/40 border border-border/60 p-4 hover:-translate-y-[3px] hover:border-primary/40 hover:shadow-soft transition-all">
                       <div className="text-2xl font-display font-semibold text-foreground">{s.k}</div>
                       <div className="text-xs text-muted-foreground mt-1">{s.v}</div>
                     </div>
                   ))}
                 </div>
-                <div className="mt-5 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-[#378ADD] bg-[#378ADD]/10 border border-[#378ADD]/30 px-3 py-1.5 rounded-full">
+                <div className="mt-5 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-primary-foreground bg-primary border border-primary px-3 py-1.5 rounded-full shadow-glow">
                   <MapPin className="h-3.5 w-3.5" /> Chennai, Tamil Nadu · India
                 </div>
               </div>
