@@ -124,9 +124,6 @@ function Landing() {
             ))}
           </nav>
           <div className="hidden md:flex items-center gap-2">
-            <Button asChild size="sm" variant="outline" className="border-border/80 bg-card/40 backdrop-blur hover:bg-card">
-              <Link to="/control-center/login">Control Center Login</Link>
-            </Button>
             <Button asChild size="sm" className="bg-gradient-primary text-primary-foreground hover:opacity-90">
               <a href="#contact">Partner with us</a>
             </Button>
