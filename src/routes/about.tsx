@@ -5,6 +5,7 @@ import {
   ShieldCheck, Handshake, Rocket, GraduationCap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { WhatsAppFab } from "@/components/whatsapp-fab";
 
 export const Route = createFileRoute("/about")({
   head: () => ({
