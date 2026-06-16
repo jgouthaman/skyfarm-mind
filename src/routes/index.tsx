@@ -190,7 +190,7 @@ function Landing() {
             </div>
             <div className="mt-10 grid grid-cols-3 gap-6 max-w-md">
               {[
-              { k: "6", v: "Verticals" },
+              { k: "7", v: "Verticals" },
                 { k: "AI", v: "Analytics core" },
                 { k: "R&D", v: "Custom UAVs" },
               ].map((s) => (
