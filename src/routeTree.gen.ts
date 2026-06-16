@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as PilotRouteImport } from './routes/pilot'
 import { Route as FieldRouteImport } from './routes/field'
+import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PilotIndexRouteImport } from './routes/pilot.index'
 import { Route as ControlCenterIndexRouteImport } from './routes/control-center.index'
@@ -49,6 +50,11 @@ const PilotRoute = PilotRouteImport.update({
 const FieldRoute = FieldRouteImport.update({
   id: '/field',
   path: '/field',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -180,6 +186,7 @@ const ControlCenterAerospawnDesignStudioAdvisorRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/field': typeof FieldRoute
   '/pilot': typeof PilotRouteWithChildren
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -208,6 +215,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/field': typeof FieldRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/control-center/agrisky': typeof ControlCenterAgriskyRoute
@@ -235,6 +243,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/field': typeof FieldRoute
   '/pilot': typeof PilotRouteWithChildren
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -265,6 +274,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/about'
     | '/field'
     | '/pilot'
     | '/sitemap.xml'
@@ -293,6 +303,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/about'
     | '/field'
     | '/sitemap.xml'
     | '/control-center/agrisky'
@@ -319,6 +330,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/about'
     | '/field'
     | '/pilot'
     | '/sitemap.xml'
@@ -348,6 +360,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AboutRoute: typeof AboutRoute
   FieldRoute: typeof FieldRoute
   PilotRoute: typeof PilotRouteWithChildren
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
@@ -379,6 +392,13 @@ declare module '@tanstack/react-router' {
       path: '/field'
       fullPath: '/field'
       preLoaderRoute: typeof FieldRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -611,6 +631,7 @@ const ControlCenterAerospawnDesignStudioRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AboutRoute: AboutRoute,
   FieldRoute: FieldRoute,
   PilotRoute: PilotRouteWithChildren,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
