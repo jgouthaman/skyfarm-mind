@@ -558,7 +558,7 @@ function Landing() {
             <h4 className="font-display font-semibold text-sm">Contact</h4>
             <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
               <li>Gouthaman — +91 99402 63589</li>
-              <li>hello@aerospawn.in</li>
+              <li>TorqWings@gmail.com</li>
               <li>India</li>
             </ul>
           </div>
@@ -661,7 +661,7 @@ function ContactForm() {
     >
       <Field id="cf-name" label="Name" required><Input id="cf-name" name="name" required placeholder="Your full name" /></Field>
       <Field id="cf-phone" label="Phone" required><Input id="cf-phone" name="phone" required type="tel" placeholder="+91 ..." /></Field>
-      <Field id="cf-email" label="Email" required><Input id="cf-email" name="email" required type="email" placeholder="you@company.com" /></Field>
+      <Field id="cf-email" label="Email" required><Input id="cf-email" name="email" required type="email" placeholder="TorqWings@gmail.com" /></Field>
       <Field id="cf-org" label="Organization"><Input id="cf-org" name="org" placeholder="Company / FPO / Institution" /></Field>
       <Field id="cf-location" label="Location"><Input id="cf-location" name="location" placeholder="City, State" /></Field>
       <Field id="cf-interest" label="Interested in" required>
