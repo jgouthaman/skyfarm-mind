@@ -101,6 +101,7 @@ const nav = [
 
 function Landing() {
   const [open, setOpen] = useState(false);
+  const [demoOpen, setDemoOpen] = useState(false);
   return (
     <div id="home" className="min-h-screen bg-background text-foreground">
       <Toaster richColors position="top-center" theme="dark" />
