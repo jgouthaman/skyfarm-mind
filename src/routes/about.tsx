@@ -368,7 +368,7 @@ function AboutPage() {
           <div>
             <h4 className="font-display font-semibold text-sm">Contact</h4>
             <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
-              <li className="flex items-center gap-2"><Phone className="h-3.5 w-3.5 text-primary" /> Gouthaman — +91 99402 63589</li>
+              <li className="flex items-center gap-2"><Phone className="h-3.5 w-3.5 text-primary" /> Hello : 9940263589</li>
               <li className="flex items-center gap-2"><Mail className="h-3.5 w-3.5 text-primary" /> torqwings@gmail.com</li>
               <li className="flex items-center gap-2"><MapPin className="h-3.5 w-3.5 text-primary" /> Chennai, India</li>
             </ul>

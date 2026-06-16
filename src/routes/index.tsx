@@ -607,7 +607,7 @@ function Landing() {
               Whether you are a farmer, infrastructure company, drone operator, investor, institution, or industry partner — TorqWings is open to pilots, partnerships, and custom drone intelligence projects.
             </p>
             <ul className="mt-8 space-y-4 text-sm">
-              <li className="flex items-center gap-3"><Phone className="h-4 w-4 text-primary" /> Gouthaman — +91 99402 63589</li>
+              <li className="flex items-center gap-3"><Phone className="h-4 w-4 text-primary" /> Hello : 9940263589</li>
               <li className="flex items-center gap-3"><Mail className="h-4 w-4 text-primary" /> torqwings@gmail.com</li>
               <li className="flex items-center gap-3"><MapPin className="h-4 w-4 text-primary" /> India</li>
             </ul>
@@ -650,7 +650,7 @@ function Landing() {
           <div>
             <h4 className="font-display font-semibold text-sm">Contact</h4>
             <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
-              <li>Gouthaman — +91 99402 63589</li>
+              <li>Hello : 9940263589</li>
               <li>torqwings@gmail.com</li>
               <li>India</li>
             </ul>
