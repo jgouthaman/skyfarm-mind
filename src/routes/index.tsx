@@ -144,9 +144,6 @@ function Landing() {
                   {n.label}
                 </a>
               ))}
-              <Button asChild size="sm" variant="outline" className="mt-2">
-                <Link to="/control-center/login" onClick={() => setOpen(false)}>Control Center Login</Link>
-              </Button>
               <Button asChild size="sm" className="bg-gradient-primary text-primary-foreground">
                 <a href="#contact" onClick={() => setOpen(false)}>Partner with us</a>
               </Button>
