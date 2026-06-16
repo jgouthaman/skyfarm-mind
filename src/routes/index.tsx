@@ -679,16 +679,15 @@ function Landing() {
               <li>torqwings@gmail.com</li>
               <li>India</li>
             </ul>
-            <h4 className="mt-6 font-display font-semibold text-sm">For partners</h4>
-            <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
-              <li><Link to="/control-center/login" className="hover:text-foreground">Control Center Login</Link></li>
-            </ul>
           </div>
         </div>
         <div className="border-t border-border">
           <div className="mx-auto max-w-7xl px-5 lg:px-8 py-6 text-xs text-muted-foreground flex flex-wrap justify-between gap-3">
             <span>© {new Date().getFullYear()} TorqWings. All rights reserved.</span>
-            <span>Aerospace · Drones · AI</span>
+            <div className="flex items-center gap-4">
+              <span>Aerospace · Drones · AI</span>
+              <Link to="/control-center/login" className="hover:text-foreground transition-colors">Control Center Login</Link>
+            </div>
           </div>
         </div>
       </footer>
