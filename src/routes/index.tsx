@@ -20,6 +20,7 @@ import { Toaster } from "@/components/ui/sonner";
 import heroImg from "@/assets/aerospawn-hero.jpg";
 import demoVideo from "@/assets/design-studio-demo.mp4.asset.json";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { WhatsAppFab } from "@/components/whatsapp-fab";
 
 export const Route = createFileRoute("/")({
   head: () => ({
