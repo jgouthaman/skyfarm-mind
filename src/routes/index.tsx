@@ -18,6 +18,8 @@ import {
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
 import heroImg from "@/assets/aerospawn-hero.jpg";
+import demoVideo from "@/assets/design-studio-demo.mp4.asset.json";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -391,8 +393,8 @@ function Landing() {
           <p className="mt-5 text-muted-foreground">
             TorqWings Design Studio is an engineering workspace where teams design drone architectures from mission requirements, run real-time flight simulations, generate component lists, and receive AI-powered design reviews — turning concepts into flyable systems faster.
           </p>
-          <Button asChild size="lg" className="mt-7 bg-gradient-primary text-primary-foreground hover:opacity-90 shadow-glow">
-            <Link to="/control-center/aerospawn-design-studio">Open Design Studio <ArrowRight className="ml-1 h-4 w-4" /></Link>
+          <Button size="lg" onClick={() => setDemoOpen(true)} className="mt-7 bg-gradient-primary text-primary-foreground hover:opacity-90 shadow-glow">
+            Watch Design Studio Demo <ArrowRight className="ml-1 h-4 w-4" />
           </Button>
         </div>
         <div className="lg:col-span-7 space-y-4">
