@@ -101,7 +101,7 @@ function AboutPage() {
           <div className="absolute inset-0 grid-bg opacity-40 pointer-events-none" />
           <div className="mx-auto max-w-7xl px-5 lg:px-8 grid lg:grid-cols-12 gap-10 items-center relative">
             <div className="lg:col-span-7">
-              <span className="inline-block text-xs font-bold uppercase tracking-[0.25em] text-[#EF9F27]">
+              <span className="inline-block text-xs font-bold uppercase tracking-[0.2em] text-primary-foreground bg-primary px-3 py-1 rounded-md shadow-glow">
                 Our story
               </span>
               <h1 className="mt-4 text-4xl sm:text-5xl lg:text-6xl font-semibold leading-[1.05]">
@@ -147,7 +147,7 @@ function AboutPage() {
         <section className="py-20 sm:py-28">
           <div className="mx-auto max-w-7xl px-5 lg:px-8 grid lg:grid-cols-12 gap-10 items-start">
             <div className="lg:col-span-6">
-              <span className="inline-block text-xs font-bold uppercase tracking-[0.25em] text-[#EF9F27]">
+              <span className="inline-block text-xs font-bold uppercase tracking-[0.2em] text-primary-foreground bg-primary px-3 py-1 rounded-md shadow-glow">
                 How we started
               </span>
               <h2 className="mt-3 text-3xl sm:text-4xl font-semibold max-w-xl">
@@ -158,11 +158,11 @@ function AboutPage() {
                 <p>Chennai gave us the perfect foundation. Surrounded by the Tamil Nadu Defence Industrial Corridor, the AIDAT ecosystem, and the IIT Madras research network, we saw an opportunity to build something that mattered — not just commercially, but nationally.</p>
                 <p>TorqWings was registered in Chennai to build AI-powered drone systems that are engineered for Indian agriculture, Indian infrastructure, and Indian defence requirements — not adapted from foreign platforms.</p>
               </div>
-              <blockquote className="mt-8 rounded-2xl border-l-4 border-[#EF9F27] bg-gradient-card border border-white/[0.08] p-6 shadow-card">
+              <blockquote className="mt-8 rounded-2xl border-l-4 border-accent bg-gradient-card border border-border/60 p-6 shadow-card">
                 <p className="text-lg font-display italic leading-snug">
                   “We didn't want to be consultants to the aerospace industry. We wanted to build the aerospace industry.”
                 </p>
-                <footer className="mt-3 text-xs uppercase tracking-[0.2em] text-[#EF9F27]">
+                <footer className="mt-3 text-xs uppercase tracking-[0.2em] text-accent">
                   — TorqWings founding team
                 </footer>
               </blockquote>
@@ -177,7 +177,7 @@ function AboutPage() {
               ].map((b) => (
                 <div
                   key={b.t}
-                  className="rounded-2xl p-5 bg-gradient-card border border-white/[0.08] shadow-card hover:-translate-y-[3px] hover:border-[#378ADD]/40 hover:shadow-soft transition-all"
+                  className="rounded-2xl p-5 bg-gradient-card border border-border/60 shadow-card hover:-translate-y-[3px] hover:border-primary/40 hover:shadow-soft transition-all"
                 >
                   <div className="text-2xl">{b.i}</div>
                   <h3 className="mt-3 font-display font-semibold text-base">{b.t}</h3>
@@ -213,11 +213,11 @@ function AboutPage() {
                     <div
                       className={`h-6 w-6 rounded-full border-2 ${
                         m.active
-                          ? "bg-[#378ADD] border-[#378ADD] shadow-glow"
-                          : "bg-background border-white/30"
+                          ? "bg-primary border-primary shadow-glow"
+                          : "bg-background border-border"
                       }`}
                     />
-                    <div className={`mt-4 text-sm font-display font-semibold ${m.active ? "text-[#378ADD]" : "text-muted-foreground"}`}>
+                    <div className={`mt-4 text-sm font-display font-semibold ${m.active ? "text-primary" : "text-muted-foreground"}`}>
                       {m.y}
                     </div>
                     <p className="mt-2 text-xs text-muted-foreground leading-relaxed">{m.t}</p>
@@ -227,7 +227,7 @@ function AboutPage() {
             </div>
 
             {/* Mobile: vertical */}
-            <ol className="mt-10 md:hidden relative border-l border-white/10 ml-3 space-y-6">
+            <ol className="mt-10 md:hidden relative border-l border-border/60 ml-3 space-y-6">
               {[
                 { y: "2025", t: "Founded in Chennai by 5 aerospace engineers", active: true },
                 { y: "2025", t: "AIDAT membership & TIDCO registration", active: true },
@@ -238,10 +238,10 @@ function AboutPage() {
                 <li key={idx} className="pl-6 relative">
                   <span
                     className={`absolute -left-[9px] top-1 h-4 w-4 rounded-full border-2 ${
-                      m.active ? "bg-[#378ADD] border-[#378ADD]" : "bg-background border-white/30"
+                      m.active ? "bg-primary border-primary" : "bg-background border-border"
                     }`}
                   />
-                  <div className={`text-sm font-display font-semibold ${m.active ? "text-[#378ADD]" : "text-muted-foreground"}`}>
+                  <div className={`text-sm font-display font-semibold ${m.active ? "text-primary" : "text-muted-foreground"}`}>
                     {m.y}
                   </div>
                   <p className="mt-1 text-sm text-muted-foreground">{m.t}</p>
@@ -252,7 +252,7 @@ function AboutPage() {
         </section>
 
         {/* 4. MISSION BAND */}
-        <section className="py-20 sm:py-28 bg-[#141928]">
+        <section className="py-20 sm:py-28 bg-muted/30">
           <div className="mx-auto max-w-7xl px-5 lg:px-8 grid lg:grid-cols-12 gap-10">
             <div className="lg:col-span-4">
               <span className={`text-xs uppercase tracking-[0.25em] ${SKY}`}>Our mission</span>
@@ -267,9 +267,9 @@ function AboutPage() {
                 { t: "Open the skies for everyone", d: "Through TorqWings Academy, we train farmers, rural entrepreneurs, SHGs, and FPOs to operate drone-based businesses." },
                 { t: "Build India's aerospace future", d: "We're part of Tamil Nadu's ₹75,000 crore aerospace vision — contributing engineering talent, IP, and platforms to India's defence and civil aviation ecosystem." },
               ].map((p) => (
-                <div key={p.t} className="rounded-2xl p-5 bg-white/[0.02] border border-white/[0.08] hover:-translate-y-[3px] hover:border-[#378ADD]/40 transition-all">
+                <div key={p.t} className="rounded-2xl p-5 bg-background/40 border border-border/60 hover:-translate-y-[3px] hover:border-primary/40 transition-all">
                   <div className="flex items-start gap-3">
-                    <span className="mt-1.5 h-2.5 w-2.5 rounded-full bg-[#378ADD] shadow-glow shrink-0" />
+                    <span className="mt-1.5 h-2.5 w-2.5 rounded-full bg-primary shadow-glow shrink-0" />
                     <div>
                       <h3 className="font-display font-semibold text-base">{p.t}</h3>
                       <p className="mt-2 text-sm text-muted-foreground">{p.d}</p>
@@ -284,7 +284,7 @@ function AboutPage() {
         {/* 5. ECOSYSTEM */}
         <section className="py-20 sm:py-28">
           <div className="mx-auto max-w-7xl px-5 lg:px-8">
-            <span className="inline-block text-xs font-bold uppercase tracking-[0.25em] text-[#EF9F27]">
+            <span className="inline-block text-xs font-bold uppercase tracking-[0.2em] text-primary-foreground bg-primary px-3 py-1 rounded-md shadow-glow">
               Our ecosystem
             </span>
             <h2 className="mt-3 text-3xl sm:text-4xl font-semibold max-w-3xl">
@@ -296,14 +296,14 @@ function AboutPage() {
 
             <div className="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {[
-                { pill: "Government", color: "text-[#378ADD] bg-[#378ADD]/10 border-[#378ADD]/30", t: "TIDCO & Sriperumbudur Aero Park", d: "Tamil Nadu's 250-acre aerospace and defence manufacturing park — our gateway to plot allocation, ACDEC design centre access, and SIPCOT infrastructure." },
-                { pill: "Industry", color: "text-[#EF9F27] bg-[#EF9F27]/10 border-[#EF9F27]/30", t: "AIDAT membership", d: "The Aerospace Industry Development Association of Tamil Nadu connects us directly to global OEMs, defence PSUs, and Tamil Nadu government aerospace policy." },
-                { pill: "Defence", color: "text-[#378ADD] bg-[#185FA5]/15 border-[#185FA5]/40", t: "Tamil Nadu Defence Corridor", d: "A direct pipeline to HAL, BEL, DRDO, and international primes like Airbus, Boeing, and Dassault — all of whom have established presence in Chennai." },
-                { pill: "Research", color: "text-[#EF9F27] bg-[#EF9F27]/10 border-[#EF9F27]/30", t: "Chennai engineering network", d: "Founded by alumni of Chennai's top engineering institutions, with ties to the IIT Madras and Anna University research and incubation ecosystems." },
-                { pill: "National", color: "text-[#378ADD] bg-[#378ADD]/10 border-[#378ADD]/30", t: "IN-SPACe & national space policy", d: "Registered with India's space regulator. Access to ISRO facilities, the ₹1,000 Cr national space startup fund, and India's 2020 space sector liberalisation framework." },
-                { pill: "Funding", color: "text-[#EF9F27] bg-[#EF9F27]/10 border-[#EF9F27]/30", t: "iDEX & DRDO TISED", d: "Actively pursuing defence innovation grants through iDEX (up to ₹1.5 Cr) and DRDO's technology development schemes for aerospace-adjacent R&D." },
+                { pill: "Government", color: "text-primary bg-primary/10 border-primary/30", t: "TIDCO & Sriperumbudur Aero Park", d: "Tamil Nadu's 250-acre aerospace and defence manufacturing park — our gateway to plot allocation, ACDEC design centre access, and SIPCOT infrastructure." },
+                { pill: "Industry", color: "text-accent bg-[#EF9F27]/10 border-accent/30", t: "AIDAT membership", d: "The Aerospace Industry Development Association of Tamil Nadu connects us directly to global OEMs, defence PSUs, and Tamil Nadu government aerospace policy." },
+                { pill: "Defence", color: "text-primary bg-primary/15 border-primary/40", t: "Tamil Nadu Defence Corridor", d: "A direct pipeline to HAL, BEL, DRDO, and international primes like Airbus, Boeing, and Dassault — all of whom have established presence in Chennai." },
+                { pill: "Research", color: "text-accent bg-[#EF9F27]/10 border-accent/30", t: "Chennai engineering network", d: "Founded by alumni of Chennai's top engineering institutions, with ties to the IIT Madras and Anna University research and incubation ecosystems." },
+                { pill: "National", color: "text-primary bg-primary/10 border-primary/30", t: "IN-SPACe & national space policy", d: "Registered with India's space regulator. Access to ISRO facilities, the ₹1,000 Cr national space startup fund, and India's 2020 space sector liberalisation framework." },
+                { pill: "Funding", color: "text-accent bg-[#EF9F27]/10 border-accent/30", t: "iDEX & DRDO TISED", d: "Actively pursuing defence innovation grants through iDEX (up to ₹1.5 Cr) and DRDO's technology development schemes for aerospace-adjacent R&D." },
               ].map((c) => (
-                <div key={c.t} className="rounded-2xl p-6 bg-gradient-card border border-white/[0.08] shadow-card hover:-translate-y-[3px] hover:border-[#378ADD]/40 hover:shadow-soft transition-all">
+                <div key={c.t} className="rounded-2xl p-6 bg-gradient-card border border-border/60 shadow-card hover:-translate-y-[3px] hover:border-primary/40 hover:shadow-soft transition-all">
                   <span className={`inline-block text-[10px] font-semibold uppercase tracking-[0.2em] px-2.5 py-1 rounded-full border ${c.color}`}>
                     {c.pill}
                   </span>
