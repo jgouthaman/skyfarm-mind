@@ -96,6 +96,7 @@ const nav = [
   { label: "Technology", href: "#technology" },
   { label: "Pilots", href: "#pilots" },
   { label: "Academy", href: "#academy" },
+  { label: "About", href: "/about" },
   { label: "Contact", href: "#contact" },
 ];
 
