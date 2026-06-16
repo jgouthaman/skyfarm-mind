@@ -395,6 +395,7 @@ function AboutPage() {
           </div>
         </div>
       </footer>
+      <WhatsAppFab />
     </div>
   );
 }
