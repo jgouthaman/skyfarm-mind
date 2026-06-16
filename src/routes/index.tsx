@@ -679,6 +679,10 @@ function Landing() {
               <li>torqwings@gmail.com</li>
               <li>India</li>
             </ul>
+            <h4 className="mt-6 font-display font-semibold text-sm">For partners</h4>
+            <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
+              <li><Link to="/control-center/login" className="hover:text-foreground">Control Center Login</Link></li>
+            </ul>
           </div>
         </div>
         <div className="border-t border-border">
@@ -688,6 +692,7 @@ function Landing() {
           </div>
         </div>
       </footer>
+      <WhatsAppFab />
     </div>
   );
 }
