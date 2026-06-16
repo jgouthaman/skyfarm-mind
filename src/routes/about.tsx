@@ -1,10 +1,11 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import {
   Plane, Mail, Phone, MapPin, Menu, X, ArrowRight,
   ShieldCheck, Handshake, Rocket, GraduationCap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { WhatsAppFab } from "@/components/whatsapp-fab";
 
 export const Route = createFileRoute("/about")({
   head: () => ({
@@ -24,9 +25,9 @@ export const Route = createFileRoute("/about")({
 const nav = [
   { label: "Home", href: "/#home" },
   { label: "Solutions", href: "/#solutions" },
-  { label: "Verticals", href: "/#verticals" },
+  { label: "Industries", href: "/#verticals" },
   { label: "Technology", href: "/#technology" },
-  { label: "Pilots", href: "/#pilots" },
+  { label: "Work with us", href: "/#pilots" },
   { label: "Academy", href: "/#academy" },
   { label: "About", href: "/about" },
   { label: "Contact", href: "/#contact" },
@@ -61,9 +62,6 @@ function AboutPage() {
             ))}
           </nav>
           <div className="hidden md:flex items-center gap-2">
-            <Button asChild size="sm" variant="outline" className="border-border/80 bg-card/40 backdrop-blur hover:bg-card">
-              <Link to="/control-center/login">Control Center Login</Link>
-            </Button>
             <Button asChild size="sm" className="bg-gradient-primary text-primary-foreground hover:opacity-90">
               <a href="/#contact">Partner with us</a>
             </Button>
@@ -84,9 +82,6 @@ function AboutPage() {
                   {n.label}
                 </a>
               ))}
-              <Button asChild size="sm" variant="outline" className="mt-2">
-                <Link to="/control-center/login" onClick={() => setOpen(false)}>Control Center Login</Link>
-              </Button>
               <Button asChild size="sm" className="bg-gradient-primary text-primary-foreground">
                 <a href="/#contact" onClick={() => setOpen(false)}>Partner with us</a>
               </Button>
@@ -400,6 +395,7 @@ function AboutPage() {
           </div>
         </div>
       </footer>
+      <WhatsAppFab />
     </div>
   );
 }

@@ -27,7 +27,7 @@ function StudioLayout() {
               <span className="text-primary">{project.projectName}</span>
             </>}
           </div>
-          <span className="text-xs text-muted-foreground">aerospawn.com</span>
+          <span className="text-xs text-muted-foreground">torqwings.com</span>
         </header>
         <main className="p-6 lg:p-8 max-w-7xl">
           <Outlet />

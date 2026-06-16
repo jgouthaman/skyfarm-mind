@@ -20,6 +20,7 @@ import { Toaster } from "@/components/ui/sonner";
 import heroImg from "@/assets/aerospawn-hero.jpg";
 import demoVideo from "@/assets/design-studio-demo.mp4.asset.json";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { WhatsAppFab } from "@/components/whatsapp-fab";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -41,8 +42,8 @@ export const Route = createFileRoute("/")({
           "@context": "https://schema.org",
           "@type": "Organization",
           name: "TorqWings",
-          url: "https://aerospawn.com",
-          logo: "https://aerospawn.com/app-icon.png",
+          url: "https://torqwings.com",
+          logo: "https://torqwings.com/app-icon.png",
           description: "TorqWings builds AI-powered drone systems, custom UAVs, and aerial intelligence solutions.",
         }),
       },
@@ -54,7 +55,9 @@ export const Route = createFileRoute("/")({
           name: "AgriSky",
           serviceType: "Agriculture Drone Intelligence",
           provider: { "@type": "Organization", name: "TorqWings" },
-          description: "Drone-based farm monitoring, crop health analysis, irrigation insights, and precision farming.",
+          areaServed: { "@type": "AdministrativeArea", name: "Tamil Nadu, India" },
+          description: "Drone agriculture services in Tamil Nadu — crop health monitoring, NDVI mapping, irrigation insights, and precision farming for farms, FPOs and SHGs.",
+          keywords: "drone agriculture Tamil Nadu, AgriSky, crop health drone, precision farming Chennai, agri drone services India",
         }),
       },
       {
@@ -65,7 +68,35 @@ export const Route = createFileRoute("/")({
           name: "GuardSky",
           serviceType: "Aerial Surveillance & Early Fire Response",
           provider: { "@type": "Organization", name: "TorqWings" },
-          description: "Drone-based surveillance, smoke and fire detection, and rapid first-response payload deployment.",
+          areaServed: { "@type": "Country", name: "India" },
+          description: "Drone-based surveillance, smoke and fire detection, and rapid first-response payload deployment for industrial sites, campuses and remote facilities.",
+          keywords: "aerial surveillance drone India, fire detection drone, GuardSky, perimeter security UAV",
+        }),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Service",
+          name: "InfraSky",
+          serviceType: "Infrastructure & Industrial Drone Inspection",
+          provider: { "@type": "Organization", name: "TorqWings" },
+          areaServed: { "@type": "AdministrativeArea", name: "Tamil Nadu, India" },
+          description: "UAV inspection in Chennai and across India for bridges, telecom towers, solar farms, roads and industrial assets — high-resolution imagery with AI defect detection.",
+          keywords: "UAV inspection Chennai, drone inspection Tamil Nadu, InfraSky, solar farm drone inspection, telecom tower drone survey, bridge inspection drone India",
+        }),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "EducationalOccupationalProgram",
+          name: "TorqWings Academy",
+          provider: { "@type": "Organization", name: "TorqWings" },
+          occupationalCategory: "Drone Pilot",
+          areaServed: { "@type": "AdministrativeArea", name: "Tamil Nadu, India" },
+          description: "Drone pilot training and certification support in Tamil Nadu — agri-drone operations, mapping workflows, mission planning and safety procedures for students, farmers, SHGs and FPOs.",
+          keywords: "drone pilot training Tamil Nadu, drone certification Chennai, agri drone training India, TorqWings Academy",
         }),
       },
       {
@@ -80,7 +111,7 @@ export const Route = createFileRoute("/")({
             addressCountry: "IN",
             addressLocality: "India",
           },
-          url: "https://aerospawn.com",
+          url: "https://torqwings.com",
           description: "TorqWings builds AI-powered drone systems, custom UAVs, and aerial intelligence solutions.",
         }),
       },
@@ -92,9 +123,9 @@ export const Route = createFileRoute("/")({
 const nav = [
   { label: "Home", href: "#home" },
   { label: "Solutions", href: "#solutions" },
-  { label: "Verticals", href: "#verticals" },
+  { label: "Industries", href: "#verticals" },
   { label: "Technology", href: "#technology" },
-  { label: "Pilots", href: "#pilots" },
+  { label: "Work with us", href: "#pilots" },
   { label: "Academy", href: "#academy" },
   { label: "About", href: "/about" },
   { label: "Contact", href: "#contact" },
@@ -124,9 +155,6 @@ function Landing() {
             ))}
           </nav>
           <div className="hidden md:flex items-center gap-2">
-            <Button asChild size="sm" variant="outline" className="border-border/80 bg-card/40 backdrop-blur hover:bg-card">
-              <Link to="/control-center/login">Control Center Login</Link>
-            </Button>
             <Button asChild size="sm" className="bg-gradient-primary text-primary-foreground hover:opacity-90">
               <a href="#contact">Partner with us</a>
             </Button>
@@ -147,9 +175,6 @@ function Landing() {
                   {n.label}
                 </a>
               ))}
-              <Button asChild size="sm" variant="outline" className="mt-2">
-                <Link to="/control-center/login" onClick={() => setOpen(false)}>Control Center Login</Link>
-              </Button>
               <Button asChild size="sm" className="bg-gradient-primary text-primary-foreground">
                 <a href="#contact" onClick={() => setOpen(false)}>Partner with us</a>
               </Button>
@@ -194,7 +219,7 @@ function Landing() {
             </div>
             <div className="mt-10 grid grid-cols-3 gap-6 max-w-md">
               {[
-              { k: "7", v: "Verticals" },
+              { k: "7", v: "Industries" },
                 { k: "AI", v: "Analytics core" },
                 { k: "R&D", v: "Custom UAVs" },
               ].map((s) => (
@@ -262,7 +287,7 @@ function Landing() {
       </Section>
 
       {/* VERTICALS */}
-      <Section id="verticals" eyebrow="Verticals" title="Built for multiple industries">
+      <Section id="verticals" eyebrow="Industries" title="Built for multiple industries">
         <p className="text-muted-foreground max-w-3xl">
           Seven focused service lines, one unified aerospace and AI platform underneath.
         </p>
@@ -521,7 +546,7 @@ function Landing() {
       </Section>
 
       {/* PILOTS */}
-      <Section id="pilots" eyebrow="Pilots" title="Pilot programs and partnerships" muted>
+      <Section id="pilots" eyebrow="Work with us" title="Pilot programs and partnerships" muted>
         <p className="text-muted-foreground max-w-3xl">
           TorqWings is building pilot programs with agriculture farms, infrastructure owners, drone operators, academic institutions, FPOs, and industry partners.
         </p>
@@ -654,6 +679,10 @@ function Landing() {
               <li>torqwings@gmail.com</li>
               <li>India</li>
             </ul>
+            <h4 className="mt-6 font-display font-semibold text-sm">For partners</h4>
+            <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
+              <li><Link to="/control-center/login" className="hover:text-foreground">Control Center Login</Link></li>
+            </ul>
           </div>
         </div>
         <div className="border-t border-border">
@@ -663,6 +692,7 @@ function Landing() {
           </div>
         </div>
       </footer>
+      <WhatsAppFab />
     </div>
   );
 }
