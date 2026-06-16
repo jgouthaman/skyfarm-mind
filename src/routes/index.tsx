@@ -260,7 +260,7 @@ function Landing() {
       {/* VERTICALS */}
       <Section id="verticals" eyebrow="Verticals" title="Built for multiple industries">
         <p className="text-muted-foreground max-w-3xl">
-          Six focused service lines, one unified aerospace and AI platform underneath.
+          Seven focused service lines, one unified aerospace and AI platform underneath.
         </p>
         <div className="mt-10 grid md:grid-cols-2 lg:grid-cols-3 gap-5">
           <VerticalCard accent="agri" tag="Agriculture" icon={<Sprout className="h-5 w-5" />} title="AgriSky" subtitle="Agriculture Drone Intelligence" desc="Drone-based farm monitoring, crop health analysis, irrigation insights, organic farming advisory, and future precision spraying support." href="#agrisky" />
