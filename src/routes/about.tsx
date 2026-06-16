@@ -200,7 +200,7 @@ function AboutPage() {
 
             {/* Desktop: horizontal */}
             <div className="mt-12 hidden md:block relative">
-              <div className="absolute left-0 right-0 top-3 h-px bg-white/10" />
+              <div className="absolute left-0 right-0 top-3 h-px bg-border" />
               <div className="grid grid-cols-5 gap-4 relative">
                 {[
                   { y: "2025", t: "Founded in Chennai by 5 aerospace engineers", active: true },
@@ -297,11 +297,11 @@ function AboutPage() {
             <div className="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {[
                 { pill: "Government", color: "text-primary bg-primary/10 border-primary/30", t: "TIDCO & Sriperumbudur Aero Park", d: "Tamil Nadu's 250-acre aerospace and defence manufacturing park — our gateway to plot allocation, ACDEC design centre access, and SIPCOT infrastructure." },
-                { pill: "Industry", color: "text-accent bg-[#EF9F27]/10 border-accent/30", t: "AIDAT membership", d: "The Aerospace Industry Development Association of Tamil Nadu connects us directly to global OEMs, defence PSUs, and Tamil Nadu government aerospace policy." },
+                { pill: "Industry", color: "text-accent bg-accent/15 border-accent/30", t: "AIDAT membership", d: "The Aerospace Industry Development Association of Tamil Nadu connects us directly to global OEMs, defence PSUs, and Tamil Nadu government aerospace policy." },
                 { pill: "Defence", color: "text-primary bg-primary/15 border-primary/40", t: "Tamil Nadu Defence Corridor", d: "A direct pipeline to HAL, BEL, DRDO, and international primes like Airbus, Boeing, and Dassault — all of whom have established presence in Chennai." },
-                { pill: "Research", color: "text-accent bg-[#EF9F27]/10 border-accent/30", t: "Chennai engineering network", d: "Founded by alumni of Chennai's top engineering institutions, with ties to the IIT Madras and Anna University research and incubation ecosystems." },
+                { pill: "Research", color: "text-accent bg-accent/15 border-accent/30", t: "Chennai engineering network", d: "Founded by alumni of Chennai's top engineering institutions, with ties to the IIT Madras and Anna University research and incubation ecosystems." },
                 { pill: "National", color: "text-primary bg-primary/10 border-primary/30", t: "IN-SPACe & national space policy", d: "Registered with India's space regulator. Access to ISRO facilities, the ₹1,000 Cr national space startup fund, and India's 2020 space sector liberalisation framework." },
-                { pill: "Funding", color: "text-accent bg-[#EF9F27]/10 border-accent/30", t: "iDEX & DRDO TISED", d: "Actively pursuing defence innovation grants through iDEX (up to ₹1.5 Cr) and DRDO's technology development schemes for aerospace-adjacent R&D." },
+                { pill: "Funding", color: "text-accent bg-accent/15 border-accent/30", t: "iDEX & DRDO TISED", d: "Actively pursuing defence innovation grants through iDEX (up to ₹1.5 Cr) and DRDO's technology development schemes for aerospace-adjacent R&D." },
               ].map((c) => (
                 <div key={c.t} className="rounded-2xl p-6 bg-gradient-card border border-border/60 shadow-card hover:-translate-y-[3px] hover:border-primary/40 hover:shadow-soft transition-all">
                   <span className={`inline-block text-[10px] font-semibold uppercase tracking-[0.2em] px-2.5 py-1 rounded-full border ${c.color}`}>
