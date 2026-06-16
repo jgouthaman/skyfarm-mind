@@ -190,7 +190,7 @@ function Landing() {
             </div>
             <div className="mt-10 grid grid-cols-3 gap-6 max-w-md">
               {[
-              { k: "6", v: "Verticals" },
+              { k: "7", v: "Verticals" },
                 { k: "AI", v: "Analytics core" },
                 { k: "R&D", v: "Custom UAVs" },
               ].map((s) => (
@@ -260,7 +260,7 @@ function Landing() {
       {/* VERTICALS */}
       <Section id="verticals" eyebrow="Verticals" title="Built for multiple industries">
         <p className="text-muted-foreground max-w-3xl">
-          Six focused service lines, one unified aerospace and AI platform underneath.
+          Seven focused service lines, one unified aerospace and AI platform underneath.
         </p>
         <div className="mt-10 grid md:grid-cols-2 lg:grid-cols-3 gap-5">
           <VerticalCard accent="agri" tag="Agriculture" icon={<Sprout className="h-5 w-5" />} title="AgriSky" subtitle="Agriculture Drone Intelligence" desc="Drone-based farm monitoring, crop health analysis, irrigation insights, organic farming advisory, and future precision spraying support." href="#agrisky" />
@@ -269,6 +269,7 @@ function Landing() {
           <VerticalCard tag="Surveillance" icon={<Eye className="h-5 w-5" />} title="GuardSky" subtitle="Aerial Surveillance & Early Fire Response" desc="Drone-based real-time monitoring, smoke/fire detection support, live aerial visibility, rapid alerts, and targeted first-response payload deployment for farms, industrial sites, campuses, remote facilities, and critical assets." href="#guardsky" />
           <VerticalCard tag="R&D" icon={<FlaskConical className="h-5 w-5" />} title="TorqWings Labs" subtitle="Custom UAV R&D" desc="Custom drone design, payload integration, flight testing, aerospace research, and prototype development for specialized use cases." />
           <VerticalCard tag="Training" icon={<GraduationCap className="h-5 w-5" />} title="TorqWings Academy" subtitle="Drone Pilot Training & Certification Support" desc="Practical drone pilot training, safety procedures, mission planning, agri-drone operations, mapping workflows, and certification support for students, farmers, drone operators, SHGs, FPOs, and professionals." href="#academy" />
+          <VerticalCard tag="Engineering" icon={<Cpu className="h-5 w-5" />} title="TorqWings Design Studio" subtitle="Drone Design & Simulation" desc="Design drone architectures from mission requirements, run flight simulations, generate component lists, and get AI-powered design reviews — all in one engineering workspace." href="#design-studio" />
           <div className="rounded-2xl p-6 bg-gradient-primary text-primary-foreground shadow-soft flex flex-col justify-between">
             <div>
               <Rocket className="h-6 w-6" />
@@ -371,6 +372,71 @@ function Landing() {
               <p className="mt-3 text-sm font-medium">{c.t}</p>
             </Card>
           ))}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* DESIGN STUDIO */}
+  <section id="design-studio" className="relative py-20 sm:py-28 overflow-hidden">
+    <div className="absolute inset-0 bg-gradient-primary opacity-[0.06] pointer-events-none" />
+    <div className="mx-auto max-w-7xl px-5 lg:px-8 relative">
+      <div className="grid lg:grid-cols-12 gap-10 items-start">
+        <div className="lg:col-span-5">
+          <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-primary-foreground bg-primary border border-primary px-3 py-1.5 rounded-full shadow-glow">
+            <Cpu className="h-3.5 w-3.5" /> Engineering vertical
+          </span>
+          <h2 className="mt-5 text-3xl sm:text-4xl font-semibold">TorqWings Design Studio</h2>
+          <p className="mt-2 text-lg text-muted-foreground">Drone design, simulation, and AI-powered engineering</p>
+          <p className="mt-5 text-muted-foreground">
+            TorqWings Design Studio is an engineering workspace where teams design drone architectures from mission requirements, run real-time flight simulations, generate component lists, and receive AI-powered design reviews — turning concepts into flyable systems faster.
+          </p>
+          <Button asChild size="lg" className="mt-7 bg-gradient-primary text-primary-foreground hover:opacity-90 shadow-glow">
+            <Link to="/control-center/aerospawn-design-studio">Open Design Studio <ArrowRight className="ml-1 h-4 w-4" /></Link>
+          </Button>
+        </div>
+        <div className="lg:col-span-7 space-y-4">
+          <div className="grid grid-cols-3 gap-3">
+            {[
+              { label: "Total Designs", value: 12, tone: "text-sky-600" },
+              { label: "Simulations", value: 8, tone: "text-indigo-600" },
+              { label: "Safe Designs", value: 9, tone: "text-emerald-600" },
+              { label: "Warning", value: 2, tone: "text-amber-600" },
+              { label: "Unsafe", value: 1, tone: "text-red-600" },
+              { label: "AI Reviews", value: 24, tone: "text-violet-600" },
+            ].map((k) => (
+              <div key={k.label} className="rounded-xl border border-border/60 bg-card/60 p-4">
+                <div className="text-[10px] uppercase tracking-wide text-muted-foreground">{k.label}</div>
+                <div className={`mt-1 text-xl font-semibold ${k.tone}`}>{k.value}</div>
+              </div>
+            ))}
+          </div>
+          <div className="rounded-xl border border-border/60 bg-card/60 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-muted/30 text-xs uppercase tracking-wider text-muted-foreground">
+                  <tr><th className="text-left font-medium px-4 py-2">Project</th><th className="text-left font-medium px-4 py-2">Vertical</th><th className="text-left font-medium px-4 py-2">Drone Type</th><th className="text-left font-medium px-4 py-2">Risk</th><th className="text-left font-medium px-4 py-2">Status</th></tr>
+                </thead>
+                <tbody>
+                  {[
+                    { name: "AgriSpray X1", vertical: "Agriculture", type: "Hexacopter", risk: "Safe", status: "Finalized" },
+                    { name: "Solar Scout", vertical: "Infrastructure", type: "Quadcopter", risk: "Safe", status: "Simulated" },
+                    { name: "FireWatch Pro", vertical: "Surveillance", type: "Octocopter", risk: "Warning", status: "Designed" },
+                    { name: "MapStream 300", vertical: "Mapping", type: "Fixed Wing", risk: "Safe", status: "Finalized" },
+                    { name: "CargoLift 50", vertical: "Logistics", type: "Hexacopter", risk: "Unsafe", status: "Draft" },
+                  ].map((p, i) => (
+                    <tr key={i} className="border-t border-border/60 hover:bg-muted/20">
+                      <td className="px-4 py-2 font-medium">{p.name}</td>
+                      <td className="px-4 py-2 text-muted-foreground">{p.vertical}</td>
+                      <td className="px-4 py-2 text-muted-foreground">{p.type}</td>
+                      <td className="px-4 py-2"><span className={`text-[10px] px-2 py-0.5 rounded-full border ${p.risk === "Safe" ? "bg-emerald-50 text-emerald-700 border-emerald-200" : p.risk === "Warning" ? "bg-amber-50 text-amber-700 border-amber-200" : "bg-red-50 text-red-700 border-red-200"}`}>{p.risk}</span></td>
+                      <td className="px-4 py-2"><span className="text-[10px] px-2 py-0.5 rounded-full bg-muted/40 border border-border">{p.status}</span></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -517,7 +583,7 @@ function Landing() {
             </p>
             <ul className="mt-8 space-y-4 text-sm">
               <li className="flex items-center gap-3"><Phone className="h-4 w-4 text-primary" /> Gouthaman — +91 99402 63589</li>
-              <li className="flex items-center gap-3"><Mail className="h-4 w-4 text-primary" /> TorqWings@gmail.com</li>
+              <li className="flex items-center gap-3"><Mail className="h-4 w-4 text-primary" /> torqwings@gmail.com</li>
               <li className="flex items-center gap-3"><MapPin className="h-4 w-4 text-primary" /> India</li>
             </ul>
           </div>
@@ -548,6 +614,7 @@ function Landing() {
               <li><a href="#solutions" className="hover:text-foreground">Solutions</a></li>
               <li><a href="#agrisky" className="hover:text-foreground">AgriSky</a></li>
               <li><a href="#guardsky" className="hover:text-foreground">GuardSky</a></li>
+              <li><a href="#design-studio" className="hover:text-foreground">Design Studio</a></li>
               <li><a href="#technology" className="hover:text-foreground">Technology</a></li>
               <li><a href="#pilots" className="hover:text-foreground">Pilot Programs</a></li>
               <li><a href="#academy" className="hover:text-foreground">Academy</a></li>
@@ -558,7 +625,7 @@ function Landing() {
             <h4 className="font-display font-semibold text-sm">Contact</h4>
             <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
               <li>Gouthaman — +91 99402 63589</li>
-              <li>TorqWings@gmail.com</li>
+              <li>torqwings@gmail.com</li>
               <li>India</li>
             </ul>
           </div>
@@ -661,7 +728,7 @@ function ContactForm() {
     >
       <Field id="cf-name" label="Name" required><Input id="cf-name" name="name" required placeholder="Your full name" /></Field>
       <Field id="cf-phone" label="Phone" required><Input id="cf-phone" name="phone" required type="tel" placeholder="+91 ..." /></Field>
-      <Field id="cf-email" label="Email" required><Input id="cf-email" name="email" required type="email" placeholder="TorqWings@gmail.com" /></Field>
+      <Field id="cf-email" label="Email" required><Input id="cf-email" name="email" required type="email" placeholder="torqwings@gmail.com" /></Field>
       <Field id="cf-org" label="Organization"><Input id="cf-org" name="org" placeholder="Company / FPO / Institution" /></Field>
       <Field id="cf-location" label="Location"><Input id="cf-location" name="location" placeholder="City, State" /></Field>
       <Field id="cf-interest" label="Interested in" required>
