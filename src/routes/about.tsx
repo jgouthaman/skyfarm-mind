@@ -391,7 +391,10 @@ function AboutPage() {
         <div className="border-t border-border">
           <div className="mx-auto max-w-7xl px-5 lg:px-8 py-6 text-xs text-muted-foreground flex flex-wrap justify-between gap-3">
             <span>© {new Date().getFullYear()} TorqWings. All rights reserved.</span>
-            <span>Aerospace · Drones · AI</span>
+            <div className="flex items-center gap-4">
+              <span>Aerospace · Drones · AI</span>
+              <Link to="/control-center/login" className="hover:text-foreground transition-colors">Control Center Login</Link>
+            </div>
           </div>
         </div>
       </footer>
