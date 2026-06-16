@@ -256,7 +256,7 @@ function Landing() {
       </Section>
 
       {/* VERTICALS */}
-      <Section id="verticals" eyebrow="Verticals" title="Built for multiple industries">
+      <Section id="verticals" eyebrow="Industries" title="Built for multiple industries">
         <p className="text-muted-foreground max-w-3xl">
           Seven focused service lines, one unified aerospace and AI platform underneath.
         </p>
