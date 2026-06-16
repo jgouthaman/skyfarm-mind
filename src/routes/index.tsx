@@ -445,6 +445,27 @@ function Landing() {
     </div>
   </section>
 
+  <Dialog open={demoOpen} onOpenChange={setDemoOpen}>
+    <DialogContent className="max-w-3xl">
+      <DialogHeader>
+        <DialogTitle>TorqWings Design Studio — Demo</DialogTitle>
+        <DialogDescription>
+          A quick walkthrough of the engineering workspace. Live access is restricted to authorized teams.
+        </DialogDescription>
+      </DialogHeader>
+      <div className="aspect-video w-full overflow-hidden rounded-lg bg-black">
+        <video src={demoVideo.url} controls autoPlay className="h-full w-full" />
+      </div>
+      <div className="rounded-lg border border-primary/30 bg-primary/5 p-4 text-sm">
+        For access to the Design Studio, please reach out to{" "}
+        <a href="mailto:Torqwings@gmail.com" className="font-semibold text-primary hover:underline">
+          Torqwings@gmail.com
+        </a>
+        .
+      </div>
+    </DialogContent>
+  </Dialog>
+
   {/* TECHNOLOGY */}
       <Section id="technology" eyebrow="Technology" title="A modular aerial intelligence stack" muted>
         <p className="text-muted-foreground max-w-3xl">
