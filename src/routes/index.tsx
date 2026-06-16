@@ -515,7 +515,7 @@ function Landing() {
       </Section>
 
       {/* PILOTS */}
-      <Section id="pilots" eyebrow="Pilots" title="Pilot programs and partnerships" muted>
+      <Section id="pilots" eyebrow="Work with us" title="Pilot programs and partnerships" muted>
         <p className="text-muted-foreground max-w-3xl">
           TorqWings is building pilot programs with agriculture farms, infrastructure owners, drone operators, academic institutions, FPOs, and industry partners.
         </p>
