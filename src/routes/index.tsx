@@ -583,7 +583,7 @@ function Landing() {
             </p>
             <ul className="mt-8 space-y-4 text-sm">
               <li className="flex items-center gap-3"><Phone className="h-4 w-4 text-primary" /> Gouthaman — +91 99402 63589</li>
-              <li className="flex items-center gap-3"><Mail className="h-4 w-4 text-primary" /> TorqWings@gmail.com</li>
+              <li className="flex items-center gap-3"><Mail className="h-4 w-4 text-primary" /> torqwings@gmail.com</li>
               <li className="flex items-center gap-3"><MapPin className="h-4 w-4 text-primary" /> India</li>
             </ul>
           </div>
@@ -614,6 +614,7 @@ function Landing() {
               <li><a href="#solutions" className="hover:text-foreground">Solutions</a></li>
               <li><a href="#agrisky" className="hover:text-foreground">AgriSky</a></li>
               <li><a href="#guardsky" className="hover:text-foreground">GuardSky</a></li>
+              <li><a href="#design-studio" className="hover:text-foreground">Design Studio</a></li>
               <li><a href="#technology" className="hover:text-foreground">Technology</a></li>
               <li><a href="#pilots" className="hover:text-foreground">Pilot Programs</a></li>
               <li><a href="#academy" className="hover:text-foreground">Academy</a></li>
@@ -624,7 +625,7 @@ function Landing() {
             <h4 className="font-display font-semibold text-sm">Contact</h4>
             <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
               <li>Gouthaman — +91 99402 63589</li>
-              <li>TorqWings@gmail.com</li>
+              <li>torqwings@gmail.com</li>
               <li>India</li>
             </ul>
           </div>
@@ -727,7 +728,7 @@ function ContactForm() {
     >
       <Field id="cf-name" label="Name" required><Input id="cf-name" name="name" required placeholder="Your full name" /></Field>
       <Field id="cf-phone" label="Phone" required><Input id="cf-phone" name="phone" required type="tel" placeholder="+91 ..." /></Field>
-      <Field id="cf-email" label="Email" required><Input id="cf-email" name="email" required type="email" placeholder="TorqWings@gmail.com" /></Field>
+      <Field id="cf-email" label="Email" required><Input id="cf-email" name="email" required type="email" placeholder="torqwings@gmail.com" /></Field>
       <Field id="cf-org" label="Organization"><Input id="cf-org" name="org" placeholder="Company / FPO / Institution" /></Field>
       <Field id="cf-location" label="Location"><Input id="cf-location" name="location" placeholder="City, State" /></Field>
       <Field id="cf-interest" label="Interested in" required>
