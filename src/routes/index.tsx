@@ -643,6 +643,7 @@ function Landing() {
               <li><a href="#technology" className="hover:text-foreground">Technology</a></li>
               <li><a href="#pilots" className="hover:text-foreground">Pilot Programs</a></li>
               <li><a href="#academy" className="hover:text-foreground">Academy</a></li>
+              <li><a href="/about" className="hover:text-foreground">About</a></li>
               <li><a href="#contact" className="hover:text-foreground">Contact</a></li>
             </ul>
           </div>
