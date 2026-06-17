@@ -99,7 +99,7 @@ export const updateMissionHubUser = createServerFn({ method: "POST" })
       patch.role = data.role;
     }
     if (Object.keys(patch).length) {
-      const { error } = await supabaseAdmin.from("profiles").update(patch).eq("user_id", data.user_id);
+      const { error } = await supabaseAdmin.from("profiles").update(patch as any).eq("user_id", data.user_id);
       if (error) throw new Error(error.message);
     }
 
