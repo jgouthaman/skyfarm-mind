@@ -393,7 +393,7 @@ function AboutPage() {
             <span>© {new Date().getFullYear()} TorqWings. All rights reserved.</span>
             <div className="flex items-center gap-4">
               <span>Aerospace · Drones · AI</span>
-              <Link to="/control-center/login" className="hover:text-foreground transition-colors">Control Center Login</Link>
+              <Link to="/mission-hub/login" className="hover:text-foreground transition-colors">Mission Hub</Link>
             </div>
           </div>
         </div>
