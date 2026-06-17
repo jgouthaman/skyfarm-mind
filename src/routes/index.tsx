@@ -668,8 +668,8 @@ function Landing() {
               <li><a href="#solutions" className="hover:text-foreground">Solutions</a></li>
               <li><a href="#agrisky" className="hover:text-foreground">AgriSky</a></li>
               <li><a href="#guardsky" className="hover:text-foreground">GuardSky</a></li>
-              <li><a href="#design-studio" className="hover:text-foreground">Design Studio</a></li>
               <li><a href="#technology" className="hover:text-foreground">Technology</a></li>
+              <li><a href="#design-studio" className="hover:text-foreground">Design Studio</a></li>
               <li><a href="#pilots" className="hover:text-foreground">Pilot Programs</a></li>
               <li><a href="#academy" className="hover:text-foreground">Academy</a></li>
               <li><a href="/about" className="hover:text-foreground">About</a></li>
