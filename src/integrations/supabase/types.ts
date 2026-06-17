@@ -417,6 +417,7 @@ export type Database = {
           risk_level: string | null
           status: string
           updated_at: string
+          user_id: string | null
           user_type: string | null
           vertical: string
         }
@@ -429,6 +430,7 @@ export type Database = {
           risk_level?: string | null
           status?: string
           updated_at?: string
+          user_id?: string | null
           user_type?: string | null
           vertical: string
         }
@@ -441,6 +443,7 @@ export type Database = {
           risk_level?: string | null
           status?: string
           updated_at?: string
+          user_id?: string | null
           user_type?: string | null
           vertical?: string
         }
@@ -673,6 +676,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_access_studio_project: {
+        Args: { _project_id: string }
+        Returns: boolean
+      }
       get_current_user_role: { Args: never; Returns: string }
       has_role: {
         Args: {

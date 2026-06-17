@@ -81,20 +81,32 @@ function AdminDashboard() {
 }
 
 function UserDashboard({ name, verticals }: { name: string; verticals: Vertical[] }) {
+  const hasDesignStudio = verticals.includes("design-studio" as Vertical);
+  const otherVerticals = verticals.filter((v) => v !== ("design-studio" as Vertical));
   return (
     <div>
       <h2 className="text-white text-2xl" style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 500 }}>
         Welcome back, {name}
       </h2>
-      <p className="mt-2 text-sm text-white/55">Your active verticals</p>
+      <p className="mt-2 text-sm text-white/55">Your workspace</p>
       {verticals.length === 0 ? (
         <div className="mt-10 text-center text-white/40">
           <Inbox className="h-8 w-8 mx-auto mb-3" />
-          No verticals assigned yet. Contact your administrator.
+          No access assigned yet. Contact your administrator.
         </div>
       ) : (
         <div className="mt-6 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {verticals.map((v) => (
+          {hasDesignStudio && (
+            <Link to="/mission-hub/design-studio">
+              <MhCard className="p-5 hover:border-[#EF9F27]/50 transition-colors">
+                <div className="text-white" style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 500 }}>
+                  Design Studio
+                </div>
+                <div className="mt-1 text-[12px] text-[#EF9F27]">Open Studio →</div>
+              </MhCard>
+            </Link>
+          )}
+          {otherVerticals.map((v) => (
             <Link key={v} to="/mission-hub/verticals/$vertical" params={{ vertical: v }}>
               <MhCard className="p-5 hover:border-[#378ADD]/40 transition-colors">
                 <div className="text-white" style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 500 }}>

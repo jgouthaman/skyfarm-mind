@@ -77,14 +77,17 @@ function Sidebar({
   const role = profile.role as "super_admin" | "admin" | "user";
   const isAdmin = role === "super_admin" || role === "admin";
 
+  const hasDesignStudio = isAdmin || verticals.includes("design-studio" as Vertical);
   const items: { to: string; label: string; icon: any; show: boolean }[] = [
     { to: "/mission-hub/dashboard", label: "Dashboard", icon: LayoutDashboard, show: true },
     { to: "/mission-hub/waitlist", label: "Waitlist", icon: Clock, show: isAdmin },
     { to: "/mission-hub/contacts", label: "Contacts", icon: BookUser, show: isAdmin },
-    { to: "/mission-hub/design-studio", label: "Design Studio", icon: Cpu, show: isAdmin },
+    { to: "/mission-hub/design-studio", label: "Design Studio", icon: Cpu, show: hasDesignStudio },
   ];
 
-  const visibleVerticals: Vertical[] = isAdmin ? ALL_VERTICALS : verticals;
+  // Design Studio has its own top-level nav item; hide it from the verticals list.
+  const visibleVerticals: Vertical[] = (isAdmin ? ALL_VERTICALS : verticals)
+    .filter((v) => v !== ("design-studio" as Vertical));
 
   return (
     <aside
