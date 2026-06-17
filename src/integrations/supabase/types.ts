@@ -223,6 +223,45 @@ export type Database = {
         }
         Relationships: []
       }
+      contacts: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          location: string | null
+          message: string | null
+          name: string
+          organisation: string | null
+          phone: string | null
+          status: string
+          vertical_interest: string | null
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          location?: string | null
+          message?: string | null
+          name: string
+          organisation?: string | null
+          phone?: string | null
+          status?: string
+          vertical_interest?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          location?: string | null
+          message?: string | null
+          name?: string
+          organisation?: string | null
+          phone?: string | null
+          status?: string
+          vertical_interest?: string | null
+        }
+        Relationships: []
+      }
       design_studio_leads: {
         Row: {
           created_at: string
@@ -236,6 +275,7 @@ export type Database = {
           plan: string
           role: string
           source: string
+          status: string
         }
         Insert: {
           created_at?: string
@@ -249,6 +289,7 @@ export type Database = {
           plan: string
           role: string
           source?: string
+          status?: string
         }
         Update: {
           created_at?: string
@@ -262,31 +303,47 @@ export type Database = {
           plan?: string
           role?: string
           source?: string
+          status?: string
         }
         Relationships: []
       }
       profiles: {
         Row: {
           created_at: string
+          created_by: string | null
+          email: string | null
           full_name: string | null
           id: string
-          phone: string
+          is_active: boolean
+          notification_prefs: Json
+          phone: string | null
+          role: string
           updated_at: string
           user_id: string
         }
         Insert: {
           created_at?: string
+          created_by?: string | null
+          email?: string | null
           full_name?: string | null
           id?: string
-          phone: string
+          is_active?: boolean
+          notification_prefs?: Json
+          phone?: string | null
+          role?: string
           updated_at?: string
           user_id: string
         }
         Update: {
           created_at?: string
+          created_by?: string | null
+          email?: string | null
           full_name?: string | null
           id?: string
-          phone?: string
+          is_active?: boolean
+          notification_prefs?: Json
+          phone?: string | null
+          role?: string
           updated_at?: string
           user_id?: string
         }
@@ -587,11 +644,36 @@ export type Database = {
         }
         Relationships: []
       }
+      user_verticals: {
+        Row: {
+          id: string
+          mapped_at: string
+          mapped_by: string | null
+          user_id: string
+          vertical: string
+        }
+        Insert: {
+          id?: string
+          mapped_at?: string
+          mapped_by?: string | null
+          user_id: string
+          vertical: string
+        }
+        Update: {
+          id?: string
+          mapped_at?: string
+          mapped_by?: string | null
+          user_id?: string
+          vertical?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      get_current_user_role: { Args: never; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -599,6 +681,8 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_mh_admin: { Args: never; Returns: boolean }
+      is_mh_super_admin: { Args: never; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "sme"
