@@ -7,7 +7,7 @@ const CreateUserSchema = z.object({
   email: z.string().email().max(255),
   password: z.string().min(8).max(128),
   role: z.enum(["user", "admin", "super_admin"]),
-  verticals: z.array(z.enum(["agrisky", "infrasky", "geosky", "guardsky", "labs", "academy"])).default([]),
+  verticals: z.array(z.enum(["agrisky", "infrasky", "geosky", "guardsky", "labs", "academy", "design-studio"])).default([]),
 });
 
 export const createMissionHubUser = createServerFn({ method: "POST" })
@@ -75,7 +75,7 @@ const UpdateUserSchema = z.object({
   full_name: z.string().min(1).max(120).optional(),
   role: z.enum(["user", "admin", "super_admin"]).optional(),
   is_active: z.boolean().optional(),
-  verticals: z.array(z.enum(["agrisky", "infrasky", "geosky", "guardsky", "labs", "academy"])).optional(),
+  verticals: z.array(z.enum(["agrisky", "infrasky", "geosky", "guardsky", "labs", "academy", "design-studio"])).optional(),
 });
 
 export const updateMissionHubUser = createServerFn({ method: "POST" })

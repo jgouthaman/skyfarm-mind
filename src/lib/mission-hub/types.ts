@@ -1,5 +1,5 @@
 export type Role = "super_admin" | "admin" | "user";
-export type Vertical = "agrisky" | "infrasky" | "geosky" | "guardsky" | "labs" | "academy";
+export type Vertical = "agrisky" | "infrasky" | "geosky" | "guardsky" | "labs" | "academy" | "design-studio";
 
 export const VERTICAL_LABELS: Record<Vertical, string> = {
   agrisky: "AgriSky",
@@ -8,6 +8,7 @@ export const VERTICAL_LABELS: Record<Vertical, string> = {
   guardsky: "GuardSky",
   labs: "Labs",
   academy: "Academy",
+  "design-studio": "Design Studio",
 };
 
 export const VERTICAL_COLORS: Record<Vertical, string> = {
@@ -17,6 +18,7 @@ export const VERTICAL_COLORS: Record<Vertical, string> = {
   guardsky: "#E15757",
   labs: "#A574E1",
   academy: "#2BB3B0",
+  "design-studio": "#EF9F27",
 };
 
-export const ALL_VERTICALS: Vertical[] = ["agrisky", "infrasky", "geosky", "guardsky", "labs", "academy"];
+export const ALL_VERTICALS: Vertical[] = ["agrisky", "infrasky", "geosky", "guardsky", "labs", "academy", "design-studio"];
