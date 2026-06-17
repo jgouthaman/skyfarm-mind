@@ -21,6 +21,7 @@ import heroImg from "@/assets/aerospawn-hero.jpg";
 import demoVideo from "@/assets/design-studio-demo.mp4.asset.json";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { WhatsAppFab } from "@/components/whatsapp-fab";
+import { DesignStudioPricing } from "@/components/design-studio-pricing";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -125,6 +126,7 @@ const nav = [
   { label: "Solutions", href: "#solutions" },
   { label: "Industries", href: "#verticals" },
   { label: "Technology", href: "#technology" },
+  { label: "Design Studio", href: "#design-studio" },
   { label: "Work with us", href: "#pilots" },
   { label: "Academy", href: "#academy" },
   { label: "About", href: "/about" },
@@ -219,7 +221,7 @@ function Landing() {
             </div>
             <div className="mt-10 grid grid-cols-3 gap-6 max-w-md">
               {[
-              { k: "7", v: "Industries" },
+              { k: "6", v: "Industries" },
                 { k: "AI", v: "Analytics core" },
                 { k: "R&D", v: "Custom UAVs" },
               ].map((s) => (
@@ -289,7 +291,7 @@ function Landing() {
       {/* VERTICALS */}
       <Section id="verticals" eyebrow="Industries" title="Built for multiple industries">
         <p className="text-muted-foreground max-w-3xl">
-          Seven focused service lines, one unified aerospace and AI platform underneath.
+          Six focused service lines, one unified aerospace and AI platform underneath.
         </p>
         <div className="mt-10 grid md:grid-cols-2 lg:grid-cols-3 gap-5">
           <VerticalCard accent="agri" tag="Agriculture" icon={<Sprout className="h-5 w-5" />} title="AgriSky" subtitle="Agriculture Drone Intelligence" desc="Drone-based farm monitoring, crop health analysis, irrigation insights, organic farming advisory, and future precision spraying support." href="#agrisky" />
@@ -298,7 +300,7 @@ function Landing() {
           <VerticalCard tag="Surveillance" icon={<Eye className="h-5 w-5" />} title="GuardSky" subtitle="Aerial Surveillance & Early Fire Response" desc="Drone-based real-time monitoring, smoke/fire detection support, live aerial visibility, rapid alerts, and targeted first-response payload deployment for farms, industrial sites, campuses, remote facilities, and critical assets." href="#guardsky" />
           <VerticalCard tag="R&D" icon={<FlaskConical className="h-5 w-5" />} title="TorqWings Labs" subtitle="Custom UAV R&D" desc="Custom drone design, payload integration, flight testing, aerospace research, and prototype development for specialized use cases." />
           <VerticalCard tag="Training" icon={<GraduationCap className="h-5 w-5" />} title="TorqWings Academy" subtitle="Drone Pilot Training & Certification Support" desc="Practical drone pilot training, safety procedures, mission planning, agri-drone operations, mapping workflows, and certification support for students, farmers, drone operators, SHGs, FPOs, and professionals." href="#academy" />
-          <VerticalCard tag="Engineering" icon={<Cpu className="h-5 w-5" />} title="TorqWings Design Studio" subtitle="Drone Design & Simulation" desc="Design drone architectures from mission requirements, run flight simulations, generate component lists, and get AI-powered design reviews — all in one engineering workspace." href="#design-studio" />
+          
           <div className="rounded-2xl p-6 bg-gradient-primary text-primary-foreground shadow-soft flex flex-col justify-between">
             <div>
               <Rocket className="h-6 w-6" />
@@ -492,6 +494,8 @@ function Landing() {
     </DialogContent>
   </Dialog>
 
+  <DesignStudioPricing />
+
   {/* TECHNOLOGY */}
       <Section id="technology" eyebrow="Technology" title="A modular aerial intelligence stack" muted>
         <p className="text-muted-foreground max-w-3xl">
@@ -664,8 +668,8 @@ function Landing() {
               <li><a href="#solutions" className="hover:text-foreground">Solutions</a></li>
               <li><a href="#agrisky" className="hover:text-foreground">AgriSky</a></li>
               <li><a href="#guardsky" className="hover:text-foreground">GuardSky</a></li>
-              <li><a href="#design-studio" className="hover:text-foreground">Design Studio</a></li>
               <li><a href="#technology" className="hover:text-foreground">Technology</a></li>
+              <li><a href="#design-studio" className="hover:text-foreground">Design Studio</a></li>
               <li><a href="#pilots" className="hover:text-foreground">Pilot Programs</a></li>
               <li><a href="#academy" className="hover:text-foreground">Academy</a></li>
               <li><a href="/about" className="hover:text-foreground">About</a></li>

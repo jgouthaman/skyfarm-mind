@@ -223,6 +223,48 @@ export type Database = {
         }
         Relationships: []
       }
+      design_studio_leads: {
+        Row: {
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          location: string
+          message: string | null
+          organisation: string | null
+          phone: string
+          plan: string
+          role: string
+          source: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          location: string
+          message?: string | null
+          organisation?: string | null
+          phone: string
+          plan: string
+          role: string
+          source?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          location?: string
+          message?: string | null
+          organisation?: string | null
+          phone?: string
+          plan?: string
+          role?: string
+          source?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
