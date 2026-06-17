@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as PilotRouteImport } from './routes/pilot'
+import { Route as MissionHubRouteImport } from './routes/mission-hub'
 import { Route as FieldRouteImport } from './routes/field'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
@@ -20,6 +21,14 @@ import { Route as PilotTrackingRouteImport } from './routes/pilot.tracking'
 import { Route as PilotSyncRouteImport } from './routes/pilot.sync'
 import { Route as PilotProfileRouteImport } from './routes/pilot.profile'
 import { Route as PilotLoginRouteImport } from './routes/pilot.login'
+import { Route as MissionHubWaitlistRouteImport } from './routes/mission-hub.waitlist'
+import { Route as MissionHubUsersRouteImport } from './routes/mission-hub.users'
+import { Route as MissionHubSettingsRouteImport } from './routes/mission-hub.settings'
+import { Route as MissionHubResetPasswordRouteImport } from './routes/mission-hub.reset-password'
+import { Route as MissionHubLoginRouteImport } from './routes/mission-hub.login'
+import { Route as MissionHubDesignStudioRouteImport } from './routes/mission-hub.design-studio'
+import { Route as MissionHubDashboardRouteImport } from './routes/mission-hub.dashboard'
+import { Route as MissionHubContactsRouteImport } from './routes/mission-hub.contacts'
 import { Route as ControlCenterUsersRouteImport } from './routes/control-center.users'
 import { Route as ControlCenterLoginRouteImport } from './routes/control-center.login'
 import { Route as ControlCenterAgriskyRouteImport } from './routes/control-center.agrisky'
@@ -27,6 +36,7 @@ import { Route as ControlCenterAerospawnDesignStudioRouteImport } from './routes
 import { Route as PilotMissionsIndexRouteImport } from './routes/pilot.missions.index'
 import { Route as ControlCenterAerospawnDesignStudioIndexRouteImport } from './routes/control-center.aerospawn-design-studio.index'
 import { Route as PilotMissionsIdRouteImport } from './routes/pilot.missions.$id'
+import { Route as MissionHubVerticalsVerticalRouteImport } from './routes/mission-hub.verticals.$vertical'
 import { Route as ControlCenterAerospawnDesignStudioSimulationRouteImport } from './routes/control-center.aerospawn-design-studio.simulation'
 import { Route as ControlCenterAerospawnDesignStudioRequirementsRouteImport } from './routes/control-center.aerospawn-design-studio.requirements'
 import { Route as ControlCenterAerospawnDesignStudioReportRouteImport } from './routes/control-center.aerospawn-design-studio.report'
@@ -45,6 +55,11 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
 const PilotRoute = PilotRouteImport.update({
   id: '/pilot',
   path: '/pilot',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MissionHubRoute = MissionHubRouteImport.update({
+  id: '/mission-hub',
+  path: '/mission-hub',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FieldRoute = FieldRouteImport.update({
@@ -92,6 +107,46 @@ const PilotLoginRoute = PilotLoginRouteImport.update({
   path: '/login',
   getParentRoute: () => PilotRoute,
 } as any)
+const MissionHubWaitlistRoute = MissionHubWaitlistRouteImport.update({
+  id: '/waitlist',
+  path: '/waitlist',
+  getParentRoute: () => MissionHubRoute,
+} as any)
+const MissionHubUsersRoute = MissionHubUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => MissionHubRoute,
+} as any)
+const MissionHubSettingsRoute = MissionHubSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => MissionHubRoute,
+} as any)
+const MissionHubResetPasswordRoute = MissionHubResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => MissionHubRoute,
+} as any)
+const MissionHubLoginRoute = MissionHubLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => MissionHubRoute,
+} as any)
+const MissionHubDesignStudioRoute = MissionHubDesignStudioRouteImport.update({
+  id: '/design-studio',
+  path: '/design-studio',
+  getParentRoute: () => MissionHubRoute,
+} as any)
+const MissionHubDashboardRoute = MissionHubDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => MissionHubRoute,
+} as any)
+const MissionHubContactsRoute = MissionHubContactsRouteImport.update({
+  id: '/contacts',
+  path: '/contacts',
+  getParentRoute: () => MissionHubRoute,
+} as any)
 const ControlCenterUsersRoute = ControlCenterUsersRouteImport.update({
   id: '/control-center/users',
   path: '/control-center/users',
@@ -129,6 +184,12 @@ const PilotMissionsIdRoute = PilotMissionsIdRouteImport.update({
   path: '/missions/$id',
   getParentRoute: () => PilotRoute,
 } as any)
+const MissionHubVerticalsVerticalRoute =
+  MissionHubVerticalsVerticalRouteImport.update({
+    id: '/verticals/$vertical',
+    path: '/verticals/$vertical',
+    getParentRoute: () => MissionHubRoute,
+  } as any)
 const ControlCenterAerospawnDesignStudioSimulationRoute =
   ControlCenterAerospawnDesignStudioSimulationRouteImport.update({
     id: '/simulation',
@@ -188,12 +249,21 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/field': typeof FieldRoute
+  '/mission-hub': typeof MissionHubRouteWithChildren
   '/pilot': typeof PilotRouteWithChildren
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/control-center/aerospawn-design-studio': typeof ControlCenterAerospawnDesignStudioRouteWithChildren
   '/control-center/agrisky': typeof ControlCenterAgriskyRoute
   '/control-center/login': typeof ControlCenterLoginRoute
   '/control-center/users': typeof ControlCenterUsersRoute
+  '/mission-hub/contacts': typeof MissionHubContactsRoute
+  '/mission-hub/dashboard': typeof MissionHubDashboardRoute
+  '/mission-hub/design-studio': typeof MissionHubDesignStudioRoute
+  '/mission-hub/login': typeof MissionHubLoginRoute
+  '/mission-hub/reset-password': typeof MissionHubResetPasswordRoute
+  '/mission-hub/settings': typeof MissionHubSettingsRoute
+  '/mission-hub/users': typeof MissionHubUsersRoute
+  '/mission-hub/waitlist': typeof MissionHubWaitlistRoute
   '/pilot/login': typeof PilotLoginRoute
   '/pilot/profile': typeof PilotProfileRoute
   '/pilot/sync': typeof PilotSyncRoute
@@ -209,6 +279,7 @@ export interface FileRoutesByFullPath {
   '/control-center/aerospawn-design-studio/report': typeof ControlCenterAerospawnDesignStudioReportRoute
   '/control-center/aerospawn-design-studio/requirements': typeof ControlCenterAerospawnDesignStudioRequirementsRoute
   '/control-center/aerospawn-design-studio/simulation': typeof ControlCenterAerospawnDesignStudioSimulationRoute
+  '/mission-hub/verticals/$vertical': typeof MissionHubVerticalsVerticalRoute
   '/pilot/missions/$id': typeof PilotMissionsIdRoute
   '/control-center/aerospawn-design-studio/': typeof ControlCenterAerospawnDesignStudioIndexRoute
   '/pilot/missions/': typeof PilotMissionsIndexRoute
@@ -217,10 +288,19 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/field': typeof FieldRoute
+  '/mission-hub': typeof MissionHubRouteWithChildren
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/control-center/agrisky': typeof ControlCenterAgriskyRoute
   '/control-center/login': typeof ControlCenterLoginRoute
   '/control-center/users': typeof ControlCenterUsersRoute
+  '/mission-hub/contacts': typeof MissionHubContactsRoute
+  '/mission-hub/dashboard': typeof MissionHubDashboardRoute
+  '/mission-hub/design-studio': typeof MissionHubDesignStudioRoute
+  '/mission-hub/login': typeof MissionHubLoginRoute
+  '/mission-hub/reset-password': typeof MissionHubResetPasswordRoute
+  '/mission-hub/settings': typeof MissionHubSettingsRoute
+  '/mission-hub/users': typeof MissionHubUsersRoute
+  '/mission-hub/waitlist': typeof MissionHubWaitlistRoute
   '/pilot/login': typeof PilotLoginRoute
   '/pilot/profile': typeof PilotProfileRoute
   '/pilot/sync': typeof PilotSyncRoute
@@ -236,6 +316,7 @@ export interface FileRoutesByTo {
   '/control-center/aerospawn-design-studio/report': typeof ControlCenterAerospawnDesignStudioReportRoute
   '/control-center/aerospawn-design-studio/requirements': typeof ControlCenterAerospawnDesignStudioRequirementsRoute
   '/control-center/aerospawn-design-studio/simulation': typeof ControlCenterAerospawnDesignStudioSimulationRoute
+  '/mission-hub/verticals/$vertical': typeof MissionHubVerticalsVerticalRoute
   '/pilot/missions/$id': typeof PilotMissionsIdRoute
   '/control-center/aerospawn-design-studio': typeof ControlCenterAerospawnDesignStudioIndexRoute
   '/pilot/missions': typeof PilotMissionsIndexRoute
@@ -245,12 +326,21 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/field': typeof FieldRoute
+  '/mission-hub': typeof MissionHubRouteWithChildren
   '/pilot': typeof PilotRouteWithChildren
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/control-center/aerospawn-design-studio': typeof ControlCenterAerospawnDesignStudioRouteWithChildren
   '/control-center/agrisky': typeof ControlCenterAgriskyRoute
   '/control-center/login': typeof ControlCenterLoginRoute
   '/control-center/users': typeof ControlCenterUsersRoute
+  '/mission-hub/contacts': typeof MissionHubContactsRoute
+  '/mission-hub/dashboard': typeof MissionHubDashboardRoute
+  '/mission-hub/design-studio': typeof MissionHubDesignStudioRoute
+  '/mission-hub/login': typeof MissionHubLoginRoute
+  '/mission-hub/reset-password': typeof MissionHubResetPasswordRoute
+  '/mission-hub/settings': typeof MissionHubSettingsRoute
+  '/mission-hub/users': typeof MissionHubUsersRoute
+  '/mission-hub/waitlist': typeof MissionHubWaitlistRoute
   '/pilot/login': typeof PilotLoginRoute
   '/pilot/profile': typeof PilotProfileRoute
   '/pilot/sync': typeof PilotSyncRoute
@@ -266,6 +356,7 @@ export interface FileRoutesById {
   '/control-center/aerospawn-design-studio/report': typeof ControlCenterAerospawnDesignStudioReportRoute
   '/control-center/aerospawn-design-studio/requirements': typeof ControlCenterAerospawnDesignStudioRequirementsRoute
   '/control-center/aerospawn-design-studio/simulation': typeof ControlCenterAerospawnDesignStudioSimulationRoute
+  '/mission-hub/verticals/$vertical': typeof MissionHubVerticalsVerticalRoute
   '/pilot/missions/$id': typeof PilotMissionsIdRoute
   '/control-center/aerospawn-design-studio/': typeof ControlCenterAerospawnDesignStudioIndexRoute
   '/pilot/missions/': typeof PilotMissionsIndexRoute
@@ -276,12 +367,21 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/field'
+    | '/mission-hub'
     | '/pilot'
     | '/sitemap.xml'
     | '/control-center/aerospawn-design-studio'
     | '/control-center/agrisky'
     | '/control-center/login'
     | '/control-center/users'
+    | '/mission-hub/contacts'
+    | '/mission-hub/dashboard'
+    | '/mission-hub/design-studio'
+    | '/mission-hub/login'
+    | '/mission-hub/reset-password'
+    | '/mission-hub/settings'
+    | '/mission-hub/users'
+    | '/mission-hub/waitlist'
     | '/pilot/login'
     | '/pilot/profile'
     | '/pilot/sync'
@@ -297,6 +397,7 @@ export interface FileRouteTypes {
     | '/control-center/aerospawn-design-studio/report'
     | '/control-center/aerospawn-design-studio/requirements'
     | '/control-center/aerospawn-design-studio/simulation'
+    | '/mission-hub/verticals/$vertical'
     | '/pilot/missions/$id'
     | '/control-center/aerospawn-design-studio/'
     | '/pilot/missions/'
@@ -305,10 +406,19 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/field'
+    | '/mission-hub'
     | '/sitemap.xml'
     | '/control-center/agrisky'
     | '/control-center/login'
     | '/control-center/users'
+    | '/mission-hub/contacts'
+    | '/mission-hub/dashboard'
+    | '/mission-hub/design-studio'
+    | '/mission-hub/login'
+    | '/mission-hub/reset-password'
+    | '/mission-hub/settings'
+    | '/mission-hub/users'
+    | '/mission-hub/waitlist'
     | '/pilot/login'
     | '/pilot/profile'
     | '/pilot/sync'
@@ -324,6 +434,7 @@ export interface FileRouteTypes {
     | '/control-center/aerospawn-design-studio/report'
     | '/control-center/aerospawn-design-studio/requirements'
     | '/control-center/aerospawn-design-studio/simulation'
+    | '/mission-hub/verticals/$vertical'
     | '/pilot/missions/$id'
     | '/control-center/aerospawn-design-studio'
     | '/pilot/missions'
@@ -332,12 +443,21 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/field'
+    | '/mission-hub'
     | '/pilot'
     | '/sitemap.xml'
     | '/control-center/aerospawn-design-studio'
     | '/control-center/agrisky'
     | '/control-center/login'
     | '/control-center/users'
+    | '/mission-hub/contacts'
+    | '/mission-hub/dashboard'
+    | '/mission-hub/design-studio'
+    | '/mission-hub/login'
+    | '/mission-hub/reset-password'
+    | '/mission-hub/settings'
+    | '/mission-hub/users'
+    | '/mission-hub/waitlist'
     | '/pilot/login'
     | '/pilot/profile'
     | '/pilot/sync'
@@ -353,6 +473,7 @@ export interface FileRouteTypes {
     | '/control-center/aerospawn-design-studio/report'
     | '/control-center/aerospawn-design-studio/requirements'
     | '/control-center/aerospawn-design-studio/simulation'
+    | '/mission-hub/verticals/$vertical'
     | '/pilot/missions/$id'
     | '/control-center/aerospawn-design-studio/'
     | '/pilot/missions/'
@@ -362,6 +483,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
   FieldRoute: typeof FieldRoute
+  MissionHubRoute: typeof MissionHubRouteWithChildren
   PilotRoute: typeof PilotRouteWithChildren
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ControlCenterAerospawnDesignStudioRoute: typeof ControlCenterAerospawnDesignStudioRouteWithChildren
@@ -385,6 +507,13 @@ declare module '@tanstack/react-router' {
       path: '/pilot'
       fullPath: '/pilot'
       preLoaderRoute: typeof PilotRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mission-hub': {
+      id: '/mission-hub'
+      path: '/mission-hub'
+      fullPath: '/mission-hub'
+      preLoaderRoute: typeof MissionHubRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/field': {
@@ -450,6 +579,62 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PilotLoginRouteImport
       parentRoute: typeof PilotRoute
     }
+    '/mission-hub/waitlist': {
+      id: '/mission-hub/waitlist'
+      path: '/waitlist'
+      fullPath: '/mission-hub/waitlist'
+      preLoaderRoute: typeof MissionHubWaitlistRouteImport
+      parentRoute: typeof MissionHubRoute
+    }
+    '/mission-hub/users': {
+      id: '/mission-hub/users'
+      path: '/users'
+      fullPath: '/mission-hub/users'
+      preLoaderRoute: typeof MissionHubUsersRouteImport
+      parentRoute: typeof MissionHubRoute
+    }
+    '/mission-hub/settings': {
+      id: '/mission-hub/settings'
+      path: '/settings'
+      fullPath: '/mission-hub/settings'
+      preLoaderRoute: typeof MissionHubSettingsRouteImport
+      parentRoute: typeof MissionHubRoute
+    }
+    '/mission-hub/reset-password': {
+      id: '/mission-hub/reset-password'
+      path: '/reset-password'
+      fullPath: '/mission-hub/reset-password'
+      preLoaderRoute: typeof MissionHubResetPasswordRouteImport
+      parentRoute: typeof MissionHubRoute
+    }
+    '/mission-hub/login': {
+      id: '/mission-hub/login'
+      path: '/login'
+      fullPath: '/mission-hub/login'
+      preLoaderRoute: typeof MissionHubLoginRouteImport
+      parentRoute: typeof MissionHubRoute
+    }
+    '/mission-hub/design-studio': {
+      id: '/mission-hub/design-studio'
+      path: '/design-studio'
+      fullPath: '/mission-hub/design-studio'
+      preLoaderRoute: typeof MissionHubDesignStudioRouteImport
+      parentRoute: typeof MissionHubRoute
+    }
+    '/mission-hub/dashboard': {
+      id: '/mission-hub/dashboard'
+      path: '/dashboard'
+      fullPath: '/mission-hub/dashboard'
+      preLoaderRoute: typeof MissionHubDashboardRouteImport
+      parentRoute: typeof MissionHubRoute
+    }
+    '/mission-hub/contacts': {
+      id: '/mission-hub/contacts'
+      path: '/contacts'
+      fullPath: '/mission-hub/contacts'
+      preLoaderRoute: typeof MissionHubContactsRouteImport
+      parentRoute: typeof MissionHubRoute
+    }
     '/control-center/users': {
       id: '/control-center/users'
       path: '/control-center/users'
@@ -498,6 +683,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/pilot/missions/$id'
       preLoaderRoute: typeof PilotMissionsIdRouteImport
       parentRoute: typeof PilotRoute
+    }
+    '/mission-hub/verticals/$vertical': {
+      id: '/mission-hub/verticals/$vertical'
+      path: '/verticals/$vertical'
+      fullPath: '/mission-hub/verticals/$vertical'
+      preLoaderRoute: typeof MissionHubVerticalsVerticalRouteImport
+      parentRoute: typeof MissionHubRoute
     }
     '/control-center/aerospawn-design-studio/simulation': {
       id: '/control-center/aerospawn-design-studio/simulation'
@@ -564,6 +756,34 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface MissionHubRouteChildren {
+  MissionHubContactsRoute: typeof MissionHubContactsRoute
+  MissionHubDashboardRoute: typeof MissionHubDashboardRoute
+  MissionHubDesignStudioRoute: typeof MissionHubDesignStudioRoute
+  MissionHubLoginRoute: typeof MissionHubLoginRoute
+  MissionHubResetPasswordRoute: typeof MissionHubResetPasswordRoute
+  MissionHubSettingsRoute: typeof MissionHubSettingsRoute
+  MissionHubUsersRoute: typeof MissionHubUsersRoute
+  MissionHubWaitlistRoute: typeof MissionHubWaitlistRoute
+  MissionHubVerticalsVerticalRoute: typeof MissionHubVerticalsVerticalRoute
+}
+
+const MissionHubRouteChildren: MissionHubRouteChildren = {
+  MissionHubContactsRoute: MissionHubContactsRoute,
+  MissionHubDashboardRoute: MissionHubDashboardRoute,
+  MissionHubDesignStudioRoute: MissionHubDesignStudioRoute,
+  MissionHubLoginRoute: MissionHubLoginRoute,
+  MissionHubResetPasswordRoute: MissionHubResetPasswordRoute,
+  MissionHubSettingsRoute: MissionHubSettingsRoute,
+  MissionHubUsersRoute: MissionHubUsersRoute,
+  MissionHubWaitlistRoute: MissionHubWaitlistRoute,
+  MissionHubVerticalsVerticalRoute: MissionHubVerticalsVerticalRoute,
+}
+
+const MissionHubRouteWithChildren = MissionHubRoute._addFileChildren(
+  MissionHubRouteChildren,
+)
 
 interface PilotRouteChildren {
   PilotLoginRoute: typeof PilotLoginRoute
@@ -633,6 +853,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   FieldRoute: FieldRoute,
+  MissionHubRoute: MissionHubRouteWithChildren,
   PilotRoute: PilotRouteWithChildren,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   ControlCenterAerospawnDesignStudioRoute:

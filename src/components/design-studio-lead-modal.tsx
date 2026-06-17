@@ -104,6 +104,10 @@ export function DesignStudioLeadModal({
               We'll be in touch within 1 business day. Watch your inbox.
             </p>
             <p className="mt-3 text-sm text-[#378ADD] break-all">{success}</p>
+            <p className="mt-4 text-[13px] text-white/60">
+              Once your access is confirmed, sign in at{" "}
+              <a href="/mission-hub/login" className="text-[#378ADD] hover:underline">Mission Hub →</a>
+            </p>
             <button
               onClick={onClose}
               className="mt-6 w-full rounded-lg border border-white/20 text-white/90 hover:bg-white/5 py-3 text-sm transition-colors"
