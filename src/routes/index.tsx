@@ -650,7 +650,7 @@ function Landing() {
 
       {/* FOOTER */}
       <footer className="border-t border-border bg-background">
-        <div className="mx-auto max-w-7xl px-5 lg:px-8 py-12 grid md:grid-cols-4 gap-8">
+        <div className="mx-auto max-w-7xl px-5 lg:px-8 py-12 grid md:grid-cols-5 gap-8">
           <div className="md:col-span-2">
             <div className="flex items-center gap-2 font-display font-semibold text-lg">
               <span className="grid place-items-center h-8 w-8 rounded-lg bg-gradient-primary shadow-glow">
@@ -677,6 +677,13 @@ function Landing() {
             </ul>
           </div>
           <div>
+            <h4 className="text-[11px] uppercase tracking-[0.07em] text-muted-foreground font-semibold">Platform</h4>
+            <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
+              <li><Link to="/mission-hub/login" className="hover:text-foreground">Mission Hub</Link></li>
+              <li><a href="#design-studio-pricing" className="hover:text-foreground">Design Studio Waitlist</a></li>
+            </ul>
+          </div>
+          <div>
             <h4 className="font-display font-semibold text-sm">Contact</h4>
             <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
               <li>Hello : 9940263589</li>
@@ -690,7 +697,7 @@ function Landing() {
             <span>© {new Date().getFullYear()} TorqWings. All rights reserved.</span>
             <div className="flex items-center gap-4">
               <span>Aerospace · Drones · AI</span>
-              <Link to="/control-center/login" className="hover:text-foreground transition-colors">Control Center Login</Link>
+              <Link to="/mission-hub/login" className="hover:text-foreground hover:underline transition-colors" style={{ color: "rgba(255,255,255,0.35)", fontSize: "12px" }}>Mission Hub</Link>
             </div>
           </div>
         </div>
@@ -773,15 +780,30 @@ function ContactForm() {
   const [interest, setInterest] = useState<string>("");
   return (
     <form
-      onSubmit={(e) => {
+      onSubmit={async (e) => {
         e.preventDefault();
         setSubmitting(true);
-        setTimeout(() => {
-          setSubmitting(false);
+        const fd = new FormData(e.currentTarget);
+        const payload = {
+          name: String(fd.get("name") ?? "").trim(),
+          phone: String(fd.get("phone") ?? "").trim() || null,
+          email: String(fd.get("email") ?? "").trim() || null,
+          organisation: String(fd.get("org") ?? "").trim() || null,
+          location: String(fd.get("location") ?? "").trim() || null,
+          vertical_interest: interest || null,
+          message: String(fd.get("message") ?? "").trim() || null,
+        };
+        try {
+          const { error } = await supabase.from("contacts" as any).insert(payload as any);
+          if (error) throw error;
           toast.success("Thanks! We'll reach out shortly.");
           (e.target as HTMLFormElement).reset();
           setInterest("");
-        }, 600);
+        } catch (err: any) {
+          toast.error(err?.message ?? "Submission failed. Please try again.");
+        } finally {
+          setSubmitting(false);
+        }
       }}
       className="grid sm:grid-cols-2 gap-4"
     >
@@ -798,11 +820,10 @@ function ContactForm() {
             <SelectItem value="infrasky">InfraSky — infrastructure inspection</SelectItem>
             <SelectItem value="geosky">GeoSky — mapping & survey</SelectItem>
             <SelectItem value="guardsky">GuardSky — aerial surveillance &amp; early fire response</SelectItem>
-            <SelectItem value="rd">Custom UAV R&D</SelectItem>
+            <SelectItem value="labs">Custom UAV R&D / Labs</SelectItem>
             <SelectItem value="academy">TorqWings Academy — drone training</SelectItem>
-            <SelectItem value="certification">Drone pilot certification support</SelectItem>
-            <SelectItem value="invest">Investment / incubation</SelectItem>
-            <SelectItem value="partner">Partnership</SelectItem>
+            <SelectItem value="design-studio">Design Studio</SelectItem>
+            <SelectItem value="partner">Partnership / Investment</SelectItem>
           </SelectContent>
         </Select>
       </Field>
