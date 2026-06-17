@@ -22,6 +22,7 @@ import demoVideo from "@/assets/design-studio-demo.mp4.asset.json";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { WhatsAppFab } from "@/components/whatsapp-fab";
 import { DesignStudioPricing } from "@/components/design-studio-pricing";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/")({
   head: () => ({
