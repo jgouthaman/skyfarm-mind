@@ -11,6 +11,7 @@ import { toast } from "sonner";
 const verticalIcon: Record<Vertical, any> = {
   agrisky: Sprout, infrasky: Building2, geosky: MapIcon,
   guardsky: Shield, labs: FlaskConical, academy: GraduationCap,
+  "design-studio": Cpu,
 };
 
 export function MissionHubShell({ title, children }: { title: string; children: ReactNode }) {
