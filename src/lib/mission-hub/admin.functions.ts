@@ -48,7 +48,7 @@ export const createMissionHubUser = createServerFn({ method: "POST" })
           email: data.email,
           role,
           is_active: true,
-          phone: "",
+          phone: null,
           created_by: context.userId,
         },
         { onConflict: "user_id" },
