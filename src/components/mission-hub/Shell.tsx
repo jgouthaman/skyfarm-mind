@@ -72,6 +72,21 @@ export function MissionHubShell({ title, children }: { title: string; children: 
   );
 }
 
+type Section = "business" | "industries" | "twbc" | "knowledge" | "config";
+
+function getSectionFromPath(path: string): Section | null {
+  if (path === "/mission-hub/twbc-drone-proven-designs") return "knowledge";
+  if (path === "/mission-hub/waitlist" || path === "/mission-hub/contacts") return "business";
+  if (path.startsWith("/mission-hub/twbc-") || path === "/mission-hub/knowledge-uav") return "twbc";
+  if (
+    path.startsWith("/mission-hub/verticals/") ||
+    path === "/mission-hub/design-studio" ||
+    path.startsWith("/mission-hub/torqwings-design-studio")
+  ) return "industries";
+  if (path === "/mission-hub/users" || path.startsWith("/mission-hub/settings")) return "config";
+  return null;
+}
+
 function Sidebar({
   profile, verticals, open, onClose, onSignOut,
 }: {
@@ -81,11 +96,13 @@ function Sidebar({
   const role = profile.role as "super_admin" | "admin" | "user";
   const isAdmin = role === "super_admin" || role === "admin";
 
-  const [businessOpen,    setBusinessOpen]    = useState(true);
-  const [industriesOpen,  setIndustriesOpen]  = useState(false);
-  const [twbcSectionOpen, setTwbcSectionOpen] = useState(false);
-  const [knowledgeOpen,   setKnowledgeOpen]   = useState(false);
-  const [configOpen,      setConfigOpen]      = useState(false);
+  const [openSection, setOpenSection] = useState<Section | null>(() => getSectionFromPath(path));
+  const toggle = (s: Section) => setOpenSection(cur => cur === s ? null : s);
+
+  useEffect(() => {
+    setOpenSection(getSectionFromPath(path));
+  }, [path]);
+
   const [twbcOpen, setTwbcOpen] = useState({ drone: false, l1: false, l2: false, l3: false, l4: false });
   const toggleTwbc = (k: keyof typeof twbcOpen) => setTwbcOpen(s => ({ ...s, [k]: !s[k] }));
 
@@ -121,12 +138,12 @@ function Sidebar({
       <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-0.5 text-[13px]">
         {isAdmin && (
           <>
-            <button type="button" onClick={() => setBusinessOpen(o => !o)}
+            <button type="button" onClick={() => toggle("business")}
               className="mb-2 flex w-full items-center px-3 text-[10px] uppercase tracking-wider text-white/30 hover:text-white/50 transition-colors">
               <span className="flex-1 text-left">Business</span>
-              {businessOpen ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
+              {openSection === "business" ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
             </button>
-            {businessOpen && (
+            {openSection === "business" && (
               <>
                 <NavLink to="/mission-hub/waitlist" icon={Clock}    active={path === "/mission-hub/waitlist"} onClick={onClose}>Subscriptions</NavLink>
                 <NavLink to="/mission-hub/contacts" icon={BookUser} active={path === "/mission-hub/contacts"} onClick={onClose}>Leads</NavLink>
@@ -138,16 +155,16 @@ function Sidebar({
         {visibleVerticals.length > 0 && (
           <button
             type="button"
-            onClick={() => setIndustriesOpen(o => !o)}
+            onClick={() => toggle("industries")}
             className="mt-5 mb-2 flex w-full items-center px-3 text-[10px] uppercase tracking-wider text-white/30 hover:text-white/50 transition-colors"
           >
             <span className="flex-1 text-left">Industries</span>
-            {industriesOpen
+            {openSection === "industries"
               ? <ChevronDown className="h-3 w-3" />
               : <ChevronRight className="h-3 w-3" />}
           </button>
         )}
-        {industriesOpen && visibleVerticals.map((v) => {
+        {openSection === "industries" && visibleVerticals.map((v) => {
           const Icon = verticalIcon[v];
           const to = v === ("design-studio" as Vertical)
             ? "/mission-hub/design-studio"
@@ -161,13 +178,13 @@ function Sidebar({
 
         {isAdmin && (
           <div className="mt-5 space-y-0.5">
-            <button type="button" onClick={() => setTwbcSectionOpen(o => !o)}
+            <button type="button" onClick={() => toggle("twbc")}
               className="mb-2 flex w-full items-center px-3 text-[10px] uppercase tracking-wider text-white/30 hover:text-white/50 transition-colors">
               <span className="flex-1 text-left">TWBC</span>
-              {twbcSectionOpen ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
+              {openSection === "twbc" ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
             </button>
 
-            {twbcSectionOpen && <>
+            {openSection === "twbc" && <>
             {/* ── Drone (collapsible) ── */}
             <button type="button" onClick={() => toggleTwbc("drone")}
               className="flex w-full items-center gap-2.5 px-4 py-2.5 rounded-lg text-[13px] text-white/65 hover:bg-white/[0.04] hover:text-white transition-colors">
@@ -246,12 +263,12 @@ function Sidebar({
 
         {hasDesignStudio && (
           <div className="mt-5 space-y-0.5">
-            <button type="button" onClick={() => setKnowledgeOpen(o => !o)}
+            <button type="button" onClick={() => toggle("knowledge")}
               className="mb-2 flex w-full items-center px-3 text-[10px] uppercase tracking-wider text-white/30 hover:text-white/50 transition-colors">
               <span className="flex-1 text-left">Knowledge Base</span>
-              {knowledgeOpen ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
+              {openSection === "knowledge" ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
             </button>
-            {knowledgeOpen && (
+            {openSection === "knowledge" && (
               <NavLink to="/mission-hub/twbc-drone-proven-designs" icon={BookOpen} active={path === "/mission-hub/twbc-drone-proven-designs"} onClick={onClose}>
                 Proven Designs
               </NavLink>
@@ -260,12 +277,12 @@ function Sidebar({
         )}
 
         <div className="mt-5 space-y-0.5">
-          <button type="button" onClick={() => setConfigOpen(o => !o)}
+          <button type="button" onClick={() => toggle("config")}
             className="mb-2 flex w-full items-center px-3 text-[10px] uppercase tracking-wider text-white/30 hover:text-white/50 transition-colors">
             <span className="flex-1 text-left">Configurations</span>
-            {configOpen ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
+            {openSection === "config" ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
           </button>
-          {configOpen && (
+          {openSection === "config" && (
             <>
               {isAdmin && (
                 <NavLink to="/mission-hub/users" icon={Users} active={path === "/mission-hub/users"} onClick={onClose}>
