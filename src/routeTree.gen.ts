@@ -13,39 +13,62 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as PilotRouteImport } from './routes/pilot'
 import { Route as MissionHubRouteImport } from './routes/mission-hub'
 import { Route as FieldRouteImport } from './routes/field'
-import { Route as AboutRouteImport } from './routes/about'
-import { Route as IndexRouteImport } from './routes/index'
+import { Route as LayoutRouteImport } from './routes/_layout'
 import { Route as PilotIndexRouteImport } from './routes/pilot.index'
 import { Route as ControlCenterIndexRouteImport } from './routes/control-center.index'
+import { Route as LayoutIndexRouteImport } from './routes/_layout.index'
 import { Route as PilotTrackingRouteImport } from './routes/pilot.tracking'
 import { Route as PilotSyncRouteImport } from './routes/pilot.sync'
 import { Route as PilotProfileRouteImport } from './routes/pilot.profile'
 import { Route as PilotLoginRouteImport } from './routes/pilot.login'
 import { Route as MissionHubWaitlistRouteImport } from './routes/mission-hub.waitlist'
 import { Route as MissionHubUsersRouteImport } from './routes/mission-hub.users'
+import { Route as MissionHubTwbcDroneSmeBrainRouteImport } from './routes/mission-hub.twbc-drone-sme-brain'
+import { Route as MissionHubTwbcDroneSimilaritySearchRouteImport } from './routes/mission-hub.twbc-drone-similarity-search'
+import { Route as MissionHubTwbcDroneRuleEngineRouteImport } from './routes/mission-hub.twbc-drone-rule-engine'
+import { Route as MissionHubTwbcDroneReferenceDesignsRouteImport } from './routes/mission-hub.twbc-drone-reference-designs'
+import { Route as MissionHubTwbcDroneReasoningApiRouteImport } from './routes/mission-hub.twbc-drone-reasoning-api'
+import { Route as MissionHubTwbcDroneProvenDesignsRouteImport } from './routes/mission-hub.twbc-drone-proven-designs'
+import { Route as MissionHubTwbcDroneFeedbackRouteImport } from './routes/mission-hub.twbc-drone-feedback'
+import { Route as MissionHubTwbcDroneDesignScoreRouteImport } from './routes/mission-hub.twbc-drone-design-score'
+import { Route as MissionHubTwbcDroneDesignRulesRouteImport } from './routes/mission-hub.twbc-drone-design-rules'
+import { Route as MissionHubTwbcDroneComponentsLibraryRouteImport } from './routes/mission-hub.twbc-drone-components-library'
+import { Route as MissionHubTwbcDroneApprovalRouteImport } from './routes/mission-hub.twbc-drone-approval'
 import { Route as MissionHubSettingsRouteImport } from './routes/mission-hub.settings'
 import { Route as MissionHubResetPasswordRouteImport } from './routes/mission-hub.reset-password'
 import { Route as MissionHubLoginRouteImport } from './routes/mission-hub.login'
+import { Route as MissionHubKnowledgeUavRouteImport } from './routes/mission-hub.knowledge-uav'
 import { Route as MissionHubDesignStudioRouteImport } from './routes/mission-hub.design-studio'
 import { Route as MissionHubDashboardRouteImport } from './routes/mission-hub.dashboard'
 import { Route as MissionHubContactsRouteImport } from './routes/mission-hub.contacts'
 import { Route as ControlCenterUsersRouteImport } from './routes/control-center.users'
+import { Route as ControlCenterTorqwingsDesignStudioRouteImport } from './routes/control-center.torqwings-design-studio'
 import { Route as ControlCenterLoginRouteImport } from './routes/control-center.login'
 import { Route as ControlCenterAgriskyRouteImport } from './routes/control-center.agrisky'
-import { Route as ControlCenterAerospawnDesignStudioRouteImport } from './routes/control-center.aerospawn-design-studio'
+import { Route as LayoutTechnologyRouteImport } from './routes/_layout.technology'
+import { Route as LayoutSolutionsRouteImport } from './routes/_layout.solutions'
+import { Route as LayoutPilotsRouteImport } from './routes/_layout.pilots'
+import { Route as LayoutIndustriesRouteImport } from './routes/_layout.industries'
+import { Route as LayoutGuardskyRouteImport } from './routes/_layout.guardsky'
+import { Route as LayoutDesignStudioRouteImport } from './routes/_layout.design-studio'
+import { Route as LayoutContactRouteImport } from './routes/_layout.contact'
+import { Route as LayoutAgriskyRouteImport } from './routes/_layout.agrisky'
+import { Route as LayoutAcademyRouteImport } from './routes/_layout.academy'
+import { Route as LayoutAboutRouteImport } from './routes/_layout.about'
 import { Route as PilotMissionsIndexRouteImport } from './routes/pilot.missions.index'
-import { Route as ControlCenterAerospawnDesignStudioIndexRouteImport } from './routes/control-center.aerospawn-design-studio.index'
+import { Route as ControlCenterTorqwingsDesignStudioIndexRouteImport } from './routes/control-center.torqwings-design-studio.index'
 import { Route as PilotMissionsIdRouteImport } from './routes/pilot.missions.$id'
 import { Route as MissionHubVerticalsVerticalRouteImport } from './routes/mission-hub.verticals.$vertical'
-import { Route as ControlCenterAerospawnDesignStudioSimulationRouteImport } from './routes/control-center.aerospawn-design-studio.simulation'
-import { Route as ControlCenterAerospawnDesignStudioRequirementsRouteImport } from './routes/control-center.aerospawn-design-studio.requirements'
-import { Route as ControlCenterAerospawnDesignStudioReportRouteImport } from './routes/control-center.aerospawn-design-studio.report'
-import { Route as ControlCenterAerospawnDesignStudioNewRouteImport } from './routes/control-center.aerospawn-design-studio.new'
-import { Route as ControlCenterAerospawnDesignStudioHistoryRouteImport } from './routes/control-center.aerospawn-design-studio.history'
-import { Route as ControlCenterAerospawnDesignStudioDesignRouteImport } from './routes/control-center.aerospawn-design-studio.design'
-import { Route as ControlCenterAerospawnDesignStudioComponentsRouteImport } from './routes/control-center.aerospawn-design-studio.components'
-import { Route as ControlCenterAerospawnDesignStudioComplianceRouteImport } from './routes/control-center.aerospawn-design-studio.compliance'
-import { Route as ControlCenterAerospawnDesignStudioAdvisorRouteImport } from './routes/control-center.aerospawn-design-studio.advisor'
+import { Route as ControlCenterTorqwingsDesignStudioSmeBrainRouteImport } from './routes/control-center.torqwings-design-studio.sme-brain'
+import { Route as ControlCenterTorqwingsDesignStudioSimulationRouteImport } from './routes/control-center.torqwings-design-studio.simulation'
+import { Route as ControlCenterTorqwingsDesignStudioRequirementsRouteImport } from './routes/control-center.torqwings-design-studio.requirements'
+import { Route as ControlCenterTorqwingsDesignStudioReportRouteImport } from './routes/control-center.torqwings-design-studio.report'
+import { Route as ControlCenterTorqwingsDesignStudioNewRouteImport } from './routes/control-center.torqwings-design-studio.new'
+import { Route as ControlCenterTorqwingsDesignStudioHistoryRouteImport } from './routes/control-center.torqwings-design-studio.history'
+import { Route as ControlCenterTorqwingsDesignStudioDesignRouteImport } from './routes/control-center.torqwings-design-studio.design'
+import { Route as ControlCenterTorqwingsDesignStudioComponentsRouteImport } from './routes/control-center.torqwings-design-studio.components'
+import { Route as ControlCenterTorqwingsDesignStudioComplianceRouteImport } from './routes/control-center.torqwings-design-studio.compliance'
+import { Route as ControlCenterTorqwingsDesignStudioAdvisorRouteImport } from './routes/control-center.torqwings-design-studio.advisor'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -67,14 +90,8 @@ const FieldRoute = FieldRouteImport.update({
   path: '/field',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AboutRoute = AboutRouteImport.update({
-  id: '/about',
-  path: '/about',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const LayoutRoute = LayoutRouteImport.update({
+  id: '/_layout',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PilotIndexRoute = PilotIndexRouteImport.update({
@@ -86,6 +103,11 @@ const ControlCenterIndexRoute = ControlCenterIndexRouteImport.update({
   id: '/control-center/',
   path: '/control-center/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const LayoutIndexRoute = LayoutIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => LayoutRoute,
 } as any)
 const PilotTrackingRoute = PilotTrackingRouteImport.update({
   id: '/tracking',
@@ -117,6 +139,72 @@ const MissionHubUsersRoute = MissionHubUsersRouteImport.update({
   path: '/users',
   getParentRoute: () => MissionHubRoute,
 } as any)
+const MissionHubTwbcDroneSmeBrainRoute =
+  MissionHubTwbcDroneSmeBrainRouteImport.update({
+    id: '/twbc-drone-sme-brain',
+    path: '/twbc-drone-sme-brain',
+    getParentRoute: () => MissionHubRoute,
+  } as any)
+const MissionHubTwbcDroneSimilaritySearchRoute =
+  MissionHubTwbcDroneSimilaritySearchRouteImport.update({
+    id: '/twbc-drone-similarity-search',
+    path: '/twbc-drone-similarity-search',
+    getParentRoute: () => MissionHubRoute,
+  } as any)
+const MissionHubTwbcDroneRuleEngineRoute =
+  MissionHubTwbcDroneRuleEngineRouteImport.update({
+    id: '/twbc-drone-rule-engine',
+    path: '/twbc-drone-rule-engine',
+    getParentRoute: () => MissionHubRoute,
+  } as any)
+const MissionHubTwbcDroneReferenceDesignsRoute =
+  MissionHubTwbcDroneReferenceDesignsRouteImport.update({
+    id: '/twbc-drone-reference-designs',
+    path: '/twbc-drone-reference-designs',
+    getParentRoute: () => MissionHubRoute,
+  } as any)
+const MissionHubTwbcDroneReasoningApiRoute =
+  MissionHubTwbcDroneReasoningApiRouteImport.update({
+    id: '/twbc-drone-reasoning-api',
+    path: '/twbc-drone-reasoning-api',
+    getParentRoute: () => MissionHubRoute,
+  } as any)
+const MissionHubTwbcDroneProvenDesignsRoute =
+  MissionHubTwbcDroneProvenDesignsRouteImport.update({
+    id: '/twbc-drone-proven-designs',
+    path: '/twbc-drone-proven-designs',
+    getParentRoute: () => MissionHubRoute,
+  } as any)
+const MissionHubTwbcDroneFeedbackRoute =
+  MissionHubTwbcDroneFeedbackRouteImport.update({
+    id: '/twbc-drone-feedback',
+    path: '/twbc-drone-feedback',
+    getParentRoute: () => MissionHubRoute,
+  } as any)
+const MissionHubTwbcDroneDesignScoreRoute =
+  MissionHubTwbcDroneDesignScoreRouteImport.update({
+    id: '/twbc-drone-design-score',
+    path: '/twbc-drone-design-score',
+    getParentRoute: () => MissionHubRoute,
+  } as any)
+const MissionHubTwbcDroneDesignRulesRoute =
+  MissionHubTwbcDroneDesignRulesRouteImport.update({
+    id: '/twbc-drone-design-rules',
+    path: '/twbc-drone-design-rules',
+    getParentRoute: () => MissionHubRoute,
+  } as any)
+const MissionHubTwbcDroneComponentsLibraryRoute =
+  MissionHubTwbcDroneComponentsLibraryRouteImport.update({
+    id: '/twbc-drone-components-library',
+    path: '/twbc-drone-components-library',
+    getParentRoute: () => MissionHubRoute,
+  } as any)
+const MissionHubTwbcDroneApprovalRoute =
+  MissionHubTwbcDroneApprovalRouteImport.update({
+    id: '/twbc-drone-approval',
+    path: '/twbc-drone-approval',
+    getParentRoute: () => MissionHubRoute,
+  } as any)
 const MissionHubSettingsRoute = MissionHubSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -130,6 +218,11 @@ const MissionHubResetPasswordRoute = MissionHubResetPasswordRouteImport.update({
 const MissionHubLoginRoute = MissionHubLoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => MissionHubRoute,
+} as any)
+const MissionHubKnowledgeUavRoute = MissionHubKnowledgeUavRouteImport.update({
+  id: '/knowledge-uav',
+  path: '/knowledge-uav',
   getParentRoute: () => MissionHubRoute,
 } as any)
 const MissionHubDesignStudioRoute = MissionHubDesignStudioRouteImport.update({
@@ -152,6 +245,12 @@ const ControlCenterUsersRoute = ControlCenterUsersRouteImport.update({
   path: '/control-center/users',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ControlCenterTorqwingsDesignStudioRoute =
+  ControlCenterTorqwingsDesignStudioRouteImport.update({
+    id: '/control-center/torqwings-design-studio',
+    path: '/control-center/torqwings-design-studio',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ControlCenterLoginRoute = ControlCenterLoginRouteImport.update({
   id: '/control-center/login',
   path: '/control-center/login',
@@ -162,22 +261,66 @@ const ControlCenterAgriskyRoute = ControlCenterAgriskyRouteImport.update({
   path: '/control-center/agrisky',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ControlCenterAerospawnDesignStudioRoute =
-  ControlCenterAerospawnDesignStudioRouteImport.update({
-    id: '/control-center/aerospawn-design-studio',
-    path: '/control-center/aerospawn-design-studio',
-    getParentRoute: () => rootRouteImport,
-  } as any)
+const LayoutTechnologyRoute = LayoutTechnologyRouteImport.update({
+  id: '/technology',
+  path: '/technology',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutSolutionsRoute = LayoutSolutionsRouteImport.update({
+  id: '/solutions',
+  path: '/solutions',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutPilotsRoute = LayoutPilotsRouteImport.update({
+  id: '/pilots',
+  path: '/pilots',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutIndustriesRoute = LayoutIndustriesRouteImport.update({
+  id: '/industries',
+  path: '/industries',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutGuardskyRoute = LayoutGuardskyRouteImport.update({
+  id: '/guardsky',
+  path: '/guardsky',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutDesignStudioRoute = LayoutDesignStudioRouteImport.update({
+  id: '/design-studio',
+  path: '/design-studio',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutContactRoute = LayoutContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutAgriskyRoute = LayoutAgriskyRouteImport.update({
+  id: '/agrisky',
+  path: '/agrisky',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutAcademyRoute = LayoutAcademyRouteImport.update({
+  id: '/academy',
+  path: '/academy',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutAboutRoute = LayoutAboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => LayoutRoute,
+} as any)
 const PilotMissionsIndexRoute = PilotMissionsIndexRouteImport.update({
   id: '/missions/',
   path: '/missions/',
   getParentRoute: () => PilotRoute,
 } as any)
-const ControlCenterAerospawnDesignStudioIndexRoute =
-  ControlCenterAerospawnDesignStudioIndexRouteImport.update({
+const ControlCenterTorqwingsDesignStudioIndexRoute =
+  ControlCenterTorqwingsDesignStudioIndexRouteImport.update({
     id: '/',
     path: '/',
-    getParentRoute: () => ControlCenterAerospawnDesignStudioRoute,
+    getParentRoute: () => ControlCenterTorqwingsDesignStudioRoute,
   } as any)
 const PilotMissionsIdRoute = PilotMissionsIdRouteImport.update({
   id: '/missions/$id',
@@ -190,78 +333,105 @@ const MissionHubVerticalsVerticalRoute =
     path: '/verticals/$vertical',
     getParentRoute: () => MissionHubRoute,
   } as any)
-const ControlCenterAerospawnDesignStudioSimulationRoute =
-  ControlCenterAerospawnDesignStudioSimulationRouteImport.update({
+const ControlCenterTorqwingsDesignStudioSmeBrainRoute =
+  ControlCenterTorqwingsDesignStudioSmeBrainRouteImport.update({
+    id: '/sme-brain',
+    path: '/sme-brain',
+    getParentRoute: () => ControlCenterTorqwingsDesignStudioRoute,
+  } as any)
+const ControlCenterTorqwingsDesignStudioSimulationRoute =
+  ControlCenterTorqwingsDesignStudioSimulationRouteImport.update({
     id: '/simulation',
     path: '/simulation',
-    getParentRoute: () => ControlCenterAerospawnDesignStudioRoute,
+    getParentRoute: () => ControlCenterTorqwingsDesignStudioRoute,
   } as any)
-const ControlCenterAerospawnDesignStudioRequirementsRoute =
-  ControlCenterAerospawnDesignStudioRequirementsRouteImport.update({
+const ControlCenterTorqwingsDesignStudioRequirementsRoute =
+  ControlCenterTorqwingsDesignStudioRequirementsRouteImport.update({
     id: '/requirements',
     path: '/requirements',
-    getParentRoute: () => ControlCenterAerospawnDesignStudioRoute,
+    getParentRoute: () => ControlCenterTorqwingsDesignStudioRoute,
   } as any)
-const ControlCenterAerospawnDesignStudioReportRoute =
-  ControlCenterAerospawnDesignStudioReportRouteImport.update({
+const ControlCenterTorqwingsDesignStudioReportRoute =
+  ControlCenterTorqwingsDesignStudioReportRouteImport.update({
     id: '/report',
     path: '/report',
-    getParentRoute: () => ControlCenterAerospawnDesignStudioRoute,
+    getParentRoute: () => ControlCenterTorqwingsDesignStudioRoute,
   } as any)
-const ControlCenterAerospawnDesignStudioNewRoute =
-  ControlCenterAerospawnDesignStudioNewRouteImport.update({
+const ControlCenterTorqwingsDesignStudioNewRoute =
+  ControlCenterTorqwingsDesignStudioNewRouteImport.update({
     id: '/new',
     path: '/new',
-    getParentRoute: () => ControlCenterAerospawnDesignStudioRoute,
+    getParentRoute: () => ControlCenterTorqwingsDesignStudioRoute,
   } as any)
-const ControlCenterAerospawnDesignStudioHistoryRoute =
-  ControlCenterAerospawnDesignStudioHistoryRouteImport.update({
+const ControlCenterTorqwingsDesignStudioHistoryRoute =
+  ControlCenterTorqwingsDesignStudioHistoryRouteImport.update({
     id: '/history',
     path: '/history',
-    getParentRoute: () => ControlCenterAerospawnDesignStudioRoute,
+    getParentRoute: () => ControlCenterTorqwingsDesignStudioRoute,
   } as any)
-const ControlCenterAerospawnDesignStudioDesignRoute =
-  ControlCenterAerospawnDesignStudioDesignRouteImport.update({
+const ControlCenterTorqwingsDesignStudioDesignRoute =
+  ControlCenterTorqwingsDesignStudioDesignRouteImport.update({
     id: '/design',
     path: '/design',
-    getParentRoute: () => ControlCenterAerospawnDesignStudioRoute,
+    getParentRoute: () => ControlCenterTorqwingsDesignStudioRoute,
   } as any)
-const ControlCenterAerospawnDesignStudioComponentsRoute =
-  ControlCenterAerospawnDesignStudioComponentsRouteImport.update({
+const ControlCenterTorqwingsDesignStudioComponentsRoute =
+  ControlCenterTorqwingsDesignStudioComponentsRouteImport.update({
     id: '/components',
     path: '/components',
-    getParentRoute: () => ControlCenterAerospawnDesignStudioRoute,
+    getParentRoute: () => ControlCenterTorqwingsDesignStudioRoute,
   } as any)
-const ControlCenterAerospawnDesignStudioComplianceRoute =
-  ControlCenterAerospawnDesignStudioComplianceRouteImport.update({
+const ControlCenterTorqwingsDesignStudioComplianceRoute =
+  ControlCenterTorqwingsDesignStudioComplianceRouteImport.update({
     id: '/compliance',
     path: '/compliance',
-    getParentRoute: () => ControlCenterAerospawnDesignStudioRoute,
+    getParentRoute: () => ControlCenterTorqwingsDesignStudioRoute,
   } as any)
-const ControlCenterAerospawnDesignStudioAdvisorRoute =
-  ControlCenterAerospawnDesignStudioAdvisorRouteImport.update({
+const ControlCenterTorqwingsDesignStudioAdvisorRoute =
+  ControlCenterTorqwingsDesignStudioAdvisorRouteImport.update({
     id: '/advisor',
     path: '/advisor',
-    getParentRoute: () => ControlCenterAerospawnDesignStudioRoute,
+    getParentRoute: () => ControlCenterTorqwingsDesignStudioRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/about': typeof AboutRoute
+  '/': typeof LayoutIndexRoute
   '/field': typeof FieldRoute
   '/mission-hub': typeof MissionHubRouteWithChildren
   '/pilot': typeof PilotRouteWithChildren
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/control-center/aerospawn-design-studio': typeof ControlCenterAerospawnDesignStudioRouteWithChildren
+  '/about': typeof LayoutAboutRoute
+  '/academy': typeof LayoutAcademyRoute
+  '/agrisky': typeof LayoutAgriskyRoute
+  '/contact': typeof LayoutContactRoute
+  '/design-studio': typeof LayoutDesignStudioRoute
+  '/guardsky': typeof LayoutGuardskyRoute
+  '/industries': typeof LayoutIndustriesRoute
+  '/pilots': typeof LayoutPilotsRoute
+  '/solutions': typeof LayoutSolutionsRoute
+  '/technology': typeof LayoutTechnologyRoute
   '/control-center/agrisky': typeof ControlCenterAgriskyRoute
   '/control-center/login': typeof ControlCenterLoginRoute
+  '/control-center/torqwings-design-studio': typeof ControlCenterTorqwingsDesignStudioRouteWithChildren
   '/control-center/users': typeof ControlCenterUsersRoute
   '/mission-hub/contacts': typeof MissionHubContactsRoute
   '/mission-hub/dashboard': typeof MissionHubDashboardRoute
   '/mission-hub/design-studio': typeof MissionHubDesignStudioRoute
+  '/mission-hub/knowledge-uav': typeof MissionHubKnowledgeUavRoute
   '/mission-hub/login': typeof MissionHubLoginRoute
   '/mission-hub/reset-password': typeof MissionHubResetPasswordRoute
   '/mission-hub/settings': typeof MissionHubSettingsRoute
+  '/mission-hub/twbc-drone-approval': typeof MissionHubTwbcDroneApprovalRoute
+  '/mission-hub/twbc-drone-components-library': typeof MissionHubTwbcDroneComponentsLibraryRoute
+  '/mission-hub/twbc-drone-design-rules': typeof MissionHubTwbcDroneDesignRulesRoute
+  '/mission-hub/twbc-drone-design-score': typeof MissionHubTwbcDroneDesignScoreRoute
+  '/mission-hub/twbc-drone-feedback': typeof MissionHubTwbcDroneFeedbackRoute
+  '/mission-hub/twbc-drone-proven-designs': typeof MissionHubTwbcDroneProvenDesignsRoute
+  '/mission-hub/twbc-drone-reasoning-api': typeof MissionHubTwbcDroneReasoningApiRoute
+  '/mission-hub/twbc-drone-reference-designs': typeof MissionHubTwbcDroneReferenceDesignsRoute
+  '/mission-hub/twbc-drone-rule-engine': typeof MissionHubTwbcDroneRuleEngineRoute
+  '/mission-hub/twbc-drone-similarity-search': typeof MissionHubTwbcDroneSimilaritySearchRoute
+  '/mission-hub/twbc-drone-sme-brain': typeof MissionHubTwbcDroneSmeBrainRoute
   '/mission-hub/users': typeof MissionHubUsersRoute
   '/mission-hub/waitlist': typeof MissionHubWaitlistRoute
   '/pilot/login': typeof PilotLoginRoute
@@ -270,116 +440,183 @@ export interface FileRoutesByFullPath {
   '/pilot/tracking': typeof PilotTrackingRoute
   '/control-center/': typeof ControlCenterIndexRoute
   '/pilot/': typeof PilotIndexRoute
-  '/control-center/aerospawn-design-studio/advisor': typeof ControlCenterAerospawnDesignStudioAdvisorRoute
-  '/control-center/aerospawn-design-studio/compliance': typeof ControlCenterAerospawnDesignStudioComplianceRoute
-  '/control-center/aerospawn-design-studio/components': typeof ControlCenterAerospawnDesignStudioComponentsRoute
-  '/control-center/aerospawn-design-studio/design': typeof ControlCenterAerospawnDesignStudioDesignRoute
-  '/control-center/aerospawn-design-studio/history': typeof ControlCenterAerospawnDesignStudioHistoryRoute
-  '/control-center/aerospawn-design-studio/new': typeof ControlCenterAerospawnDesignStudioNewRoute
-  '/control-center/aerospawn-design-studio/report': typeof ControlCenterAerospawnDesignStudioReportRoute
-  '/control-center/aerospawn-design-studio/requirements': typeof ControlCenterAerospawnDesignStudioRequirementsRoute
-  '/control-center/aerospawn-design-studio/simulation': typeof ControlCenterAerospawnDesignStudioSimulationRoute
+  '/control-center/torqwings-design-studio/advisor': typeof ControlCenterTorqwingsDesignStudioAdvisorRoute
+  '/control-center/torqwings-design-studio/compliance': typeof ControlCenterTorqwingsDesignStudioComplianceRoute
+  '/control-center/torqwings-design-studio/components': typeof ControlCenterTorqwingsDesignStudioComponentsRoute
+  '/control-center/torqwings-design-studio/design': typeof ControlCenterTorqwingsDesignStudioDesignRoute
+  '/control-center/torqwings-design-studio/history': typeof ControlCenterTorqwingsDesignStudioHistoryRoute
+  '/control-center/torqwings-design-studio/new': typeof ControlCenterTorqwingsDesignStudioNewRoute
+  '/control-center/torqwings-design-studio/report': typeof ControlCenterTorqwingsDesignStudioReportRoute
+  '/control-center/torqwings-design-studio/requirements': typeof ControlCenterTorqwingsDesignStudioRequirementsRoute
+  '/control-center/torqwings-design-studio/simulation': typeof ControlCenterTorqwingsDesignStudioSimulationRoute
+  '/control-center/torqwings-design-studio/sme-brain': typeof ControlCenterTorqwingsDesignStudioSmeBrainRoute
   '/mission-hub/verticals/$vertical': typeof MissionHubVerticalsVerticalRoute
   '/pilot/missions/$id': typeof PilotMissionsIdRoute
-  '/control-center/aerospawn-design-studio/': typeof ControlCenterAerospawnDesignStudioIndexRoute
+  '/control-center/torqwings-design-studio/': typeof ControlCenterTorqwingsDesignStudioIndexRoute
   '/pilot/missions/': typeof PilotMissionsIndexRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/about': typeof AboutRoute
   '/field': typeof FieldRoute
   '/mission-hub': typeof MissionHubRouteWithChildren
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/about': typeof LayoutAboutRoute
+  '/academy': typeof LayoutAcademyRoute
+  '/agrisky': typeof LayoutAgriskyRoute
+  '/contact': typeof LayoutContactRoute
+  '/design-studio': typeof LayoutDesignStudioRoute
+  '/guardsky': typeof LayoutGuardskyRoute
+  '/industries': typeof LayoutIndustriesRoute
+  '/pilots': typeof LayoutPilotsRoute
+  '/solutions': typeof LayoutSolutionsRoute
+  '/technology': typeof LayoutTechnologyRoute
   '/control-center/agrisky': typeof ControlCenterAgriskyRoute
   '/control-center/login': typeof ControlCenterLoginRoute
   '/control-center/users': typeof ControlCenterUsersRoute
   '/mission-hub/contacts': typeof MissionHubContactsRoute
   '/mission-hub/dashboard': typeof MissionHubDashboardRoute
   '/mission-hub/design-studio': typeof MissionHubDesignStudioRoute
+  '/mission-hub/knowledge-uav': typeof MissionHubKnowledgeUavRoute
   '/mission-hub/login': typeof MissionHubLoginRoute
   '/mission-hub/reset-password': typeof MissionHubResetPasswordRoute
   '/mission-hub/settings': typeof MissionHubSettingsRoute
+  '/mission-hub/twbc-drone-approval': typeof MissionHubTwbcDroneApprovalRoute
+  '/mission-hub/twbc-drone-components-library': typeof MissionHubTwbcDroneComponentsLibraryRoute
+  '/mission-hub/twbc-drone-design-rules': typeof MissionHubTwbcDroneDesignRulesRoute
+  '/mission-hub/twbc-drone-design-score': typeof MissionHubTwbcDroneDesignScoreRoute
+  '/mission-hub/twbc-drone-feedback': typeof MissionHubTwbcDroneFeedbackRoute
+  '/mission-hub/twbc-drone-proven-designs': typeof MissionHubTwbcDroneProvenDesignsRoute
+  '/mission-hub/twbc-drone-reasoning-api': typeof MissionHubTwbcDroneReasoningApiRoute
+  '/mission-hub/twbc-drone-reference-designs': typeof MissionHubTwbcDroneReferenceDesignsRoute
+  '/mission-hub/twbc-drone-rule-engine': typeof MissionHubTwbcDroneRuleEngineRoute
+  '/mission-hub/twbc-drone-similarity-search': typeof MissionHubTwbcDroneSimilaritySearchRoute
+  '/mission-hub/twbc-drone-sme-brain': typeof MissionHubTwbcDroneSmeBrainRoute
   '/mission-hub/users': typeof MissionHubUsersRoute
   '/mission-hub/waitlist': typeof MissionHubWaitlistRoute
   '/pilot/login': typeof PilotLoginRoute
   '/pilot/profile': typeof PilotProfileRoute
   '/pilot/sync': typeof PilotSyncRoute
   '/pilot/tracking': typeof PilotTrackingRoute
+  '/': typeof LayoutIndexRoute
   '/control-center': typeof ControlCenterIndexRoute
   '/pilot': typeof PilotIndexRoute
-  '/control-center/aerospawn-design-studio/advisor': typeof ControlCenterAerospawnDesignStudioAdvisorRoute
-  '/control-center/aerospawn-design-studio/compliance': typeof ControlCenterAerospawnDesignStudioComplianceRoute
-  '/control-center/aerospawn-design-studio/components': typeof ControlCenterAerospawnDesignStudioComponentsRoute
-  '/control-center/aerospawn-design-studio/design': typeof ControlCenterAerospawnDesignStudioDesignRoute
-  '/control-center/aerospawn-design-studio/history': typeof ControlCenterAerospawnDesignStudioHistoryRoute
-  '/control-center/aerospawn-design-studio/new': typeof ControlCenterAerospawnDesignStudioNewRoute
-  '/control-center/aerospawn-design-studio/report': typeof ControlCenterAerospawnDesignStudioReportRoute
-  '/control-center/aerospawn-design-studio/requirements': typeof ControlCenterAerospawnDesignStudioRequirementsRoute
-  '/control-center/aerospawn-design-studio/simulation': typeof ControlCenterAerospawnDesignStudioSimulationRoute
+  '/control-center/torqwings-design-studio/advisor': typeof ControlCenterTorqwingsDesignStudioAdvisorRoute
+  '/control-center/torqwings-design-studio/compliance': typeof ControlCenterTorqwingsDesignStudioComplianceRoute
+  '/control-center/torqwings-design-studio/components': typeof ControlCenterTorqwingsDesignStudioComponentsRoute
+  '/control-center/torqwings-design-studio/design': typeof ControlCenterTorqwingsDesignStudioDesignRoute
+  '/control-center/torqwings-design-studio/history': typeof ControlCenterTorqwingsDesignStudioHistoryRoute
+  '/control-center/torqwings-design-studio/new': typeof ControlCenterTorqwingsDesignStudioNewRoute
+  '/control-center/torqwings-design-studio/report': typeof ControlCenterTorqwingsDesignStudioReportRoute
+  '/control-center/torqwings-design-studio/requirements': typeof ControlCenterTorqwingsDesignStudioRequirementsRoute
+  '/control-center/torqwings-design-studio/simulation': typeof ControlCenterTorqwingsDesignStudioSimulationRoute
+  '/control-center/torqwings-design-studio/sme-brain': typeof ControlCenterTorqwingsDesignStudioSmeBrainRoute
   '/mission-hub/verticals/$vertical': typeof MissionHubVerticalsVerticalRoute
   '/pilot/missions/$id': typeof PilotMissionsIdRoute
-  '/control-center/aerospawn-design-studio': typeof ControlCenterAerospawnDesignStudioIndexRoute
+  '/control-center/torqwings-design-studio': typeof ControlCenterTorqwingsDesignStudioIndexRoute
   '/pilot/missions': typeof PilotMissionsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
-  '/about': typeof AboutRoute
+  '/_layout': typeof LayoutRouteWithChildren
   '/field': typeof FieldRoute
   '/mission-hub': typeof MissionHubRouteWithChildren
   '/pilot': typeof PilotRouteWithChildren
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/control-center/aerospawn-design-studio': typeof ControlCenterAerospawnDesignStudioRouteWithChildren
+  '/_layout/about': typeof LayoutAboutRoute
+  '/_layout/academy': typeof LayoutAcademyRoute
+  '/_layout/agrisky': typeof LayoutAgriskyRoute
+  '/_layout/contact': typeof LayoutContactRoute
+  '/_layout/design-studio': typeof LayoutDesignStudioRoute
+  '/_layout/guardsky': typeof LayoutGuardskyRoute
+  '/_layout/industries': typeof LayoutIndustriesRoute
+  '/_layout/pilots': typeof LayoutPilotsRoute
+  '/_layout/solutions': typeof LayoutSolutionsRoute
+  '/_layout/technology': typeof LayoutTechnologyRoute
   '/control-center/agrisky': typeof ControlCenterAgriskyRoute
   '/control-center/login': typeof ControlCenterLoginRoute
+  '/control-center/torqwings-design-studio': typeof ControlCenterTorqwingsDesignStudioRouteWithChildren
   '/control-center/users': typeof ControlCenterUsersRoute
   '/mission-hub/contacts': typeof MissionHubContactsRoute
   '/mission-hub/dashboard': typeof MissionHubDashboardRoute
   '/mission-hub/design-studio': typeof MissionHubDesignStudioRoute
+  '/mission-hub/knowledge-uav': typeof MissionHubKnowledgeUavRoute
   '/mission-hub/login': typeof MissionHubLoginRoute
   '/mission-hub/reset-password': typeof MissionHubResetPasswordRoute
   '/mission-hub/settings': typeof MissionHubSettingsRoute
+  '/mission-hub/twbc-drone-approval': typeof MissionHubTwbcDroneApprovalRoute
+  '/mission-hub/twbc-drone-components-library': typeof MissionHubTwbcDroneComponentsLibraryRoute
+  '/mission-hub/twbc-drone-design-rules': typeof MissionHubTwbcDroneDesignRulesRoute
+  '/mission-hub/twbc-drone-design-score': typeof MissionHubTwbcDroneDesignScoreRoute
+  '/mission-hub/twbc-drone-feedback': typeof MissionHubTwbcDroneFeedbackRoute
+  '/mission-hub/twbc-drone-proven-designs': typeof MissionHubTwbcDroneProvenDesignsRoute
+  '/mission-hub/twbc-drone-reasoning-api': typeof MissionHubTwbcDroneReasoningApiRoute
+  '/mission-hub/twbc-drone-reference-designs': typeof MissionHubTwbcDroneReferenceDesignsRoute
+  '/mission-hub/twbc-drone-rule-engine': typeof MissionHubTwbcDroneRuleEngineRoute
+  '/mission-hub/twbc-drone-similarity-search': typeof MissionHubTwbcDroneSimilaritySearchRoute
+  '/mission-hub/twbc-drone-sme-brain': typeof MissionHubTwbcDroneSmeBrainRoute
   '/mission-hub/users': typeof MissionHubUsersRoute
   '/mission-hub/waitlist': typeof MissionHubWaitlistRoute
   '/pilot/login': typeof PilotLoginRoute
   '/pilot/profile': typeof PilotProfileRoute
   '/pilot/sync': typeof PilotSyncRoute
   '/pilot/tracking': typeof PilotTrackingRoute
+  '/_layout/': typeof LayoutIndexRoute
   '/control-center/': typeof ControlCenterIndexRoute
   '/pilot/': typeof PilotIndexRoute
-  '/control-center/aerospawn-design-studio/advisor': typeof ControlCenterAerospawnDesignStudioAdvisorRoute
-  '/control-center/aerospawn-design-studio/compliance': typeof ControlCenterAerospawnDesignStudioComplianceRoute
-  '/control-center/aerospawn-design-studio/components': typeof ControlCenterAerospawnDesignStudioComponentsRoute
-  '/control-center/aerospawn-design-studio/design': typeof ControlCenterAerospawnDesignStudioDesignRoute
-  '/control-center/aerospawn-design-studio/history': typeof ControlCenterAerospawnDesignStudioHistoryRoute
-  '/control-center/aerospawn-design-studio/new': typeof ControlCenterAerospawnDesignStudioNewRoute
-  '/control-center/aerospawn-design-studio/report': typeof ControlCenterAerospawnDesignStudioReportRoute
-  '/control-center/aerospawn-design-studio/requirements': typeof ControlCenterAerospawnDesignStudioRequirementsRoute
-  '/control-center/aerospawn-design-studio/simulation': typeof ControlCenterAerospawnDesignStudioSimulationRoute
+  '/control-center/torqwings-design-studio/advisor': typeof ControlCenterTorqwingsDesignStudioAdvisorRoute
+  '/control-center/torqwings-design-studio/compliance': typeof ControlCenterTorqwingsDesignStudioComplianceRoute
+  '/control-center/torqwings-design-studio/components': typeof ControlCenterTorqwingsDesignStudioComponentsRoute
+  '/control-center/torqwings-design-studio/design': typeof ControlCenterTorqwingsDesignStudioDesignRoute
+  '/control-center/torqwings-design-studio/history': typeof ControlCenterTorqwingsDesignStudioHistoryRoute
+  '/control-center/torqwings-design-studio/new': typeof ControlCenterTorqwingsDesignStudioNewRoute
+  '/control-center/torqwings-design-studio/report': typeof ControlCenterTorqwingsDesignStudioReportRoute
+  '/control-center/torqwings-design-studio/requirements': typeof ControlCenterTorqwingsDesignStudioRequirementsRoute
+  '/control-center/torqwings-design-studio/simulation': typeof ControlCenterTorqwingsDesignStudioSimulationRoute
+  '/control-center/torqwings-design-studio/sme-brain': typeof ControlCenterTorqwingsDesignStudioSmeBrainRoute
   '/mission-hub/verticals/$vertical': typeof MissionHubVerticalsVerticalRoute
   '/pilot/missions/$id': typeof PilotMissionsIdRoute
-  '/control-center/aerospawn-design-studio/': typeof ControlCenterAerospawnDesignStudioIndexRoute
+  '/control-center/torqwings-design-studio/': typeof ControlCenterTorqwingsDesignStudioIndexRoute
   '/pilot/missions/': typeof PilotMissionsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/about'
     | '/field'
     | '/mission-hub'
     | '/pilot'
     | '/sitemap.xml'
-    | '/control-center/aerospawn-design-studio'
+    | '/about'
+    | '/academy'
+    | '/agrisky'
+    | '/contact'
+    | '/design-studio'
+    | '/guardsky'
+    | '/industries'
+    | '/pilots'
+    | '/solutions'
+    | '/technology'
     | '/control-center/agrisky'
     | '/control-center/login'
+    | '/control-center/torqwings-design-studio'
     | '/control-center/users'
     | '/mission-hub/contacts'
     | '/mission-hub/dashboard'
     | '/mission-hub/design-studio'
+    | '/mission-hub/knowledge-uav'
     | '/mission-hub/login'
     | '/mission-hub/reset-password'
     | '/mission-hub/settings'
+    | '/mission-hub/twbc-drone-approval'
+    | '/mission-hub/twbc-drone-components-library'
+    | '/mission-hub/twbc-drone-design-rules'
+    | '/mission-hub/twbc-drone-design-score'
+    | '/mission-hub/twbc-drone-feedback'
+    | '/mission-hub/twbc-drone-proven-designs'
+    | '/mission-hub/twbc-drone-reasoning-api'
+    | '/mission-hub/twbc-drone-reference-designs'
+    | '/mission-hub/twbc-drone-rule-engine'
+    | '/mission-hub/twbc-drone-similarity-search'
+    | '/mission-hub/twbc-drone-sme-brain'
     | '/mission-hub/users'
     | '/mission-hub/waitlist'
     | '/pilot/login'
@@ -388,107 +625,152 @@ export interface FileRouteTypes {
     | '/pilot/tracking'
     | '/control-center/'
     | '/pilot/'
-    | '/control-center/aerospawn-design-studio/advisor'
-    | '/control-center/aerospawn-design-studio/compliance'
-    | '/control-center/aerospawn-design-studio/components'
-    | '/control-center/aerospawn-design-studio/design'
-    | '/control-center/aerospawn-design-studio/history'
-    | '/control-center/aerospawn-design-studio/new'
-    | '/control-center/aerospawn-design-studio/report'
-    | '/control-center/aerospawn-design-studio/requirements'
-    | '/control-center/aerospawn-design-studio/simulation'
+    | '/control-center/torqwings-design-studio/advisor'
+    | '/control-center/torqwings-design-studio/compliance'
+    | '/control-center/torqwings-design-studio/components'
+    | '/control-center/torqwings-design-studio/design'
+    | '/control-center/torqwings-design-studio/history'
+    | '/control-center/torqwings-design-studio/new'
+    | '/control-center/torqwings-design-studio/report'
+    | '/control-center/torqwings-design-studio/requirements'
+    | '/control-center/torqwings-design-studio/simulation'
+    | '/control-center/torqwings-design-studio/sme-brain'
     | '/mission-hub/verticals/$vertical'
     | '/pilot/missions/$id'
-    | '/control-center/aerospawn-design-studio/'
+    | '/control-center/torqwings-design-studio/'
     | '/pilot/missions/'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/'
-    | '/about'
     | '/field'
     | '/mission-hub'
     | '/sitemap.xml'
+    | '/about'
+    | '/academy'
+    | '/agrisky'
+    | '/contact'
+    | '/design-studio'
+    | '/guardsky'
+    | '/industries'
+    | '/pilots'
+    | '/solutions'
+    | '/technology'
     | '/control-center/agrisky'
     | '/control-center/login'
     | '/control-center/users'
     | '/mission-hub/contacts'
     | '/mission-hub/dashboard'
     | '/mission-hub/design-studio'
+    | '/mission-hub/knowledge-uav'
     | '/mission-hub/login'
     | '/mission-hub/reset-password'
     | '/mission-hub/settings'
+    | '/mission-hub/twbc-drone-approval'
+    | '/mission-hub/twbc-drone-components-library'
+    | '/mission-hub/twbc-drone-design-rules'
+    | '/mission-hub/twbc-drone-design-score'
+    | '/mission-hub/twbc-drone-feedback'
+    | '/mission-hub/twbc-drone-proven-designs'
+    | '/mission-hub/twbc-drone-reasoning-api'
+    | '/mission-hub/twbc-drone-reference-designs'
+    | '/mission-hub/twbc-drone-rule-engine'
+    | '/mission-hub/twbc-drone-similarity-search'
+    | '/mission-hub/twbc-drone-sme-brain'
     | '/mission-hub/users'
     | '/mission-hub/waitlist'
     | '/pilot/login'
     | '/pilot/profile'
     | '/pilot/sync'
     | '/pilot/tracking'
+    | '/'
     | '/control-center'
     | '/pilot'
-    | '/control-center/aerospawn-design-studio/advisor'
-    | '/control-center/aerospawn-design-studio/compliance'
-    | '/control-center/aerospawn-design-studio/components'
-    | '/control-center/aerospawn-design-studio/design'
-    | '/control-center/aerospawn-design-studio/history'
-    | '/control-center/aerospawn-design-studio/new'
-    | '/control-center/aerospawn-design-studio/report'
-    | '/control-center/aerospawn-design-studio/requirements'
-    | '/control-center/aerospawn-design-studio/simulation'
+    | '/control-center/torqwings-design-studio/advisor'
+    | '/control-center/torqwings-design-studio/compliance'
+    | '/control-center/torqwings-design-studio/components'
+    | '/control-center/torqwings-design-studio/design'
+    | '/control-center/torqwings-design-studio/history'
+    | '/control-center/torqwings-design-studio/new'
+    | '/control-center/torqwings-design-studio/report'
+    | '/control-center/torqwings-design-studio/requirements'
+    | '/control-center/torqwings-design-studio/simulation'
+    | '/control-center/torqwings-design-studio/sme-brain'
     | '/mission-hub/verticals/$vertical'
     | '/pilot/missions/$id'
-    | '/control-center/aerospawn-design-studio'
+    | '/control-center/torqwings-design-studio'
     | '/pilot/missions'
   id:
     | '__root__'
-    | '/'
-    | '/about'
+    | '/_layout'
     | '/field'
     | '/mission-hub'
     | '/pilot'
     | '/sitemap.xml'
-    | '/control-center/aerospawn-design-studio'
+    | '/_layout/about'
+    | '/_layout/academy'
+    | '/_layout/agrisky'
+    | '/_layout/contact'
+    | '/_layout/design-studio'
+    | '/_layout/guardsky'
+    | '/_layout/industries'
+    | '/_layout/pilots'
+    | '/_layout/solutions'
+    | '/_layout/technology'
     | '/control-center/agrisky'
     | '/control-center/login'
+    | '/control-center/torqwings-design-studio'
     | '/control-center/users'
     | '/mission-hub/contacts'
     | '/mission-hub/dashboard'
     | '/mission-hub/design-studio'
+    | '/mission-hub/knowledge-uav'
     | '/mission-hub/login'
     | '/mission-hub/reset-password'
     | '/mission-hub/settings'
+    | '/mission-hub/twbc-drone-approval'
+    | '/mission-hub/twbc-drone-components-library'
+    | '/mission-hub/twbc-drone-design-rules'
+    | '/mission-hub/twbc-drone-design-score'
+    | '/mission-hub/twbc-drone-feedback'
+    | '/mission-hub/twbc-drone-proven-designs'
+    | '/mission-hub/twbc-drone-reasoning-api'
+    | '/mission-hub/twbc-drone-reference-designs'
+    | '/mission-hub/twbc-drone-rule-engine'
+    | '/mission-hub/twbc-drone-similarity-search'
+    | '/mission-hub/twbc-drone-sme-brain'
     | '/mission-hub/users'
     | '/mission-hub/waitlist'
     | '/pilot/login'
     | '/pilot/profile'
     | '/pilot/sync'
     | '/pilot/tracking'
+    | '/_layout/'
     | '/control-center/'
     | '/pilot/'
-    | '/control-center/aerospawn-design-studio/advisor'
-    | '/control-center/aerospawn-design-studio/compliance'
-    | '/control-center/aerospawn-design-studio/components'
-    | '/control-center/aerospawn-design-studio/design'
-    | '/control-center/aerospawn-design-studio/history'
-    | '/control-center/aerospawn-design-studio/new'
-    | '/control-center/aerospawn-design-studio/report'
-    | '/control-center/aerospawn-design-studio/requirements'
-    | '/control-center/aerospawn-design-studio/simulation'
+    | '/control-center/torqwings-design-studio/advisor'
+    | '/control-center/torqwings-design-studio/compliance'
+    | '/control-center/torqwings-design-studio/components'
+    | '/control-center/torqwings-design-studio/design'
+    | '/control-center/torqwings-design-studio/history'
+    | '/control-center/torqwings-design-studio/new'
+    | '/control-center/torqwings-design-studio/report'
+    | '/control-center/torqwings-design-studio/requirements'
+    | '/control-center/torqwings-design-studio/simulation'
+    | '/control-center/torqwings-design-studio/sme-brain'
     | '/mission-hub/verticals/$vertical'
     | '/pilot/missions/$id'
-    | '/control-center/aerospawn-design-studio/'
+    | '/control-center/torqwings-design-studio/'
     | '/pilot/missions/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  AboutRoute: typeof AboutRoute
+  LayoutRoute: typeof LayoutRouteWithChildren
   FieldRoute: typeof FieldRoute
   MissionHubRoute: typeof MissionHubRouteWithChildren
   PilotRoute: typeof PilotRouteWithChildren
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
-  ControlCenterAerospawnDesignStudioRoute: typeof ControlCenterAerospawnDesignStudioRouteWithChildren
   ControlCenterAgriskyRoute: typeof ControlCenterAgriskyRoute
   ControlCenterLoginRoute: typeof ControlCenterLoginRoute
+  ControlCenterTorqwingsDesignStudioRoute: typeof ControlCenterTorqwingsDesignStudioRouteWithChildren
   ControlCenterUsersRoute: typeof ControlCenterUsersRoute
   ControlCenterIndexRoute: typeof ControlCenterIndexRoute
 }
@@ -523,18 +805,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FieldRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/about': {
-      id: '/about'
-      path: '/about'
-      fullPath: '/about'
-      preLoaderRoute: typeof AboutRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/': {
-      id: '/'
-      path: '/'
+    '/_layout': {
+      id: '/_layout'
+      path: ''
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+      preLoaderRoute: typeof LayoutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pilot/': {
@@ -550,6 +825,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/control-center/'
       preLoaderRoute: typeof ControlCenterIndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_layout/': {
+      id: '/_layout/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof LayoutIndexRouteImport
+      parentRoute: typeof LayoutRoute
     }
     '/pilot/tracking': {
       id: '/pilot/tracking'
@@ -593,6 +875,83 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MissionHubUsersRouteImport
       parentRoute: typeof MissionHubRoute
     }
+    '/mission-hub/twbc-drone-sme-brain': {
+      id: '/mission-hub/twbc-drone-sme-brain'
+      path: '/twbc-drone-sme-brain'
+      fullPath: '/mission-hub/twbc-drone-sme-brain'
+      preLoaderRoute: typeof MissionHubTwbcDroneSmeBrainRouteImport
+      parentRoute: typeof MissionHubRoute
+    }
+    '/mission-hub/twbc-drone-similarity-search': {
+      id: '/mission-hub/twbc-drone-similarity-search'
+      path: '/twbc-drone-similarity-search'
+      fullPath: '/mission-hub/twbc-drone-similarity-search'
+      preLoaderRoute: typeof MissionHubTwbcDroneSimilaritySearchRouteImport
+      parentRoute: typeof MissionHubRoute
+    }
+    '/mission-hub/twbc-drone-rule-engine': {
+      id: '/mission-hub/twbc-drone-rule-engine'
+      path: '/twbc-drone-rule-engine'
+      fullPath: '/mission-hub/twbc-drone-rule-engine'
+      preLoaderRoute: typeof MissionHubTwbcDroneRuleEngineRouteImport
+      parentRoute: typeof MissionHubRoute
+    }
+    '/mission-hub/twbc-drone-reference-designs': {
+      id: '/mission-hub/twbc-drone-reference-designs'
+      path: '/twbc-drone-reference-designs'
+      fullPath: '/mission-hub/twbc-drone-reference-designs'
+      preLoaderRoute: typeof MissionHubTwbcDroneReferenceDesignsRouteImport
+      parentRoute: typeof MissionHubRoute
+    }
+    '/mission-hub/twbc-drone-reasoning-api': {
+      id: '/mission-hub/twbc-drone-reasoning-api'
+      path: '/twbc-drone-reasoning-api'
+      fullPath: '/mission-hub/twbc-drone-reasoning-api'
+      preLoaderRoute: typeof MissionHubTwbcDroneReasoningApiRouteImport
+      parentRoute: typeof MissionHubRoute
+    }
+    '/mission-hub/twbc-drone-proven-designs': {
+      id: '/mission-hub/twbc-drone-proven-designs'
+      path: '/twbc-drone-proven-designs'
+      fullPath: '/mission-hub/twbc-drone-proven-designs'
+      preLoaderRoute: typeof MissionHubTwbcDroneProvenDesignsRouteImport
+      parentRoute: typeof MissionHubRoute
+    }
+    '/mission-hub/twbc-drone-feedback': {
+      id: '/mission-hub/twbc-drone-feedback'
+      path: '/twbc-drone-feedback'
+      fullPath: '/mission-hub/twbc-drone-feedback'
+      preLoaderRoute: typeof MissionHubTwbcDroneFeedbackRouteImport
+      parentRoute: typeof MissionHubRoute
+    }
+    '/mission-hub/twbc-drone-design-score': {
+      id: '/mission-hub/twbc-drone-design-score'
+      path: '/twbc-drone-design-score'
+      fullPath: '/mission-hub/twbc-drone-design-score'
+      preLoaderRoute: typeof MissionHubTwbcDroneDesignScoreRouteImport
+      parentRoute: typeof MissionHubRoute
+    }
+    '/mission-hub/twbc-drone-design-rules': {
+      id: '/mission-hub/twbc-drone-design-rules'
+      path: '/twbc-drone-design-rules'
+      fullPath: '/mission-hub/twbc-drone-design-rules'
+      preLoaderRoute: typeof MissionHubTwbcDroneDesignRulesRouteImport
+      parentRoute: typeof MissionHubRoute
+    }
+    '/mission-hub/twbc-drone-components-library': {
+      id: '/mission-hub/twbc-drone-components-library'
+      path: '/twbc-drone-components-library'
+      fullPath: '/mission-hub/twbc-drone-components-library'
+      preLoaderRoute: typeof MissionHubTwbcDroneComponentsLibraryRouteImport
+      parentRoute: typeof MissionHubRoute
+    }
+    '/mission-hub/twbc-drone-approval': {
+      id: '/mission-hub/twbc-drone-approval'
+      path: '/twbc-drone-approval'
+      fullPath: '/mission-hub/twbc-drone-approval'
+      preLoaderRoute: typeof MissionHubTwbcDroneApprovalRouteImport
+      parentRoute: typeof MissionHubRoute
+    }
     '/mission-hub/settings': {
       id: '/mission-hub/settings'
       path: '/settings'
@@ -612,6 +971,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/mission-hub/login'
       preLoaderRoute: typeof MissionHubLoginRouteImport
+      parentRoute: typeof MissionHubRoute
+    }
+    '/mission-hub/knowledge-uav': {
+      id: '/mission-hub/knowledge-uav'
+      path: '/knowledge-uav'
+      fullPath: '/mission-hub/knowledge-uav'
+      preLoaderRoute: typeof MissionHubKnowledgeUavRouteImport
       parentRoute: typeof MissionHubRoute
     }
     '/mission-hub/design-studio': {
@@ -642,6 +1008,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ControlCenterUsersRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/control-center/torqwings-design-studio': {
+      id: '/control-center/torqwings-design-studio'
+      path: '/control-center/torqwings-design-studio'
+      fullPath: '/control-center/torqwings-design-studio'
+      preLoaderRoute: typeof ControlCenterTorqwingsDesignStudioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/control-center/login': {
       id: '/control-center/login'
       path: '/control-center/login'
@@ -656,12 +1029,75 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ControlCenterAgriskyRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/control-center/aerospawn-design-studio': {
-      id: '/control-center/aerospawn-design-studio'
-      path: '/control-center/aerospawn-design-studio'
-      fullPath: '/control-center/aerospawn-design-studio'
-      preLoaderRoute: typeof ControlCenterAerospawnDesignStudioRouteImport
-      parentRoute: typeof rootRouteImport
+    '/_layout/technology': {
+      id: '/_layout/technology'
+      path: '/technology'
+      fullPath: '/technology'
+      preLoaderRoute: typeof LayoutTechnologyRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/solutions': {
+      id: '/_layout/solutions'
+      path: '/solutions'
+      fullPath: '/solutions'
+      preLoaderRoute: typeof LayoutSolutionsRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/pilots': {
+      id: '/_layout/pilots'
+      path: '/pilots'
+      fullPath: '/pilots'
+      preLoaderRoute: typeof LayoutPilotsRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/industries': {
+      id: '/_layout/industries'
+      path: '/industries'
+      fullPath: '/industries'
+      preLoaderRoute: typeof LayoutIndustriesRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/guardsky': {
+      id: '/_layout/guardsky'
+      path: '/guardsky'
+      fullPath: '/guardsky'
+      preLoaderRoute: typeof LayoutGuardskyRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/design-studio': {
+      id: '/_layout/design-studio'
+      path: '/design-studio'
+      fullPath: '/design-studio'
+      preLoaderRoute: typeof LayoutDesignStudioRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/contact': {
+      id: '/_layout/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof LayoutContactRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/agrisky': {
+      id: '/_layout/agrisky'
+      path: '/agrisky'
+      fullPath: '/agrisky'
+      preLoaderRoute: typeof LayoutAgriskyRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/academy': {
+      id: '/_layout/academy'
+      path: '/academy'
+      fullPath: '/academy'
+      preLoaderRoute: typeof LayoutAcademyRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/about': {
+      id: '/_layout/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof LayoutAboutRouteImport
+      parentRoute: typeof LayoutRoute
     }
     '/pilot/missions/': {
       id: '/pilot/missions/'
@@ -670,12 +1106,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PilotMissionsIndexRouteImport
       parentRoute: typeof PilotRoute
     }
-    '/control-center/aerospawn-design-studio/': {
-      id: '/control-center/aerospawn-design-studio/'
+    '/control-center/torqwings-design-studio/': {
+      id: '/control-center/torqwings-design-studio/'
       path: '/'
-      fullPath: '/control-center/aerospawn-design-studio/'
-      preLoaderRoute: typeof ControlCenterAerospawnDesignStudioIndexRouteImport
-      parentRoute: typeof ControlCenterAerospawnDesignStudioRoute
+      fullPath: '/control-center/torqwings-design-studio/'
+      preLoaderRoute: typeof ControlCenterTorqwingsDesignStudioIndexRouteImport
+      parentRoute: typeof ControlCenterTorqwingsDesignStudioRoute
     }
     '/pilot/missions/$id': {
       id: '/pilot/missions/$id'
@@ -691,79 +1127,129 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MissionHubVerticalsVerticalRouteImport
       parentRoute: typeof MissionHubRoute
     }
-    '/control-center/aerospawn-design-studio/simulation': {
-      id: '/control-center/aerospawn-design-studio/simulation'
+    '/control-center/torqwings-design-studio/sme-brain': {
+      id: '/control-center/torqwings-design-studio/sme-brain'
+      path: '/sme-brain'
+      fullPath: '/control-center/torqwings-design-studio/sme-brain'
+      preLoaderRoute: typeof ControlCenterTorqwingsDesignStudioSmeBrainRouteImport
+      parentRoute: typeof ControlCenterTorqwingsDesignStudioRoute
+    }
+    '/control-center/torqwings-design-studio/simulation': {
+      id: '/control-center/torqwings-design-studio/simulation'
       path: '/simulation'
-      fullPath: '/control-center/aerospawn-design-studio/simulation'
-      preLoaderRoute: typeof ControlCenterAerospawnDesignStudioSimulationRouteImport
-      parentRoute: typeof ControlCenterAerospawnDesignStudioRoute
+      fullPath: '/control-center/torqwings-design-studio/simulation'
+      preLoaderRoute: typeof ControlCenterTorqwingsDesignStudioSimulationRouteImport
+      parentRoute: typeof ControlCenterTorqwingsDesignStudioRoute
     }
-    '/control-center/aerospawn-design-studio/requirements': {
-      id: '/control-center/aerospawn-design-studio/requirements'
+    '/control-center/torqwings-design-studio/requirements': {
+      id: '/control-center/torqwings-design-studio/requirements'
       path: '/requirements'
-      fullPath: '/control-center/aerospawn-design-studio/requirements'
-      preLoaderRoute: typeof ControlCenterAerospawnDesignStudioRequirementsRouteImport
-      parentRoute: typeof ControlCenterAerospawnDesignStudioRoute
+      fullPath: '/control-center/torqwings-design-studio/requirements'
+      preLoaderRoute: typeof ControlCenterTorqwingsDesignStudioRequirementsRouteImport
+      parentRoute: typeof ControlCenterTorqwingsDesignStudioRoute
     }
-    '/control-center/aerospawn-design-studio/report': {
-      id: '/control-center/aerospawn-design-studio/report'
+    '/control-center/torqwings-design-studio/report': {
+      id: '/control-center/torqwings-design-studio/report'
       path: '/report'
-      fullPath: '/control-center/aerospawn-design-studio/report'
-      preLoaderRoute: typeof ControlCenterAerospawnDesignStudioReportRouteImport
-      parentRoute: typeof ControlCenterAerospawnDesignStudioRoute
+      fullPath: '/control-center/torqwings-design-studio/report'
+      preLoaderRoute: typeof ControlCenterTorqwingsDesignStudioReportRouteImport
+      parentRoute: typeof ControlCenterTorqwingsDesignStudioRoute
     }
-    '/control-center/aerospawn-design-studio/new': {
-      id: '/control-center/aerospawn-design-studio/new'
+    '/control-center/torqwings-design-studio/new': {
+      id: '/control-center/torqwings-design-studio/new'
       path: '/new'
-      fullPath: '/control-center/aerospawn-design-studio/new'
-      preLoaderRoute: typeof ControlCenterAerospawnDesignStudioNewRouteImport
-      parentRoute: typeof ControlCenterAerospawnDesignStudioRoute
+      fullPath: '/control-center/torqwings-design-studio/new'
+      preLoaderRoute: typeof ControlCenterTorqwingsDesignStudioNewRouteImport
+      parentRoute: typeof ControlCenterTorqwingsDesignStudioRoute
     }
-    '/control-center/aerospawn-design-studio/history': {
-      id: '/control-center/aerospawn-design-studio/history'
+    '/control-center/torqwings-design-studio/history': {
+      id: '/control-center/torqwings-design-studio/history'
       path: '/history'
-      fullPath: '/control-center/aerospawn-design-studio/history'
-      preLoaderRoute: typeof ControlCenterAerospawnDesignStudioHistoryRouteImport
-      parentRoute: typeof ControlCenterAerospawnDesignStudioRoute
+      fullPath: '/control-center/torqwings-design-studio/history'
+      preLoaderRoute: typeof ControlCenterTorqwingsDesignStudioHistoryRouteImport
+      parentRoute: typeof ControlCenterTorqwingsDesignStudioRoute
     }
-    '/control-center/aerospawn-design-studio/design': {
-      id: '/control-center/aerospawn-design-studio/design'
+    '/control-center/torqwings-design-studio/design': {
+      id: '/control-center/torqwings-design-studio/design'
       path: '/design'
-      fullPath: '/control-center/aerospawn-design-studio/design'
-      preLoaderRoute: typeof ControlCenterAerospawnDesignStudioDesignRouteImport
-      parentRoute: typeof ControlCenterAerospawnDesignStudioRoute
+      fullPath: '/control-center/torqwings-design-studio/design'
+      preLoaderRoute: typeof ControlCenterTorqwingsDesignStudioDesignRouteImport
+      parentRoute: typeof ControlCenterTorqwingsDesignStudioRoute
     }
-    '/control-center/aerospawn-design-studio/components': {
-      id: '/control-center/aerospawn-design-studio/components'
+    '/control-center/torqwings-design-studio/components': {
+      id: '/control-center/torqwings-design-studio/components'
       path: '/components'
-      fullPath: '/control-center/aerospawn-design-studio/components'
-      preLoaderRoute: typeof ControlCenterAerospawnDesignStudioComponentsRouteImport
-      parentRoute: typeof ControlCenterAerospawnDesignStudioRoute
+      fullPath: '/control-center/torqwings-design-studio/components'
+      preLoaderRoute: typeof ControlCenterTorqwingsDesignStudioComponentsRouteImport
+      parentRoute: typeof ControlCenterTorqwingsDesignStudioRoute
     }
-    '/control-center/aerospawn-design-studio/compliance': {
-      id: '/control-center/aerospawn-design-studio/compliance'
+    '/control-center/torqwings-design-studio/compliance': {
+      id: '/control-center/torqwings-design-studio/compliance'
       path: '/compliance'
-      fullPath: '/control-center/aerospawn-design-studio/compliance'
-      preLoaderRoute: typeof ControlCenterAerospawnDesignStudioComplianceRouteImport
-      parentRoute: typeof ControlCenterAerospawnDesignStudioRoute
+      fullPath: '/control-center/torqwings-design-studio/compliance'
+      preLoaderRoute: typeof ControlCenterTorqwingsDesignStudioComplianceRouteImport
+      parentRoute: typeof ControlCenterTorqwingsDesignStudioRoute
     }
-    '/control-center/aerospawn-design-studio/advisor': {
-      id: '/control-center/aerospawn-design-studio/advisor'
+    '/control-center/torqwings-design-studio/advisor': {
+      id: '/control-center/torqwings-design-studio/advisor'
       path: '/advisor'
-      fullPath: '/control-center/aerospawn-design-studio/advisor'
-      preLoaderRoute: typeof ControlCenterAerospawnDesignStudioAdvisorRouteImport
-      parentRoute: typeof ControlCenterAerospawnDesignStudioRoute
+      fullPath: '/control-center/torqwings-design-studio/advisor'
+      preLoaderRoute: typeof ControlCenterTorqwingsDesignStudioAdvisorRouteImport
+      parentRoute: typeof ControlCenterTorqwingsDesignStudioRoute
     }
   }
 }
+
+interface LayoutRouteChildren {
+  LayoutAboutRoute: typeof LayoutAboutRoute
+  LayoutAcademyRoute: typeof LayoutAcademyRoute
+  LayoutAgriskyRoute: typeof LayoutAgriskyRoute
+  LayoutContactRoute: typeof LayoutContactRoute
+  LayoutDesignStudioRoute: typeof LayoutDesignStudioRoute
+  LayoutGuardskyRoute: typeof LayoutGuardskyRoute
+  LayoutIndustriesRoute: typeof LayoutIndustriesRoute
+  LayoutPilotsRoute: typeof LayoutPilotsRoute
+  LayoutSolutionsRoute: typeof LayoutSolutionsRoute
+  LayoutTechnologyRoute: typeof LayoutTechnologyRoute
+  LayoutIndexRoute: typeof LayoutIndexRoute
+}
+
+const LayoutRouteChildren: LayoutRouteChildren = {
+  LayoutAboutRoute: LayoutAboutRoute,
+  LayoutAcademyRoute: LayoutAcademyRoute,
+  LayoutAgriskyRoute: LayoutAgriskyRoute,
+  LayoutContactRoute: LayoutContactRoute,
+  LayoutDesignStudioRoute: LayoutDesignStudioRoute,
+  LayoutGuardskyRoute: LayoutGuardskyRoute,
+  LayoutIndustriesRoute: LayoutIndustriesRoute,
+  LayoutPilotsRoute: LayoutPilotsRoute,
+  LayoutSolutionsRoute: LayoutSolutionsRoute,
+  LayoutTechnologyRoute: LayoutTechnologyRoute,
+  LayoutIndexRoute: LayoutIndexRoute,
+}
+
+const LayoutRouteWithChildren =
+  LayoutRoute._addFileChildren(LayoutRouteChildren)
 
 interface MissionHubRouteChildren {
   MissionHubContactsRoute: typeof MissionHubContactsRoute
   MissionHubDashboardRoute: typeof MissionHubDashboardRoute
   MissionHubDesignStudioRoute: typeof MissionHubDesignStudioRoute
+  MissionHubKnowledgeUavRoute: typeof MissionHubKnowledgeUavRoute
   MissionHubLoginRoute: typeof MissionHubLoginRoute
   MissionHubResetPasswordRoute: typeof MissionHubResetPasswordRoute
   MissionHubSettingsRoute: typeof MissionHubSettingsRoute
+  MissionHubTwbcDroneApprovalRoute: typeof MissionHubTwbcDroneApprovalRoute
+  MissionHubTwbcDroneComponentsLibraryRoute: typeof MissionHubTwbcDroneComponentsLibraryRoute
+  MissionHubTwbcDroneDesignRulesRoute: typeof MissionHubTwbcDroneDesignRulesRoute
+  MissionHubTwbcDroneDesignScoreRoute: typeof MissionHubTwbcDroneDesignScoreRoute
+  MissionHubTwbcDroneFeedbackRoute: typeof MissionHubTwbcDroneFeedbackRoute
+  MissionHubTwbcDroneProvenDesignsRoute: typeof MissionHubTwbcDroneProvenDesignsRoute
+  MissionHubTwbcDroneReasoningApiRoute: typeof MissionHubTwbcDroneReasoningApiRoute
+  MissionHubTwbcDroneReferenceDesignsRoute: typeof MissionHubTwbcDroneReferenceDesignsRoute
+  MissionHubTwbcDroneRuleEngineRoute: typeof MissionHubTwbcDroneRuleEngineRoute
+  MissionHubTwbcDroneSimilaritySearchRoute: typeof MissionHubTwbcDroneSimilaritySearchRoute
+  MissionHubTwbcDroneSmeBrainRoute: typeof MissionHubTwbcDroneSmeBrainRoute
   MissionHubUsersRoute: typeof MissionHubUsersRoute
   MissionHubWaitlistRoute: typeof MissionHubWaitlistRoute
   MissionHubVerticalsVerticalRoute: typeof MissionHubVerticalsVerticalRoute
@@ -773,9 +1259,24 @@ const MissionHubRouteChildren: MissionHubRouteChildren = {
   MissionHubContactsRoute: MissionHubContactsRoute,
   MissionHubDashboardRoute: MissionHubDashboardRoute,
   MissionHubDesignStudioRoute: MissionHubDesignStudioRoute,
+  MissionHubKnowledgeUavRoute: MissionHubKnowledgeUavRoute,
   MissionHubLoginRoute: MissionHubLoginRoute,
   MissionHubResetPasswordRoute: MissionHubResetPasswordRoute,
   MissionHubSettingsRoute: MissionHubSettingsRoute,
+  MissionHubTwbcDroneApprovalRoute: MissionHubTwbcDroneApprovalRoute,
+  MissionHubTwbcDroneComponentsLibraryRoute:
+    MissionHubTwbcDroneComponentsLibraryRoute,
+  MissionHubTwbcDroneDesignRulesRoute: MissionHubTwbcDroneDesignRulesRoute,
+  MissionHubTwbcDroneDesignScoreRoute: MissionHubTwbcDroneDesignScoreRoute,
+  MissionHubTwbcDroneFeedbackRoute: MissionHubTwbcDroneFeedbackRoute,
+  MissionHubTwbcDroneProvenDesignsRoute: MissionHubTwbcDroneProvenDesignsRoute,
+  MissionHubTwbcDroneReasoningApiRoute: MissionHubTwbcDroneReasoningApiRoute,
+  MissionHubTwbcDroneReferenceDesignsRoute:
+    MissionHubTwbcDroneReferenceDesignsRoute,
+  MissionHubTwbcDroneRuleEngineRoute: MissionHubTwbcDroneRuleEngineRoute,
+  MissionHubTwbcDroneSimilaritySearchRoute:
+    MissionHubTwbcDroneSimilaritySearchRoute,
+  MissionHubTwbcDroneSmeBrainRoute: MissionHubTwbcDroneSmeBrainRoute,
   MissionHubUsersRoute: MissionHubUsersRoute,
   MissionHubWaitlistRoute: MissionHubWaitlistRoute,
   MissionHubVerticalsVerticalRoute: MissionHubVerticalsVerticalRoute,
@@ -807,62 +1308,74 @@ const PilotRouteChildren: PilotRouteChildren = {
 
 const PilotRouteWithChildren = PilotRoute._addFileChildren(PilotRouteChildren)
 
-interface ControlCenterAerospawnDesignStudioRouteChildren {
-  ControlCenterAerospawnDesignStudioAdvisorRoute: typeof ControlCenterAerospawnDesignStudioAdvisorRoute
-  ControlCenterAerospawnDesignStudioComplianceRoute: typeof ControlCenterAerospawnDesignStudioComplianceRoute
-  ControlCenterAerospawnDesignStudioComponentsRoute: typeof ControlCenterAerospawnDesignStudioComponentsRoute
-  ControlCenterAerospawnDesignStudioDesignRoute: typeof ControlCenterAerospawnDesignStudioDesignRoute
-  ControlCenterAerospawnDesignStudioHistoryRoute: typeof ControlCenterAerospawnDesignStudioHistoryRoute
-  ControlCenterAerospawnDesignStudioNewRoute: typeof ControlCenterAerospawnDesignStudioNewRoute
-  ControlCenterAerospawnDesignStudioReportRoute: typeof ControlCenterAerospawnDesignStudioReportRoute
-  ControlCenterAerospawnDesignStudioRequirementsRoute: typeof ControlCenterAerospawnDesignStudioRequirementsRoute
-  ControlCenterAerospawnDesignStudioSimulationRoute: typeof ControlCenterAerospawnDesignStudioSimulationRoute
-  ControlCenterAerospawnDesignStudioIndexRoute: typeof ControlCenterAerospawnDesignStudioIndexRoute
+interface ControlCenterTorqwingsDesignStudioRouteChildren {
+  ControlCenterTorqwingsDesignStudioAdvisorRoute: typeof ControlCenterTorqwingsDesignStudioAdvisorRoute
+  ControlCenterTorqwingsDesignStudioComplianceRoute: typeof ControlCenterTorqwingsDesignStudioComplianceRoute
+  ControlCenterTorqwingsDesignStudioComponentsRoute: typeof ControlCenterTorqwingsDesignStudioComponentsRoute
+  ControlCenterTorqwingsDesignStudioDesignRoute: typeof ControlCenterTorqwingsDesignStudioDesignRoute
+  ControlCenterTorqwingsDesignStudioHistoryRoute: typeof ControlCenterTorqwingsDesignStudioHistoryRoute
+  ControlCenterTorqwingsDesignStudioNewRoute: typeof ControlCenterTorqwingsDesignStudioNewRoute
+  ControlCenterTorqwingsDesignStudioReportRoute: typeof ControlCenterTorqwingsDesignStudioReportRoute
+  ControlCenterTorqwingsDesignStudioRequirementsRoute: typeof ControlCenterTorqwingsDesignStudioRequirementsRoute
+  ControlCenterTorqwingsDesignStudioSimulationRoute: typeof ControlCenterTorqwingsDesignStudioSimulationRoute
+  ControlCenterTorqwingsDesignStudioSmeBrainRoute: typeof ControlCenterTorqwingsDesignStudioSmeBrainRoute
+  ControlCenterTorqwingsDesignStudioIndexRoute: typeof ControlCenterTorqwingsDesignStudioIndexRoute
 }
 
-const ControlCenterAerospawnDesignStudioRouteChildren: ControlCenterAerospawnDesignStudioRouteChildren =
+const ControlCenterTorqwingsDesignStudioRouteChildren: ControlCenterTorqwingsDesignStudioRouteChildren =
   {
-    ControlCenterAerospawnDesignStudioAdvisorRoute:
-      ControlCenterAerospawnDesignStudioAdvisorRoute,
-    ControlCenterAerospawnDesignStudioComplianceRoute:
-      ControlCenterAerospawnDesignStudioComplianceRoute,
-    ControlCenterAerospawnDesignStudioComponentsRoute:
-      ControlCenterAerospawnDesignStudioComponentsRoute,
-    ControlCenterAerospawnDesignStudioDesignRoute:
-      ControlCenterAerospawnDesignStudioDesignRoute,
-    ControlCenterAerospawnDesignStudioHistoryRoute:
-      ControlCenterAerospawnDesignStudioHistoryRoute,
-    ControlCenterAerospawnDesignStudioNewRoute:
-      ControlCenterAerospawnDesignStudioNewRoute,
-    ControlCenterAerospawnDesignStudioReportRoute:
-      ControlCenterAerospawnDesignStudioReportRoute,
-    ControlCenterAerospawnDesignStudioRequirementsRoute:
-      ControlCenterAerospawnDesignStudioRequirementsRoute,
-    ControlCenterAerospawnDesignStudioSimulationRoute:
-      ControlCenterAerospawnDesignStudioSimulationRoute,
-    ControlCenterAerospawnDesignStudioIndexRoute:
-      ControlCenterAerospawnDesignStudioIndexRoute,
+    ControlCenterTorqwingsDesignStudioAdvisorRoute:
+      ControlCenterTorqwingsDesignStudioAdvisorRoute,
+    ControlCenterTorqwingsDesignStudioComplianceRoute:
+      ControlCenterTorqwingsDesignStudioComplianceRoute,
+    ControlCenterTorqwingsDesignStudioComponentsRoute:
+      ControlCenterTorqwingsDesignStudioComponentsRoute,
+    ControlCenterTorqwingsDesignStudioDesignRoute:
+      ControlCenterTorqwingsDesignStudioDesignRoute,
+    ControlCenterTorqwingsDesignStudioHistoryRoute:
+      ControlCenterTorqwingsDesignStudioHistoryRoute,
+    ControlCenterTorqwingsDesignStudioNewRoute:
+      ControlCenterTorqwingsDesignStudioNewRoute,
+    ControlCenterTorqwingsDesignStudioReportRoute:
+      ControlCenterTorqwingsDesignStudioReportRoute,
+    ControlCenterTorqwingsDesignStudioRequirementsRoute:
+      ControlCenterTorqwingsDesignStudioRequirementsRoute,
+    ControlCenterTorqwingsDesignStudioSimulationRoute:
+      ControlCenterTorqwingsDesignStudioSimulationRoute,
+    ControlCenterTorqwingsDesignStudioSmeBrainRoute:
+      ControlCenterTorqwingsDesignStudioSmeBrainRoute,
+    ControlCenterTorqwingsDesignStudioIndexRoute:
+      ControlCenterTorqwingsDesignStudioIndexRoute,
   }
 
-const ControlCenterAerospawnDesignStudioRouteWithChildren =
-  ControlCenterAerospawnDesignStudioRoute._addFileChildren(
-    ControlCenterAerospawnDesignStudioRouteChildren,
+const ControlCenterTorqwingsDesignStudioRouteWithChildren =
+  ControlCenterTorqwingsDesignStudioRoute._addFileChildren(
+    ControlCenterTorqwingsDesignStudioRouteChildren,
   )
 
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
-  AboutRoute: AboutRoute,
+  LayoutRoute: LayoutRouteWithChildren,
   FieldRoute: FieldRoute,
   MissionHubRoute: MissionHubRouteWithChildren,
   PilotRoute: PilotRouteWithChildren,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
-  ControlCenterAerospawnDesignStudioRoute:
-    ControlCenterAerospawnDesignStudioRouteWithChildren,
   ControlCenterAgriskyRoute: ControlCenterAgriskyRoute,
   ControlCenterLoginRoute: ControlCenterLoginRoute,
+  ControlCenterTorqwingsDesignStudioRoute:
+    ControlCenterTorqwingsDesignStudioRouteWithChildren,
   ControlCenterUsersRoute: ControlCenterUsersRoute,
   ControlCenterIndexRoute: ControlCenterIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

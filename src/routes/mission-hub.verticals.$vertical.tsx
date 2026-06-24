@@ -36,7 +36,7 @@ function VerticalPage() {
       const since = new Date(Date.now() - 7 * 86400000).toISOString();
       const [a, b, c, d] = await Promise.all([
         supabase.from("contacts").select("*", { count: "exact", head: true }).eq("vertical_interest", v),
-        supabase.from("user_verticals").select("*", { count: "exact", head: true }).eq("vertical", v),
+        supabase.from("mission_hub_users").select("*", { count: "exact", head: true }).contains("industries", [v]),
         supabase.from("contacts").select("*", { count: "exact", head: true }).eq("vertical_interest", v).gte("created_at", since),
         supabase.from("contacts").select("*").eq("vertical_interest", v).order("created_at", { ascending: false }).limit(20),
       ]);

@@ -32,7 +32,7 @@ function SettingsPage() {
     setSubmitting(true);
     const { error } = await supabase.from("profiles")
       .update({ full_name: name, notification_prefs: prefs })
-      .eq("user_id", profile!.user_id);
+      .eq("user_id", profile!.id);
     setSubmitting(false);
     if (error) { toast.error(error.message); return; }
     toast.success("Saved");

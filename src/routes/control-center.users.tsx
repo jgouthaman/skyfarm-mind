@@ -26,7 +26,7 @@ export const Route = createFileRoute("/control-center/users")({
   component: UsersPage,
 });
 
-type ControlUser = { user_id: string; phone: string; full_name: string | null; roles: string[]; created_at: string };
+type ControlUser = { user_id: string; full_name: string | null; roles: string[]; created_at: string };
 
 function UsersPage() {
   const auth = useControlAuth();
@@ -170,19 +170,17 @@ function UsersPage() {
               <thead className="bg-muted/40 text-muted-foreground">
                 <tr>
                   <th className="text-left px-4 py-3 font-medium">Name</th>
-                  <th className="text-left px-4 py-3 font-medium">Mobile</th>
                   <th className="text-left px-4 py-3 font-medium">Roles</th>
                   <th className="text-right px-4 py-3 font-medium">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {users.length === 0 && (
-                  <tr><td colSpan={4} className="px-4 py-8 text-center text-muted-foreground">No users yet.</td></tr>
+                  <tr><td colSpan={3} className="px-4 py-8 text-center text-muted-foreground">No users yet.</td></tr>
                 )}
                 {users.map((u) => (
                   <tr key={u.user_id} className="border-t border-border/40">
                     <td className="px-4 py-3">{u.full_name ?? "—"}</td>
-                    <td className="px-4 py-3 font-mono">{u.phone}</td>
                     <td className="px-4 py-3">
                       {u.roles.map((r) => (
                         <span key={r} className={`inline-block mr-1 text-xs px-2 py-0.5 rounded-full border ${r === "admin" ? "bg-primary/15 text-primary border-primary/30" : "bg-accent/15 text-accent border-accent/30"}`}>

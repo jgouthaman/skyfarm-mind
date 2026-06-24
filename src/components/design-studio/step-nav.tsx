@@ -3,12 +3,12 @@ import { Cpu, ListChecks, FlaskConical, Sparkles, FileText, ShieldAlert } from "
 import { cn } from "@/lib/utils";
 
 const steps = [
-  { to: "/control-center/aerospawn-design-studio/design", label: "Design", icon: Cpu },
-  { to: "/control-center/aerospawn-design-studio/components", label: "Components", icon: ListChecks },
-  { to: "/control-center/aerospawn-design-studio/simulation", label: "Simulation", icon: FlaskConical },
-  { to: "/control-center/aerospawn-design-studio/advisor", label: "Advisor", icon: Sparkles },
-  { to: "/control-center/aerospawn-design-studio/compliance", label: "Compliance", icon: ShieldAlert },
-  { to: "/control-center/aerospawn-design-studio/report", label: "Report", icon: FileText },
+  { to: "/control-center/torqwings-design-studio/design", label: "Design", icon: Cpu },
+  { to: "/control-center/torqwings-design-studio/components", label: "Components", icon: ListChecks },
+  { to: "/control-center/torqwings-design-studio/simulation", label: "Simulation", icon: FlaskConical },
+  { to: "/control-center/torqwings-design-studio/advisor", label: "Advisor", icon: Sparkles },
+  { to: "/control-center/torqwings-design-studio/compliance", label: "Compliance", icon: ShieldAlert },
+  { to: "/control-center/torqwings-design-studio/report", label: "Report", icon: FileText },
 ] as const;
 
 export function StudioStepNav() {

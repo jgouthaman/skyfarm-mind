@@ -1,8 +1,9 @@
 import { type ReactNode, useEffect, useState } from "react";
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import {
-  LayoutDashboard, Clock, BookUser, Cpu, Sprout, Building2, Map as MapIcon,
-  Shield, FlaskConical, GraduationCap, Users, Settings, Bell, Menu, X, LogOut,
+  Clock, BookUser, Cpu, Sprout, Building2, Map as MapIcon,
+  Shield, FlaskConical, GraduationCap, Users, Settings, Bell, Menu, X, LogOut, BookOpen,
+  ChevronDown, ChevronRight,
 } from "lucide-react";
 import { useMissionHubAuth } from "@/lib/mission-hub/context";
 import { ALL_VERTICALS, VERTICAL_LABELS, type Vertical } from "@/lib/mission-hub/types";
@@ -27,7 +28,10 @@ export function MissionHubShell({ title, children }: { title: string; children: 
     if (!loading && !profile) navigate({ to: "/mission-hub/login" });
   }, [loading, profile, navigate]);
 
-  if (loading || !profile) {
+  // Gate on `!profile`, not `loading`: a background auth refresh (token refresh,
+  // tab focus) flips `loading` true while the existing profile is still valid.
+  // Tearing down `{children}` there would unmount open modals/forms mid-entry.
+  if (!profile) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#0a0f1c] text-white/60 text-sm">
         Loading…
@@ -77,17 +81,14 @@ function Sidebar({
   const role = profile.role as "super_admin" | "admin" | "user";
   const isAdmin = role === "super_admin" || role === "admin";
 
-  const hasDesignStudio = isAdmin || verticals.includes("design-studio" as Vertical);
-  const items: { to: string; label: string; icon: any; show: boolean }[] = [
-    { to: "/mission-hub/dashboard", label: "Dashboard", icon: LayoutDashboard, show: true },
-    { to: "/mission-hub/waitlist", label: "Waitlist", icon: Clock, show: isAdmin },
-    { to: "/mission-hub/contacts", label: "Contacts", icon: BookUser, show: isAdmin },
-    { to: "/mission-hub/design-studio", label: "Design Studio", icon: Cpu, show: hasDesignStudio },
-  ];
+  const [businessOpen,   setBusinessOpen]   = useState(true);
+  const [industriesOpen, setIndustriesOpen] = useState(false);
+  const [twbcSectionOpen, setTwbcSectionOpen] = useState(false);
+  const [configOpen,     setConfigOpen]     = useState(false);
+  const [twbcOpen, setTwbcOpen] = useState({ drone: false, l1: false, l2: false, l3: false, l4: false });
+  const toggleTwbc = (k: keyof typeof twbcOpen) => setTwbcOpen(s => ({ ...s, [k]: !s[k] }));
 
-  // Design Studio has its own top-level nav item; hide it from the verticals list.
-  const visibleVerticals: Vertical[] = (isAdmin ? ALL_VERTICALS : verticals)
-    .filter((v) => v !== ("design-studio" as Vertical));
+  const visibleVerticals: Vertical[] = isAdmin ? ALL_VERTICALS : verticals;
 
   return (
     <aside
@@ -116,18 +117,39 @@ function Sidebar({
       <div className="border-t border-white/[0.06]" />
 
       <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-0.5 text-[13px]">
-        {items.filter((i) => i.show).map((i) => (
-          <NavLink key={i.to} to={i.to} icon={i.icon} active={path === i.to} onClick={onClose}>
-            {i.label}
-          </NavLink>
-        ))}
+        {isAdmin && (
+          <>
+            <button type="button" onClick={() => setBusinessOpen(o => !o)}
+              className="mb-2 flex w-full items-center px-3 text-[10px] uppercase tracking-wider text-white/30 hover:text-white/50 transition-colors">
+              <span className="flex-1 text-left">Business</span>
+              {businessOpen ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
+            </button>
+            {businessOpen && (
+              <>
+                <NavLink to="/mission-hub/waitlist" icon={Clock}    active={path === "/mission-hub/waitlist"} onClick={onClose}>Subscriptions</NavLink>
+                <NavLink to="/mission-hub/contacts" icon={BookUser} active={path === "/mission-hub/contacts"} onClick={onClose}>Leads</NavLink>
+              </>
+            )}
+          </>
+        )}
 
         {visibleVerticals.length > 0 && (
-          <div className="mt-5 mb-2 px-3 text-[10px] uppercase tracking-wider text-white/30">Verticals</div>
+          <button
+            type="button"
+            onClick={() => setIndustriesOpen(o => !o)}
+            className="mt-5 mb-2 flex w-full items-center px-3 text-[10px] uppercase tracking-wider text-white/30 hover:text-white/50 transition-colors"
+          >
+            <span className="flex-1 text-left">Industries</span>
+            {industriesOpen
+              ? <ChevronDown className="h-3 w-3" />
+              : <ChevronRight className="h-3 w-3" />}
+          </button>
         )}
-        {visibleVerticals.map((v) => {
+        {industriesOpen && visibleVerticals.map((v) => {
           const Icon = verticalIcon[v];
-          const to = `/mission-hub/verticals/${v}`;
+          const to = v === ("design-studio" as Vertical)
+            ? "/mission-hub/design-studio"
+            : `/mission-hub/verticals/${v}`;
           return (
             <NavLink key={v} to={to} icon={Icon} active={path === to} onClick={onClose}>
               {VERTICAL_LABELS[v]}
@@ -135,15 +157,109 @@ function Sidebar({
           );
         })}
 
-        <div className="mt-5 space-y-0.5">
-          {isAdmin && (
-            <NavLink to="/mission-hub/users" icon={Users} active={path === "/mission-hub/users"} onClick={onClose}>
-              Users
+        {isAdmin && (
+          <div className="mt-5 space-y-0.5">
+            <button type="button" onClick={() => setTwbcSectionOpen(o => !o)}
+              className="mb-2 flex w-full items-center px-3 text-[10px] uppercase tracking-wider text-white/30 hover:text-white/50 transition-colors">
+              <span className="flex-1 text-left">TWBC</span>
+              {twbcSectionOpen ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
+            </button>
+
+            {twbcSectionOpen && <>
+            {/* ── Drone (collapsible) ── */}
+            <button type="button" onClick={() => toggleTwbc("drone")}
+              className="flex w-full items-center gap-2.5 px-4 py-2.5 rounded-lg text-[13px] text-white/65 hover:bg-white/[0.04] hover:text-white transition-colors">
+              <Cpu className="h-4 w-4 shrink-0" />
+              <span className="flex-1 truncate text-left">Drone</span>
+              {twbcOpen.drone ? <ChevronDown className="h-3.5 w-3.5 opacity-50" /> : <ChevronRight className="h-3.5 w-3.5 opacity-50" />}
+            </button>
+
+            {twbcOpen.drone && (
+              <div className="ml-3 border-l border-white/[0.06] pl-1.5 space-y-0.5">
+
+                {/* Layer 1 */}
+                <button type="button" onClick={() => toggleTwbc("l1")}
+                  className="flex w-full items-center gap-2 px-3 py-1.5 rounded-md text-[12px] text-white/55 hover:bg-white/[0.04] hover:text-white transition-colors">
+                  <span className="flex-1 truncate text-left">Layer 1</span>
+                  {twbcOpen.l1 ? <ChevronDown className="h-3 w-3 opacity-40" /> : <ChevronRight className="h-3 w-3 opacity-40" />}
+                </button>
+                {twbcOpen.l1 && (
+                  <div className="ml-3 border-l border-white/[0.06] pl-1.5 space-y-0.5">
+                    <TwbcLeaf to="/mission-hub/twbc-drone-sme-brain" active={path === "/mission-hub/twbc-drone-sme-brain"} onClick={onClose}>SME Brain</TwbcLeaf>
+                    <TwbcLeaf to="/mission-hub/twbc-drone-proven-designs" active={path === "/mission-hub/twbc-drone-proven-designs"} onClick={onClose}>Proven Designs</TwbcLeaf>
+                  </div>
+                )}
+
+                {/* Layer 2 */}
+                <button type="button" onClick={() => toggleTwbc("l2")}
+                  className="flex w-full items-center gap-2 px-3 py-1.5 rounded-md text-[12px] text-white/55 hover:bg-white/[0.04] hover:text-white transition-colors">
+                  <span className="flex-1 truncate text-left">Layer 2</span>
+                  {twbcOpen.l2 ? <ChevronDown className="h-3 w-3 opacity-40" /> : <ChevronRight className="h-3 w-3 opacity-40" />}
+                </button>
+                {twbcOpen.l2 && (
+                  <div className="ml-3 border-l border-white/[0.06] pl-1.5 space-y-0.5">
+                    <TwbcLeaf to="/mission-hub/twbc-drone-design-rules" active={path === "/mission-hub/twbc-drone-design-rules"} onClick={onClose}>Design Rules</TwbcLeaf>
+                    <TwbcLeaf to="/mission-hub/twbc-drone-reference-designs" active={path === "/mission-hub/twbc-drone-reference-designs"} onClick={onClose}>Reference Designs</TwbcLeaf>
+                    <TwbcLeaf to="/mission-hub/twbc-drone-components-library" active={path === "/mission-hub/twbc-drone-components-library"} onClick={onClose}>Components Library</TwbcLeaf>
+                  </div>
+                )}
+
+                {/* Layer 3 */}
+                <button type="button" onClick={() => toggleTwbc("l3")}
+                  className="flex w-full items-center gap-2 px-3 py-1.5 rounded-md text-[12px] text-white/55 hover:bg-white/[0.04] hover:text-white transition-colors">
+                  <span className="flex-1 truncate text-left">Layer 3</span>
+                  {twbcOpen.l3 ? <ChevronDown className="h-3 w-3 opacity-40" /> : <ChevronRight className="h-3 w-3 opacity-40" />}
+                </button>
+                {twbcOpen.l3 && (
+                  <div className="ml-3 border-l border-white/[0.06] pl-1.5 space-y-0.5">
+                    <TwbcLeaf to="/mission-hub/twbc-drone-rule-engine" active={path === "/mission-hub/twbc-drone-rule-engine"} onClick={onClose}>Rule Engine</TwbcLeaf>
+                    <TwbcLeaf to="/mission-hub/twbc-drone-similarity-search" active={path === "/mission-hub/twbc-drone-similarity-search"} onClick={onClose}>Similarity Search</TwbcLeaf>
+                    <TwbcLeaf to="/mission-hub/twbc-drone-reasoning-api" active={path === "/mission-hub/twbc-drone-reasoning-api"} onClick={onClose}>Reasoning API</TwbcLeaf>
+                  </div>
+                )}
+
+                {/* Layer 4 */}
+                <button type="button" onClick={() => toggleTwbc("l4")}
+                  className="flex w-full items-center gap-2 px-3 py-1.5 rounded-md text-[12px] text-white/55 hover:bg-white/[0.04] hover:text-white transition-colors">
+                  <span className="flex-1 truncate text-left">Layer 4</span>
+                  {twbcOpen.l4 ? <ChevronDown className="h-3 w-3 opacity-40" /> : <ChevronRight className="h-3 w-3 opacity-40" />}
+                </button>
+                {twbcOpen.l4 && (
+                  <div className="ml-3 border-l border-white/[0.06] pl-1.5 space-y-0.5">
+                    <TwbcLeaf to="/mission-hub/twbc-drone-design-score" active={path === "/mission-hub/twbc-drone-design-score"} onClick={onClose}>Design Score</TwbcLeaf>
+                    <TwbcLeaf to="/mission-hub/twbc-drone-approval" active={path === "/mission-hub/twbc-drone-approval"} onClick={onClose}>Approval</TwbcLeaf>
+                    <TwbcLeaf to="/mission-hub/twbc-drone-feedback" active={path === "/mission-hub/twbc-drone-feedback"} onClick={onClose}>Feedback</TwbcLeaf>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* ── UAV ── */}
+            <NavLink to="/mission-hub/knowledge-uav" icon={BookOpen} active={path === "/mission-hub/knowledge-uav"} onClick={onClose}>
+              UAV
             </NavLink>
+            </>}
+          </div>
+        )}
+
+        <div className="mt-5 space-y-0.5">
+          <button type="button" onClick={() => setConfigOpen(o => !o)}
+            className="mb-2 flex w-full items-center px-3 text-[10px] uppercase tracking-wider text-white/30 hover:text-white/50 transition-colors">
+            <span className="flex-1 text-left">Configurations</span>
+            {configOpen ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
+          </button>
+          {configOpen && (
+            <>
+              {isAdmin && (
+                <NavLink to="/mission-hub/users" icon={Users} active={path === "/mission-hub/users"} onClick={onClose}>
+                  Users
+                </NavLink>
+              )}
+              <NavLink to="/mission-hub/settings" icon={Settings} active={path === "/mission-hub/settings"} onClick={onClose}>
+                Settings
+              </NavLink>
+            </>
           )}
-          <NavLink to="/mission-hub/settings" icon={Settings} active={path === "/mission-hub/settings"} onClick={onClose}>
-            Settings
-          </NavLink>
         </div>
       </nav>
 
@@ -182,6 +298,23 @@ function NavLink({
     >
       <Icon className="h-4 w-4 flex-shrink-0" />
       <span className="truncate">{children}</span>
+    </Link>
+  );
+}
+
+function TwbcLeaf({ to, active, onClick, children }: { to: string; active: boolean; onClick: () => void; children: ReactNode }) {
+  return (
+    <Link
+      to={to as never}
+      onClick={onClick}
+      className={[
+        "flex items-center px-3 py-1.5 rounded-md text-[12px] border-l-2 transition-colors",
+        active
+          ? "bg-[rgba(55,138,221,0.10)] border-[#378ADD] text-white"
+          : "border-transparent text-white/50 hover:bg-white/[0.04] hover:text-white",
+      ].join(" ")}
+    >
+      {children}
     </Link>
   );
 }

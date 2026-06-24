@@ -13,7 +13,7 @@ export interface AdvisorContext {
 }
 
 export const askAdvisor = createServerFn({ method: "POST" })
-  .inputValidator((d: AdvisorContext) => d)
+  .validator((d: AdvisorContext) => d)
   .handler(async ({ data }) => {
     const key = process.env.LOVABLE_API_KEY;
     const userContent = `Project: ${data.projectName}

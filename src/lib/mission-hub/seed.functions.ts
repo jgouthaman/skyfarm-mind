@@ -4,10 +4,10 @@ import { z } from "zod";
 export const checkSuperAdminExists = createServerFn({ method: "GET" }).handler(async () => {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const { count, error } = await supabaseAdmin
-    .from("profiles")
+    .from("mission_hub_users")
     .select("*", { count: "exact", head: true })
     .eq("role", "super_admin")
-    .eq("is_active", true);
+    .eq("status", "active");
   if (error) throw new Error(error.message);
   return { exists: (count ?? 0) > 0 };
 });
@@ -19,16 +19,16 @@ const SeedSchema = z.object({
 });
 
 export const seedSuperAdmin = createServerFn({ method: "POST" })
-  .inputValidator((d: unknown) => SeedSchema.parse(d))
+  .validator((d: unknown) => SeedSchema.parse(d))
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     // Lock: refuse if any active super_admin already exists.
     const { count } = await supabaseAdmin
-      .from("profiles")
+      .from("mission_hub_users")
       .select("*", { count: "exact", head: true })
       .eq("role", "super_admin")
-      .eq("is_active", true);
+      .eq("status", "active");
     if ((count ?? 0) > 0) {
       throw new Error("Super admin already configured");
     }
@@ -52,17 +52,16 @@ export const seedSuperAdmin = createServerFn({ method: "POST" })
 
     // Upsert profile as super_admin
     const { error: pErr } = await supabaseAdmin
-      .from("profiles")
+      .from("mission_hub_users")
       .upsert(
         {
-          user_id: userId,
+          id: userId,
           full_name: data.full_name,
           email: data.email,
           role: "super_admin",
-          is_active: true,
-          phone: "",
+          status: "active",
         },
-        { onConflict: "user_id" },
+        { onConflict: "id" },
       );
     if (pErr) throw new Error(pErr.message);
 

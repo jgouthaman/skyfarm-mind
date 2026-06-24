@@ -55,7 +55,7 @@ async function hydrate() {
 
     const selectedId =
       typeof window !== "undefined"
-        ? window.sessionStorage.getItem("aerospawn-studio:selected")
+        ? window.sessionStorage.getItem("torqwings-studio:selected")
         : null;
     setState({ projects: built, selectedId, loaded: true });
   })();
@@ -82,8 +82,8 @@ export function useCurrentProject(): DroneProject | null {
 // ---------- Actions ----------
 function persistSelected(id: string | null) {
   if (typeof window === "undefined") return;
-  if (id) window.sessionStorage.setItem("aerospawn-studio:selected", id);
-  else window.sessionStorage.removeItem("aerospawn-studio:selected");
+  if (id) window.sessionStorage.setItem("torqwings-studio:selected", id);
+  else window.sessionStorage.removeItem("torqwings-studio:selected");
 }
 
 async function reload() { loadPromise = null; await hydrate(); }

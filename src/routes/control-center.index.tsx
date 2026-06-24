@@ -38,7 +38,7 @@ const verticals = [
     icon: GraduationCap, cta: "Coming Soon" },
   { id: "design-studio", name: "TorqWings Design Studio", tag: "AI-Powered Drone Design Studio", status: "New", tone: "active",
     desc: "AI-powered drone design, component generation, simulation, and engineering advisory studio.",
-    icon: Sparkles, cta: "Open Design Studio", to: "/control-center/aerospawn-design-studio" as const },
+    icon: Sparkles, cta: "Open Design Studio", to: "/control-center/torqwings-design-studio" as const },
 ];
 
 function statusClasses(tone: string) {
