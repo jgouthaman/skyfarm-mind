@@ -15,7 +15,6 @@ import { Route as MissionHubRouteImport } from './routes/mission-hub'
 import { Route as FieldRouteImport } from './routes/field'
 import { Route as LayoutRouteImport } from './routes/_layout'
 import { Route as PilotIndexRouteImport } from './routes/pilot.index'
-import { Route as ControlCenterIndexRouteImport } from './routes/control-center.index'
 import { Route as LayoutIndexRouteImport } from './routes/_layout.index'
 import { Route as PilotTrackingRouteImport } from './routes/pilot.tracking'
 import { Route as PilotSyncRouteImport } from './routes/pilot.sync'
@@ -34,6 +33,7 @@ import { Route as MissionHubTwbcDroneDesignScoreRouteImport } from './routes/mis
 import { Route as MissionHubTwbcDroneDesignRulesRouteImport } from './routes/mission-hub.twbc-drone-design-rules'
 import { Route as MissionHubTwbcDroneComponentsLibraryRouteImport } from './routes/mission-hub.twbc-drone-components-library'
 import { Route as MissionHubTwbcDroneApprovalRouteImport } from './routes/mission-hub.twbc-drone-approval'
+import { Route as MissionHubTorqwingsDesignStudioRouteImport } from './routes/mission-hub.torqwings-design-studio'
 import { Route as MissionHubSettingsRouteImport } from './routes/mission-hub.settings'
 import { Route as MissionHubResetPasswordRouteImport } from './routes/mission-hub.reset-password'
 import { Route as MissionHubLoginRouteImport } from './routes/mission-hub.login'
@@ -41,10 +41,6 @@ import { Route as MissionHubKnowledgeUavRouteImport } from './routes/mission-hub
 import { Route as MissionHubDesignStudioRouteImport } from './routes/mission-hub.design-studio'
 import { Route as MissionHubDashboardRouteImport } from './routes/mission-hub.dashboard'
 import { Route as MissionHubContactsRouteImport } from './routes/mission-hub.contacts'
-import { Route as ControlCenterUsersRouteImport } from './routes/control-center.users'
-import { Route as ControlCenterTorqwingsDesignStudioRouteImport } from './routes/control-center.torqwings-design-studio'
-import { Route as ControlCenterLoginRouteImport } from './routes/control-center.login'
-import { Route as ControlCenterAgriskyRouteImport } from './routes/control-center.agrisky'
 import { Route as LayoutTechnologyRouteImport } from './routes/_layout.technology'
 import { Route as LayoutSolutionsRouteImport } from './routes/_layout.solutions'
 import { Route as LayoutPilotsRouteImport } from './routes/_layout.pilots'
@@ -56,19 +52,19 @@ import { Route as LayoutAgriskyRouteImport } from './routes/_layout.agrisky'
 import { Route as LayoutAcademyRouteImport } from './routes/_layout.academy'
 import { Route as LayoutAboutRouteImport } from './routes/_layout.about'
 import { Route as PilotMissionsIndexRouteImport } from './routes/pilot.missions.index'
-import { Route as ControlCenterTorqwingsDesignStudioIndexRouteImport } from './routes/control-center.torqwings-design-studio.index'
+import { Route as MissionHubTorqwingsDesignStudioIndexRouteImport } from './routes/mission-hub.torqwings-design-studio.index'
 import { Route as PilotMissionsIdRouteImport } from './routes/pilot.missions.$id'
 import { Route as MissionHubVerticalsVerticalRouteImport } from './routes/mission-hub.verticals.$vertical'
-import { Route as ControlCenterTorqwingsDesignStudioSmeBrainRouteImport } from './routes/control-center.torqwings-design-studio.sme-brain'
-import { Route as ControlCenterTorqwingsDesignStudioSimulationRouteImport } from './routes/control-center.torqwings-design-studio.simulation'
-import { Route as ControlCenterTorqwingsDesignStudioRequirementsRouteImport } from './routes/control-center.torqwings-design-studio.requirements'
-import { Route as ControlCenterTorqwingsDesignStudioReportRouteImport } from './routes/control-center.torqwings-design-studio.report'
-import { Route as ControlCenterTorqwingsDesignStudioNewRouteImport } from './routes/control-center.torqwings-design-studio.new'
-import { Route as ControlCenterTorqwingsDesignStudioHistoryRouteImport } from './routes/control-center.torqwings-design-studio.history'
-import { Route as ControlCenterTorqwingsDesignStudioDesignRouteImport } from './routes/control-center.torqwings-design-studio.design'
-import { Route as ControlCenterTorqwingsDesignStudioComponentsRouteImport } from './routes/control-center.torqwings-design-studio.components'
-import { Route as ControlCenterTorqwingsDesignStudioComplianceRouteImport } from './routes/control-center.torqwings-design-studio.compliance'
-import { Route as ControlCenterTorqwingsDesignStudioAdvisorRouteImport } from './routes/control-center.torqwings-design-studio.advisor'
+import { Route as MissionHubTorqwingsDesignStudioSmeBrainRouteImport } from './routes/mission-hub.torqwings-design-studio.sme-brain'
+import { Route as MissionHubTorqwingsDesignStudioSimulationRouteImport } from './routes/mission-hub.torqwings-design-studio.simulation'
+import { Route as MissionHubTorqwingsDesignStudioRequirementsRouteImport } from './routes/mission-hub.torqwings-design-studio.requirements'
+import { Route as MissionHubTorqwingsDesignStudioReportRouteImport } from './routes/mission-hub.torqwings-design-studio.report'
+import { Route as MissionHubTorqwingsDesignStudioNewRouteImport } from './routes/mission-hub.torqwings-design-studio.new'
+import { Route as MissionHubTorqwingsDesignStudioHistoryRouteImport } from './routes/mission-hub.torqwings-design-studio.history'
+import { Route as MissionHubTorqwingsDesignStudioDesignRouteImport } from './routes/mission-hub.torqwings-design-studio.design'
+import { Route as MissionHubTorqwingsDesignStudioComponentsRouteImport } from './routes/mission-hub.torqwings-design-studio.components'
+import { Route as MissionHubTorqwingsDesignStudioComplianceRouteImport } from './routes/mission-hub.torqwings-design-studio.compliance'
+import { Route as MissionHubTorqwingsDesignStudioAdvisorRouteImport } from './routes/mission-hub.torqwings-design-studio.advisor'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -98,11 +94,6 @@ const PilotIndexRoute = PilotIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => PilotRoute,
-} as any)
-const ControlCenterIndexRoute = ControlCenterIndexRouteImport.update({
-  id: '/control-center/',
-  path: '/control-center/',
-  getParentRoute: () => rootRouteImport,
 } as any)
 const LayoutIndexRoute = LayoutIndexRouteImport.update({
   id: '/',
@@ -205,6 +196,12 @@ const MissionHubTwbcDroneApprovalRoute =
     path: '/twbc-drone-approval',
     getParentRoute: () => MissionHubRoute,
   } as any)
+const MissionHubTorqwingsDesignStudioRoute =
+  MissionHubTorqwingsDesignStudioRouteImport.update({
+    id: '/torqwings-design-studio',
+    path: '/torqwings-design-studio',
+    getParentRoute: () => MissionHubRoute,
+  } as any)
 const MissionHubSettingsRoute = MissionHubSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -239,27 +236,6 @@ const MissionHubContactsRoute = MissionHubContactsRouteImport.update({
   id: '/contacts',
   path: '/contacts',
   getParentRoute: () => MissionHubRoute,
-} as any)
-const ControlCenterUsersRoute = ControlCenterUsersRouteImport.update({
-  id: '/control-center/users',
-  path: '/control-center/users',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ControlCenterTorqwingsDesignStudioRoute =
-  ControlCenterTorqwingsDesignStudioRouteImport.update({
-    id: '/control-center/torqwings-design-studio',
-    path: '/control-center/torqwings-design-studio',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ControlCenterLoginRoute = ControlCenterLoginRouteImport.update({
-  id: '/control-center/login',
-  path: '/control-center/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ControlCenterAgriskyRoute = ControlCenterAgriskyRouteImport.update({
-  id: '/control-center/agrisky',
-  path: '/control-center/agrisky',
-  getParentRoute: () => rootRouteImport,
 } as any)
 const LayoutTechnologyRoute = LayoutTechnologyRouteImport.update({
   id: '/technology',
@@ -316,11 +292,11 @@ const PilotMissionsIndexRoute = PilotMissionsIndexRouteImport.update({
   path: '/missions/',
   getParentRoute: () => PilotRoute,
 } as any)
-const ControlCenterTorqwingsDesignStudioIndexRoute =
-  ControlCenterTorqwingsDesignStudioIndexRouteImport.update({
+const MissionHubTorqwingsDesignStudioIndexRoute =
+  MissionHubTorqwingsDesignStudioIndexRouteImport.update({
     id: '/',
     path: '/',
-    getParentRoute: () => ControlCenterTorqwingsDesignStudioRoute,
+    getParentRoute: () => MissionHubTorqwingsDesignStudioRoute,
   } as any)
 const PilotMissionsIdRoute = PilotMissionsIdRouteImport.update({
   id: '/missions/$id',
@@ -333,65 +309,65 @@ const MissionHubVerticalsVerticalRoute =
     path: '/verticals/$vertical',
     getParentRoute: () => MissionHubRoute,
   } as any)
-const ControlCenterTorqwingsDesignStudioSmeBrainRoute =
-  ControlCenterTorqwingsDesignStudioSmeBrainRouteImport.update({
+const MissionHubTorqwingsDesignStudioSmeBrainRoute =
+  MissionHubTorqwingsDesignStudioSmeBrainRouteImport.update({
     id: '/sme-brain',
     path: '/sme-brain',
-    getParentRoute: () => ControlCenterTorqwingsDesignStudioRoute,
+    getParentRoute: () => MissionHubTorqwingsDesignStudioRoute,
   } as any)
-const ControlCenterTorqwingsDesignStudioSimulationRoute =
-  ControlCenterTorqwingsDesignStudioSimulationRouteImport.update({
+const MissionHubTorqwingsDesignStudioSimulationRoute =
+  MissionHubTorqwingsDesignStudioSimulationRouteImport.update({
     id: '/simulation',
     path: '/simulation',
-    getParentRoute: () => ControlCenterTorqwingsDesignStudioRoute,
+    getParentRoute: () => MissionHubTorqwingsDesignStudioRoute,
   } as any)
-const ControlCenterTorqwingsDesignStudioRequirementsRoute =
-  ControlCenterTorqwingsDesignStudioRequirementsRouteImport.update({
+const MissionHubTorqwingsDesignStudioRequirementsRoute =
+  MissionHubTorqwingsDesignStudioRequirementsRouteImport.update({
     id: '/requirements',
     path: '/requirements',
-    getParentRoute: () => ControlCenterTorqwingsDesignStudioRoute,
+    getParentRoute: () => MissionHubTorqwingsDesignStudioRoute,
   } as any)
-const ControlCenterTorqwingsDesignStudioReportRoute =
-  ControlCenterTorqwingsDesignStudioReportRouteImport.update({
+const MissionHubTorqwingsDesignStudioReportRoute =
+  MissionHubTorqwingsDesignStudioReportRouteImport.update({
     id: '/report',
     path: '/report',
-    getParentRoute: () => ControlCenterTorqwingsDesignStudioRoute,
+    getParentRoute: () => MissionHubTorqwingsDesignStudioRoute,
   } as any)
-const ControlCenterTorqwingsDesignStudioNewRoute =
-  ControlCenterTorqwingsDesignStudioNewRouteImport.update({
+const MissionHubTorqwingsDesignStudioNewRoute =
+  MissionHubTorqwingsDesignStudioNewRouteImport.update({
     id: '/new',
     path: '/new',
-    getParentRoute: () => ControlCenterTorqwingsDesignStudioRoute,
+    getParentRoute: () => MissionHubTorqwingsDesignStudioRoute,
   } as any)
-const ControlCenterTorqwingsDesignStudioHistoryRoute =
-  ControlCenterTorqwingsDesignStudioHistoryRouteImport.update({
+const MissionHubTorqwingsDesignStudioHistoryRoute =
+  MissionHubTorqwingsDesignStudioHistoryRouteImport.update({
     id: '/history',
     path: '/history',
-    getParentRoute: () => ControlCenterTorqwingsDesignStudioRoute,
+    getParentRoute: () => MissionHubTorqwingsDesignStudioRoute,
   } as any)
-const ControlCenterTorqwingsDesignStudioDesignRoute =
-  ControlCenterTorqwingsDesignStudioDesignRouteImport.update({
+const MissionHubTorqwingsDesignStudioDesignRoute =
+  MissionHubTorqwingsDesignStudioDesignRouteImport.update({
     id: '/design',
     path: '/design',
-    getParentRoute: () => ControlCenterTorqwingsDesignStudioRoute,
+    getParentRoute: () => MissionHubTorqwingsDesignStudioRoute,
   } as any)
-const ControlCenterTorqwingsDesignStudioComponentsRoute =
-  ControlCenterTorqwingsDesignStudioComponentsRouteImport.update({
+const MissionHubTorqwingsDesignStudioComponentsRoute =
+  MissionHubTorqwingsDesignStudioComponentsRouteImport.update({
     id: '/components',
     path: '/components',
-    getParentRoute: () => ControlCenterTorqwingsDesignStudioRoute,
+    getParentRoute: () => MissionHubTorqwingsDesignStudioRoute,
   } as any)
-const ControlCenterTorqwingsDesignStudioComplianceRoute =
-  ControlCenterTorqwingsDesignStudioComplianceRouteImport.update({
+const MissionHubTorqwingsDesignStudioComplianceRoute =
+  MissionHubTorqwingsDesignStudioComplianceRouteImport.update({
     id: '/compliance',
     path: '/compliance',
-    getParentRoute: () => ControlCenterTorqwingsDesignStudioRoute,
+    getParentRoute: () => MissionHubTorqwingsDesignStudioRoute,
   } as any)
-const ControlCenterTorqwingsDesignStudioAdvisorRoute =
-  ControlCenterTorqwingsDesignStudioAdvisorRouteImport.update({
+const MissionHubTorqwingsDesignStudioAdvisorRoute =
+  MissionHubTorqwingsDesignStudioAdvisorRouteImport.update({
     id: '/advisor',
     path: '/advisor',
-    getParentRoute: () => ControlCenterTorqwingsDesignStudioRoute,
+    getParentRoute: () => MissionHubTorqwingsDesignStudioRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -410,10 +386,6 @@ export interface FileRoutesByFullPath {
   '/pilots': typeof LayoutPilotsRoute
   '/solutions': typeof LayoutSolutionsRoute
   '/technology': typeof LayoutTechnologyRoute
-  '/control-center/agrisky': typeof ControlCenterAgriskyRoute
-  '/control-center/login': typeof ControlCenterLoginRoute
-  '/control-center/torqwings-design-studio': typeof ControlCenterTorqwingsDesignStudioRouteWithChildren
-  '/control-center/users': typeof ControlCenterUsersRoute
   '/mission-hub/contacts': typeof MissionHubContactsRoute
   '/mission-hub/dashboard': typeof MissionHubDashboardRoute
   '/mission-hub/design-studio': typeof MissionHubDesignStudioRoute
@@ -421,6 +393,7 @@ export interface FileRoutesByFullPath {
   '/mission-hub/login': typeof MissionHubLoginRoute
   '/mission-hub/reset-password': typeof MissionHubResetPasswordRoute
   '/mission-hub/settings': typeof MissionHubSettingsRoute
+  '/mission-hub/torqwings-design-studio': typeof MissionHubTorqwingsDesignStudioRouteWithChildren
   '/mission-hub/twbc-drone-approval': typeof MissionHubTwbcDroneApprovalRoute
   '/mission-hub/twbc-drone-components-library': typeof MissionHubTwbcDroneComponentsLibraryRoute
   '/mission-hub/twbc-drone-design-rules': typeof MissionHubTwbcDroneDesignRulesRoute
@@ -438,21 +411,20 @@ export interface FileRoutesByFullPath {
   '/pilot/profile': typeof PilotProfileRoute
   '/pilot/sync': typeof PilotSyncRoute
   '/pilot/tracking': typeof PilotTrackingRoute
-  '/control-center/': typeof ControlCenterIndexRoute
   '/pilot/': typeof PilotIndexRoute
-  '/control-center/torqwings-design-studio/advisor': typeof ControlCenterTorqwingsDesignStudioAdvisorRoute
-  '/control-center/torqwings-design-studio/compliance': typeof ControlCenterTorqwingsDesignStudioComplianceRoute
-  '/control-center/torqwings-design-studio/components': typeof ControlCenterTorqwingsDesignStudioComponentsRoute
-  '/control-center/torqwings-design-studio/design': typeof ControlCenterTorqwingsDesignStudioDesignRoute
-  '/control-center/torqwings-design-studio/history': typeof ControlCenterTorqwingsDesignStudioHistoryRoute
-  '/control-center/torqwings-design-studio/new': typeof ControlCenterTorqwingsDesignStudioNewRoute
-  '/control-center/torqwings-design-studio/report': typeof ControlCenterTorqwingsDesignStudioReportRoute
-  '/control-center/torqwings-design-studio/requirements': typeof ControlCenterTorqwingsDesignStudioRequirementsRoute
-  '/control-center/torqwings-design-studio/simulation': typeof ControlCenterTorqwingsDesignStudioSimulationRoute
-  '/control-center/torqwings-design-studio/sme-brain': typeof ControlCenterTorqwingsDesignStudioSmeBrainRoute
+  '/mission-hub/torqwings-design-studio/advisor': typeof MissionHubTorqwingsDesignStudioAdvisorRoute
+  '/mission-hub/torqwings-design-studio/compliance': typeof MissionHubTorqwingsDesignStudioComplianceRoute
+  '/mission-hub/torqwings-design-studio/components': typeof MissionHubTorqwingsDesignStudioComponentsRoute
+  '/mission-hub/torqwings-design-studio/design': typeof MissionHubTorqwingsDesignStudioDesignRoute
+  '/mission-hub/torqwings-design-studio/history': typeof MissionHubTorqwingsDesignStudioHistoryRoute
+  '/mission-hub/torqwings-design-studio/new': typeof MissionHubTorqwingsDesignStudioNewRoute
+  '/mission-hub/torqwings-design-studio/report': typeof MissionHubTorqwingsDesignStudioReportRoute
+  '/mission-hub/torqwings-design-studio/requirements': typeof MissionHubTorqwingsDesignStudioRequirementsRoute
+  '/mission-hub/torqwings-design-studio/simulation': typeof MissionHubTorqwingsDesignStudioSimulationRoute
+  '/mission-hub/torqwings-design-studio/sme-brain': typeof MissionHubTorqwingsDesignStudioSmeBrainRoute
   '/mission-hub/verticals/$vertical': typeof MissionHubVerticalsVerticalRoute
   '/pilot/missions/$id': typeof PilotMissionsIdRoute
-  '/control-center/torqwings-design-studio/': typeof ControlCenterTorqwingsDesignStudioIndexRoute
+  '/mission-hub/torqwings-design-studio/': typeof MissionHubTorqwingsDesignStudioIndexRoute
   '/pilot/missions/': typeof PilotMissionsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -469,9 +441,6 @@ export interface FileRoutesByTo {
   '/pilots': typeof LayoutPilotsRoute
   '/solutions': typeof LayoutSolutionsRoute
   '/technology': typeof LayoutTechnologyRoute
-  '/control-center/agrisky': typeof ControlCenterAgriskyRoute
-  '/control-center/login': typeof ControlCenterLoginRoute
-  '/control-center/users': typeof ControlCenterUsersRoute
   '/mission-hub/contacts': typeof MissionHubContactsRoute
   '/mission-hub/dashboard': typeof MissionHubDashboardRoute
   '/mission-hub/design-studio': typeof MissionHubDesignStudioRoute
@@ -497,21 +466,20 @@ export interface FileRoutesByTo {
   '/pilot/sync': typeof PilotSyncRoute
   '/pilot/tracking': typeof PilotTrackingRoute
   '/': typeof LayoutIndexRoute
-  '/control-center': typeof ControlCenterIndexRoute
   '/pilot': typeof PilotIndexRoute
-  '/control-center/torqwings-design-studio/advisor': typeof ControlCenterTorqwingsDesignStudioAdvisorRoute
-  '/control-center/torqwings-design-studio/compliance': typeof ControlCenterTorqwingsDesignStudioComplianceRoute
-  '/control-center/torqwings-design-studio/components': typeof ControlCenterTorqwingsDesignStudioComponentsRoute
-  '/control-center/torqwings-design-studio/design': typeof ControlCenterTorqwingsDesignStudioDesignRoute
-  '/control-center/torqwings-design-studio/history': typeof ControlCenterTorqwingsDesignStudioHistoryRoute
-  '/control-center/torqwings-design-studio/new': typeof ControlCenterTorqwingsDesignStudioNewRoute
-  '/control-center/torqwings-design-studio/report': typeof ControlCenterTorqwingsDesignStudioReportRoute
-  '/control-center/torqwings-design-studio/requirements': typeof ControlCenterTorqwingsDesignStudioRequirementsRoute
-  '/control-center/torqwings-design-studio/simulation': typeof ControlCenterTorqwingsDesignStudioSimulationRoute
-  '/control-center/torqwings-design-studio/sme-brain': typeof ControlCenterTorqwingsDesignStudioSmeBrainRoute
+  '/mission-hub/torqwings-design-studio/advisor': typeof MissionHubTorqwingsDesignStudioAdvisorRoute
+  '/mission-hub/torqwings-design-studio/compliance': typeof MissionHubTorqwingsDesignStudioComplianceRoute
+  '/mission-hub/torqwings-design-studio/components': typeof MissionHubTorqwingsDesignStudioComponentsRoute
+  '/mission-hub/torqwings-design-studio/design': typeof MissionHubTorqwingsDesignStudioDesignRoute
+  '/mission-hub/torqwings-design-studio/history': typeof MissionHubTorqwingsDesignStudioHistoryRoute
+  '/mission-hub/torqwings-design-studio/new': typeof MissionHubTorqwingsDesignStudioNewRoute
+  '/mission-hub/torqwings-design-studio/report': typeof MissionHubTorqwingsDesignStudioReportRoute
+  '/mission-hub/torqwings-design-studio/requirements': typeof MissionHubTorqwingsDesignStudioRequirementsRoute
+  '/mission-hub/torqwings-design-studio/simulation': typeof MissionHubTorqwingsDesignStudioSimulationRoute
+  '/mission-hub/torqwings-design-studio/sme-brain': typeof MissionHubTorqwingsDesignStudioSmeBrainRoute
   '/mission-hub/verticals/$vertical': typeof MissionHubVerticalsVerticalRoute
   '/pilot/missions/$id': typeof PilotMissionsIdRoute
-  '/control-center/torqwings-design-studio': typeof ControlCenterTorqwingsDesignStudioIndexRoute
+  '/mission-hub/torqwings-design-studio': typeof MissionHubTorqwingsDesignStudioIndexRoute
   '/pilot/missions': typeof PilotMissionsIndexRoute
 }
 export interface FileRoutesById {
@@ -531,10 +499,6 @@ export interface FileRoutesById {
   '/_layout/pilots': typeof LayoutPilotsRoute
   '/_layout/solutions': typeof LayoutSolutionsRoute
   '/_layout/technology': typeof LayoutTechnologyRoute
-  '/control-center/agrisky': typeof ControlCenterAgriskyRoute
-  '/control-center/login': typeof ControlCenterLoginRoute
-  '/control-center/torqwings-design-studio': typeof ControlCenterTorqwingsDesignStudioRouteWithChildren
-  '/control-center/users': typeof ControlCenterUsersRoute
   '/mission-hub/contacts': typeof MissionHubContactsRoute
   '/mission-hub/dashboard': typeof MissionHubDashboardRoute
   '/mission-hub/design-studio': typeof MissionHubDesignStudioRoute
@@ -542,6 +506,7 @@ export interface FileRoutesById {
   '/mission-hub/login': typeof MissionHubLoginRoute
   '/mission-hub/reset-password': typeof MissionHubResetPasswordRoute
   '/mission-hub/settings': typeof MissionHubSettingsRoute
+  '/mission-hub/torqwings-design-studio': typeof MissionHubTorqwingsDesignStudioRouteWithChildren
   '/mission-hub/twbc-drone-approval': typeof MissionHubTwbcDroneApprovalRoute
   '/mission-hub/twbc-drone-components-library': typeof MissionHubTwbcDroneComponentsLibraryRoute
   '/mission-hub/twbc-drone-design-rules': typeof MissionHubTwbcDroneDesignRulesRoute
@@ -560,21 +525,20 @@ export interface FileRoutesById {
   '/pilot/sync': typeof PilotSyncRoute
   '/pilot/tracking': typeof PilotTrackingRoute
   '/_layout/': typeof LayoutIndexRoute
-  '/control-center/': typeof ControlCenterIndexRoute
   '/pilot/': typeof PilotIndexRoute
-  '/control-center/torqwings-design-studio/advisor': typeof ControlCenterTorqwingsDesignStudioAdvisorRoute
-  '/control-center/torqwings-design-studio/compliance': typeof ControlCenterTorqwingsDesignStudioComplianceRoute
-  '/control-center/torqwings-design-studio/components': typeof ControlCenterTorqwingsDesignStudioComponentsRoute
-  '/control-center/torqwings-design-studio/design': typeof ControlCenterTorqwingsDesignStudioDesignRoute
-  '/control-center/torqwings-design-studio/history': typeof ControlCenterTorqwingsDesignStudioHistoryRoute
-  '/control-center/torqwings-design-studio/new': typeof ControlCenterTorqwingsDesignStudioNewRoute
-  '/control-center/torqwings-design-studio/report': typeof ControlCenterTorqwingsDesignStudioReportRoute
-  '/control-center/torqwings-design-studio/requirements': typeof ControlCenterTorqwingsDesignStudioRequirementsRoute
-  '/control-center/torqwings-design-studio/simulation': typeof ControlCenterTorqwingsDesignStudioSimulationRoute
-  '/control-center/torqwings-design-studio/sme-brain': typeof ControlCenterTorqwingsDesignStudioSmeBrainRoute
+  '/mission-hub/torqwings-design-studio/advisor': typeof MissionHubTorqwingsDesignStudioAdvisorRoute
+  '/mission-hub/torqwings-design-studio/compliance': typeof MissionHubTorqwingsDesignStudioComplianceRoute
+  '/mission-hub/torqwings-design-studio/components': typeof MissionHubTorqwingsDesignStudioComponentsRoute
+  '/mission-hub/torqwings-design-studio/design': typeof MissionHubTorqwingsDesignStudioDesignRoute
+  '/mission-hub/torqwings-design-studio/history': typeof MissionHubTorqwingsDesignStudioHistoryRoute
+  '/mission-hub/torqwings-design-studio/new': typeof MissionHubTorqwingsDesignStudioNewRoute
+  '/mission-hub/torqwings-design-studio/report': typeof MissionHubTorqwingsDesignStudioReportRoute
+  '/mission-hub/torqwings-design-studio/requirements': typeof MissionHubTorqwingsDesignStudioRequirementsRoute
+  '/mission-hub/torqwings-design-studio/simulation': typeof MissionHubTorqwingsDesignStudioSimulationRoute
+  '/mission-hub/torqwings-design-studio/sme-brain': typeof MissionHubTorqwingsDesignStudioSmeBrainRoute
   '/mission-hub/verticals/$vertical': typeof MissionHubVerticalsVerticalRoute
   '/pilot/missions/$id': typeof PilotMissionsIdRoute
-  '/control-center/torqwings-design-studio/': typeof ControlCenterTorqwingsDesignStudioIndexRoute
+  '/mission-hub/torqwings-design-studio/': typeof MissionHubTorqwingsDesignStudioIndexRoute
   '/pilot/missions/': typeof PilotMissionsIndexRoute
 }
 export interface FileRouteTypes {
@@ -595,10 +559,6 @@ export interface FileRouteTypes {
     | '/pilots'
     | '/solutions'
     | '/technology'
-    | '/control-center/agrisky'
-    | '/control-center/login'
-    | '/control-center/torqwings-design-studio'
-    | '/control-center/users'
     | '/mission-hub/contacts'
     | '/mission-hub/dashboard'
     | '/mission-hub/design-studio'
@@ -606,6 +566,7 @@ export interface FileRouteTypes {
     | '/mission-hub/login'
     | '/mission-hub/reset-password'
     | '/mission-hub/settings'
+    | '/mission-hub/torqwings-design-studio'
     | '/mission-hub/twbc-drone-approval'
     | '/mission-hub/twbc-drone-components-library'
     | '/mission-hub/twbc-drone-design-rules'
@@ -623,21 +584,20 @@ export interface FileRouteTypes {
     | '/pilot/profile'
     | '/pilot/sync'
     | '/pilot/tracking'
-    | '/control-center/'
     | '/pilot/'
-    | '/control-center/torqwings-design-studio/advisor'
-    | '/control-center/torqwings-design-studio/compliance'
-    | '/control-center/torqwings-design-studio/components'
-    | '/control-center/torqwings-design-studio/design'
-    | '/control-center/torqwings-design-studio/history'
-    | '/control-center/torqwings-design-studio/new'
-    | '/control-center/torqwings-design-studio/report'
-    | '/control-center/torqwings-design-studio/requirements'
-    | '/control-center/torqwings-design-studio/simulation'
-    | '/control-center/torqwings-design-studio/sme-brain'
+    | '/mission-hub/torqwings-design-studio/advisor'
+    | '/mission-hub/torqwings-design-studio/compliance'
+    | '/mission-hub/torqwings-design-studio/components'
+    | '/mission-hub/torqwings-design-studio/design'
+    | '/mission-hub/torqwings-design-studio/history'
+    | '/mission-hub/torqwings-design-studio/new'
+    | '/mission-hub/torqwings-design-studio/report'
+    | '/mission-hub/torqwings-design-studio/requirements'
+    | '/mission-hub/torqwings-design-studio/simulation'
+    | '/mission-hub/torqwings-design-studio/sme-brain'
     | '/mission-hub/verticals/$vertical'
     | '/pilot/missions/$id'
-    | '/control-center/torqwings-design-studio/'
+    | '/mission-hub/torqwings-design-studio/'
     | '/pilot/missions/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -654,9 +614,6 @@ export interface FileRouteTypes {
     | '/pilots'
     | '/solutions'
     | '/technology'
-    | '/control-center/agrisky'
-    | '/control-center/login'
-    | '/control-center/users'
     | '/mission-hub/contacts'
     | '/mission-hub/dashboard'
     | '/mission-hub/design-studio'
@@ -682,21 +639,20 @@ export interface FileRouteTypes {
     | '/pilot/sync'
     | '/pilot/tracking'
     | '/'
-    | '/control-center'
     | '/pilot'
-    | '/control-center/torqwings-design-studio/advisor'
-    | '/control-center/torqwings-design-studio/compliance'
-    | '/control-center/torqwings-design-studio/components'
-    | '/control-center/torqwings-design-studio/design'
-    | '/control-center/torqwings-design-studio/history'
-    | '/control-center/torqwings-design-studio/new'
-    | '/control-center/torqwings-design-studio/report'
-    | '/control-center/torqwings-design-studio/requirements'
-    | '/control-center/torqwings-design-studio/simulation'
-    | '/control-center/torqwings-design-studio/sme-brain'
+    | '/mission-hub/torqwings-design-studio/advisor'
+    | '/mission-hub/torqwings-design-studio/compliance'
+    | '/mission-hub/torqwings-design-studio/components'
+    | '/mission-hub/torqwings-design-studio/design'
+    | '/mission-hub/torqwings-design-studio/history'
+    | '/mission-hub/torqwings-design-studio/new'
+    | '/mission-hub/torqwings-design-studio/report'
+    | '/mission-hub/torqwings-design-studio/requirements'
+    | '/mission-hub/torqwings-design-studio/simulation'
+    | '/mission-hub/torqwings-design-studio/sme-brain'
     | '/mission-hub/verticals/$vertical'
     | '/pilot/missions/$id'
-    | '/control-center/torqwings-design-studio'
+    | '/mission-hub/torqwings-design-studio'
     | '/pilot/missions'
   id:
     | '__root__'
@@ -715,10 +671,6 @@ export interface FileRouteTypes {
     | '/_layout/pilots'
     | '/_layout/solutions'
     | '/_layout/technology'
-    | '/control-center/agrisky'
-    | '/control-center/login'
-    | '/control-center/torqwings-design-studio'
-    | '/control-center/users'
     | '/mission-hub/contacts'
     | '/mission-hub/dashboard'
     | '/mission-hub/design-studio'
@@ -726,6 +678,7 @@ export interface FileRouteTypes {
     | '/mission-hub/login'
     | '/mission-hub/reset-password'
     | '/mission-hub/settings'
+    | '/mission-hub/torqwings-design-studio'
     | '/mission-hub/twbc-drone-approval'
     | '/mission-hub/twbc-drone-components-library'
     | '/mission-hub/twbc-drone-design-rules'
@@ -744,21 +697,20 @@ export interface FileRouteTypes {
     | '/pilot/sync'
     | '/pilot/tracking'
     | '/_layout/'
-    | '/control-center/'
     | '/pilot/'
-    | '/control-center/torqwings-design-studio/advisor'
-    | '/control-center/torqwings-design-studio/compliance'
-    | '/control-center/torqwings-design-studio/components'
-    | '/control-center/torqwings-design-studio/design'
-    | '/control-center/torqwings-design-studio/history'
-    | '/control-center/torqwings-design-studio/new'
-    | '/control-center/torqwings-design-studio/report'
-    | '/control-center/torqwings-design-studio/requirements'
-    | '/control-center/torqwings-design-studio/simulation'
-    | '/control-center/torqwings-design-studio/sme-brain'
+    | '/mission-hub/torqwings-design-studio/advisor'
+    | '/mission-hub/torqwings-design-studio/compliance'
+    | '/mission-hub/torqwings-design-studio/components'
+    | '/mission-hub/torqwings-design-studio/design'
+    | '/mission-hub/torqwings-design-studio/history'
+    | '/mission-hub/torqwings-design-studio/new'
+    | '/mission-hub/torqwings-design-studio/report'
+    | '/mission-hub/torqwings-design-studio/requirements'
+    | '/mission-hub/torqwings-design-studio/simulation'
+    | '/mission-hub/torqwings-design-studio/sme-brain'
     | '/mission-hub/verticals/$vertical'
     | '/pilot/missions/$id'
-    | '/control-center/torqwings-design-studio/'
+    | '/mission-hub/torqwings-design-studio/'
     | '/pilot/missions/'
   fileRoutesById: FileRoutesById
 }
@@ -768,11 +720,6 @@ export interface RootRouteChildren {
   MissionHubRoute: typeof MissionHubRouteWithChildren
   PilotRoute: typeof PilotRouteWithChildren
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
-  ControlCenterAgriskyRoute: typeof ControlCenterAgriskyRoute
-  ControlCenterLoginRoute: typeof ControlCenterLoginRoute
-  ControlCenterTorqwingsDesignStudioRoute: typeof ControlCenterTorqwingsDesignStudioRouteWithChildren
-  ControlCenterUsersRoute: typeof ControlCenterUsersRoute
-  ControlCenterIndexRoute: typeof ControlCenterIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -818,13 +765,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/pilot/'
       preLoaderRoute: typeof PilotIndexRouteImport
       parentRoute: typeof PilotRoute
-    }
-    '/control-center/': {
-      id: '/control-center/'
-      path: '/control-center'
-      fullPath: '/control-center/'
-      preLoaderRoute: typeof ControlCenterIndexRouteImport
-      parentRoute: typeof rootRouteImport
     }
     '/_layout/': {
       id: '/_layout/'
@@ -952,6 +892,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MissionHubTwbcDroneApprovalRouteImport
       parentRoute: typeof MissionHubRoute
     }
+    '/mission-hub/torqwings-design-studio': {
+      id: '/mission-hub/torqwings-design-studio'
+      path: '/torqwings-design-studio'
+      fullPath: '/mission-hub/torqwings-design-studio'
+      preLoaderRoute: typeof MissionHubTorqwingsDesignStudioRouteImport
+      parentRoute: typeof MissionHubRoute
+    }
     '/mission-hub/settings': {
       id: '/mission-hub/settings'
       path: '/settings'
@@ -1000,34 +947,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/mission-hub/contacts'
       preLoaderRoute: typeof MissionHubContactsRouteImport
       parentRoute: typeof MissionHubRoute
-    }
-    '/control-center/users': {
-      id: '/control-center/users'
-      path: '/control-center/users'
-      fullPath: '/control-center/users'
-      preLoaderRoute: typeof ControlCenterUsersRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/control-center/torqwings-design-studio': {
-      id: '/control-center/torqwings-design-studio'
-      path: '/control-center/torqwings-design-studio'
-      fullPath: '/control-center/torqwings-design-studio'
-      preLoaderRoute: typeof ControlCenterTorqwingsDesignStudioRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/control-center/login': {
-      id: '/control-center/login'
-      path: '/control-center/login'
-      fullPath: '/control-center/login'
-      preLoaderRoute: typeof ControlCenterLoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/control-center/agrisky': {
-      id: '/control-center/agrisky'
-      path: '/control-center/agrisky'
-      fullPath: '/control-center/agrisky'
-      preLoaderRoute: typeof ControlCenterAgriskyRouteImport
-      parentRoute: typeof rootRouteImport
     }
     '/_layout/technology': {
       id: '/_layout/technology'
@@ -1106,12 +1025,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PilotMissionsIndexRouteImport
       parentRoute: typeof PilotRoute
     }
-    '/control-center/torqwings-design-studio/': {
-      id: '/control-center/torqwings-design-studio/'
+    '/mission-hub/torqwings-design-studio/': {
+      id: '/mission-hub/torqwings-design-studio/'
       path: '/'
-      fullPath: '/control-center/torqwings-design-studio/'
-      preLoaderRoute: typeof ControlCenterTorqwingsDesignStudioIndexRouteImport
-      parentRoute: typeof ControlCenterTorqwingsDesignStudioRoute
+      fullPath: '/mission-hub/torqwings-design-studio/'
+      preLoaderRoute: typeof MissionHubTorqwingsDesignStudioIndexRouteImport
+      parentRoute: typeof MissionHubTorqwingsDesignStudioRoute
     }
     '/pilot/missions/$id': {
       id: '/pilot/missions/$id'
@@ -1127,75 +1046,75 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MissionHubVerticalsVerticalRouteImport
       parentRoute: typeof MissionHubRoute
     }
-    '/control-center/torqwings-design-studio/sme-brain': {
-      id: '/control-center/torqwings-design-studio/sme-brain'
+    '/mission-hub/torqwings-design-studio/sme-brain': {
+      id: '/mission-hub/torqwings-design-studio/sme-brain'
       path: '/sme-brain'
-      fullPath: '/control-center/torqwings-design-studio/sme-brain'
-      preLoaderRoute: typeof ControlCenterTorqwingsDesignStudioSmeBrainRouteImport
-      parentRoute: typeof ControlCenterTorqwingsDesignStudioRoute
+      fullPath: '/mission-hub/torqwings-design-studio/sme-brain'
+      preLoaderRoute: typeof MissionHubTorqwingsDesignStudioSmeBrainRouteImport
+      parentRoute: typeof MissionHubTorqwingsDesignStudioRoute
     }
-    '/control-center/torqwings-design-studio/simulation': {
-      id: '/control-center/torqwings-design-studio/simulation'
+    '/mission-hub/torqwings-design-studio/simulation': {
+      id: '/mission-hub/torqwings-design-studio/simulation'
       path: '/simulation'
-      fullPath: '/control-center/torqwings-design-studio/simulation'
-      preLoaderRoute: typeof ControlCenterTorqwingsDesignStudioSimulationRouteImport
-      parentRoute: typeof ControlCenterTorqwingsDesignStudioRoute
+      fullPath: '/mission-hub/torqwings-design-studio/simulation'
+      preLoaderRoute: typeof MissionHubTorqwingsDesignStudioSimulationRouteImport
+      parentRoute: typeof MissionHubTorqwingsDesignStudioRoute
     }
-    '/control-center/torqwings-design-studio/requirements': {
-      id: '/control-center/torqwings-design-studio/requirements'
+    '/mission-hub/torqwings-design-studio/requirements': {
+      id: '/mission-hub/torqwings-design-studio/requirements'
       path: '/requirements'
-      fullPath: '/control-center/torqwings-design-studio/requirements'
-      preLoaderRoute: typeof ControlCenterTorqwingsDesignStudioRequirementsRouteImport
-      parentRoute: typeof ControlCenterTorqwingsDesignStudioRoute
+      fullPath: '/mission-hub/torqwings-design-studio/requirements'
+      preLoaderRoute: typeof MissionHubTorqwingsDesignStudioRequirementsRouteImport
+      parentRoute: typeof MissionHubTorqwingsDesignStudioRoute
     }
-    '/control-center/torqwings-design-studio/report': {
-      id: '/control-center/torqwings-design-studio/report'
+    '/mission-hub/torqwings-design-studio/report': {
+      id: '/mission-hub/torqwings-design-studio/report'
       path: '/report'
-      fullPath: '/control-center/torqwings-design-studio/report'
-      preLoaderRoute: typeof ControlCenterTorqwingsDesignStudioReportRouteImport
-      parentRoute: typeof ControlCenterTorqwingsDesignStudioRoute
+      fullPath: '/mission-hub/torqwings-design-studio/report'
+      preLoaderRoute: typeof MissionHubTorqwingsDesignStudioReportRouteImport
+      parentRoute: typeof MissionHubTorqwingsDesignStudioRoute
     }
-    '/control-center/torqwings-design-studio/new': {
-      id: '/control-center/torqwings-design-studio/new'
+    '/mission-hub/torqwings-design-studio/new': {
+      id: '/mission-hub/torqwings-design-studio/new'
       path: '/new'
-      fullPath: '/control-center/torqwings-design-studio/new'
-      preLoaderRoute: typeof ControlCenterTorqwingsDesignStudioNewRouteImport
-      parentRoute: typeof ControlCenterTorqwingsDesignStudioRoute
+      fullPath: '/mission-hub/torqwings-design-studio/new'
+      preLoaderRoute: typeof MissionHubTorqwingsDesignStudioNewRouteImport
+      parentRoute: typeof MissionHubTorqwingsDesignStudioRoute
     }
-    '/control-center/torqwings-design-studio/history': {
-      id: '/control-center/torqwings-design-studio/history'
+    '/mission-hub/torqwings-design-studio/history': {
+      id: '/mission-hub/torqwings-design-studio/history'
       path: '/history'
-      fullPath: '/control-center/torqwings-design-studio/history'
-      preLoaderRoute: typeof ControlCenterTorqwingsDesignStudioHistoryRouteImport
-      parentRoute: typeof ControlCenterTorqwingsDesignStudioRoute
+      fullPath: '/mission-hub/torqwings-design-studio/history'
+      preLoaderRoute: typeof MissionHubTorqwingsDesignStudioHistoryRouteImport
+      parentRoute: typeof MissionHubTorqwingsDesignStudioRoute
     }
-    '/control-center/torqwings-design-studio/design': {
-      id: '/control-center/torqwings-design-studio/design'
+    '/mission-hub/torqwings-design-studio/design': {
+      id: '/mission-hub/torqwings-design-studio/design'
       path: '/design'
-      fullPath: '/control-center/torqwings-design-studio/design'
-      preLoaderRoute: typeof ControlCenterTorqwingsDesignStudioDesignRouteImport
-      parentRoute: typeof ControlCenterTorqwingsDesignStudioRoute
+      fullPath: '/mission-hub/torqwings-design-studio/design'
+      preLoaderRoute: typeof MissionHubTorqwingsDesignStudioDesignRouteImport
+      parentRoute: typeof MissionHubTorqwingsDesignStudioRoute
     }
-    '/control-center/torqwings-design-studio/components': {
-      id: '/control-center/torqwings-design-studio/components'
+    '/mission-hub/torqwings-design-studio/components': {
+      id: '/mission-hub/torqwings-design-studio/components'
       path: '/components'
-      fullPath: '/control-center/torqwings-design-studio/components'
-      preLoaderRoute: typeof ControlCenterTorqwingsDesignStudioComponentsRouteImport
-      parentRoute: typeof ControlCenterTorqwingsDesignStudioRoute
+      fullPath: '/mission-hub/torqwings-design-studio/components'
+      preLoaderRoute: typeof MissionHubTorqwingsDesignStudioComponentsRouteImport
+      parentRoute: typeof MissionHubTorqwingsDesignStudioRoute
     }
-    '/control-center/torqwings-design-studio/compliance': {
-      id: '/control-center/torqwings-design-studio/compliance'
+    '/mission-hub/torqwings-design-studio/compliance': {
+      id: '/mission-hub/torqwings-design-studio/compliance'
       path: '/compliance'
-      fullPath: '/control-center/torqwings-design-studio/compliance'
-      preLoaderRoute: typeof ControlCenterTorqwingsDesignStudioComplianceRouteImport
-      parentRoute: typeof ControlCenterTorqwingsDesignStudioRoute
+      fullPath: '/mission-hub/torqwings-design-studio/compliance'
+      preLoaderRoute: typeof MissionHubTorqwingsDesignStudioComplianceRouteImport
+      parentRoute: typeof MissionHubTorqwingsDesignStudioRoute
     }
-    '/control-center/torqwings-design-studio/advisor': {
-      id: '/control-center/torqwings-design-studio/advisor'
+    '/mission-hub/torqwings-design-studio/advisor': {
+      id: '/mission-hub/torqwings-design-studio/advisor'
       path: '/advisor'
-      fullPath: '/control-center/torqwings-design-studio/advisor'
-      preLoaderRoute: typeof ControlCenterTorqwingsDesignStudioAdvisorRouteImport
-      parentRoute: typeof ControlCenterTorqwingsDesignStudioRoute
+      fullPath: '/mission-hub/torqwings-design-studio/advisor'
+      preLoaderRoute: typeof MissionHubTorqwingsDesignStudioAdvisorRouteImport
+      parentRoute: typeof MissionHubTorqwingsDesignStudioRoute
     }
   }
 }
@@ -1231,6 +1150,51 @@ const LayoutRouteChildren: LayoutRouteChildren = {
 const LayoutRouteWithChildren =
   LayoutRoute._addFileChildren(LayoutRouteChildren)
 
+interface MissionHubTorqwingsDesignStudioRouteChildren {
+  MissionHubTorqwingsDesignStudioAdvisorRoute: typeof MissionHubTorqwingsDesignStudioAdvisorRoute
+  MissionHubTorqwingsDesignStudioComplianceRoute: typeof MissionHubTorqwingsDesignStudioComplianceRoute
+  MissionHubTorqwingsDesignStudioComponentsRoute: typeof MissionHubTorqwingsDesignStudioComponentsRoute
+  MissionHubTorqwingsDesignStudioDesignRoute: typeof MissionHubTorqwingsDesignStudioDesignRoute
+  MissionHubTorqwingsDesignStudioHistoryRoute: typeof MissionHubTorqwingsDesignStudioHistoryRoute
+  MissionHubTorqwingsDesignStudioNewRoute: typeof MissionHubTorqwingsDesignStudioNewRoute
+  MissionHubTorqwingsDesignStudioReportRoute: typeof MissionHubTorqwingsDesignStudioReportRoute
+  MissionHubTorqwingsDesignStudioRequirementsRoute: typeof MissionHubTorqwingsDesignStudioRequirementsRoute
+  MissionHubTorqwingsDesignStudioSimulationRoute: typeof MissionHubTorqwingsDesignStudioSimulationRoute
+  MissionHubTorqwingsDesignStudioSmeBrainRoute: typeof MissionHubTorqwingsDesignStudioSmeBrainRoute
+  MissionHubTorqwingsDesignStudioIndexRoute: typeof MissionHubTorqwingsDesignStudioIndexRoute
+}
+
+const MissionHubTorqwingsDesignStudioRouteChildren: MissionHubTorqwingsDesignStudioRouteChildren =
+  {
+    MissionHubTorqwingsDesignStudioAdvisorRoute:
+      MissionHubTorqwingsDesignStudioAdvisorRoute,
+    MissionHubTorqwingsDesignStudioComplianceRoute:
+      MissionHubTorqwingsDesignStudioComplianceRoute,
+    MissionHubTorqwingsDesignStudioComponentsRoute:
+      MissionHubTorqwingsDesignStudioComponentsRoute,
+    MissionHubTorqwingsDesignStudioDesignRoute:
+      MissionHubTorqwingsDesignStudioDesignRoute,
+    MissionHubTorqwingsDesignStudioHistoryRoute:
+      MissionHubTorqwingsDesignStudioHistoryRoute,
+    MissionHubTorqwingsDesignStudioNewRoute:
+      MissionHubTorqwingsDesignStudioNewRoute,
+    MissionHubTorqwingsDesignStudioReportRoute:
+      MissionHubTorqwingsDesignStudioReportRoute,
+    MissionHubTorqwingsDesignStudioRequirementsRoute:
+      MissionHubTorqwingsDesignStudioRequirementsRoute,
+    MissionHubTorqwingsDesignStudioSimulationRoute:
+      MissionHubTorqwingsDesignStudioSimulationRoute,
+    MissionHubTorqwingsDesignStudioSmeBrainRoute:
+      MissionHubTorqwingsDesignStudioSmeBrainRoute,
+    MissionHubTorqwingsDesignStudioIndexRoute:
+      MissionHubTorqwingsDesignStudioIndexRoute,
+  }
+
+const MissionHubTorqwingsDesignStudioRouteWithChildren =
+  MissionHubTorqwingsDesignStudioRoute._addFileChildren(
+    MissionHubTorqwingsDesignStudioRouteChildren,
+  )
+
 interface MissionHubRouteChildren {
   MissionHubContactsRoute: typeof MissionHubContactsRoute
   MissionHubDashboardRoute: typeof MissionHubDashboardRoute
@@ -1239,6 +1203,7 @@ interface MissionHubRouteChildren {
   MissionHubLoginRoute: typeof MissionHubLoginRoute
   MissionHubResetPasswordRoute: typeof MissionHubResetPasswordRoute
   MissionHubSettingsRoute: typeof MissionHubSettingsRoute
+  MissionHubTorqwingsDesignStudioRoute: typeof MissionHubTorqwingsDesignStudioRouteWithChildren
   MissionHubTwbcDroneApprovalRoute: typeof MissionHubTwbcDroneApprovalRoute
   MissionHubTwbcDroneComponentsLibraryRoute: typeof MissionHubTwbcDroneComponentsLibraryRoute
   MissionHubTwbcDroneDesignRulesRoute: typeof MissionHubTwbcDroneDesignRulesRoute
@@ -1263,6 +1228,8 @@ const MissionHubRouteChildren: MissionHubRouteChildren = {
   MissionHubLoginRoute: MissionHubLoginRoute,
   MissionHubResetPasswordRoute: MissionHubResetPasswordRoute,
   MissionHubSettingsRoute: MissionHubSettingsRoute,
+  MissionHubTorqwingsDesignStudioRoute:
+    MissionHubTorqwingsDesignStudioRouteWithChildren,
   MissionHubTwbcDroneApprovalRoute: MissionHubTwbcDroneApprovalRoute,
   MissionHubTwbcDroneComponentsLibraryRoute:
     MissionHubTwbcDroneComponentsLibraryRoute,
@@ -1308,63 +1275,12 @@ const PilotRouteChildren: PilotRouteChildren = {
 
 const PilotRouteWithChildren = PilotRoute._addFileChildren(PilotRouteChildren)
 
-interface ControlCenterTorqwingsDesignStudioRouteChildren {
-  ControlCenterTorqwingsDesignStudioAdvisorRoute: typeof ControlCenterTorqwingsDesignStudioAdvisorRoute
-  ControlCenterTorqwingsDesignStudioComplianceRoute: typeof ControlCenterTorqwingsDesignStudioComplianceRoute
-  ControlCenterTorqwingsDesignStudioComponentsRoute: typeof ControlCenterTorqwingsDesignStudioComponentsRoute
-  ControlCenterTorqwingsDesignStudioDesignRoute: typeof ControlCenterTorqwingsDesignStudioDesignRoute
-  ControlCenterTorqwingsDesignStudioHistoryRoute: typeof ControlCenterTorqwingsDesignStudioHistoryRoute
-  ControlCenterTorqwingsDesignStudioNewRoute: typeof ControlCenterTorqwingsDesignStudioNewRoute
-  ControlCenterTorqwingsDesignStudioReportRoute: typeof ControlCenterTorqwingsDesignStudioReportRoute
-  ControlCenterTorqwingsDesignStudioRequirementsRoute: typeof ControlCenterTorqwingsDesignStudioRequirementsRoute
-  ControlCenterTorqwingsDesignStudioSimulationRoute: typeof ControlCenterTorqwingsDesignStudioSimulationRoute
-  ControlCenterTorqwingsDesignStudioSmeBrainRoute: typeof ControlCenterTorqwingsDesignStudioSmeBrainRoute
-  ControlCenterTorqwingsDesignStudioIndexRoute: typeof ControlCenterTorqwingsDesignStudioIndexRoute
-}
-
-const ControlCenterTorqwingsDesignStudioRouteChildren: ControlCenterTorqwingsDesignStudioRouteChildren =
-  {
-    ControlCenterTorqwingsDesignStudioAdvisorRoute:
-      ControlCenterTorqwingsDesignStudioAdvisorRoute,
-    ControlCenterTorqwingsDesignStudioComplianceRoute:
-      ControlCenterTorqwingsDesignStudioComplianceRoute,
-    ControlCenterTorqwingsDesignStudioComponentsRoute:
-      ControlCenterTorqwingsDesignStudioComponentsRoute,
-    ControlCenterTorqwingsDesignStudioDesignRoute:
-      ControlCenterTorqwingsDesignStudioDesignRoute,
-    ControlCenterTorqwingsDesignStudioHistoryRoute:
-      ControlCenterTorqwingsDesignStudioHistoryRoute,
-    ControlCenterTorqwingsDesignStudioNewRoute:
-      ControlCenterTorqwingsDesignStudioNewRoute,
-    ControlCenterTorqwingsDesignStudioReportRoute:
-      ControlCenterTorqwingsDesignStudioReportRoute,
-    ControlCenterTorqwingsDesignStudioRequirementsRoute:
-      ControlCenterTorqwingsDesignStudioRequirementsRoute,
-    ControlCenterTorqwingsDesignStudioSimulationRoute:
-      ControlCenterTorqwingsDesignStudioSimulationRoute,
-    ControlCenterTorqwingsDesignStudioSmeBrainRoute:
-      ControlCenterTorqwingsDesignStudioSmeBrainRoute,
-    ControlCenterTorqwingsDesignStudioIndexRoute:
-      ControlCenterTorqwingsDesignStudioIndexRoute,
-  }
-
-const ControlCenterTorqwingsDesignStudioRouteWithChildren =
-  ControlCenterTorqwingsDesignStudioRoute._addFileChildren(
-    ControlCenterTorqwingsDesignStudioRouteChildren,
-  )
-
 const rootRouteChildren: RootRouteChildren = {
   LayoutRoute: LayoutRouteWithChildren,
   FieldRoute: FieldRoute,
   MissionHubRoute: MissionHubRouteWithChildren,
   PilotRoute: PilotRouteWithChildren,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
-  ControlCenterAgriskyRoute: ControlCenterAgriskyRoute,
-  ControlCenterLoginRoute: ControlCenterLoginRoute,
-  ControlCenterTorqwingsDesignStudioRoute:
-    ControlCenterTorqwingsDesignStudioRouteWithChildren,
-  ControlCenterUsersRoute: ControlCenterUsersRoute,
-  ControlCenterIndexRoute: ControlCenterIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -3,12 +3,12 @@ import { Cpu, ListChecks, FlaskConical, Sparkles, FileText, ShieldAlert } from "
 import { cn } from "@/lib/utils";
 
 const steps = [
-  { to: "/control-center/torqwings-design-studio/design", label: "Design", icon: Cpu },
-  { to: "/control-center/torqwings-design-studio/components", label: "Components", icon: ListChecks },
-  { to: "/control-center/torqwings-design-studio/simulation", label: "Simulation", icon: FlaskConical },
-  { to: "/control-center/torqwings-design-studio/advisor", label: "Advisor", icon: Sparkles },
-  { to: "/control-center/torqwings-design-studio/compliance", label: "Compliance", icon: ShieldAlert },
-  { to: "/control-center/torqwings-design-studio/report", label: "Report", icon: FileText },
+  { to: "/mission-hub/torqwings-design-studio/design", label: "Design", icon: Cpu },
+  { to: "/mission-hub/torqwings-design-studio/components", label: "Components", icon: ListChecks },
+  { to: "/mission-hub/torqwings-design-studio/simulation", label: "Simulation", icon: FlaskConical },
+  { to: "/mission-hub/torqwings-design-studio/advisor", label: "Advisor", icon: Sparkles },
+  { to: "/mission-hub/torqwings-design-studio/compliance", label: "Compliance", icon: ShieldAlert },
+  { to: "/mission-hub/torqwings-design-studio/report", label: "Report", icon: FileText },
 ] as const;
 
 export function StudioStepNav() {

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Disclaimer } from "@/components/design-studio/sidebar";
 import { FilePlus, FlaskConical, Sparkles, FileText, ChevronRight, Inbox } from "lucide-react";
 
-export const Route = createFileRoute("/control-center/torqwings-design-studio/")({
+export const Route = createFileRoute("/mission-hub/torqwings-design-studio/")({
   component: Dashboard,
 });
 
@@ -64,16 +64,16 @@ function Dashboard() {
       </div>
 
       <div className="flex flex-wrap gap-2">
-        <Button onClick={() => nav({ to: "/control-center/torqwings-design-studio/new" })} className="bg-sky-500 hover:bg-sky-600 text-white">
+        <Button onClick={() => nav({ to: "/mission-hub/torqwings-design-studio/new" })} className="bg-sky-500 hover:bg-sky-600 text-white">
           <FilePlus className="h-4 w-4 mr-1" /> Create New Drone Design
         </Button>
-        <Button variant="outline" onClick={() => nav({ to: "/control-center/torqwings-design-studio/simulation" })}>
+        <Button variant="outline" onClick={() => nav({ to: "/mission-hub/torqwings-design-studio/simulation" })}>
           <FlaskConical className="h-4 w-4 mr-1" /> Open Simulation Lab
         </Button>
-        <Button variant="outline" onClick={() => nav({ to: "/control-center/torqwings-design-studio/advisor" })}>
+        <Button variant="outline" onClick={() => nav({ to: "/mission-hub/torqwings-design-studio/advisor" })}>
           <Sparkles className="h-4 w-4 mr-1" /> Ask AI Advisor
         </Button>
-        <Button variant="outline" onClick={() => nav({ to: "/control-center/torqwings-design-studio/report" })}>
+        <Button variant="outline" onClick={() => nav({ to: "/mission-hub/torqwings-design-studio/report" })}>
           <FileText className="h-4 w-4 mr-1" /> View Reports
         </Button>
       </div>
@@ -122,7 +122,7 @@ function Dashboard() {
                       </td>
                       <td className="px-4 py-3">
                         <Link
-                          to="/control-center/torqwings-design-studio/design"
+                          to="/mission-hub/torqwings-design-studio/design"
                           onClick={() => {
                             if (typeof window !== "undefined") {
                               window.sessionStorage.setItem("torqwings-studio:selected", r.id);

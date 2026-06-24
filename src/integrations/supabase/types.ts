@@ -428,6 +428,7 @@ export type Database = {
           confidence_score: number
           engineer_notes: string | null
           approval_status: string
+          approved_by: string | null
           is_active: boolean
           created_by: string | null
           created_at: string
@@ -447,6 +448,7 @@ export type Database = {
           confidence_score?: number
           engineer_notes?: string | null
           approval_status?: string
+          approved_by?: string | null
           is_active?: boolean
           created_by?: string | null
           created_at?: string
@@ -466,6 +468,7 @@ export type Database = {
           confidence_score?: number
           engineer_notes?: string | null
           approval_status?: string
+          approved_by?: string | null
           is_active?: boolean
           created_by?: string | null
           created_at?: string

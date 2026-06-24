@@ -8,7 +8,7 @@ import { buildComplianceReport, getStateRule, INDIAN_STATES } from "@/lib/design
 import { CheckCircle2, XCircle, ShieldAlert, MapPin, FileCheck2, Plane } from "lucide-react";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/control-center/torqwings-design-studio/compliance")({
+export const Route = createFileRoute("/mission-hub/torqwings-design-studio/compliance")({
   component: Compliance,
 });
 

@@ -12,7 +12,7 @@ import { StepPayload } from "@/components/design-studio/wizard/StepPayload";
 import { StepSafety }  from "@/components/design-studio/wizard/StepSafety";
 import { StepReview }  from "@/components/design-studio/wizard/StepReview";
 
-export const Route = createFileRoute("/control-center/torqwings-design-studio/new")({
+export const Route = createFileRoute("/mission-hub/torqwings-design-studio/new")({
   component: NewProjectWizard,
   ssr: false,
 });
@@ -40,7 +40,7 @@ function NewProjectWizard() {
           window.sessionStorage.setItem("torqwings-studio:selected", result.id);
         }
         toast.success("Project created! Generating design…");
-        nav({ to: "/control-center/torqwings-design-studio/design" });
+        nav({ to: "/mission-hub/torqwings-design-studio/design" });
       }
     } catch (err: any) {
       toast.error(err?.message ?? "Failed to save project.");

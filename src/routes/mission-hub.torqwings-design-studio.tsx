@@ -7,7 +7,7 @@ import { Plane, ArrowLeft } from "lucide-react";
 import { MissionHubAuthProvider, useMissionHubAuth } from "@/lib/mission-hub/context";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/control-center/torqwings-design-studio")({
+export const Route = createFileRoute("/mission-hub/torqwings-design-studio")({
   ssr: false,
   head: () => ({ meta: [{ title: "TorqWings Design Studio" }] }),
   component: StudioRoot,

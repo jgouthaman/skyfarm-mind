@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Disclaimer } from "@/components/design-studio/sidebar";
 import { Sparkles, Send } from "lucide-react";
 
-export const Route = createFileRoute("/control-center/torqwings-design-studio/advisor")({
+export const Route = createFileRoute("/mission-hub/torqwings-design-studio/advisor")({
   component: Advisor,
 });
 

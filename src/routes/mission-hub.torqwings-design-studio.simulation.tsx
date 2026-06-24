@@ -16,7 +16,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Info } from "lucide-react";
 
-export const Route = createFileRoute("/control-center/torqwings-design-studio/simulation")({
+export const Route = createFileRoute("/mission-hub/torqwings-design-studio/simulation")({
   component: SimulationLab,
   ssr: false,
 });
@@ -72,7 +72,7 @@ function SimulationLab() {
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => setParams(initial)}>Reset</Button>
-          <Button variant="outline" onClick={() => nav({ to: "/control-center/torqwings-design-studio/advisor" })}>Ask AI Advisor</Button>
+          <Button variant="outline" onClick={() => nav({ to: "/mission-hub/torqwings-design-studio/advisor" })}>Ask AI Advisor</Button>
           <Button onClick={save} className="bg-sky-500 hover:bg-sky-600 text-white">Save Simulation</Button>
         </div>
       </header>

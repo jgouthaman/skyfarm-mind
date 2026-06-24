@@ -93,5 +93,23 @@ export function useReferenceDesigns(search: string, verticalFilter: string[]) {
     setTick((t) => t + 1);
   }, []);
 
-  return { designs, loading, error, stats, insert };
+  const approveDesign = useCallback(async (id: string, userId: string) => {
+    const { error: upErr } = await supabase
+      .from("reference_designs")
+      .update({ approval_status: "approved", approved_by: userId })
+      .eq("id", id);
+    if (upErr) throw new Error(upErr.message);
+    setTick((t) => t + 1);
+  }, []);
+
+  const rejectDesign = useCallback(async (id: string, userId: string) => {
+    const { error: upErr } = await supabase
+      .from("reference_designs")
+      .update({ approval_status: "rejected", approved_by: userId })
+      .eq("id", id);
+    if (upErr) throw new Error(upErr.message);
+    setTick((t) => t + 1);
+  }, []);
+
+  return { designs, loading, error, stats, insert, approveDesign, rejectDesign };
 }

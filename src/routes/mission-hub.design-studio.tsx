@@ -51,7 +51,7 @@ function LaunchBanner() {
       </div>
       <div className="flex gap-2">
         <Link
-          to="/control-center/torqwings-design-studio/new"
+          to="/mission-hub/torqwings-design-studio/new"
           className="inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-[13px] text-white"
           style={{ background: "#185FA5" }}
         >
@@ -193,7 +193,7 @@ function MyProjects({ isAdmin, userId }: { isAdmin: boolean; userId: string }) {
                       <td className="px-4 py-3 text-[12px] text-white/60">{new Date(r.updated_at).toLocaleDateString()}</td>
                       <td className="px-4 py-3 text-right">
                         <Link
-                          to="/control-center/torqwings-design-studio"
+                          to="/mission-hub/torqwings-design-studio"
                           className="text-[12px] text-[#378ADD] inline-flex items-center gap-1"
                           onClick={() => {
                             if (typeof window !== "undefined") {

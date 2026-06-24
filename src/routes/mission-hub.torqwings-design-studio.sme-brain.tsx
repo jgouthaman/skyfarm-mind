@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Brain } from "lucide-react";
 import { useMissionHubAuth } from "@/lib/mission-hub/context";
+import { supabase } from "@/integrations/supabase/client";
 import {
   fetchDesignRules,
   insertDesignRule,
@@ -13,8 +14,17 @@ import { RuleForm } from "@/components/design-studio/sme/RuleForm";
 import { RuleDetailModal } from "@/components/design-studio/sme/RuleDetailModal";
 import type { DesignRule, DesignRuleInsert } from "@/lib/design-studio/sme-types";
 
+const VERTICAL_MAP: Record<string, string | null> = {
+  "AgriSky":        "agriculture",
+  "InfraSky":       "infrastructure",
+  "GeoSky":         "mapping",
+  "GuardSky":       "surveillance",
+  "TorqWings Labs": "industrial",
+  "Academy":        null,
+};
+
 export const Route = createFileRoute(
-  "/control-center/torqwings-design-studio/sme-brain",
+  "/mission-hub/torqwings-design-studio/sme-brain",
 )({ component: SmeBrainPage });
 
 function SmeBrainPage() {
@@ -34,10 +44,10 @@ function SmeBrainPage() {
     );
   }
 
-  return <SmeBrainContent engineerName={engineerName} />;
+  return <SmeBrainContent engineerName={engineerName} userId={profile!.id} />;
 }
 
-function SmeBrainContent({ engineerName }: { engineerName: string }) {
+function SmeBrainContent({ engineerName, userId }: { engineerName: string; userId: string }) {
   const [rules, setRules]             = useState<DesignRule[]>([]);
   const [loadingRules, setLoading]    = useState(true);
   const [saving, setSaving]           = useState(false);
@@ -87,6 +97,31 @@ function SmeBrainContent({ engineerName }: { engineerName: string }) {
     setEditingRule(rule);
     setSelected(null);
     window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handlePromote = async (rule: DesignRule) => {
+    const droneLabel = rule.drone_type ?? "Drone";
+    const payloadPart = rule.payload_max_kg != null ? ` Payload up to ${rule.payload_max_kg} kg.` : "";
+    const noteParts = [rule.engineering_notes, "Reference: see real-world implementation (link TBD)"].filter(Boolean);
+
+    const { error } = await supabase.from("reference_designs").insert({
+      name:                  rule.purpose,
+      purpose:               rule.purpose,
+      description:           `${droneLabel} for ${rule.purpose}.${payloadPart}`,
+      vertical:              VERTICAL_MAP[rule.vertical] ?? null,
+      drone_type:            rule.drone_type ?? null,
+      frame_size:            rule.frame_size ?? null,
+      motor_class:           rule.motor_class ?? null,
+      battery:               rule.battery ?? null,
+      estimated_flight_time: rule.flight_time_min ?? null,
+      payload_weight:        rule.payload_max_kg,
+      confidence_score:      rule.confidence_level != null ? rule.confidence_level * 20 : 60,
+      engineer_notes:        noteParts.length > 0 ? noteParts.join("\n") : null,
+      approval_status:       "pending",
+      created_by:            userId,
+    });
+    if (error) throw new Error(error.message);
+    toast.success("Promoted to Proven Designs (pending review)");
   };
 
   const stars = (n: number | null) => {
@@ -237,6 +272,7 @@ function SmeBrainContent({ engineerName }: { engineerName: string }) {
         onClose={() => setSelected(null)}
         onEdit={handleEdit}
         onDelete={handleDelete}
+        onPromote={handlePromote}
       />
     </div>
   );

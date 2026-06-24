@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/control-center/torqwings-design-studio/requirements")({
+export const Route = createFileRoute("/mission-hub/torqwings-design-studio/requirements")({
   component: RequirementsWizard,
 });
 
@@ -33,7 +33,7 @@ function RequirementsWizard() {
     return (
       <div className="space-y-4">
         <p className="text-sm text-muted-foreground">No active project. Create one to capture requirements.</p>
-        <Button asChild><Link to="/control-center/torqwings-design-studio/new">Create project</Link></Button>
+        <Button asChild><Link to="/mission-hub/torqwings-design-studio/new">Create project</Link></Button>
       </div>
     );
   }
@@ -61,7 +61,7 @@ function RequirementsWizard() {
       riskLevel: design.riskLevel, status: "Designed",
     });
     toast.success("Drone design generated");
-    nav({ to: "/control-center/torqwings-design-studio/design" });
+    nav({ to: "/mission-hub/torqwings-design-studio/design" });
   }
 
   return (

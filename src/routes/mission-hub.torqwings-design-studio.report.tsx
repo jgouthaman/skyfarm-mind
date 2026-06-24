@@ -8,7 +8,7 @@ import { riskColor } from "@/lib/design-studio/engine";
 
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/control-center/torqwings-design-studio/report")({
+export const Route = createFileRoute("/mission-hub/torqwings-design-studio/report")({
   component: Report,
 });
 

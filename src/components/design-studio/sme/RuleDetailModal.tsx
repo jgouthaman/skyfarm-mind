@@ -1,11 +1,14 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { ArrowUpCircle, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import type { DesignRule } from "@/lib/design-studio/sme-types";
 
 interface Props {
-  rule:     DesignRule | null;
-  onClose:  () => void;
-  onEdit:   (rule: DesignRule) => void;
-  onDelete: (id: string) => void;
+  rule:      DesignRule | null;
+  onClose:   () => void;
+  onEdit:    (rule: DesignRule) => void;
+  onDelete:  (id: string) => void;
+  onPromote?: (rule: DesignRule) => Promise<void>;
 }
 
 function SpecCard({ label, value }: { label: string; value: string }) {
@@ -17,7 +20,9 @@ function SpecCard({ label, value }: { label: string; value: string }) {
   );
 }
 
-export function RuleDetailModal({ rule, onClose, onEdit, onDelete }: Props) {
+export function RuleDetailModal({ rule, onClose, onEdit, onDelete, onPromote }: Props) {
+  const [promoting, setPromoting] = useState(false);
+
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
     document.addEventListener("keydown", handler);
@@ -25,6 +30,18 @@ export function RuleDetailModal({ rule, onClose, onEdit, onDelete }: Props) {
   }, [onClose]);
 
   if (!rule) return null;
+
+  const handlePromote = async () => {
+    if (!onPromote || promoting) return;
+    setPromoting(true);
+    try {
+      await onPromote(rule);
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : "Promote failed.");
+    } finally {
+      setPromoting(false);
+    }
+  };
 
   const confStars = () => {
     const v = rule.confidence_level ?? 0;
@@ -160,7 +177,7 @@ export function RuleDetailModal({ rule, onClose, onEdit, onDelete }: Props) {
         )}
 
         {/* Footer */}
-        <div className="flex justify-between mt-8 pt-4 border-t border-white/[0.08]">
+        <div className="flex flex-wrap items-center justify-between gap-3 mt-8 pt-4 border-t border-white/[0.08]">
           <button
             type="button"
             onClick={() => {
@@ -172,13 +189,34 @@ export function RuleDetailModal({ rule, onClose, onEdit, onDelete }: Props) {
           >
             Delete
           </button>
-          <button
-            type="button"
-            onClick={() => onEdit(rule)}
-            className="bg-[#378ADD] text-white h-9 px-6 rounded-lg text-sm hover:opacity-90 transition-opacity"
-          >
-            Edit
-          </button>
+
+          <div className="flex items-center gap-2 ml-auto">
+            {onPromote && (
+              <button
+                type="button"
+                onClick={handlePromote}
+                disabled={promoting}
+                className="inline-flex items-center gap-2 h-9 px-5 rounded-lg text-sm transition-colors disabled:opacity-50"
+                style={{
+                  background: "rgba(20,184,166,0.12)",
+                  color: "#2dd4bf",
+                  border: "0.5px solid rgba(20,184,166,0.3)",
+                }}
+              >
+                {promoting
+                  ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  : <ArrowUpCircle className="h-3.5 w-3.5" />}
+                Promote to Proven Design
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => onEdit(rule)}
+              className="bg-[#378ADD] text-white h-9 px-6 rounded-lg text-sm hover:opacity-90 transition-opacity"
+            >
+              Edit
+            </button>
+          </div>
         </div>
       </div>
     </div>

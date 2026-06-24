@@ -1,12 +1,12 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 
 const tabs = [
-  { label: "Design Result",   href: "/control-center/torqwings-design-studio/design" },
-  { label: "Component List",  href: "/control-center/torqwings-design-studio/components" },
-  { label: "Simulation Lab",  href: "/control-center/torqwings-design-studio/simulation" },
-  { label: "AI Advisor",      href: "/control-center/torqwings-design-studio/advisor" },
-  { label: "Reports",         href: "/control-center/torqwings-design-studio/report" },
-  { label: "Project History", href: "/control-center/torqwings-design-studio/history" },
+  { label: "Design Result",   href: "/mission-hub/torqwings-design-studio/design" },
+  { label: "Component List",  href: "/mission-hub/torqwings-design-studio/components" },
+  { label: "Simulation Lab",  href: "/mission-hub/torqwings-design-studio/simulation" },
+  { label: "AI Advisor",      href: "/mission-hub/torqwings-design-studio/advisor" },
+  { label: "Reports",         href: "/mission-hub/torqwings-design-studio/report" },
+  { label: "Project History", href: "/mission-hub/torqwings-design-studio/history" },
 ];
 
 export function StudioTabNav() {

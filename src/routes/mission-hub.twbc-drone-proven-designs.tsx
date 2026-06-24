@@ -67,7 +67,10 @@ function ProvenDesignsContent() {
   const [modalOpen, setModalOpen] = useState(false);
   const [viewTarget, setViewTarget] = useState<ReferenceDesign | null>(null);
 
-  const { designs, loading, error, stats, insert } = useReferenceDesigns(search, activeVerticals.map((v) => v.toLowerCase()));
+  const { designs, loading, error, stats, insert, approveDesign, rejectDesign } = useReferenceDesigns(search, activeVerticals.map((v) => v.toLowerCase()));
+  const isAdmin = profile?.role === "admin" || profile?.role === "super_admin";
+  const [pendingOnly, setPendingOnly] = useState(false);
+  const displayedDesigns = pendingOnly ? designs.filter((d) => d.approval_status === "pending") : designs;
 
   const toggleVertical = (v: VerticalKey) =>
     setActiveVerticals((prev) =>
@@ -163,6 +166,20 @@ function ProvenDesignsContent() {
               Clear
             </button>
           )}
+          {isAdmin && (
+            <button
+              onClick={() => setPendingOnly((p) => !p)}
+              className="rounded-full px-3 py-1 text-[12px] border transition-all inline-flex items-center gap-1"
+              style={
+                pendingOnly
+                  ? { background: "rgba(245,158,11,0.12)", color: "#fbbf24", borderColor: "#fbbf2455" }
+                  : { background: "transparent", color: "rgba(255,255,255,0.4)", borderColor: "rgba(255,255,255,0.12)" }
+              }
+            >
+              <Clock className="h-3 w-3" />
+              Pending review
+            </button>
+          )}
         </div>
       </div>
 
@@ -181,18 +198,21 @@ function ProvenDesignsContent() {
         <div className="text-center py-20">
           <p className="text-[13px] text-[#f87171]">{error}</p>
         </div>
-      ) : designs.length === 0 ? (
+      ) : displayedDesigns.length === 0 ? (
         <div className="text-center py-20 text-white/30">
           <p className="text-sm">No designs match your filters.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-          {designs.map((d) => (
+          {displayedDesigns.map((d) => (
             <DesignCard
               key={d.id}
               design={d}
+              isAdmin={isAdmin}
               onView={() => setViewTarget(d)}
               onUseAsBase={() => { setViewTarget(null); setModalOpen(true); }}
+              onApprove={isAdmin ? async () => approveDesign(d.id, profile!.id) : undefined}
+              onReject={isAdmin ? async () => rejectDesign(d.id, profile!.id) : undefined}
             />
           ))}
         </div>
@@ -207,8 +227,15 @@ function ProvenDesignsContent() {
       {viewTarget && (
         <ViewDesignModal
           design={viewTarget}
+          isAdmin={isAdmin}
           onClose={() => setViewTarget(null)}
           onUseAsBase={() => { setViewTarget(null); setModalOpen(true); }}
+          onApprove={isAdmin && viewTarget.approval_status === "pending"
+            ? async () => { await approveDesign(viewTarget.id, profile!.id); setViewTarget(null); }
+            : undefined}
+          onReject={isAdmin && viewTarget.approval_status === "pending"
+            ? async () => { await rejectDesign(viewTarget.id, profile!.id); setViewTarget(null); }
+            : undefined}
         />
       )}
     </div>
@@ -237,12 +264,21 @@ function StatCard({ label, value, accent }: { label: string; value: number; acce
 // ─── Design card ───────────────────────────────────────────────────────────────
 
 function DesignCard({
-  design, onView, onUseAsBase,
+  design, onView, onUseAsBase, isAdmin, onApprove, onReject,
 }: {
   design: ReferenceDesign;
   onView: () => void;
   onUseAsBase: () => void;
+  isAdmin?: boolean;
+  onApprove?: () => Promise<void>;
+  onReject?: () => Promise<void>;
 }) {
+  const [acting, setActing] = useState(false);
+  const act = async (fn: () => Promise<void>) => {
+    setActing(true);
+    try { await fn(); } finally { setActing(false); }
+  };
+
   const scoreColor =
     design.confidence_score >= 80 ? "#4ade80"
     : design.confidence_score >= 60 ? "#fbbf24"
@@ -313,6 +349,30 @@ function DesignCard({
           <Copy className="h-3.5 w-3.5" /> Use as base
         </button>
       </div>
+
+      {/* Admin approval actions — only for pending designs */}
+      {isAdmin && design.approval_status === "pending" && onApprove && onReject && (
+        <div className="flex gap-2">
+          <button
+            onClick={() => act(onApprove)}
+            disabled={acting}
+            className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-lg py-2 text-[12px] transition-colors disabled:opacity-50"
+            style={{ background: "rgba(34,197,94,0.12)", color: "#4ade80" }}
+          >
+            {acting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <CheckCircle2 className="h-3.5 w-3.5" />}
+            Approve
+          </button>
+          <button
+            onClick={() => act(onReject)}
+            disabled={acting}
+            className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-lg py-2 text-[12px] transition-colors disabled:opacity-50"
+            style={{ background: "rgba(239,68,68,0.12)", color: "#f87171" }}
+          >
+            {acting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <XCircle className="h-3.5 w-3.5" />}
+            Reject
+          </button>
+        </div>
+      )}
     </div>
   );
 }
@@ -320,12 +380,21 @@ function DesignCard({
 // ─── View modal ────────────────────────────────────────────────────────────────
 
 function ViewDesignModal({
-  design, onClose, onUseAsBase,
+  design, onClose, onUseAsBase, isAdmin, onApprove, onReject,
 }: {
   design: ReferenceDesign;
   onClose: () => void;
   onUseAsBase: () => void;
+  isAdmin?: boolean;
+  onApprove?: () => Promise<void>;
+  onReject?: () => Promise<void>;
 }) {
+  const [acting, setActing] = useState(false);
+  const act = async (fn: () => Promise<void>) => {
+    setActing(true);
+    try { await fn(); } finally { setActing(false); }
+  };
+
   useEffect(() => {
     const h = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
     document.addEventListener("keydown", h);
@@ -390,6 +459,29 @@ function ViewDesignModal({
               {design.engineer_notes}
             </p>
           </>
+        )}
+
+        {isAdmin && design.approval_status === "pending" && onApprove && onReject && (
+          <div className="flex gap-3 mb-5">
+            <button
+              onClick={() => act(onApprove)}
+              disabled={acting}
+              className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg py-2.5 text-[13px] transition-colors disabled:opacity-50"
+              style={{ background: "rgba(34,197,94,0.12)", color: "#4ade80", border: "0.5px solid rgba(74,222,128,0.2)" }}
+            >
+              {acting ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
+              Approve design
+            </button>
+            <button
+              onClick={() => act(onReject)}
+              disabled={acting}
+              className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg py-2.5 text-[13px] transition-colors disabled:opacity-50"
+              style={{ background: "rgba(239,68,68,0.12)", color: "#f87171", border: "0.5px solid rgba(248,113,113,0.2)" }}
+            >
+              {acting ? <Loader2 className="h-4 w-4 animate-spin" /> : <XCircle className="h-4 w-4" />}
+              Reject design
+            </button>
+          </div>
         )}
 
         <div className="flex justify-between items-center pt-4 border-t" style={{ borderColor: "rgba(255,255,255,0.08)" }}>

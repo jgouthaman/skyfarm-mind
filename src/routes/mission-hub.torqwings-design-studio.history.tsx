@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { riskColor } from "@/lib/design-studio/engine";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/control-center/torqwings-design-studio/history")({
+export const Route = createFileRoute("/mission-hub/torqwings-design-studio/history")({
   component: History,
 });
 
@@ -39,7 +39,7 @@ function History() {
                   <td className="px-4 py-2.5"><span className="text-xs px-2 py-0.5 rounded-full bg-muted/40 border border-border">{p.status}</span></td>
                   <td className="px-4 py-2.5">
                     <div className="flex gap-1.5">
-                      <Button asChild size="sm" variant="outline" onClick={() => studioActions.select(p.id)}><Link to="/control-center/torqwings-design-studio/design">Open</Link></Button>
+                      <Button asChild size="sm" variant="outline" onClick={() => studioActions.select(p.id)}><Link to="/mission-hub/torqwings-design-studio/design">Open</Link></Button>
                       <Button size="sm" variant="outline" onClick={() => { studioActions.duplicate(p.id); toast.success("Duplicated"); }}>Duplicate</Button>
                       <Button size="sm" variant="outline" onClick={() => { if (confirm("Delete?")) { studioActions.remove(p.id); toast.success("Deleted"); } }}>Delete</Button>
                     </div>

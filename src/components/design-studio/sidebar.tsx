@@ -5,8 +5,8 @@ import { useMissionHubAuth } from "@/lib/mission-hub/context";
 
 type Item = { to: string; label: string; icon: typeof LayoutDashboard; exact?: boolean };
 const items: Item[] = [
-  { to: "/control-center/torqwings-design-studio", label: "Dashboard", icon: LayoutDashboard, exact: true },
-  { to: "/control-center/torqwings-design-studio/new", label: "New Design", icon: FilePlus },
+  { to: "/mission-hub/torqwings-design-studio", label: "Dashboard", icon: LayoutDashboard, exact: true },
+  { to: "/mission-hub/torqwings-design-studio/new", label: "New Design", icon: FilePlus },
 ];
 
 export function StudioSidebar() {
@@ -15,7 +15,7 @@ export function StudioSidebar() {
   const isAdmin = profile?.role === "admin" || profile?.role === "super_admin";
   return (
     <aside className="w-60 shrink-0 border-r border-border/60 bg-card/50 backdrop-blur p-3 flex flex-col gap-1 min-h-screen">
-      <Link to="/control-center/torqwings-design-studio" className="flex items-center gap-2 px-2 py-3 mb-2">
+      <Link to="/mission-hub/torqwings-design-studio" className="flex items-center gap-2 px-2 py-3 mb-2">
         <span className="grid place-items-center h-8 w-8 rounded-lg bg-gradient-to-br from-sky-500 to-indigo-600 shadow-lg">
           <Plane className="h-4 w-4 text-white" />
         </span>
@@ -38,10 +38,10 @@ export function StudioSidebar() {
       })}
       {isAdmin && (
         <Link
-          to="/control-center/torqwings-design-studio/sme-brain"
+          to="/mission-hub/torqwings-design-studio/sme-brain"
           className={cn(
             "flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors",
-            path.startsWith("/control-center/torqwings-design-studio/sme-brain")
+            path.startsWith("/mission-hub/torqwings-design-studio/sme-brain")
               ? "bg-primary/15 text-primary border border-primary/30"
               : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
           )}

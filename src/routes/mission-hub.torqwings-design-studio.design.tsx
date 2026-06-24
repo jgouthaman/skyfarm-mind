@@ -11,14 +11,14 @@ import { ShieldAlert, CheckCircle2, XCircle } from "lucide-react";
 import { StudioStepNav } from "@/components/design-studio/step-nav";
 import { StudioTabNav } from "@/components/design-studio/StudioTabNav";
 
-export const Route = createFileRoute("/control-center/torqwings-design-studio/design")({
+export const Route = createFileRoute("/mission-hub/torqwings-design-studio/design")({
   component: DesignResult,
 });
 
 function DesignResult() {
   const project = useCurrentProject();
   if (!project?.recommendedDesign) {
-    return <Empty msg="No design generated yet. Capture mission requirements first." cta="/control-center/torqwings-design-studio/requirements" ctaLabel="Open requirements" />;
+    return <Empty msg="No design generated yet. Capture mission requirements first." cta="/mission-hub/torqwings-design-studio/requirements" ctaLabel="Open requirements" />;
   }
   const d = project.recommendedDesign;
   const cards: Array<[string, string]> = [
@@ -134,7 +134,7 @@ function ComplianceCard() {
 
       <div className="flex justify-end">
         <Button asChild variant="outline" size="sm">
-          <Link to="/control-center/torqwings-design-studio/compliance">Open full compliance checklist →</Link>
+          <Link to="/mission-hub/torqwings-design-studio/compliance">Open full compliance checklist →</Link>
         </Button>
       </div>
     </div>

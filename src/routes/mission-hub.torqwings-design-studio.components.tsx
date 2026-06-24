@@ -6,7 +6,7 @@ import { useCurrentProject } from "@/lib/design-studio/store";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/control-center/torqwings-design-studio/components")({
+export const Route = createFileRoute("/mission-hub/torqwings-design-studio/components")({
   component: Components,
 });
 
@@ -30,7 +30,7 @@ function Components() {
     return (
       <div className="rounded-xl border border-border/60 bg-card/60 p-10 text-center">
         <p className="text-sm text-muted-foreground">No component list yet. Generate a design first.</p>
-        <Button asChild className="mt-4"><Link to="/control-center/torqwings-design-studio/requirements">Open requirements</Link></Button>
+        <Button asChild className="mt-4"><Link to="/mission-hub/torqwings-design-studio/requirements">Open requirements</Link></Button>
       </div>
     );
   }
