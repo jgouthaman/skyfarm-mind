@@ -67,8 +67,8 @@ function ProvenDesignsContent() {
   const [modalOpen, setModalOpen] = useState(false);
   const [viewTarget, setViewTarget] = useState<ReferenceDesign | null>(null);
 
-  const { designs, loading, error, stats, insert, approveDesign, rejectDesign } = useReferenceDesigns(search, activeVerticals.map((v) => v.toLowerCase()));
   const isAdmin = profile?.role === "admin" || profile?.role === "super_admin";
+  const { designs, loading, error, stats, insert, approveDesign, rejectDesign } = useReferenceDesigns(search, activeVerticals.map((v) => v.toLowerCase()), !isAdmin);
   const [pendingOnly, setPendingOnly] = useState(false);
   const displayedDesigns = pendingOnly ? designs.filter((d) => d.approval_status === "pending") : designs;
 
@@ -108,13 +108,15 @@ function ProvenDesignsContent() {
         </button>
       </div>
 
-      {/* ── Stats ── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <StatCard label="Total designs"     value={stats.total} />
-        <StatCard label="Approved"          value={stats.approved} accent="#4ade80" />
-        <StatCard label="Pending review"    value={stats.pending} accent="#fbbf24" />
-        <StatCard label="Verticals covered" value={stats.verticals} />
-      </div>
+      {/* ── Stats (admin only) ── */}
+      {isAdmin && (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <StatCard label="Total designs"     value={stats.total} />
+          <StatCard label="Approved"          value={stats.approved} accent="#4ade80" />
+          <StatCard label="Pending review"    value={stats.pending} accent="#fbbf24" />
+          <StatCard label="Verticals covered" value={stats.verticals} />
+        </div>
+      )}
 
       {/* ── Search + Filters ── */}
       <div className="flex flex-col sm:flex-row gap-3 mb-6">

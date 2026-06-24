@@ -81,14 +81,16 @@ function Sidebar({
   const role = profile.role as "super_admin" | "admin" | "user";
   const isAdmin = role === "super_admin" || role === "admin";
 
-  const [businessOpen,   setBusinessOpen]   = useState(true);
-  const [industriesOpen, setIndustriesOpen] = useState(false);
+  const [businessOpen,    setBusinessOpen]    = useState(true);
+  const [industriesOpen,  setIndustriesOpen]  = useState(false);
   const [twbcSectionOpen, setTwbcSectionOpen] = useState(false);
-  const [configOpen,     setConfigOpen]     = useState(false);
+  const [knowledgeOpen,   setKnowledgeOpen]   = useState(false);
+  const [configOpen,      setConfigOpen]      = useState(false);
   const [twbcOpen, setTwbcOpen] = useState({ drone: false, l1: false, l2: false, l3: false, l4: false });
   const toggleTwbc = (k: keyof typeof twbcOpen) => setTwbcOpen(s => ({ ...s, [k]: !s[k] }));
 
   const visibleVerticals: Vertical[] = isAdmin ? ALL_VERTICALS : verticals;
+  const hasDesignStudio = isAdmin || verticals.includes("design-studio" as Vertical);
 
   return (
     <aside
@@ -239,6 +241,21 @@ function Sidebar({
               UAV
             </NavLink>
             </>}
+          </div>
+        )}
+
+        {hasDesignStudio && (
+          <div className="mt-5 space-y-0.5">
+            <button type="button" onClick={() => setKnowledgeOpen(o => !o)}
+              className="mb-2 flex w-full items-center px-3 text-[10px] uppercase tracking-wider text-white/30 hover:text-white/50 transition-colors">
+              <span className="flex-1 text-left">Knowledge Base</span>
+              {knowledgeOpen ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
+            </button>
+            {knowledgeOpen && (
+              <NavLink to="/mission-hub/twbc-drone-proven-designs" icon={BookOpen} active={path === "/mission-hub/twbc-drone-proven-designs"} onClick={onClose}>
+                Proven Designs
+              </NavLink>
+            )}
           </div>
         )}
 

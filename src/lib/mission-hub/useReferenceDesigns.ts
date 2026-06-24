@@ -12,7 +12,7 @@ type Stats = {
   verticals: number;
 };
 
-export function useReferenceDesigns(search: string, verticalFilter: string[]) {
+export function useReferenceDesigns(search: string, verticalFilter: string[], approvedOnly = false) {
   const [designs, setDesigns] = useState<ReferenceDesign[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -55,6 +55,9 @@ export function useReferenceDesigns(search: string, verticalFilter: string[]) {
         .select("*")
         .order("confidence_score", { ascending: false });
 
+      if (approvedOnly) {
+        q = q.eq("approval_status", "approved");
+      }
       if (debouncedSearch) {
         q = q.or(`name.ilike.%${debouncedSearch}%,purpose.ilike.%${debouncedSearch}%`);
       }
