@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect, useRef } from "react";
 import {
   Plus, Search, X, Eye, Copy, Loader2,
@@ -62,6 +62,7 @@ function ProvenDesignsPage() {
 
 function ProvenDesignsContent() {
   const { profile } = useMissionHubAuth();
+  const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [activeVerticals, setActiveVerticals] = useState<VerticalKey[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
@@ -212,7 +213,10 @@ function ProvenDesignsContent() {
               design={d}
               isAdmin={isAdmin}
               onView={() => setViewTarget(d)}
-              onUseAsBase={() => { setViewTarget(null); setModalOpen(true); }}
+              onUseAsBase={() => {
+                sessionStorage.setItem("torqwings-studio:base-design", d.id);
+                navigate({ to: "/mission-hub/torqwings-design-studio/new" });
+              }}
               onApprove={isAdmin ? async () => approveDesign(d.id, profile!.id) : undefined}
               onReject={isAdmin ? async () => rejectDesign(d.id, profile!.id) : undefined}
             />
@@ -231,7 +235,10 @@ function ProvenDesignsContent() {
           design={viewTarget}
           isAdmin={isAdmin}
           onClose={() => setViewTarget(null)}
-          onUseAsBase={() => { setViewTarget(null); setModalOpen(true); }}
+          onUseAsBase={() => {
+            sessionStorage.setItem("torqwings-studio:base-design", viewTarget.id);
+            navigate({ to: "/mission-hub/torqwings-design-studio/new" });
+          }}
           onApprove={isAdmin && viewTarget.approval_status === "pending"
             ? async () => { await approveDesign(viewTarget.id, profile!.id); setViewTarget(null); }
             : undefined}

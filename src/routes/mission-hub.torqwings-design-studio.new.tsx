@@ -1,6 +1,8 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { Bookmark } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 import { useMissionHubAuth } from "@/lib/mission-hub/context";
 import { INITIAL_FORM } from "@/lib/design-studio/wizard-types";
 import type { WizardFormState } from "@/lib/design-studio/wizard-types";
@@ -22,12 +24,45 @@ const TOTAL = 5;
 function NewProjectWizard() {
   const { profile } = useMissionHubAuth();
   const nav = useNavigate();
-  const [step, setStep]     = useState(1);
-  const [form, setForm]     = useState<WizardFormState>(INITIAL_FORM);
-  const [saving, setSaving] = useState(false);
+  const [step, setStep]       = useState(1);
+  const [form, setForm]       = useState<WizardFormState>(INITIAL_FORM);
+  const [saving, setSaving]   = useState(false);
+  const [baseName, setBaseName] = useState<string | null>(null);
 
   const patch = (p: Partial<WizardFormState>) =>
     setForm((f) => ({ ...f, ...p }));
+
+  const SLUG_TO_VERTICAL: Record<string, string> = {
+    agriculture:    "AgriSky",
+    infrastructure: "InfraSky",
+    mapping:        "GeoSky",
+    surveillance:   "GuardSky",
+    industrial:     "TorqWings Labs",
+    defence:        "GuardSky",
+  };
+
+  useEffect(() => {
+    const baseId = sessionStorage.getItem("torqwings-studio:base-design");
+    if (!baseId) return;
+    sessionStorage.removeItem("torqwings-studio:base-design");
+
+    supabase
+      .from("reference_designs")
+      .select("name, purpose, vertical, payload_weight, estimated_flight_time")
+      .eq("id", baseId)
+      .single()
+      .then(({ data }) => {
+        if (!data) return;
+        patch({
+          projectName:        data.name ?? "",
+          purpose:            data.purpose ?? INITIAL_FORM.purpose,
+          vertical:           SLUG_TO_VERTICAL[data.vertical ?? ""] ?? INITIAL_FORM.vertical,
+          payloadWeight:      data.payload_weight != null ? String(data.payload_weight) : "",
+          requiredFlightTime: data.estimated_flight_time != null ? String(data.estimated_flight_time) : "",
+        });
+        setBaseName(data.name ?? null);
+      });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function handleSubmit() {
     if (!profile?.id) return;
@@ -50,6 +85,19 @@ function NewProjectWizard() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-10 space-y-6">
+      {baseName && (
+        <div
+          className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm"
+          style={{ background: "rgba(55,138,221,0.10)", border: "0.5px solid rgba(55,138,221,0.25)" }}
+        >
+          <Bookmark className="h-4 w-4 shrink-0" style={{ color: "#378ADD" }} />
+          <span style={{ color: "#94c7f5" }}>
+            Started from proven design:{" "}
+            <strong className="text-white">{baseName}</strong>
+          </span>
+        </div>
+      )}
+
       <WizardProgress
         step={step}
         total={TOTAL}
