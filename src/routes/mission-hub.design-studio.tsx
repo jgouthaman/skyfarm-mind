@@ -40,25 +40,15 @@ function DesignStudioPage() {
 
 function LaunchBanner() {
   return (
-    <MhCard className="p-6 mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-      <div>
-        <div className="text-white text-lg" style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 500 }}>
-          TorqWings Design Studio
-        </div>
-        <p className="mt-1 text-[13px] text-white/55 max-w-xl">
-          Design drone architectures from mission requirements, run simulations, and generate component lists & reports. Your work is saved to your account.
-        </p>
-      </div>
-      <div className="flex gap-2">
-        <Link
-          to="/mission-hub/torqwings-design-studio/new"
-          className="inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-[13px] text-white"
-          style={{ background: "#185FA5" }}
-        >
-          <Plus className="h-4 w-4" /> New project
-        </Link>
-      </div>
-    </MhCard>
+    <div className="flex justify-end mb-6">
+      <Link
+        to="/mission-hub/torqwings-design-studio/new"
+        className="inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-[13px] text-white"
+        style={{ background: "#185FA5" }}
+      >
+        <Plus className="h-4 w-4" /> New project
+      </Link>
+    </div>
   );
 }
 

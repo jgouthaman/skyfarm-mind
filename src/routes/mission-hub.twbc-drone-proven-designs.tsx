@@ -99,14 +99,16 @@ function ProvenDesignsContent() {
             these as starting points or reference baselines for new projects.
           </p>
         </div>
-        <button
-          onClick={() => setModalOpen(true)}
-          className="inline-flex items-center gap-2 shrink-0 rounded-lg px-4 py-2.5 text-[13px] text-white transition-colors hover:opacity-90"
-          style={{ background: "#185FA5", fontFamily: "'Space Grotesk', sans-serif", fontWeight: 500 }}
-        >
-          <Plus className="h-4 w-4" />
-          Add proven design
-        </button>
+        {isAdmin && (
+          <button
+            onClick={() => setModalOpen(true)}
+            className="inline-flex items-center gap-2 shrink-0 rounded-lg px-4 py-2.5 text-[13px] text-white transition-colors hover:opacity-90"
+            style={{ background: "#185FA5", fontFamily: "'Space Grotesk', sans-serif", fontWeight: 500 }}
+          >
+            <Plus className="h-4 w-4" />
+            Add proven design
+          </button>
+        )}
       </div>
 
       {/* ── Stats (admin only) ── */}
