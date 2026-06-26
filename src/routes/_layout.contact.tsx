@@ -26,7 +26,7 @@ function ContactPage() {
               <Phone className="h-4 w-4 text-primary" aria-hidden="true" /> Hello : 9940263589
             </li>
             <li className="flex items-center gap-3">
-              <Mail className="h-4 w-4 text-primary" aria-hidden="true" /> torqwings@gmail.com
+              <Mail className="h-4 w-4 text-primary" aria-hidden="true" /> support@torqwings.com
             </li>
             <li className="flex items-center gap-3">
               <MapPin className="h-4 w-4 text-primary" aria-hidden="true" /> India

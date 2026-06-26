@@ -24,7 +24,7 @@ export function Footer() {
           <h4 className="font-display font-semibold text-sm">Contact</h4>
           <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
             <li>Hello : 9940263589</li>
-            <li>torqwings@gmail.com</li>
+            <li>support@torqwings.com</li>
             <li>India</li>
           </ul>
         </div>

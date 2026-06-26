@@ -56,7 +56,7 @@ export function ContactForm() {
         <Input id="cf-phone" name="phone" required type="tel" placeholder="+91 ..." />
       </Field>
       <Field id="cf-email" label="Email" required>
-        <Input id="cf-email" name="email" required type="email" placeholder="torqwings@gmail.com" />
+        <Input id="cf-email" name="email" required type="email" placeholder="support@torqwings.com" />
       </Field>
       <Field id="cf-org" label="Organization">
         <Input id="cf-org" name="org" placeholder="Company / FPO / Institution" />
