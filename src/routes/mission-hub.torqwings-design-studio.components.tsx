@@ -1,8 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { StudioStepNav } from "@/components/design-studio/step-nav";
 import { StudioTabNav } from "@/components/design-studio/StudioTabNav";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useCurrentProject } from "@/lib/design-studio/store";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
@@ -13,8 +14,38 @@ export const Route = createFileRoute("/mission-hub/torqwings-design-studio/compo
 const SAFETY = new Set(["Safety buzzer", "Voltage monitor", "Obstacle sensor", "Parachute", "Landing gear"]);
 const PAYLOAD = new Set(["Payload module", "Camera module", "Spray system", "Pump", "Nozzles", "Tank"]);
 
+const DARK_VARS = {
+  '--foreground':       'oklch(0.95 0.01 250)',
+  '--muted-foreground': 'oklch(0.58 0.04 250)',
+  '--border':           'oklch(0.95 0.01 250 / 15%)',
+  '--card':             'oklch(0.14 0.04 250)',
+} as React.CSSProperties;
+
+const COMP_KEYS = ['frame', 'motors', 'esc', 'battery', 'flight_controller', 'gps', 'payload', 'propellers'];
+
+const COMP_BADGE: Record<string, string> = {
+  frame:             'bg-blue-500/20 text-blue-300 border-blue-500/30',
+  motors:            'bg-green-500/20 text-green-300 border-green-500/30',
+  esc:               'bg-yellow-500/20 text-yellow-300 border-yellow-500/30',
+  battery:           'bg-orange-500/20 text-orange-300 border-orange-500/30',
+  flight_controller: 'bg-purple-500/20 text-purple-300 border-purple-500/30',
+  gps:               'bg-teal-500/20 text-teal-300 border-teal-500/30',
+  payload:           'bg-pink-500/20 text-pink-300 border-pink-500/30',
+  propellers:        'bg-cyan-500/20 text-cyan-300 border-cyan-500/30',
+};
+
+const CONFIDENCE_BADGE: Record<string, string> = {
+  high:   'bg-emerald-500/15 border-emerald-500/30 text-emerald-400',
+  medium: 'bg-amber-500/15 border-amber-500/30 text-amber-400',
+  low:    'bg-red-500/15 border-red-500/30 text-red-400',
+};
+
 function Components() {
   const project = useCurrentProject();
+  const rec = project?.design_recommendation ?? null;
+  const hasOldList = !!project?.componentList;
+  const [liveComponentList, setLiveComponentList] = useState<Record<string, unknown> | null>(null);
+  const [refNotFound, setRefNotFound] = useState(false);
   const [filter, setFilter] = useState<"all" | "mandatory" | "optional" | "safety" | "payload">("all");
 
   const filtered = useMemo(() => {
@@ -26,11 +57,113 @@ function Components() {
     return list;
   }, [project, filter]);
 
-  if (!project?.componentList) {
+  useEffect(() => {
+    const refId = rec?.matched_reference?.id;
+    if (!refId) return;
+
+    const saved = rec?.matched_reference?.component_list;
+    const isEmpty = !saved ||
+      Array.isArray(saved) ||
+      Object.keys(saved as object).length === 0;
+
+    if (!isEmpty) {
+      setLiveComponentList(saved as Record<string, unknown>);
+      return;
+    }
+
+    supabase
+      .from('reference_designs')
+      .select('component_list')
+      .eq('id', refId)
+      .eq('approval_status', 'approved')
+      .limit(1)
+      .then(({ data }) => {
+        const row = Array.isArray(data) ? data[0] : data;
+        if (row?.component_list) {
+          setLiveComponentList(row.component_list as Record<string, unknown>);
+        } else {
+          setRefNotFound(true);
+        }
+      });
+  }, [rec?.matched_reference?.id]);
+
+  const hasNewRec = rec !== null && (
+    (rec.matched_reference?.component_list != null && !Array.isArray(rec.matched_reference.component_list)) ||
+    liveComponentList !== null
+  );
+
+  if (refNotFound && !hasOldList) {
+    return (
+      <div className="py-12 text-center text-white/40 text-sm">
+        Reference design no longer available.
+        <a href="/mission-hub/torqwings-design-studio/new" className="text-[#378ADD] ml-1 hover:underline">
+          Regenerate this design →
+        </a>
+      </div>
+    );
+  }
+
+  if (!hasOldList && !hasNewRec) {
     return (
       <div className="rounded-xl border border-border/60 bg-card/60 p-10 text-center">
         <p className="text-sm text-muted-foreground">No component list yet. Generate a design first.</p>
         <Button asChild className="mt-4"><Link to="/mission-hub/torqwings-design-studio/requirements">Open requirements</Link></Button>
+      </div>
+    );
+  }
+
+  if (hasNewRec) {
+    const compList = (liveComponentList ?? rec!.matched_reference!.component_list) as Record<string, Record<string, unknown>>;
+    const rows = COMP_KEYS.filter(k => compList[k]);
+    return (
+      <div className="space-y-5" style={DARK_VARS}>
+        <StudioTabNav />
+        <header className="flex items-end justify-between flex-wrap gap-4">
+          <div>
+            <h1 className="text-2xl font-semibold text-white">Bill of Materials</h1>
+            <p className="text-sm text-white/50 mt-1">
+              {project!.projectName} · Based on:{' '}
+              <span className="text-white/70">{rec!.matched_reference!.name}</span>
+            </p>
+          </div>
+          <span className={`text-[11px] px-2.5 py-1 rounded-full border font-medium capitalize ${CONFIDENCE_BADGE[rec!.confidence] ?? CONFIDENCE_BADGE.low}`}>
+            {rec!.confidence} confidence
+          </span>
+        </header>
+
+        <div className="rounded-xl border border-white/[0.08] bg-[#0a0f1c] overflow-hidden">
+          <div className="grid grid-cols-[140px_1fr_1fr_110px] gap-4 bg-[#0d1117] text-[11px] uppercase tracking-wider text-white/40 px-4 py-3">
+            <span>Category</span>
+            <span>Model</span>
+            <span>Specs</span>
+            <span></span>
+          </div>
+          {rows.map(key => {
+            const val = compList[key];
+            const model = (val?.model as string) ?? '—';
+            const extras = Object.entries(val ?? {})
+              .filter(([k]) => k !== 'model')
+              .map(([k, v]) => `${k.replace(/_/g, ' ')}: ${v}`)
+              .join(' · ');
+            const badgeCls = COMP_BADGE[key] ?? 'bg-white/10 text-white/50 border-white/10';
+            return (
+              <div key={key} className="grid grid-cols-[140px_1fr_1fr_110px] gap-4 border-t border-white/[0.05] px-4 py-3.5 items-center">
+                <span className={`inline-flex text-[11px] font-medium px-2 py-0.5 rounded-full border w-fit ${badgeCls}`}>
+                  {key.replace(/_/g, ' ').replace(/^\w/, c => c.toUpperCase())}
+                </span>
+                <span className="text-white font-medium text-sm">{model}</span>
+                <span className="text-white/45 text-[12px]">{extras || '—'}</span>
+                <Link
+                  to="/mission-hub/twbc-drone-components-library"
+                  className="text-[12px] text-[#378ADD] hover:underline whitespace-nowrap"
+                >
+                  Find in Library →
+                </Link>
+              </div>
+            );
+          })}
+        </div>
+        <StudioStepNav />
       </div>
     );
   }
