@@ -66,5 +66,6 @@ export interface StudioProjectInsert {
   risk_level:      null;
   requirements:    Record<string, unknown>;
   payload_details: Record<string, unknown>;
-  safety:          Record<string, boolean>;
+  safety:                Record<string, boolean>;
+  design_recommendation: Record<string, unknown> | null;
 }

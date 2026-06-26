@@ -1,9 +1,12 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { WizardFormState, StudioProjectInsert } from "./wizard-types";
+import type { IntelligenceResult } from "@/lib/intelligence/types";
 
 export function buildInsertPayload(
   form: WizardFormState,
   userId: string,
+  recommendation: IntelligenceResult | null = null,
+  acceptedSource: 'rule' | 'reference' = 'rule',
 ): StudioProjectInsert {
   return {
     user_id:      userId,
@@ -41,6 +44,9 @@ export function buildInsertPayload(
       parachute:          form.parachute,
       flightLogging:      form.flightLogging,
     },
+    design_recommendation: recommendation
+      ? { ...recommendation, accepted_source: acceptedSource }
+      : null,
   };
 }
 

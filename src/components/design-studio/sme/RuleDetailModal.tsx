@@ -105,7 +105,7 @@ export function RuleDetailModal({ rule, onClose, onEdit, onDelete, onPromote }: 
               label="Flight time"
               value={rule.flight_time_min ? `${rule.flight_time_min} min min.` : "Any"}
             />
-            <SpecCard label="Terrain"    value={rule.terrain ?? "Any"} />
+            <SpecCard label="Terrain"    value={rule.terrain_types ?? "Any"} />
             <SpecCard label="Wind"       value={rule.wind_condition ?? "Any"} />
             <SpecCard label="Automation" value={rule.automation_level ?? "Any"} />
             <SpecCard label="Budget"     value={rule.budget_range ?? "Any"} />
@@ -122,8 +122,8 @@ export function RuleDetailModal({ rule, onClose, onEdit, onDelete, onPromote }: 
             <SpecCard label="Frame size"       value={rule.frame_size ?? "—"} />
             <SpecCard label="Motor class"      value={rule.motor_class ?? "—"} />
             <SpecCard label="ESC rating"       value={rule.esc_rating ?? "—"} />
-            <SpecCard label="Propeller size"   value={rule.propeller_size ?? "—"} />
-            <SpecCard label="Battery"          value={rule.battery ?? "—"} />
+            <SpecCard label="Propeller spec"   value={rule.propeller_spec ?? "—"} />
+            <SpecCard label="Battery config"   value={rule.battery_config ?? "—"} />
             <SpecCard label="Flight controller" value={rule.flight_controller ?? "—"} />
             <SpecCard label="GPS type"         value={rule.gps_type ?? "—"} />
             <SpecCard label="Payload system"   value={rule.payload_system ?? "—"} />
@@ -151,13 +151,13 @@ export function RuleDetailModal({ rule, onClose, onEdit, onDelete, onPromote }: 
         </div>
 
         {/* Engineering Notes */}
-        {rule.engineering_notes && (
+        {rule.engineer_notes && (
           <div className="mt-6">
             <p className="text-[11px] uppercase tracking-widest text-white/30 font-medium mb-3">
               Engineering Notes
             </p>
             <p className="text-sm text-white/60 bg-white/5 rounded-xl p-4">
-              {rule.engineering_notes}
+              {rule.engineer_notes}
             </p>
           </div>
         )}

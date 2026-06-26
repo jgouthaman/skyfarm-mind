@@ -50,6 +50,7 @@ async function hydrate() {
         componentList: compMap.get(p.id) ?? undefined,
         simulationParameters: latest?.inputs ?? undefined,
         simulationResults: latest?.outcome ?? undefined,
+        design_recommendation: (p.design_recommendation as import('@/lib/intelligence/types').IntelligenceResult | null) ?? null,
       };
     });
 

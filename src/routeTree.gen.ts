@@ -22,7 +22,6 @@ import { Route as PilotProfileRouteImport } from './routes/pilot.profile'
 import { Route as PilotLoginRouteImport } from './routes/pilot.login'
 import { Route as MissionHubWaitlistRouteImport } from './routes/mission-hub.waitlist'
 import { Route as MissionHubUsersRouteImport } from './routes/mission-hub.users'
-import { Route as MissionHubTwbcDroneSmeBrainRouteImport } from './routes/mission-hub.twbc-drone-sme-brain'
 import { Route as MissionHubTwbcDroneSimilaritySearchRouteImport } from './routes/mission-hub.twbc-drone-similarity-search'
 import { Route as MissionHubTwbcDroneRuleEngineRouteImport } from './routes/mission-hub.twbc-drone-rule-engine'
 import { Route as MissionHubTwbcDroneReferenceDesignsRouteImport } from './routes/mission-hub.twbc-drone-reference-designs'
@@ -31,6 +30,7 @@ import { Route as MissionHubTwbcDroneProvenDesignsRouteImport } from './routes/m
 import { Route as MissionHubTwbcDroneFeedbackRouteImport } from './routes/mission-hub.twbc-drone-feedback'
 import { Route as MissionHubTwbcDroneDesignScoreRouteImport } from './routes/mission-hub.twbc-drone-design-score'
 import { Route as MissionHubTwbcDroneDesignRulesRouteImport } from './routes/mission-hub.twbc-drone-design-rules'
+import { Route as MissionHubTwbcDroneDesignRuleRouteImport } from './routes/mission-hub.twbc-drone-design-rule'
 import { Route as MissionHubTwbcDroneComponentsLibraryRouteImport } from './routes/mission-hub.twbc-drone-components-library'
 import { Route as MissionHubTwbcDroneApprovalRouteImport } from './routes/mission-hub.twbc-drone-approval'
 import { Route as MissionHubTorqwingsDesignStudioRouteImport } from './routes/mission-hub.torqwings-design-studio'
@@ -55,12 +55,12 @@ import { Route as PilotMissionsIndexRouteImport } from './routes/pilot.missions.
 import { Route as MissionHubTorqwingsDesignStudioIndexRouteImport } from './routes/mission-hub.torqwings-design-studio.index'
 import { Route as PilotMissionsIdRouteImport } from './routes/pilot.missions.$id'
 import { Route as MissionHubVerticalsVerticalRouteImport } from './routes/mission-hub.verticals.$vertical'
-import { Route as MissionHubTorqwingsDesignStudioSmeBrainRouteImport } from './routes/mission-hub.torqwings-design-studio.sme-brain'
 import { Route as MissionHubTorqwingsDesignStudioSimulationRouteImport } from './routes/mission-hub.torqwings-design-studio.simulation'
 import { Route as MissionHubTorqwingsDesignStudioRequirementsRouteImport } from './routes/mission-hub.torqwings-design-studio.requirements'
 import { Route as MissionHubTorqwingsDesignStudioReportRouteImport } from './routes/mission-hub.torqwings-design-studio.report'
 import { Route as MissionHubTorqwingsDesignStudioNewRouteImport } from './routes/mission-hub.torqwings-design-studio.new'
 import { Route as MissionHubTorqwingsDesignStudioHistoryRouteImport } from './routes/mission-hub.torqwings-design-studio.history'
+import { Route as MissionHubTorqwingsDesignStudioDesignRuleRouteImport } from './routes/mission-hub.torqwings-design-studio.design-rule'
 import { Route as MissionHubTorqwingsDesignStudioDesignRouteImport } from './routes/mission-hub.torqwings-design-studio.design'
 import { Route as MissionHubTorqwingsDesignStudioComponentsRouteImport } from './routes/mission-hub.torqwings-design-studio.components'
 import { Route as MissionHubTorqwingsDesignStudioComplianceRouteImport } from './routes/mission-hub.torqwings-design-studio.compliance'
@@ -130,12 +130,6 @@ const MissionHubUsersRoute = MissionHubUsersRouteImport.update({
   path: '/users',
   getParentRoute: () => MissionHubRoute,
 } as any)
-const MissionHubTwbcDroneSmeBrainRoute =
-  MissionHubTwbcDroneSmeBrainRouteImport.update({
-    id: '/twbc-drone-sme-brain',
-    path: '/twbc-drone-sme-brain',
-    getParentRoute: () => MissionHubRoute,
-  } as any)
 const MissionHubTwbcDroneSimilaritySearchRoute =
   MissionHubTwbcDroneSimilaritySearchRouteImport.update({
     id: '/twbc-drone-similarity-search',
@@ -182,6 +176,12 @@ const MissionHubTwbcDroneDesignRulesRoute =
   MissionHubTwbcDroneDesignRulesRouteImport.update({
     id: '/twbc-drone-design-rules',
     path: '/twbc-drone-design-rules',
+    getParentRoute: () => MissionHubRoute,
+  } as any)
+const MissionHubTwbcDroneDesignRuleRoute =
+  MissionHubTwbcDroneDesignRuleRouteImport.update({
+    id: '/twbc-drone-design-rule',
+    path: '/twbc-drone-design-rule',
     getParentRoute: () => MissionHubRoute,
   } as any)
 const MissionHubTwbcDroneComponentsLibraryRoute =
@@ -309,12 +309,6 @@ const MissionHubVerticalsVerticalRoute =
     path: '/verticals/$vertical',
     getParentRoute: () => MissionHubRoute,
   } as any)
-const MissionHubTorqwingsDesignStudioSmeBrainRoute =
-  MissionHubTorqwingsDesignStudioSmeBrainRouteImport.update({
-    id: '/sme-brain',
-    path: '/sme-brain',
-    getParentRoute: () => MissionHubTorqwingsDesignStudioRoute,
-  } as any)
 const MissionHubTorqwingsDesignStudioSimulationRoute =
   MissionHubTorqwingsDesignStudioSimulationRouteImport.update({
     id: '/simulation',
@@ -343,6 +337,12 @@ const MissionHubTorqwingsDesignStudioHistoryRoute =
   MissionHubTorqwingsDesignStudioHistoryRouteImport.update({
     id: '/history',
     path: '/history',
+    getParentRoute: () => MissionHubTorqwingsDesignStudioRoute,
+  } as any)
+const MissionHubTorqwingsDesignStudioDesignRuleRoute =
+  MissionHubTorqwingsDesignStudioDesignRuleRouteImport.update({
+    id: '/design-rule',
+    path: '/design-rule',
     getParentRoute: () => MissionHubTorqwingsDesignStudioRoute,
   } as any)
 const MissionHubTorqwingsDesignStudioDesignRoute =
@@ -396,6 +396,7 @@ export interface FileRoutesByFullPath {
   '/mission-hub/torqwings-design-studio': typeof MissionHubTorqwingsDesignStudioRouteWithChildren
   '/mission-hub/twbc-drone-approval': typeof MissionHubTwbcDroneApprovalRoute
   '/mission-hub/twbc-drone-components-library': typeof MissionHubTwbcDroneComponentsLibraryRoute
+  '/mission-hub/twbc-drone-design-rule': typeof MissionHubTwbcDroneDesignRuleRoute
   '/mission-hub/twbc-drone-design-rules': typeof MissionHubTwbcDroneDesignRulesRoute
   '/mission-hub/twbc-drone-design-score': typeof MissionHubTwbcDroneDesignScoreRoute
   '/mission-hub/twbc-drone-feedback': typeof MissionHubTwbcDroneFeedbackRoute
@@ -404,7 +405,6 @@ export interface FileRoutesByFullPath {
   '/mission-hub/twbc-drone-reference-designs': typeof MissionHubTwbcDroneReferenceDesignsRoute
   '/mission-hub/twbc-drone-rule-engine': typeof MissionHubTwbcDroneRuleEngineRoute
   '/mission-hub/twbc-drone-similarity-search': typeof MissionHubTwbcDroneSimilaritySearchRoute
-  '/mission-hub/twbc-drone-sme-brain': typeof MissionHubTwbcDroneSmeBrainRoute
   '/mission-hub/users': typeof MissionHubUsersRoute
   '/mission-hub/waitlist': typeof MissionHubWaitlistRoute
   '/pilot/login': typeof PilotLoginRoute
@@ -416,12 +416,12 @@ export interface FileRoutesByFullPath {
   '/mission-hub/torqwings-design-studio/compliance': typeof MissionHubTorqwingsDesignStudioComplianceRoute
   '/mission-hub/torqwings-design-studio/components': typeof MissionHubTorqwingsDesignStudioComponentsRoute
   '/mission-hub/torqwings-design-studio/design': typeof MissionHubTorqwingsDesignStudioDesignRoute
+  '/mission-hub/torqwings-design-studio/design-rule': typeof MissionHubTorqwingsDesignStudioDesignRuleRoute
   '/mission-hub/torqwings-design-studio/history': typeof MissionHubTorqwingsDesignStudioHistoryRoute
   '/mission-hub/torqwings-design-studio/new': typeof MissionHubTorqwingsDesignStudioNewRoute
   '/mission-hub/torqwings-design-studio/report': typeof MissionHubTorqwingsDesignStudioReportRoute
   '/mission-hub/torqwings-design-studio/requirements': typeof MissionHubTorqwingsDesignStudioRequirementsRoute
   '/mission-hub/torqwings-design-studio/simulation': typeof MissionHubTorqwingsDesignStudioSimulationRoute
-  '/mission-hub/torqwings-design-studio/sme-brain': typeof MissionHubTorqwingsDesignStudioSmeBrainRoute
   '/mission-hub/verticals/$vertical': typeof MissionHubVerticalsVerticalRoute
   '/pilot/missions/$id': typeof PilotMissionsIdRoute
   '/mission-hub/torqwings-design-studio/': typeof MissionHubTorqwingsDesignStudioIndexRoute
@@ -450,6 +450,7 @@ export interface FileRoutesByTo {
   '/mission-hub/settings': typeof MissionHubSettingsRoute
   '/mission-hub/twbc-drone-approval': typeof MissionHubTwbcDroneApprovalRoute
   '/mission-hub/twbc-drone-components-library': typeof MissionHubTwbcDroneComponentsLibraryRoute
+  '/mission-hub/twbc-drone-design-rule': typeof MissionHubTwbcDroneDesignRuleRoute
   '/mission-hub/twbc-drone-design-rules': typeof MissionHubTwbcDroneDesignRulesRoute
   '/mission-hub/twbc-drone-design-score': typeof MissionHubTwbcDroneDesignScoreRoute
   '/mission-hub/twbc-drone-feedback': typeof MissionHubTwbcDroneFeedbackRoute
@@ -458,7 +459,6 @@ export interface FileRoutesByTo {
   '/mission-hub/twbc-drone-reference-designs': typeof MissionHubTwbcDroneReferenceDesignsRoute
   '/mission-hub/twbc-drone-rule-engine': typeof MissionHubTwbcDroneRuleEngineRoute
   '/mission-hub/twbc-drone-similarity-search': typeof MissionHubTwbcDroneSimilaritySearchRoute
-  '/mission-hub/twbc-drone-sme-brain': typeof MissionHubTwbcDroneSmeBrainRoute
   '/mission-hub/users': typeof MissionHubUsersRoute
   '/mission-hub/waitlist': typeof MissionHubWaitlistRoute
   '/pilot/login': typeof PilotLoginRoute
@@ -471,12 +471,12 @@ export interface FileRoutesByTo {
   '/mission-hub/torqwings-design-studio/compliance': typeof MissionHubTorqwingsDesignStudioComplianceRoute
   '/mission-hub/torqwings-design-studio/components': typeof MissionHubTorqwingsDesignStudioComponentsRoute
   '/mission-hub/torqwings-design-studio/design': typeof MissionHubTorqwingsDesignStudioDesignRoute
+  '/mission-hub/torqwings-design-studio/design-rule': typeof MissionHubTorqwingsDesignStudioDesignRuleRoute
   '/mission-hub/torqwings-design-studio/history': typeof MissionHubTorqwingsDesignStudioHistoryRoute
   '/mission-hub/torqwings-design-studio/new': typeof MissionHubTorqwingsDesignStudioNewRoute
   '/mission-hub/torqwings-design-studio/report': typeof MissionHubTorqwingsDesignStudioReportRoute
   '/mission-hub/torqwings-design-studio/requirements': typeof MissionHubTorqwingsDesignStudioRequirementsRoute
   '/mission-hub/torqwings-design-studio/simulation': typeof MissionHubTorqwingsDesignStudioSimulationRoute
-  '/mission-hub/torqwings-design-studio/sme-brain': typeof MissionHubTorqwingsDesignStudioSmeBrainRoute
   '/mission-hub/verticals/$vertical': typeof MissionHubVerticalsVerticalRoute
   '/pilot/missions/$id': typeof PilotMissionsIdRoute
   '/mission-hub/torqwings-design-studio': typeof MissionHubTorqwingsDesignStudioIndexRoute
@@ -509,6 +509,7 @@ export interface FileRoutesById {
   '/mission-hub/torqwings-design-studio': typeof MissionHubTorqwingsDesignStudioRouteWithChildren
   '/mission-hub/twbc-drone-approval': typeof MissionHubTwbcDroneApprovalRoute
   '/mission-hub/twbc-drone-components-library': typeof MissionHubTwbcDroneComponentsLibraryRoute
+  '/mission-hub/twbc-drone-design-rule': typeof MissionHubTwbcDroneDesignRuleRoute
   '/mission-hub/twbc-drone-design-rules': typeof MissionHubTwbcDroneDesignRulesRoute
   '/mission-hub/twbc-drone-design-score': typeof MissionHubTwbcDroneDesignScoreRoute
   '/mission-hub/twbc-drone-feedback': typeof MissionHubTwbcDroneFeedbackRoute
@@ -517,7 +518,6 @@ export interface FileRoutesById {
   '/mission-hub/twbc-drone-reference-designs': typeof MissionHubTwbcDroneReferenceDesignsRoute
   '/mission-hub/twbc-drone-rule-engine': typeof MissionHubTwbcDroneRuleEngineRoute
   '/mission-hub/twbc-drone-similarity-search': typeof MissionHubTwbcDroneSimilaritySearchRoute
-  '/mission-hub/twbc-drone-sme-brain': typeof MissionHubTwbcDroneSmeBrainRoute
   '/mission-hub/users': typeof MissionHubUsersRoute
   '/mission-hub/waitlist': typeof MissionHubWaitlistRoute
   '/pilot/login': typeof PilotLoginRoute
@@ -530,12 +530,12 @@ export interface FileRoutesById {
   '/mission-hub/torqwings-design-studio/compliance': typeof MissionHubTorqwingsDesignStudioComplianceRoute
   '/mission-hub/torqwings-design-studio/components': typeof MissionHubTorqwingsDesignStudioComponentsRoute
   '/mission-hub/torqwings-design-studio/design': typeof MissionHubTorqwingsDesignStudioDesignRoute
+  '/mission-hub/torqwings-design-studio/design-rule': typeof MissionHubTorqwingsDesignStudioDesignRuleRoute
   '/mission-hub/torqwings-design-studio/history': typeof MissionHubTorqwingsDesignStudioHistoryRoute
   '/mission-hub/torqwings-design-studio/new': typeof MissionHubTorqwingsDesignStudioNewRoute
   '/mission-hub/torqwings-design-studio/report': typeof MissionHubTorqwingsDesignStudioReportRoute
   '/mission-hub/torqwings-design-studio/requirements': typeof MissionHubTorqwingsDesignStudioRequirementsRoute
   '/mission-hub/torqwings-design-studio/simulation': typeof MissionHubTorqwingsDesignStudioSimulationRoute
-  '/mission-hub/torqwings-design-studio/sme-brain': typeof MissionHubTorqwingsDesignStudioSmeBrainRoute
   '/mission-hub/verticals/$vertical': typeof MissionHubVerticalsVerticalRoute
   '/pilot/missions/$id': typeof PilotMissionsIdRoute
   '/mission-hub/torqwings-design-studio/': typeof MissionHubTorqwingsDesignStudioIndexRoute
@@ -569,6 +569,7 @@ export interface FileRouteTypes {
     | '/mission-hub/torqwings-design-studio'
     | '/mission-hub/twbc-drone-approval'
     | '/mission-hub/twbc-drone-components-library'
+    | '/mission-hub/twbc-drone-design-rule'
     | '/mission-hub/twbc-drone-design-rules'
     | '/mission-hub/twbc-drone-design-score'
     | '/mission-hub/twbc-drone-feedback'
@@ -577,7 +578,6 @@ export interface FileRouteTypes {
     | '/mission-hub/twbc-drone-reference-designs'
     | '/mission-hub/twbc-drone-rule-engine'
     | '/mission-hub/twbc-drone-similarity-search'
-    | '/mission-hub/twbc-drone-sme-brain'
     | '/mission-hub/users'
     | '/mission-hub/waitlist'
     | '/pilot/login'
@@ -589,12 +589,12 @@ export interface FileRouteTypes {
     | '/mission-hub/torqwings-design-studio/compliance'
     | '/mission-hub/torqwings-design-studio/components'
     | '/mission-hub/torqwings-design-studio/design'
+    | '/mission-hub/torqwings-design-studio/design-rule'
     | '/mission-hub/torqwings-design-studio/history'
     | '/mission-hub/torqwings-design-studio/new'
     | '/mission-hub/torqwings-design-studio/report'
     | '/mission-hub/torqwings-design-studio/requirements'
     | '/mission-hub/torqwings-design-studio/simulation'
-    | '/mission-hub/torqwings-design-studio/sme-brain'
     | '/mission-hub/verticals/$vertical'
     | '/pilot/missions/$id'
     | '/mission-hub/torqwings-design-studio/'
@@ -623,6 +623,7 @@ export interface FileRouteTypes {
     | '/mission-hub/settings'
     | '/mission-hub/twbc-drone-approval'
     | '/mission-hub/twbc-drone-components-library'
+    | '/mission-hub/twbc-drone-design-rule'
     | '/mission-hub/twbc-drone-design-rules'
     | '/mission-hub/twbc-drone-design-score'
     | '/mission-hub/twbc-drone-feedback'
@@ -631,7 +632,6 @@ export interface FileRouteTypes {
     | '/mission-hub/twbc-drone-reference-designs'
     | '/mission-hub/twbc-drone-rule-engine'
     | '/mission-hub/twbc-drone-similarity-search'
-    | '/mission-hub/twbc-drone-sme-brain'
     | '/mission-hub/users'
     | '/mission-hub/waitlist'
     | '/pilot/login'
@@ -644,12 +644,12 @@ export interface FileRouteTypes {
     | '/mission-hub/torqwings-design-studio/compliance'
     | '/mission-hub/torqwings-design-studio/components'
     | '/mission-hub/torqwings-design-studio/design'
+    | '/mission-hub/torqwings-design-studio/design-rule'
     | '/mission-hub/torqwings-design-studio/history'
     | '/mission-hub/torqwings-design-studio/new'
     | '/mission-hub/torqwings-design-studio/report'
     | '/mission-hub/torqwings-design-studio/requirements'
     | '/mission-hub/torqwings-design-studio/simulation'
-    | '/mission-hub/torqwings-design-studio/sme-brain'
     | '/mission-hub/verticals/$vertical'
     | '/pilot/missions/$id'
     | '/mission-hub/torqwings-design-studio'
@@ -681,6 +681,7 @@ export interface FileRouteTypes {
     | '/mission-hub/torqwings-design-studio'
     | '/mission-hub/twbc-drone-approval'
     | '/mission-hub/twbc-drone-components-library'
+    | '/mission-hub/twbc-drone-design-rule'
     | '/mission-hub/twbc-drone-design-rules'
     | '/mission-hub/twbc-drone-design-score'
     | '/mission-hub/twbc-drone-feedback'
@@ -689,7 +690,6 @@ export interface FileRouteTypes {
     | '/mission-hub/twbc-drone-reference-designs'
     | '/mission-hub/twbc-drone-rule-engine'
     | '/mission-hub/twbc-drone-similarity-search'
-    | '/mission-hub/twbc-drone-sme-brain'
     | '/mission-hub/users'
     | '/mission-hub/waitlist'
     | '/pilot/login'
@@ -702,12 +702,12 @@ export interface FileRouteTypes {
     | '/mission-hub/torqwings-design-studio/compliance'
     | '/mission-hub/torqwings-design-studio/components'
     | '/mission-hub/torqwings-design-studio/design'
+    | '/mission-hub/torqwings-design-studio/design-rule'
     | '/mission-hub/torqwings-design-studio/history'
     | '/mission-hub/torqwings-design-studio/new'
     | '/mission-hub/torqwings-design-studio/report'
     | '/mission-hub/torqwings-design-studio/requirements'
     | '/mission-hub/torqwings-design-studio/simulation'
-    | '/mission-hub/torqwings-design-studio/sme-brain'
     | '/mission-hub/verticals/$vertical'
     | '/pilot/missions/$id'
     | '/mission-hub/torqwings-design-studio/'
@@ -815,13 +815,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MissionHubUsersRouteImport
       parentRoute: typeof MissionHubRoute
     }
-    '/mission-hub/twbc-drone-sme-brain': {
-      id: '/mission-hub/twbc-drone-sme-brain'
-      path: '/twbc-drone-sme-brain'
-      fullPath: '/mission-hub/twbc-drone-sme-brain'
-      preLoaderRoute: typeof MissionHubTwbcDroneSmeBrainRouteImport
-      parentRoute: typeof MissionHubRoute
-    }
     '/mission-hub/twbc-drone-similarity-search': {
       id: '/mission-hub/twbc-drone-similarity-search'
       path: '/twbc-drone-similarity-search'
@@ -876,6 +869,13 @@ declare module '@tanstack/react-router' {
       path: '/twbc-drone-design-rules'
       fullPath: '/mission-hub/twbc-drone-design-rules'
       preLoaderRoute: typeof MissionHubTwbcDroneDesignRulesRouteImport
+      parentRoute: typeof MissionHubRoute
+    }
+    '/mission-hub/twbc-drone-design-rule': {
+      id: '/mission-hub/twbc-drone-design-rule'
+      path: '/twbc-drone-design-rule'
+      fullPath: '/mission-hub/twbc-drone-design-rule'
+      preLoaderRoute: typeof MissionHubTwbcDroneDesignRuleRouteImport
       parentRoute: typeof MissionHubRoute
     }
     '/mission-hub/twbc-drone-components-library': {
@@ -1046,13 +1046,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MissionHubVerticalsVerticalRouteImport
       parentRoute: typeof MissionHubRoute
     }
-    '/mission-hub/torqwings-design-studio/sme-brain': {
-      id: '/mission-hub/torqwings-design-studio/sme-brain'
-      path: '/sme-brain'
-      fullPath: '/mission-hub/torqwings-design-studio/sme-brain'
-      preLoaderRoute: typeof MissionHubTorqwingsDesignStudioSmeBrainRouteImport
-      parentRoute: typeof MissionHubTorqwingsDesignStudioRoute
-    }
     '/mission-hub/torqwings-design-studio/simulation': {
       id: '/mission-hub/torqwings-design-studio/simulation'
       path: '/simulation'
@@ -1086,6 +1079,13 @@ declare module '@tanstack/react-router' {
       path: '/history'
       fullPath: '/mission-hub/torqwings-design-studio/history'
       preLoaderRoute: typeof MissionHubTorqwingsDesignStudioHistoryRouteImport
+      parentRoute: typeof MissionHubTorqwingsDesignStudioRoute
+    }
+    '/mission-hub/torqwings-design-studio/design-rule': {
+      id: '/mission-hub/torqwings-design-studio/design-rule'
+      path: '/design-rule'
+      fullPath: '/mission-hub/torqwings-design-studio/design-rule'
+      preLoaderRoute: typeof MissionHubTorqwingsDesignStudioDesignRuleRouteImport
       parentRoute: typeof MissionHubTorqwingsDesignStudioRoute
     }
     '/mission-hub/torqwings-design-studio/design': {
@@ -1155,12 +1155,12 @@ interface MissionHubTorqwingsDesignStudioRouteChildren {
   MissionHubTorqwingsDesignStudioComplianceRoute: typeof MissionHubTorqwingsDesignStudioComplianceRoute
   MissionHubTorqwingsDesignStudioComponentsRoute: typeof MissionHubTorqwingsDesignStudioComponentsRoute
   MissionHubTorqwingsDesignStudioDesignRoute: typeof MissionHubTorqwingsDesignStudioDesignRoute
+  MissionHubTorqwingsDesignStudioDesignRuleRoute: typeof MissionHubTorqwingsDesignStudioDesignRuleRoute
   MissionHubTorqwingsDesignStudioHistoryRoute: typeof MissionHubTorqwingsDesignStudioHistoryRoute
   MissionHubTorqwingsDesignStudioNewRoute: typeof MissionHubTorqwingsDesignStudioNewRoute
   MissionHubTorqwingsDesignStudioReportRoute: typeof MissionHubTorqwingsDesignStudioReportRoute
   MissionHubTorqwingsDesignStudioRequirementsRoute: typeof MissionHubTorqwingsDesignStudioRequirementsRoute
   MissionHubTorqwingsDesignStudioSimulationRoute: typeof MissionHubTorqwingsDesignStudioSimulationRoute
-  MissionHubTorqwingsDesignStudioSmeBrainRoute: typeof MissionHubTorqwingsDesignStudioSmeBrainRoute
   MissionHubTorqwingsDesignStudioIndexRoute: typeof MissionHubTorqwingsDesignStudioIndexRoute
 }
 
@@ -1174,6 +1174,8 @@ const MissionHubTorqwingsDesignStudioRouteChildren: MissionHubTorqwingsDesignStu
       MissionHubTorqwingsDesignStudioComponentsRoute,
     MissionHubTorqwingsDesignStudioDesignRoute:
       MissionHubTorqwingsDesignStudioDesignRoute,
+    MissionHubTorqwingsDesignStudioDesignRuleRoute:
+      MissionHubTorqwingsDesignStudioDesignRuleRoute,
     MissionHubTorqwingsDesignStudioHistoryRoute:
       MissionHubTorqwingsDesignStudioHistoryRoute,
     MissionHubTorqwingsDesignStudioNewRoute:
@@ -1184,8 +1186,6 @@ const MissionHubTorqwingsDesignStudioRouteChildren: MissionHubTorqwingsDesignStu
       MissionHubTorqwingsDesignStudioRequirementsRoute,
     MissionHubTorqwingsDesignStudioSimulationRoute:
       MissionHubTorqwingsDesignStudioSimulationRoute,
-    MissionHubTorqwingsDesignStudioSmeBrainRoute:
-      MissionHubTorqwingsDesignStudioSmeBrainRoute,
     MissionHubTorqwingsDesignStudioIndexRoute:
       MissionHubTorqwingsDesignStudioIndexRoute,
   }
@@ -1206,6 +1206,7 @@ interface MissionHubRouteChildren {
   MissionHubTorqwingsDesignStudioRoute: typeof MissionHubTorqwingsDesignStudioRouteWithChildren
   MissionHubTwbcDroneApprovalRoute: typeof MissionHubTwbcDroneApprovalRoute
   MissionHubTwbcDroneComponentsLibraryRoute: typeof MissionHubTwbcDroneComponentsLibraryRoute
+  MissionHubTwbcDroneDesignRuleRoute: typeof MissionHubTwbcDroneDesignRuleRoute
   MissionHubTwbcDroneDesignRulesRoute: typeof MissionHubTwbcDroneDesignRulesRoute
   MissionHubTwbcDroneDesignScoreRoute: typeof MissionHubTwbcDroneDesignScoreRoute
   MissionHubTwbcDroneFeedbackRoute: typeof MissionHubTwbcDroneFeedbackRoute
@@ -1214,7 +1215,6 @@ interface MissionHubRouteChildren {
   MissionHubTwbcDroneReferenceDesignsRoute: typeof MissionHubTwbcDroneReferenceDesignsRoute
   MissionHubTwbcDroneRuleEngineRoute: typeof MissionHubTwbcDroneRuleEngineRoute
   MissionHubTwbcDroneSimilaritySearchRoute: typeof MissionHubTwbcDroneSimilaritySearchRoute
-  MissionHubTwbcDroneSmeBrainRoute: typeof MissionHubTwbcDroneSmeBrainRoute
   MissionHubUsersRoute: typeof MissionHubUsersRoute
   MissionHubWaitlistRoute: typeof MissionHubWaitlistRoute
   MissionHubVerticalsVerticalRoute: typeof MissionHubVerticalsVerticalRoute
@@ -1233,6 +1233,7 @@ const MissionHubRouteChildren: MissionHubRouteChildren = {
   MissionHubTwbcDroneApprovalRoute: MissionHubTwbcDroneApprovalRoute,
   MissionHubTwbcDroneComponentsLibraryRoute:
     MissionHubTwbcDroneComponentsLibraryRoute,
+  MissionHubTwbcDroneDesignRuleRoute: MissionHubTwbcDroneDesignRuleRoute,
   MissionHubTwbcDroneDesignRulesRoute: MissionHubTwbcDroneDesignRulesRoute,
   MissionHubTwbcDroneDesignScoreRoute: MissionHubTwbcDroneDesignScoreRoute,
   MissionHubTwbcDroneFeedbackRoute: MissionHubTwbcDroneFeedbackRoute,
@@ -1243,7 +1244,6 @@ const MissionHubRouteChildren: MissionHubRouteChildren = {
   MissionHubTwbcDroneRuleEngineRoute: MissionHubTwbcDroneRuleEngineRoute,
   MissionHubTwbcDroneSimilaritySearchRoute:
     MissionHubTwbcDroneSimilaritySearchRoute,
-  MissionHubTwbcDroneSmeBrainRoute: MissionHubTwbcDroneSmeBrainRoute,
   MissionHubUsersRoute: MissionHubUsersRoute,
   MissionHubWaitlistRoute: MissionHubWaitlistRoute,
   MissionHubVerticalsVerticalRoute: MissionHubVerticalsVerticalRoute,

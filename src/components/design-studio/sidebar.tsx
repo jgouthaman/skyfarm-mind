@@ -38,15 +38,15 @@ export function StudioSidebar() {
       })}
       {isAdmin && (
         <Link
-          to="/mission-hub/torqwings-design-studio/sme-brain"
+          to="/mission-hub/torqwings-design-studio/design-rule"
           className={cn(
             "flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors",
-            path.startsWith("/mission-hub/torqwings-design-studio/sme-brain")
+            path.startsWith("/mission-hub/torqwings-design-studio/design-rule")
               ? "bg-primary/15 text-primary border border-primary/30"
               : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
           )}
         >
-          <Brain className="h-4 w-4" /> SME Brain
+          <Brain className="h-4 w-4" /> Design Rule
         </Link>
       )}
       <div className="mt-auto pt-3 border-t border-border/60">

@@ -60,6 +60,7 @@ export function DesignStudioLeadModal({
     setSubmitting(true);
     try {
       const { error } = await supabase.from("design_studio_leads" as any).insert(data as any);
+      console.log('[Leads] insert result — error:', error);
       if (error) throw error;
       setSuccess(data.email);
     } catch (err) {

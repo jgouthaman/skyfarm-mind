@@ -87,18 +87,10 @@ function ProvenDesignsContent() {
     <div style={{ fontFamily: "Inter, system-ui, sans-serif" }}>
       {/* ── Header ── */}
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-8">
-        <div>
-          <h1
-            className="text-white text-2xl"
-            style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600 }}
-          >
-            Proven Designs
-          </h1>
-          <p className="mt-1 text-[13px] text-white/50 max-w-lg">
-            Validated drone configurations approved by the engineering team. Use
-            these as starting points or reference baselines for new projects.
-          </p>
-        </div>
+        <p className="text-[13px] text-white/50 max-w-lg self-center">
+          Validated drone configurations approved by the engineering team. Use
+          these as starting points or reference baselines for new projects.
+        </p>
         {isAdmin && (
           <button
             onClick={() => setModalOpen(true)}

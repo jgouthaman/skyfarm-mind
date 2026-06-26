@@ -12,22 +12,28 @@ import { StepScope }   from "@/components/design-studio/wizard/StepScope";
 import { StepMission } from "@/components/design-studio/wizard/StepMission";
 import { StepPayload } from "@/components/design-studio/wizard/StepPayload";
 import { StepSafety }  from "@/components/design-studio/wizard/StepSafety";
-import { StepReview }  from "@/components/design-studio/wizard/StepReview";
+import { StepReview }          from "@/components/design-studio/wizard/StepReview";
+import { StepRecommendation }  from "@/components/design-studio/wizard/StepRecommendation";
+import { runIntelligenceEngine } from "@/lib/intelligence/orchestrator";
+import type { IntelligenceResult, IntelligenceInput } from "@/lib/intelligence/types";
 
 export const Route = createFileRoute("/mission-hub/torqwings-design-studio/new")({
   component: NewProjectWizard,
   ssr: false,
 });
 
-const TOTAL = 5;
+const TOTAL = 6;
 
 function NewProjectWizard() {
   const { profile } = useMissionHubAuth();
   const nav = useNavigate();
-  const [step, setStep]       = useState(1);
-  const [form, setForm]       = useState<WizardFormState>(INITIAL_FORM);
-  const [saving, setSaving]   = useState(false);
-  const [baseName, setBaseName] = useState<string | null>(null);
+  const [step, setStep]             = useState(1);
+  const [form, setForm]             = useState<WizardFormState>(INITIAL_FORM);
+  const [saving, setSaving]         = useState(false);
+  const [baseName, setBaseName]     = useState<string | null>(null);
+  const [recommendation, setRecommendation] = useState<IntelligenceResult | null>(null);
+  const [engineLoading, setEngineLoading]   = useState(false);
+  const [acceptedSource, setAcceptedSource] = useState<'rule' | 'reference'>('rule');
 
   const patch = (p: Partial<WizardFormState>) =>
     setForm((f) => ({ ...f, ...p }));
@@ -64,11 +70,40 @@ function NewProjectWizard() {
       });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  function buildEngineInput(form: WizardFormState): IntelligenceInput {
+    const USER_TYPE_MAP: Record<string, string> = {
+      'Farmer':     'commercial',
+      'Engineer':   'commercial',
+      'Researcher': 'research',
+      'Student':    'research',
+      'Demo':       'commercial',
+    };
+    return {
+      vertical:           form.vertical,
+      purpose:            form.purpose,
+      payloadWeight:      parseFloat(form.payloadWeight) || 0,
+      requiredFlightTime: parseFloat(form.requiredFlightTime) || 0,
+      terrain:            form.terrain || null,
+      windCondition:      form.windCondition || null,
+      userType:           USER_TYPE_MAP[form.userType] ?? null,
+    };
+  }
+
+  async function runEngine(f: WizardFormState) {
+    setEngineLoading(true);
+    try {
+      const result = await runIntelligenceEngine(buildEngineInput(f));
+      setRecommendation(result);
+    } finally {
+      setEngineLoading(false);
+    }
+  }
+
   async function handleSubmit() {
     if (!profile?.id) return;
     setSaving(true);
     try {
-      const payload = buildInsertPayload(form, profile.id);
+      const payload = buildInsertPayload(form, profile.id, recommendation, acceptedSource);
       const result  = await createProject(payload);
       if (result?.id) {
         if (typeof window !== "undefined") {
@@ -133,14 +168,23 @@ function NewProjectWizard() {
         <StepSafety
           form={form}
           onChange={patch}
-          onNext={() => setStep(5)}
+          onNext={() => { runEngine(form); setStep(5); }}
           onBack={() => setStep(3)}
         />
       )}
       {step === 5 && (
+        <StepRecommendation
+          result={recommendation}
+          input={buildEngineInput(form)}
+          isLoading={engineLoading}
+          onBack={() => setStep(4)}
+          onAccept={(choice) => { setAcceptedSource(choice); setStep(6); }}
+        />
+      )}
+      {step === 6 && (
         <StepReview
           form={form}
-          onBack={() => setStep(4)}
+          onBack={() => setStep(5)}
           onSubmit={handleSubmit}
           saving={saving}
         />

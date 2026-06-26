@@ -2,8 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Brain } from "lucide-react";
+import { MissionHubShell } from "@/components/mission-hub/Shell";
 import { useMissionHubAuth } from "@/lib/mission-hub/context";
-import { supabase } from "@/integrations/supabase/client";
 import {
   fetchDesignRules,
   insertDesignRule,
@@ -14,40 +14,40 @@ import { RuleForm } from "@/components/design-studio/sme/RuleForm";
 import { RuleDetailModal } from "@/components/design-studio/sme/RuleDetailModal";
 import type { DesignRule, DesignRuleInsert } from "@/lib/design-studio/sme-types";
 
-const VERTICAL_MAP: Record<string, string | null> = {
-  "AgriSky":        "agriculture",
-  "InfraSky":       "infrastructure",
-  "GeoSky":         "mapping",
-  "GuardSky":       "surveillance",
-  "TorqWings Labs": "industrial",
-  "Academy":        null,
-};
+export const Route = createFileRoute("/mission-hub/twbc-drone-design-rule")({
+  component: DesignRulePage,
+});
 
-export const Route = createFileRoute(
-  "/mission-hub/torqwings-design-studio/sme-brain",
-)({ component: SmeBrainPage });
-
-function SmeBrainPage() {
+function DesignRulePage() {
   const { profile } = useMissionHubAuth();
   const isAdmin =
     profile?.role === "admin" || profile?.role === "super_admin";
-  const engineerName = profile?.full_name ?? "Unknown Engineer";
 
   if (!isAdmin) {
     return (
-      <div className="flex flex-col items-center justify-center py-24 text-center">
-        <Brain className="h-10 w-10 text-white/20 mb-4" aria-hidden="true" />
-        <p className="text-white/40 text-sm">
-          Access restricted to the engineering team.
-        </p>
-      </div>
+      <MissionHubShell title="Design Rule">
+        <div className="flex flex-col items-center justify-center py-24 text-center">
+          <Brain className="h-10 w-10 text-white/20 mb-4" aria-hidden="true" />
+          <p className="text-white/40 text-sm">
+            Access restricted to the engineering team.
+          </p>
+        </div>
+      </MissionHubShell>
     );
   }
 
-  return <SmeBrainContent engineerName={engineerName} userId={profile!.id} />;
+  return (
+    <MissionHubShell title="Design Rule">
+      <DesignRuleContent
+        engineerName={profile?.full_name ?? "Unknown Engineer"}
+        userId={profile.id}
+        isAdmin={isAdmin}
+      />
+    </MissionHubShell>
+  );
 }
 
-function SmeBrainContent({ engineerName, userId }: { engineerName: string; userId: string }) {
+function DesignRuleContent({ engineerName, userId, isAdmin }: { engineerName: string; userId: string; isAdmin: boolean }) {
   const [rules, setRules]             = useState<DesignRule[]>([]);
   const [loadingRules, setLoading]    = useState(true);
   const [saving, setSaving]           = useState(false);
@@ -72,8 +72,8 @@ function SmeBrainContent({ engineerName, userId }: { engineerName: string; userI
         toast.success("Rule updated successfully.");
       } else {
         const saved = await insertDesignRule(form);
-        setRules(r => [saved, ...r]);
-        toast.success("Design rule saved to SME Brain.");
+        setRules((r) => [saved, ...r]);
+        toast.success("Design rule saved to Design Rule.");
       }
     } catch (e: unknown) {
       toast.error(e instanceof Error ? e.message : "Save failed.");
@@ -85,7 +85,7 @@ function SmeBrainContent({ engineerName, userId }: { engineerName: string; userI
   const handleDelete = async (id: string) => {
     try {
       await deleteDesignRule(id);
-      setRules(r => r.filter(x => x.id !== id));
+      setRules((r) => r.filter((x) => x.id !== id));
       setSelected(null);
       toast.success("Rule deleted.");
     } catch (e: unknown) {
@@ -97,31 +97,6 @@ function SmeBrainContent({ engineerName, userId }: { engineerName: string; userI
     setEditingRule(rule);
     setSelected(null);
     window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
-  const handlePromote = async (rule: DesignRule) => {
-    const droneLabel = rule.drone_type ?? "Drone";
-    const payloadPart = rule.payload_max_kg != null ? ` Payload up to ${rule.payload_max_kg} kg.` : "";
-    const noteParts = [rule.engineering_notes, "Reference: see real-world implementation (link TBD)"].filter(Boolean);
-
-    const { error } = await supabase.from("reference_designs").insert({
-      name:                  rule.purpose,
-      purpose:               rule.purpose,
-      description:           `${droneLabel} for ${rule.purpose}.${payloadPart}`,
-      vertical:              VERTICAL_MAP[rule.vertical] ?? null,
-      drone_type:            rule.drone_type ?? null,
-      frame_size:            rule.frame_size ?? null,
-      motor_class:           rule.motor_class ?? null,
-      battery:               rule.battery ?? null,
-      estimated_flight_time: rule.flight_time_min ?? null,
-      payload_weight:        rule.payload_max_kg,
-      confidence_score:      rule.confidence_level != null ? rule.confidence_level * 20 : 60,
-      engineer_notes:        noteParts.length > 0 ? noteParts.join("\n") : null,
-      approval_status:       "pending",
-      created_by:            userId,
-    });
-    if (error) throw new Error(error.message);
-    toast.success("Promoted to Proven Designs (pending review)");
   };
 
   const stars = (n: number | null) => {
@@ -136,19 +111,37 @@ function SmeBrainContent({ engineerName, userId }: { engineerName: string; userI
       ? "text-amber-400"
       : "text-red-400";
 
-  /* Strip id/created_at/updated_at when pre-populating the form */
+  const relativeTime = (iso: string): string => {
+    const diff = Date.now() - new Date(iso).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return 'just now';
+    if (mins < 60) return `${mins}m ago`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs}h ago`;
+    return `${Math.floor(hrs / 24)}d ago`;
+  };
+
   const editInitial = editingRule
     ? (({ id: _id, created_at: _c, updated_at: _u, ...rest }) => rest)(editingRule)
     : undefined;
 
+  const totalMatches = rules.reduce((s, r) => s + (r.match_count ?? 0), 0);
+  const neverMatched = rules.filter(r => (r.match_count ?? 0) === 0).length;
+  const sumFallbacks = rules.reduce((s, r) => s + (r.fallback_count ?? 0), 0);
+  const fallbackRate = totalMatches > 0 ? Math.round((sumFallbacks / totalMatches) * 100) : 0;
+  const gridCols = isAdmin
+    ? "grid-cols-[2fr_1fr_1fr_1fr_1fr_80px_80px_60px_70px_70px_90px]"
+    : "grid-cols-[2fr_1fr_1fr_1fr_1fr_80px_80px_60px]";
+
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8 space-y-10">
+    <div className="max-w-6xl mx-auto space-y-10">
+
       {/* Page header */}
       <div>
         <div className="flex items-center gap-2">
           <Brain className="h-5 w-5 text-[#378ADD]" aria-hidden="true" />
           <h1 className="text-2xl font-semibold text-white">
-            SME Brain — Design Knowledge Capture
+            Design Rule — Design Knowledge Capture
           </h1>
         </div>
         <p className="text-sm text-white/50 mt-1 max-w-2xl">
@@ -178,6 +171,7 @@ function SmeBrainContent({ engineerName, userId }: { engineerName: string; userI
       {/* Form */}
       <RuleForm
         engineerName={engineerName}
+        userId={userId}
         initial={editInitial}
         onSave={handleSave}
         saving={saving}
@@ -192,10 +186,16 @@ function SmeBrainContent({ engineerName, userId }: { engineerName: string; userI
         <div className="flex-1 h-px bg-white/[0.08]" />
       </div>
 
+      {isAdmin && !loadingRules && rules.length > 0 && (
+        <p className="text-xs text-white/40 mb-3">
+          {totalMatches} total matches · {neverMatched} rule{neverMatched !== 1 ? 's' : ''} never matched · {fallbackRate}% fallback rate
+        </p>
+      )}
+
       {/* Rules list */}
       <div className="bg-[#0d1b2e]/60 border border-white/[0.08] rounded-xl overflow-hidden">
         {/* Table header */}
-        <div className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr_80px_80px_60px] bg-[#0a0f1c] text-[11px] uppercase text-white/40 px-4 py-3 gap-3">
+        <div className={`grid ${gridCols} bg-[#0a0f1c] text-[11px] uppercase text-white/40 px-4 py-3 gap-3`}>
           <span>Purpose</span>
           <span>Vertical</span>
           <span>Drone type</span>
@@ -204,11 +204,14 @@ function SmeBrainContent({ engineerName, userId }: { engineerName: string; userI
           <span>Conf</span>
           <span>Date</span>
           <span>Active</span>
+          {isAdmin && <span>Matches</span>}
+          {isAdmin && <span>Fallbacks</span>}
+          {isAdmin && <span>Last Hit</span>}
         </div>
 
         {/* Loading skeleton */}
         {loadingRules &&
-          [0, 1, 2].map(i => (
+          [0, 1, 2].map((i) => (
             <div
               key={i}
               className="h-12 mx-4 my-2 rounded bg-white/5 animate-pulse"
@@ -229,11 +232,11 @@ function SmeBrainContent({ engineerName, userId }: { engineerName: string; userI
 
         {/* Rows */}
         {!loadingRules &&
-          rules.map(rule => (
+          rules.map((rule) => (
             <div
               key={rule.id}
               onDoubleClick={() => setSelected(rule)}
-              className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr_80px_80px_60px] border-t border-white/[0.05] px-4 py-3 gap-3 items-center cursor-pointer hover:bg-white/[0.04] transition-colors"
+              className={`grid ${gridCols} border-t border-white/[0.05] px-4 py-3 gap-3 items-center cursor-pointer hover:bg-white/[0.04] transition-colors`}
             >
               <span className="text-white/85 text-sm truncate">{rule.purpose}</span>
               <span className="text-white/60 text-[12px] truncate">{rule.vertical}</span>
@@ -255,6 +258,21 @@ function SmeBrainContent({ engineerName, userId }: { engineerName: string; userI
                   className={`w-2 h-2 rounded-full ${rule.is_active ? "bg-emerald-400" : "bg-white/20"}`}
                 />
               </span>
+              {isAdmin && (
+                <span className={`text-[12px] ${(rule.match_count ?? 0) > 0 ? 'text-white' : 'text-white/25'}`}>
+                  {(rule.match_count ?? 0) > 0 ? rule.match_count : '—'}
+                </span>
+              )}
+              {isAdmin && (
+                <span className={`text-[12px] ${(rule.fallback_count ?? 0) > 0 ? 'text-amber-400' : 'text-white/25'}`}>
+                  {(rule.fallback_count ?? 0) > 0 ? rule.fallback_count : '—'}
+                </span>
+              )}
+              {isAdmin && (
+                <span className={`text-[12px] ${rule.last_matched_at ? 'text-white/60' : 'text-white/25'}`}>
+                  {rule.last_matched_at ? relativeTime(rule.last_matched_at) : 'Never'}
+                </span>
+              )}
             </div>
           ))}
 
@@ -272,7 +290,6 @@ function SmeBrainContent({ engineerName, userId }: { engineerName: string; userI
         onClose={() => setSelected(null)}
         onEdit={handleEdit}
         onDelete={handleDelete}
-        onPromote={handlePromote}
       />
     </div>
   );

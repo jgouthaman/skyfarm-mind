@@ -8,26 +8,36 @@ export interface DesignRule {
   payload_min_kg:     number | null;
   payload_max_kg:     number | null;
   flight_time_min:    number | null;
-  terrain:            string | null;
+  flight_time_max:    number | null;
+  terrain_types:      string | null;
   wind_condition:     string | null;
   automation_level:   string | null;
   budget_range:       string | null;
   frame_size:         string | null;
   motor_class:        string | null;
+  motor_count:        number | null;
   esc_rating:         string | null;
-  propeller_size:     string | null;
-  battery:            string | null;
+  propeller_spec:     string | null;
+  battery_config:     string | null;
   flight_controller:  string | null;
   gps_type:           string | null;
   payload_system:     string | null;
   risk_level:         string | null;
+  twr_min:            number | null;
   cost_min_inr:       number | null;
   cost_max_inr:       number | null;
-  engineering_notes:  string | null;
+  engineer_notes:     string | null;
   risk_flags:         string[] | null;
   is_active:          boolean;
+  rule_name:          string | null;
+  status:             string | null;
+  created_by:         string | null;
+  user_type:          string | null;
   created_at:         string;
   updated_at:         string;
+  match_count:        number | null;
+  fallback_count:     number | null;
+  last_matched_at:    string | null;
 }
 
 export type DesignRuleInsert = Omit<DesignRule, "id" | "created_at" | "updated_at">;
@@ -41,24 +51,31 @@ export const EMPTY_RULE: DesignRuleInsert = {
   payload_min_kg:    null,
   payload_max_kg:    null,
   flight_time_min:   null,
-  terrain:           null,
+  flight_time_max:   null,
+  terrain_types:     null,
   wind_condition:    null,
   automation_level:  null,
   budget_range:      null,
   frame_size:        null,
   motor_class:       null,
+  motor_count:       null,
   esc_rating:        null,
-  propeller_size:    null,
-  battery:           null,
+  propeller_spec:    null,
+  battery_config:    null,
   flight_controller: null,
   gps_type:          null,
   payload_system:    null,
   risk_level:        "Safe",
+  twr_min:           null,
   cost_min_inr:      null,
   cost_max_inr:      null,
-  engineering_notes: null,
+  engineer_notes:    null,
   risk_flags:        [],
   is_active:         true,
+  rule_name:         null,
+  status:            null,
+  created_by:        null,
+  user_type:         null,
 };
 
 export const SPECIALISATION_OPTIONS = [

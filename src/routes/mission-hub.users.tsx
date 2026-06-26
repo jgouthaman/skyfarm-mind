@@ -34,10 +34,7 @@ function UsersPage() {
   return (
     <MissionHubShell title="Users">
       <div className="flex items-center justify-between mb-5">
-        <div className="flex items-center gap-2.5">
-          <h2 className="text-[22px] text-white" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Users</h2>
-          <span className="text-[12px] px-2.5 py-0.5 rounded-full" style={{ background: "rgba(55,138,221,0.12)", color: "#378ADD" }}>{users.length}</span>
-        </div>
+        <span className="text-[12px] px-2.5 py-0.5 rounded-full" style={{ background: "rgba(55,138,221,0.12)", color: "#378ADD" }}>{users.length} users</span>
         <button
           onClick={() => setShowCreate(true)}
           className="flex items-center gap-1.5 bg-[#185FA5] hover:bg-[#378ADD] text-white text-[13px] rounded-lg px-3.5 py-2 transition-colors"

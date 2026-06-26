@@ -18,6 +18,7 @@ import {
 
 interface Props {
   engineerName: string;
+  userId?:      string;
   initial?:     DesignRuleInsert;
   onSave:       (rule: DesignRuleInsert) => Promise<void>;
   saving:       boolean;
@@ -69,7 +70,7 @@ function F({ label, children }: { label: string; children: ReactNode }) {
   );
 }
 
-export function RuleForm({ engineerName, initial, onSave, saving, isEditing }: Props) {
+export function RuleForm({ engineerName, userId, initial, onSave, saving, isEditing }: Props) {
   const [form, setForm]           = useState<DesignRuleInsert>(initial ?? EMPTY_RULE);
   const [flagInput, setFlagInput] = useState("");
   const [error, setError]         = useState("");
@@ -88,6 +89,14 @@ export function RuleForm({ engineerName, initial, onSave, saving, isEditing }: P
   return (
     <div className="space-y-4">
 
+      {/* Rule name */}
+      <F label="Rule name">
+        <input type="text" className={INP}
+          placeholder="e.g. Heavy-lift agri sprayer — hexacopter"
+          value={form.rule_name ?? ""}
+          onChange={e => patch({ rule_name: e.target.value || null })} />
+      </F>
+
       {/* Identity strip */}
       <div className="bg-white/5 border border-white/[0.08] rounded-xl px-5 py-3 flex items-center gap-4">
         <div className="bg-[#378ADD]/20 text-[#378ADD] w-9 h-9 rounded-full flex items-center justify-center text-sm font-semibold shrink-0">
@@ -99,7 +108,14 @@ export function RuleForm({ engineerName, initial, onSave, saving, isEditing }: P
             Submitting as · knowledge auto-attributed to your profile
           </div>
         </div>
-        <div className="ml-auto shrink-0">
+        <div className="ml-auto shrink-0 flex items-end gap-3">
+          <F label="Status">
+            <Sel value={form.status ?? "draft"} onChange={e => patch({ status: e.target.value })}>
+              <option value="draft">Draft</option>
+              <option value="active">Active</option>
+              <option value="deprecated">Deprecated</option>
+            </Sel>
+          </F>
           <F label="Your confidence">
             <Sel value={form.confidence_level ?? 5} onChange={e => patch({ confidence_level: +e.target.value })}>
               <option value={1}>1 – Uncertain</option>
@@ -138,6 +154,15 @@ export function RuleForm({ engineerName, initial, onSave, saving, isEditing }: P
               {((PURPOSE_OPTIONS as Record<string, string[]>)[form.vertical] ?? []).map(p => (
                 <option key={p} value={p}>{p}</option>
               ))}
+            </Sel>
+          </F>
+
+          <F label="User type">
+            <Sel value={form.user_type ?? ""} onChange={e => patch({ user_type: e.target.value || null })}>
+              <option value="">All types</option>
+              <option value="commercial">Commercial</option>
+              <option value="research">Research</option>
+              <option value="defence">Defence</option>
             </Sel>
           </F>
 
@@ -181,12 +206,17 @@ export function RuleForm({ engineerName, initial, onSave, saving, isEditing }: P
               value={form.flight_time_min ?? ""}
               onChange={e => patch({ flight_time_min: e.target.value ? +e.target.value : null })} />
           </F>
+          <F label="Max flight time (min)">
+            <input type="number" className={INP} placeholder="e.g. 45"
+              value={form.flight_time_max ?? ""}
+              onChange={e => patch({ flight_time_max: e.target.value ? +e.target.value : null })} />
+          </F>
 
           <span className="col-span-full text-[11px] text-white/25 uppercase tracking-wider mt-3">
             Environment
           </span>
           <F label="Terrain">
-            <Sel value={form.terrain ?? ""} onChange={e => patch({ terrain: e.target.value || null })}>
+            <Sel value={form.terrain_types ?? ""} onChange={e => patch({ terrain_types: e.target.value || null })}>
               <option value="">Any</option>
               {TERRAIN_OPTIONS.map(t => <option key={t} value={t}>{t}</option>)}
             </Sel>
@@ -223,7 +253,7 @@ export function RuleForm({ engineerName, initial, onSave, saving, isEditing }: P
         </p>
 
         {/* Structure */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
           <span className="col-span-full text-[11px] text-white/25 uppercase tracking-wider">
             Structure
           </span>
@@ -236,6 +266,15 @@ export function RuleForm({ engineerName, initial, onSave, saving, isEditing }: P
             <input type="text" className={INP} placeholder="e.g. Heavy-lift agricultural"
               value={form.motor_class ?? ""}
               onChange={e => patch({ motor_class: e.target.value || null })} />
+          </F>
+          <F label="Motor count">
+            <Sel value={form.motor_count ?? ""} onChange={e => patch({ motor_count: e.target.value ? +e.target.value : null })}>
+              <option value="">Select</option>
+              <option value={4}>4</option>
+              <option value={6}>6</option>
+              <option value={8}>8</option>
+              <option value={12}>12</option>
+            </Sel>
           </F>
           <F label="ESC rating">
             <input type="text" className={INP} placeholder="e.g. 80A"
@@ -251,13 +290,13 @@ export function RuleForm({ engineerName, initial, onSave, saving, isEditing }: P
           </span>
           <F label="Propeller size">
             <input type="text" className={INP} placeholder="e.g. 15 inch"
-              value={form.propeller_size ?? ""}
-              onChange={e => patch({ propeller_size: e.target.value || null })} />
+              value={form.propeller_spec ?? ""}
+              onChange={e => patch({ propeller_spec: e.target.value || null })} />
           </F>
           <F label="Battery">
             <input type="text" className={INP} placeholder="e.g. 12S 22000mAh"
-              value={form.battery ?? ""}
-              onChange={e => patch({ battery: e.target.value || null })} />
+              value={form.battery_config ?? ""}
+              onChange={e => patch({ battery_config: e.target.value || null })} />
           </F>
           <F label="Flight controller">
             <input type="text" className={INP} placeholder="e.g. Pixhawk 6C"
@@ -269,6 +308,18 @@ export function RuleForm({ engineerName, initial, onSave, saving, isEditing }: P
               <option value="">Select GPS</option>
               {GPS_OPTIONS.map(g => <option key={g} value={g}>{g}</option>)}
             </Sel>
+          </F>
+        </div>
+
+        {/* Performance */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+          <span className="col-span-full text-[11px] text-white/25 uppercase tracking-wider mt-3">
+            Performance
+          </span>
+          <F label="Min thrust-to-weight ratio (TWR)">
+            <input type="number" step="0.1" className={INP} placeholder="e.g. 2.0"
+              value={form.twr_min ?? ""}
+              onChange={e => patch({ twr_min: e.target.value ? +e.target.value : null })} />
           </F>
         </div>
 
@@ -311,8 +362,8 @@ export function RuleForm({ engineerName, initial, onSave, saving, isEditing }: P
           className="w-full bg-white/[0.08] border border-white/[0.12] rounded-xl p-3 text-sm text-white placeholder-white/30 resize-none focus:outline-none focus:border-white/30 transition-colors"
           rows={3}
           placeholder="Explain why this configuration works for the above conditions. Include trade-offs, cautions, or field observations."
-          value={form.engineering_notes ?? ""}
-          onChange={e => patch({ engineering_notes: e.target.value || null })}
+          value={form.engineer_notes ?? ""}
+          onChange={e => patch({ engineer_notes: e.target.value || null })}
         />
         <div className="mt-3">
           <div className="flex flex-wrap gap-2 mb-2">
@@ -366,7 +417,7 @@ export function RuleForm({ engineerName, initial, onSave, saving, isEditing }: P
               return;
             }
             setError("");
-            await onSave({ ...form, engineer_name: engineerName });
+            await onSave({ ...form, engineer_name: engineerName, created_by: userId ?? null });
           }}
           className="bg-[#378ADD] text-white h-10 px-8 rounded-lg text-sm font-medium hover:opacity-90 disabled:opacity-50 transition-opacity shrink-0"
         >

@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Plane, Menu, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { NAV_LINKS } from "@/constants/nav.constants";
 
 export function Navbar() {
@@ -24,12 +23,6 @@ export function Navbar() {
             </Link>
           ))}
         </nav>
-
-        <div className="hidden md:flex items-center gap-2">
-          <Button asChild size="sm" className="bg-gradient-primary text-primary-foreground hover:opacity-90">
-            <Link to="/contact">Partner with us</Link>
-          </Button>
-        </div>
 
         <button
           className="md:hidden p-2 rounded-md hover:bg-muted"
@@ -55,9 +48,6 @@ export function Navbar() {
                 {n.label}
               </Link>
             ))}
-            <Button asChild size="sm" className="bg-gradient-primary text-primary-foreground">
-              <Link to="/contact" onClick={() => setOpen(false)}>Partner with us</Link>
-            </Button>
           </div>
         </div>
       )}

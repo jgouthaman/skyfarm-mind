@@ -74,8 +74,10 @@ export function MissionHubShell({ title, children }: { title: string; children: 
 
 type Section = "business" | "industries" | "twbc" | "knowledge" | "config";
 
-function getSectionFromPath(path: string): Section | null {
-  if (path === "/mission-hub/twbc-drone-proven-designs") return "knowledge";
+function getSectionFromPath(path: string, role?: string): Section | null {
+  if (path === "/mission-hub/twbc-drone-proven-designs") {
+    return role === "super_admin" ? "twbc" : "knowledge";
+  }
   if (path === "/mission-hub/waitlist" || path === "/mission-hub/contacts") return "business";
   if (path.startsWith("/mission-hub/twbc-") || path === "/mission-hub/knowledge-uav") return "twbc";
   if (
@@ -87,6 +89,22 @@ function getSectionFromPath(path: string): Section | null {
   return null;
 }
 
+function getTwbcOpenFromPath(path: string) {
+  const kb = [
+    "/mission-hub/twbc-drone-design-rule",
+    "/mission-hub/twbc-drone-proven-designs",
+    "/mission-hub/twbc-drone-components-library",
+  ].includes(path);
+  const ie = ["/mission-hub/twbc-drone-rule-engine"].includes(path);
+  const er = [
+    "/mission-hub/twbc-drone-design-score",
+    "/mission-hub/twbc-drone-approval",
+    "/mission-hub/twbc-drone-feedback",
+  ].includes(path);
+  const drone = kb || ie || er;
+  return { drone, kb, ie, er };
+}
+
 function Sidebar({
   profile, verticals, open, onClose, onSignOut,
 }: {
@@ -96,14 +114,26 @@ function Sidebar({
   const role = profile.role as "super_admin" | "admin" | "user";
   const isAdmin = role === "super_admin" || role === "admin";
 
-  const [openSection, setOpenSection] = useState<Section | null>(() => getSectionFromPath(path));
+  const [openSection, setOpenSection] = useState<Section | null>(() => getSectionFromPath(path, role));
   const toggle = (s: Section) => setOpenSection(cur => cur === s ? null : s);
 
   useEffect(() => {
-    setOpenSection(getSectionFromPath(path));
+    setOpenSection(getSectionFromPath(path, role));
   }, [path]);
 
-  const [twbcOpen, setTwbcOpen] = useState({ drone: false, l1: false, l2: false, l3: false, l4: false });
+  useEffect(() => {
+    const derived = getTwbcOpenFromPath(path);
+    if (derived.drone) {
+      setTwbcOpen(s => ({
+        drone: true,
+        kb: s.kb || derived.kb,
+        ie: s.ie || derived.ie,
+        er: s.er || derived.er,
+      }));
+    }
+  }, [path]);
+
+  const [twbcOpen, setTwbcOpen] = useState(() => getTwbcOpenFromPath(path));
   const toggleTwbc = (k: keyof typeof twbcOpen) => setTwbcOpen(s => ({ ...s, [k]: !s[k] }));
 
   const visibleVerticals: Vertical[] = isAdmin ? ALL_VERTICALS : verticals;
@@ -139,7 +169,7 @@ function Sidebar({
         {isAdmin && (
           <>
             <button type="button" onClick={() => toggle("business")}
-              className="mb-2 flex w-full items-center px-3 text-[10px] uppercase tracking-wider text-white/30 hover:text-white/50 transition-colors">
+              className="mb-2 flex w-full items-center px-3 text-[10px] uppercase tracking-wider text-white/70 hover:text-white/90 transition-colors">
               <span className="flex-1 text-left">Business</span>
               {openSection === "business" ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
             </button>
@@ -156,7 +186,7 @@ function Sidebar({
           <button
             type="button"
             onClick={() => toggle("industries")}
-            className="mt-5 mb-2 flex w-full items-center px-3 text-[10px] uppercase tracking-wider text-white/30 hover:text-white/50 transition-colors"
+            className="mt-5 mb-2 flex w-full items-center px-3 text-[10px] uppercase tracking-wider text-white/70 hover:text-white/90 transition-colors"
           >
             <span className="flex-1 text-left">Industries</span>
             {openSection === "industries"
@@ -179,8 +209,8 @@ function Sidebar({
         {isAdmin && (
           <div className="mt-5 space-y-0.5">
             <button type="button" onClick={() => toggle("twbc")}
-              className="mb-2 flex w-full items-center px-3 text-[10px] uppercase tracking-wider text-white/30 hover:text-white/50 transition-colors">
-              <span className="flex-1 text-left">TWBC</span>
+              className="mb-2 flex w-full items-center px-3 text-[10px] uppercase tracking-wider text-white/70 hover:text-white/90 transition-colors">
+              <span className="flex-1 text-left">Design Intelligence</span>
               {openSection === "twbc" ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
             </button>
 
@@ -196,54 +226,39 @@ function Sidebar({
             {twbcOpen.drone && (
               <div className="ml-3 border-l border-white/[0.06] pl-1.5 space-y-0.5">
 
-                {/* Layer 1 */}
-                <button type="button" onClick={() => toggleTwbc("l1")}
+                {/* Knowledge Base */}
+                <button type="button" onClick={() => toggleTwbc("kb")}
                   className="flex w-full items-center gap-2 px-3 py-1.5 rounded-md text-[12px] text-white/55 hover:bg-white/[0.04] hover:text-white transition-colors">
-                  <span className="flex-1 truncate text-left">Layer 1</span>
-                  {twbcOpen.l1 ? <ChevronDown className="h-3 w-3 opacity-40" /> : <ChevronRight className="h-3 w-3 opacity-40" />}
+                  <span className="flex-1 truncate text-left">Knowledge Base</span>
+                  {twbcOpen.kb ? <ChevronDown className="h-3 w-3 opacity-40" /> : <ChevronRight className="h-3 w-3 opacity-40" />}
                 </button>
-                {twbcOpen.l1 && (
+                {twbcOpen.kb && (
                   <div className="ml-3 border-l border-white/[0.06] pl-1.5 space-y-0.5">
-                    <TwbcLeaf to="/mission-hub/twbc-drone-sme-brain" active={path === "/mission-hub/twbc-drone-sme-brain"} onClick={onClose}>SME Brain</TwbcLeaf>
+                    <TwbcLeaf to="/mission-hub/twbc-drone-design-rule" active={path === "/mission-hub/twbc-drone-design-rule"} onClick={onClose}>Design Rules</TwbcLeaf>
                     <TwbcLeaf to="/mission-hub/twbc-drone-proven-designs" active={path === "/mission-hub/twbc-drone-proven-designs"} onClick={onClose}>Proven Designs</TwbcLeaf>
+                    <TwbcLeaf to="/mission-hub/twbc-drone-components-library" active={path === "/mission-hub/twbc-drone-components-library"} onClick={onClose}>Components</TwbcLeaf>
                   </div>
                 )}
 
-                {/* Layer 2 */}
-                <button type="button" onClick={() => toggleTwbc("l2")}
+                {/* Intelligence Engine */}
+                <button type="button" onClick={() => toggleTwbc("ie")}
                   className="flex w-full items-center gap-2 px-3 py-1.5 rounded-md text-[12px] text-white/55 hover:bg-white/[0.04] hover:text-white transition-colors">
-                  <span className="flex-1 truncate text-left">Layer 2</span>
-                  {twbcOpen.l2 ? <ChevronDown className="h-3 w-3 opacity-40" /> : <ChevronRight className="h-3 w-3 opacity-40" />}
+                  <span className="flex-1 truncate text-left">Intelligence Engine</span>
+                  {twbcOpen.ie ? <ChevronDown className="h-3 w-3 opacity-40" /> : <ChevronRight className="h-3 w-3 opacity-40" />}
                 </button>
-                {twbcOpen.l2 && (
-                  <div className="ml-3 border-l border-white/[0.06] pl-1.5 space-y-0.5">
-                    <TwbcLeaf to="/mission-hub/twbc-drone-design-rules" active={path === "/mission-hub/twbc-drone-design-rules"} onClick={onClose}>Design Rules</TwbcLeaf>
-                    <TwbcLeaf to="/mission-hub/twbc-drone-reference-designs" active={path === "/mission-hub/twbc-drone-reference-designs"} onClick={onClose}>Reference Designs</TwbcLeaf>
-                    <TwbcLeaf to="/mission-hub/twbc-drone-components-library" active={path === "/mission-hub/twbc-drone-components-library"} onClick={onClose}>Components Library</TwbcLeaf>
-                  </div>
-                )}
-
-                {/* Layer 3 */}
-                <button type="button" onClick={() => toggleTwbc("l3")}
-                  className="flex w-full items-center gap-2 px-3 py-1.5 rounded-md text-[12px] text-white/55 hover:bg-white/[0.04] hover:text-white transition-colors">
-                  <span className="flex-1 truncate text-left">Layer 3</span>
-                  {twbcOpen.l3 ? <ChevronDown className="h-3 w-3 opacity-40" /> : <ChevronRight className="h-3 w-3 opacity-40" />}
-                </button>
-                {twbcOpen.l3 && (
+                {twbcOpen.ie && (
                   <div className="ml-3 border-l border-white/[0.06] pl-1.5 space-y-0.5">
                     <TwbcLeaf to="/mission-hub/twbc-drone-rule-engine" active={path === "/mission-hub/twbc-drone-rule-engine"} onClick={onClose}>Rule Engine</TwbcLeaf>
-                    <TwbcLeaf to="/mission-hub/twbc-drone-similarity-search" active={path === "/mission-hub/twbc-drone-similarity-search"} onClick={onClose}>Similarity Search</TwbcLeaf>
-                    <TwbcLeaf to="/mission-hub/twbc-drone-reasoning-api" active={path === "/mission-hub/twbc-drone-reasoning-api"} onClick={onClose}>Reasoning API</TwbcLeaf>
                   </div>
                 )}
 
-                {/* Layer 4 */}
-                <button type="button" onClick={() => toggleTwbc("l4")}
+                {/* Engineer Review */}
+                <button type="button" onClick={() => toggleTwbc("er")}
                   className="flex w-full items-center gap-2 px-3 py-1.5 rounded-md text-[12px] text-white/55 hover:bg-white/[0.04] hover:text-white transition-colors">
-                  <span className="flex-1 truncate text-left">Layer 4</span>
-                  {twbcOpen.l4 ? <ChevronDown className="h-3 w-3 opacity-40" /> : <ChevronRight className="h-3 w-3 opacity-40" />}
+                  <span className="flex-1 truncate text-left">Engineer Review</span>
+                  {twbcOpen.er ? <ChevronDown className="h-3 w-3 opacity-40" /> : <ChevronRight className="h-3 w-3 opacity-40" />}
                 </button>
-                {twbcOpen.l4 && (
+                {twbcOpen.er && (
                   <div className="ml-3 border-l border-white/[0.06] pl-1.5 space-y-0.5">
                     <TwbcLeaf to="/mission-hub/twbc-drone-design-score" active={path === "/mission-hub/twbc-drone-design-score"} onClick={onClose}>Design Score</TwbcLeaf>
                     <TwbcLeaf to="/mission-hub/twbc-drone-approval" active={path === "/mission-hub/twbc-drone-approval"} onClick={onClose}>Approval</TwbcLeaf>
@@ -261,10 +276,10 @@ function Sidebar({
           </div>
         )}
 
-        {hasDesignStudio && (
+        {hasDesignStudio && role !== "super_admin" && (
           <div className="mt-5 space-y-0.5">
             <button type="button" onClick={() => toggle("knowledge")}
-              className="mb-2 flex w-full items-center px-3 text-[10px] uppercase tracking-wider text-white/30 hover:text-white/50 transition-colors">
+              className="mb-2 flex w-full items-center px-3 text-[10px] uppercase tracking-wider text-white/70 hover:text-white/90 transition-colors">
               <span className="flex-1 text-left">Knowledge Base</span>
               {openSection === "knowledge" ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
             </button>
@@ -278,7 +293,7 @@ function Sidebar({
 
         <div className="mt-5 space-y-0.5">
           <button type="button" onClick={() => toggle("config")}
-            className="mb-2 flex w-full items-center px-3 text-[10px] uppercase tracking-wider text-white/30 hover:text-white/50 transition-colors">
+            className="mb-2 flex w-full items-center px-3 text-[10px] uppercase tracking-wider text-white/70 hover:text-white/90 transition-colors">
             <span className="flex-1 text-left">Configurations</span>
             {openSection === "config" ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
           </button>
