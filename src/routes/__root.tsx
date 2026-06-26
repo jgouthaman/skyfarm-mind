@@ -71,6 +71,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   head: () => ({
     meta: [
       { charSet: "utf-8" },
+      { name: "google-site-verification", content: "IL9yaYUX7jYk9iy6Z-N0xSWw6F_q86yJaKMUIKCSNBo" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
       { title: "TorqWings — Engineering the future of aerial intelligence" },
       { name: "description", content: "TorqWings builds AI-powered drone systems, custom UAVs, and aerial intelligence for agriculture, infrastructure, mapping, and surveillance." },
