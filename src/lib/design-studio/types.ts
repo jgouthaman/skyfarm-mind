@@ -1,3 +1,5 @@
+import type { IntelligenceResult } from '@/lib/intelligence/types';
+
 export type Vertical = "AgriSky" | "GuardSky" | "DeliverySky" | "TrainSky" | "Custom Drone Lab";
 export type Purpose =
   | "Agriculture spraying"
@@ -115,4 +117,5 @@ export interface DroneProject {
   status: "Draft" | "Designed" | "Simulated" | "Reviewed";
   createdAt: string;
   updatedAt: string;
+  design_recommendation: IntelligenceResult | null;
 }

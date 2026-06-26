@@ -37,7 +37,7 @@ function AdminDashboard() {
       const [a, b, c, d, e, leads, contacts] = await Promise.all([
         supabase.from("design_studio_leads").select("*", { count: "exact", head: true }),
         supabase.from("contacts").select("*", { count: "exact", head: true }),
-        supabase.from("profiles").select("*", { count: "exact", head: true }),
+        supabase.from("mission_hub_users").select("*", { count: "exact", head: true }),
         supabase.from("design_studio_leads").select("*", { count: "exact", head: true }).gte("created_at", since),
         supabase.from("contacts").select("*", { count: "exact", head: true }).gte("created_at", since),
         supabase.from("design_studio_leads").select("*").order("created_at", { ascending: false }).limit(5),

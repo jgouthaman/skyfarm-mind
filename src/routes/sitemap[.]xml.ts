@@ -17,10 +17,9 @@ export const Route = createFileRoute("/sitemap.xml")({
           { path: "/", changefreq: "weekly", priority: "1.0" },
           { path: "/field", changefreq: "monthly", priority: "0.6" },
           { path: "/pilot/login", changefreq: "monthly", priority: "0.5" },
-          { path: "/control-center/login", changefreq: "monthly", priority: "0.5" },
-          { path: "/control-center", changefreq: "monthly", priority: "0.4" },
-          { path: "/control-center/agrisky", changefreq: "monthly", priority: "0.4" },
-          { path: "/control-center/users", changefreq: "monthly", priority: "0.3" },
+          { path: "/mission-hub/login", changefreq: "monthly", priority: "0.5" },
+          { path: "/mission-hub/dashboard", changefreq: "monthly", priority: "0.4" },
+          { path: "/mission-hub/torqwings-design-studio", changefreq: "monthly", priority: "0.6" },
         ];
 
         const urls = entries.map((e) =>

@@ -4,11 +4,11 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Role, Vertical } from "./types";
 
 export type MhProfile = {
-  user_id: string;
+  id: string;
   full_name: string;
   email: string;
   role: Role;
-  is_active: boolean;
+  status: string;
   notification_prefs?: { new_lead?: boolean; new_contact?: boolean };
 };
 
@@ -38,9 +38,9 @@ export function MissionHubAuthProvider({ children }: { children: ReactNode }) {
       return;
     }
     const { data: p } = await supabase
-      .from("profiles")
-      .select("user_id, full_name, email, role, is_active, notification_prefs")
-      .eq("user_id", user.id)
+      .from("mission_hub_users")
+      .select("id, full_name, email, role, status, notification_prefs, industries")
+      .eq("id", user.id)
       .maybeSingle();
     if (!p) {
       await supabase.auth.signOut();
@@ -50,11 +50,7 @@ export function MissionHubAuthProvider({ children }: { children: ReactNode }) {
       return;
     }
     setProfile(p as any);
-    const { data: vs } = await supabase
-      .from("user_verticals")
-      .select("vertical")
-      .eq("user_id", user.id);
-    setVerticals(((vs as any) ?? []).map((r: any) => r.vertical));
+    setVerticals((p.industries as any) ?? []);
     setLoading(false);
   }
 

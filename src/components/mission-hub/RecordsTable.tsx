@@ -115,7 +115,7 @@ export function RecordsTable({
       <div className="flex items-center justify-between gap-3 mb-5">
         <div className="flex items-center gap-2.5">
           <h2 className="text-[22px] text-white" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-            {table === "design_studio_leads" ? "Waitlist" : "Contacts"}
+            {table === "design_studio_leads" ? "Subscriptions" : "Leads"}
           </h2>
           <span
             className="text-[12px] px-2.5 py-0.5 rounded-full"

@@ -14,7 +14,7 @@ const passwordSchema = z.string().min(8, "Password must be at least 8 characters
  * the hard-coded admin phone number.
  */
 export const bootstrapAdmin = createServerFn({ method: "POST" })
-  .inputValidator((input) =>
+  .validator((input) =>
     z.object({
       phone: phoneSchema,
       password: passwordSchema,
@@ -69,9 +69,9 @@ export const bootstrapAdmin = createServerFn({ method: "POST" })
     }
 
     // Ensure profile + admin role
-    await supabaseAdmin.from("profiles").upsert(
-      { user_id: userId, phone: data.phone, full_name: data.fullName ?? "Administrator" },
-      { onConflict: "user_id" },
+    await supabaseAdmin.from("mission_hub_users").upsert(
+      { id: userId, full_name: data.fullName ?? "Administrator" },
+      { onConflict: "id" },
     );
     const { error: roleErr } = await supabaseAdmin
       .from("user_roles")
@@ -107,7 +107,7 @@ async function assertCallerIsAdmin(userId: string) {
 /** Create a new control-center user (admin only). Role defaults to 'sme'. */
 export const createControlUser = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input) =>
+  .validator((input) =>
     z.object({
       phone: phoneSchema,
       password: passwordSchema,
@@ -129,9 +129,9 @@ export const createControlUser = createServerFn({ method: "POST" })
     if (createErr) throw new Error(createErr.message);
     const userId = created.user!.id;
 
-    await supabaseAdmin.from("profiles").upsert(
-      { user_id: userId, phone: data.phone, full_name: data.fullName },
-      { onConflict: "user_id" },
+    await supabaseAdmin.from("mission_hub_users").upsert(
+      { id: userId, full_name: data.fullName },
+      { onConflict: "id" },
     );
     const { error: roleErr } = await supabaseAdmin
       .from("user_roles")
@@ -144,7 +144,7 @@ export const createControlUser = createServerFn({ method: "POST" })
 /** Reset a user's password (admin only). */
 export const setUserPassword = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input) =>
+  .validator((input) =>
     z.object({
       userId: z.string().uuid(),
       password: passwordSchema,
@@ -167,7 +167,7 @@ export const listControlUsers = createServerFn({ method: "GET" })
     await assertCallerIsAdmin(context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const [{ data: profiles, error: pErr }, { data: roles, error: rErr }] = await Promise.all([
-      supabaseAdmin.from("profiles").select("user_id, phone, full_name, created_at").order("created_at", { ascending: false }),
+      supabaseAdmin.from("mission_hub_users").select("user_id:id, full_name, created_at").order("created_at", { ascending: false }),
       supabaseAdmin.from("user_roles").select("user_id, role"),
     ]);
     if (pErr) throw new Error(pErr.message);

@@ -349,6 +349,132 @@ export type Database = {
         }
         Relationships: []
       }
+      industries: {
+        Row: {
+          id: string
+          name: string
+          slug: string | null
+          color: string | null
+          sort_order: number | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          slug?: string | null
+          color?: string | null
+          sort_order?: number | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          slug?: string | null
+          color?: string | null
+          sort_order?: number | null
+          created_at?: string
+        }
+        Relationships: []
+      }
+      mission_hub_users: {
+        Row: {
+          id: string
+          auth_user_id: string | null
+          full_name: string | null
+          email: string | null
+          role: string
+          status: string
+          industries: string[]
+          notification_prefs: Json
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          auth_user_id?: string | null
+          full_name?: string | null
+          email?: string | null
+          role?: string
+          status?: string
+          industries?: string[]
+          notification_prefs?: Json
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          auth_user_id?: string | null
+          full_name?: string | null
+          email?: string | null
+          role?: string
+          status?: string
+          industries?: string[]
+          notification_prefs?: Json
+          created_at?: string
+        }
+        Relationships: []
+      }
+      reference_designs: {
+        Row: {
+          id: string
+          name: string
+          description: string | null
+          purpose: string | null
+          vertical: string | null
+          drone_type: string | null
+          frame_size: string | null
+          payload_weight: string | null
+          estimated_flight_time: number | null
+          motor_class: string | null
+          battery: string | null
+          confidence_score: number
+          engineer_notes: string | null
+          approval_status: string
+          approved_by: string | null
+          is_active: boolean
+          created_by: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          description?: string | null
+          purpose?: string | null
+          vertical?: string | null
+          drone_type?: string | null
+          frame_size?: string | null
+          payload_weight?: string | null
+          estimated_flight_time?: number | null
+          motor_class?: string | null
+          battery?: string | null
+          confidence_score?: number
+          engineer_notes?: string | null
+          approval_status?: string
+          approved_by?: string | null
+          is_active?: boolean
+          created_by?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          description?: string | null
+          purpose?: string | null
+          vertical?: string | null
+          drone_type?: string | null
+          frame_size?: string | null
+          payload_weight?: string | null
+          estimated_flight_time?: number | null
+          motor_class?: string | null
+          battery?: string | null
+          confidence_score?: number
+          engineer_notes?: string | null
+          approval_status?: string
+          approved_by?: string | null
+          is_active?: boolean
+          created_by?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
       studio_components: {
         Row: {
           created_at: string

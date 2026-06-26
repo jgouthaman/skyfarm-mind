@@ -7,23 +7,23 @@ const CreateUserSchema = z.object({
   email: z.string().email().max(255),
   password: z.string().min(8).max(128),
   role: z.enum(["user", "admin", "super_admin"]),
-  verticals: z.array(z.enum(["agrisky", "infrasky", "geosky", "guardsky", "labs", "academy", "design-studio"])).default([]),
+  industries: z.array(z.string()).default([]),
 });
 
 export const createMissionHubUser = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => CreateUserSchema.parse(d))
+  .validator((d: unknown) => CreateUserSchema.parse(d))
   .handler(async ({ data, context }) => {
-    // Verify caller is admin or super_admin
+    // Verify caller is an active admin or super_admin.
     const { data: caller } = await context.supabase
-      .from("profiles")
-      .select("role, is_active")
-      .eq("user_id", context.userId)
+      .from("mission_hub_users")
+      .select("role, status")
+      .eq("id", context.userId)
       .maybeSingle();
-    if (!caller || !caller.is_active || (caller.role !== "admin" && caller.role !== "super_admin")) {
+    if (!caller || caller.status !== "active" || (caller.role !== "admin" && caller.role !== "super_admin")) {
       throw new Error("Forbidden");
     }
-    // Admin cannot create admin or super_admin
+    // Admins cannot create admin or super_admin accounts.
     let role = data.role;
     if (caller.role === "admin" && role !== "user") {
       role = "user";
@@ -39,83 +39,63 @@ export const createMissionHubUser = createServerFn({ method: "POST" })
     if (cErr || !created?.user) throw new Error(cErr?.message ?? "Failed to create user");
     const newId = created.user.id;
 
-    const { error: pErr } = await supabaseAdmin
-      .from("profiles")
+    const { error: uErr } = await supabaseAdmin
+      .from("mission_hub_users")
       .upsert(
         {
-          user_id: newId,
+          id: newId,
           full_name: data.full_name,
           email: data.email,
           role,
-          is_active: true,
-          phone: null,
-          created_by: context.userId,
+          status: "active",
+          industries: data.industries,
         },
-        { onConflict: "user_id" },
+        { onConflict: "id" },
       );
-    if (pErr) throw new Error(pErr.message);
-
-    if (data.verticals.length) {
-      const rows = data.verticals.map((v) => ({
-        user_id: newId,
-        vertical: v,
-        mapped_by: context.userId,
-      }));
-      const { error: vErr } = await supabaseAdmin.from("user_verticals").upsert(rows, {
-        onConflict: "user_id,vertical",
-      });
-      if (vErr) throw new Error(vErr.message);
+    if (uErr) {
+      // Roll back the auth user so a retry isn't blocked by "email already exists".
+      await supabaseAdmin.auth.admin.deleteUser(newId);
+      throw new Error(uErr.message);
     }
 
-    return { ok: true, user_id: newId };
+    return { ok: true, id: newId };
   });
 
 const UpdateUserSchema = z.object({
-  user_id: z.string().uuid(),
+  id: z.string().uuid(),
   full_name: z.string().min(1).max(120).optional(),
   role: z.enum(["user", "admin", "super_admin"]).optional(),
-  is_active: z.boolean().optional(),
-  verticals: z.array(z.enum(["agrisky", "infrasky", "geosky", "guardsky", "labs", "academy", "design-studio"])).optional(),
+  status: z.enum(["active", "inactive", "pending"]).optional(),
+  industries: z.array(z.string()).optional(),
 });
 
 export const updateMissionHubUser = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => UpdateUserSchema.parse(d))
+  .validator((d: unknown) => UpdateUserSchema.parse(d))
   .handler(async ({ data, context }) => {
     const { data: caller } = await context.supabase
-      .from("profiles")
-      .select("role, is_active")
-      .eq("user_id", context.userId)
+      .from("mission_hub_users")
+      .select("role, status")
+      .eq("id", context.userId)
       .maybeSingle();
-    if (!caller || !caller.is_active) throw new Error("Forbidden");
+    if (!caller || caller.status !== "active") throw new Error("Forbidden");
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     const patch: Record<string, any> = {};
     if (data.full_name !== undefined) patch.full_name = data.full_name;
-    if (data.is_active !== undefined) patch.is_active = data.is_active;
+    if (data.status !== undefined) patch.status = data.status;
+    if (data.industries !== undefined) {
+      if (caller.role !== "admin" && caller.role !== "super_admin") throw new Error("Forbidden");
+      patch.industries = data.industries;
+    }
     if (data.role !== undefined) {
       if (caller.role !== "super_admin") throw new Error("Only super admin can change roles");
       patch.role = data.role;
     }
     if (Object.keys(patch).length) {
-      const { error } = await supabaseAdmin.from("profiles").update(patch as any).eq("user_id", data.user_id);
+      const { error } = await supabaseAdmin.from("mission_hub_users").update(patch as any).eq("id", data.id);
       if (error) throw new Error(error.message);
-    }
-
-    if (data.verticals) {
-      if (caller.role !== "admin" && caller.role !== "super_admin") throw new Error("Forbidden");
-      const { error: delErr } = await supabaseAdmin.from("user_verticals").delete().eq("user_id", data.user_id);
-      if (delErr) throw new Error(delErr.message);
-      if (data.verticals.length) {
-        const rows = data.verticals.map((v) => ({
-          user_id: data.user_id,
-          vertical: v,
-          mapped_by: context.userId,
-        }));
-        const { error } = await supabaseAdmin.from("user_verticals").insert(rows);
-        if (error) throw new Error(error.message);
-      }
     }
     return { ok: true };
   });

@@ -36,7 +36,7 @@ function VerticalPage() {
       const since = new Date(Date.now() - 7 * 86400000).toISOString();
       const [a, b, c, d] = await Promise.all([
         supabase.from("contacts").select("*", { count: "exact", head: true }).eq("vertical_interest", v),
-        supabase.from("user_verticals").select("*", { count: "exact", head: true }).eq("vertical", v),
+        supabase.from("mission_hub_users").select("*", { count: "exact", head: true }).contains("industries", [v]),
         supabase.from("contacts").select("*", { count: "exact", head: true }).eq("vertical_interest", v).gte("created_at", since),
         supabase.from("contacts").select("*").eq("vertical_interest", v).order("created_at", { ascending: false }).limit(20),
       ]);
@@ -49,10 +49,6 @@ function VerticalPage() {
 
   return (
     <MissionHubShell title={VERTICAL_LABELS[v]}>
-      <div className="flex items-center gap-3 mb-6">
-        <h2 className="text-[22px] text-white" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{VERTICAL_LABELS[v]}</h2>
-      </div>
-
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-7">
         <Stat label="Contacts from this vertical" value={stats.contacts} />
         <Stat label="Users mapped to this vertical" value={stats.users} />

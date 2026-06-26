@@ -30,7 +30,7 @@ function ContactsPage() {
   }, [loading, profile, navigate]);
 
   return (
-    <MissionHubShell title="Contacts">
+    <MissionHubShell title="Leads">
       <RecordsTable
         table="contacts"
         searchFields={["name", "email"]}

@@ -27,7 +27,7 @@ function WaitlistPage() {
   }, [loading, profile, navigate]);
 
   return (
-    <MissionHubShell title="Waitlist">
+    <MissionHubShell title="Subscriptions">
       <RecordsTable
         table="design_studio_leads"
         searchFields={["full_name", "email"]}
