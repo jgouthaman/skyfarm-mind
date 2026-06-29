@@ -1,1 +1,0 @@
-import{j as o,O as r}from"./index-DLNZrTfg.js";import{M as t}from"./context-DPNN4rcN.js";import{T as s}from"./index-DO-TQZIE.js";function m(){return o.jsxs(t,{children:[o.jsx(r,{}),o.jsx(s,{theme:"dark",position:"top-right",richColors:!0})]})}export{m as component};
