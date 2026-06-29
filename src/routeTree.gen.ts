@@ -44,12 +44,12 @@ import { Route as MissionHubContactsRouteImport } from './routes/mission-hub.con
 import { Route as LayoutTechnologyRouteImport } from './routes/_layout.technology'
 import { Route as LayoutSolutionsRouteImport } from './routes/_layout.solutions'
 import { Route as LayoutPilotsRouteImport } from './routes/_layout.pilots'
+import { Route as LayoutLearnRouteImport } from './routes/_layout.learn'
 import { Route as LayoutIndustriesRouteImport } from './routes/_layout.industries'
 import { Route as LayoutGuardskyRouteImport } from './routes/_layout.guardsky'
 import { Route as LayoutDesignStudioRouteImport } from './routes/_layout.design-studio'
 import { Route as LayoutContactRouteImport } from './routes/_layout.contact'
 import { Route as LayoutAgriskyRouteImport } from './routes/_layout.agrisky'
-import { Route as LayoutAcademyRouteImport } from './routes/_layout.academy'
 import { Route as LayoutAboutRouteImport } from './routes/_layout.about'
 import { Route as PilotMissionsIndexRouteImport } from './routes/pilot.missions.index'
 import { Route as MissionHubTorqwingsDesignStudioIndexRouteImport } from './routes/mission-hub.torqwings-design-studio.index'
@@ -252,6 +252,11 @@ const LayoutPilotsRoute = LayoutPilotsRouteImport.update({
   path: '/pilots',
   getParentRoute: () => LayoutRoute,
 } as any)
+const LayoutLearnRoute = LayoutLearnRouteImport.update({
+  id: '/learn',
+  path: '/learn',
+  getParentRoute: () => LayoutRoute,
+} as any)
 const LayoutIndustriesRoute = LayoutIndustriesRouteImport.update({
   id: '/industries',
   path: '/industries',
@@ -275,11 +280,6 @@ const LayoutContactRoute = LayoutContactRouteImport.update({
 const LayoutAgriskyRoute = LayoutAgriskyRouteImport.update({
   id: '/agrisky',
   path: '/agrisky',
-  getParentRoute: () => LayoutRoute,
-} as any)
-const LayoutAcademyRoute = LayoutAcademyRouteImport.update({
-  id: '/academy',
-  path: '/academy',
   getParentRoute: () => LayoutRoute,
 } as any)
 const LayoutAboutRoute = LayoutAboutRouteImport.update({
@@ -377,12 +377,12 @@ export interface FileRoutesByFullPath {
   '/pilot': typeof PilotRouteWithChildren
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/about': typeof LayoutAboutRoute
-  '/academy': typeof LayoutAcademyRoute
   '/agrisky': typeof LayoutAgriskyRoute
   '/contact': typeof LayoutContactRoute
   '/design-studio': typeof LayoutDesignStudioRoute
   '/guardsky': typeof LayoutGuardskyRoute
   '/industries': typeof LayoutIndustriesRoute
+  '/learn': typeof LayoutLearnRoute
   '/pilots': typeof LayoutPilotsRoute
   '/solutions': typeof LayoutSolutionsRoute
   '/technology': typeof LayoutTechnologyRoute
@@ -432,12 +432,12 @@ export interface FileRoutesByTo {
   '/mission-hub': typeof MissionHubRouteWithChildren
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/about': typeof LayoutAboutRoute
-  '/academy': typeof LayoutAcademyRoute
   '/agrisky': typeof LayoutAgriskyRoute
   '/contact': typeof LayoutContactRoute
   '/design-studio': typeof LayoutDesignStudioRoute
   '/guardsky': typeof LayoutGuardskyRoute
   '/industries': typeof LayoutIndustriesRoute
+  '/learn': typeof LayoutLearnRoute
   '/pilots': typeof LayoutPilotsRoute
   '/solutions': typeof LayoutSolutionsRoute
   '/technology': typeof LayoutTechnologyRoute
@@ -490,12 +490,12 @@ export interface FileRoutesById {
   '/pilot': typeof PilotRouteWithChildren
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/_layout/about': typeof LayoutAboutRoute
-  '/_layout/academy': typeof LayoutAcademyRoute
   '/_layout/agrisky': typeof LayoutAgriskyRoute
   '/_layout/contact': typeof LayoutContactRoute
   '/_layout/design-studio': typeof LayoutDesignStudioRoute
   '/_layout/guardsky': typeof LayoutGuardskyRoute
   '/_layout/industries': typeof LayoutIndustriesRoute
+  '/_layout/learn': typeof LayoutLearnRoute
   '/_layout/pilots': typeof LayoutPilotsRoute
   '/_layout/solutions': typeof LayoutSolutionsRoute
   '/_layout/technology': typeof LayoutTechnologyRoute
@@ -550,12 +550,12 @@ export interface FileRouteTypes {
     | '/pilot'
     | '/sitemap.xml'
     | '/about'
-    | '/academy'
     | '/agrisky'
     | '/contact'
     | '/design-studio'
     | '/guardsky'
     | '/industries'
+    | '/learn'
     | '/pilots'
     | '/solutions'
     | '/technology'
@@ -605,12 +605,12 @@ export interface FileRouteTypes {
     | '/mission-hub'
     | '/sitemap.xml'
     | '/about'
-    | '/academy'
     | '/agrisky'
     | '/contact'
     | '/design-studio'
     | '/guardsky'
     | '/industries'
+    | '/learn'
     | '/pilots'
     | '/solutions'
     | '/technology'
@@ -662,12 +662,12 @@ export interface FileRouteTypes {
     | '/pilot'
     | '/sitemap.xml'
     | '/_layout/about'
-    | '/_layout/academy'
     | '/_layout/agrisky'
     | '/_layout/contact'
     | '/_layout/design-studio'
     | '/_layout/guardsky'
     | '/_layout/industries'
+    | '/_layout/learn'
     | '/_layout/pilots'
     | '/_layout/solutions'
     | '/_layout/technology'
@@ -969,6 +969,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutPilotsRouteImport
       parentRoute: typeof LayoutRoute
     }
+    '/_layout/learn': {
+      id: '/_layout/learn'
+      path: '/learn'
+      fullPath: '/learn'
+      preLoaderRoute: typeof LayoutLearnRouteImport
+      parentRoute: typeof LayoutRoute
+    }
     '/_layout/industries': {
       id: '/_layout/industries'
       path: '/industries'
@@ -1002,13 +1009,6 @@ declare module '@tanstack/react-router' {
       path: '/agrisky'
       fullPath: '/agrisky'
       preLoaderRoute: typeof LayoutAgriskyRouteImport
-      parentRoute: typeof LayoutRoute
-    }
-    '/_layout/academy': {
-      id: '/_layout/academy'
-      path: '/academy'
-      fullPath: '/academy'
-      preLoaderRoute: typeof LayoutAcademyRouteImport
       parentRoute: typeof LayoutRoute
     }
     '/_layout/about': {
@@ -1121,12 +1121,12 @@ declare module '@tanstack/react-router' {
 
 interface LayoutRouteChildren {
   LayoutAboutRoute: typeof LayoutAboutRoute
-  LayoutAcademyRoute: typeof LayoutAcademyRoute
   LayoutAgriskyRoute: typeof LayoutAgriskyRoute
   LayoutContactRoute: typeof LayoutContactRoute
   LayoutDesignStudioRoute: typeof LayoutDesignStudioRoute
   LayoutGuardskyRoute: typeof LayoutGuardskyRoute
   LayoutIndustriesRoute: typeof LayoutIndustriesRoute
+  LayoutLearnRoute: typeof LayoutLearnRoute
   LayoutPilotsRoute: typeof LayoutPilotsRoute
   LayoutSolutionsRoute: typeof LayoutSolutionsRoute
   LayoutTechnologyRoute: typeof LayoutTechnologyRoute
@@ -1135,12 +1135,12 @@ interface LayoutRouteChildren {
 
 const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutAboutRoute: LayoutAboutRoute,
-  LayoutAcademyRoute: LayoutAcademyRoute,
   LayoutAgriskyRoute: LayoutAgriskyRoute,
   LayoutContactRoute: LayoutContactRoute,
   LayoutDesignStudioRoute: LayoutDesignStudioRoute,
   LayoutGuardskyRoute: LayoutGuardskyRoute,
   LayoutIndustriesRoute: LayoutIndustriesRoute,
+  LayoutLearnRoute: LayoutLearnRoute,
   LayoutPilotsRoute: LayoutPilotsRoute,
   LayoutSolutionsRoute: LayoutSolutionsRoute,
   LayoutTechnologyRoute: LayoutTechnologyRoute,

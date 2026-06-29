@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Satellite, Activity, ShieldCheck, ArrowRight } from "lucide-react";
+import { Activity, ShieldCheck, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FloatingCard } from "@/components/FloatingCard";
+import { SectionBadge } from "@/components/SectionBadge";
 import { gradientTextStyle } from "@/constants/styles.constants";
 import heroImg from "@/assets/torqwings-hero.jpg";
 
@@ -33,7 +34,7 @@ export const Route = createFileRoute("/_layout/")({
 const HERO_STATS = [
   { k: "6",   v: "Industries"     },
   { k: "AI",  v: "Analytics core" },
-  { k: "R&D", v: "Custom UAVs"    },
+  { k: "R&D", v: "Custom platforms"    },
 ];
 
 function HeroPage() {
@@ -43,31 +44,26 @@ function HeroPage() {
       <div className="mx-auto max-w-7xl px-5 lg:px-8 grid lg:grid-cols-12 gap-10 items-center relative">
 
         <div className="lg:col-span-6">
-          <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-primary-foreground bg-primary border border-primary px-3 py-1.5 rounded-full shadow-glow">
-            <Satellite className="h-3.5 w-3.5" aria-hidden="true" /> Aerospace · Drones · AI
-          </span>
-          <h1 className="mt-5 text-4xl sm:text-5xl lg:text-6xl font-semibold leading-[1.05]">
+          <SectionBadge label="Aerospace · Autonomous Aerial Platforms · AI" />
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.05]">
             Engineering the future of{" "}
             <span className="bg-gradient-primary" style={gradientTextStyle}>
               aerial intelligence
             </span>
           </h1>
           <p className="mt-6 text-lg text-muted-foreground max-w-xl">
-            AI-powered drone systems, custom UAV engineering, and aerial intelligence solutions for agriculture, infrastructure, mapping, surveillance, and industrial applications.
+            AI-powered autonomous aerial platforms, custom engineering, and aerial intelligence solutions for agriculture, infrastructure, mapping, surveillance, and industrial applications.
           </p>
-          <div className="mt-8 flex flex-wrap gap-3">
+          <div className="mt-8">
             <Button asChild size="lg" className="bg-gradient-primary text-primary-foreground hover:opacity-90 shadow-glow">
               <Link to="/solutions">Explore Solutions <ArrowRight className="ml-1 h-4 w-4" aria-hidden="true" /></Link>
             </Button>
-            <Button asChild size="lg" variant="outline" className="border-border/80 bg-card/40 backdrop-blur hover:bg-card">
-              <Link to="/contact">Partner With Us</Link>
-            </Button>
           </div>
-          <div className="mt-10 grid grid-cols-3 gap-6 max-w-md">
+          <div className="mt-10 flex gap-8">
             {HERO_STATS.map((s) => (
               <div key={s.v}>
-                <div className="text-2xl font-display font-semibold text-foreground">{s.k}</div>
-                <div className="text-xs text-muted-foreground mt-1">{s.v}</div>
+                <div className="text-[22px] font-display font-bold text-foreground">{s.k}</div>
+                <div className="text-[11px] text-muted-foreground mt-0.5">{s.v}</div>
               </div>
             ))}
           </div>

@@ -11,11 +11,12 @@ export const Route = createFileRoute("/_layout/solutions")({
 function SolutionsPage() {
   return (
     <>
-      <SectionWrapper id="problem" eyebrow="The problem" title="Industries need smarter aerial visibility">
+      <SectionWrapper id="problem" eyebrow="The problem" title="Industries Need Smarter Aerial Visibility">
         <p className="text-muted-foreground max-w-3xl">
           Many industries still depend on manual inspection, delayed field reporting, fragmented data collection,
           and expensive monitoring workflows. From farms to infrastructure sites, decision-makers need faster,
-          safer, and more intelligent aerial insights.
+          safer, and more intelligent aerial insights — built on platforms designed for the mission, not adapted
+          from consumer hardware.
         </p>
         <div className="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {PROBLEM_CARDS.map((c) => (
@@ -27,10 +28,11 @@ function SolutionsPage() {
         </div>
       </SectionWrapper>
 
-      <SectionWrapper id="solutions" eyebrow="The solution" title="Drones, data, and intelligence in one platform" muted>
+      <SectionWrapper id="solutions" eyebrow="The solution" title="Design. Simulate. Deploy. Intelligent." muted>
         <p className="text-muted-foreground max-w-3xl">
-          TorqWings combines aerospace engineering, custom UAV systems, aerial imaging, AI analytics, and
-          domain-specific workflows to convert drone missions into actionable business intelligence.
+          TorqWings combines autonomous aerial platform design, AI-powered flight intelligence, and domain-specific
+          engineering to convert mission requirements into deployable aerial systems — validated by simulation
+          before a single component is ordered.
         </p>
         <div className="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {SOLUTION_CARDS.map((c) => (

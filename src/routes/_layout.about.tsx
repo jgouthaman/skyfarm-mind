@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { MapPin, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { SectionBadge } from "@/components/SectionBadge";
 
 export const Route = createFileRoute("/_layout/about")({
   head: () => ({
@@ -18,7 +19,6 @@ export const Route = createFileRoute("/_layout/about")({
 });
 
 const SKY = "text-primary";
-const EYEBROW = "inline-block text-xs font-bold uppercase tracking-[0.2em] text-primary-foreground bg-primary px-3 py-1 rounded-md shadow-glow";
 
 function AboutPage() {
   return (
@@ -28,21 +28,19 @@ function AboutPage() {
         <div className="absolute inset-0 grid-bg opacity-40 pointer-events-none" />
         <div className="mx-auto max-w-7xl px-5 lg:px-8 grid lg:grid-cols-12 gap-10 items-center relative">
           <div className="lg:col-span-7">
-            <span className="inline-block text-xs font-bold uppercase tracking-[0.2em] text-primary-foreground bg-primary px-3 py-1 rounded-md shadow-glow">
-              Our story
-            </span>
-            <h1 className="mt-4 text-4xl sm:text-5xl lg:text-6xl font-semibold leading-[1.05]">
+            <SectionBadge label="Our Story" />
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.05]">
               Built by engineers. Flown for <span className={SKY}>India</span>.
             </h1>
             <p className="mt-6 text-lg text-muted-foreground max-w-xl">
               Five aerospace engineers walked out of graduation and asked one question: why is India still
-              inspecting farms, bridges, and borders with human eyes? TorqWings is our answer.
+              inspecting farms, bridges, and borders with human eyes? Autonomous aerial platforms are our answer.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <Button asChild size="lg" className="bg-gradient-primary text-primary-foreground hover:opacity-90 shadow-glow">
+              <Button asChild size="lg" className="hover:opacity-90" style={{ background: "#0d3b5e", color: "white" }}>
                 <Link to="/contact">Partner with us <ArrowRight className="ml-1 h-4 w-4" aria-hidden="true" /></Link>
               </Button>
-              <Button asChild size="lg" variant="outline" className="border-border/80 bg-card/40 backdrop-blur hover:bg-card">
+              <Button asChild size="lg" variant="outline" className="border-white/30 text-white hover:bg-white/10">
                 <Link to="/industries">See our solutions</Link>
               </Button>
             </div>
@@ -55,7 +53,7 @@ function AboutPage() {
                   { k: "5",      v: "Aerospace engineers"              },
                   { k: "6",      v: "Industry verticals"               },
                   { k: "₹75K Cr",v: "TN aerospace target by 2032"      },
-                  { k: "1st",    v: "AI drone platform from Chennai"    },
+                  { k: "1st",    v: "Autonomous aerial platform from Chennai"    },
                 ].map((s) => (
                   <div key={s.v} className="rounded-2xl bg-background/40 border border-border/60 p-4 hover:-translate-y-[3px] hover:border-primary/40 hover:shadow-soft transition-all">
                     <div className="text-2xl font-display font-semibold text-foreground">{s.k}</div>
@@ -75,16 +73,14 @@ function AboutPage() {
       <section className="py-20 sm:py-28">
         <div className="mx-auto max-w-7xl px-5 lg:px-8 grid lg:grid-cols-12 gap-10 items-start">
           <div className="lg:col-span-6">
-            <span className="inline-block text-xs font-bold uppercase tracking-[0.2em] text-primary-foreground bg-primary px-3 py-1 rounded-md shadow-glow">
-              How we started
-            </span>
-            <h2 className="mt-3 text-3xl sm:text-4xl font-semibold max-w-xl">
+            <SectionBadge label="How We Started" />
+            <h2 className="text-3xl sm:text-4xl font-bold max-w-xl">
               Five engineers. One <span className={SKY}>conviction</span>.
             </h2>
             <div className="mt-6 space-y-5 text-muted-foreground">
-              <p>We graduated from aerospace engineering with the same frustration: India had world-class engineering talent but was importing drone intelligence from overseas, or doing without it entirely.</p>
+              <p>We graduated from aerospace engineering with the same frustration: India had world-class engineering talent but was importing aerial intelligence from overseas, or doing without it entirely.</p>
               <p>Chennai gave us the perfect foundation. Surrounded by the Tamil Nadu Defence Industrial Corridor, the AIDAT ecosystem, and the IIT Madras research network, we saw an opportunity to build something that mattered — not just commercially, but nationally.</p>
-              <p>TorqWings was registered in Chennai to build AI-powered drone systems that are engineered for Indian agriculture, Indian infrastructure, and Indian defence requirements — not adapted from foreign platforms.</p>
+              <p>TorqWings was registered in Chennai to build AI-powered autonomous aerial platforms engineered for Indian agriculture, Indian infrastructure, and Indian defence requirements — not adapted from foreign platforms.</p>
             </div>
             <blockquote className="mt-8 rounded-2xl border-l-4 border-accent bg-gradient-card border border-border/60 p-6 shadow-card">
               <p className="text-lg font-display italic leading-snug">
@@ -116,10 +112,8 @@ function AboutPage() {
       {/* 3. TIMELINE */}
       <section className="py-20 sm:py-24 bg-muted/30">
         <div className="mx-auto max-w-7xl px-5 lg:px-8">
-          <span className="inline-block text-xs font-bold uppercase tracking-[0.2em] text-primary-foreground bg-primary px-3 py-1 rounded-md shadow-glow">
-            Milestones
-          </span>
-          <h2 className="mt-3 text-3xl sm:text-4xl font-semibold max-w-3xl">
+          <SectionBadge label="Milestones" />
+          <h2 className="text-3xl sm:text-4xl font-bold max-w-3xl">
             From graduation to <span className={SKY}>flight</span>.
           </h2>
 
@@ -155,14 +149,14 @@ function AboutPage() {
       <section className="py-20 sm:py-28 bg-muted/30">
         <div className="mx-auto max-w-7xl px-5 lg:px-8 grid lg:grid-cols-12 gap-10">
           <div className="lg:col-span-4">
-            <span className={EYEBROW}>Our mission</span>
-            <h2 className="mt-3 text-3xl sm:text-4xl font-semibold">Engineering the future of aerial intelligence.</h2>
+            <SectionBadge label="Our Mission" />
+            <h2 className="text-3xl sm:text-4xl font-bold">Engineering the future of aerial intelligence.</h2>
           </div>
           <div className="lg:col-span-8 grid sm:grid-cols-2 gap-5">
             {[
-              { t: "Make in India, fly for India", d: "Every drone system we build is engineered in Chennai for Indian conditions — our farms, our climate, our regulatory environment." },
+              { t: "Make in India, fly for India", d: "Every autonomous aerial platform we build is engineered in Chennai for Indian conditions — our farms, our climate, our regulatory environment." },
               { t: "AI that earns its keep", d: "We only deploy AI when it turns aerial data into a decision that saves time, money, or lives. No dashboards for dashboards' sake." },
-              { t: "Open the skies for everyone", d: "Through TorqWings Academy, we train farmers, rural entrepreneurs, SHGs, and FPOs to operate drone-based businesses." },
+              { t: "Open the skies for everyone", d: "Through TorqWings Academy, we train farmers, rural entrepreneurs, SHGs, and FPOs to operate autonomous aerial platform businesses." },
               { t: "Build India's aerospace future", d: "We're part of Tamil Nadu's ₹75,000 crore aerospace vision — contributing engineering talent, IP, and platforms to India's defence and civil aviation ecosystem." },
             ].map((p) => (
               <div key={p.t} className="rounded-2xl p-5 bg-background/40 border border-border/60 hover:-translate-y-[3px] hover:border-primary/40 transition-all">
@@ -182,10 +176,8 @@ function AboutPage() {
       {/* 5. ECOSYSTEM */}
       <section className="py-20 sm:py-28">
         <div className="mx-auto max-w-7xl px-5 lg:px-8">
-          <span className="inline-block text-xs font-bold uppercase tracking-[0.2em] text-primary-foreground bg-primary px-3 py-1 rounded-md shadow-glow">
-            Our ecosystem
-          </span>
-          <h2 className="mt-3 text-3xl sm:text-4xl font-semibold max-w-3xl">
+          <SectionBadge label="Our Ecosystem" />
+          <h2 className="text-3xl sm:text-4xl font-bold max-w-3xl">
             Rooted in Chennai's <span className={SKY}>aerospace corridor</span>
           </h2>
           <p className="mt-5 text-muted-foreground max-w-3xl">
@@ -214,18 +206,18 @@ function AboutPage() {
       <section className="relative py-20 sm:py-28 bg-gradient-hero">
         <div className="absolute inset-0 grid-bg opacity-30 pointer-events-none" />
         <div className="mx-auto max-w-3xl px-5 lg:px-8 relative text-center">
-          <h2 className="text-3xl sm:text-4xl font-semibold">
+          <h2 className="text-3xl sm:text-4xl font-bold">
             Ready to fly with <span className={SKY}>TorqWings</span>?
           </h2>
           <p className="mt-5 text-muted-foreground">
-            Whether you're a farm owner, infrastructure company, drone operator, investor, or institution — we're open to pilots, partnerships, and custom aerial intelligence projects.
+            Whether you're a farm owner, infrastructure company, autonomous aerial platform operator, investor, or institution — we're open to pilots, partnerships, and custom aerial intelligence projects.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <Button asChild size="lg" className="bg-gradient-primary text-primary-foreground hover:opacity-90 shadow-glow">
+            <Button asChild size="lg" className="hover:opacity-90" style={{ background: "#0d3b5e", color: "white" }}>
               <Link to="/contact">Partner with us <ArrowRight className="ml-1 h-4 w-4" aria-hidden="true" /></Link>
             </Button>
-            <Button asChild size="lg" variant="outline" className="border-border/80 bg-card/40 backdrop-blur hover:bg-card">
-              <Link to="/pilots">View pilot programs</Link>
+            <Button asChild size="lg" variant="outline" className="border-white/30 text-white hover:bg-white/10">
+              <Link to="/contact">View pilot programs</Link>
             </Button>
           </div>
         </div>

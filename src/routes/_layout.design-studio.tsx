@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { Cpu, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import { SectionBadge } from "@/components/SectionBadge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { DesignStudioPricing } from "@/components/design-studio-pricing";
@@ -44,13 +45,11 @@ function DesignStudioPage() {
           <div className="grid lg:grid-cols-12 gap-10 items-start">
 
             <div className="lg:col-span-5">
-              <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-primary-foreground bg-primary border border-primary px-3 py-1.5 rounded-full shadow-glow">
-                <Cpu className="h-3.5 w-3.5" aria-hidden="true" /> Engineering vertical
-              </span>
-              <h2 className="mt-5 text-3xl sm:text-4xl font-semibold">TorqWings Design Studio</h2>
-              <p className="mt-2 text-lg text-muted-foreground">Drone design, simulation, and AI-powered engineering</p>
+              <SectionBadge label="Engineering Vertical" />
+              <h2 className="text-3xl sm:text-4xl font-bold">TorqWings Design Studio</h2>
+              <p className="mt-2 text-lg text-muted-foreground">Autonomous aerial platform design, simulation, and AI-powered engineering</p>
               <p className="mt-5 text-muted-foreground">
-                TorqWings Design Studio is an engineering workspace where teams design drone architectures
+                TorqWings Design Studio is an engineering workspace where teams design autonomous aerial platform architectures
                 from mission requirements, run real-time flight simulations, generate component lists, and
                 receive AI-powered design reviews — turning concepts into flyable systems faster.
               </p>
@@ -76,12 +75,12 @@ function DesignStudioPage() {
               <div className="rounded-xl border border-border/60 bg-card/60 overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm" aria-label="Design Studio project overview">
-                    <caption className="sr-only">Design Studio projects with vertical, drone type, risk, and status</caption>
+                    <caption className="sr-only">Design Studio projects with vertical, platform type, risk, and status</caption>
                     <thead className="bg-muted/30 text-xs uppercase tracking-wider text-muted-foreground">
                       <tr>
                         <th scope="col" className="text-left font-medium px-4 py-2">Project</th>
                         <th scope="col" className="text-left font-medium px-4 py-2">Vertical</th>
-                        <th scope="col" className="text-left font-medium px-4 py-2">Drone Type</th>
+                        <th scope="col" className="text-left font-medium px-4 py-2">Platform Type</th>
                         <th scope="col" className="text-left font-medium px-4 py-2">Risk</th>
                         <th scope="col" className="text-left font-medium px-4 py-2">Status</th>
                       </tr>

@@ -10,17 +10,17 @@ export const PROBLEM_CARDS = [
   { icon: <Leaf aria-hidden="true" />, text: "Farm and field issues are detected late" },
   { icon: <Building2 aria-hidden="true" />, text: "Infrastructure monitoring lacks real-time visibility" },
   { icon: <MapIcon aria-hidden="true" />, text: "Mapping and surveying are time-consuming" },
-  { icon: <Brain aria-hidden="true" />, text: "Drone data is rarely converted into actionable intelligence" },
-  { icon: <Cog aria-hidden="true" />, text: "Industry-specific drone customization is limited" },
+  { icon: <Brain aria-hidden="true" />, text: "Aerial data is rarely converted into actionable intelligence" },
+  { icon: <Cog aria-hidden="true" />, text: "Industry-specific platform customisation is limited" },
 ];
 
 export const SOLUTION_CARDS = [
-  { icon: <Plane aria-hidden="true" />, text: "Custom drone systems", desc: "Purpose-built UAVs engineered for specific industry missions." },
-  { icon: <Brain aria-hidden="true" />, text: "AI-powered aerial analytics", desc: "Computer vision models that turn imagery into decisions." },
-  { icon: <Layers aria-hidden="true" />, text: "Industry-specific verticals", desc: "Tailored workflows for agriculture, infra, mapping and more." },
-  { icon: <Compass aria-hidden="true" />, text: "Mission planning & reporting", desc: "From flight plan to PDF — operations end-to-end." },
-  { icon: <GitBranch aria-hidden="true" />, text: "Scalable drone operations", desc: "Repeatable processes from a single farm to enterprise fleets." },
-  { icon: <FlaskConical aria-hidden="true" />, text: "Research & prototyping", desc: "Rapid prototyping of payloads and aerospace experiments." },
+  { icon: <Plane aria-hidden="true" />, text: "Custom platform design", desc: "Purpose-engineered autonomous aerial platforms built from mission requirements using proven design rules and AI-powered component selection." },
+  { icon: <Brain aria-hidden="true" />, text: "AI-powered aerial analytics", desc: "Computer vision models that turn aerial imagery into decisions — crop health, structural defects, boundary mapping, and threat detection." },
+  { icon: <Layers aria-hidden="true" />, text: "Industry-specific verticals", desc: "Tailored design workflows and intelligence layers for agriculture, infrastructure, mapping, surveillance, and defence." },
+  { icon: <Compass aria-hidden="true" />, text: "Mission planning & reporting", desc: "From design brief to PDF compliance report — end-to-end platform engineering and operations." },
+  { icon: <GitBranch aria-hidden="true" />, text: "Scalable aerial operations", desc: "Repeatable design processes from a single farm platform to enterprise-grade aerial fleets." },
+  { icon: <FlaskConical aria-hidden="true" />, text: "Research & prototyping", desc: "Rapid prototyping of payloads, aerospace experiments, and next-generation autonomous systems through TorqWings Labs." },
 ];
 
 export const TECH_PIPELINE = [

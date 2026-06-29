@@ -9,8 +9,7 @@ export const NAV_LINKS: NavLink[] = [
   { label: "Industries",   to: "/industries"   },
   { label: "Technology",   to: "/technology"   },
   { label: "Design Studio",to: "/design-studio"},
-  { label: "Work with us", to: "/pilots"       },
-  { label: "Academy",      to: "/academy"      },
+  { label: "Academy",      to: "/learn"        },
   { label: "About",        to: "/about"        },
   { label: "Contact",      to: "/contact"      },
 ];

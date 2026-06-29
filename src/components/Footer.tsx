@@ -1,61 +1,89 @@
 import { Link } from "@tanstack/react-router";
-import { Plane } from "lucide-react";
+import { Plane, Linkedin, Instagram, MessageCircle } from "lucide-react";
 
 export function Footer() {
   return (
     <footer className="border-t border-border bg-secondary">
-      <div className="mx-auto max-w-3xl px-5 lg:px-8 py-12 grid md:grid-cols-3 gap-8">
-        <div className="md:col-span-2">
-          <div className="flex items-center gap-2 font-display font-semibold text-lg">
-            <span className="grid place-items-center h-8 w-8 rounded-lg bg-gradient-primary shadow-glow">
-              <Plane className="h-4 w-4 text-primary-foreground" aria-hidden="true" />
-            </span>
-            TorqWings
-          </div>
-          <p className="mt-3 text-sm text-muted-foreground">
-            Engineering the future of aerial intelligence.
-          </p>
-          <p className="mt-2 text-xs text-muted-foreground">
-            AgriSky is a flagship service vertical of TorqWings.
-          </p>
-        </div>
 
-        <div>
-          <h4 className="font-display font-semibold text-sm">Contact</h4>
-          <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
+      {/* ── Row 1 — Main body ───────────────────────────────────────────── */}
+      <div className="mx-auto max-w-6xl px-5 lg:px-8 py-4 sm:py-6">
+        <div className="flex flex-col sm:flex-row sm:justify-between gap-8">
+
+          {/* Left — logo + taglines */}
+          <div>
+            <div className="flex items-center gap-2 font-display font-semibold text-lg">
+              <span className="grid place-items-center h-8 w-8 rounded-lg bg-gradient-primary shadow-glow">
+                <Plane className="h-4 w-4 text-primary-foreground" aria-hidden="true" />
+              </span>
+              TorqWings
+            </div>
+            <p className="mt-2 text-muted-foreground leading-[1.5]" style={{ fontSize: 12 }}>
+              Engineering the future of aerial intelligence.
+            </p>
+            <p className="mt-1 text-muted-foreground leading-[1.5]" style={{ fontSize: 11, opacity: 0.7 }}>
+              Design Studio - flagship platform powered by Autonomous Aerial Intelligence.
+            </p>
+          </div>
+
+          {/* Right — contact + social */}
+          <ul className="space-y-1.5 text-xs text-muted-foreground leading-[1.5]">
             <li>Hello : 9940263589</li>
             <li>support@torqwings.com</li>
             <li>India</li>
             <li>
               <a
-                href="https://instagram.com/torqwings.official"
+                href="https://www.linkedin.com/company/torqwings"
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer"
                 className="flex items-center gap-1.5 hover:text-foreground transition-colors"
               >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
-                  <circle cx="12" cy="12" r="4" />
-                  <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
-                </svg>
+                <Linkedin width={14} height={14} aria-hidden="true" />
+                TorqWings on LinkedIn
+              </a>
+            </li>
+            <li>
+              <a
+                href="https://instagram.com/torqwings.official"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 hover:text-foreground transition-colors"
+              >
+                <Instagram width={14} height={14} aria-hidden="true" />
                 @torqwings.official
               </a>
             </li>
           </ul>
+
         </div>
       </div>
 
+      {/* ── Row 2 — Bottom bar ──────────────────────────────────────────── */}
       <div className="border-t border-border">
-        <div className="mx-auto max-w-3xl px-5 lg:px-8 py-6 text-xs text-muted-foreground flex flex-wrap justify-between gap-3">
-          <span>© {new Date().getFullYear()} TorqWings. All rights reserved.</span>
-          <div className="flex items-center gap-4">
-            <span>Aerospace · Drones · AI</span>
-            <Link to="/mission-hub/login" className="hover:text-foreground transition-colors">
-              Mission Hub
-            </Link>
+        <div
+          className="mx-auto max-w-6xl px-5 lg:px-8 py-2 sm:py-3 text-muted-foreground"
+          style={{ fontSize: 11 }}
+        >
+          <div className="grid grid-cols-1 sm:grid-cols-3 sm:items-center gap-y-1 gap-x-4">
+            <span>© {new Date().getFullYear()} TorqWings. All rights reserved.</span>
+            <span className="sm:text-center">
+              Aerospace · Autonomous Aerial Platforms · AI ·{" "}
+              <Link to="/mission-hub/login" className="hover:text-foreground transition-colors">
+                Mission Hub
+              </Link>
+            </span>
+            <a
+              href="https://wa.me/919940263589"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 hover:text-foreground transition-colors sm:justify-end"
+            >
+              <MessageCircle width={14} height={14} aria-hidden="true" />
+              Chat on WhatsApp
+            </a>
           </div>
         </div>
       </div>
+
     </footer>
   );
 }

@@ -24,7 +24,7 @@ function IndustriesPage() {
             <Rocket className="h-6 w-6" aria-hidden="true" />
             <h3 className="mt-4 text-xl font-display font-semibold">One platform. Many missions.</h3>
             <p className="mt-2 text-sm opacity-90">
-              Every vertical shares the same modular UAV, data, and AI stack — engineered once, deployed everywhere.
+              Every vertical shares the same modular autonomous aerial platform, data, and AI stack — engineered once, deployed everywhere.
             </p>
           </div>
           <Link
