@@ -29,6 +29,7 @@ type MainTier = {
   excluded: string[];
   cta: string;
   ctaClass: string;
+  comingSoon?: boolean;
 };
 
 type CampusSubTier = {
@@ -120,10 +121,10 @@ const TIERS: MainTier[] = [
     name: "Studio",
     tagline: "For small drone companies and design teams",
     badgeLabel: "New tier ✦",
-    badgeBg: "rgba(34,197,94,0.18)",
-    badgeText: "#4ade80",
+    badgeBg: "rgba(239,159,39,0.15)",
+    badgeText: "#EF9F27",
     topPill: true,
-    pillLabel: "New tier ✦",
+    pillLabel: "Coming Soon",
     cardBorder: "2px solid #22c55e",
     hoverBorder: "#22c55e",
     monthlyPrice: 4999,
@@ -140,8 +141,8 @@ const TIERS: MainTier[] = [
       { text: "Dedicated onboarding" },
     ],
     excluded: ["DRDO compliance pack"],
-    cta: "Get early access",
-    ctaClass: "bg-[#22c55e] hover:bg-[#16a34a] text-[#0a0f1c] font-semibold",
+    cta: "Join waitlist",
+    ctaClass: "border border-white/30 text-white hover:bg-white/5",
   },
   {
     key: "squadron",
@@ -167,8 +168,9 @@ const TIERS: MainTier[] = [
       { text: "White-glove onboarding" },
     ],
     excluded: [],
-    cta: "Request a demo",
+    cta: "Join waitlist",
     ctaClass: "border border-[#EF9F27] text-[#EF9F27] hover:bg-[#EF9F27]/10",
+    comingSoon: true,
   },
 ];
 
@@ -357,13 +359,23 @@ export function DesignStudioPricing() {
                   if (!t.topPill) e.currentTarget.style.border = t.cardBorder;
                 }}
               >
-                {/* Centred pill — Engineer "Most popular" / Studio "New tier ✦" */}
+                {/* Centred pill — Engineer "Most popular" / Studio "Coming Soon" */}
                 {t.topPill && (
                   <span
                     className="absolute -top-3.5 left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] font-semibold uppercase tracking-[0.18em] px-3 py-1 rounded-full"
                     style={{ background: t.badgeBg, color: t.badgeText }}
                   >
                     {t.pillLabel ?? t.badgeLabel}
+                  </span>
+                )}
+
+                {/* Coming Soon pill for non-topPill tiers (Squadron) */}
+                {t.comingSoon && !t.topPill && (
+                  <span
+                    className="absolute -top-3.5 left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] font-semibold uppercase tracking-[0.18em] px-3 py-1 rounded-full"
+                    style={{ background: "rgba(239,159,39,0.15)", color: "#EF9F27" }}
+                  >
+                    Coming Soon
                   </span>
                 )}
 
