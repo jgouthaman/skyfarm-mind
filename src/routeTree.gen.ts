@@ -53,6 +53,7 @@ import { Route as LayoutAgriskyRouteImport } from './routes/_layout.agrisky'
 import { Route as LayoutAboutRouteImport } from './routes/_layout.about'
 import { Route as PilotMissionsIndexRouteImport } from './routes/pilot.missions.index'
 import { Route as MissionHubTorqwingsDesignStudioIndexRouteImport } from './routes/mission-hub.torqwings-design-studio.index'
+import { Route as LayoutLearnIndexRouteImport } from './routes/_layout.learn.index'
 import { Route as PilotMissionsIdRouteImport } from './routes/pilot.missions.$id'
 import { Route as MissionHubVerticalsVerticalRouteImport } from './routes/mission-hub.verticals.$vertical'
 import { Route as MissionHubTorqwingsDesignStudioSimulationRouteImport } from './routes/mission-hub.torqwings-design-studio.simulation'
@@ -65,6 +66,7 @@ import { Route as MissionHubTorqwingsDesignStudioDesignRouteImport } from './rou
 import { Route as MissionHubTorqwingsDesignStudioComponentsRouteImport } from './routes/mission-hub.torqwings-design-studio.components'
 import { Route as MissionHubTorqwingsDesignStudioComplianceRouteImport } from './routes/mission-hub.torqwings-design-studio.compliance'
 import { Route as MissionHubTorqwingsDesignStudioAdvisorRouteImport } from './routes/mission-hub.torqwings-design-studio.advisor'
+import { Route as LayoutLearnDroneDesignFundamentalsRouteImport } from './routes/_layout.learn.drone-design-fundamentals'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -298,6 +300,11 @@ const MissionHubTorqwingsDesignStudioIndexRoute =
     path: '/',
     getParentRoute: () => MissionHubTorqwingsDesignStudioRoute,
   } as any)
+const LayoutLearnIndexRoute = LayoutLearnIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => LayoutLearnRoute,
+} as any)
 const PilotMissionsIdRoute = PilotMissionsIdRouteImport.update({
   id: '/missions/$id',
   path: '/missions/$id',
@@ -369,6 +376,12 @@ const MissionHubTorqwingsDesignStudioAdvisorRoute =
     path: '/advisor',
     getParentRoute: () => MissionHubTorqwingsDesignStudioRoute,
   } as any)
+const LayoutLearnDroneDesignFundamentalsRoute =
+  LayoutLearnDroneDesignFundamentalsRouteImport.update({
+    id: '/drone-design-fundamentals',
+    path: '/drone-design-fundamentals',
+    getParentRoute: () => LayoutLearnRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof LayoutIndexRoute
@@ -382,7 +395,7 @@ export interface FileRoutesByFullPath {
   '/design-studio': typeof LayoutDesignStudioRoute
   '/guardsky': typeof LayoutGuardskyRoute
   '/industries': typeof LayoutIndustriesRoute
-  '/learn': typeof LayoutLearnRoute
+  '/learn': typeof LayoutLearnRouteWithChildren
   '/pilots': typeof LayoutPilotsRoute
   '/solutions': typeof LayoutSolutionsRoute
   '/technology': typeof LayoutTechnologyRoute
@@ -412,6 +425,7 @@ export interface FileRoutesByFullPath {
   '/pilot/sync': typeof PilotSyncRoute
   '/pilot/tracking': typeof PilotTrackingRoute
   '/pilot/': typeof PilotIndexRoute
+  '/learn/drone-design-fundamentals': typeof LayoutLearnDroneDesignFundamentalsRoute
   '/mission-hub/torqwings-design-studio/advisor': typeof MissionHubTorqwingsDesignStudioAdvisorRoute
   '/mission-hub/torqwings-design-studio/compliance': typeof MissionHubTorqwingsDesignStudioComplianceRoute
   '/mission-hub/torqwings-design-studio/components': typeof MissionHubTorqwingsDesignStudioComponentsRoute
@@ -424,6 +438,7 @@ export interface FileRoutesByFullPath {
   '/mission-hub/torqwings-design-studio/simulation': typeof MissionHubTorqwingsDesignStudioSimulationRoute
   '/mission-hub/verticals/$vertical': typeof MissionHubVerticalsVerticalRoute
   '/pilot/missions/$id': typeof PilotMissionsIdRoute
+  '/learn/': typeof LayoutLearnIndexRoute
   '/mission-hub/torqwings-design-studio/': typeof MissionHubTorqwingsDesignStudioIndexRoute
   '/pilot/missions/': typeof PilotMissionsIndexRoute
 }
@@ -437,7 +452,6 @@ export interface FileRoutesByTo {
   '/design-studio': typeof LayoutDesignStudioRoute
   '/guardsky': typeof LayoutGuardskyRoute
   '/industries': typeof LayoutIndustriesRoute
-  '/learn': typeof LayoutLearnRoute
   '/pilots': typeof LayoutPilotsRoute
   '/solutions': typeof LayoutSolutionsRoute
   '/technology': typeof LayoutTechnologyRoute
@@ -467,6 +481,7 @@ export interface FileRoutesByTo {
   '/pilot/tracking': typeof PilotTrackingRoute
   '/': typeof LayoutIndexRoute
   '/pilot': typeof PilotIndexRoute
+  '/learn/drone-design-fundamentals': typeof LayoutLearnDroneDesignFundamentalsRoute
   '/mission-hub/torqwings-design-studio/advisor': typeof MissionHubTorqwingsDesignStudioAdvisorRoute
   '/mission-hub/torqwings-design-studio/compliance': typeof MissionHubTorqwingsDesignStudioComplianceRoute
   '/mission-hub/torqwings-design-studio/components': typeof MissionHubTorqwingsDesignStudioComponentsRoute
@@ -479,6 +494,7 @@ export interface FileRoutesByTo {
   '/mission-hub/torqwings-design-studio/simulation': typeof MissionHubTorqwingsDesignStudioSimulationRoute
   '/mission-hub/verticals/$vertical': typeof MissionHubVerticalsVerticalRoute
   '/pilot/missions/$id': typeof PilotMissionsIdRoute
+  '/learn': typeof LayoutLearnIndexRoute
   '/mission-hub/torqwings-design-studio': typeof MissionHubTorqwingsDesignStudioIndexRoute
   '/pilot/missions': typeof PilotMissionsIndexRoute
 }
@@ -495,7 +511,7 @@ export interface FileRoutesById {
   '/_layout/design-studio': typeof LayoutDesignStudioRoute
   '/_layout/guardsky': typeof LayoutGuardskyRoute
   '/_layout/industries': typeof LayoutIndustriesRoute
-  '/_layout/learn': typeof LayoutLearnRoute
+  '/_layout/learn': typeof LayoutLearnRouteWithChildren
   '/_layout/pilots': typeof LayoutPilotsRoute
   '/_layout/solutions': typeof LayoutSolutionsRoute
   '/_layout/technology': typeof LayoutTechnologyRoute
@@ -526,6 +542,7 @@ export interface FileRoutesById {
   '/pilot/tracking': typeof PilotTrackingRoute
   '/_layout/': typeof LayoutIndexRoute
   '/pilot/': typeof PilotIndexRoute
+  '/_layout/learn/drone-design-fundamentals': typeof LayoutLearnDroneDesignFundamentalsRoute
   '/mission-hub/torqwings-design-studio/advisor': typeof MissionHubTorqwingsDesignStudioAdvisorRoute
   '/mission-hub/torqwings-design-studio/compliance': typeof MissionHubTorqwingsDesignStudioComplianceRoute
   '/mission-hub/torqwings-design-studio/components': typeof MissionHubTorqwingsDesignStudioComponentsRoute
@@ -538,6 +555,7 @@ export interface FileRoutesById {
   '/mission-hub/torqwings-design-studio/simulation': typeof MissionHubTorqwingsDesignStudioSimulationRoute
   '/mission-hub/verticals/$vertical': typeof MissionHubVerticalsVerticalRoute
   '/pilot/missions/$id': typeof PilotMissionsIdRoute
+  '/_layout/learn/': typeof LayoutLearnIndexRoute
   '/mission-hub/torqwings-design-studio/': typeof MissionHubTorqwingsDesignStudioIndexRoute
   '/pilot/missions/': typeof PilotMissionsIndexRoute
 }
@@ -585,6 +603,7 @@ export interface FileRouteTypes {
     | '/pilot/sync'
     | '/pilot/tracking'
     | '/pilot/'
+    | '/learn/drone-design-fundamentals'
     | '/mission-hub/torqwings-design-studio/advisor'
     | '/mission-hub/torqwings-design-studio/compliance'
     | '/mission-hub/torqwings-design-studio/components'
@@ -597,6 +616,7 @@ export interface FileRouteTypes {
     | '/mission-hub/torqwings-design-studio/simulation'
     | '/mission-hub/verticals/$vertical'
     | '/pilot/missions/$id'
+    | '/learn/'
     | '/mission-hub/torqwings-design-studio/'
     | '/pilot/missions/'
   fileRoutesByTo: FileRoutesByTo
@@ -610,7 +630,6 @@ export interface FileRouteTypes {
     | '/design-studio'
     | '/guardsky'
     | '/industries'
-    | '/learn'
     | '/pilots'
     | '/solutions'
     | '/technology'
@@ -640,6 +659,7 @@ export interface FileRouteTypes {
     | '/pilot/tracking'
     | '/'
     | '/pilot'
+    | '/learn/drone-design-fundamentals'
     | '/mission-hub/torqwings-design-studio/advisor'
     | '/mission-hub/torqwings-design-studio/compliance'
     | '/mission-hub/torqwings-design-studio/components'
@@ -652,6 +672,7 @@ export interface FileRouteTypes {
     | '/mission-hub/torqwings-design-studio/simulation'
     | '/mission-hub/verticals/$vertical'
     | '/pilot/missions/$id'
+    | '/learn'
     | '/mission-hub/torqwings-design-studio'
     | '/pilot/missions'
   id:
@@ -698,6 +719,7 @@ export interface FileRouteTypes {
     | '/pilot/tracking'
     | '/_layout/'
     | '/pilot/'
+    | '/_layout/learn/drone-design-fundamentals'
     | '/mission-hub/torqwings-design-studio/advisor'
     | '/mission-hub/torqwings-design-studio/compliance'
     | '/mission-hub/torqwings-design-studio/components'
@@ -710,6 +732,7 @@ export interface FileRouteTypes {
     | '/mission-hub/torqwings-design-studio/simulation'
     | '/mission-hub/verticals/$vertical'
     | '/pilot/missions/$id'
+    | '/_layout/learn/'
     | '/mission-hub/torqwings-design-studio/'
     | '/pilot/missions/'
   fileRoutesById: FileRoutesById
@@ -1032,6 +1055,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MissionHubTorqwingsDesignStudioIndexRouteImport
       parentRoute: typeof MissionHubTorqwingsDesignStudioRoute
     }
+    '/_layout/learn/': {
+      id: '/_layout/learn/'
+      path: '/'
+      fullPath: '/learn/'
+      preLoaderRoute: typeof LayoutLearnIndexRouteImport
+      parentRoute: typeof LayoutLearnRoute
+    }
     '/pilot/missions/$id': {
       id: '/pilot/missions/$id'
       path: '/missions/$id'
@@ -1116,8 +1146,30 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MissionHubTorqwingsDesignStudioAdvisorRouteImport
       parentRoute: typeof MissionHubTorqwingsDesignStudioRoute
     }
+    '/_layout/learn/drone-design-fundamentals': {
+      id: '/_layout/learn/drone-design-fundamentals'
+      path: '/drone-design-fundamentals'
+      fullPath: '/learn/drone-design-fundamentals'
+      preLoaderRoute: typeof LayoutLearnDroneDesignFundamentalsRouteImport
+      parentRoute: typeof LayoutLearnRoute
+    }
   }
 }
+
+interface LayoutLearnRouteChildren {
+  LayoutLearnDroneDesignFundamentalsRoute: typeof LayoutLearnDroneDesignFundamentalsRoute
+  LayoutLearnIndexRoute: typeof LayoutLearnIndexRoute
+}
+
+const LayoutLearnRouteChildren: LayoutLearnRouteChildren = {
+  LayoutLearnDroneDesignFundamentalsRoute:
+    LayoutLearnDroneDesignFundamentalsRoute,
+  LayoutLearnIndexRoute: LayoutLearnIndexRoute,
+}
+
+const LayoutLearnRouteWithChildren = LayoutLearnRoute._addFileChildren(
+  LayoutLearnRouteChildren,
+)
 
 interface LayoutRouteChildren {
   LayoutAboutRoute: typeof LayoutAboutRoute
@@ -1126,7 +1178,7 @@ interface LayoutRouteChildren {
   LayoutDesignStudioRoute: typeof LayoutDesignStudioRoute
   LayoutGuardskyRoute: typeof LayoutGuardskyRoute
   LayoutIndustriesRoute: typeof LayoutIndustriesRoute
-  LayoutLearnRoute: typeof LayoutLearnRoute
+  LayoutLearnRoute: typeof LayoutLearnRouteWithChildren
   LayoutPilotsRoute: typeof LayoutPilotsRoute
   LayoutSolutionsRoute: typeof LayoutSolutionsRoute
   LayoutTechnologyRoute: typeof LayoutTechnologyRoute
@@ -1140,7 +1192,7 @@ const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutDesignStudioRoute: LayoutDesignStudioRoute,
   LayoutGuardskyRoute: LayoutGuardskyRoute,
   LayoutIndustriesRoute: LayoutIndustriesRoute,
-  LayoutLearnRoute: LayoutLearnRoute,
+  LayoutLearnRoute: LayoutLearnRouteWithChildren,
   LayoutPilotsRoute: LayoutPilotsRoute,
   LayoutSolutionsRoute: LayoutSolutionsRoute,
   LayoutTechnologyRoute: LayoutTechnologyRoute,
