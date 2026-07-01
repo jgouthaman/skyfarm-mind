@@ -8,23 +8,23 @@ export const Route = createFileRoute("/_layout/auth/callback")({
 
 function AuthCallback() {
   useEffect(() => {
-    const handleCallback = async () => {
-      const params = new URLSearchParams(window.location.search);
-      const code = params.get("code");
-
-      if (code) {
-        const { error } = await supabase.auth.exchangeCodeForSession(code);
-        if (error) {
-          window.location.href = "/learn";
-        } else {
-          window.location.href = "/learn/drone-design-fundamentals";
-        }
-      } else {
-        window.location.href = "/learn";
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_IN" && session) {
+        subscription.unsubscribe();
+        window.location.href = "/learn/drone-design-fundamentals";
       }
-    };
+    });
 
-    handleCallback();
+    // Fallback: if no SIGNED_IN event within 10s, go to academy
+    const timeout = setTimeout(() => {
+      subscription.unsubscribe();
+      window.location.href = "/learn";
+    }, 10000);
+
+    return () => {
+      subscription.unsubscribe();
+      clearTimeout(timeout);
+    };
   }, []);
 
   return (
