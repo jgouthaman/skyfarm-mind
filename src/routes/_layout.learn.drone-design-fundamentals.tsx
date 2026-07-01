@@ -179,7 +179,7 @@ const MODULES: Module[] = [
   },
 ];
 
-// ── Lightweight markdown renderer ──────────────────────────────────────────
+// ── Markdown renderer ──────────────────────────────────────────────────────
 
 function parseInline(text: string): React.ReactNode {
   const parts: React.ReactNode[] = [];
@@ -208,91 +208,49 @@ function renderMarkdown(md: string): React.ReactNode {
   const nodes: React.ReactNode[] = [];
   let i = 0;
   let key = 0;
-
   while (i < lines.length) {
     const line = lines[i];
-
     if (line.startsWith("### ")) {
-      nodes.push(
-        <h3 key={key++} className="mt-6 mb-2 text-base font-semibold text-foreground">
-          {parseInline(line.slice(4))}
-        </h3>
-      );
+      nodes.push(<h3 key={key++} className="mt-6 mb-2 text-base font-semibold text-foreground">{parseInline(line.slice(4))}</h3>);
       i++;
     } else if (line.startsWith("## ")) {
-      nodes.push(
-        <h2 key={key++} className="mt-8 mb-3 text-lg font-semibold text-foreground border-b border-border pb-2">
-          {parseInline(line.slice(3))}
-        </h2>
-      );
+      nodes.push(<h2 key={key++} className="mt-8 mb-3 text-lg font-semibold text-foreground border-b border-border pb-2">{parseInline(line.slice(3))}</h2>);
       i++;
     } else if (line.startsWith("# ")) {
-      nodes.push(
-        <h1 key={key++} className="mt-0 mb-4 text-2xl font-bold text-foreground">
-          {parseInline(line.slice(2))}
-        </h1>
-      );
+      nodes.push(<h1 key={key++} className="mt-0 mb-4 text-2xl font-bold text-foreground">{parseInline(line.slice(2))}</h1>);
       i++;
     } else if (line.startsWith("> ")) {
-      nodes.push(
-        <blockquote
-          key={key++}
-          className="my-4 border-l-4 border-[#1baf7a] pl-4 italic text-muted-foreground"
-          style={{ fontSize: 14 }}
-        >
-          {parseInline(line.slice(2))}
-        </blockquote>
-      );
+      nodes.push(<blockquote key={key++} className="my-4 border-l-4 border-[#1baf7a] pl-4 italic text-muted-foreground" style={{ fontSize: 14 }}>{parseInline(line.slice(2))}</blockquote>);
       i++;
     } else if (line.startsWith("- ")) {
       const items: string[] = [];
-      while (i < lines.length && lines[i].startsWith("- ")) {
-        items.push(lines[i].slice(2));
-        i++;
-      }
+      while (i < lines.length && lines[i].startsWith("- ")) { items.push(lines[i].slice(2)); i++; }
       nodes.push(
         <ul key={key++} className="my-3 space-y-1.5 pl-5 list-disc" style={{ fontSize: 14 }}>
-          {items.map((item, idx) => (
-            <li key={idx} className="text-muted-foreground leading-relaxed">
-              {parseInline(item)}
-            </li>
-          ))}
+          {items.map((item, idx) => <li key={idx} className="text-muted-foreground leading-relaxed">{parseInline(item)}</li>)}
         </ul>
       );
     } else if (/^\d+\. /.test(line)) {
       const items: string[] = [];
-      while (i < lines.length && /^\d+\. /.test(lines[i])) {
-        items.push(lines[i].replace(/^\d+\. /, ""));
-        i++;
-      }
+      while (i < lines.length && /^\d+\. /.test(lines[i])) { items.push(lines[i].replace(/^\d+\. /, "")); i++; }
       nodes.push(
         <ol key={key++} className="my-3 space-y-1.5 pl-5 list-decimal" style={{ fontSize: 14 }}>
-          {items.map((item, idx) => (
-            <li key={idx} className="text-muted-foreground leading-relaxed">
-              {parseInline(item)}
-            </li>
-          ))}
+          {items.map((item, idx) => <li key={idx} className="text-muted-foreground leading-relaxed">{parseInline(item)}</li>)}
         </ol>
       );
     } else if (line.trim() === "---") {
-      nodes.push(<hr key={key++} className="my-8 border-border" />);
-      i++;
+      nodes.push(<hr key={key++} className="my-8 border-border" />); i++;
     } else if (line.trim() === "") {
       i++;
     } else {
-      nodes.push(
-        <p key={key++} className="my-3 leading-relaxed text-muted-foreground" style={{ fontSize: 14 }}>
-          {parseInline(line)}
-        </p>
-      );
+      nodes.push(<p key={key++} className="my-3 leading-relaxed text-muted-foreground" style={{ fontSize: 14 }}>{parseInline(line)}</p>);
       i++;
     }
   }
-
   return <>{nodes}</>;
 }
 
-// ── Module accordion row ───────────────────────────────────────────────────
+// ── Module row ─────────────────────────────────────────────────────────────
 
 function ModuleRow({
   mod,
@@ -309,10 +267,7 @@ function ModuleRow({
   const freeCount = mod.lessons.filter((l) => l.is_free).length;
 
   return (
-    <div
-      className="rounded-xl bg-card"
-      style={{ border: "0.5px solid var(--color-border)" }}
-    >
+    <div className="rounded-xl bg-card" style={{ border: "0.5px solid var(--color-border)" }}>
       <button
         onClick={() => setOpen((v) => !v)}
         className="w-full flex items-start gap-4 px-5 py-4 text-left hover:bg-white/[0.02] transition-colors rounded-xl"
@@ -325,26 +280,19 @@ function ModuleRow({
         </span>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium text-foreground leading-snug">{mod.title}</p>
-          <p className="mt-0.5 text-xs text-muted-foreground leading-relaxed line-clamp-2">
-            {mod.description}
-          </p>
+          <p className="mt-0.5 text-xs text-muted-foreground leading-relaxed line-clamp-2">{mod.description}</p>
           <p className="mt-1.5 text-[10px] text-muted-foreground">
             {mod.lessons.length} {mod.lessons.length === 1 ? "lesson" : "lessons"}
-            {freeCount > 0 && (
-              <span className="ml-2" style={{ color: "#1baf7a" }}>
-                {freeCount} free preview
-              </span>
-            )}
+            {freeCount > 0 && <span className="ml-2" style={{ color: "#1baf7a" }}>{freeCount} free preview</span>}
           </p>
         </div>
-        {open ? (
-          <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground mt-0.5" />
-        ) : (
-          <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground mt-0.5" />
-        )}
+        {open
+          ? <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground mt-0.5" />
+          : <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground mt-0.5" />
+        }
       </button>
 
-      {open && mod.lessons.length > 0 && (
+      {open && (
         <div className="border-t border-border divide-y divide-border">
           {mod.lessons.map((lesson) =>
             lesson.is_free ? (
@@ -370,23 +318,15 @@ function ModuleRow({
                   </span>
                 </button>
                 {expandedLessonId === lesson.id && lesson.content && (
-                  <div
-                    className="px-6 pb-8 pt-2 border-t border-border"
-                    style={{ background: "rgba(255,255,255,0.015)" }}
-                  >
+                  <div className="px-6 pb-8 pt-2 border-t border-border" style={{ background: "rgba(255,255,255,0.015)" }}>
                     {renderMarkdown(lesson.content)}
                   </div>
                 )}
               </div>
             ) : (
-              <div
-                key={lesson.id}
-                className="flex items-center gap-3 px-5 py-3 opacity-50"
-              >
+              <div key={lesson.id} className="flex items-center gap-3 px-5 py-3 opacity-50">
                 <Lock className="h-4 w-4 shrink-0 text-muted-foreground" />
-                <span className="flex-1 text-sm text-muted-foreground leading-snug">
-                  {lesson.title}
-                </span>
+                <span className="flex-1 text-sm text-muted-foreground leading-snug">{lesson.title}</span>
               </div>
             )
           )}
@@ -396,15 +336,17 @@ function ModuleRow({
   );
 }
 
-// ── Google sign-in ─────────────────────────────────────────────────────────
+// ── Google SVG ─────────────────────────────────────────────────────────────
 
-async function signInWithGoogle() {
-  await supabase.auth.signInWithOAuth({
-    provider: "google",
-    options: {
-      redirectTo: `${window.location.origin}/auth/callback`,
-    },
-  });
+function GoogleIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
+      <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
+      <path d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/>
+      <path d="M3.964 10.707A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.707V4.961H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.039l3.007-2.332z" fill="#FBBC05"/>
+      <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.961L3.964 6.293C4.672 4.166 6.656 3.58 9 3.58z" fill="#EA4335"/>
+    </svg>
+  );
 }
 
 // ── Page ───────────────────────────────────────────────────────────────────
@@ -432,7 +374,25 @@ function CourseDetailPage() {
     setExpandedLessonId((prev) => (prev === id ? null : id));
   }
 
+  function openLesson1() {
+    setExpandedLessonId("l1");
+    document.getElementById("course-modules")?.scrollIntoView({ behavior: "smooth" });
+  }
+
+  async function signInWithGoogle() {
+    await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: `${window.location.origin}/auth/callback` },
+    });
+  }
+
+  async function signOut() {
+    await supabase.auth.signOut();
+  }
+
   const lvl = LEVEL_STYLE[COURSE.level];
+  const displayName = user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email?.split("@")[0] || "there";
+  const avatarUrl = user?.user_metadata?.avatar_url || user?.user_metadata?.picture;
 
   return (
     <>
@@ -440,20 +400,57 @@ function CourseDetailPage() {
       <section className="relative overflow-hidden pt-24 pb-10 bg-gradient-hero">
         <div className="absolute inset-0 grid-bg opacity-40 pointer-events-none" />
         <div className="relative mx-auto max-w-4xl px-5 lg:px-8">
-          <Link
-            to="/learn"
-            className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors mb-5"
-          >
-            <ArrowLeft className="h-3.5 w-3.5" />
-            Torqwings Academy
-          </Link>
 
-          <span
-            className="inline-block rounded px-2 py-0.5 mb-3"
-            style={{ fontSize: 10, fontWeight: 500, background: lvl.bg, color: lvl.color }}
-          >
-            {COURSE.level}
-          </span>
+          {/* Top row: back link + user info */}
+          <div className="flex items-center justify-between mb-5">
+            <Link
+              to="/learn"
+              className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <ArrowLeft className="h-3.5 w-3.5" />
+              Torqwings Academy
+            </Link>
+
+            {user && (
+              <div className="flex items-center gap-2.5">
+                {avatarUrl ? (
+                  <img src={avatarUrl} alt={displayName} className="h-7 w-7 rounded-full object-cover" />
+                ) : (
+                  <div
+                    className="h-7 w-7 rounded-full flex items-center justify-center text-[11px] font-semibold text-white"
+                    style={{ background: "#2a78d6" }}
+                  >
+                    {displayName.charAt(0).toUpperCase()}
+                  </div>
+                )}
+                <span className="text-xs text-muted-foreground hidden sm:block">{displayName}</span>
+                <button
+                  onClick={signOut}
+                  className="text-[11px] text-muted-foreground hover:text-foreground transition-colors border border-border rounded px-2 py-0.5"
+                >
+                  Sign out
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Level badge + enrolled badge */}
+          <div className="flex items-center gap-2 mb-3">
+            <span
+              className="inline-block rounded px-2 py-0.5"
+              style={{ fontSize: 10, fontWeight: 500, background: lvl.bg, color: lvl.color }}
+            >
+              {COURSE.level}
+            </span>
+            {user && (
+              <span
+                className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-semibold"
+                style={{ background: "rgba(27,175,122,0.15)", color: "#1baf7a" }}
+              >
+                ✓ Enrolled
+              </span>
+            )}
+          </div>
 
           <h1 className="text-3xl sm:text-4xl font-bold text-foreground leading-tight mb-3">
             {COURSE.title}
@@ -478,22 +475,18 @@ function CourseDetailPage() {
             </span>
             <span className="font-medium text-foreground">
               ₹{COURSE.price.toLocaleString("en-IN")}
-              <span className="ml-1.5 font-normal text-muted-foreground text-xs">
-                · Free with Explorer tier
-              </span>
+              <span className="ml-1.5 font-normal text-muted-foreground text-xs">· Free with Explorer tier</span>
             </span>
           </div>
         </div>
       </section>
 
       {/* ── Module list ─────────────────────────────────────────────────── */}
-      <section className="py-10">
+      <section id="course-modules" className="py-10">
         <div className="mx-auto max-w-4xl px-5 lg:px-8">
           <p className="mb-4 text-sm font-medium text-foreground">
             Course modules
-            <span className="ml-2 text-muted-foreground font-normal">
-              ({MODULES.length} modules)
-            </span>
+            <span className="ml-2 text-muted-foreground font-normal">({MODULES.length} modules · 18 lessons)</span>
           </p>
 
           <div className="space-y-3">
@@ -508,43 +501,44 @@ function CourseDetailPage() {
             ))}
           </div>
 
-          {/* Enroll CTA */}
+          {/* ── Bottom CTA card ─────────────────────────────────────────── */}
           <div
-            className="mt-8 rounded-xl bg-card p-6 text-center"
+            className="mt-8 rounded-xl bg-card p-6"
             style={{ border: "0.5px solid var(--color-border)" }}
           >
             {user ? (
-              <>
-                <span
-                  className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-medium mb-3"
-                  style={{ background: "rgba(27,175,122,0.12)", color: "#1baf7a" }}
+              /* State 2 — enrolled */
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div>
+                  <p className="text-sm font-medium text-foreground">
+                    Welcome back, {displayName}!
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Pick up where you left off.
+                  </p>
+                </div>
+                <button
+                  onClick={openLesson1}
+                  className="inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-medium text-white transition-colors hover:opacity-90 shrink-0"
+                  style={{ background: "#2a78d6" }}
                 >
-                  <span>✓</span> You're enrolled
-                </span>
-                <p className="text-xs text-muted-foreground">
-                  Signed in as {user.email}
-                </p>
-              </>
+                  Continue learning →
+                </button>
+              </div>
             ) : (
-              <>
-                <p className="text-sm font-medium text-foreground mb-1">
-                  Ready to access the full course?
-                </p>
-                <p className="text-xs text-muted-foreground mb-4">
-                  Sign in once to unlock all modules, projects, and your certificate path.
+              /* State 1 — not enrolled */
+              <div className="text-center">
+                <p className="text-base font-semibold text-foreground mb-1">Ready to learn?</p>
+                <p className="text-sm text-muted-foreground mb-5">
+                  Enroll for free to unlock all 18 lessons
                 </p>
                 <div className="flex flex-col sm:flex-row justify-center gap-3">
                   <button
                     onClick={signInWithGoogle}
                     className="inline-flex items-center justify-center gap-2.5 rounded-lg border border-border bg-white px-6 py-2.5 text-sm font-medium text-gray-800 shadow-sm transition-colors hover:bg-gray-50 active:bg-gray-100"
                   >
-                    <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
-                      <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
-                      <path d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/>
-                      <path d="M3.964 10.707A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.707V4.961H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.039l3.007-2.332z" fill="#FBBC05"/>
-                      <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.961L3.964 6.293C4.672 4.166 6.656 3.58 9 3.58z" fill="#EA4335"/>
-                    </svg>
-                    Enroll for free
+                    <GoogleIcon />
+                    Enroll with Google
                   </button>
                   <a
                     href="mailto:academy@torqwings.com"
@@ -553,7 +547,7 @@ function CourseDetailPage() {
                     Talk to an advisor
                   </a>
                 </div>
-              </>
+              </div>
             )}
           </div>
         </div>
