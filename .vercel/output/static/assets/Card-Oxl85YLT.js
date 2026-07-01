@@ -1,0 +1,1 @@
+import{j as a}from"./index-si7fDvEE.js";function e({children:r,className:o=""}){return a.jsx("div",{className:`rounded-2xl p-6 bg-gradient-card border border-border/60 shadow-card hover:border-primary/40 hover:shadow-soft transition-all ${o}`,children:r})}export{e as C};

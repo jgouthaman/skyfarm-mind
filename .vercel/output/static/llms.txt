@@ -1,0 +1,9 @@
+# TorqWings
+
+> TorqWings builds AI-powered drone systems, custom UAVs, and aerial intelligence solutions for agriculture, infrastructure, mapping, and surveillance.
+
+TorqWings combines aerospace engineering, custom UAV systems, aerial imaging, and AI analytics to convert drone missions into actionable intelligence across verticals such as AgriSky (agriculture), GuardSky (surveillance & fire response), GeoSky (mapping), InfraSky (infrastructure), TorqWings Labs (R&D), and TorqWings Academy (pilot training).
+
+## Pages
+
+- [Home](/): Overview of TorqWings's verticals, technology stack, and contact details.
