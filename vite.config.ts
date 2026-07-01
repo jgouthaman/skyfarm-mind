@@ -15,27 +15,19 @@ export default defineConfig({
     nitro({
       preset: "vercel",
       externals: {
-        inline: ["tslib"],
+        inline: ["tslib", "@supabase/auth-js"],
       },
     }),
     react(),
   ],
   resolve: {
-    alias: {
-      "@": `${process.cwd()}/src`,
-    },
+    alias: { "@": `${process.cwd()}/src` },
     dedupe: [
-      "react",
-      "react-dom",
-      "react/jsx-runtime",
-      "react/jsx-dev-runtime",
-      "@tanstack/react-query",
+      "react", "react-dom", "react/jsx-runtime",
+      "react/jsx-dev-runtime", "@tanstack/react-query",
       "@tanstack/query-core",
     ],
   },
-  server: {
-    host: "::",
-    port: 8080,
-  },
+  server: { host: "::", port: 8080 },
   css: { transformer: "lightningcss" },
 });
