@@ -67,6 +67,7 @@ import { Route as MissionHubTorqwingsDesignStudioComponentsRouteImport } from '.
 import { Route as MissionHubTorqwingsDesignStudioComplianceRouteImport } from './routes/mission-hub.torqwings-design-studio.compliance'
 import { Route as MissionHubTorqwingsDesignStudioAdvisorRouteImport } from './routes/mission-hub.torqwings-design-studio.advisor'
 import { Route as LayoutLearnDroneDesignFundamentalsRouteImport } from './routes/_layout.learn.drone-design-fundamentals'
+import { Route as LayoutAuthCallbackRouteImport } from './routes/_layout.auth.callback'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -382,6 +383,11 @@ const LayoutLearnDroneDesignFundamentalsRoute =
     path: '/drone-design-fundamentals',
     getParentRoute: () => LayoutLearnRoute,
   } as any)
+const LayoutAuthCallbackRoute = LayoutAuthCallbackRouteImport.update({
+  id: '/auth/callback',
+  path: '/auth/callback',
+  getParentRoute: () => LayoutRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof LayoutIndexRoute
@@ -425,6 +431,7 @@ export interface FileRoutesByFullPath {
   '/pilot/sync': typeof PilotSyncRoute
   '/pilot/tracking': typeof PilotTrackingRoute
   '/pilot/': typeof PilotIndexRoute
+  '/auth/callback': typeof LayoutAuthCallbackRoute
   '/learn/drone-design-fundamentals': typeof LayoutLearnDroneDesignFundamentalsRoute
   '/mission-hub/torqwings-design-studio/advisor': typeof MissionHubTorqwingsDesignStudioAdvisorRoute
   '/mission-hub/torqwings-design-studio/compliance': typeof MissionHubTorqwingsDesignStudioComplianceRoute
@@ -481,6 +488,7 @@ export interface FileRoutesByTo {
   '/pilot/tracking': typeof PilotTrackingRoute
   '/': typeof LayoutIndexRoute
   '/pilot': typeof PilotIndexRoute
+  '/auth/callback': typeof LayoutAuthCallbackRoute
   '/learn/drone-design-fundamentals': typeof LayoutLearnDroneDesignFundamentalsRoute
   '/mission-hub/torqwings-design-studio/advisor': typeof MissionHubTorqwingsDesignStudioAdvisorRoute
   '/mission-hub/torqwings-design-studio/compliance': typeof MissionHubTorqwingsDesignStudioComplianceRoute
@@ -542,6 +550,7 @@ export interface FileRoutesById {
   '/pilot/tracking': typeof PilotTrackingRoute
   '/_layout/': typeof LayoutIndexRoute
   '/pilot/': typeof PilotIndexRoute
+  '/_layout/auth/callback': typeof LayoutAuthCallbackRoute
   '/_layout/learn/drone-design-fundamentals': typeof LayoutLearnDroneDesignFundamentalsRoute
   '/mission-hub/torqwings-design-studio/advisor': typeof MissionHubTorqwingsDesignStudioAdvisorRoute
   '/mission-hub/torqwings-design-studio/compliance': typeof MissionHubTorqwingsDesignStudioComplianceRoute
@@ -603,6 +612,7 @@ export interface FileRouteTypes {
     | '/pilot/sync'
     | '/pilot/tracking'
     | '/pilot/'
+    | '/auth/callback'
     | '/learn/drone-design-fundamentals'
     | '/mission-hub/torqwings-design-studio/advisor'
     | '/mission-hub/torqwings-design-studio/compliance'
@@ -659,6 +669,7 @@ export interface FileRouteTypes {
     | '/pilot/tracking'
     | '/'
     | '/pilot'
+    | '/auth/callback'
     | '/learn/drone-design-fundamentals'
     | '/mission-hub/torqwings-design-studio/advisor'
     | '/mission-hub/torqwings-design-studio/compliance'
@@ -719,6 +730,7 @@ export interface FileRouteTypes {
     | '/pilot/tracking'
     | '/_layout/'
     | '/pilot/'
+    | '/_layout/auth/callback'
     | '/_layout/learn/drone-design-fundamentals'
     | '/mission-hub/torqwings-design-studio/advisor'
     | '/mission-hub/torqwings-design-studio/compliance'
@@ -1153,6 +1165,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutLearnDroneDesignFundamentalsRouteImport
       parentRoute: typeof LayoutLearnRoute
     }
+    '/_layout/auth/callback': {
+      id: '/_layout/auth/callback'
+      path: '/auth/callback'
+      fullPath: '/auth/callback'
+      preLoaderRoute: typeof LayoutAuthCallbackRouteImport
+      parentRoute: typeof LayoutRoute
+    }
   }
 }
 
@@ -1183,6 +1202,7 @@ interface LayoutRouteChildren {
   LayoutSolutionsRoute: typeof LayoutSolutionsRoute
   LayoutTechnologyRoute: typeof LayoutTechnologyRoute
   LayoutIndexRoute: typeof LayoutIndexRoute
+  LayoutAuthCallbackRoute: typeof LayoutAuthCallbackRoute
 }
 
 const LayoutRouteChildren: LayoutRouteChildren = {
@@ -1197,6 +1217,7 @@ const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutSolutionsRoute: LayoutSolutionsRoute,
   LayoutTechnologyRoute: LayoutTechnologyRoute,
   LayoutIndexRoute: LayoutIndexRoute,
+  LayoutAuthCallbackRoute: LayoutAuthCallbackRoute,
 }
 
 const LayoutRouteWithChildren =

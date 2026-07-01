@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Lock, ChevronDown, ChevronRight, ArrowLeft, Clock, BookOpen, Layers } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import type { User } from "@supabase/supabase-js";
 
 export const Route = createFileRoute("/_layout/learn/drone-design-fundamentals")({
   component: CourseDetailPage,
@@ -291,47 +292,20 @@ function renderMarkdown(md: string): React.ReactNode {
   return <>{nodes}</>;
 }
 
-// ── Lesson Reader ──────────────────────────────────────────────────────────
-
-function LessonReader({ lesson, onBack }: { lesson: Lesson; onBack: () => void }) {
-  return (
-    <div className="min-h-screen bg-background">
-      <div className="sticky top-0 z-10 border-b border-border bg-background/95 backdrop-blur">
-        <div className="mx-auto max-w-3xl px-5 py-3 flex items-center justify-between">
-          <button
-            onClick={onBack}
-            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to course
-          </button>
-          <span
-            className="rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide"
-            style={{ background: "rgba(27,175,122,0.15)", color: "#1baf7a" }}
-          >
-            Free Preview
-          </span>
-        </div>
-      </div>
-      <div className="mx-auto max-w-3xl px-5 py-10">
-        {renderMarkdown(lesson.content ?? "")}
-      </div>
-    </div>
-  );
-}
-
 // ── Module accordion row ───────────────────────────────────────────────────
 
 function ModuleRow({
   mod,
   index,
+  expandedLessonId,
   onLessonClick,
 }: {
   mod: Module;
   index: number;
-  onLessonClick: (lesson: Lesson) => void;
+  expandedLessonId: string | null;
+  onLessonClick: (id: string) => void;
 }) {
-  const [open, setOpen] = useState(index === 0);
+  const [open, setOpen] = useState(true);
   const freeCount = mod.lessons.filter((l) => l.is_free).length;
 
   return (
@@ -374,27 +348,36 @@ function ModuleRow({
         <div className="border-t border-border divide-y divide-border">
           {mod.lessons.map((lesson) =>
             lesson.is_free ? (
-              <button
-                key={lesson.id}
-                onClick={() => onLessonClick(lesson)}
-                className="w-full flex items-center gap-3 px-5 py-3 text-left hover:bg-white/[0.03] transition-colors group"
-              >
-                <span
-                  className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[9px] font-bold"
-                  style={{ background: "rgba(27,175,122,0.15)", color: "#1baf7a" }}
+              <div key={lesson.id}>
+                <button
+                  onClick={() => onLessonClick(lesson.id)}
+                  className="w-full flex items-center gap-3 px-5 py-3 text-left hover:bg-white/[0.03] transition-colors group"
                 >
-                  ▶
-                </span>
-                <span className="flex-1 text-sm text-foreground group-hover:text-foreground/90 leading-snug">
-                  {lesson.title}
-                </span>
-                <span
-                  className="rounded-full px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide shrink-0"
-                  style={{ background: "rgba(27,175,122,0.15)", color: "#1baf7a" }}
-                >
-                  Free Preview
-                </span>
-              </button>
+                  <span
+                    className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[9px] font-bold"
+                    style={{ background: "rgba(27,175,122,0.15)", color: "#1baf7a" }}
+                  >
+                    ▶
+                  </span>
+                  <span className="flex-1 text-sm text-foreground group-hover:text-foreground/90 leading-snug">
+                    {lesson.title}
+                  </span>
+                  <span
+                    className="rounded-full px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide shrink-0"
+                    style={{ background: "rgba(27,175,122,0.15)", color: "#1baf7a" }}
+                  >
+                    Free Preview
+                  </span>
+                </button>
+                {expandedLessonId === lesson.id && lesson.content && (
+                  <div
+                    className="px-6 pb-8 pt-2 border-t border-border"
+                    style={{ background: "rgba(255,255,255,0.015)" }}
+                  >
+                    {renderMarkdown(lesson.content)}
+                  </div>
+                )}
+              </div>
             ) : (
               <div
                 key={lesson.id}
@@ -413,12 +396,14 @@ function ModuleRow({
   );
 }
 
-// ── Google sign-in ────────────────────────────────────────────────────────
+// ── Google sign-in ─────────────────────────────────────────────────────────
 
 async function signInWithGoogle() {
   await supabase.auth.signInWithOAuth({
     provider: "google",
-    options: { redirectTo: typeof window !== "undefined" ? window.location.href : undefined },
+    options: {
+      redirectTo: `${window.location.origin}/auth/callback`,
+    },
   });
 }
 
@@ -432,10 +417,19 @@ const LEVEL_STYLE: Record<string, { bg: string; color: string }> = {
 };
 
 function CourseDetailPage() {
-  const [activeLesson, setActiveLesson] = useState<Lesson | null>(null);
+  const [expandedLessonId, setExpandedLessonId] = useState<string | null>(null);
+  const [user, setUser] = useState<User | null>(null);
 
-  if (activeLesson) {
-    return <LessonReader lesson={activeLesson} onBack={() => setActiveLesson(null)} />;
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setUser(data.user));
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
+  function toggleLesson(id: string) {
+    setExpandedLessonId((prev) => (prev === id ? null : id));
   }
 
   const lvl = LEVEL_STYLE[COURSE.level];
@@ -508,7 +502,8 @@ function CourseDetailPage() {
                 key={mod.id}
                 mod={mod}
                 index={idx}
-                onLessonClick={setActiveLesson}
+                expandedLessonId={expandedLessonId}
+                onLessonClick={toggleLesson}
               />
             ))}
           </div>
@@ -518,32 +513,48 @@ function CourseDetailPage() {
             className="mt-8 rounded-xl bg-card p-6 text-center"
             style={{ border: "0.5px solid var(--color-border)" }}
           >
-            <p className="text-sm font-medium text-foreground mb-1">
-              Ready to access the full course?
-            </p>
-            <p className="text-xs text-muted-foreground mb-4">
-              Sign in to unlock all modules, projects, and your certificate path.
-            </p>
-            <div className="flex flex-col sm:flex-row justify-center gap-3">
-              <button
-                onClick={signInWithGoogle}
-                className="inline-flex items-center justify-center gap-2.5 rounded-lg border border-border bg-white px-6 py-2.5 text-sm font-medium text-gray-800 shadow-sm transition-colors hover:bg-gray-50 active:bg-gray-100"
-              >
-                <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
-                  <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
-                  <path d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/>
-                  <path d="M3.964 10.707A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.707V4.961H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.039l3.007-2.332z" fill="#FBBC05"/>
-                  <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.961L3.964 6.293C4.672 4.166 6.656 3.58 9 3.58z" fill="#EA4335"/>
-                </svg>
-                Sign in with Google
-              </button>
-              <a
-                href="mailto:academy@torqwings.com"
-                className="inline-flex items-center justify-center rounded-lg border border-border px-6 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-white/5"
-              >
-                Talk to an advisor
-              </a>
-            </div>
+            {user ? (
+              <>
+                <span
+                  className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-medium mb-3"
+                  style={{ background: "rgba(27,175,122,0.12)", color: "#1baf7a" }}
+                >
+                  <span>✓</span> You're enrolled
+                </span>
+                <p className="text-xs text-muted-foreground">
+                  Signed in as {user.email}
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="text-sm font-medium text-foreground mb-1">
+                  Ready to access the full course?
+                </p>
+                <p className="text-xs text-muted-foreground mb-4">
+                  Sign in once to unlock all modules, projects, and your certificate path.
+                </p>
+                <div className="flex flex-col sm:flex-row justify-center gap-3">
+                  <button
+                    onClick={signInWithGoogle}
+                    className="inline-flex items-center justify-center gap-2.5 rounded-lg border border-border bg-white px-6 py-2.5 text-sm font-medium text-gray-800 shadow-sm transition-colors hover:bg-gray-50 active:bg-gray-100"
+                  >
+                    <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
+                      <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
+                      <path d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/>
+                      <path d="M3.964 10.707A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.707V4.961H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.039l3.007-2.332z" fill="#FBBC05"/>
+                      <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.961L3.964 6.293C4.672 4.166 6.656 3.58 9 3.58z" fill="#EA4335"/>
+                    </svg>
+                    Enroll for free
+                  </button>
+                  <a
+                    href="mailto:academy@torqwings.com"
+                    className="inline-flex items-center justify-center rounded-lg border border-border px-6 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-white/5"
+                  >
+                    Talk to an advisor
+                  </a>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </section>
