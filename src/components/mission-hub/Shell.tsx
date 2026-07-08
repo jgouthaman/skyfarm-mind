@@ -15,6 +15,10 @@ const verticalIcon: Record<Vertical, any> = {
   "design-studio": Cpu,
 };
 
+// The Industries group holds only the actual industry verticals. Design
+// Studio, Labs, and Academy render as top-level nav items instead.
+const INDUSTRY_VERTICALS: Vertical[] = ["agrisky", "infrasky", "geosky", "guardsky"];
+
 export function MissionHubShell({ title, children }: { title: string; children: ReactNode }) {
   const { profile, verticals, loading, signOut } = useMissionHubAuth();
   const navigate = useNavigate();
@@ -80,11 +84,7 @@ function getSectionFromPath(path: string, role?: string): Section | null {
   }
   if (path === "/mission-hub/waitlist" || path === "/mission-hub/contacts") return "business";
   if (path.startsWith("/mission-hub/twbc-") || path === "/mission-hub/knowledge-uav") return "twbc";
-  if (
-    path.startsWith("/mission-hub/verticals/") ||
-    path === "/mission-hub/design-studio" ||
-    path.startsWith("/mission-hub/torqwings-design-studio")
-  ) return "industries";
+  if (INDUSTRY_VERTICALS.some((v) => path === `/mission-hub/verticals/${v}`)) return "industries";
   if (path === "/mission-hub/users" || path.startsWith("/mission-hub/settings")) return "config";
   return null;
 }
@@ -137,7 +137,9 @@ function Sidebar({
   const toggleTwbc = (k: keyof typeof twbcOpen) => setTwbcOpen(s => ({ ...s, [k]: !s[k] }));
 
   const visibleVerticals: Vertical[] = isAdmin ? ALL_VERTICALS : verticals;
-  const hasDesignStudio = isAdmin || verticals.includes("design-studio" as Vertical);
+  const industryVerticals = visibleVerticals.filter((v) => INDUSTRY_VERTICALS.includes(v));
+  const hasVertical = (v: Vertical) => isAdmin || verticals.includes(v);
+  const hasDesignStudio = hasVertical("design-studio");
 
   return (
     <aside
@@ -182,7 +184,7 @@ function Sidebar({
           </>
         )}
 
-        {visibleVerticals.length > 0 && (
+        {industryVerticals.length > 0 && (
           <button
             type="button"
             onClick={() => toggle("industries")}
@@ -194,17 +196,50 @@ function Sidebar({
               : <ChevronRight className="h-3 w-3" />}
           </button>
         )}
-        {openSection === "industries" && visibleVerticals.map((v) => {
+        {openSection === "industries" && industryVerticals.map((v) => {
           const Icon = verticalIcon[v];
-          const to = v === ("design-studio" as Vertical)
-            ? "/mission-hub/design-studio"
-            : `/mission-hub/verticals/${v}`;
+          const to = `/mission-hub/verticals/${v}`;
           return (
             <NavLink key={v} to={to} icon={Icon} active={path === to} onClick={onClose}>
               {VERTICAL_LABELS[v]}
             </NavLink>
           );
         })}
+
+        {/* ── Top-level: Design Studio (primary product surface), then the
+            secondary Labs / Academy surfaces — not nested in any section. ── */}
+        {hasDesignStudio && (
+          <div className="mt-5">
+            <NavLink
+              to="/mission-hub/design-studio"
+              icon={verticalIcon["design-studio"]}
+              active={path === "/mission-hub/design-studio"}
+              onClick={onClose}
+            >
+              {VERTICAL_LABELS["design-studio"]}
+            </NavLink>
+          </div>
+        )}
+        {hasVertical("labs") && (
+          <NavLink
+            to="/mission-hub/verticals/labs"
+            icon={verticalIcon.labs}
+            active={path === "/mission-hub/verticals/labs"}
+            onClick={onClose}
+          >
+            {VERTICAL_LABELS.labs}
+          </NavLink>
+        )}
+        {hasVertical("academy") && (
+          <NavLink
+            to="/mission-hub/verticals/academy"
+            icon={verticalIcon.academy}
+            active={path === "/mission-hub/verticals/academy"}
+            onClick={onClose}
+          >
+            {VERTICAL_LABELS.academy}
+          </NavLink>
+        )}
 
         {isAdmin && (
           <div className="mt-5 space-y-0.5">
