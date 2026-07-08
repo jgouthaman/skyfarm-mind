@@ -29,14 +29,7 @@ export function buildInsertPayload(
       budgetRange:        form.budgetRange,
       automationLevel:    form.automationLevel,
     },
-    payload_details: {
-      tankCapacity:  form.tankCapacity,
-      sprayWidth:    form.sprayWidth,
-      cropType:      form.cropType,
-      farmSize:      form.farmSize,
-      liquidDensity: form.liquidDensity,
-      sprayingMode:  form.sprayingMode,
-    },
+    payload_details: form.payloadDetails,
     safety: {
       returnToHome:       form.returnToHome,
       gpsHold:            form.gpsHold,

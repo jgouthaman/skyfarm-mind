@@ -15,12 +15,7 @@ export interface WizardFormState {
   windCondition:      string;
   budgetRange:        string;
   automationLevel:    string;
-  tankCapacity:       string;
-  sprayWidth:         string;
-  cropType:           string;
-  farmSize:           string;
-  liquidDensity:      string;
-  sprayingMode:       string;
+  payloadDetails:     Record<string, string | number>;
   returnToHome:        boolean;
   gpsHold:             boolean;
   obstacleAvoidance:   boolean;
@@ -45,12 +40,7 @@ export const INITIAL_FORM: WizardFormState = {
   windCondition:      "Medium",
   budgetRange:        "Balanced",
   automationLevel:    "Semi-autonomous",
-  tankCapacity:       "",
-  sprayWidth:         "",
-  cropType:           "",
-  farmSize:           "",
-  liquidDensity:      "Normal",
-  sprayingMode:       "route-based",
+  payloadDetails:     {},
   returnToHome:        true,
   gpsHold:             true,
   obstacleAvoidance:   false,
