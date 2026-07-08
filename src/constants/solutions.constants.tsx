@@ -3,23 +3,39 @@ import {
   Plane, Layers, Compass, GitBranch, FlaskConical,
   Radar, FileText, Zap, Cpu, ScanLine, Sprout,
   Eye, BarChart3, Rocket, Users, Globe2,
+  Store, Unlink, Clock, Sigma, ShieldCheck, Link,
 } from "lucide-react";
 
-export const PROBLEM_CARDS: { icon: React.ReactNode; text: string; desc?: string }[] = [
-  { icon: <Wrench aria-hidden="true" />, text: "Manual inspections are slow and risky" },
-  { icon: <Leaf aria-hidden="true" />, text: "Farm and field issues are detected late" },
-  { icon: <Building2 aria-hidden="true" />, text: "Infrastructure monitoring lacks real-time visibility" },
-  { icon: <MapIcon aria-hidden="true" />, text: "Mapping and surveying are time-consuming" },
-  { icon: <Brain aria-hidden="true" />, text: "Aerial data is rarely converted into actionable intelligence" },
-  { icon: <Split aria-hidden="true" />, text: "Choosing the right aerial platform is guesswork", desc: "Multirotor, fixed-wing, or VTOL-hybrid? Most buyers default to whatever's familiar — not what the mission's payload, range, and launch site actually require." },
+export const SCIENCE_PROBLEM_CARDS: { icon: React.ReactNode; text: string; desc: string }[] = [
+  { icon: <Store aria-hidden="true" />, text: "Vendor familiarity over published research", desc: "Design decisions default to whatever platform a vendor sells, not to the aerospace research on which architecture actually fits the mission." },
+  { icon: <Unlink aria-hidden="true" />, text: "No shared language between research and deployment", desc: "Academic decision-science frameworks for UAV selection rarely reach the engineers and buyers actually specifying missions in the field." },
+  { icon: <Users aria-hidden="true" />, text: "Reasoning lives in tribal knowledge, not codified rules", desc: "Mission-to-platform logic is passed down informally instead of being auditable, documented, and testable." },
+  { icon: <Clock aria-hidden="true" />, text: "Validation happens after purchase", desc: "Simulation and design validation are typically an afterthought, applied once components are already ordered — when it's expensive to discover a mismatch." },
 ];
 
+export const SCIENCE_SOLUTION_CARDS: { icon: React.ReactNode; text: string; desc: string }[] = [
+  { icon: <Sigma aria-hidden="true" />, text: "Algorithm-driven, research-grounded selection", desc: "Platform recommendations come from aerospace decision-science research, not intuition or vendor bias." },
+  { icon: <Eye aria-hidden="true" />, text: "Transparent by design", desc: "Every recommendation shows its reasoning — confidence level, contributing factors, and alternatives — instead of a black-box answer." },
+  { icon: <ShieldCheck aria-hidden="true" />, text: "Validated before you build", desc: "Simulation tests the design against the mission before a single component is ordered." },
+  { icon: <Link aria-hidden="true" />, text: "A bridge between research and field deployment", desc: "The Design Studio is where published aerospace science becomes a usable engineering tool, not a paper nobody reads." },
+];
+
+export const PROBLEM_CARDS: { icon: React.ReactNode; text: string; desc: string }[] = [
+  { icon: <Split aria-hidden="true" />, text: "Choosing the right aerial platform is guesswork", desc: "Multirotor, fixed-wing, or VTOL-hybrid? Most buyers default to whatever's familiar — not what the mission's payload, range, and launch site actually require." },
+  { icon: <Wrench aria-hidden="true" />, text: "Manual inspections are slow and risky", desc: "Sending people up towers, across roofs, and into confined structures to check what a platform could survey from the air — at higher cost, lower repeatability, and real physical risk." },
+  { icon: <Leaf aria-hidden="true" />, text: "Farm and field issues are detected late", desc: "Crop stress, irrigation failure, and pest pressure are often visible from the air weeks before they're visible from the ground — by which point the yield impact is already locked in." },
+  { icon: <Building2 aria-hidden="true" />, text: "Infrastructure monitoring lacks real-time visibility", desc: "Roads, towers, solar farms, and pipelines get inspected on a schedule, not continuously — meaning failures are discovered on the next visit, not the day they start." },
+  { icon: <MapIcon aria-hidden="true" />, text: "Mapping and surveying are time-consuming", desc: "Traditional land survey and GIS data capture can take days of fieldwork for what a mission-tuned platform can cover in a single flight." },
+  { icon: <Rocket aria-hidden="true" />, text: "New payloads and sensor needs have no fast path from concept to field validation", desc: "A new sensor configuration or mission-specific payload usually means starting from scratch — no shared research base, no rapid prototyping path, no place to validate before committing." },
+];
+
+// Ordered to pair 1:1 with PROBLEM_CARDS above (same index answers same problem).
 export const SOLUTION_CARDS = [
   { icon: <Plane aria-hidden="true" />, text: "Custom platform design", desc: "Purpose-engineered autonomous aerial platforms across multirotor, fixed-wing, and VTOL-hybrid architectures — matched to your mission by proven design rules and AI-powered recommendations, not a one-size-fits-all frame." },
+  { icon: <GitBranch aria-hidden="true" />, text: "Scalable aerial operations", desc: "Repeatable design processes from a single farm platform to enterprise-grade aerial fleets." },
   { icon: <Brain aria-hidden="true" />, text: "AI-powered aerial analytics", desc: "Computer vision models that turn aerial imagery into decisions — crop health, structural defects, boundary mapping, and threat detection." },
   { icon: <Layers aria-hidden="true" />, text: "Industry-specific verticals", desc: "Tailored design workflows and intelligence layers for agriculture, infrastructure, mapping, and surveillance." },
   { icon: <Compass aria-hidden="true" />, text: "Mission planning & reporting", desc: "From design brief to PDF compliance report — end-to-end platform engineering and operations." },
-  { icon: <GitBranch aria-hidden="true" />, text: "Scalable aerial operations", desc: "Repeatable design processes from a single farm platform to enterprise-grade aerial fleets." },
   { icon: <FlaskConical aria-hidden="true" />, text: "Research & prototyping", desc: "Rapid prototyping of payloads, aerospace experiments, and next-generation autonomous systems through TorqWings Labs." },
 ];
 
