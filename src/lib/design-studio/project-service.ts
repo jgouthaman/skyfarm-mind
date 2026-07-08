@@ -1,6 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { WizardFormState, StudioProjectInsert } from "./wizard-types";
 import type { IntelligenceResult } from "@/lib/intelligence/types";
+import { DEFAULT_VEHICLE_TYPE } from "@/constants/vehicleTypes.constants";
 
 export function buildInsertPayload(
   form: WizardFormState,
@@ -11,6 +12,7 @@ export function buildInsertPayload(
   return {
     user_id:      userId,
     project_name: form.projectName.trim(),
+    vehicle_type: form.vehicleType || DEFAULT_VEHICLE_TYPE,
     vertical:     form.vertical,
     purpose:      form.purpose,
     user_type:    form.userType,

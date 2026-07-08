@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { DEFAULT_VEHICLE_TYPE } from '@/constants/vehicleTypes.constants';
 import type { IntelligenceInput, MatchedRule } from './types';
 
 export async function solveRule(input: IntelligenceInput): Promise<{
@@ -7,6 +8,8 @@ export async function solveRule(input: IntelligenceInput): Promise<{
   is_fallback: boolean;
   fallback_reason: string | null;
 }> {
+  const vehicleType = input.vehicleType || DEFAULT_VEHICLE_TYPE;
+
   const SELECT_COLS = `
     id, rule_name, drone_type, frame_size, motor_class, motor_count,
     battery_config, esc_rating, propeller_spec, flight_controller,
@@ -22,6 +25,7 @@ export async function solveRule(input: IntelligenceInput): Promise<{
     .select(SELECT_COLS)
     .eq('status', 'active')
     .eq('vertical', input.vertical)
+    .eq('vehicle_type', vehicleType)
     .eq('purpose', input.purpose)
     .lte('payload_min_kg', input.payloadWeight)
     .gte('payload_max_kg', input.payloadWeight)
@@ -49,6 +53,7 @@ export async function solveRule(input: IntelligenceInput): Promise<{
     .select(SELECT_COLS)
     .eq('status', 'active')
     .eq('vertical', input.vertical)
+    .eq('vehicle_type', vehicleType)
     .eq('purpose', input.purpose)
     .order('confidence_level', { ascending: false });
 

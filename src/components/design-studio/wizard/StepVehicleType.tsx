@@ -1,0 +1,260 @@
+import { useState } from "react";
+import {
+  VEHICLE_TYPES,
+  DEFAULT_VEHICLE_TYPE,
+  type VehicleTypeSlug,
+} from "@/constants/vehicleTypes.constants";
+import {
+  recommendVehicleType,
+  type VehicleTypeRecommendation,
+} from "@/lib/intelligence/vehicleTypeRecommender";
+import { WizardInput, WizardSelect } from "./WizardField";
+import type { WizardFormState } from "@/lib/design-studio/wizard-types";
+
+interface Props {
+  form:     WizardFormState;
+  onChange: (patch: Partial<WizardFormState>) => void;
+  onNext:   () => void;
+}
+
+type View = "choice" | "recommend-form" | "recommend-result" | "grid";
+
+const VTOL_OPTIONS = ["yes", "no", "unsure"] as const;
+
+const CARD_STYLE = {
+  background: "rgba(255,255,255,0.12)",
+  borderColor: "rgba(255,255,255,0.15)",
+};
+
+export function StepVehicleType({ form, onChange, onNext }: Props) {
+  const [view, setView] = useState<View>("choice");
+  const [payloadKg, setPayloadKg] = useState("");
+  const [rangeKm, setRangeKm] = useState("");
+  const [vtolRequired, setVtolRequired] = useState<typeof VTOL_OPTIONS[number]>("unsure");
+  const [error, setError] = useState("");
+  const [recommendation, setRecommendation] = useState<VehicleTypeRecommendation | null>(null);
+
+  function selectVehicleType(slug: VehicleTypeSlug) {
+    onChange({ vehicleType: slug });
+    sessionStorage.setItem("torqwings-studio:vehicle-type", slug);
+    onNext();
+  }
+
+  function handleGetRecommendation() {
+    const payload = parseFloat(payloadKg);
+    const range = parseFloat(rangeKm);
+    if (!payloadKg || Number.isNaN(payload) || payload <= 0) {
+      setError("Enter a payload weight greater than 0");
+      return;
+    }
+    if (!rangeKm || Number.isNaN(range) || range <= 0) {
+      setError("Enter a mission range greater than 0");
+      return;
+    }
+    setError("");
+    setRecommendation(recommendVehicleType({ payloadKg: payload, rangeKm: range, vtolRequired }));
+    setView("recommend-result");
+  }
+
+  if (view === "choice") {
+    return (
+      <div>
+        <h2 className="text-2xl font-semibold text-white mb-1">
+          Choose Your Vehicle Type
+        </h2>
+        <p className="text-sm text-white/60 mb-6">
+          Every autonomous aerial platform starts with a frame decision. Let us recommend one, or pick your own.
+        </p>
+
+        <div className="grid md:grid-cols-2 gap-4">
+          <button
+            onClick={() => setView("recommend-form")}
+            className="text-left rounded-2xl border p-6 space-y-2 backdrop-blur-sm hover:border-white/30 transition-colors"
+            style={CARD_STYLE}
+          >
+            <h3 className="text-base font-semibold text-white">Let us recommend</h3>
+            <p className="text-sm text-white/60">
+              Answer three quick questions about payload, range, and hover needs — we'll suggest the right platform type.
+            </p>
+          </button>
+
+          <button
+            onClick={() => setView("grid")}
+            className="text-left rounded-2xl border p-6 space-y-2 backdrop-blur-sm hover:border-white/30 transition-colors"
+            style={CARD_STYLE}
+          >
+            <h3 className="text-base font-semibold text-white">Choose my vehicle type</h3>
+            <p className="text-sm text-white/60">
+              Already know what you need? Pick directly from all four platform types.
+            </p>
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (view === "recommend-form") {
+    return (
+      <div>
+        <h2 className="text-2xl font-semibold text-white mb-1">Let Us Recommend</h2>
+        <p className="text-sm text-white/60 mb-6">
+          Three quick questions about your mission.
+        </p>
+
+        <div
+          className="rounded-2xl border p-8 space-y-5 backdrop-blur-sm"
+          style={CARD_STYLE}
+        >
+          <WizardInput
+            label="Payload weight (kg)"
+            type="number"
+            min="0"
+            step="0.1"
+            value={payloadKg}
+            placeholder="e.g. 10"
+            onChange={(e) => { setPayloadKg(e.target.value); setError(""); }}
+          />
+
+          <WizardInput
+            label="Mission range (km)"
+            type="number"
+            min="0"
+            step="1"
+            value={rangeKm}
+            placeholder="e.g. 20"
+            onChange={(e) => { setRangeKm(e.target.value); setError(""); }}
+          />
+
+          <WizardSelect
+            label="Do you need vertical takeoff/landing (VTOL)?"
+            options={VTOL_OPTIONS}
+            value={vtolRequired}
+            onChange={(e) => setVtolRequired(e.target.value as typeof VTOL_OPTIONS[number])}
+          />
+
+          {error && <p className="text-red-400 text-xs">{error}</p>}
+
+          <div className="flex justify-between pt-2">
+            <button
+              onClick={() => setView("choice")}
+              className="px-5 h-11 rounded-[10px] text-sm text-white/70
+                border border-white/20 bg-transparent hover:bg-white/5 transition-colors"
+            >
+              Back
+            </button>
+            <button
+              onClick={handleGetRecommendation}
+              className="px-5 h-11 rounded-[10px] text-sm font-medium text-white
+                hover:opacity-90 transition-opacity"
+              style={{ background: "#378ADD" }}
+            >
+              Get recommendation
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (view === "recommend-result" && recommendation) {
+    const match = VEHICLE_TYPES.find((v) => v.slug === recommendation.type)
+      ?? VEHICLE_TYPES.find((v) => v.slug === DEFAULT_VEHICLE_TYPE)!;
+    const Icon = match.icon;
+
+    return (
+      <div>
+        <h2 className="text-2xl font-semibold text-white mb-1">Recommended Platform</h2>
+        <p className="text-sm text-white/60 mb-6">Based on your mission inputs.</p>
+
+        <div
+          className="rounded-2xl border p-8 space-y-4 backdrop-blur-sm"
+          style={CARD_STYLE}
+        >
+          <div className="flex items-center gap-3">
+            <Icon className="h-6 w-6" style={{ color: "#378ADD" }} aria-hidden="true" />
+            <h3 className="text-lg font-semibold text-white">{match.label}</h3>
+          </div>
+
+          <p className="text-sm text-white/70">{recommendation.reasoning}</p>
+
+          <div className="grid grid-cols-2 gap-4 text-[13px]">
+            <div>
+              <span className="text-white/35">Typical payload: </span>
+              <span className="text-white/75">{match.typicalPayload}</span>
+            </div>
+            <div>
+              <span className="text-white/35">Typical range: </span>
+              <span className="text-white/75">{match.typicalRange}</span>
+            </div>
+          </div>
+
+          <div className="flex justify-between pt-2">
+            <button
+              onClick={() => setView("grid")}
+              className="px-5 h-11 rounded-[10px] text-sm text-white/70
+                border border-white/20 bg-transparent hover:bg-white/5 transition-colors"
+            >
+              See all options
+            </button>
+            <button
+              onClick={() => selectVehicleType(match.slug)}
+              className="px-5 h-11 rounded-[10px] text-sm font-medium text-white
+                hover:opacity-90 transition-opacity"
+              style={{ background: "#378ADD" }}
+            >
+              Use this vehicle type
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <h2 className="text-2xl font-semibold text-white mb-1">Choose Your Vehicle Type</h2>
+      <p className="text-sm text-white/60 mb-6">Pick the platform type that fits your mission.</p>
+
+      <div className="grid md:grid-cols-2 gap-4">
+        {VEHICLE_TYPES.map((vt) => {
+          const Icon = vt.icon;
+          const isSelected = form.vehicleType === vt.slug;
+          return (
+            <button
+              key={vt.slug}
+              onClick={() => selectVehicleType(vt.slug)}
+              className={`text-left rounded-2xl border p-6 space-y-3 backdrop-blur-sm hover:border-white/30 transition-colors ${
+                isSelected ? "ring-1 ring-[#378ADD]" : ""
+              }`}
+              style={isSelected ? { ...CARD_STYLE, borderColor: "#378ADD" } : CARD_STYLE}
+            >
+              <div className="flex items-center gap-3">
+                <Icon className="h-5 w-5" style={{ color: "#378ADD" }} aria-hidden="true" />
+                <h3 className="text-base font-semibold text-white">{vt.label}</h3>
+              </div>
+              <p className="text-sm text-white/60">{vt.shortDescription}</p>
+              <div className="flex gap-4 text-[12px] pt-1">
+                <span className="text-white/40">
+                  Payload: <span className="text-white/70">{vt.typicalPayload}</span>
+                </span>
+                <span className="text-white/40">
+                  Range: <span className="text-white/70">{vt.typicalRange}</span>
+                </span>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="pt-4">
+        <button
+          onClick={() => setView("choice")}
+          className="px-5 h-11 rounded-[10px] text-sm text-white/70
+            border border-white/20 bg-transparent hover:bg-white/5 transition-colors"
+        >
+          Back
+        </button>
+      </div>
+    </div>
+  );
+}

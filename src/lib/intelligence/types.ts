@@ -1,5 +1,6 @@
 export interface IntelligenceInput {
   vertical: string;
+  vehicleType: string;
   purpose: string;
   payloadWeight: number;
   requiredFlightTime: number;
@@ -35,7 +36,7 @@ export interface MatchedReference {
   name: string;
   score: number;
   payload_delta: number;
-  drone_type: string;
+  drone_type: string | null;
   frame_size: string | null;
   motor_class: string | null;
   battery: string | null;

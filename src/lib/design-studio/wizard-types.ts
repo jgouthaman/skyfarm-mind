@@ -1,5 +1,8 @@
+import type { VehicleTypeSlug } from "@/constants/vehicleTypes.constants";
+
 export interface WizardFormState {
   projectName:        string;
+  vehicleType:        VehicleTypeSlug | "";
   vertical:           string;
   purpose:            string;
   userType:           string;
@@ -29,6 +32,7 @@ export interface WizardFormState {
 
 export const INITIAL_FORM: WizardFormState = {
   projectName:        "",
+  vehicleType:        "",
   vertical:           "AgriSky",
   purpose:            "Agriculture spraying",
   userType:           "Farmer",
@@ -59,6 +63,7 @@ export const INITIAL_FORM: WizardFormState = {
 export interface StudioProjectInsert {
   user_id:         string;
   project_name:    string;
+  vehicle_type:    VehicleTypeSlug;
   vertical:        string;
   purpose:         string;
   user_type:       string;

@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { DEFAULT_VEHICLE_TYPE } from '@/constants/vehicleTypes.constants';
 import type { IntelligenceInput, MatchedReference } from './types';
 
 // Maps wizard display names to reference_designs vertical slugs
@@ -45,14 +46,17 @@ export async function matchReference(input: IntelligenceInput): Promise<{
   const slug = VERTICAL_TO_SLUG[input.vertical];
   if (!slug) return { reference: null, score: 0 };
 
+  const vehicleType = input.vehicleType || DEFAULT_VEHICLE_TYPE;
+
   const { data, error } = await supabase
     .from('reference_designs')
     .select(`
-      id, name, purpose, vertical, drone_type, frame_size, motor_class,
+      id, name, purpose, vertical, vehicle_type, drone_type, frame_size, motor_class,
       battery, payload_weight, estimated_flight_time,
       component_list, requirements, engineer_notes, confidence_score
     `)
     .eq('vertical', slug)
+    .eq('vehicle_type', vehicleType)
     .eq('approval_status', 'approved')
     .eq('is_active', true);
 

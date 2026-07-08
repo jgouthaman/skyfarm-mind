@@ -8,6 +8,7 @@ import { INITIAL_FORM } from "@/lib/design-studio/wizard-types";
 import type { WizardFormState } from "@/lib/design-studio/wizard-types";
 import { buildInsertPayload, createProject } from "@/lib/design-studio/project-service";
 import { WizardProgress } from "@/components/design-studio/wizard/WizardProgress";
+import { StepVehicleType } from "@/components/design-studio/wizard/StepVehicleType";
 import { StepScope }   from "@/components/design-studio/wizard/StepScope";
 import { StepMission } from "@/components/design-studio/wizard/StepMission";
 import { StepPayload } from "@/components/design-studio/wizard/StepPayload";
@@ -22,7 +23,7 @@ export const Route = createFileRoute("/mission-hub/torqwings-design-studio/new")
   ssr: false,
 });
 
-const TOTAL = 6;
+const TOTAL = 7;
 
 function NewProjectWizard() {
   const { profile } = useMissionHubAuth();
@@ -54,13 +55,14 @@ function NewProjectWizard() {
 
     supabase
       .from("reference_designs")
-      .select("name, purpose, vertical, payload_weight, estimated_flight_time")
+      .select("name, purpose, vertical, vehicle_type, payload_weight, estimated_flight_time")
       .eq("id", baseId)
       .single()
       .then(({ data }) => {
         if (!data) return;
         patch({
           projectName:        data.name ?? "",
+          vehicleType:        (data.vehicle_type as WizardFormState["vehicleType"]) ?? INITIAL_FORM.vehicleType,
           purpose:            data.purpose ?? INITIAL_FORM.purpose,
           vertical:           SLUG_TO_VERTICAL[data.vertical ?? ""] ?? INITIAL_FORM.vertical,
           payloadWeight:      data.payload_weight != null ? String(data.payload_weight) : "",
@@ -80,6 +82,7 @@ function NewProjectWizard() {
     };
     return {
       vertical:           form.vertical,
+      vehicleType:        form.vehicleType,
       purpose:            form.purpose,
       payloadWeight:      parseFloat(form.payloadWeight) || 0,
       requiredFlightTime: parseFloat(form.requiredFlightTime) || 0,
@@ -142,22 +145,21 @@ function NewProjectWizard() {
       />
 
       {step === 1 && (
-        <StepScope
+        <StepVehicleType
           form={form}
           onChange={patch}
           onNext={() => setStep(2)}
         />
       )}
       {step === 2 && (
-        <StepMission
+        <StepScope
           form={form}
           onChange={patch}
           onNext={() => setStep(3)}
-          onBack={() => setStep(1)}
         />
       )}
       {step === 3 && (
-        <StepPayload
+        <StepMission
           form={form}
           onChange={patch}
           onNext={() => setStep(4)}
@@ -165,26 +167,34 @@ function NewProjectWizard() {
         />
       )}
       {step === 4 && (
-        <StepSafety
+        <StepPayload
           form={form}
           onChange={patch}
-          onNext={() => { runEngine(form); setStep(5); }}
+          onNext={() => setStep(5)}
           onBack={() => setStep(3)}
         />
       )}
       {step === 5 && (
+        <StepSafety
+          form={form}
+          onChange={patch}
+          onNext={() => { runEngine(form); setStep(6); }}
+          onBack={() => setStep(4)}
+        />
+      )}
+      {step === 6 && (
         <StepRecommendation
           result={recommendation}
           input={buildEngineInput(form)}
           isLoading={engineLoading}
-          onBack={() => setStep(4)}
-          onAccept={(choice) => { setAcceptedSource(choice); setStep(6); }}
+          onBack={() => setStep(5)}
+          onAccept={(choice) => { setAcceptedSource(choice); setStep(7); }}
         />
       )}
-      {step === 6 && (
+      {step === 7 && (
         <StepReview
           form={form}
-          onBack={() => setStep(5)}
+          onBack={() => setStep(6)}
           onSubmit={handleSubmit}
           saving={saving}
         />
