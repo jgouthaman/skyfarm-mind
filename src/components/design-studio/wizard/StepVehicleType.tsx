@@ -2,11 +2,14 @@ import { useState } from "react";
 import {
   VEHICLE_TYPES,
   DEFAULT_VEHICLE_TYPE,
+  getVehicleType,
   type VehicleTypeSlug,
 } from "@/constants/vehicleTypes.constants";
+import { VERTICALS } from "@/constants/verticals.constants";
 import {
   recommendVehicleType,
   type VehicleTypeRecommendation,
+  type YesNoUnsure,
 } from "@/lib/intelligence/vehicleTypeRecommender";
 import { WizardInput, WizardSelect } from "./WizardField";
 import type { WizardFormState } from "@/lib/design-studio/wizard-types";
@@ -19,7 +22,12 @@ interface Props {
 
 type View = "choice" | "recommend-form" | "recommend-result" | "grid";
 
-const VTOL_OPTIONS = ["yes", "no", "unsure"] as const;
+// Only the 3 currently active vehicle types are shown/recommended.
+// cargo-heavy-lift stays in VEHICLE_TYPES/the DB constraint for later reuse.
+const ACTIVE_VEHICLE_TYPES = VEHICLE_TYPES.filter((vt) => vt.slug !== "cargo-heavy-lift");
+
+const YES_NO_UNSURE_OPTIONS = ["yes", "no", "unsure"] as const;
+const VERTICAL_OPTIONS = VERTICALS.map((v) => v.tag);
 
 const CARD_STYLE = {
   background: "rgba(255,255,255,0.12)",
@@ -30,7 +38,10 @@ export function StepVehicleType({ form, onChange, onNext }: Props) {
   const [view, setView] = useState<View>("choice");
   const [payloadKg, setPayloadKg] = useState("");
   const [rangeKm, setRangeKm] = useState("");
-  const [vtolRequired, setVtolRequired] = useState<typeof VTOL_OPTIONS[number]>("unsure");
+  const [enduranceMin, setEnduranceMin] = useState("");
+  const [hoverRequired, setHoverRequired] = useState<YesNoUnsure>("unsure");
+  const [runwayAvailable, setRunwayAvailable] = useState<YesNoUnsure>("unsure");
+  const [missionType, setMissionType] = useState(VERTICAL_OPTIONS[0] ?? "");
   const [error, setError] = useState("");
   const [recommendation, setRecommendation] = useState<VehicleTypeRecommendation | null>(null);
 
@@ -43,6 +54,7 @@ export function StepVehicleType({ form, onChange, onNext }: Props) {
   function handleGetRecommendation() {
     const payload = parseFloat(payloadKg);
     const range = parseFloat(rangeKm);
+    const endurance = parseFloat(enduranceMin);
     if (!payloadKg || Number.isNaN(payload) || payload <= 0) {
       setError("Enter a payload weight greater than 0");
       return;
@@ -51,8 +63,21 @@ export function StepVehicleType({ form, onChange, onNext }: Props) {
       setError("Enter a mission range greater than 0");
       return;
     }
+    if (!enduranceMin || Number.isNaN(endurance) || endurance <= 0) {
+      setError("Enter a mission endurance greater than 0");
+      return;
+    }
     setError("");
-    setRecommendation(recommendVehicleType({ payloadKg: payload, rangeKm: range, vtolRequired }));
+    setRecommendation(
+      recommendVehicleType({
+        payloadKg: payload,
+        rangeKm: range,
+        enduranceMin: endurance,
+        hoverRequired,
+        runwayAvailable,
+        vertical: missionType,
+      }),
+    );
     setView("recommend-result");
   }
 
@@ -125,11 +150,35 @@ export function StepVehicleType({ form, onChange, onNext }: Props) {
             onChange={(e) => { setRangeKm(e.target.value); setError(""); }}
           />
 
+          <WizardInput
+            label="Mission endurance (min)"
+            type="number"
+            min="0"
+            step="1"
+            value={enduranceMin}
+            placeholder="e.g. 30"
+            onChange={(e) => { setEnduranceMin(e.target.value); setError(""); }}
+          />
+
           <WizardSelect
-            label="Do you need vertical takeoff/landing (VTOL)?"
-            options={VTOL_OPTIONS}
-            value={vtolRequired}
-            onChange={(e) => setVtolRequired(e.target.value as typeof VTOL_OPTIONS[number])}
+            label="Does the mission require hovering or precise low-altitude work (spraying, close inspection, photography)?"
+            options={YES_NO_UNSURE_OPTIONS}
+            value={hoverRequired}
+            onChange={(e) => setHoverRequired(e.target.value as YesNoUnsure)}
+          />
+
+          <WizardSelect
+            label="Do you have a runway or open launch strip available?"
+            options={YES_NO_UNSURE_OPTIONS}
+            value={runwayAvailable}
+            onChange={(e) => setRunwayAvailable(e.target.value as YesNoUnsure)}
+          />
+
+          <WizardSelect
+            label="Mission type"
+            options={VERTICAL_OPTIONS}
+            value={missionType}
+            onChange={(e) => setMissionType(e.target.value)}
           />
 
           {error && <p className="text-red-400 text-xs">{error}</p>}
@@ -157,9 +206,56 @@ export function StepVehicleType({ form, onChange, onNext }: Props) {
   }
 
   if (view === "recommend-result" && recommendation) {
-    const match = VEHICLE_TYPES.find((v) => v.slug === recommendation.type)
-      ?? VEHICLE_TYPES.find((v) => v.slug === DEFAULT_VEHICLE_TYPE)!;
+    if (recommendation.overflow) {
+      return (
+        <div>
+          <h2 className="text-2xl font-semibold text-white mb-1">
+            Payload exceeds current platform support
+          </h2>
+          <p className="text-sm text-white/60 mb-6">Based on your mission inputs.</p>
+
+          <div
+            className="rounded-2xl border p-8 space-y-4 backdrop-blur-sm"
+            style={CARD_STYLE}
+          >
+            <p className="text-sm text-white/70">
+              Our active platform types — multirotor, fixed-wing, and VTOL/hybrid — support payloads
+              up to 25 kg. Heavier payloads are on our roadmap for a dedicated cargo/heavy-lift
+              platform, but aren't available for recommendation yet.
+            </p>
+
+            <div className="pt-2">
+              <button
+                onClick={() => setView("grid")}
+                className="px-5 h-11 rounded-[10px] text-sm text-white/70
+                  border border-white/20 bg-transparent hover:bg-white/5 transition-colors"
+              >
+                See all options
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    const match = ACTIVE_VEHICLE_TYPES.find((v) => v.slug === recommendation.type)
+      ?? ACTIVE_VEHICLE_TYPES.find((v) => v.slug === DEFAULT_VEHICLE_TYPE)!;
     const Icon = match.icon;
+    const runnerUpMatch = recommendation.runnerUp
+      ? getVehicleType(recommendation.runnerUp.type)
+      : null;
+    const confidence = recommendation.confidence;
+
+    const confidenceNote =
+      confidence === "medium" && runnerUpMatch
+        ? `This fits well, though ${runnerUpMatch.label} could also work for your mission.`
+        : confidence === "low" && runnerUpMatch
+        ? `This was a close call between ${match.label} and ${runnerUpMatch.label} — worth comparing both before committing.`
+        : null;
+
+    const seeAllOptionsBtnClass = confidence === "low"
+      ? "px-5 h-11 rounded-[10px] text-sm font-medium text-white/80 border border-white/30 bg-transparent hover:bg-white/5 transition-colors"
+      : "px-5 h-11 rounded-[10px] text-sm text-white/70 border border-white/20 bg-transparent hover:bg-white/5 transition-colors";
 
     return (
       <div>
@@ -170,12 +266,26 @@ export function StepVehicleType({ form, onChange, onNext }: Props) {
           className="rounded-2xl border p-8 space-y-4 backdrop-blur-sm"
           style={CARD_STYLE}
         >
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
             <Icon className="h-6 w-6" style={{ color: "#378ADD" }} aria-hidden="true" />
             <h3 className="text-lg font-semibold text-white">{match.label}</h3>
+            {confidence && (
+              <span
+                className={`text-[10px] uppercase tracking-widest px-2 py-0.5 rounded-full border ${
+                  confidence === "high"
+                    ? "text-emerald-400 border-emerald-500/30 bg-emerald-500/10"
+                    : confidence === "medium"
+                    ? "text-amber-400 border-amber-500/30 bg-amber-500/10"
+                    : "text-red-400 border-red-500/30 bg-red-500/10"
+                }`}
+              >
+                {confidence} confidence
+              </span>
+            )}
           </div>
 
           <p className="text-sm text-white/70">{recommendation.reasoning}</p>
+          {confidenceNote && <p className="text-sm text-white/50">{confidenceNote}</p>}
 
           <div className="grid grid-cols-2 gap-4 text-[13px]">
             <div>
@@ -191,8 +301,7 @@ export function StepVehicleType({ form, onChange, onNext }: Props) {
           <div className="flex justify-between pt-2">
             <button
               onClick={() => setView("grid")}
-              className="px-5 h-11 rounded-[10px] text-sm text-white/70
-                border border-white/20 bg-transparent hover:bg-white/5 transition-colors"
+              className={seeAllOptionsBtnClass}
             >
               See all options
             </button>
@@ -216,7 +325,7 @@ export function StepVehicleType({ form, onChange, onNext }: Props) {
       <p className="text-sm text-white/60 mb-6">Pick the platform type that fits your mission.</p>
 
       <div className="grid md:grid-cols-2 gap-4">
-        {VEHICLE_TYPES.map((vt) => {
+        {ACTIVE_VEHICLE_TYPES.map((vt) => {
           const Icon = vt.icon;
           const isSelected = form.vehicleType === vt.slug;
           return (
