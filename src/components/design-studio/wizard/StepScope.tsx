@@ -20,9 +20,10 @@ interface Props {
   form:     WizardFormState;
   onChange: (patch: Partial<WizardFormState>) => void;
   onNext:   () => void;
+  onBack:   () => void;
 }
 
-export function StepScope({ form, onChange, onNext }: Props) {
+export function StepScope({ form, onChange, onNext, onBack }: Props) {
   const [error, setError] = useState("");
   const [selectError, setSelectError] = useState("");
 
@@ -120,14 +121,23 @@ export function StepScope({ form, onChange, onNext }: Props) {
           <p className="text-red-400 text-xs">{selectError}</p>
         )}
 
-        <button
-          onClick={handleNext}
-          className="w-full h-11 rounded-[10px] text-sm font-medium text-white
-            hover:opacity-90 transition-opacity"
-          style={{ background: "#378ADD" }}
-        >
-          Continue to Requirements
-        </button>
+        <div className="flex justify-between pt-2">
+          <button
+            onClick={onBack}
+            className="px-5 h-11 rounded-[10px] text-sm text-white/70
+              border border-white/20 bg-transparent hover:bg-white/5 transition-colors"
+          >
+            Back
+          </button>
+          <button
+            onClick={handleNext}
+            className="px-5 h-11 rounded-[10px] text-sm font-medium text-white
+              hover:opacity-90 transition-opacity"
+            style={{ background: "#378ADD" }}
+          >
+            Continue to Requirements
+          </button>
+        </div>
       </div>
     </div>
   );

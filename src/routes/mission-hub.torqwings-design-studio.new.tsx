@@ -24,12 +24,31 @@ export const Route = createFileRoute("/mission-hub/torqwings-design-studio/new")
 });
 
 const TOTAL = 7;
+const STEP_KEY = "torqwings-studio:wizard-step";
+const FORM_KEY = "torqwings-studio:wizard-form";
+
+function loadInitialStep(): number {
+  if (typeof window === "undefined") return 1;
+  const saved = Number(sessionStorage.getItem(STEP_KEY));
+  return Number.isFinite(saved) && saved >= 1 && saved <= TOTAL ? saved : 1;
+}
+
+function loadInitialForm(): WizardFormState {
+  if (typeof window === "undefined") return INITIAL_FORM;
+  const saved = sessionStorage.getItem(FORM_KEY);
+  if (!saved) return INITIAL_FORM;
+  try {
+    return { ...INITIAL_FORM, ...JSON.parse(saved) };
+  } catch {
+    return INITIAL_FORM;
+  }
+}
 
 function NewProjectWizard() {
   const { profile } = useMissionHubAuth();
   const nav = useNavigate();
-  const [step, setStep]             = useState(1);
-  const [form, setForm]             = useState<WizardFormState>(INITIAL_FORM);
+  const [step, setStep]             = useState(loadInitialStep);
+  const [form, setForm]             = useState<WizardFormState>(loadInitialForm);
   const [saving, setSaving]         = useState(false);
   const [baseName, setBaseName]     = useState<string | null>(null);
   const [recommendation, setRecommendation] = useState<IntelligenceResult | null>(null);
@@ -38,6 +57,14 @@ function NewProjectWizard() {
 
   const patch = (p: Partial<WizardFormState>) =>
     setForm((f) => ({ ...f, ...p }));
+
+  useEffect(() => {
+    sessionStorage.setItem(STEP_KEY, String(step));
+  }, [step]);
+
+  useEffect(() => {
+    sessionStorage.setItem(FORM_KEY, JSON.stringify(form));
+  }, [form]);
 
   const SLUG_TO_VERTICAL: Record<string, string> = {
     agriculture:    "AgriSky",
@@ -69,6 +96,10 @@ function NewProjectWizard() {
           requiredFlightTime: data.estimated_flight_time != null ? String(data.estimated_flight_time) : "",
         });
         setBaseName(data.name ?? null);
+        // Starting from a proven design is a fresh run — don't leave the
+        // wizard sitting on a step left over from a previously abandoned,
+        // now-restored session.
+        setStep(1);
       });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -109,6 +140,8 @@ function NewProjectWizard() {
       const payload = buildInsertPayload(form, profile.id, recommendation, acceptedSource);
       const result  = await createProject(payload);
       if (result?.id) {
+        sessionStorage.removeItem(STEP_KEY);
+        sessionStorage.removeItem(FORM_KEY);
         if (typeof window !== "undefined") {
           window.sessionStorage.setItem("torqwings-studio:selected", result.id);
         }
@@ -156,6 +189,7 @@ function NewProjectWizard() {
           form={form}
           onChange={patch}
           onNext={() => setStep(3)}
+          onBack={() => setStep(1)}
         />
       )}
       {step === 3 && (

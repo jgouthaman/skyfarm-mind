@@ -34,6 +34,10 @@ function AccessGate({ children }: { children: React.ReactNode }) {
     }
   }, [loading, profile, hasAccess, navigate]);
 
-  if (loading || !profile || !hasAccess) return null;
+  // Gate on `!profile`, not `loading`: a background auth refresh (token refresh,
+  // tab focus) flips `loading` true while the existing profile is still valid.
+  // Tearing down `{children}` there would unmount an in-progress wizard/form.
+  // Mirrors the same fix in MissionHubShell.
+  if (!profile || !hasAccess) return null;
   return <>{children}</>;
 }

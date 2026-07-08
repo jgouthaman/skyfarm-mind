@@ -1,4 +1,5 @@
 import type { VehicleTypeSlug } from "@/constants/vehicleTypes.constants";
+import type { YesNoUnsure } from "@/lib/intelligence/vehicleTypeRecommender";
 
 export interface WizardFormState {
   projectName:        string;
@@ -6,6 +7,15 @@ export interface WizardFormState {
   vertical:           string;
   purpose:            string;
   userType:           string;
+  // Step 0's raw "Let us recommend" inputs, lifted here (rather than kept
+  // local to StepVehicleType) so they survive back-navigation to Step 1 and
+  // can pre-fill Step 3's payload weight / flight time. Unset entirely when
+  // the user took the "Choose my vehicle type" path.
+  recommendPayloadKg?:      string;
+  recommendRangeKm?:        string;
+  recommendEnduranceMin?:   string;
+  recommendHoverRequired?:  YesNoUnsure;
+  recommendRunwayAvailable?: YesNoUnsure;
   payloadWeight:      string;
   requiredFlightTime: string;
   missionArea:        string;

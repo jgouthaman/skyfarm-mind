@@ -8,8 +8,10 @@ import {
 import { VERTICALS } from "@/constants/verticals.constants";
 import {
   TAG_TO_WIZARD_VERTICAL,
+  WIZARD_VERTICAL_TO_TAG,
   getSuggestedDefaults,
 } from "@/lib/design-studio/suggested-defaults";
+import type { Vertical } from "@/lib/design-studio/constants";
 import {
   recommendVehicleType,
   type VehicleTypeRecommendation,
@@ -38,16 +40,46 @@ const CARD_STYLE = {
   borderColor: "rgba(255,255,255,0.15)",
 };
 
+// Reverse of TAG_TO_WIZARD_VERTICAL — used to resume the "Mission type"
+// select from form.vertical (already persisted) when this component remounts.
+function deriveMissionType(vertical: string): string {
+  return (vertical && WIZARD_VERTICAL_TO_TAG[vertical as Vertical]) || VERTICAL_OPTIONS[0] || "";
+}
+
 export function StepVehicleType({ form, onChange, onNext }: Props) {
-  const [view, setView] = useState<View>("choice");
-  const [payloadKg, setPayloadKg] = useState("");
-  const [rangeKm, setRangeKm] = useState("");
-  const [enduranceMin, setEnduranceMin] = useState("");
-  const [hoverRequired, setHoverRequired] = useState<YesNoUnsure>("unsure");
-  const [runwayAvailable, setRunwayAvailable] = useState<YesNoUnsure>("unsure");
-  const [missionType, setMissionType] = useState(VERTICAL_OPTIONS[0] ?? "");
+  // If the user already answered the "Let us recommend" questions before
+  // navigating back to this step, resume straight at the result instead of
+  // making them re-answer — recommendVehicleType is a pure function, so
+  // recomputing it from the persisted raw inputs is reliable and cheap.
+  const [view, setView] = useState<View>(() => {
+    if (form.recommendPayloadKg && form.recommendRangeKm && form.recommendEnduranceMin) {
+      return "recommend-result";
+    }
+    if (form.vehicleType) {
+      return "grid";
+    }
+    return "choice";
+  });
+  const [payloadKg, setPayloadKg] = useState(form.recommendPayloadKg ?? "");
+  const [rangeKm, setRangeKm] = useState(form.recommendRangeKm ?? "");
+  const [enduranceMin, setEnduranceMin] = useState(form.recommendEnduranceMin ?? "");
+  const [hoverRequired, setHoverRequired] = useState<YesNoUnsure>(form.recommendHoverRequired ?? "unsure");
+  const [runwayAvailable, setRunwayAvailable] = useState<YesNoUnsure>(form.recommendRunwayAvailable ?? "unsure");
+  const [missionType, setMissionType] = useState(() => deriveMissionType(form.vertical));
   const [error, setError] = useState("");
-  const [recommendation, setRecommendation] = useState<VehicleTypeRecommendation | null>(null);
+  const [recommendation, setRecommendation] = useState<VehicleTypeRecommendation | null>(() => {
+    if (form.recommendPayloadKg && form.recommendRangeKm && form.recommendEnduranceMin) {
+      return recommendVehicleType({
+        payloadKg: parseFloat(form.recommendPayloadKg),
+        rangeKm: parseFloat(form.recommendRangeKm),
+        enduranceMin: parseFloat(form.recommendEnduranceMin),
+        hoverRequired: form.recommendHoverRequired ?? "unsure",
+        runwayAvailable: form.recommendRunwayAvailable ?? "unsure",
+        vertical: deriveMissionType(form.vertical),
+      });
+    }
+    return null;
+  });
 
   function selectVehicleType(slug: VehicleTypeSlug) {
     // Suggest (not lock) purpose/user-type once both vehicle type and
@@ -152,7 +184,11 @@ export function StepVehicleType({ form, onChange, onNext }: Props) {
             step="0.1"
             value={payloadKg}
             placeholder="e.g. 10"
-            onChange={(e) => { setPayloadKg(e.target.value); setError(""); }}
+            onChange={(e) => {
+              setPayloadKg(e.target.value);
+              setError("");
+              onChange({ recommendPayloadKg: e.target.value });
+            }}
           />
 
           <WizardInput
@@ -162,7 +198,11 @@ export function StepVehicleType({ form, onChange, onNext }: Props) {
             step="1"
             value={rangeKm}
             placeholder="e.g. 20"
-            onChange={(e) => { setRangeKm(e.target.value); setError(""); }}
+            onChange={(e) => {
+              setRangeKm(e.target.value);
+              setError("");
+              onChange({ recommendRangeKm: e.target.value });
+            }}
           />
 
           <WizardInput
@@ -172,21 +212,33 @@ export function StepVehicleType({ form, onChange, onNext }: Props) {
             step="1"
             value={enduranceMin}
             placeholder="e.g. 30"
-            onChange={(e) => { setEnduranceMin(e.target.value); setError(""); }}
+            onChange={(e) => {
+              setEnduranceMin(e.target.value);
+              setError("");
+              onChange({ recommendEnduranceMin: e.target.value });
+            }}
           />
 
           <WizardSelect
             label="Does the mission require hovering or precise low-altitude work (spraying, close inspection, photography)?"
             options={YES_NO_UNSURE_OPTIONS}
             value={hoverRequired}
-            onChange={(e) => setHoverRequired(e.target.value as YesNoUnsure)}
+            onChange={(e) => {
+              const v = e.target.value as YesNoUnsure;
+              setHoverRequired(v);
+              onChange({ recommendHoverRequired: v });
+            }}
           />
 
           <WizardSelect
             label="Do you have a runway or open launch strip available?"
             options={YES_NO_UNSURE_OPTIONS}
             value={runwayAvailable}
-            onChange={(e) => setRunwayAvailable(e.target.value as YesNoUnsure)}
+            onChange={(e) => {
+              const v = e.target.value as YesNoUnsure;
+              setRunwayAvailable(v);
+              onChange({ recommendRunwayAvailable: v });
+            }}
           />
 
           <WizardSelect
