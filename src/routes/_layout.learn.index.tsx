@@ -1,5 +1,6 @@
-import { useState, Fragment } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { Fragment } from "react";
+import { createFileRoute } from "@tanstack/react-router";
+import { Trophy, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SectionBadge } from "@/components/SectionBadge";
 
@@ -9,190 +10,201 @@ export const Route = createFileRoute("/_layout/learn/")({
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
-type Level = "Beginner" | "Intermediate" | "Advanced" | "Professional";
-type FilterOption = "All" | Level;
+type CourseLevel = "Foundation" | "Intermediate" | "Intermediate/Advanced" | "Advanced" | "Expert";
 
 type Course = {
+  num: number;
   title: string;
-  slug: string | null;
-  level: Level;
-  description: string;
-  duration: string;
+  level: CourseLevel;
+  prerequisite: string;
+  modules: string[];
+  focus: string;
+  outcome: string;
+  hours: number;
   projects: number;
-  vertical: string;
   price: string;
-  note: string | null;
-  badge: string | null;
-};
-
-type LearningStep = {
-  step: number;
-  label: string;
-  sub: string;
-  teal: boolean;
 };
 
 // ── Static data ────────────────────────────────────────────────────────────
 
 const COURSES: Course[] = [
   {
-    title: "Drone Design Fundamentals",
-    slug: "drone-design-fundamentals",
-    level: "Beginner",
-    description:
-      "Aerodynamics, frame types, propulsion basics, and payload math — take your first design from zero to BOM.",
-    duration: "8 hrs",
+    num: 1,
+    title: "Applied Aerospace: From Classical Theory to Autonomous Platforms",
+    level: "Foundation",
+    prerequisite: "Aerospace engineering background",
+    modules: [
+      "Low Reynolds Number Aerodynamics",
+      "Miniaturized Structural Design",
+      "Electric Propulsion Systems",
+      "Electric Energy Systems & Endurance Modeling",
+      "Applied Control for Small Autonomous Platforms",
+    ],
+    focus: "Bridging classical aerospace theory to small-scale, electric, autonomous platform constraints.",
+    outcome: "Can translate classical aerospace principles into small-scale/electric platform design, identifying where standard aerospace assumptions break down at this scale.",
+    hours: 8,
     projects: 5,
-    vertical: "All verticals",
-    price: "₹1,999",
-    note: "Free with Explorer tier",
-    badge: null,
+    price: "₹999",
   },
   {
-    title: "Component Selection Masterclass",
-    slug: null,
+    num: 2,
+    title: "Autonomous Platform Systems Engineering",
     level: "Intermediate",
-    description:
-      "Motors, ESCs, flight controllers, batteries — read datasheets, match specs, and build production-ready BOMs.",
-    duration: "10 hrs",
-    projects: 8,
-    vertical: "All verticals",
-    price: "₹2,999",
-    note: "Included in Engineer tier",
-    badge: null,
+    prerequisite: "Course 1",
+    modules: [
+      "Avionics / Sensor Fusion",
+      "Payload Integration",
+      "Comms / Telemetry",
+      "Design Studio Applied Lab",
+      "Simulation & Validation",
+    ],
+    focus: "Systems integration using TorqWings Design Studio. Applied lab: choose the TQ Drone (3-motor, free flight/aerial photography) or Sagush UAV (fixed-wing) project track.",
+    outcome: "One complete, simulation-validated, build-ready blueprint on your chosen track (TQ Drone or Sagush UAV).",
+    hours: 12,
+    projects: 6,
+    price: "₹1,499",
   },
   {
-    title: "Flight Simulation & Validation",
-    slug: null,
-    level: "Intermediate",
-    description:
-      "Use TorqWings simulation to stress-test designs across Indian terrain types, monsoon conditions, and payloads.",
-    duration: "8 hrs",
-    projects: 5,
-    vertical: "All verticals",
-    price: "₹2,999",
-    note: null,
-    badge: null,
-  },
-  {
-    title: "DRDO Compliance & Defence UAV Design",
-    slug: null,
-    level: "Advanced",
-    description:
-      "HAL specs, DRDO documentation, defence-grade payload integration, and the GuardSky vertical in depth.",
-    duration: "12 hrs",
+    num: 3,
+    title: "AI & Autonomy for Aerial Intelligence",
+    level: "Intermediate/Advanced",
+    prerequisite: "Course 2",
+    modules: [
+      "Autonomy Fundamentals",
+      "Computer Vision",
+      "Intelligence Engine Internals",
+      "Data-Driven Design",
+      "Regulatory / Ethics",
+    ],
+    focus: "The AI and autonomy layer — the reasoning behind TorqWings' own Intelligence Engine.",
+    outcome: "Can interpret and justify Intelligence Engine recommendations and confidence scores; classify autonomy and regulatory status.",
+    hours: 10,
     projects: 4,
-    vertical: "GuardSky",
-    price: "₹4,999",
-    note: "Included in Squadron tier",
-    badge: "🛡️ Defence",
+    price: "₹2,499",
   },
   {
-    title: "TorqWings Certified Designer",
-    slug: null,
-    level: "Professional",
-    description:
-      "All courses bundled into one complete learning path — from zero to industry-recognised certified autonomous aerial platform design engineer.",
-    duration: "44 hrs",
-    projects: 25,
-    vertical: "All verticals",
-    price: "₹9,999",
-    note: "Full certification path",
-    badge: "🏆 Full path",
+    num: 4,
+    title: "Vertical Specialization",
+    level: "Advanced",
+    prerequisite: "Courses 1–3",
+    modules: ["Design Principles", "Proven Designs"],
+    focus: "Choose your track — GuardSky (surveillance mission design & payload principles) or AgriSky (agricultural platform design principles). The Proven Designs module studied is specific to your chosen track.",
+    outcome: "One documented platform design meeting the chosen vertical's requirements, built from a studied proven design as its base.",
+    hours: 12,
+    projects: 4,
+    price: "₹3,499",
+  },
+  {
+    num: 5,
+    title: "Capstone: Aerial Intelligence Hackathon",
+    level: "Expert",
+    prerequisite: "Courses 1–4",
+    modules: [
+      "Problem Statement Definition",
+      "Design Studio Full-Access Build",
+      "Two-Pattern Delivery",
+      "Hackathon Day Pitch & Certification",
+    ],
+    focus: "Bring your own real-world problem statement. Get full, unguided access to TorqWings Design Studio and deliver two distinct design patterns (e.g. TQ Drone vs Sagush UAV) with a comparative justification.",
+    outcome: "A self-authored problem statement, two simulation-validated design patterns, and a defensible recommendation — presented at Hackathon Day. Fly the winning pattern's platform to earn certification.",
+    hours: 12,
+    projects: 2,
+    price: "₹4,499",
   },
 ];
 
-const LEVEL_STYLE: Record<Level, { bg: string; color: string }> = {
-  Beginner:     { bg: "#e6f1fb", color: "#185fa5" },
-  Intermediate: { bg: "#faeeda", color: "#854f0b" },
-  Advanced:     { bg: "#eeedfe", color: "#3c3489" },
-  Professional: { bg: "#e1f5ee", color: "#0f6e56" },
+const LEVEL_STYLE: Record<CourseLevel, { background: string; color: string }> = {
+  "Foundation":            { background: "#e6f1fb", color: "#185fa5" },
+  "Intermediate":          { background: "#faeeda", color: "#854f0b" },
+  "Intermediate/Advanced": { background: "#fde8e8", color: "#9b2c2c" },
+  "Advanced":              { background: "#eeedfe", color: "#3c3489" },
+  "Expert":                { background: "#e1f5ee", color: "#0f6e56" },
 };
 
-const FILTERS: FilterOption[] = [
-  "All",
-  "Beginner",
-  "Intermediate",
-  "Advanced",
-  "Professional",
+const CREDENTIAL_PATH = [
+  "Courses 1–4",
+  "Capstone Hackathon",
+  "Problem statement",
+  "Two design patterns",
+  "Hackathon Day pitch",
+  "Fly & certify",
 ];
 
-const LEARNING_PATH: LearningStep[] = [
-  { step: 1, label: "Explorer",    sub: "Free fundamentals",   teal: false },
-  { step: 2, label: "Engineer",    sub: "Component mastery",   teal: false },
-  { step: 3, label: "Simulator",   sub: "Validate designs",    teal: false },
-  { step: 4, label: "Specialist",  sub: "Pick your vertical",  teal: false },
-  { step: 5, label: "Certified ✦", sub: "Industry credential", teal: true  },
-];
+const TOTAL_MODULES = COURSES.reduce((sum, c) => sum + c.modules.length, 0);
+const TOTAL_HOURS = COURSES.reduce((sum, c) => sum + c.hours, 0);
+const TOTAL_PROJECTS = COURSES.reduce((sum, c) => sum + c.projects, 0);
 
 // ── Sub-components ─────────────────────────────────────────────────────────
 
-function CourseCard({ course }: { course: Course }) {
+function CourseCard({ course, isLast }: { course: Course; isLast: boolean }) {
   const lvl = LEVEL_STYLE[course.level];
   return (
-    <div
-      className="relative flex flex-col rounded-xl bg-card p-4 transition-colors hover:border-foreground/20"
-      style={{ border: "0.5px solid var(--color-border)" }}
-    >
-      {course.badge && (
-        <span
-          className="absolute top-3 right-3 rounded px-2 py-0.5"
-          style={{ fontSize: 9, fontWeight: 500, background: "#faeeda", color: "#854f0b" }}
+    <div className="relative flex gap-5">
+      {/* Numbered rail */}
+      <div className="flex flex-col items-center">
+        <div
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full font-display font-bold"
+          style={
+            course.num === 5
+              ? { background: "#1baf7a", color: "white", fontSize: 15 }
+              : { background: "#2a78d6", color: "white", fontSize: 15 }
+          }
         >
-          {course.badge}
-        </span>
-      )}
-
-      <span
-        className="self-start rounded px-1.5 py-0.5"
-        style={{ fontSize: 10, fontWeight: 500, background: lvl.bg, color: lvl.color }}
-      >
-        {course.level}
-      </span>
-
-      <p className="mt-2 leading-snug text-foreground" style={{ fontSize: 13, fontWeight: 500 }}>
-        {course.title}
-      </p>
-
-      <p
-        className="mt-1 mb-2 leading-relaxed text-muted-foreground line-clamp-2"
-        style={{ fontSize: 11 }}
-      >
-        {course.description}
-      </p>
-
-      <div className="mb-2 flex flex-wrap gap-2 text-muted-foreground" style={{ fontSize: 10 }}>
-        <span>📹 {course.duration}</span>
-        <span>📝 {course.projects} projects</span>
-        <span>{course.vertical}</span>
+          {course.num}
+        </div>
+        {!isLast && (
+          <div className="w-px flex-1 bg-border mt-2" style={{ minHeight: 24 }} />
+        )}
       </div>
 
-      <div className="mt-auto border-t border-border pt-2">
-        <p className="text-foreground" style={{ fontSize: 13, fontWeight: 500 }}>
-          {course.price}
-          {course.note && (
-            <span className="ml-2 font-normal text-muted-foreground" style={{ fontSize: 10 }}>
-              {course.note}
+      {/* Card */}
+      <div
+        className="flex-1 rounded-xl bg-card p-5 md:p-6 mb-6"
+        style={{ border: "0.5px solid var(--color-border)" }}
+      >
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <span
+              className="inline-block rounded px-1.5 py-0.5"
+              style={{ fontSize: 10, fontWeight: 500, background: lvl.background, color: lvl.color }}
+            >
+              {course.level}
             </span>
-          )}
-        </p>
-        <div className="mt-2 flex gap-1.5">
-          {course.slug ? (
-            <Button asChild size="sm" variant="outline" className="h-7 flex-1" style={{ fontSize: 11 }}>
-              <Link to={`/learn/${course.slug}` as any}>Preview course</Link>
-            </Button>
-          ) : (
-            <Button size="sm" variant="outline" className="h-7 flex-1" style={{ fontSize: 11 }}>
-              Preview course
-            </Button>
-          )}
-          <Button
-            size="sm"
-            className="h-7 flex-1 border-0 hover:opacity-90"
-            style={{ fontSize: 11, background: "#2a78d6", color: "white" }}
-          >
-            Enroll now
-          </Button>
+            <h3 className="mt-2 text-lg md:text-xl font-semibold text-foreground leading-snug">
+              {course.title}
+            </h3>
+            <p className="mt-1 text-xs text-muted-foreground">Prerequisite: {course.prerequisite}</p>
+          </div>
+          <div className="text-right shrink-0">
+            <p className="text-lg font-display font-bold text-foreground">{course.price}</p>
+            <p className="mt-0.5 text-[11px] text-muted-foreground">
+              {course.hours} hrs · {course.projects} projects
+            </p>
+          </div>
+        </div>
+
+        <p className="mt-4 text-sm text-muted-foreground leading-relaxed">{course.focus}</p>
+
+        <div className="mt-4">
+          <p className="mb-1.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+            Modules
+          </p>
+          <div className="flex flex-wrap gap-1.5">
+            {course.modules.map((m) => (
+              <span
+                key={m}
+                className="rounded-full px-2.5 py-1 text-[11px]"
+                style={{ background: "var(--color-muted)", color: "var(--color-foreground)" }}
+              >
+                {m}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-4 rounded-lg p-3" style={{ background: "rgba(27,175,122,0.08)" }}>
+          <p className="text-[11px] font-medium" style={{ color: "#0f6e56" }}>Outcome</p>
+          <p className="mt-0.5 text-xs leading-relaxed text-foreground/80">{course.outcome}</p>
         </div>
       </div>
     </div>
@@ -202,11 +214,6 @@ function CourseCard({ course }: { course: Course }) {
 // ── Page ───────────────────────────────────────────────────────────────────
 
 function LearnPage() {
-  const [filter, setFilter] = useState<FilterOption>("All");
-
-  const visibleCourses =
-    filter === "All" ? COURSES : COURSES.filter((c) => c.level === filter);
-
   return (
     <>
       {/* ── 1. Hero ─────────────────────────────────────────────────────── */}
@@ -216,44 +223,55 @@ function LearnPage() {
           <div className="grid grid-cols-1 md:grid-cols-5 items-start gap-12 md:gap-16">
 
             <div className="md:col-span-3">
-              <SectionBadge label="Torqwings Academy" />
+              <SectionBadge label="TorqWings Academy" />
 
               <h1 className="text-4xl md:text-5xl font-bold text-foreground leading-tight" style={{ marginBottom: 12 }}>
-                Aerospace Intelligence is for Every Indian.{" "}
-                <br className="hidden sm:block" />
-                The Technology Above Must Be Built in India.
+                Become a TorqWings Certified AI Aerospace Engineer
               </h1>
 
               <p className="text-lg md:text-xl font-medium text-muted-foreground">
-                We Don't Just Teach You to Fly. We Teach You to Build Autonomous Aerial Platforms.
-              </p>
-            </div>
-
-            <div className="md:col-span-2">
-              <div style={{ width: 32, height: 2, background: "#1baf7a", borderRadius: 2, marginBottom: 16 }} />
-
-              <p className="text-sm md:text-base text-muted-foreground leading-relaxed" style={{ marginBottom: 12 }}>
-                TorqWings Academy goes beyond pilot training. We are building
-                India's first pipeline of autonomous aerial platform designers, engineers, and aerial
-                intelligence professionals — from students and rural innovators to
-                defence-adjacent researchers and aerospace startups.
-              </p>
-
-              <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
-                Every course is rooted in real design, real components, and real AI
-                — because India's aerospace future depends not on who flies the
-                platform, but on who builds it.
+                Five courses. One hackathon. A credential that proves you can design, validate, and defend a
+                real autonomous aerial platform — not just pass a quiz.
               </p>
 
               <div className="flex gap-8 mt-6">
                 <div>
-                  <p className="text-[22px] font-display font-bold text-foreground">5</p>
-                  <p className="text-[11px] text-muted-foreground mt-0.5">Courses</p>
+                  <p className="text-[22px] font-display font-bold text-foreground">{TOTAL_MODULES}</p>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">Modules</p>
                 </div>
                 <div>
-                  <p className="text-[22px] font-display font-bold text-foreground">38+ hrs</p>
+                  <p className="text-[22px] font-display font-bold text-foreground">{TOTAL_HOURS} hrs</p>
                   <p className="text-[11px] text-muted-foreground mt-0.5">Content</p>
                 </div>
+                <div>
+                  <p className="text-[22px] font-display font-bold text-foreground">{TOTAL_PROJECTS}</p>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">Projects</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="md:col-span-2">
+              <div
+                className="rounded-2xl p-6"
+                style={{ background: "#0d3b5e", border: "1px solid rgba(255,255,255,0.08)" }}
+              >
+                <p className="uppercase" style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.08em", color: "#7fd9b8" }}>
+                  Bundle &amp; save 22%
+                </p>
+                <div className="mt-3 flex items-baseline gap-2 flex-wrap">
+                  <span className="text-3xl font-display font-bold text-white">₹10,136</span>
+                  <span className="text-sm text-white/50 line-through">₹12,995</span>
+                </div>
+                <p className="mt-1 text-sm text-white/70">All 5 courses — one credential path</p>
+                <Button
+                  className="mt-5 w-full h-11 border-0 hover:opacity-90"
+                  style={{ background: "#1baf7a", color: "white" }}
+                >
+                  Enroll in the full bundle
+                </Button>
+                <p className="mt-3 text-[11px] text-white/50 text-center">
+                  Prefer course-by-course? Individual pricing is listed below.
+                </p>
               </div>
             </div>
 
@@ -261,117 +279,55 @@ function LearnPage() {
         </div>
       </section>
 
-      {/* ── 2. Filter bar ────────────────────────────────────────────────── */}
-      <section className="py-6 border-b border-border">
-        <div className="mx-auto max-w-6xl px-6">
-          <div className="flex flex-wrap gap-2">
-            {FILTERS.map((f) => (
-              <button
-                key={f}
-                onClick={() => setFilter(f)}
-                className="rounded-full px-4 py-1.5 text-sm font-medium transition-colors"
-                style={
-                  filter === f
-                    ? { background: "#2a78d6", color: "white", border: "1px solid #2a78d6" }
-                    : {
-                        background: "transparent",
-                        border: "1px solid var(--color-border)",
-                        color: "var(--color-foreground)",
-                      }
-                }
-              >
-                {f}
-              </button>
+      {/* ── 2. Course path ───────────────────────────────────────────────── */}
+      <section className="py-16 lg:py-20">
+        <div className="mx-auto max-w-5xl px-5 lg:px-8">
+          <div className="text-center mb-4">
+            <p className="uppercase text-muted-foreground" style={{ fontSize: 10, fontWeight: 500, letterSpacing: "0.08em" }}>
+              The course path
+            </p>
+            <h2 className="mt-2 text-2xl md:text-3xl font-bold text-foreground">
+              Five courses, one prerequisite chain, one credential
+            </h2>
+            <p className="mt-3 text-sm md:text-base text-muted-foreground">
+              {TOTAL_MODULES} modules · {TOTAL_HOURS} hours · {TOTAL_PROJECTS} projects across all 5 courses
+            </p>
+          </div>
+
+          <div className="mt-12">
+            {COURSES.map((c, i) => (
+              <CourseCard key={c.num} course={c} isLast={i === COURSES.length - 1} />
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── 3. Course card grid ──────────────────────────────────────────── */}
-      <section className="py-10">
-        <div className="mx-auto max-w-6xl px-6">
-          {visibleCourses.length === 0 ? (
-            <p className="py-12 text-center text-muted-foreground">
-              No courses at this level yet — check back soon.
-            </p>
-          ) : (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {visibleCourses.map((c) => (
-                <CourseCard key={c.title} course={c} />
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
+      {/* ── 3. Certification ─────────────────────────────────────────────── */}
+      <section className="relative overflow-hidden py-20 lg:py-28" style={{ background: "#0d3b5e" }}>
+        <div className="absolute inset-0 grid-bg opacity-20 pointer-events-none" />
+        <div className="relative mx-auto max-w-4xl px-5 lg:px-8 text-center">
+          <Trophy className="mx-auto h-10 w-10" style={{ color: "#1baf7a" }} aria-hidden="true" />
+          <p className="mt-4 uppercase" style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.12em", color: "#7fd9b8" }}>
+            The credential
+          </p>
+          <h2 className="mt-3 text-3xl md:text-4xl font-bold text-white leading-tight">
+            Earn the TorqWings Certified AI Aerospace Engineer Credential
+          </h2>
+          <p className="mt-5 text-base md:text-lg text-white/70 leading-relaxed max-w-2xl mx-auto">
+            Complete Courses 1–4, then take on the Capstone: Aerial Intelligence Hackathon. Author your own
+            real-world problem statement, get full unguided access to TorqWings Design Studio, and deliver two
+            simulation-validated design patterns with a defensible, comparative recommendation. Present both at
+            Hackathon Day — then fly the winning pattern's platform to earn your certification.
+          </p>
 
-      {/* ── 4. AI callout banner ─────────────────────────────────────────── */}
-      <section className="pb-8">
-        <div className="mx-auto max-w-6xl px-6">
-          <div
-            className="flex items-start gap-3 bg-card px-6 py-4"
-            style={{ borderLeft: "4px solid #1baf7a", borderRadius: "0 10px 10px 0" }}
-          >
-            <span className="mt-0.5 shrink-0 text-xl" aria-hidden="true">🤖</span>
-            <div>
-              <p className="text-foreground" style={{ fontSize: 13, fontWeight: 500 }}>
-                Courses powered by TorqWings AI
-              </p>
-              <p
-                className="mt-0.5 leading-relaxed text-muted-foreground"
-                style={{ fontSize: 11 }}
-              >
-                Every module is generated from TorqWings' autonomous aerial platform design knowledge base —
-                reviewed by domain experts and updated automatically as the platform evolves.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── 5. Learning path ─────────────────────────────────────────────── */}
-      <section className="border-t border-border bg-card py-12">
-        <div className="mx-auto max-w-4xl px-6 text-center">
-          <p className="mb-8 text-base font-medium text-foreground">Your learning path</p>
-          <div className="flex flex-col items-center sm:flex-row sm:items-start justify-center">
-            {LEARNING_PATH.map((s, i) => (
-              <Fragment key={s.step}>
-                <div className="flex flex-col items-center text-center">
-                  <div
-                    className="flex h-8 w-8 items-center justify-center rounded-full"
-                    style={
-                      s.teal
-                        ? { background: "#1baf7a", color: "white", fontSize: 13, fontWeight: 500 }
-                        : {
-                            background: "var(--color-muted)",
-                            border: "0.5px solid var(--color-border)",
-                            color: "var(--color-muted-foreground)",
-                            fontSize: 13,
-                            fontWeight: 500,
-                          }
-                    }
-                  >
-                    {s.step}
-                  </div>
-                  <p
-                    className="mt-2 text-xs font-medium"
-                    style={{ color: s.teal ? "#0f6e56" : "var(--color-foreground)" }}
-                  >
-                    {s.label}
-                  </p>
-                  <p
-                    style={{
-                      fontSize: 10,
-                      color: s.teal ? "#0f6e56" : "var(--color-muted-foreground)",
-                    }}
-                  >
-                    {s.sub}
-                  </p>
-                </div>
-                {i < LEARNING_PATH.length - 1 && (
-                  <>
-                    <div className="hidden sm:block flex-1 h-px bg-border self-start mt-4 mx-2" />
-                    <div className="sm:hidden w-px h-5 bg-border my-1" />
-                  </>
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-3 text-sm">
+            {CREDENTIAL_PATH.map((step, i) => (
+              <Fragment key={step}>
+                <span className="rounded-full px-4 py-1.5" style={{ background: "rgba(255,255,255,0.08)", color: "white" }}>
+                  {step}
+                </span>
+                {i < CREDENTIAL_PATH.length - 1 && (
+                  <ArrowRight className="h-3.5 w-3.5 text-white/30" aria-hidden="true" />
                 )}
               </Fragment>
             ))}
@@ -379,20 +335,27 @@ function LearnPage() {
         </div>
       </section>
 
-      {/* ── 6. CTA strip ─────────────────────────────────────────────────── */}
-      <section className="border-t border-border bg-card py-12 text-center">
-        <div className="mx-auto max-w-lg px-6">
-          <p
-            className="mb-2 uppercase text-muted-foreground"
-            style={{ fontSize: 10, fontWeight: 500, letterSpacing: "0.08em" }}
-          >
-            GET STARTED
+      {/* ── 4. Bundle CTA ────────────────────────────────────────────────── */}
+      <section className="border-t border-border bg-card py-16 lg:py-20 text-center">
+        <div className="mx-auto max-w-2xl px-6">
+          <p className="uppercase text-muted-foreground" style={{ fontSize: 10, fontWeight: 500, letterSpacing: "0.08em" }}>
+            Get started
           </p>
-          <h2 className="mb-2 text-[22px] font-medium text-foreground leading-tight">
-            Begin your journey as an autonomous aerial platform designer with TorqWings Academy
+          <h2 className="mt-2 text-2xl md:text-3xl font-bold text-foreground leading-tight">
+            All 5 courses — ₹10,136
           </h2>
-          <p className="leading-relaxed text-muted-foreground" style={{ fontSize: 13 }}>
-            Enroll in a course or drop a note to our advisor to find the right learning path at{" "}
+          <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
+            22% off the ₹12,995 individual total. Prefer to enroll course-by-course? Individual pricing is
+            listed above for each course.
+          </p>
+          <Button
+            className="mt-6 h-11 px-8 border-0 hover:opacity-90"
+            style={{ background: "#2a78d6", color: "white" }}
+          >
+            Enroll in the full bundle
+          </Button>
+          <p className="mt-4 text-xs text-muted-foreground">
+            Questions? Email{" "}
             <a
               href="mailto:academy@torqwings.com"
               className="underline underline-offset-2 hover:opacity-80 transition-opacity"
