@@ -35,28 +35,11 @@ function SolutionsPage() {
         </div>
       </SectionWrapper>
 
-      <SectionWrapper id="problem" eyebrow="The problem" title="Industries Need Smarter Aerial Visibility" muted>
-        <p className="text-muted-foreground max-w-3xl">
-          Many industries still depend on manual inspection, delayed field reporting, fragmented data collection,
-          and expensive monitoring workflows. From farms to infrastructure sites, decision-makers need faster,
-          safer, and more intelligent aerial insights — built on platforms designed for the mission, not adapted
-          from consumer hardware.
-        </p>
-        <div className="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {PROBLEM_CARDS.map((c) => (
-            <Card key={c.text}>
-              <IconBubble>{c.icon}</IconBubble>
-              <p className="mt-4 font-medium">{c.text}</p>
-              <p className="mt-1.5 text-sm text-muted-foreground">{c.desc}</p>
-            </Card>
-          ))}
-        </div>
-      </SectionWrapper>
-
       <SectionWrapper
         id="science-solution"
         eyebrow="The science"
         title="An Engineering Studio, Not a Sales Configurator"
+        muted
       >
         <p className="text-muted-foreground max-w-3xl">
           TorqWings codifies published aerospace decision science — gate-then-score selection models,
@@ -74,7 +57,25 @@ function SolutionsPage() {
         </div>
       </SectionWrapper>
 
-      <SectionWrapper id="solutions" eyebrow="The solution" title="Design. Simulate. Deploy. Intelligent." muted>
+      <SectionWrapper id="problem" eyebrow="The industry problem" title="Industries Need Smarter Aerial Visibility">
+        <p className="text-muted-foreground max-w-3xl">
+          Many industries still depend on manual inspection, delayed field reporting, fragmented data collection,
+          and expensive monitoring workflows. From farms to infrastructure sites, decision-makers need faster,
+          safer, and more intelligent aerial insights — built on platforms designed for the mission, not adapted
+          from consumer hardware.
+        </p>
+        <div className="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {PROBLEM_CARDS.map((c) => (
+            <Card key={c.text}>
+              <IconBubble>{c.icon}</IconBubble>
+              <p className="mt-4 font-medium">{c.text}</p>
+              <p className="mt-1.5 text-sm text-muted-foreground">{c.desc}</p>
+            </Card>
+          ))}
+        </div>
+      </SectionWrapper>
+
+      <SectionWrapper id="solutions" eyebrow="The industry solution" title="Design. Simulate. Deploy. Intelligent." muted>
         <p className="text-muted-foreground max-w-3xl">
           TorqWings combines autonomous aerial platform design, AI-powered flight intelligence, and domain-specific
           engineering to convert mission requirements into deployable aerial systems — validated by simulation
