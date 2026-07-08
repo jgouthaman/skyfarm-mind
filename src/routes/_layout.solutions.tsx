@@ -23,6 +23,9 @@ function SolutionsPage() {
             <Card key={c.text}>
               <IconBubble>{c.icon}</IconBubble>
               <p className="mt-4 font-medium">{c.text}</p>
+              {c.desc && (
+                <p className="mt-1.5 text-sm text-muted-foreground">{c.desc}</p>
+              )}
             </Card>
           ))}
         </div>

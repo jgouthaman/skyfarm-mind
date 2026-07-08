@@ -1,23 +1,23 @@
 import {
-  Wrench, Leaf, Building2, Map as MapIcon, Brain, Cog,
+  Wrench, Leaf, Building2, Map as MapIcon, Brain, Cog, Split,
   Plane, Layers, Compass, GitBranch, FlaskConical,
   Radar, FileText, Zap, Cpu, ScanLine, Sprout,
   Eye, BarChart3, Rocket, Users, Globe2,
 } from "lucide-react";
 
-export const PROBLEM_CARDS = [
+export const PROBLEM_CARDS: { icon: React.ReactNode; text: string; desc?: string }[] = [
   { icon: <Wrench aria-hidden="true" />, text: "Manual inspections are slow and risky" },
   { icon: <Leaf aria-hidden="true" />, text: "Farm and field issues are detected late" },
   { icon: <Building2 aria-hidden="true" />, text: "Infrastructure monitoring lacks real-time visibility" },
   { icon: <MapIcon aria-hidden="true" />, text: "Mapping and surveying are time-consuming" },
   { icon: <Brain aria-hidden="true" />, text: "Aerial data is rarely converted into actionable intelligence" },
-  { icon: <Cog aria-hidden="true" />, text: "Industry-specific platform customisation is limited" },
+  { icon: <Split aria-hidden="true" />, text: "Choosing the right aerial platform is guesswork", desc: "Multirotor, fixed-wing, or VTOL-hybrid? Most buyers default to whatever's familiar — not what the mission's payload, range, and launch site actually require." },
 ];
 
 export const SOLUTION_CARDS = [
-  { icon: <Plane aria-hidden="true" />, text: "Custom platform design", desc: "Purpose-engineered autonomous aerial platforms built from mission requirements using proven design rules and AI-powered component selection." },
+  { icon: <Plane aria-hidden="true" />, text: "Custom platform design", desc: "Purpose-engineered autonomous aerial platforms across multirotor, fixed-wing, and VTOL-hybrid architectures — matched to your mission by proven design rules and AI-powered recommendations, not a one-size-fits-all frame." },
   { icon: <Brain aria-hidden="true" />, text: "AI-powered aerial analytics", desc: "Computer vision models that turn aerial imagery into decisions — crop health, structural defects, boundary mapping, and threat detection." },
-  { icon: <Layers aria-hidden="true" />, text: "Industry-specific verticals", desc: "Tailored design workflows and intelligence layers for agriculture, infrastructure, mapping, surveillance, and defence." },
+  { icon: <Layers aria-hidden="true" />, text: "Industry-specific verticals", desc: "Tailored design workflows and intelligence layers for agriculture, infrastructure, mapping, and surveillance." },
   { icon: <Compass aria-hidden="true" />, text: "Mission planning & reporting", desc: "From design brief to PDF compliance report — end-to-end platform engineering and operations." },
   { icon: <GitBranch aria-hidden="true" />, text: "Scalable aerial operations", desc: "Repeatable design processes from a single farm platform to enterprise-grade aerial fleets." },
   { icon: <FlaskConical aria-hidden="true" />, text: "Research & prototyping", desc: "Rapid prototyping of payloads, aerospace experiments, and next-generation autonomous systems through TorqWings Labs." },
