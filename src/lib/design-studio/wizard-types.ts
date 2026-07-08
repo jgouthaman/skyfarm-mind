@@ -33,9 +33,9 @@ export interface WizardFormState {
 export const INITIAL_FORM: WizardFormState = {
   projectName:        "",
   vehicleType:        "",
-  vertical:           "AgriSky",
-  purpose:            "Agriculture spraying",
-  userType:           "Farmer",
+  vertical:           "",
+  purpose:            "",
+  userType:           "",
   payloadWeight:      "",
   requiredFlightTime: "",
   missionArea:        "",

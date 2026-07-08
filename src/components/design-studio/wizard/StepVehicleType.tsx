@@ -6,6 +6,7 @@ import {
   type VehicleTypeSlug,
 } from "@/constants/vehicleTypes.constants";
 import { VERTICALS } from "@/constants/verticals.constants";
+import { VERTICALS as WIZARD_VERTICALS } from "@/lib/design-studio/constants";
 import {
   recommendVehicleType,
   type VehicleTypeRecommendation,
@@ -13,6 +14,20 @@ import {
 } from "@/lib/intelligence/vehicleTypeRecommender";
 import { WizardInput, WizardSelect } from "./WizardField";
 import type { WizardFormState } from "@/lib/design-studio/wizard-types";
+
+// Maps a verticals.constants.tsx `tag` (e.g. "Agriculture") to the matching
+// entry in the wizard's own vertical list (e.g. "AgriSky"), by cross
+// referencing the two lists' brand names rather than hardcoding pairs.
+function normalizeVerticalName(s: string): string {
+  return s.replace(/^TorqWings\s+/i, "").trim().toLowerCase();
+}
+
+function tagToWizardVertical(tag: string): string {
+  const entry = VERTICALS.find((v) => v.tag === tag);
+  if (!entry) return "";
+  const target = normalizeVerticalName(entry.title);
+  return WIZARD_VERTICALS.find((v) => normalizeVerticalName(v) === target) ?? "";
+}
 
 interface Props {
   form:     WizardFormState;
@@ -68,6 +83,9 @@ export function StepVehicleType({ form, onChange, onNext }: Props) {
       return;
     }
     setError("");
+    // Persist the chosen mission type into wizard state now, so it survives
+    // even if the user backs out to "See all options" after this point.
+    onChange({ vertical: tagToWizardVertical(missionType) });
     setRecommendation(
       recommendVehicleType({
         payloadKg: payload,
@@ -299,12 +317,21 @@ export function StepVehicleType({ form, onChange, onNext }: Props) {
           </div>
 
           <div className="flex justify-between pt-2">
-            <button
-              onClick={() => setView("grid")}
-              className={seeAllOptionsBtnClass}
-            >
-              See all options
-            </button>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setView("recommend-form")}
+                className="px-5 h-11 rounded-[10px] text-sm text-white/70
+                  border border-white/20 bg-transparent hover:bg-white/5 transition-colors"
+              >
+                Back
+              </button>
+              <button
+                onClick={() => setView("grid")}
+                className={seeAllOptionsBtnClass}
+              >
+                See all options
+              </button>
+            </div>
             <button
               onClick={() => selectVehicleType(match.slug)}
               className="px-5 h-11 rounded-[10px] text-sm font-medium text-white
