@@ -7,13 +7,13 @@ export type Vertical = typeof VERTICALS[number];
 export const PURPOSE_OPTIONS: Record<Vertical, string[]> = {
   AgriSky:          ["Agriculture spraying", "Crop monitoring", "NDVI mapping", "Irrigation planning"],
   InfraSky:         ["Bridge inspection", "Solar farm inspection", "Tower inspection", "Road inspection"],
-  GeoSky:           ["Aerial mapping", "Land survey", "Site progress monitoring", "GIS data capture"],
+  GeoSky:           ["Aerial mapping and survey", "Aerial mapping", "Land survey", "Site progress monitoring", "GIS data capture"],
   GuardSky:         ["Perimeter surveillance", "Fire detection", "Asset monitoring", "Remote area patrol"],
   "TorqWings Labs": ["R&D prototype", "Payload testing", "Custom build", "Aerospace research"],
   Academy:          ["Training flight", "Demo flight", "Certification prep"],
 };
 
-export const USER_TYPES         = ["Farmer", "Student", "Engineer", "Researcher", "Demo"] as const;
+export const USER_TYPES         = ["Farmer", "Student", "Engineer", "Researcher", "Surveyor", "Demo"] as const;
 export const TERRAIN_OPTIONS    = ["Flat farm", "Hilly", "Forest", "Coastal", "Urban", "Industrial"] as const;
 export const WIND_OPTIONS       = ["Calm", "Light", "Medium", "Strong"] as const;
 export const BUDGET_OPTIONS     = ["Economy", "Balanced", "Premium"] as const;

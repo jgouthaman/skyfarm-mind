@@ -6,7 +6,10 @@ import {
   type VehicleTypeSlug,
 } from "@/constants/vehicleTypes.constants";
 import { VERTICALS } from "@/constants/verticals.constants";
-import { VERTICALS as WIZARD_VERTICALS } from "@/lib/design-studio/constants";
+import {
+  TAG_TO_WIZARD_VERTICAL,
+  getSuggestedDefaults,
+} from "@/lib/design-studio/suggested-defaults";
 import {
   recommendVehicleType,
   type VehicleTypeRecommendation,
@@ -14,20 +17,6 @@ import {
 } from "@/lib/intelligence/vehicleTypeRecommender";
 import { WizardInput, WizardSelect } from "./WizardField";
 import type { WizardFormState } from "@/lib/design-studio/wizard-types";
-
-// Maps a verticals.constants.tsx `tag` (e.g. "Agriculture") to the matching
-// entry in the wizard's own vertical list (e.g. "AgriSky"), by cross
-// referencing the two lists' brand names rather than hardcoding pairs.
-function normalizeVerticalName(s: string): string {
-  return s.replace(/^TorqWings\s+/i, "").trim().toLowerCase();
-}
-
-function tagToWizardVertical(tag: string): string {
-  const entry = VERTICALS.find((v) => v.tag === tag);
-  if (!entry) return "";
-  const target = normalizeVerticalName(entry.title);
-  return WIZARD_VERTICALS.find((v) => normalizeVerticalName(v) === target) ?? "";
-}
 
 interface Props {
   form:     WizardFormState;
@@ -61,7 +50,15 @@ export function StepVehicleType({ form, onChange, onNext }: Props) {
   const [recommendation, setRecommendation] = useState<VehicleTypeRecommendation | null>(null);
 
   function selectVehicleType(slug: VehicleTypeSlug) {
-    onChange({ vehicleType: slug });
+    // Suggest (not lock) purpose/user-type once both vehicle type and
+    // vertical are known. If the user came from "Choose my vehicle type",
+    // form.vertical is still "" and no suggestion is made — Step 2 keeps
+    // its empty placeholders in that case, as intended.
+    const suggestion = getSuggestedDefaults(slug, form.vertical);
+    onChange({
+      vehicleType: slug,
+      ...(suggestion && { purpose: suggestion.purpose, userType: suggestion.userType }),
+    });
     sessionStorage.setItem("torqwings-studio:vehicle-type", slug);
     onNext();
   }
@@ -85,7 +82,7 @@ export function StepVehicleType({ form, onChange, onNext }: Props) {
     setError("");
     // Persist the chosen mission type into wizard state now, so it survives
     // even if the user backs out to "See all options" after this point.
-    onChange({ vertical: tagToWizardVertical(missionType) });
+    onChange({ vertical: TAG_TO_WIZARD_VERTICAL[missionType] ?? "" });
     setRecommendation(
       recommendVehicleType({
         payloadKg: payload,

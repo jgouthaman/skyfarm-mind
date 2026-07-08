@@ -1,9 +1,20 @@
 import { useState } from "react";
 import { VERTICALS, PURPOSE_OPTIONS, USER_TYPES } from "@/lib/design-studio/constants";
 import type { Vertical } from "@/lib/design-studio/constants";
+import { WIZARD_VERTICAL_TO_TAG } from "@/lib/design-studio/suggested-defaults";
 import { getVehicleType } from "@/constants/vehicleTypes.constants";
 import { WizardInput, WizardSelect } from "./WizardField";
 import type { WizardFormState } from "@/lib/design-studio/wizard-types";
+
+// Step 0's "Mission type" select shows each vertical's `tag` (e.g. "Mapping").
+// Mirror that same label here instead of the brand name (e.g. "GeoSky"), so
+// the same underlying vertical reads identically across both steps — the
+// stored form.vertical value stays the brand name for compatibility with
+// the rest of the app (PURPOSE_OPTIONS, the intelligence engine, etc).
+const VERTICAL_SELECT_OPTIONS = VERTICALS.map((v) => ({
+  value: v,
+  label: WIZARD_VERTICAL_TO_TAG[v],
+}));
 
 interface Props {
   form:     WizardFormState;
@@ -39,6 +50,13 @@ export function StepScope({ form, onChange, onNext }: Props) {
   }
 
   const vehicleTypeLabel = getVehicleType(form.vehicleType)?.label;
+  const verticalTag = form.vertical ? WIZARD_VERTICAL_TO_TAG[form.vertical as Vertical] : null;
+
+  const projectNamePlaceholder = vehicleTypeLabel
+    ? verticalTag
+      ? `e.g. ${vehicleTypeLabel} ${verticalTag} Platform`
+      : `e.g. ${vehicleTypeLabel} Platform Project`
+    : "e.g. Autonomous Aerial Platform Project";
 
   return (
     <div>
@@ -57,7 +75,7 @@ export function StepScope({ form, onChange, onNext }: Props) {
           <WizardInput
             label="Project name"
             value={form.projectName}
-            placeholder="e.g. AgriSky 10L Spraying Drone"
+            placeholder={projectNamePlaceholder}
             onChange={(e) => {
               onChange({ projectName: e.target.value });
               setError("");
@@ -71,7 +89,7 @@ export function StepScope({ form, onChange, onNext }: Props) {
         <WizardSelect
           label="Drone vertical"
           placeholder="Select vertical"
-          options={VERTICALS}
+          options={VERTICAL_SELECT_OPTIONS}
           value={form.vertical}
           onChange={(e) => {
             onChange({
