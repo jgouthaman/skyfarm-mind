@@ -24,7 +24,7 @@ export const SOLUTION_CARDS = [
 ];
 
 export const TECH_PIPELINE = [
-  { num: "01", icon: <Plane aria-hidden="true" />, text: "Drone Mission", desc: "Custom UAV or partner drone captures aerial data." },
+  { num: "01", icon: <Plane aria-hidden="true" />, text: "Platform Mission", desc: "Multirotor, fixed-wing, or VTOL-hybrid platform — matched to your mission — captures the aerial data." },
   { num: "02", icon: <Radar aria-hidden="true" />, text: "Data Capture", desc: "RGB, thermal, multispectral, LiDAR, or sensor-based data." },
   { num: "03", icon: <Brain aria-hidden="true" />, text: "AI Analysis", desc: "Vision models detect patterns, risks, defects, stress, and changes." },
   { num: "04", icon: <FileText aria-hidden="true" />, text: "Actionable Reports", desc: "Dashboards, PDF reports, alerts and recommendations." },
@@ -32,16 +32,16 @@ export const TECH_PIPELINE = [
 ];
 
 export const PRODUCT_CAPABILITIES = [
-  { icon: <Plane aria-hidden="true" />, text: "Custom UAV Design" },
+  { icon: <Plane aria-hidden="true" />, text: "Custom Platform Design" },
   { icon: <Cpu aria-hidden="true" />, text: "Payload Integration" },
-  { icon: <Compass aria-hidden="true" />, text: "Drone Mission Planning" },
+  { icon: <Compass aria-hidden="true" />, text: "Mission Planning" },
   { icon: <ScanLine aria-hidden="true" />, text: "AI Image Analysis" },
   { icon: <MapIcon aria-hidden="true" />, text: "Aerial Mapping" },
   { icon: <Sprout aria-hidden="true" />, text: "Crop Intelligence" },
   { icon: <Building2 aria-hidden="true" />, text: "Infrastructure Inspection" },
   { icon: <Eye aria-hidden="true" />, text: "Surveillance Workflows" },
   { icon: <BarChart3 aria-hidden="true" />, text: "Reporting Dashboards" },
-  { icon: <Cog aria-hidden="true" />, text: "Drone Service Operations" },
+  { icon: <Cog aria-hidden="true" />, text: "Platform Operations" },
 ];
 
 export const PILOT_PROGRAMS = [
