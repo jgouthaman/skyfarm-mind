@@ -53,6 +53,7 @@ function NewProjectWizard() {
   const [baseName, setBaseName]     = useState<string | null>(null);
   const [recommendation, setRecommendation] = useState<IntelligenceResult | null>(null);
   const [engineLoading, setEngineLoading]   = useState(false);
+  const [engineError, setEngineError]       = useState<string | null>(null);
   const [acceptedSource, setAcceptedSource] = useState<'rule' | 'reference'>('rule');
 
   const patch = (p: Partial<WizardFormState>) =>
@@ -125,9 +126,12 @@ function NewProjectWizard() {
 
   async function runEngine(f: WizardFormState) {
     setEngineLoading(true);
+    setEngineError(null);
     try {
       const result = await runIntelligenceEngine(buildEngineInput(f));
       setRecommendation(result);
+    } catch (err: any) {
+      setEngineError(err?.message ?? "Something went wrong while analysing your requirements.");
     } finally {
       setEngineLoading(false);
     }
@@ -212,7 +216,13 @@ function NewProjectWizard() {
         <StepSafety
           form={form}
           onChange={patch}
-          onNext={() => { runEngine(form); setStep(6); }}
+          onNext={() => {
+            // runEngine catches its own errors and always resolves (never
+            // rejects) — this .catch is just a safety net so a genuinely
+            // unexpected failure never surfaces as an unhandled rejection.
+            runEngine(form).catch(() => {});
+            setStep(6);
+          }}
           onBack={() => setStep(4)}
         />
       )}
@@ -221,6 +231,8 @@ function NewProjectWizard() {
           result={recommendation}
           input={buildEngineInput(form)}
           isLoading={engineLoading}
+          error={engineError}
+          onRetry={() => runEngine(form)}
           onBack={() => setStep(5)}
           onAccept={(choice) => { setAcceptedSource(choice); setStep(7); }}
         />

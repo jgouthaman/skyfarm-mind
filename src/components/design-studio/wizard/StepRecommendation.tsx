@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Loader2 } from 'lucide-react';
+import { Loader2, AlertTriangle } from 'lucide-react';
 import type { IntelligenceResult, IntelligenceInput } from '@/lib/intelligence/types';
 
 interface Props {
@@ -7,7 +7,9 @@ interface Props {
   input:      IntelligenceInput;
   onAccept:   (choice: 'rule' | 'reference') => void;
   onBack:     () => void;
+  onRetry:    () => void;
   isLoading:  boolean;
+  error:      string | null;
 }
 
 const COMP_KEYS = ['frame', 'motors', 'esc', 'battery', 'flight_controller', 'gps', 'payload', 'propellers'];
@@ -48,7 +50,7 @@ const BANNER = {
   low:    { bg: 'rgba(239,68,68,0.12)',   border: 'rgba(239,68,68,0.3)',  color: '#f87171', label: 'No direct match — engineer review required' },
 } as const;
 
-export function StepRecommendation({ result, onAccept, onBack, isLoading }: Props) {
+export function StepRecommendation({ result, onAccept, onBack, onRetry, isLoading, error }: Props) {
 
   const [selected, setSelected] = useState<'rule' | 'reference' | null>(() => {
     if (!result) return null;
@@ -58,7 +60,7 @@ export function StepRecommendation({ result, onAccept, onBack, isLoading }: Prop
   });
 
   /* ── Loading state ── */
-  if (isLoading || !result) {
+  if (isLoading) {
     return (
       <div
         className="rounded-2xl border p-8 flex flex-col items-center justify-center gap-4 min-h-[280px]"
@@ -68,6 +70,45 @@ export function StepRecommendation({ result, onAccept, onBack, isLoading }: Prop
         <div className="text-center">
           <p className="text-white font-medium">Analysing your requirements...</p>
           <p className="text-sm text-white/50 mt-1">Matching design rules and proven designs</p>
+        </div>
+      </div>
+    );
+  }
+
+  /* ── Error state ── covers both a real caught error and the otherwise-
+     impossible "finished loading, nothing came back" case, so there's never
+     a silent stuck-looking screen with no explanation. */
+  if (error || !result) {
+    return (
+      <div
+        className="rounded-2xl border p-8 flex flex-col items-center justify-center gap-4 min-h-[280px]"
+        style={{ background: 'rgba(255,255,255,0.12)', borderColor: 'rgba(255,255,255,0.15)' }}
+      >
+        <div className="grid h-12 w-12 place-items-center rounded-full bg-red-500/15 border border-red-500/30">
+          <AlertTriangle className="h-6 w-6 text-red-400" aria-hidden="true" />
+        </div>
+        <div className="text-center">
+          <p className="text-white font-medium">Something went wrong</p>
+          <p className="text-sm text-white/50 mt-1">
+            {error ?? 'No analysis result came back. Please try again.'}
+          </p>
+        </div>
+        <div className="flex items-center gap-3 pt-2">
+          <button
+            type="button"
+            onClick={onBack}
+            className="h-10 px-6 rounded-lg text-sm text-white/60 hover:text-white border border-white/10 hover:border-white/20 transition-colors"
+          >
+            Back
+          </button>
+          <button
+            type="button"
+            onClick={onRetry}
+            className="h-10 px-6 rounded-lg text-sm font-medium text-white hover:opacity-90 transition-opacity"
+            style={{ background: '#378ADD' }}
+          >
+            Try again
+          </button>
         </div>
       </div>
     );
