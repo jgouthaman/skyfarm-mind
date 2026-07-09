@@ -113,6 +113,33 @@ function DesignStudioPage() {
         </div>
       </section>
 
+      <section className="py-14 sm:py-16 border-y border-border/60 bg-muted/20">
+        <div className="mx-auto max-w-5xl px-5 lg:px-8 text-center">
+          <span className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
+            How it works
+          </span>
+          <h2 className="mt-3 text-2xl sm:text-3xl font-bold">
+            Every Recommendation Shows Its Reasoning
+          </h2>
+          <p className="mt-4 text-muted-foreground max-w-2xl mx-auto">
+            The Design Studio doesn't just output a platform type — it shows the gate-and-score logic
+            behind it: which factors mattered, how confident the match is, and what the runner-up would
+            have been. Engineering judgment you can audit, not a black box.
+          </p>
+
+          <div className="mt-8 grid sm:grid-cols-3 gap-3 max-w-3xl mx-auto">
+            {["Gate-then-score model", "Confidence-scored results", "Runner-up always shown"].map((item) => (
+              <div
+                key={item}
+                className="rounded-lg border border-border/60 bg-card/60 px-4 py-3 text-sm font-medium"
+              >
+                {item}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <Dialog open={demoOpen} onOpenChange={setDemoOpen}>
         <DialogContent className="max-w-3xl">
           <DialogHeader>
