@@ -1,7 +1,5 @@
-import {
-  LIQUID_DENSITY_OPTIONS,
-  SPRAYING_MODE_OPTIONS,
-} from "@/lib/design-studio/constants";
+import { useEffect } from "react";
+import { getPayloadFields } from "@/lib/design-studio/payloadFields.constants";
 import { WizardInput, WizardSelect } from "./WizardField";
 import type { WizardFormState } from "@/lib/design-studio/wizard-types";
 
@@ -13,6 +11,29 @@ interface Props {
 }
 
 export function StepPayload({ form, onChange, onNext, onBack }: Props) {
+  const fields = getPayloadFields(form.vertical);
+
+  // Seed select-type fields with their first option (matching the original
+  // per-vertical defaults, e.g. AgriSky's "liquidDensity: Normal") — without
+  // this, an untouched select would visually show its first option while
+  // form.payloadDetails silently kept no value for that key.
+  useEffect(() => {
+    const patch: Record<string, string> = {};
+    for (const f of fields) {
+      if (f.type === "select" && form.payloadDetails[f.key] === undefined && f.options?.length) {
+        patch[f.key] = f.options[0];
+      }
+    }
+    if (Object.keys(patch).length > 0) {
+      onChange({ payloadDetails: { ...form.payloadDetails, ...patch } });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.vertical]);
+
+  function setField(key: string, value: string) {
+    onChange({ payloadDetails: { ...form.payloadDetails, [key]: value } });
+  }
+
   return (
     <div
       className="rounded-2xl border p-8 space-y-6 backdrop-blur-sm"
@@ -21,48 +42,34 @@ export function StepPayload({ form, onChange, onNext, onBack }: Props) {
       <h3 className="text-base font-semibold text-white mb-5">Payload Details</h3>
 
       <div className="grid md:grid-cols-2 gap-4">
-        <WizardInput
-          label="Tank capacity (L)"
-          type="number"
-          min={0}
-          value={form.tankCapacity}
-          placeholder="e.g. 10"
-          onChange={(e) => onChange({ tankCapacity: e.target.value })}
-        />
-        <WizardInput
-          label="Spray width (m)"
-          type="number"
-          min={0}
-          value={form.sprayWidth}
-          placeholder="e.g. 4"
-          onChange={(e) => onChange({ sprayWidth: e.target.value })}
-        />
-        <WizardInput
-          label="Crop type"
-          value={form.cropType}
-          placeholder="e.g. Cotton"
-          onChange={(e) => onChange({ cropType: e.target.value })}
-        />
-        <WizardInput
-          label="Farm size (acres)"
-          type="number"
-          min={0}
-          value={form.farmSize}
-          placeholder="e.g. 25"
-          onChange={(e) => onChange({ farmSize: e.target.value })}
-        />
-        <WizardSelect
-          label="Liquid density"
-          options={LIQUID_DENSITY_OPTIONS}
-          value={form.liquidDensity}
-          onChange={(e) => onChange({ liquidDensity: e.target.value })}
-        />
-        <WizardSelect
-          label="Spraying mode"
-          options={SPRAYING_MODE_OPTIONS}
-          value={form.sprayingMode}
-          onChange={(e) => onChange({ sprayingMode: e.target.value })}
-        />
+        {fields.map((field) => {
+          const value = form.payloadDetails[field.key] ?? "";
+          const label = field.unit ? `${field.label} (${field.unit})` : field.label;
+
+          if (field.type === "select") {
+            return (
+              <WizardSelect
+                key={field.key}
+                label={label}
+                options={field.options ?? []}
+                value={String(value)}
+                onChange={(e) => setField(field.key, e.target.value)}
+              />
+            );
+          }
+
+          return (
+            <WizardInput
+              key={field.key}
+              label={label}
+              type={field.type === "number" ? "number" : "text"}
+              min={field.type === "number" ? 0 : undefined}
+              value={String(value)}
+              placeholder={field.placeholder}
+              onChange={(e) => setField(field.key, e.target.value)}
+            />
+          );
+        })}
       </div>
 
       <div className="flex justify-between pt-2">

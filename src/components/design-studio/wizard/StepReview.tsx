@@ -1,3 +1,4 @@
+import { getPayloadFields } from "@/lib/design-studio/payloadFields.constants";
 import type { WizardFormState } from "@/lib/design-studio/wizard-types";
 
 interface Props {
@@ -8,6 +9,16 @@ interface Props {
 }
 
 export function StepReview({ form, onBack, onSubmit, saving }: Props) {
+  const payloadFields = getPayloadFields(form.vertical);
+  const payloadDetailsDisplay: Record<string, string> = Object.fromEntries(
+    Object.entries(form.payloadDetails).map(([key, value]) => {
+      const def = payloadFields.find((f) => f.key === key);
+      const label = def?.label ?? key;
+      const display = def?.unit ? `${value} ${def.unit}` : String(value);
+      return [label, display];
+    }),
+  );
+
   const review = {
     payloadWeight:      form.payloadWeight,
     requiredFlightTime: form.requiredFlightTime,
@@ -18,14 +29,7 @@ export function StepReview({ form, onBack, onSubmit, saving }: Props) {
     windCondition:      form.windCondition,
     budgetRange:        form.budgetRange,
     automationLevel:    form.automationLevel,
-    payloadDetails: {
-      tankCapacity:  form.tankCapacity,
-      sprayWidth:    form.sprayWidth,
-      cropType:      form.cropType,
-      farmSize:      form.farmSize,
-      liquidDensity: form.liquidDensity,
-      sprayingMode:  form.sprayingMode,
-    },
+    payloadDetails: payloadDetailsDisplay,
     safetyRequirements: {
       returnToHome:       form.returnToHome,
       gpsHold:            form.gpsHold,

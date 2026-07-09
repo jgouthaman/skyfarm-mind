@@ -419,12 +419,15 @@ export type Database = {
           description: string | null
           purpose: string | null
           vertical: string | null
+          vehicle_type: string
           drone_type: string | null
           frame_size: string | null
           payload_weight: string | null
           estimated_flight_time: number | null
           motor_class: string | null
           battery: string | null
+          component_list: Json | null
+          requirements: Json | null
           confidence_score: number
           engineer_notes: string | null
           approval_status: string
@@ -439,12 +442,15 @@ export type Database = {
           description?: string | null
           purpose?: string | null
           vertical?: string | null
+          vehicle_type?: string
           drone_type?: string | null
           frame_size?: string | null
           payload_weight?: string | null
           estimated_flight_time?: number | null
           motor_class?: string | null
           battery?: string | null
+          component_list?: Json | null
+          requirements?: Json | null
           confidence_score?: number
           engineer_notes?: string | null
           approval_status?: string
@@ -459,12 +465,15 @@ export type Database = {
           description?: string | null
           purpose?: string | null
           vertical?: string | null
+          vehicle_type?: string
           drone_type?: string | null
           frame_size?: string | null
           payload_weight?: string | null
           estimated_flight_time?: number | null
           motor_class?: string | null
           battery?: string | null
+          component_list?: Json | null
+          requirements?: Json | null
           confidence_score?: number
           engineer_notes?: string | null
           approval_status?: string
@@ -545,6 +554,7 @@ export type Database = {
           updated_at: string
           user_id: string | null
           user_type: string | null
+          vehicle_type: string
           vertical: string
         }
         Insert: {
@@ -558,6 +568,7 @@ export type Database = {
           updated_at?: string
           user_id?: string | null
           user_type?: string | null
+          vehicle_type?: string
           vertical: string
         }
         Update: {
@@ -571,6 +582,7 @@ export type Database = {
           updated_at?: string
           user_id?: string | null
           user_type?: string | null
+          vehicle_type?: string
           vertical?: string
         }
         Relationships: []

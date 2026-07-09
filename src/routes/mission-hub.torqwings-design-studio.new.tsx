@@ -8,6 +8,7 @@ import { INITIAL_FORM } from "@/lib/design-studio/wizard-types";
 import type { WizardFormState } from "@/lib/design-studio/wizard-types";
 import { buildInsertPayload, createProject } from "@/lib/design-studio/project-service";
 import { WizardProgress } from "@/components/design-studio/wizard/WizardProgress";
+import { StepVehicleType } from "@/components/design-studio/wizard/StepVehicleType";
 import { StepScope }   from "@/components/design-studio/wizard/StepScope";
 import { StepMission } from "@/components/design-studio/wizard/StepMission";
 import { StepPayload } from "@/components/design-studio/wizard/StepPayload";
@@ -22,21 +23,49 @@ export const Route = createFileRoute("/mission-hub/torqwings-design-studio/new")
   ssr: false,
 });
 
-const TOTAL = 6;
+const TOTAL = 7;
+const STEP_KEY = "torqwings-studio:wizard-step";
+const FORM_KEY = "torqwings-studio:wizard-form";
+
+function loadInitialStep(): number {
+  if (typeof window === "undefined") return 1;
+  const saved = Number(sessionStorage.getItem(STEP_KEY));
+  return Number.isFinite(saved) && saved >= 1 && saved <= TOTAL ? saved : 1;
+}
+
+function loadInitialForm(): WizardFormState {
+  if (typeof window === "undefined") return INITIAL_FORM;
+  const saved = sessionStorage.getItem(FORM_KEY);
+  if (!saved) return INITIAL_FORM;
+  try {
+    return { ...INITIAL_FORM, ...JSON.parse(saved) };
+  } catch {
+    return INITIAL_FORM;
+  }
+}
 
 function NewProjectWizard() {
   const { profile } = useMissionHubAuth();
   const nav = useNavigate();
-  const [step, setStep]             = useState(1);
-  const [form, setForm]             = useState<WizardFormState>(INITIAL_FORM);
+  const [step, setStep]             = useState(loadInitialStep);
+  const [form, setForm]             = useState<WizardFormState>(loadInitialForm);
   const [saving, setSaving]         = useState(false);
   const [baseName, setBaseName]     = useState<string | null>(null);
   const [recommendation, setRecommendation] = useState<IntelligenceResult | null>(null);
   const [engineLoading, setEngineLoading]   = useState(false);
+  const [engineError, setEngineError]       = useState<string | null>(null);
   const [acceptedSource, setAcceptedSource] = useState<'rule' | 'reference'>('rule');
 
   const patch = (p: Partial<WizardFormState>) =>
     setForm((f) => ({ ...f, ...p }));
+
+  useEffect(() => {
+    sessionStorage.setItem(STEP_KEY, String(step));
+  }, [step]);
+
+  useEffect(() => {
+    sessionStorage.setItem(FORM_KEY, JSON.stringify(form));
+  }, [form]);
 
   const SLUG_TO_VERTICAL: Record<string, string> = {
     agriculture:    "AgriSky",
@@ -54,19 +83,24 @@ function NewProjectWizard() {
 
     supabase
       .from("reference_designs")
-      .select("name, purpose, vertical, payload_weight, estimated_flight_time")
+      .select("name, purpose, vertical, vehicle_type, payload_weight, estimated_flight_time")
       .eq("id", baseId)
       .single()
       .then(({ data }) => {
         if (!data) return;
         patch({
           projectName:        data.name ?? "",
+          vehicleType:        (data.vehicle_type as WizardFormState["vehicleType"]) ?? INITIAL_FORM.vehicleType,
           purpose:            data.purpose ?? INITIAL_FORM.purpose,
           vertical:           SLUG_TO_VERTICAL[data.vertical ?? ""] ?? INITIAL_FORM.vertical,
           payloadWeight:      data.payload_weight != null ? String(data.payload_weight) : "",
           requiredFlightTime: data.estimated_flight_time != null ? String(data.estimated_flight_time) : "",
         });
         setBaseName(data.name ?? null);
+        // Starting from a proven design is a fresh run — don't leave the
+        // wizard sitting on a step left over from a previously abandoned,
+        // now-restored session.
+        setStep(1);
       });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -80,6 +114,7 @@ function NewProjectWizard() {
     };
     return {
       vertical:           form.vertical,
+      vehicleType:        form.vehicleType,
       purpose:            form.purpose,
       payloadWeight:      parseFloat(form.payloadWeight) || 0,
       requiredFlightTime: parseFloat(form.requiredFlightTime) || 0,
@@ -91,9 +126,12 @@ function NewProjectWizard() {
 
   async function runEngine(f: WizardFormState) {
     setEngineLoading(true);
+    setEngineError(null);
     try {
       const result = await runIntelligenceEngine(buildEngineInput(f));
       setRecommendation(result);
+    } catch (err: any) {
+      setEngineError(err?.message ?? "Something went wrong while analysing your requirements.");
     } finally {
       setEngineLoading(false);
     }
@@ -106,6 +144,8 @@ function NewProjectWizard() {
       const payload = buildInsertPayload(form, profile.id, recommendation, acceptedSource);
       const result  = await createProject(payload);
       if (result?.id) {
+        sessionStorage.removeItem(STEP_KEY);
+        sessionStorage.removeItem(FORM_KEY);
         if (typeof window !== "undefined") {
           window.sessionStorage.setItem("torqwings-studio:selected", result.id);
         }
@@ -142,14 +182,14 @@ function NewProjectWizard() {
       />
 
       {step === 1 && (
-        <StepScope
+        <StepVehicleType
           form={form}
           onChange={patch}
           onNext={() => setStep(2)}
         />
       )}
       {step === 2 && (
-        <StepMission
+        <StepScope
           form={form}
           onChange={patch}
           onNext={() => setStep(3)}
@@ -157,7 +197,7 @@ function NewProjectWizard() {
         />
       )}
       {step === 3 && (
-        <StepPayload
+        <StepMission
           form={form}
           onChange={patch}
           onNext={() => setStep(4)}
@@ -165,26 +205,42 @@ function NewProjectWizard() {
         />
       )}
       {step === 4 && (
-        <StepSafety
+        <StepPayload
           form={form}
           onChange={patch}
-          onNext={() => { runEngine(form); setStep(5); }}
+          onNext={() => setStep(5)}
           onBack={() => setStep(3)}
         />
       )}
       {step === 5 && (
+        <StepSafety
+          form={form}
+          onChange={patch}
+          onNext={() => {
+            // runEngine catches its own errors and always resolves (never
+            // rejects) — this .catch is just a safety net so a genuinely
+            // unexpected failure never surfaces as an unhandled rejection.
+            runEngine(form).catch(() => {});
+            setStep(6);
+          }}
+          onBack={() => setStep(4)}
+        />
+      )}
+      {step === 6 && (
         <StepRecommendation
           result={recommendation}
           input={buildEngineInput(form)}
           isLoading={engineLoading}
-          onBack={() => setStep(4)}
-          onAccept={(choice) => { setAcceptedSource(choice); setStep(6); }}
+          error={engineError}
+          onRetry={() => runEngine(form)}
+          onBack={() => setStep(5)}
+          onAccept={(choice) => { setAcceptedSource(choice); setStep(7); }}
         />
       )}
-      {step === 6 && (
+      {step === 7 && (
         <StepReview
           form={form}
-          onBack={() => setStep(5)}
+          onBack={() => setStep(6)}
           onSubmit={handleSubmit}
           saving={saving}
         />

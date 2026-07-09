@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import {
   TERRAIN_OPTIONS,
   WIND_OPTIONS,
@@ -16,6 +17,23 @@ interface Props {
 }
 
 export function StepMission({ form, onChange, onNext, onBack }: Props) {
+  // Pre-fill (not force) payload weight / flight time from Step 0's "Let us
+  // recommend" answers, if those were given and these fields are still
+  // blank. One-time on mount — never overwrites a value the user has typed.
+  useEffect(() => {
+    const patch: Partial<WizardFormState> = {};
+    if (!form.payloadWeight && form.recommendPayloadKg) {
+      patch.payloadWeight = form.recommendPayloadKg;
+    }
+    if (!form.requiredFlightTime && form.recommendEnduranceMin) {
+      patch.requiredFlightTime = form.recommendEnduranceMin;
+    }
+    if (Object.keys(patch).length > 0) {
+      onChange(patch);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <div
       className="rounded-2xl border p-8 space-y-6 backdrop-blur-sm"

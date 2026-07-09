@@ -15,13 +15,19 @@ export function WizardInput({
   );
 }
 
+export type WizardSelectOption = string | { value: string; label: string };
+
 export function WizardSelect({
   label,
   options,
+  placeholder,
   ...props
 }: {
   label: string;
-  options: readonly string[] | string[];
+  options: readonly WizardSelectOption[];
+  /** Renders as a disabled first option so an unset value shows real
+   * placeholder text instead of silently displaying the first real option. */
+  placeholder?: string;
 } & React.SelectHTMLAttributes<HTMLSelectElement>) {
   return (
     <div>
@@ -32,11 +38,20 @@ export function WizardSelect({
           focus:border-white/40 appearance-none transition-colors"
         {...props}
       >
-        {options.map((o) => (
-          <option key={o} value={o} className="bg-[#1e2d45] text-white">
-            {o}
+        {placeholder && (
+          <option value="" disabled className="bg-[#1e2d45] text-white/40">
+            {placeholder}
           </option>
-        ))}
+        )}
+        {options.map((o) => {
+          const value = typeof o === "string" ? o : o.value;
+          const text  = typeof o === "string" ? o : o.label;
+          return (
+            <option key={value} value={value} className="bg-[#1e2d45] text-white">
+              {text}
+            </option>
+          );
+        })}
       </select>
     </div>
   );

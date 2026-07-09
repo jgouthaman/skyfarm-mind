@@ -74,7 +74,7 @@ const TIERS: MainTier[] = [
     annualBillingLine: "",
     isFree: true,
     included: [
-      { text: "5 drone designs per month", note: "↑ from 3" },
+      { text: "5 platform designs per month", note: "↑ from 3" },
       { text: "3 AI advisor queries / month" },
       { text: "Basic flight simulation" },
       { text: "Standard component list" },
@@ -92,7 +92,7 @@ const TIERS: MainTier[] = [
   {
     key: "engineer",
     name: "Engineer",
-    tagline: "For solo professional drone engineers",
+    tagline: "For solo aerial platform engineers",
     badgeLabel: "Most popular",
     badgeBg: "#185FA5",
     badgeText: "#ffffff",
@@ -104,7 +104,7 @@ const TIERS: MainTier[] = [
     annualBillingLine: "billed ₹14,388 / year",
     included: [
       { text: "Everything in Explorer" },
-      { text: "Unlimited drone designs" },
+      { text: "Unlimited platform designs" },
       { text: "50 AI advisor queries / month" },
       { text: "Full flight simulation" },
       { text: "AI-powered design review" },
@@ -119,7 +119,7 @@ const TIERS: MainTier[] = [
   {
     key: "studio",
     name: "Studio",
-    tagline: "For small drone companies and design teams",
+    tagline: "For small aerial platform companies and design teams",
     badgeLabel: "New tier ✦",
     badgeBg: "rgba(239,159,39,0.15)",
     badgeText: "#EF9F27",
@@ -147,7 +147,7 @@ const TIERS: MainTier[] = [
   {
     key: "squadron",
     name: "Squadron",
-    tagline: "For drone companies and defence labs",
+    tagline: "For aerial platform companies and defence labs",
     badgeLabel: "Enterprise · DRDO",
     badgeBg: "#EF9F27",
     badgeText: "#0a0f1c",

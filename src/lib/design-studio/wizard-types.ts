@@ -1,8 +1,21 @@
+import type { VehicleTypeSlug } from "@/constants/vehicleTypes.constants";
+import type { YesNoUnsure } from "@/lib/intelligence/vehicleTypeRecommender";
+
 export interface WizardFormState {
   projectName:        string;
+  vehicleType:        VehicleTypeSlug | "";
   vertical:           string;
   purpose:            string;
   userType:           string;
+  // Step 0's raw "Let us recommend" inputs, lifted here (rather than kept
+  // local to StepVehicleType) so they survive back-navigation to Step 1 and
+  // can pre-fill Step 3's payload weight / flight time. Unset entirely when
+  // the user took the "Choose my vehicle type" path.
+  recommendPayloadKg?:      string;
+  recommendRangeKm?:        string;
+  recommendEnduranceMin?:   string;
+  recommendHoverRequired?:  YesNoUnsure;
+  recommendRunwayAvailable?: YesNoUnsure;
   payloadWeight:      string;
   requiredFlightTime: string;
   missionArea:        string;
@@ -12,12 +25,7 @@ export interface WizardFormState {
   windCondition:      string;
   budgetRange:        string;
   automationLevel:    string;
-  tankCapacity:       string;
-  sprayWidth:         string;
-  cropType:           string;
-  farmSize:           string;
-  liquidDensity:      string;
-  sprayingMode:       string;
+  payloadDetails:     Record<string, string | number>;
   returnToHome:        boolean;
   gpsHold:             boolean;
   obstacleAvoidance:   boolean;
@@ -29,9 +37,10 @@ export interface WizardFormState {
 
 export const INITIAL_FORM: WizardFormState = {
   projectName:        "",
-  vertical:           "AgriSky",
-  purpose:            "Agriculture spraying",
-  userType:           "Farmer",
+  vehicleType:        "",
+  vertical:           "",
+  purpose:            "",
+  userType:           "",
   payloadWeight:      "",
   requiredFlightTime: "",
   missionArea:        "",
@@ -41,12 +50,7 @@ export const INITIAL_FORM: WizardFormState = {
   windCondition:      "Medium",
   budgetRange:        "Balanced",
   automationLevel:    "Semi-autonomous",
-  tankCapacity:       "",
-  sprayWidth:         "",
-  cropType:           "",
-  farmSize:           "",
-  liquidDensity:      "Normal",
-  sprayingMode:       "route-based",
+  payloadDetails:     {},
   returnToHome:        true,
   gpsHold:             true,
   obstacleAvoidance:   false,
@@ -59,6 +63,7 @@ export const INITIAL_FORM: WizardFormState = {
 export interface StudioProjectInsert {
   user_id:         string;
   project_name:    string;
+  vehicle_type:    VehicleTypeSlug;
   vertical:        string;
   purpose:         string;
   user_type:       string;
