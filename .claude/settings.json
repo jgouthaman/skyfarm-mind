@@ -5,7 +5,9 @@
       "Bash(git commit -m ' *)",
       "PowerShell(netstat -ano)",
       "PowerShell(Get-Process -Name \"node\" -ErrorAction SilentlyContinue)",
-      "Bash(git status *)"
+      "Bash(git status *)",
+      "Bash(xargs grep -l \"lesson\")",
+      "Bash(node -e \"const m = require\\('c:/Workshop/Glacier/skyfarm-mind/node_modules/lucide-react/dist/lucide-react.cjs.js'\\); const names=['Fan','Plane','PlaneTakeoff','PackagePlus','Boxes','Rotate3d']; names.forEach\\(n=>console.log\\(n, typeof m[n]\\)\\);\")"
     ]
   }
 }

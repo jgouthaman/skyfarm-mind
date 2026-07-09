@@ -27,9 +27,9 @@ export function Footer() {
 
           {/* Right — contact + social */}
           <ul className="space-y-1.5 text-xs text-muted-foreground leading-[1.5]">
-            <li>Hello : 9940263589</li>
+            <li>Hello : +919940263589</li>
             <li>support@torqwings.com</li>
-            <li>India</li>
+         
             <li>
               <a
                 href="https://www.linkedin.com/company/torqwings"
@@ -66,10 +66,8 @@ export function Footer() {
           <div className="grid grid-cols-1 sm:grid-cols-3 sm:items-center gap-y-1 gap-x-4">
             <span>© {new Date().getFullYear()} TorqWings. All rights reserved.</span>
             <span className="sm:text-center">
-              Aerospace · Autonomous Aerial Platforms · AI ·{" "}
-              <Link to="/mission-hub/login" className="hover:text-foreground transition-colors">
-                Mission Hub
-              </Link>
+              Aerospace · Autonomous Aerial Platforms · AI {" "}
+
             </span>
             <a
               href="https://wa.me/919940263589"
