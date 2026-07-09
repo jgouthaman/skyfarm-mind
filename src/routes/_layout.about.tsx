@@ -51,7 +51,7 @@ function AboutPage() {
               <div className="grid grid-cols-2 gap-5">
                 {[
                   { k: "5",      v: "Aerospace engineers"              },
-                  { k: "4",      v: "Industry verticals"               },
+                  { k: "4",      v: "Dedicated Verticals"               },
                   { k: "₹75K Cr",v: "TN aerospace target by 2032"      },
                   { k: "1st",    v: "Autonomous aerial platform from Chennai"    },
                 ].map((s) => (

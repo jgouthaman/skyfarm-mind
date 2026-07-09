@@ -32,7 +32,7 @@ export const Route = createFileRoute("/_layout/")({
 });
 
 const HERO_STATS = [
-  { k: "6",   v: "Industries"     },
+  { k: "17",   v: "Target Industries"     },
   { k: "AI",  v: "Analytics core" },
   { k: "R&D", v: "Custom platforms"    },
 ];
@@ -52,7 +52,7 @@ function HeroPage() {
             </span>
           </h1>
           <p className="mt-6 text-lg text-muted-foreground max-w-xl">
-            AI-powered autonomous aerial platforms, custom engineering, and aerial intelligence solutions for agriculture, infrastructure, mapping, surveillance, and industrial applications.
+           AI-powered autonomous aerial platforms and aerial intelligence solutions for Agriculture, Infrastructure, Security, Logistics, Urban Surveillance, Aerospace Research and Industrial Applications.
           </p>
           <div className="mt-8">
             <Button asChild size="lg" className="bg-gradient-primary text-primary-foreground hover:opacity-90 shadow-glow">
