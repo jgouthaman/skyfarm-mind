@@ -7,9 +7,9 @@ export const Route = createFileRoute("/_layout/about")({
   head: () => ({
     meta: [
       { title: "About TorqWings — Built by engineers. Flown for India." },
-      { name: "description", content: "TorqWings is a Chennai-based aerospace startup building AI-powered drone systems for Indian agriculture, infrastructure, and defence. Founded by 5 aerospace engineers." },
+      { name: "description", content: "TorqWings is a Chennai-based aerospace startup building AI-powered autonomous aerial platforms for Indian agriculture, infrastructure, and defence. Founded by 5 aerospace engineers." },
       { property: "og:title", content: "About TorqWings — Built by engineers. Flown for India." },
-      { property: "og:description", content: "Five aerospace engineers building India's drone intelligence platform from Chennai's aerospace corridor." },
+      { property: "og:description", content: "Five aerospace engineers building India's autonomous aerial intelligence platform from Chennai's aerospace corridor." },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "/about" },
     ],
@@ -51,7 +51,7 @@ function AboutPage() {
               <div className="grid grid-cols-2 gap-5">
                 {[
                   { k: "5",      v: "Aerospace engineers"              },
-                  { k: "6",      v: "Industry verticals"               },
+                  { k: "4",      v: "Industry verticals"               },
                   { k: "₹75K Cr",v: "TN aerospace target by 2032"      },
                   { k: "1st",    v: "Autonomous aerial platform from Chennai"    },
                 ].map((s) => (
@@ -97,7 +97,7 @@ function AboutPage() {
               { i: "🛡️", t: "Tamil Nadu Defence Industrial Corridor", d: "Operating inside India's fastest-growing aerospace and defence manufacturing ecosystem, with direct access to TIDCO, HAL, BEL, and global OEMs." },
               { i: "🤝", t: "AIDAT ecosystem member", d: "Affiliated with the Aerospace Industry Development Association of Tamil Nadu — the state's primary body for aerospace and defence sector development." },
               { i: "🚀", t: "IN-SPACe registered", d: "Registered with India's national space regulator, enabling access to ISRO facilities, government drone frameworks, and the ₹1,000 Cr national aerospace startup fund." },
-              { i: "🎓", t: "Chennai engineering pedigree", d: "Our founding team brings aerospace degrees from Chennai's top engineering institutions, combined with hands-on UAV design, CFD simulation, and AI systems experience." },
+              { i: "🎓", t: "Chennai engineering pedigree", d: "Our founding team brings aerospace degrees from Chennai's top engineering institutions, combined with hands-on autonomous aerial platform design, CFD simulation, and AI systems experience." },
             ].map((b) => (
               <div key={b.t} className="rounded-2xl p-5 bg-gradient-card border border-border/60 shadow-card hover:-translate-y-[3px] hover:border-primary/40 hover:shadow-soft transition-all">
                 <div className="text-2xl">{b.i}</div>
