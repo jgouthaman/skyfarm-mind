@@ -56,6 +56,7 @@ type EnrollmentRow = {
 type AcademyUserRow = {
   id: string;
   full_name: string;
+  email: string;
 };
 
 export function AcademyVerticalTabs() {
@@ -74,7 +75,7 @@ export function AcademyVerticalTabs() {
       supabase.from("academy_course_modules" as any).select("*").order("order_index", { ascending: true }),
       supabase.from("academy_waitlist" as any).select("*").neq("status", "converted").order("created_at", { ascending: false }),
       supabase.from("enrollments" as any).select("*").order("enrolled_at", { ascending: false }),
-      supabase.from("academy_users" as any).select("id, full_name"),
+      supabase.from("academy_users" as any).select("id, full_name, email"),
     ]);
     if (coursesRes.error) console.error("[Academy] failed to load courses:", coursesRes.error);
     if (modulesRes.error) console.error("[Academy] failed to load modules:", modulesRes.error);
@@ -340,11 +341,14 @@ function UsersTab({
       {rows.length === 0 ? (
         <EmptyState message="No enrollments yet." />
       ) : (
-        <TableShell headers={["User", "Course", "Status", "Enrolled"]}>
+        <TableShell headers={["User", "Email", "Course", "Status", "Enrolled"]}>
           {rows.map((r) => (
             <tr key={r.id} className="border-t border-white/[0.05]">
               <td className="px-4 py-3 text-white/70 text-[12px]">
                 {academyUserById.get(r.user_id)?.full_name ?? r.user_id}
+              </td>
+              <td className="px-4 py-3 text-white/70 text-[12px]">
+                {academyUserById.get(r.user_id)?.email ?? "—"}
               </td>
               <td className="px-4 py-3 text-white/70 text-[12px]">
                 {r.course_id ? (courseById.get(r.course_id)?.title ?? "—") : "—"}
