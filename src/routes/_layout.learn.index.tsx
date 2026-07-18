@@ -32,7 +32,7 @@ const COURSES: Course[] = [
     num: 1,
     title: "Applied Aerospace: From Classical Theory to Autonomous Platforms",
     level: "Foundation",
-    prerequisite: "Aerospace engineering background",
+    prerequisite: "",
     modules: [
       "Low Reynolds Number Aerodynamics",
       "Miniaturized Structural Design",
@@ -173,7 +173,9 @@ function CourseCard({ course, isLast }: { course: Course; isLast: boolean }) {
             <h3 className="mt-2 text-lg md:text-xl font-semibold text-foreground leading-snug">
               {course.title}
             </h3>
-            <p className="mt-1 text-xs text-muted-foreground">Prerequisite: {course.prerequisite}</p>
+            {course.prerequisite && (
+              <p className="mt-1 text-xs text-muted-foreground">Prerequisite: {course.prerequisite}</p>
+            )}
           </div>
           <div className="text-right shrink-0">
             <p className="text-lg font-display font-bold text-foreground">{course.price}</p>

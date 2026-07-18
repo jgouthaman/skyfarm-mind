@@ -38,3 +38,5 @@ dist-ssr
 .vercel/output
 
 .env
+
+supabase/.temp/
