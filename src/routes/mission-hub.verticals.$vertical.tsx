@@ -4,6 +4,7 @@ import { MissionHubShell, MhCard } from "@/components/mission-hub/Shell";
 import { useMissionHubAuth } from "@/lib/mission-hub/context";
 import { supabase } from "@/integrations/supabase/client";
 import { ALL_VERTICALS, VERTICAL_LABELS, type Vertical } from "@/lib/mission-hub/types";
+import { AcademyVerticalTabs } from "@/components/mission-hub/AcademyVerticalTabs";
 import { Inbox } from "lucide-react";
 import { toast } from "sonner";
 
@@ -31,7 +32,7 @@ function VerticalPage() {
   }, [v, loading, profile, verticals, isAdmin, navigate]);
 
   useEffect(() => {
-    if (!ALL_VERTICALS.includes(v)) return;
+    if (!ALL_VERTICALS.includes(v) || v === "academy") return;
     (async () => {
       const since = new Date(Date.now() - 7 * 86400000).toISOString();
       const [a, b, c, d] = await Promise.all([
@@ -46,6 +47,14 @@ function VerticalPage() {
   }, [v]);
 
   if (!ALL_VERTICALS.includes(v)) return null;
+
+  if (v === "academy") {
+    return (
+      <MissionHubShell title={VERTICAL_LABELS[v]}>
+        <AcademyVerticalTabs />
+      </MissionHubShell>
+    );
+  }
 
   return (
     <MissionHubShell title={VERTICAL_LABELS[v]}>

@@ -1,8 +1,10 @@
-import { Fragment } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Trophy, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SectionBadge } from "@/components/SectionBadge";
+import { AcademyWaitlistModal } from "@/components/academy-waitlist-modal";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_layout/learn/")({
   component: LearnPage,
@@ -11,107 +13,26 @@ export const Route = createFileRoute("/_layout/learn/")({
 // ── Types ──────────────────────────────────────────────────────────────────
 
 type CourseLevel = "Foundation" | "Intermediate" | "Intermediate/Advanced" | "Advanced" | "Expert";
+type CourseStatus = "active" | "coming_soon";
 
-type Course = {
-  num: number;
+type AcademyCourse = {
+  id: string;
+  slug: string;
   title: string;
+  description: string | null;
   level: CourseLevel;
-  prerequisite: string;
-  modules: string[];
-  focus: string;
-  outcome: string;
+  price: number;
   hours: number;
-  projects: number;
-  price: string;
+  project_count: number;
+  vertical: string | null;
+  status: CourseStatus;
+  outcome: string | null;
+  order_index: number | null;
+  prerequisite: string | null;
+  modules: string[] | null;
 };
 
 // ── Static data ────────────────────────────────────────────────────────────
-
-const COURSES: Course[] = [
-  {
-    num: 1,
-    title: "Applied Aerospace: From Classical Theory to Autonomous Platforms",
-    level: "Foundation",
-    prerequisite: "",
-    modules: [
-      "Low Reynolds Number Aerodynamics",
-      "Miniaturized Structural Design",
-      "Electric Propulsion Systems",
-      "Electric Energy Systems & Endurance Modeling",
-      "Applied Control for Small Autonomous Platforms",
-    ],
-    focus: "Bridging classical aerospace theory to small-scale, electric, autonomous platform constraints.",
-    outcome: "Can translate classical aerospace principles into small-scale/electric platform design, identifying where standard aerospace assumptions break down at this scale.",
-    hours: 8,
-    projects: 5,
-    price: "₹999",
-  },
-  {
-    num: 2,
-    title: "Autonomous Platform Systems Engineering",
-    level: "Intermediate",
-    prerequisite: "Course 1",
-    modules: [
-      "Avionics / Sensor Fusion",
-      "Payload Integration",
-      "Comms / Telemetry",
-      "Design Studio Applied Lab",
-      "Simulation & Validation",
-    ],
-    focus: "Systems integration using TorqWings Design Studio. Applied lab: choose the TQ Drone (3-motor, free flight/aerial photography) or Sagush UAV (fixed-wing) project track.",
-    outcome: "One complete, simulation-validated, build-ready blueprint on your chosen track (TQ Drone or Sagush UAV).",
-    hours: 12,
-    projects: 6,
-    price: "₹1,499",
-  },
-  {
-    num: 3,
-    title: "AI & Autonomy for Aerial Intelligence",
-    level: "Intermediate/Advanced",
-    prerequisite: "Course 2",
-    modules: [
-      "Autonomy Fundamentals",
-      "Computer Vision",
-      "Intelligence Engine Internals",
-      "Data-Driven Design",
-      "Regulatory / Ethics",
-    ],
-    focus: "The AI and autonomy layer — the reasoning behind TorqWings' own Intelligence Engine.",
-    outcome: "Can interpret and justify Intelligence Engine recommendations and confidence scores; classify autonomy and regulatory status.",
-    hours: 10,
-    projects: 4,
-    price: "₹2,499",
-  },
-  {
-    num: 4,
-    title: "Vertical Specialization",
-    level: "Advanced",
-    prerequisite: "Courses 1–3",
-    modules: ["Design Principles", "Proven Designs"],
-    focus: "Choose your track — GuardSky (surveillance mission design & payload principles) or AgriSky (agricultural platform design principles). The Proven Designs module studied is specific to your chosen track.",
-    outcome: "One documented platform design meeting the chosen vertical's requirements, built from a studied proven design as its base.",
-    hours: 12,
-    projects: 4,
-    price: "₹3,499",
-  },
-  {
-    num: 5,
-    title: "Capstone: Aerial Intelligence Hackathon",
-    level: "Expert",
-    prerequisite: "Courses 1–4",
-    modules: [
-      "Problem Statement Definition",
-      "Design Studio Full-Access Build",
-      "Two-Pattern Delivery",
-      "Hackathon Day Pitch & Certification",
-    ],
-    focus: "Bring your own real-world problem statement. Get full, unguided access to TorqWings Design Studio and deliver two distinct design patterns (e.g. TQ Drone vs Sagush UAV) with a comparative justification.",
-    outcome: "A self-authored problem statement, two simulation-validated design patterns, and a defensible recommendation — presented at Hackathon Day. Fly the winning pattern's platform to earn certification.",
-    hours: 12,
-    projects: 2,
-    price: "₹4,499",
-  },
-];
 
 const LEVEL_STYLE: Record<CourseLevel, { background: string; color: string }> = {
   "Foundation":            { background: "#e6f1fb", color: "#185fa5" },
@@ -119,6 +40,11 @@ const LEVEL_STYLE: Record<CourseLevel, { background: string; color: string }> = 
   "Intermediate/Advanced": { background: "#fde8e8", color: "#9b2c2c" },
   "Advanced":              { background: "#eeedfe", color: "#3c3489" },
   "Expert":                { background: "#e1f5ee", color: "#0f6e56" },
+};
+
+const STATUS_LABEL: Record<CourseStatus, string> = {
+  active: "Enroll Now",
+  coming_soon: "Wait for Launch",
 };
 
 const CREDENTIAL_PATH = [
@@ -130,13 +56,17 @@ const CREDENTIAL_PATH = [
   "Fly & certify",
 ];
 
-const TOTAL_MODULES = COURSES.reduce((sum, c) => sum + c.modules.length, 0);
-const TOTAL_HOURS = COURSES.reduce((sum, c) => sum + c.hours, 0);
-const TOTAL_PROJECTS = COURSES.reduce((sum, c) => sum + c.projects, 0);
+const BUNDLE_DISCOUNT = 0.22;
+
+function formatINR(amount: number): string {
+  return `₹${Math.round(amount).toLocaleString("en-IN")}`;
+}
 
 // ── Sub-components ─────────────────────────────────────────────────────────
 
-function CourseCard({ course, isLast }: { course: Course; isLast: boolean }) {
+function CourseCard({
+  course, num, isLast, onJoinWaitlist,
+}: { course: AcademyCourse; num: number; isLast: boolean; onJoinWaitlist: (courseId: string) => void }) {
   const lvl = LEVEL_STYLE[course.level];
   return (
     <div className="relative flex gap-5">
@@ -145,12 +75,12 @@ function CourseCard({ course, isLast }: { course: Course; isLast: boolean }) {
         <div
           className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full font-display font-bold"
           style={
-            course.num === 5
+            isLast
               ? { background: "#1baf7a", color: "white", fontSize: 15 }
               : { background: "#2a78d6", color: "white", fontSize: 15 }
           }
         >
-          {course.num}
+          {num}
         </div>
         {!isLast && (
           <div className="w-px flex-1 bg-border mt-2" style={{ minHeight: 24 }} />
@@ -170,6 +100,14 @@ function CourseCard({ course, isLast }: { course: Course; isLast: boolean }) {
             >
               {course.level}
             </span>
+            {course.status === "coming_soon" && (
+              <span
+                className="ml-2 inline-block rounded px-1.5 py-0.5"
+                style={{ fontSize: 10, fontWeight: 500, background: "var(--color-muted)", color: "var(--color-muted-foreground)" }}
+              >
+                Coming Soon
+              </span>
+            )}
             <h3 className="mt-2 text-lg md:text-xl font-semibold text-foreground leading-snug">
               {course.title}
             </h3>
@@ -178,36 +116,47 @@ function CourseCard({ course, isLast }: { course: Course; isLast: boolean }) {
             )}
           </div>
           <div className="text-right shrink-0">
-            <p className="text-lg font-display font-bold text-foreground">{course.price}</p>
+            <p className="text-lg font-display font-bold text-foreground">{formatINR(course.price)}</p>
             <p className="mt-0.5 text-[11px] text-muted-foreground">
-              {course.hours} hrs · {course.projects} projects
+              {course.hours} hrs · {course.project_count} projects
             </p>
           </div>
         </div>
 
-        <p className="mt-4 text-sm text-muted-foreground leading-relaxed">{course.focus}</p>
+        <p className="mt-4 text-sm text-muted-foreground leading-relaxed">{course.description}</p>
 
-        <div className="mt-4">
-          <p className="mb-1.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-            Modules
-          </p>
-          <div className="flex flex-wrap gap-1.5">
-            {course.modules.map((m) => (
-              <span
-                key={m}
-                className="rounded-full px-2.5 py-1 text-[11px]"
-                style={{ background: "var(--color-muted)", color: "var(--color-foreground)" }}
-              >
-                {m}
-              </span>
-            ))}
+        {course.modules && course.modules.length > 0 && (
+          <div className="mt-4">
+            <p className="mb-1.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+              Modules
+            </p>
+            <div className="flex flex-wrap gap-1.5">
+              {course.modules.map((m) => (
+                <span
+                  key={m}
+                  className="rounded-full px-2.5 py-1 text-[11px]"
+                  style={{ background: "var(--color-muted)", color: "var(--color-foreground)" }}
+                >
+                  {m}
+                </span>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
-        <div className="mt-4 rounded-lg p-3" style={{ background: "rgba(27,175,122,0.08)" }}>
-          <p className="text-[11px] font-medium" style={{ color: "#0f6e56" }}>Outcome</p>
-          <p className="mt-0.5 text-xs leading-relaxed text-foreground/80">{course.outcome}</p>
-        </div>
+        {course.outcome && (
+          <div className="mt-4 rounded-lg p-3" style={{ background: "rgba(27,175,122,0.08)" }}>
+            <p className="text-[11px] font-medium" style={{ color: "#0f6e56" }}>Outcome</p>
+            <p className="mt-0.5 text-xs leading-relaxed text-foreground/80">{course.outcome}</p>
+          </div>
+        )}
+
+        <Button
+          className="mt-4 w-full sm:w-auto"
+          onClick={course.status === "coming_soon" ? () => onJoinWaitlist(course.id) : undefined}
+        >
+          {STATUS_LABEL[course.status]}
+        </Button>
       </div>
     </div>
   );
@@ -216,6 +165,34 @@ function CourseCard({ course, isLast }: { course: Course; isLast: boolean }) {
 // ── Page ───────────────────────────────────────────────────────────────────
 
 function LearnPage() {
+  const [courses, setCourses] = useState<AcademyCourse[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [waitlistOpen, setWaitlistOpen] = useState(false);
+  const [waitlistCourseId, setWaitlistCourseId] = useState<string | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      const { data, error } = await supabase
+        .from("academy_courses" as any)
+        .select("*")
+        .order("order_index", { ascending: true });
+      if (error) console.error("[Academy] failed to load courses:", error);
+      setCourses((data ?? []) as unknown as AcademyCourse[]);
+      setLoading(false);
+    })();
+  }, []);
+
+  const totalModules = useMemo(() => courses.reduce((sum, c) => sum + (c.modules?.length ?? 0), 0), [courses]);
+  const totalHours = useMemo(() => courses.reduce((sum, c) => sum + c.hours, 0), [courses]);
+  const totalProjects = useMemo(() => courses.reduce((sum, c) => sum + c.project_count, 0), [courses]);
+  const totalIndividualPrice = useMemo(() => courses.reduce((sum, c) => sum + Number(c.price), 0), [courses]);
+  const bundlePrice = useMemo(() => totalIndividualPrice * (1 - BUNDLE_DISCOUNT), [totalIndividualPrice]);
+
+  function openWaitlist(courseId: string | null) {
+    setWaitlistCourseId(courseId);
+    setWaitlistOpen(true);
+  }
+
   return (
     <>
       {/* ── 1. Hero ─────────────────────────────────────────────────────── */}
@@ -238,15 +215,15 @@ function LearnPage() {
 
               <div className="flex gap-8 mt-6">
                 <div>
-                  <p className="text-[22px] font-display font-bold text-foreground">{TOTAL_MODULES}</p>
+                  <p className="text-[22px] font-display font-bold text-foreground">{loading ? "…" : totalModules}</p>
                   <p className="text-[11px] text-muted-foreground mt-0.5">Modules</p>
                 </div>
                 <div>
-                  <p className="text-[22px] font-display font-bold text-foreground">{TOTAL_HOURS} hrs</p>
+                  <p className="text-[22px] font-display font-bold text-foreground">{loading ? "…" : `${totalHours} hrs`}</p>
                   <p className="text-[11px] text-muted-foreground mt-0.5">Content</p>
                 </div>
                 <div>
-                  <p className="text-[22px] font-display font-bold text-foreground">{TOTAL_PROJECTS}</p>
+                  <p className="text-[22px] font-display font-bold text-foreground">{loading ? "…" : totalProjects}</p>
                   <p className="text-[11px] text-muted-foreground mt-0.5">Projects</p>
                 </div>
               </div>
@@ -258,18 +235,23 @@ function LearnPage() {
                 style={{ background: "#0d3b5e", border: "1px solid rgba(255,255,255,0.08)" }}
               >
                 <p className="uppercase" style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.08em", color: "#7fd9b8" }}>
-                  Bundle &amp; save 22%
+                  Bundle &amp; save {BUNDLE_DISCOUNT * 100}%
                 </p>
                 <div className="mt-3 flex items-baseline gap-2 flex-wrap">
-                  <span className="text-3xl font-display font-bold text-white">₹10,136</span>
-                  <span className="text-sm text-white/50 line-through">₹12,995</span>
+                  <span className="text-3xl font-display font-bold text-white">
+                    {loading ? "…" : formatINR(bundlePrice)}
+                  </span>
+                  <span className="text-sm text-white/50 line-through">
+                    {loading ? "" : formatINR(totalIndividualPrice)}
+                  </span>
                 </div>
                 <p className="mt-1 text-sm text-white/70">All 5 courses — one credential path</p>
                 <Button
                   className="mt-5 w-full h-11 border-0 hover:opacity-90"
                   style={{ background: "#1baf7a", color: "white" }}
+                  onClick={() => openWaitlist(null)}
                 >
-                  Enroll in the full bundle
+                  Wait for Launch
                 </Button>
                 <p className="mt-3 text-[11px] text-white/50 text-center">
                   Prefer course-by-course? Individual pricing is listed below.
@@ -292,13 +274,19 @@ function LearnPage() {
               Five courses, one prerequisite chain, one credential
             </h2>
             <p className="mt-3 text-sm md:text-base text-muted-foreground">
-              {TOTAL_MODULES} modules · {TOTAL_HOURS} hours · {TOTAL_PROJECTS} projects across all 5 courses
+              {loading ? "Loading courses…" : `${totalModules} modules · ${totalHours} hours · ${totalProjects} projects across all 5 courses`}
             </p>
           </div>
 
           <div className="mt-12">
-            {COURSES.map((c, i) => (
-              <CourseCard key={c.num} course={c} isLast={i === COURSES.length - 1} />
+            {courses.map((c, i) => (
+              <CourseCard
+                key={c.id}
+                course={c}
+                num={c.order_index ?? i + 1}
+                isLast={i === courses.length - 1}
+                onJoinWaitlist={openWaitlist}
+              />
             ))}
           </div>
         </div>
@@ -344,17 +332,18 @@ function LearnPage() {
             Get started
           </p>
           <h2 className="mt-2 text-2xl md:text-3xl font-bold text-foreground leading-tight">
-            All 5 courses — ₹10,136
+            All 5 courses — {loading ? "…" : formatINR(bundlePrice)}
           </h2>
           <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-            22% off the ₹12,995 individual total. Prefer to enroll course-by-course? Individual pricing is
-            listed above for each course.
+            {BUNDLE_DISCOUNT * 100}% off the {loading ? "…" : formatINR(totalIndividualPrice)} individual total. Prefer to enroll
+            course-by-course? Individual pricing is listed above for each course.
           </p>
           <Button
             className="mt-6 h-11 px-8 border-0 hover:opacity-90"
             style={{ background: "#2a78d6", color: "white" }}
+            onClick={() => openWaitlist(null)}
           >
-            Enroll in the full bundle
+            Wait for Launch
           </Button>
           <p className="mt-4 text-xs text-muted-foreground">
             Questions? Email{" "}
@@ -367,6 +356,13 @@ function LearnPage() {
           </p>
         </div>
       </section>
+
+      <AcademyWaitlistModal
+        open={waitlistOpen}
+        onOpenChange={setWaitlistOpen}
+        courseId={waitlistCourseId}
+        courses={courses.map((c) => ({ id: c.id, title: c.title }))}
+      />
     </>
   );
 }
