@@ -72,7 +72,7 @@ export function AcademyVerticalTabs() {
     const [coursesRes, modulesRes, waitlistRes, enrollmentsRes, academyUsersRes] = await Promise.all([
       supabase.from("academy_courses" as any).select("*").order("order_index", { ascending: true }),
       supabase.from("academy_course_modules" as any).select("*").order("order_index", { ascending: true }),
-      supabase.from("academy_waitlist" as any).select("*").order("created_at", { ascending: false }),
+      supabase.from("academy_waitlist" as any).select("*").neq("status", "converted").order("created_at", { ascending: false }),
       supabase.from("enrollments" as any).select("*").order("enrolled_at", { ascending: false }),
       supabase.from("academy_users" as any).select("id, full_name"),
     ]);
@@ -217,7 +217,7 @@ function WaitlistTab({
   return (
     <MhCard className="overflow-hidden">
       {rows.length === 0 ? (
-        <EmptyState message="No waitlist signups yet." />
+        <EmptyState message="No pending waitlist entries." />
       ) : (
         <TableShell headers={["Email", "Name", "Course", "Date", "Status"]}>
           {rows.map((r) => {
