@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Trophy, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SectionBadge } from "@/components/SectionBadge";
-import { AcademyWaitlistModal } from "@/components/academy-waitlist-modal";
+import { AcademyWaitlistModal, type WaitlistSource } from "@/components/academy-waitlist-modal";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_layout/learn/")({
@@ -66,7 +66,12 @@ function formatINR(amount: number): string {
 
 function CourseCard({
   course, num, isLast, onJoinWaitlist,
-}: { course: AcademyCourse; num: number; isLast: boolean; onJoinWaitlist: (courseId: string) => void }) {
+}: {
+  course: AcademyCourse;
+  num: number;
+  isLast: boolean;
+  onJoinWaitlist: (courseId: string, source: WaitlistSource) => void;
+}) {
   const lvl = LEVEL_STYLE[course.level];
   return (
     <div className="relative flex gap-5">
@@ -153,7 +158,7 @@ function CourseCard({
 
         <Button
           className="mt-4 w-full sm:w-auto"
-          onClick={course.status === "coming_soon" ? () => onJoinWaitlist(course.id) : undefined}
+          onClick={() => onJoinWaitlist(course.id, course.status === "active" ? "enroll" : "waitlist")}
         >
           {STATUS_LABEL[course.status]}
         </Button>
@@ -169,6 +174,7 @@ function LearnPage() {
   const [loading, setLoading] = useState(true);
   const [waitlistOpen, setWaitlistOpen] = useState(false);
   const [waitlistCourseId, setWaitlistCourseId] = useState<string | null>(null);
+  const [waitlistSource, setWaitlistSource] = useState<WaitlistSource>("waitlist");
 
   useEffect(() => {
     (async () => {
@@ -188,8 +194,9 @@ function LearnPage() {
   const totalIndividualPrice = useMemo(() => courses.reduce((sum, c) => sum + Number(c.price), 0), [courses]);
   const bundlePrice = useMemo(() => totalIndividualPrice * (1 - BUNDLE_DISCOUNT), [totalIndividualPrice]);
 
-  function openWaitlist(courseId: string | null) {
+  function openWaitlist(courseId: string | null, source: WaitlistSource = "waitlist") {
     setWaitlistCourseId(courseId);
+    setWaitlistSource(source);
     setWaitlistOpen(true);
   }
 
@@ -362,6 +369,7 @@ function LearnPage() {
         onOpenChange={setWaitlistOpen}
         courseId={waitlistCourseId}
         courses={courses.map((c) => ({ id: c.id, title: c.title }))}
+        source={waitlistSource}
       />
     </>
   );

@@ -16,13 +16,16 @@ const BUNDLE_VALUE = "__bundle__";
 
 export type WaitlistCourseOption = { id: string; title: string };
 
+export type WaitlistSource = "waitlist" | "enroll";
+
 export function AcademyWaitlistModal({
-  open, onOpenChange, courseId, courses,
+  open, onOpenChange, courseId, courses, source,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   courseId: string | null;
   courses: WaitlistCourseOption[];
+  source: WaitlistSource;
 }) {
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -63,6 +66,7 @@ export function AcademyWaitlistModal({
           course_id: selectedCourseId === BUNDLE_VALUE ? null : selectedCourseId,
           email,
           name: name || null,
+          source,
         } as any);
       if (insertError) throw insertError;
       setSuccess(true);
