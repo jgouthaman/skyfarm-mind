@@ -30,6 +30,7 @@ export function AcademyWaitlistModal({
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [nameError, setNameError] = useState<string | null>(null);
   const [emailError, setEmailError] = useState<string | null>(null);
   const [selectedCourseId, setSelectedCourseId] = useState(courseId ?? BUNDLE_VALUE);
 
@@ -41,6 +42,7 @@ export function AcademyWaitlistModal({
     if (!next) {
       setSuccess(false);
       setError(null);
+      setNameError(null);
       setEmailError(null);
     }
     onOpenChange(next);
@@ -53,11 +55,21 @@ export function AcademyWaitlistModal({
     const email = String(fd.get("email") ?? "").trim();
     const name = String(fd.get("name") ?? "").trim();
 
+    let hasError = false;
+    if (!name) {
+      setNameError("Enter your name");
+      hasError = true;
+    } else {
+      setNameError(null);
+    }
     if (!email || !EMAIL_RE.test(email)) {
       setEmailError("Enter a valid email address");
-      return;
+      hasError = true;
+    } else {
+      setEmailError(null);
     }
-    setEmailError(null);
+    if (hasError) return;
+
     setSubmitting(true);
     try {
       const { error: insertError } = await supabase
@@ -65,7 +77,7 @@ export function AcademyWaitlistModal({
         .insert({
           course_id: selectedCourseId === BUNDLE_VALUE ? null : selectedCourseId,
           email,
-          name: name || null,
+          name,
           source,
         } as any);
       if (insertError) throw insertError;
@@ -119,9 +131,10 @@ export function AcademyWaitlistModal({
               </div>
               <div>
                 <Label htmlFor="waitlist-name" className="text-xs uppercase tracking-wider text-muted-foreground">
-                  Name
+                  Name *
                 </Label>
-                <Input id="waitlist-name" name="name" className="mt-1.5" placeholder="Your name (optional)" />
+                <Input id="waitlist-name" name="name" required className="mt-1.5" placeholder="Your full name" />
+                {nameError && <p className="mt-1 text-xs text-destructive">{nameError}</p>}
               </div>
               <div>
                 <Label htmlFor="waitlist-email" className="text-xs uppercase tracking-wider text-muted-foreground">

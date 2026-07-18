@@ -53,6 +53,11 @@ type EnrollmentRow = {
   status: string;
 };
 
+type AcademyUserRow = {
+  id: string;
+  full_name: string;
+};
+
 export function AcademyVerticalTabs() {
   const [tab, setTab] = useState<Tab>("waitlist");
   const [loading, setLoading] = useState(true);
@@ -60,23 +65,27 @@ export function AcademyVerticalTabs() {
   const [modules, setModules] = useState<ModuleRow[]>([]);
   const [waitlist, setWaitlist] = useState<WaitlistRow[]>([]);
   const [enrollments, setEnrollments] = useState<EnrollmentRow[]>([]);
+  const [academyUsers, setAcademyUsers] = useState<AcademyUserRow[]>([]);
   const [promotingId, setPromotingId] = useState<string | null>(null);
 
   async function loadAll() {
-    const [coursesRes, modulesRes, waitlistRes, enrollmentsRes] = await Promise.all([
+    const [coursesRes, modulesRes, waitlistRes, enrollmentsRes, academyUsersRes] = await Promise.all([
       supabase.from("academy_courses" as any).select("*").order("order_index", { ascending: true }),
       supabase.from("academy_course_modules" as any).select("*").order("order_index", { ascending: true }),
       supabase.from("academy_waitlist" as any).select("*").order("created_at", { ascending: false }),
       supabase.from("enrollments" as any).select("*").order("enrolled_at", { ascending: false }),
+      supabase.from("academy_users" as any).select("id, full_name"),
     ]);
     if (coursesRes.error) console.error("[Academy] failed to load courses:", coursesRes.error);
     if (modulesRes.error) console.error("[Academy] failed to load modules:", modulesRes.error);
     if (waitlistRes.error) console.error("[Academy] failed to load waitlist:", waitlistRes.error);
     if (enrollmentsRes.error) console.error("[Academy] failed to load enrollments:", enrollmentsRes.error);
+    if (academyUsersRes.error) console.error("[Academy] failed to load academy_users:", academyUsersRes.error);
     setCourses((coursesRes.data ?? []) as unknown as CourseRow[]);
     setModules((modulesRes.data ?? []) as unknown as ModuleRow[]);
     setWaitlist((waitlistRes.data ?? []) as unknown as WaitlistRow[]);
     setEnrollments((enrollmentsRes.data ?? []) as unknown as EnrollmentRow[]);
+    setAcademyUsers((academyUsersRes.data ?? []) as unknown as AcademyUserRow[]);
   }
 
   useEffect(() => {
@@ -88,6 +97,7 @@ export function AcademyVerticalTabs() {
   }, []);
 
   const courseById = new Map(courses.map((c) => [c.id, c]));
+  const academyUserById = new Map(academyUsers.map((u) => [u.id, u]));
 
   async function handlePromote(row: WaitlistRow) {
     if (row.status !== "pending" || promotingId) return;
@@ -161,7 +171,9 @@ export function AcademyVerticalTabs() {
           )}
           {tab === "courses" && <CoursesTab rows={courses} onStatusChange={handleStatusChange} />}
           {tab === "modules" && <ModulesTab modules={modules} courses={courses} />}
-          {tab === "users" && <UsersTab rows={enrollments} courseById={courseById} />}
+          {tab === "users" && (
+            <UsersTab rows={enrollments} courseById={courseById} academyUserById={academyUserById} />
+          )}
         </>
       )}
     </div>
@@ -316,7 +328,13 @@ function ModulesTab({ modules, courses }: { modules: ModuleRow[]; courses: Cours
   );
 }
 
-function UsersTab({ rows, courseById }: { rows: EnrollmentRow[]; courseById: Map<string, CourseRow> }) {
+function UsersTab({
+  rows, courseById, academyUserById,
+}: {
+  rows: EnrollmentRow[];
+  courseById: Map<string, CourseRow>;
+  academyUserById: Map<string, AcademyUserRow>;
+}) {
   return (
     <MhCard className="overflow-hidden">
       {rows.length === 0 ? (
@@ -325,7 +343,9 @@ function UsersTab({ rows, courseById }: { rows: EnrollmentRow[]; courseById: Map
         <TableShell headers={["User", "Course", "Status", "Enrolled"]}>
           {rows.map((r) => (
             <tr key={r.id} className="border-t border-white/[0.05]">
-              <td className="px-4 py-3 text-white/70 text-[12px] font-mono">{r.user_id}</td>
+              <td className="px-4 py-3 text-white/70 text-[12px]">
+                {academyUserById.get(r.user_id)?.full_name ?? r.user_id}
+              </td>
               <td className="px-4 py-3 text-white/70 text-[12px]">
                 {r.course_id ? (courseById.get(r.course_id)?.title ?? "—") : "—"}
               </td>
