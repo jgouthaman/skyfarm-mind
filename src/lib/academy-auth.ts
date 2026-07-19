@@ -26,3 +26,18 @@ export async function verifyAcademyUser(name: string, email: string): Promise<Ac
   if (error) throw error;
   return (data as AcademyUser) ?? null; // rpc returns jsonb: object on match, null on no match
 }
+
+export interface AcademyModule {
+  id: string;
+  title: string;
+  description: string | null;
+  order_index: number;
+}
+
+export async function getCourseModules(courseId: string): Promise<AcademyModule[]> {
+  const { data, error } = await supabase.rpc("get_course_modules" as any, {
+    p_course_id: courseId,
+  } as any);
+  if (error) throw error;
+  return (data as AcademyModule[]) ?? [];
+}

@@ -13,6 +13,7 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as PilotRouteImport } from './routes/pilot'
 import { Route as MissionHubRouteImport } from './routes/mission-hub'
 import { Route as FieldRouteImport } from './routes/field'
+import { Route as AcademyRouteImport } from './routes/academy'
 import { Route as LayoutRouteImport } from './routes/_layout'
 import { Route as PilotIndexRouteImport } from './routes/pilot.index'
 import { Route as LayoutIndexRouteImport } from './routes/_layout.index'
@@ -41,6 +42,8 @@ import { Route as MissionHubKnowledgeUavRouteImport } from './routes/mission-hub
 import { Route as MissionHubDesignStudioRouteImport } from './routes/mission-hub.design-studio'
 import { Route as MissionHubDashboardRouteImport } from './routes/mission-hub.dashboard'
 import { Route as MissionHubContactsRouteImport } from './routes/mission-hub.contacts'
+import { Route as AcademySignInRouteImport } from './routes/academy.sign-in'
+import { Route as AcademyDashboardRouteImport } from './routes/academy.dashboard'
 import { Route as LayoutTechnologyRouteImport } from './routes/_layout.technology'
 import { Route as LayoutSolutionsRouteImport } from './routes/_layout.solutions'
 import { Route as LayoutPilotsRouteImport } from './routes/_layout.pilots'
@@ -68,8 +71,7 @@ import { Route as MissionHubTorqwingsDesignStudioComplianceRouteImport } from '.
 import { Route as MissionHubTorqwingsDesignStudioAdvisorRouteImport } from './routes/mission-hub.torqwings-design-studio.advisor'
 import { Route as LayoutLearnDroneDesignFundamentalsRouteImport } from './routes/_layout.learn.drone-design-fundamentals'
 import { Route as LayoutAuthCallbackRouteImport } from './routes/_layout.auth.callback'
-import { Route as LayoutAcademySignInRouteImport } from './routes/_layout.academy.sign-in'
-import { Route as LayoutAcademyDashboardRouteImport } from './routes/_layout.academy.dashboard'
+import { Route as AcademyCoursesSlugLearnRouteImport } from './routes/academy.courses.$slug.learn'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -89,6 +91,11 @@ const MissionHubRoute = MissionHubRouteImport.update({
 const FieldRoute = FieldRouteImport.update({
   id: '/field',
   path: '/field',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AcademyRoute = AcademyRouteImport.update({
+  id: '/academy',
+  path: '/academy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LayoutRoute = LayoutRouteImport.update({
@@ -242,6 +249,16 @@ const MissionHubContactsRoute = MissionHubContactsRouteImport.update({
   path: '/contacts',
   getParentRoute: () => MissionHubRoute,
 } as any)
+const AcademySignInRoute = AcademySignInRouteImport.update({
+  id: '/sign-in',
+  path: '/sign-in',
+  getParentRoute: () => AcademyRoute,
+} as any)
+const AcademyDashboardRoute = AcademyDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AcademyRoute,
+} as any)
 const LayoutTechnologyRoute = LayoutTechnologyRouteImport.update({
   id: '/technology',
   path: '/technology',
@@ -390,19 +407,15 @@ const LayoutAuthCallbackRoute = LayoutAuthCallbackRouteImport.update({
   path: '/auth/callback',
   getParentRoute: () => LayoutRoute,
 } as any)
-const LayoutAcademySignInRoute = LayoutAcademySignInRouteImport.update({
-  id: '/academy/sign-in',
-  path: '/academy/sign-in',
-  getParentRoute: () => LayoutRoute,
-} as any)
-const LayoutAcademyDashboardRoute = LayoutAcademyDashboardRouteImport.update({
-  id: '/academy/dashboard',
-  path: '/academy/dashboard',
-  getParentRoute: () => LayoutRoute,
+const AcademyCoursesSlugLearnRoute = AcademyCoursesSlugLearnRouteImport.update({
+  id: '/courses/$slug/learn',
+  path: '/courses/$slug/learn',
+  getParentRoute: () => AcademyRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof LayoutIndexRoute
+  '/academy': typeof AcademyRouteWithChildren
   '/field': typeof FieldRoute
   '/mission-hub': typeof MissionHubRouteWithChildren
   '/pilot': typeof PilotRouteWithChildren
@@ -417,6 +430,8 @@ export interface FileRoutesByFullPath {
   '/pilots': typeof LayoutPilotsRoute
   '/solutions': typeof LayoutSolutionsRoute
   '/technology': typeof LayoutTechnologyRoute
+  '/academy/dashboard': typeof AcademyDashboardRoute
+  '/academy/sign-in': typeof AcademySignInRoute
   '/mission-hub/contacts': typeof MissionHubContactsRoute
   '/mission-hub/dashboard': typeof MissionHubDashboardRoute
   '/mission-hub/design-studio': typeof MissionHubDesignStudioRoute
@@ -443,8 +458,6 @@ export interface FileRoutesByFullPath {
   '/pilot/sync': typeof PilotSyncRoute
   '/pilot/tracking': typeof PilotTrackingRoute
   '/pilot/': typeof PilotIndexRoute
-  '/academy/dashboard': typeof LayoutAcademyDashboardRoute
-  '/academy/sign-in': typeof LayoutAcademySignInRoute
   '/auth/callback': typeof LayoutAuthCallbackRoute
   '/learn/drone-design-fundamentals': typeof LayoutLearnDroneDesignFundamentalsRoute
   '/mission-hub/torqwings-design-studio/advisor': typeof MissionHubTorqwingsDesignStudioAdvisorRoute
@@ -462,8 +475,10 @@ export interface FileRoutesByFullPath {
   '/learn/': typeof LayoutLearnIndexRoute
   '/mission-hub/torqwings-design-studio/': typeof MissionHubTorqwingsDesignStudioIndexRoute
   '/pilot/missions/': typeof PilotMissionsIndexRoute
+  '/academy/courses/$slug/learn': typeof AcademyCoursesSlugLearnRoute
 }
 export interface FileRoutesByTo {
+  '/academy': typeof AcademyRouteWithChildren
   '/field': typeof FieldRoute
   '/mission-hub': typeof MissionHubRouteWithChildren
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -476,6 +491,8 @@ export interface FileRoutesByTo {
   '/pilots': typeof LayoutPilotsRoute
   '/solutions': typeof LayoutSolutionsRoute
   '/technology': typeof LayoutTechnologyRoute
+  '/academy/dashboard': typeof AcademyDashboardRoute
+  '/academy/sign-in': typeof AcademySignInRoute
   '/mission-hub/contacts': typeof MissionHubContactsRoute
   '/mission-hub/dashboard': typeof MissionHubDashboardRoute
   '/mission-hub/design-studio': typeof MissionHubDesignStudioRoute
@@ -502,8 +519,6 @@ export interface FileRoutesByTo {
   '/pilot/tracking': typeof PilotTrackingRoute
   '/': typeof LayoutIndexRoute
   '/pilot': typeof PilotIndexRoute
-  '/academy/dashboard': typeof LayoutAcademyDashboardRoute
-  '/academy/sign-in': typeof LayoutAcademySignInRoute
   '/auth/callback': typeof LayoutAuthCallbackRoute
   '/learn/drone-design-fundamentals': typeof LayoutLearnDroneDesignFundamentalsRoute
   '/mission-hub/torqwings-design-studio/advisor': typeof MissionHubTorqwingsDesignStudioAdvisorRoute
@@ -521,10 +536,12 @@ export interface FileRoutesByTo {
   '/learn': typeof LayoutLearnIndexRoute
   '/mission-hub/torqwings-design-studio': typeof MissionHubTorqwingsDesignStudioIndexRoute
   '/pilot/missions': typeof PilotMissionsIndexRoute
+  '/academy/courses/$slug/learn': typeof AcademyCoursesSlugLearnRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_layout': typeof LayoutRouteWithChildren
+  '/academy': typeof AcademyRouteWithChildren
   '/field': typeof FieldRoute
   '/mission-hub': typeof MissionHubRouteWithChildren
   '/pilot': typeof PilotRouteWithChildren
@@ -539,6 +556,8 @@ export interface FileRoutesById {
   '/_layout/pilots': typeof LayoutPilotsRoute
   '/_layout/solutions': typeof LayoutSolutionsRoute
   '/_layout/technology': typeof LayoutTechnologyRoute
+  '/academy/dashboard': typeof AcademyDashboardRoute
+  '/academy/sign-in': typeof AcademySignInRoute
   '/mission-hub/contacts': typeof MissionHubContactsRoute
   '/mission-hub/dashboard': typeof MissionHubDashboardRoute
   '/mission-hub/design-studio': typeof MissionHubDesignStudioRoute
@@ -566,8 +585,6 @@ export interface FileRoutesById {
   '/pilot/tracking': typeof PilotTrackingRoute
   '/_layout/': typeof LayoutIndexRoute
   '/pilot/': typeof PilotIndexRoute
-  '/_layout/academy/dashboard': typeof LayoutAcademyDashboardRoute
-  '/_layout/academy/sign-in': typeof LayoutAcademySignInRoute
   '/_layout/auth/callback': typeof LayoutAuthCallbackRoute
   '/_layout/learn/drone-design-fundamentals': typeof LayoutLearnDroneDesignFundamentalsRoute
   '/mission-hub/torqwings-design-studio/advisor': typeof MissionHubTorqwingsDesignStudioAdvisorRoute
@@ -585,11 +602,13 @@ export interface FileRoutesById {
   '/_layout/learn/': typeof LayoutLearnIndexRoute
   '/mission-hub/torqwings-design-studio/': typeof MissionHubTorqwingsDesignStudioIndexRoute
   '/pilot/missions/': typeof PilotMissionsIndexRoute
+  '/academy/courses/$slug/learn': typeof AcademyCoursesSlugLearnRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/academy'
     | '/field'
     | '/mission-hub'
     | '/pilot'
@@ -604,6 +623,8 @@ export interface FileRouteTypes {
     | '/pilots'
     | '/solutions'
     | '/technology'
+    | '/academy/dashboard'
+    | '/academy/sign-in'
     | '/mission-hub/contacts'
     | '/mission-hub/dashboard'
     | '/mission-hub/design-studio'
@@ -630,8 +651,6 @@ export interface FileRouteTypes {
     | '/pilot/sync'
     | '/pilot/tracking'
     | '/pilot/'
-    | '/academy/dashboard'
-    | '/academy/sign-in'
     | '/auth/callback'
     | '/learn/drone-design-fundamentals'
     | '/mission-hub/torqwings-design-studio/advisor'
@@ -649,8 +668,10 @@ export interface FileRouteTypes {
     | '/learn/'
     | '/mission-hub/torqwings-design-studio/'
     | '/pilot/missions/'
+    | '/academy/courses/$slug/learn'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/academy'
     | '/field'
     | '/mission-hub'
     | '/sitemap.xml'
@@ -663,6 +684,8 @@ export interface FileRouteTypes {
     | '/pilots'
     | '/solutions'
     | '/technology'
+    | '/academy/dashboard'
+    | '/academy/sign-in'
     | '/mission-hub/contacts'
     | '/mission-hub/dashboard'
     | '/mission-hub/design-studio'
@@ -689,8 +712,6 @@ export interface FileRouteTypes {
     | '/pilot/tracking'
     | '/'
     | '/pilot'
-    | '/academy/dashboard'
-    | '/academy/sign-in'
     | '/auth/callback'
     | '/learn/drone-design-fundamentals'
     | '/mission-hub/torqwings-design-studio/advisor'
@@ -708,9 +729,11 @@ export interface FileRouteTypes {
     | '/learn'
     | '/mission-hub/torqwings-design-studio'
     | '/pilot/missions'
+    | '/academy/courses/$slug/learn'
   id:
     | '__root__'
     | '/_layout'
+    | '/academy'
     | '/field'
     | '/mission-hub'
     | '/pilot'
@@ -725,6 +748,8 @@ export interface FileRouteTypes {
     | '/_layout/pilots'
     | '/_layout/solutions'
     | '/_layout/technology'
+    | '/academy/dashboard'
+    | '/academy/sign-in'
     | '/mission-hub/contacts'
     | '/mission-hub/dashboard'
     | '/mission-hub/design-studio'
@@ -752,8 +777,6 @@ export interface FileRouteTypes {
     | '/pilot/tracking'
     | '/_layout/'
     | '/pilot/'
-    | '/_layout/academy/dashboard'
-    | '/_layout/academy/sign-in'
     | '/_layout/auth/callback'
     | '/_layout/learn/drone-design-fundamentals'
     | '/mission-hub/torqwings-design-studio/advisor'
@@ -771,10 +794,12 @@ export interface FileRouteTypes {
     | '/_layout/learn/'
     | '/mission-hub/torqwings-design-studio/'
     | '/pilot/missions/'
+    | '/academy/courses/$slug/learn'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   LayoutRoute: typeof LayoutRouteWithChildren
+  AcademyRoute: typeof AcademyRouteWithChildren
   FieldRoute: typeof FieldRoute
   MissionHubRoute: typeof MissionHubRouteWithChildren
   PilotRoute: typeof PilotRouteWithChildren
@@ -809,6 +834,13 @@ declare module '@tanstack/react-router' {
       path: '/field'
       fullPath: '/field'
       preLoaderRoute: typeof FieldRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/academy': {
+      id: '/academy'
+      path: '/academy'
+      fullPath: '/academy'
+      preLoaderRoute: typeof AcademyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_layout': {
@@ -1007,6 +1039,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MissionHubContactsRouteImport
       parentRoute: typeof MissionHubRoute
     }
+    '/academy/sign-in': {
+      id: '/academy/sign-in'
+      path: '/sign-in'
+      fullPath: '/academy/sign-in'
+      preLoaderRoute: typeof AcademySignInRouteImport
+      parentRoute: typeof AcademyRoute
+    }
+    '/academy/dashboard': {
+      id: '/academy/dashboard'
+      path: '/dashboard'
+      fullPath: '/academy/dashboard'
+      preLoaderRoute: typeof AcademyDashboardRouteImport
+      parentRoute: typeof AcademyRoute
+    }
     '/_layout/technology': {
       id: '/_layout/technology'
       path: '/technology'
@@ -1196,19 +1242,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutAuthCallbackRouteImport
       parentRoute: typeof LayoutRoute
     }
-    '/_layout/academy/sign-in': {
-      id: '/_layout/academy/sign-in'
-      path: '/academy/sign-in'
-      fullPath: '/academy/sign-in'
-      preLoaderRoute: typeof LayoutAcademySignInRouteImport
-      parentRoute: typeof LayoutRoute
-    }
-    '/_layout/academy/dashboard': {
-      id: '/_layout/academy/dashboard'
-      path: '/academy/dashboard'
-      fullPath: '/academy/dashboard'
-      preLoaderRoute: typeof LayoutAcademyDashboardRouteImport
-      parentRoute: typeof LayoutRoute
+    '/academy/courses/$slug/learn': {
+      id: '/academy/courses/$slug/learn'
+      path: '/courses/$slug/learn'
+      fullPath: '/academy/courses/$slug/learn'
+      preLoaderRoute: typeof AcademyCoursesSlugLearnRouteImport
+      parentRoute: typeof AcademyRoute
     }
   }
 }
@@ -1240,8 +1279,6 @@ interface LayoutRouteChildren {
   LayoutSolutionsRoute: typeof LayoutSolutionsRoute
   LayoutTechnologyRoute: typeof LayoutTechnologyRoute
   LayoutIndexRoute: typeof LayoutIndexRoute
-  LayoutAcademyDashboardRoute: typeof LayoutAcademyDashboardRoute
-  LayoutAcademySignInRoute: typeof LayoutAcademySignInRoute
   LayoutAuthCallbackRoute: typeof LayoutAuthCallbackRoute
 }
 
@@ -1257,13 +1294,26 @@ const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutSolutionsRoute: LayoutSolutionsRoute,
   LayoutTechnologyRoute: LayoutTechnologyRoute,
   LayoutIndexRoute: LayoutIndexRoute,
-  LayoutAcademyDashboardRoute: LayoutAcademyDashboardRoute,
-  LayoutAcademySignInRoute: LayoutAcademySignInRoute,
   LayoutAuthCallbackRoute: LayoutAuthCallbackRoute,
 }
 
 const LayoutRouteWithChildren =
   LayoutRoute._addFileChildren(LayoutRouteChildren)
+
+interface AcademyRouteChildren {
+  AcademyDashboardRoute: typeof AcademyDashboardRoute
+  AcademySignInRoute: typeof AcademySignInRoute
+  AcademyCoursesSlugLearnRoute: typeof AcademyCoursesSlugLearnRoute
+}
+
+const AcademyRouteChildren: AcademyRouteChildren = {
+  AcademyDashboardRoute: AcademyDashboardRoute,
+  AcademySignInRoute: AcademySignInRoute,
+  AcademyCoursesSlugLearnRoute: AcademyCoursesSlugLearnRoute,
+}
+
+const AcademyRouteWithChildren =
+  AcademyRoute._addFileChildren(AcademyRouteChildren)
 
 interface MissionHubTorqwingsDesignStudioRouteChildren {
   MissionHubTorqwingsDesignStudioAdvisorRoute: typeof MissionHubTorqwingsDesignStudioAdvisorRoute
@@ -1392,6 +1442,7 @@ const PilotRouteWithChildren = PilotRoute._addFileChildren(PilotRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   LayoutRoute: LayoutRouteWithChildren,
+  AcademyRoute: AcademyRouteWithChildren,
   FieldRoute: FieldRoute,
   MissionHubRoute: MissionHubRouteWithChildren,
   PilotRoute: PilotRouteWithChildren,

@@ -3,7 +3,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Plane, Lock, User, Mail, ArrowRight, Award, Loader2 } from "lucide-react";
 import { verifyAcademyUser } from "@/lib/academy-auth";
 
-export const Route = createFileRoute("/_layout/academy/sign-in")({
+export const Route = createFileRoute("/academy/sign-in")({
   component: AcademySignInPage,
 });
 
