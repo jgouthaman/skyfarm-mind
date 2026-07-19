@@ -1,9 +1,21 @@
 import { supabase } from "@/integrations/supabase/client";
 
+export interface AcademyCourse {
+  id: string;
+  slug: string;
+  title: string;
+  level: string | null;
+  hours: number | null;
+  price: number | null;
+  enrolled_at: string | null;
+  status: string | null;
+}
+
 export interface AcademyUser {
   id: string;
   full_name: string;
   email: string;
+  courses: AcademyCourse[];
 }
 
 export async function verifyAcademyUser(name: string, email: string): Promise<AcademyUser | null> {
@@ -12,6 +24,5 @@ export async function verifyAcademyUser(name: string, email: string): Promise<Ac
     p_email: email.trim(),
   } as any);
   if (error) throw error;
-  const row = Array.isArray(data) ? data[0] : data;
-  return row ?? null;
+  return (data as AcademyUser) ?? null; // rpc returns jsonb: object on match, null on no match
 }
