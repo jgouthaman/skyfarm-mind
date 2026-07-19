@@ -62,6 +62,8 @@ export interface AcademyModuleSection {
   section_type: AcademyModuleSectionType;
   title: string;
   topic_brief: string;
+  cached_content: string | null;
+  cached_at: string | null;
 }
 
 // RLS note: academy students never get a real Supabase Auth session — sign-in
@@ -79,6 +81,18 @@ export async function getModuleSections(moduleId: string): Promise<AcademyModule
     .order("order_index");
   if (error) throw error;
   return (data as unknown as AcademyModuleSection[]) ?? [];
+}
+
+// Writes the fully-generated markdown back onto the section row so the next
+// student (or the same student reopening the module) skips regeneration.
+// Best-effort: a failure here shouldn't block the learner, so callers should
+// swallow/log errors rather than surface them.
+export async function cacheModuleContent(sectionId: string, content: string): Promise<void> {
+  const { error } = await supabase
+    .from("academy_module_sections" as any)
+    .update({ cached_content: content, cached_at: new Date().toISOString() } as any)
+    .eq("id", sectionId);
+  if (error) throw error;
 }
 
 export interface SaveQuizAttemptInput {

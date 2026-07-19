@@ -3,7 +3,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import ReactMarkdown from "react-markdown";
 import { ArrowLeft, Plane, Trophy, Loader2, RotateCcw, Lock, Lightbulb, CheckCircle2, ArrowLeftRight } from "lucide-react";
 import type { AcademyModuleSection, AcademyUser } from "@/lib/academy-auth";
-import { getModuleSections, saveQuizAttempt, setModuleComplete } from "@/lib/academy-auth";
+import { cacheModuleContent, getModuleSections, saveQuizAttempt, setModuleComplete } from "@/lib/academy-auth";
 import { streamAnthropicContent, generateAnthropicQuestions, type GeneratedQuestion } from "@/lib/academy/anthropic-client";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -556,9 +556,18 @@ function ContentSection({
     setCards([]);
     setCardIndex(0);
     try {
-      let acc = "";
-      await streamAnthropicContent(section.topic_brief, (fullTextSoFar) => { acc = fullTextSoFar; }, 1500);
-      setCards(buildContentCards(acc));
+      if (section.cached_content) {
+        console.info(`[Academy] "${section.title}" — serving cached content (cached_at: ${section.cached_at}).`);
+        setCards(buildContentCards(section.cached_content));
+      } else {
+        console.info(`[Academy] "${section.title}" — no cache hit, generating via Anthropic API.`);
+        let acc = "";
+        await streamAnthropicContent(section.topic_brief, (fullTextSoFar) => { acc = fullTextSoFar; }, 1500);
+        setCards(buildContentCards(acc));
+        cacheModuleContent(section.id, acc)
+          .then(() => console.info(`[Academy] "${section.title}" — cached generated content for next time.`))
+          .catch((err) => console.error(`[Academy] "${section.title}" — failed to cache generated content:`, err));
+      }
       setCardIndex(0);
       setStatus("ready");
       setPhase("entering");
@@ -567,7 +576,7 @@ function ContentSection({
       console.error("[Academy] content generation failed:", err);
       setStatus("error");
     }
-  }, [section.topic_brief]);
+  }, [section.cached_content, section.id, section.topic_brief]);
 
   useEffect(() => { generate(); }, [generate]);
 
@@ -1148,7 +1157,7 @@ function AcademyModulePlayerPage() {
       const ok = window.confirm("Assessment in progress. Leave anyway?");
       if (!ok) return;
     }
-    navigate({ to: "/academy" });
+    navigate({ to: "/academy/dashboard" });
   }
 
   if (!user) return null;
@@ -1318,7 +1327,7 @@ function AcademyModulePlayerPage() {
                       section={s}
                       user={user}
                       moduleId={moduleId}
-                      onPass={() => navigate({ to: "/academy" })}
+                      onPass={() => navigate({ to: "/academy/dashboard" })}
                       onRestudy={handleRestudy}
                       onInProgressChange={setAssessmentInProgress}
                     />
