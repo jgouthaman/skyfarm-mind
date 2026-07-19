@@ -1,11 +1,10 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useServerFn } from "@tanstack/react-start";
 import ReactMarkdown from "react-markdown";
-import { ArrowLeft, Plane, Trophy, Loader2, RotateCcw } from "lucide-react";
+import { ArrowLeft, Plane, Trophy, Loader2, RotateCcw, Lock } from "lucide-react";
 import type { AcademyModuleSection, AcademyUser } from "@/lib/academy-auth";
 import { getModuleSections, saveQuizAttempt, setModuleComplete } from "@/lib/academy-auth";
-import { generateQuizQuestions, type GeneratedQuizQuestion } from "@/lib/academy/quiz.functions";
+import { streamAnthropicContent, generateAnthropicQuestions, type GeneratedQuestion } from "@/lib/academy/anthropic-client";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/academy/courses/$slug/modules/$moduleId")({
@@ -17,13 +16,13 @@ const C = {
   line: "#1E2838", line2: "#2A3648",
   text: "#E8ECF2", mute: "#8A94A6", faint: "#5C6678",
   amber: "#FFB020", amberSoft: "rgba(255,176,32,0.10)",
-  green: "#3DD68C", greenSoft: "rgba(61,214,140,0.10)",
+  green: "#4FD08A", greenSoft: "rgba(79,208,138,0.10)",
   red: "#F27D7D", redSoft: "rgba(242,125,125,0.10)",
 };
 const DISPLAY = "'Space Grotesk', system-ui, -apple-system, sans-serif";
 const MONO = "'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace";
 const SANS = "system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif";
-const LETTERS = ["A", "B", "C", "D"];
+const OPTION_KEYS = ["a", "b", "c", "d"] as const;
 const PASS_MARK = 22;
 const FINAL_TEST_COUNT = 25;
 const QUIZ_COUNT = 3;
@@ -68,72 +67,24 @@ function Skeleton({ label }: { label: string }) {
 
 function ContinueButton({ onClick, disabled, label = "Continue" }: { onClick: () => void; disabled?: boolean; label?: string }) {
   return (
-    <div style={{ marginTop: 24, display: "flex", justifyContent: "flex-end" }}>
-      <button
-        onClick={onClick}
-        disabled={disabled}
-        style={{
-          background: C.amber, color: "#0A0A0A", border: "none", borderRadius: 8,
-          padding: "10px 18px", font: `600 13px/1 ${SANS}`, cursor: disabled ? "default" : "pointer",
-          opacity: disabled ? 0.6 : 1,
-        }}
-      >
-        {label} →
-      </button>
-    </div>
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      style={{
+        marginTop: 22, width: "100%", background: C.amber, color: "#0A0A0A", border: "none", borderRadius: 9,
+        padding: "13px 18px", font: `600 14px/1 ${SANS}`, cursor: disabled ? "default" : "pointer",
+        opacity: disabled ? 0.6 : 1,
+      }}
+    >
+      {label} →
+    </button>
   );
 }
 
-function scoreFromAnswers(answers: Record<number, number>, questions: GeneratedQuizQuestion[]): number {
+function scoreFromAnswers(answers: Record<number, string>, questions: GeneratedQuestion[]): number {
   return Object.entries(answers).reduce(
-    (acc, [i, v]) => acc + (questions[Number(i)]?.correctIndex === v ? 1 : 0),
+    (acc, [i, v]) => acc + (questions[Number(i)]?.correct === v ? 1 : 0),
     0,
-  );
-}
-
-function answersToLetters(answers: Record<number, number>): Record<number, string> {
-  const out: Record<number, string> = {};
-  for (const [k, v] of Object.entries(answers)) out[Number(k)] = ["a", "b", "c", "d"][v];
-  return out;
-}
-
-// ---------- progress bar ----------
-
-function ProgressBar({ sections, currentIndex }: { sections: AcademyModuleSection[]; currentIndex: number }) {
-  const total = sections.length;
-  const fillPct = total > 0 ? (currentIndex / total) * 100 : 0;
-  return (
-    <div style={{ marginBottom: 32 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
-        <span style={{ font: `600 10px/1 ${MONO}`, letterSpacing: ".14em", color: C.faint, textTransform: "uppercase" }}>
-          Progress
-        </span>
-        <span style={{ font: `600 10px/1 ${MONO}`, color: C.faint }}>
-          {Math.min(currentIndex, total)} / {total} sections
-        </span>
-      </div>
-      <div style={{ position: "relative", height: 4, borderRadius: 2, background: C.line2, overflow: "hidden" }}>
-        <div style={{ position: "absolute", inset: 0, width: `${fillPct}%`, background: C.amber, borderRadius: 2, transition: "width .4s ease" }} />
-      </div>
-      <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
-        {sections.map((s, i) => {
-          const state = i < currentIndex ? "done" : i === currentIndex ? "active" : "locked";
-          return (
-            <div
-              key={s.id}
-              title={s.title}
-              style={{
-                width: state === "active" ? 12 : 8, height: state === "active" ? 12 : 8, borderRadius: "50%",
-                background: state === "locked" ? "transparent" : C.amber,
-                border: state === "locked" ? `1.5px solid ${C.line2}` : state === "active" ? `2px solid ${C.amberSoft}` : "none",
-                boxShadow: state === "active" ? `0 0 0 3px ${C.amberSoft}` : "none",
-                transition: "all .3s ease",
-              }}
-            />
-          );
-        })}
-      </div>
-    </div>
   );
 }
 
@@ -147,22 +98,11 @@ function ContentSection({ section, onComplete }: { section: AcademyModuleSection
     setStatus("loading");
     setText("");
     try {
-      const res = await fetch("/api/academy/generate-content", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ topicBrief: section.topic_brief }),
-      });
-      if (!res.ok || !res.body) throw new Error(`generation failed: ${res.status}`);
-      setStatus("streaming");
-      const reader = res.body.getReader();
-      const decoder = new TextDecoder();
-      let acc = "";
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        acc += decoder.decode(value, { stream: true });
+      let started = false;
+      await streamAnthropicContent(section.topic_brief, (acc) => {
+        if (!started) { started = true; setStatus("streaming"); }
         setText(acc);
-      }
+      });
       setStatus("done");
     } catch (err) {
       console.error("[Academy] content generation failed:", err);
@@ -191,68 +131,89 @@ function ContentSection({ section, onComplete }: { section: AcademyModuleSection
 // ---------- quiz section (3 questions, one at a time) ----------
 
 function QuizSection({
-  section, generate, onComplete, onSave,
+  section, user, onComplete,
 }: {
   section: AcademyModuleSection;
-  generate: (topicBrief: string, count: number) => Promise<{ questions: GeneratedQuizQuestion[] } | { error: string }>;
+  user: AcademyUser;
   onComplete: () => void;
-  onSave: (questions: GeneratedQuizQuestion[], answers: Record<number, number>, score: number) => Promise<void>;
 }) {
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
-  const [questions, setQuestions] = useState<GeneratedQuizQuestion[]>([]);
+  const [questions, setQuestions] = useState<GeneratedQuestion[]>([]);
   const [qIndex, setQIndex] = useState(0);
-  const [answers, setAnswers] = useState<Record<number, number>>({});
+  const [answers, setAnswers] = useState<Record<number, string>>({});
   const [finished, setFinished] = useState(false);
   const [saving, setSaving] = useState(false);
 
   const load = useCallback(async () => {
     setStatus("loading");
-    const result = await generate(section.topic_brief, QUIZ_COUNT);
-    if ("error" in result) { setStatus("error"); return; }
-    setQuestions(result.questions);
-    setQIndex(0);
-    setAnswers({});
-    setFinished(false);
-    setStatus("ready");
-  }, [generate, section.topic_brief]);
+    try {
+      const qs = await generateAnthropicQuestions(section.topic_brief, QUIZ_COUNT, 1000);
+      setQuestions(qs);
+      setQIndex(0);
+      setAnswers({});
+      setFinished(false);
+      setStatus("ready");
+    } catch (err) {
+      console.error("[Academy] quiz generation failed:", err);
+      setStatus("error");
+    }
+  }, [section.topic_brief]);
 
   useEffect(() => { load(); }, [load]);
 
   const score = useMemo(() => scoreFromAnswers(answers, questions), [answers, questions]);
 
-  function selectOption(idx: number) {
+  function selectOption(key: string) {
     if (qIndex in answers) return;
-    setAnswers((a) => ({ ...a, [qIndex]: idx }));
+    setAnswers((a) => ({ ...a, [qIndex]: key }));
   }
 
   function goNext() {
-    if (qIndex + 1 < questions.length) {
-      setQIndex((i) => i + 1);
-    } else {
-      setFinished(true);
-    }
+    if (qIndex + 1 < questions.length) setQIndex((i) => i + 1);
+    else setFinished(true);
   }
 
   async function handleContinue() {
     setSaving(true);
     try {
-      await onSave(questions, answers, score);
+      await saveQuizAttempt({
+        user_id: user.id,
+        section_id: section.id,
+        generated_questions: questions,
+        user_answers: answers,
+        score,
+        total: questions.length,
+        passed: score >= QUIZ_PASS_MARK,
+      });
+    } catch (err) {
+      console.error("[Academy] failed to save quiz attempt:", err);
     } finally {
       setSaving(false);
       onComplete();
     }
   }
 
-  if (status === "loading") return <Skeleton label="Preparing questions…" />;
-  if (status === "error") return <ErrorRetry message="Content generation failed. Try again." onRetry={load} />;
+  if (status === "loading") return <Skeleton label="Generating questions…" />;
+  if (status === "error") return <ErrorRetry message="Failed to generate questions." onRetry={load} />;
 
   if (finished) {
+    const scoreColor = score >= QUIZ_PASS_MARK ? C.green : score === 1 ? C.amber : C.red;
+    const scoreBg = score >= QUIZ_PASS_MARK ? C.greenSoft : score === 1 ? C.amberSoft : C.redSoft;
     return (
       <div>
-        <h2 style={{ font: `700 22px/1.2 ${DISPLAY}`, color: C.text, margin: "0 0 8px" }}>Test Your Knowledge</h2>
-        <p style={{ font: `500 14px/1.5 ${SANS}`, color: C.mute }}>
-          {score} of {questions.length} correct
-        </p>
+        <span style={{
+          font: `600 10px/1 ${MONO}`, letterSpacing: ".1em", textTransform: "uppercase", color: C.amber,
+          background: C.amberSoft, border: `1px solid ${C.amber}33`, padding: "5px 8px", borderRadius: 5,
+        }}>
+          Test Your Knowledge
+        </span>
+        <h2 style={{ font: `700 22px/1.2 ${DISPLAY}`, color: C.text, margin: "12px 0 16px" }}>{section.title}</h2>
+        <div style={{
+          border: `1px solid ${scoreColor}44`, background: scoreBg, borderRadius: 12,
+          padding: "18px 20px", textAlign: "center",
+        }}>
+          <span style={{ font: `700 20px/1 ${DISPLAY}`, color: scoreColor }}>{score} of {questions.length} correct</span>
+        </div>
         <ContinueButton onClick={handleContinue} disabled={saving} />
       </div>
     );
@@ -260,11 +221,17 @@ function QuizSection({
 
   const q = questions[qIndex];
   const answered = qIndex in answers;
-  const selectedIdx = answers[qIndex];
+  const selectedKey = answers[qIndex];
 
   return (
     <div>
-      <h2 style={{ font: `700 22px/1.2 ${DISPLAY}`, color: C.text, margin: "0 0 4px" }}>Test Your Knowledge</h2>
+      <span style={{
+        font: `600 10px/1 ${MONO}`, letterSpacing: ".1em", textTransform: "uppercase", color: C.amber,
+        background: C.amberSoft, border: `1px solid ${C.amber}33`, padding: "5px 8px", borderRadius: 5,
+      }}>
+        Test Your Knowledge
+      </span>
+      <h2 style={{ font: `700 22px/1.2 ${DISPLAY}`, color: C.text, margin: "12px 0 4px" }}>{section.title}</h2>
       <p style={{ font: `500 11px/1 ${MONO}`, color: C.faint, marginBottom: 18 }}>
         Question {qIndex + 1} of {questions.length}
       </p>
@@ -272,19 +239,19 @@ function QuizSection({
       <p style={{ font: `500 15px/1.5 ${SANS}`, color: C.text, marginBottom: 14 }}>{q.question}</p>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-        {q.options.map((opt, i) => {
+        {OPTION_KEYS.map((key) => {
           let border = C.line2;
           let bg = "transparent";
           let textColor = C.text;
           if (answered) {
-            if (i === q.correctIndex) { border = C.green; bg = C.greenSoft; textColor = C.green; }
-            else if (i === selectedIdx) { border = C.red; bg = C.redSoft; textColor = C.red; }
+            if (key === q.correct) { border = C.green; bg = C.greenSoft; textColor = C.green; }
+            else if (key === selectedKey) { border = C.red; bg = C.redSoft; textColor = C.red; }
           }
           return (
             <button
-              key={i}
+              key={key}
               disabled={answered}
-              onClick={() => selectOption(i)}
+              onClick={() => selectOption(key)}
               style={{
                 textAlign: "left", display: "flex", gap: 10, alignItems: "flex-start",
                 border: `1px solid ${border}`, background: bg, color: textColor, borderRadius: 9,
@@ -292,8 +259,8 @@ function QuizSection({
                 transition: "all .15s",
               }}
             >
-              <span style={{ font: `600 12px/1 ${MONO}`, color: C.faint, flexShrink: 0 }}>{LETTERS[i]}</span>
-              {opt}
+              <span style={{ font: `600 12px/1 ${MONO}`, color: C.faint, flexShrink: 0, textTransform: "uppercase" }}>{key}</span>
+              {q.options[key]}
             </button>
           );
         })}
@@ -315,30 +282,35 @@ function QuizSection({
 // ---------- final test (25 questions, all at once, reveal on submit) ----------
 
 function FinalTestSection({
-  section, generate, onSave, onPass, onRestudy, onInProgressChange,
+  section, user, moduleId, onPass, onRestudy, onInProgressChange,
 }: {
   section: AcademyModuleSection;
-  generate: (topicBrief: string, count: number) => Promise<{ questions: GeneratedQuizQuestion[] } | { error: string }>;
-  onSave: (questions: GeneratedQuizQuestion[], answers: Record<number, number>, score: number, passed: boolean) => Promise<void>;
+  user: AcademyUser;
+  moduleId: string;
   onPass: () => void;
   onRestudy: () => void;
   onInProgressChange: (inProgress: boolean) => void;
 }) {
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
-  const [questions, setQuestions] = useState<GeneratedQuizQuestion[]>([]);
-  const [answers, setAnswers] = useState<Record<number, number>>({});
+  const [questions, setQuestions] = useState<GeneratedQuestion[]>([]);
+  const [answers, setAnswers] = useState<Record<number, string>>({});
   const [submitted, setSubmitted] = useState(false);
   const [saving, setSaving] = useState(false);
+  const topRef = useRef<HTMLDivElement | null>(null);
 
   const load = useCallback(async () => {
     setStatus("loading");
-    const result = await generate(section.topic_brief, FINAL_TEST_COUNT);
-    if ("error" in result) { setStatus("error"); return; }
-    setQuestions(result.questions);
-    setAnswers({});
-    setSubmitted(false);
-    setStatus("ready");
-  }, [generate, section.topic_brief]);
+    try {
+      const qs = await generateAnthropicQuestions(section.topic_brief, FINAL_TEST_COUNT, 4000);
+      setQuestions(qs);
+      setAnswers({});
+      setSubmitted(false);
+      setStatus("ready");
+    } catch (err) {
+      console.error("[Academy] final assessment generation failed:", err);
+      setStatus("error");
+    }
+  }, [section.topic_brief]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -351,136 +323,160 @@ function FinalTestSection({
   const allAnswered = questions.length > 0 && Object.keys(answers).length === questions.length;
   const passed = score >= PASS_MARK;
 
-  function selectOption(qIdx: number, optIdx: number) {
+  function selectOption(qIdx: number, key: string) {
     if (submitted) return;
-    setAnswers((a) => ({ ...a, [qIdx]: optIdx }));
+    setAnswers((a) => ({ ...a, [qIdx]: key }));
   }
 
   async function submit() {
     setSubmitted(true);
     setSaving(true);
+    topRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     try {
-      await onSave(questions, answers, score, passed);
+      await saveQuizAttempt({
+        user_id: user.id,
+        section_id: section.id,
+        generated_questions: questions,
+        user_answers: answers,
+        score,
+        total: questions.length,
+        passed,
+      });
+      if (passed) await setModuleComplete(user.id, moduleId, true);
+    } catch (err) {
+      console.error("[Academy] failed to save final assessment:", err);
     } finally {
       setSaving(false);
     }
   }
 
-  if (status === "loading") return <Skeleton label="Preparing your final assessment…" />;
-  if (status === "error") return <ErrorRetry message="Content generation failed. Try again." onRetry={load} />;
-
-  if (submitted) {
-    return (
-      <div>
-        {passed ? (
-          <div style={{ textAlign: "center", padding: "28px 0" }}>
-            <Trophy size={36} color={C.amber} style={{ marginBottom: 12 }} />
-            <h2 style={{ font: `700 26px/1.2 ${DISPLAY}`, color: C.text, margin: 0 }}>Congratulations! You passed.</h2>
-            <p style={{ font: `600 15px/1 ${MONO}`, color: C.amber, marginTop: 10 }}>{score} / {questions.length}</p>
-            <button
-              onClick={onPass}
-              style={{
-                marginTop: 22, background: C.amber, color: "#0A0A0A", border: "none", borderRadius: 8,
-                padding: "10px 20px", font: `600 13px/1 ${SANS}`, cursor: "pointer",
-              }}
-            >
-              Back to courses
-            </button>
-          </div>
-        ) : (
-          <div style={{ textAlign: "center", padding: "28px 0" }}>
-            <h2 style={{ font: `700 22px/1.2 ${DISPLAY}`, color: C.text, margin: 0 }}>
-              You scored {score}/{questions.length}. You need {PASS_MARK} to pass.
-            </h2>
-            <p style={{ font: `400 14px/1.5 ${SANS}`, color: C.mute, marginTop: 10 }}>
-              Take another look at the material — you've got this.
-            </p>
-            <button
-              onClick={onRestudy}
-              disabled={saving}
-              style={{
-                marginTop: 22, display: "inline-flex", alignItems: "center", gap: 8,
-                background: "transparent", color: C.amber, border: `1px solid ${C.amber}66`, borderRadius: 8,
-                padding: "10px 20px", font: `600 13px/1 ${SANS}`, cursor: "pointer",
-              }}
-            >
-              <RotateCcw size={14} /> Restudy module
-            </button>
-          </div>
-        )}
-
-        <div style={{ marginTop: 28, display: "flex", flexDirection: "column", gap: 14 }}>
-          {questions.map((q, i) => (
-            <div key={i} style={{ border: `1px solid ${C.line}`, borderRadius: 10, padding: "14px 16px" }}>
-              <p style={{ font: `500 13px/1.5 ${SANS}`, color: C.text, marginBottom: 8 }}>{i + 1}. {q.question}</p>
-              {q.options.map((opt, oi) => {
-                const isCorrect = oi === q.correctIndex;
-                const isSelected = answers[i] === oi;
-                const color = isCorrect ? C.green : isSelected ? C.red : C.faint;
-                return (
-                  <div key={oi} style={{ font: `400 12px/1.6 ${SANS}`, color, display: "flex", gap: 8 }}>
-                    <span style={{ font: `600 11px/1 ${MONO}` }}>{LETTERS[oi]}</span> {opt}
-                  </div>
-                );
-              })}
-              <p style={{ font: `400 12px/1.6 ${SANS}`, color: C.mute, marginTop: 6 }}>{q.explanation}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
+  if (status === "loading") return <Skeleton label="Generating assessment…" />;
+  if (status === "error") return <ErrorRetry message="Failed to generate questions." onRetry={load} />;
 
   return (
-    <div>
+    <div ref={topRef}>
       <h2 style={{ font: `700 24px/1.2 ${DISPLAY}`, color: C.text, margin: "0 0 4px" }}>Final Assessment</h2>
       <p style={{ font: `500 11px/1 ${MONO}`, color: C.faint, marginBottom: 22 }}>
-        {FINAL_TEST_COUNT} questions · Pass mark: {PASS_MARK}/{FINAL_TEST_COUNT}
+        {FINAL_TEST_COUNT} questions · Pass mark: {PASS_MARK}/{FINAL_TEST_COUNT} ({Math.round((PASS_MARK / FINAL_TEST_COUNT) * 100)}%)
       </p>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 14, maxHeight: "60vh", overflowY: "auto", paddingRight: 4 }}>
+      {submitted && (
+        <div style={{
+          border: `1px solid ${passed ? C.green : C.amber}44`, background: passed ? C.greenSoft : C.amberSoft,
+          borderRadius: 12, padding: "22px 20px", marginBottom: 24, textAlign: "center",
+        }}>
+          {passed ? (
+            <>
+              <Trophy size={30} color={C.green} style={{ marginBottom: 8 }} />
+              <h3 style={{ font: `700 20px/1.3 ${DISPLAY}`, color: C.green, margin: 0 }}>🎉 Congratulations! You passed.</h3>
+              <p style={{ font: `600 14px/1 ${MONO}`, color: C.green, marginTop: 10 }}>You scored {score}/{questions.length}</p>
+              <button
+                onClick={onPass}
+                style={{
+                  marginTop: 18, background: C.amber, color: "#0A0A0A", border: "none", borderRadius: 8,
+                  padding: "11px 20px", font: `600 13px/1 ${SANS}`, cursor: "pointer",
+                }}
+              >
+                Back to My Courses →
+              </button>
+            </>
+          ) : (
+            <>
+              <h3 style={{ font: `700 18px/1.3 ${DISPLAY}`, color: C.amber, margin: 0 }}>
+                You scored {score}/{questions.length}. You need {PASS_MARK} to pass.
+              </h3>
+              <button
+                onClick={onRestudy}
+                disabled={saving}
+                style={{
+                  marginTop: 18, display: "inline-flex", alignItems: "center", gap: 8,
+                  background: "transparent", color: C.amber, border: `1px solid ${C.amber}66`, borderRadius: 8,
+                  padding: "11px 20px", font: `600 13px/1 ${SANS}`, cursor: "pointer",
+                }}
+              >
+                <RotateCcw size={14} /> Restudy Module
+              </button>
+            </>
+          )}
+        </div>
+      )}
+
+      <div style={{ display: "flex", flexDirection: "column", gap: 14, paddingBottom: submitted ? 0 : 90 }}>
         {questions.map((q, qi) => (
           <div key={qi} style={{ border: `1px solid ${C.line}`, borderRadius: 10, padding: "14px 16px" }}>
             <p style={{ font: `500 14px/1.5 ${SANS}`, color: C.text, marginBottom: 10 }}>{qi + 1}. {q.question}</p>
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-              {q.options.map((opt, oi) => {
-                const selected = answers[qi] === oi;
+              {OPTION_KEYS.map((key) => {
+                const selected = answers[qi] === key;
+                let border = selected ? C.amber : C.line2;
+                let bg = selected ? C.amberSoft : "transparent";
+                let color = selected ? C.amber : C.text;
+                if (submitted) {
+                  if (key === q.correct) { border = C.green; bg = C.greenSoft; color = C.green; }
+                  else if (selected) { border = C.red; bg = C.redSoft; color = C.red; }
+                  else { border = C.line2; bg = "transparent"; color = C.mute; }
+                }
                 return (
                   <button
-                    key={oi}
-                    onClick={() => selectOption(qi, oi)}
+                    key={key}
+                    onClick={() => selectOption(qi, key)}
+                    disabled={submitted}
                     style={{
                       textAlign: "left", display: "flex", gap: 10, alignItems: "flex-start",
-                      border: `1px solid ${selected ? C.amber : C.line2}`, background: selected ? C.amberSoft : "transparent",
-                      color: selected ? C.amber : C.text, borderRadius: 8, padding: "8px 12px",
-                      font: `500 13px/1.4 ${SANS}`, cursor: "pointer",
+                      border: `1px solid ${border}`, background: bg, color, borderRadius: 8, padding: "8px 12px",
+                      font: `500 13px/1.4 ${SANS}`, cursor: submitted ? "default" : "pointer",
                     }}
                   >
-                    <span style={{ font: `600 11px/1 ${MONO}`, flexShrink: 0 }}>{LETTERS[oi]}</span>
-                    {opt}
+                    <span style={{ font: `600 11px/1 ${MONO}`, flexShrink: 0, textTransform: "uppercase" }}>{key}</span>
+                    {q.options[key]}
                   </button>
                 );
               })}
             </div>
+            {submitted && (
+              <p style={{ font: `400 12px/1.6 ${SANS}`, color: C.mute, marginTop: 10, borderTop: `1px solid ${C.line}`, paddingTop: 10 }}>
+                {q.explanation}
+              </p>
+            )}
           </div>
         ))}
       </div>
 
-      {allAnswered && (
-        <div style={{ marginTop: 20, display: "flex", justifyContent: "flex-end" }}>
-          <button
-            onClick={submit}
-            disabled={saving}
-            style={{
-              background: C.amber, color: "#0A0A0A", border: "none", borderRadius: 8,
-              padding: "11px 20px", font: `600 13px/1 ${SANS}`, cursor: saving ? "default" : "pointer",
-              opacity: saving ? 0.7 : 1,
-            }}
-          >
-            Submit Assessment
-          </button>
+      {!submitted && (
+        <div style={{
+          position: "fixed", left: 0, right: 0, bottom: 0, zIndex: 6,
+          background: "rgba(8,11,18,.92)", backdropFilter: "blur(10px)", borderTop: `1px solid ${C.line}`,
+          padding: "16px clamp(20px,4vw,44px)", display: "flex", justifyContent: "center",
+        }}>
+          <div style={{ width: "100%", maxWidth: 760 }}>
+            <button
+              onClick={submit}
+              disabled={!allAnswered || saving}
+              style={{
+                width: "100%", background: C.amber, color: "#0A0A0A", border: "none", borderRadius: 9,
+                padding: "13px 18px", font: `600 14px/1 ${SANS}`, cursor: allAnswered && !saving ? "pointer" : "default",
+                opacity: allAnswered ? 1 : 0.4,
+              }}
+            >
+              {allAnswered ? "Submit Assessment" : `Answer all questions to submit (${Object.keys(answers).length}/${questions.length})`}
+            </button>
+          </div>
         </div>
       )}
+    </div>
+  );
+}
+
+// ---------- locked placeholder ----------
+
+function LockedSection({ title }: { title: string }) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 12, color: C.faint }}>
+      <Lock size={16} />
+      <div>
+        <div style={{ font: `600 14px/1.4 ${SANS}`, color: C.mute }}>{title}</div>
+        <div style={{ font: `400 12px/1.4 ${SANS}` }}>Complete the previous section to unlock.</div>
+      </div>
     </div>
   );
 }
@@ -490,14 +486,17 @@ function FinalTestSection({
 function AcademyModulePlayerPage() {
   const { moduleId } = Route.useParams();
   const navigate = useNavigate();
-  const generateQuiz = useServerFn(generateQuizQuestions);
 
   const [user, setUser] = useState<AcademyUser | null>(null);
   const [moduleTitle, setModuleTitle] = useState<string | null>(null);
   const [sections, setSections] = useState<AcademyModuleSection[] | null>(null);
   const [sectionsError, setSectionsError] = useState(false);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [completedSections, setCompletedSections] = useState<Set<string>>(new Set());
+  const [frontierIndex, setFrontierIndex] = useState(0);
+  const [resetKey, setResetKey] = useState(0);
   const [assessmentInProgress, setAssessmentInProgress] = useState(false);
+  const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const pageTopRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const raw = sessionStorage.getItem("academy_user");
@@ -524,6 +523,9 @@ function AcademyModulePlayerPage() {
   const loadSections = useCallback(async () => {
     setSectionsError(false);
     setSections(null);
+    setCompletedSections(new Set());
+    setFrontierIndex(0);
+    setResetKey((k) => k + 1);
     try {
       const rows = await getModuleSections(moduleId);
       setSections(rows);
@@ -538,64 +540,34 @@ function AcademyModulePlayerPage() {
     loadSections();
   }, [user, loadSections]);
 
-  const generate = useCallback(
-    async (topicBrief: string, count: number) => generateQuiz({ data: { topicBrief, count } }),
-    [generateQuiz],
-  );
+  const isMountRef = useRef(true);
+  useEffect(() => {
+    if (isMountRef.current) { isMountRef.current = false; return; }
+    if (!sections) return;
+    const s = sections[frontierIndex];
+    if (s) sectionRefs.current[s.id]?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [frontierIndex, sections]);
 
-  async function handleQuizSave(questions: GeneratedQuizQuestion[], answers: Record<number, number>, score: number) {
-    if (!user) return;
-    const section = sections?.[currentIndex];
-    if (!section) return;
-    try {
-      await saveQuizAttempt({
-        user_id: user.id,
-        section_id: section.id,
-        generated_questions: questions,
-        user_answers: answersToLetters(answers),
-        score,
-        total: questions.length,
-        passed: score >= QUIZ_PASS_MARK,
-      });
-    } catch (err) {
-      console.error("[Academy] failed to save quiz attempt:", err);
-    }
+  function markSectionComplete(sectionId: string) {
+    setCompletedSections((prev) => new Set(prev).add(sectionId));
+    setFrontierIndex((i) => (sections ? Math.min(i + 1, sections.length - 1) : i));
   }
 
-  async function handleFinalTestSave(
-    questions: GeneratedQuizQuestion[], answers: Record<number, number>, score: number, passed: boolean,
-  ) {
-    if (!user) return;
-    const section = sections?.[currentIndex];
-    if (!section) return;
-    try {
-      await saveQuizAttempt({
-        user_id: user.id,
-        section_id: section.id,
-        generated_questions: questions,
-        user_answers: answersToLetters(answers),
-        score,
-        total: questions.length,
-        passed,
-      });
-      if (passed) await setModuleComplete(user.id, moduleId, true);
-    } catch (err) {
-      console.error("[Academy] failed to save final assessment:", err);
-    }
-  }
-
-  function goToNextSection() {
-    setCurrentIndex((i) => i + 1);
+  function jumpToSection(index: number) {
+    if (index > frontierIndex || !sections) return;
+    const s = sections[index];
+    sectionRefs.current[s.id]?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   function handleRestudy() {
     setAssessmentInProgress(false);
-    setCurrentIndex(0);
+    loadSections();
+    pageTopRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   function handleBack() {
     if (assessmentInProgress) {
-      const ok = window.confirm("Leave without finishing the assessment? Your progress on this attempt will be lost.");
+      const ok = window.confirm("Assessment in progress. Leave anyway?");
       if (!ok) return;
     }
     navigate({ to: "/academy" });
@@ -613,7 +585,11 @@ function AcademyModulePlayerPage() {
       <style>{`
         .tw-academy-player-spin{animation:tw-academy-player-sp 1s linear infinite;}
         @keyframes tw-academy-player-sp{to{transform:rotate(360deg);}}
-        @media(prefers-reduced-motion:reduce){.tw-academy-player-spin{animation:none;}}
+        @keyframes tw-academy-player-fadein{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+        @keyframes tw-academy-player-pulse{0%,100%{box-shadow:0 0 0 0 ${C.amber}66;}50%{box-shadow:0 0 0 5px ${C.amber}00;}}
+        .tw-academy-player-fadein{animation:tw-academy-player-fadein .4s ease both;}
+        .tw-academy-player-pulse{animation:tw-academy-player-pulse 1.6s ease-in-out infinite;}
+        @media(prefers-reduced-motion:reduce){.tw-academy-player-spin,.tw-academy-player-fadein,.tw-academy-player-pulse{animation:none;}}
         .tw-academy-player-prose p{margin:0 0 14px;}
         .tw-academy-player-prose h1,.tw-academy-player-prose h2,.tw-academy-player-prose h3{
           font-family:${DISPLAY};color:${C.text};margin:22px 0 10px;
@@ -626,28 +602,56 @@ function AcademyModulePlayerPage() {
         .tw-academy-player-prose a{color:${C.amber};}
       `}</style>
 
-      <div style={{
-        position: "sticky", top: 0, zIndex: 5, background: "rgba(8,11,18,.82)", backdropFilter: "blur(10px)",
-        borderBottom: `1px solid ${C.line}`, padding: "14px clamp(20px,4vw,44px)",
-        display: "flex", alignItems: "center", gap: 14,
-      }}>
-        <button
-          onClick={handleBack}
-          style={{ background: "transparent", border: "none", color: C.mute, cursor: "pointer", display: "flex", padding: 4 }}
-          aria-label="Back to courses"
-        >
-          <ArrowLeft size={18} />
-        </button>
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={{ width: 30, height: 30, borderRadius: 7, background: C.amberSoft, border: `1px solid ${C.amber}44`, display: "grid", placeItems: "center" }}>
-            <Plane size={15} color={C.amber} />
+      <div ref={pageTopRef} style={{ position: "sticky", top: 0, zIndex: 5, background: "rgba(8,11,18,.92)", backdropFilter: "blur(10px)", borderBottom: `1px solid ${C.line}` }}>
+        <div style={{ padding: "14px clamp(20px,4vw,44px)", display: "flex", alignItems: "center", gap: 14 }}>
+          <button
+            onClick={handleBack}
+            style={{ background: "transparent", border: "none", color: C.mute, cursor: "pointer", display: "flex", padding: 4 }}
+            aria-label="Back to courses"
+          >
+            <ArrowLeft size={18} />
+          </button>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <div style={{ width: 30, height: 30, borderRadius: 7, background: C.amberSoft, border: `1px solid ${C.amber}44`, display: "grid", placeItems: "center" }}>
+              <Plane size={15} color={C.amber} />
+            </div>
+            <span style={{ font: `600 12px/1 ${MONO}`, letterSpacing: ".16em", color: C.text }}>TORQWINGS ACADEMY</span>
           </div>
-          <span style={{ font: `600 12px/1 ${MONO}`, letterSpacing: ".16em", color: C.text }}>TORQWINGS ACADEMY</span>
         </div>
+
+        {sections && sections.length > 0 && (
+          <div style={{ padding: "0 clamp(20px,4vw,44px) 14px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+              <span style={{ font: `600 10px/1 ${MONO}`, letterSpacing: ".1em", color: C.faint, textTransform: "uppercase" }}>
+                Section {Math.min(frontierIndex + 1, sections.length)} of {sections.length}
+              </span>
+            </div>
+            <div style={{ display: "flex", gap: 8 }}>
+              {sections.map((s, i) => {
+                const isComplete = completedSections.has(s.id);
+                const isCurrent = i === frontierIndex && !isComplete;
+                const isLocked = i > frontierIndex;
+                return (
+                  <button
+                    key={s.id}
+                    title={s.title}
+                    onClick={() => jumpToSection(i)}
+                    className={isCurrent ? "tw-academy-player-pulse" : undefined}
+                    style={{
+                      width: 10, height: 10, borderRadius: "50%", padding: 0,
+                      background: isLocked ? "transparent" : C.amber,
+                      border: isLocked ? `1.5px solid ${C.line2}` : "none",
+                      cursor: isLocked ? "default" : "pointer",
+                    }}
+                  />
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
 
       <div style={{ maxWidth: 760, margin: "0 auto", padding: "clamp(28px,4vw,48px) clamp(20px,4vw,44px)" }}>
-        <div style={{ font: `500 11px/1 ${MONO}`, letterSpacing: ".18em", color: C.amber, marginBottom: 6 }}>● MODULE PLAYER</div>
         {moduleTitle && (
           <h1 style={{ font: `700 clamp(20px,3vw,26px)/1.2 ${DISPLAY}`, color: C.text, margin: "0 0 24px" }}>{moduleTitle}</h1>
         )}
@@ -660,40 +664,44 @@ function AcademyModulePlayerPage() {
         )}
 
         {sections !== null && sections.length > 0 && (
-          <>
-            <ProgressBar sections={sections} currentIndex={currentIndex} />
+          <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+            {sections.map((s, i) => {
+              const isComplete = completedSections.has(s.id);
+              const isCurrent = i === frontierIndex && !isComplete;
+              const isLocked = i > frontierIndex;
+              const borderColor = isLocked ? C.line2 : isCurrent ? C.amber : C.green;
 
-            {currentIndex < sections.length ? (
-              <div
-                key={sections[currentIndex].id}
-                style={{ border: `1px solid ${C.line}`, borderRadius: 14, background: C.panel, padding: "24px 26px" }}
-              >
-                {sections[currentIndex].section_type === "content" && (
-                  <ContentSection section={sections[currentIndex]} onComplete={goToNextSection} />
-                )}
-                {sections[currentIndex].section_type === "quiz" && (
-                  <QuizSection
-                    section={sections[currentIndex]}
-                    generate={generate}
-                    onComplete={goToNextSection}
-                    onSave={handleQuizSave}
-                  />
-                )}
-                {sections[currentIndex].section_type === "final_test" && (
-                  <FinalTestSection
-                    section={sections[currentIndex]}
-                    generate={generate}
-                    onSave={handleFinalTestSave}
-                    onPass={() => navigate({ to: "/academy" })}
-                    onRestudy={handleRestudy}
-                    onInProgressChange={setAssessmentInProgress}
-                  />
-                )}
-              </div>
-            ) : (
-              <p style={{ font: `400 13px/1.5 ${SANS}`, color: C.mute }}>All sections complete.</p>
-            )}
-          </>
+              return (
+                <div
+                  key={isLocked ? s.id : `${s.id}-${resetKey}`}
+                  ref={(el) => { sectionRefs.current[s.id] = el; }}
+                  className={!isLocked ? "tw-academy-player-fadein" : undefined}
+                  style={{
+                    border: `1px solid ${C.line}`, borderLeft: `3px solid ${borderColor}`, borderRadius: 14,
+                    background: C.panel, padding: isLocked ? "18px 22px" : "24px 26px",
+                  }}
+                >
+                  {isLocked && <LockedSection title={s.title} />}
+                  {!isLocked && s.section_type === "content" && (
+                    <ContentSection section={s} onComplete={() => markSectionComplete(s.id)} />
+                  )}
+                  {!isLocked && s.section_type === "quiz" && (
+                    <QuizSection section={s} user={user} onComplete={() => markSectionComplete(s.id)} />
+                  )}
+                  {!isLocked && s.section_type === "final_test" && (
+                    <FinalTestSection
+                      section={s}
+                      user={user}
+                      moduleId={moduleId}
+                      onPass={() => navigate({ to: "/academy" })}
+                      onRestudy={handleRestudy}
+                      onInProgressChange={setAssessmentInProgress}
+                    />
+                  )}
+                </div>
+              );
+            })}
+          </div>
         )}
       </div>
     </div>

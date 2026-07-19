@@ -64,6 +64,13 @@ export interface AcademyModuleSection {
   topic_brief: string;
 }
 
+// RLS note: academy students never get a real Supabase Auth session — sign-in
+// only stores an AcademyUser in sessionStorage (see verifyAcademyUser above),
+// so every request from this module runs as the anon/publishable key with no
+// auth.uid(). The RLS policy on academy_module_sections must therefore grant
+// SELECT to the anon role directly (e.g. `USING (true)`); a policy gated on
+// auth.uid() or auth.role() = 'authenticated' will silently return zero rows
+// for every academy student.
 export async function getModuleSections(moduleId: string): Promise<AcademyModuleSection[]> {
   const { data, error } = await supabase
     .from("academy_module_sections" as any)
@@ -84,6 +91,10 @@ export interface SaveQuizAttemptInput {
   passed: boolean;
 }
 
+// Same RLS caveat as getModuleSections above: no auth.uid() exists for
+// academy students, so academy_quiz_attempts needs SELECT (for the count
+// query below) and INSERT policies open to the anon role — a WITH CHECK
+// keyed on auth.uid() will reject every insert.
 export async function saveQuizAttempt(input: SaveQuizAttemptInput): Promise<void> {
   const { count, error: countError } = await supabase
     .from("academy_quiz_attempts" as any)
