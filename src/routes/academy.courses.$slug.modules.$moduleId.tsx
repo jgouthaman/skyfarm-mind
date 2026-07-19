@@ -35,7 +35,7 @@ function AcademyModulePage() {
   useEffect(() => {
     const raw = sessionStorage.getItem("academy_user");
     if (!raw) {
-      navigate({ to: "/academy/sign-in" });
+      navigate({ to: "/academy" });
       return;
     }
     setUser(JSON.parse(raw));

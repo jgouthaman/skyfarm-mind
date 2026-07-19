@@ -147,7 +147,7 @@ function AcademyDashboardPage() {
   useEffect(() => {
     const raw = sessionStorage.getItem("academy_user");
     if (!raw) {
-      navigate({ to: "/academy/sign-in" });
+      navigate({ to: "/academy" });
       return;
     }
     setUser(JSON.parse(raw));
@@ -155,7 +155,7 @@ function AcademyDashboardPage() {
 
   function handleSignOut() {
     sessionStorage.removeItem("academy_user");
-    navigate({ to: "/academy/sign-in" });
+    navigate({ to: "/academy" });
   }
 
   async function handleToggleCourse(courseId: string) {
