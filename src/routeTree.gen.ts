@@ -16,6 +16,7 @@ import { Route as FieldRouteImport } from './routes/field'
 import { Route as AcademyRouteImport } from './routes/academy'
 import { Route as LayoutRouteImport } from './routes/_layout'
 import { Route as PilotIndexRouteImport } from './routes/pilot.index'
+import { Route as MissionHubIndexRouteImport } from './routes/mission-hub.index'
 import { Route as AcademyIndexRouteImport } from './routes/academy.index'
 import { Route as LayoutIndexRouteImport } from './routes/_layout.index'
 import { Route as PilotTrackingRouteImport } from './routes/pilot.tracking'
@@ -107,6 +108,11 @@ const PilotIndexRoute = PilotIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => PilotRoute,
+} as any)
+const MissionHubIndexRoute = MissionHubIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => MissionHubRoute,
 } as any)
 const AcademyIndexRoute = AcademyIndexRouteImport.update({
   id: '/',
@@ -464,6 +470,7 @@ export interface FileRoutesByFullPath {
   '/pilot/sync': typeof PilotSyncRoute
   '/pilot/tracking': typeof PilotTrackingRoute
   '/academy/': typeof AcademyIndexRoute
+  '/mission-hub/': typeof MissionHubIndexRoute
   '/pilot/': typeof PilotIndexRoute
   '/auth/callback': typeof LayoutAuthCallbackRoute
   '/learn/drone-design-fundamentals': typeof LayoutLearnDroneDesignFundamentalsRoute
@@ -487,7 +494,6 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/field': typeof FieldRoute
-  '/mission-hub': typeof MissionHubRouteWithChildren
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/about': typeof LayoutAboutRoute
   '/agrisky': typeof LayoutAgriskyRoute
@@ -525,6 +531,7 @@ export interface FileRoutesByTo {
   '/pilot/tracking': typeof PilotTrackingRoute
   '/': typeof LayoutIndexRoute
   '/academy': typeof AcademyIndexRoute
+  '/mission-hub': typeof MissionHubIndexRoute
   '/pilot': typeof PilotIndexRoute
   '/auth/callback': typeof LayoutAuthCallbackRoute
   '/learn/drone-design-fundamentals': typeof LayoutLearnDroneDesignFundamentalsRoute
@@ -592,6 +599,7 @@ export interface FileRoutesById {
   '/pilot/tracking': typeof PilotTrackingRoute
   '/_layout/': typeof LayoutIndexRoute
   '/academy/': typeof AcademyIndexRoute
+  '/mission-hub/': typeof MissionHubIndexRoute
   '/pilot/': typeof PilotIndexRoute
   '/_layout/auth/callback': typeof LayoutAuthCallbackRoute
   '/_layout/learn/drone-design-fundamentals': typeof LayoutLearnDroneDesignFundamentalsRoute
@@ -659,6 +667,7 @@ export interface FileRouteTypes {
     | '/pilot/sync'
     | '/pilot/tracking'
     | '/academy/'
+    | '/mission-hub/'
     | '/pilot/'
     | '/auth/callback'
     | '/learn/drone-design-fundamentals'
@@ -682,7 +691,6 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/field'
-    | '/mission-hub'
     | '/sitemap.xml'
     | '/about'
     | '/agrisky'
@@ -720,6 +728,7 @@ export interface FileRouteTypes {
     | '/pilot/tracking'
     | '/'
     | '/academy'
+    | '/mission-hub'
     | '/pilot'
     | '/auth/callback'
     | '/learn/drone-design-fundamentals'
@@ -786,6 +795,7 @@ export interface FileRouteTypes {
     | '/pilot/tracking'
     | '/_layout/'
     | '/academy/'
+    | '/mission-hub/'
     | '/pilot/'
     | '/_layout/auth/callback'
     | '/_layout/learn/drone-design-fundamentals'
@@ -867,6 +877,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/pilot/'
       preLoaderRoute: typeof PilotIndexRouteImport
       parentRoute: typeof PilotRoute
+    }
+    '/mission-hub/': {
+      id: '/mission-hub/'
+      path: '/'
+      fullPath: '/mission-hub/'
+      preLoaderRoute: typeof MissionHubIndexRouteImport
+      parentRoute: typeof MissionHubRoute
     }
     '/academy/': {
       id: '/academy/'
@@ -1403,6 +1420,7 @@ interface MissionHubRouteChildren {
   MissionHubTwbcDroneSimilaritySearchRoute: typeof MissionHubTwbcDroneSimilaritySearchRoute
   MissionHubUsersRoute: typeof MissionHubUsersRoute
   MissionHubWaitlistRoute: typeof MissionHubWaitlistRoute
+  MissionHubIndexRoute: typeof MissionHubIndexRoute
   MissionHubVerticalsVerticalRoute: typeof MissionHubVerticalsVerticalRoute
 }
 
@@ -1432,6 +1450,7 @@ const MissionHubRouteChildren: MissionHubRouteChildren = {
     MissionHubTwbcDroneSimilaritySearchRoute,
   MissionHubUsersRoute: MissionHubUsersRoute,
   MissionHubWaitlistRoute: MissionHubWaitlistRoute,
+  MissionHubIndexRoute: MissionHubIndexRoute,
   MissionHubVerticalsVerticalRoute: MissionHubVerticalsVerticalRoute,
 }
 
