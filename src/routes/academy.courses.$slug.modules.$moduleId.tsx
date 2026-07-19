@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import ReactMarkdown from "react-markdown";
-import { ArrowLeft, Plane, Trophy, Loader2, RotateCcw, Lock } from "lucide-react";
+import { ArrowLeft, Plane, Trophy, Loader2, RotateCcw, Lock, Lightbulb, CheckCircle2, ArrowLeftRight } from "lucide-react";
 import type { AcademyModuleSection, AcademyUser } from "@/lib/academy-auth";
 import { getModuleSections, saveQuizAttempt, setModuleComplete } from "@/lib/academy-auth";
 import { streamAnthropicContent, generateAnthropicQuestions, type GeneratedQuestion } from "@/lib/academy/anthropic-client";
@@ -92,6 +92,7 @@ function scoreFromAnswers(answers: Record<number, string>, questions: GeneratedQ
 // ---------- content card parsing ----------
 
 const MAX_CARD_CHARS = 400;
+const MIN_CARD_WORDS = 80;
 
 function plainTextLength(md: string): number {
   return md
@@ -99,6 +100,11 @@ function plainTextLength(md: string): number {
     .replace(/[*_`>]/g, "")
     .replace(/\s+/g, " ")
     .trim().length;
+}
+
+function wordCount(md: string): number {
+  const plain = md.replace(/^#{1,6}\s+/gm, "").replace(/[*_`>]/g, "").trim();
+  return plain ? plain.split(/\s+/).length : 0;
 }
 
 function splitLongChunk(chunk: string): string[] {
@@ -156,6 +162,362 @@ function splitIntoCards(markdown: string): string[] {
   return chunks.flatMap(splitLongChunk);
 }
 
+// Folds any chunk under MIN_CARD_WORDS into the previous one — keeps thin
+// trailing fragments (e.g. a lone closing sentence after the last heading)
+// from becoming their own near-empty card.
+function mergeShortCards(chunks: string[]): string[] {
+  const out: string[] = [];
+  for (const chunk of chunks) {
+    if (out.length > 0 && wordCount(chunk) < MIN_CARD_WORDS) {
+      out[out.length - 1] = `${out[out.length - 1]}\n\n${chunk}`;
+    } else {
+      out.push(chunk);
+    }
+  }
+  return out;
+}
+
+function extractHeading(markdown: string): string | null {
+  const m = markdown.match(/^#{2,3}\s+(.+)$/m);
+  return m ? m[1].trim() : null;
+}
+
+function stripMarkdownEmphasis(markdown: string): string {
+  return markdown
+    .replace(/^#{1,6}\s+/gm, "")
+    .replace(/[*_`]/g, "")
+    .replace(/\n{2,}/g, " ")
+    .replace(/\n/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function firstSentence(markdown: string): string {
+  const plain = stripMarkdownEmphasis(markdown);
+  const match = plain.match(/^.*?[.!?](?:\s|$)/);
+  return (match ? match[0] : plain).trim();
+}
+
+type ContentCardType = "hero" | "concept" | "formula" | "example" | "comparison" | "keyInsight";
+
+// Priority matters: key-insight and formula markers can both appear in the
+// same chunk, and key-insight is meant to be the rarer, higher-impact call-
+// out, so it wins ties.
+function classifyCard(markdown: string): Exclude<ContentCardType, "hero"> {
+  const lower = markdown.toLowerCase();
+  if (/\b(key|important|remember|critical)\b/.test(lower)) return "keyInsight";
+  if (/=/.test(markdown) || /\bformula\b/.test(lower)) return "formula";
+  if (/\bexample\b/.test(lower) || /\bcalculate\b/.test(lower) || /\d+\s?(m\/s|km\/h|mph|kg|km|n|hz|°|deg|cm|mm|ft|lbs?)\b/i.test(markdown)) return "example";
+  if (/\bvs\.?\b/.test(lower) || /\bcompare/.test(lower) || /^\|.*\|\s*$/m.test(markdown)) return "comparison";
+  return "concept";
+}
+
+interface TextContentCard { kind: "text"; type: ContentCardType; markdown: string }
+interface ImageContentCard { kind: "image"; url: string; caption: string }
+type PositionedCard = TextContentCard | ImageContentCard;
+
+const CONTENT_IMAGES: { keywords: RegExp; url: string; caption: string }[] = [
+  {
+    keywords: /laminar|turbulent/i,
+    url: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Laminar_turbulent_transition.svg/640px-Laminar_turbulent_transition.svg.png",
+    caption: "Laminar vs. turbulent flow transition",
+  },
+  {
+    keywords: /airfoil|wing cross|cross.?section/i,
+    url: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f9/Anatomie_einer_Tragfl%C3%A4che.svg/640px-Anatomie_einer_Tragfl%C3%A4che.svg.png",
+    caption: "Airfoil cross-section anatomy",
+  },
+  {
+    keywords: /reynolds/i,
+    url: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Reynolds_fluid_animation.gif/220px-Reynolds_fluid_animation.gif",
+    caption: "Reynolds number flow concept",
+  },
+  {
+    keywords: /propeller|rotor|drone|quadcopter|uav/i,
+    url: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Quadcopter_camera_drone_in_flight.jpg/640px-Quadcopter_camera_drone_in_flight.jpg",
+    caption: "Multirotor drone in flight",
+  },
+  {
+    keywords: /separation|stall/i,
+    url: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/45/Flow_separation.svg/640px-Flow_separation.svg.png",
+    caption: "Flow separation over a surface",
+  },
+];
+
+function pickImageForContext(precedingText: string, position: number): { url: string; caption: string } {
+  const heading = extractHeading(precedingText);
+  const matched = CONTENT_IMAGES.find((img) => img.keywords.test(precedingText));
+  const img = matched ?? CONTENT_IMAGES[position % CONTENT_IMAGES.length];
+  return { url: img.url, caption: heading ?? img.caption };
+}
+
+// First card is always the hero. Every 4th text card thereafter (except the
+// very last) is followed by a supporting diagram card.
+function buildContentCards(rawMarkdown: string): PositionedCard[] {
+  const chunks = mergeShortCards(splitIntoCards(rawMarkdown));
+  const cards: PositionedCard[] = [];
+  let imagesInserted = 0;
+
+  chunks.forEach((chunk, i) => {
+    const type: ContentCardType = i === 0 ? "hero" : classifyCard(chunk);
+    cards.push({ kind: "text", type, markdown: chunk });
+    if ((i + 1) % 4 === 0 && i < chunks.length - 1) {
+      cards.push({ kind: "image", ...pickImageForContext(chunk, imagesInserted) });
+      imagesInserted += 1;
+    }
+  });
+
+  return cards;
+}
+
+// ---------- content sub-card renderers ----------
+
+function extractFormulaParts(markdown: string): { formula: string; explanation: string } {
+  const lines = markdown.split("\n");
+  let formula = "";
+  const rest: string[] = [];
+  for (const line of lines) {
+    const trimmed = line.trim();
+    const isHeading = /^#{1,6}\s/.test(trimmed);
+    if (!formula && !isHeading && /=/.test(trimmed) && trimmed.length > 0 && trimmed.length < 120) {
+      formula = trimmed.replace(/^[-*]\s+/, "").replace(/[*_`]/g, "");
+    } else {
+      rest.push(line);
+    }
+  }
+  return { formula: formula || "—", explanation: rest.join("\n").trim() };
+}
+
+function extractExampleParts(markdown: string): { setup: string; steps: string[] } {
+  const lines = markdown.split("\n");
+  const setupLines: string[] = [];
+  const steps: string[] = [];
+  let inSteps = false;
+  for (const line of lines) {
+    const trimmed = line.trim();
+    const numbered = trimmed.match(/^(?:\d+[.)]|step\s*\d+[:.]?)\s+(.*)$/i);
+    if (numbered) {
+      inSteps = true;
+      steps.push(numbered[1]);
+    } else if (inSteps && trimmed) {
+      if (steps.length) steps[steps.length - 1] += ` ${trimmed}`;
+    } else if (!inSteps) {
+      setupLines.push(line);
+    }
+  }
+  return { setup: setupLines.join("\n").trim(), steps };
+}
+
+function extractComparisonParts(markdown: string): { leftLabel: string; rightLabel: string; leftItems: string[]; rightItems: string[] } {
+  const heading = extractHeading(markdown) ?? "";
+  const vsMatch = heading.match(/([A-Za-z][\w\s]*?)\s+vs\.?\s+([A-Za-z][\w\s]*)/i);
+  const leftLabel = vsMatch ? vsMatch[1].trim() : "Option A";
+  const rightLabel = vsMatch ? vsMatch[2].trim() : "Option B";
+
+  const items = markdown
+    .split("\n")
+    .map((l) => l.trim())
+    .filter((l) => /^[-*]\s+/.test(l))
+    .map((l) => l.replace(/^[-*]\s+/, ""));
+
+  const mid = Math.ceil(items.length / 2);
+  return { leftLabel, rightLabel, leftItems: items.slice(0, mid), rightItems: items.slice(mid) };
+}
+
+function CardTypeBadge({ label, color, bg }: { label: string; color: string; bg: string }) {
+  return (
+    <span style={{
+      position: "absolute", top: 18, right: 22,
+      font: `600 10px/1 ${MONO}`, letterSpacing: ".08em", textTransform: "uppercase",
+      color, background: bg, border: `1px solid ${color}44`, padding: "5px 9px", borderRadius: 6,
+    }}>
+      {label}
+    </span>
+  );
+}
+
+function HeroCard({ title, hook, onNext }: { title: string; hook: string; onNext: () => void }) {
+  return (
+    <div style={{ textAlign: "center" }}>
+      <Plane
+        size={38} color={C.amber}
+        className="tw-academy-hero-icon"
+        style={{ position: "absolute", top: 24, right: 28, opacity: 0.55 }}
+      />
+      <h2 style={{ font: `700 clamp(24px,4vw,32px)/1.3 ${DISPLAY}`, color: C.text, margin: "0 0 14px" }}>{title}</h2>
+      <p style={{ font: `400 15px/1.6 ${SANS}`, color: C.mute, maxWidth: 460, margin: "0 auto" }}>{hook}</p>
+      <div style={{ marginTop: 32 }}>
+        <button
+          onClick={onNext}
+          style={{
+            background: C.amber, color: "#0A0A0A", border: "none", borderRadius: 9,
+            padding: "13px 30px", font: `600 14px/1 ${SANS}`, cursor: "pointer",
+          }}
+        >
+          Begin →
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function ConceptCard({ number, markdown }: { number: number; markdown: string }) {
+  return (
+    <div style={{ display: "flex", gap: 24 }}>
+      <div style={{ flexShrink: 0, minWidth: 52, font: `700 38px/1 ${DISPLAY}`, color: C.amber, opacity: 0.85 }}>
+        {String(number).padStart(2, "0")}
+      </div>
+      <div className="tw-academy-card-prose" style={{ borderLeft: `2px solid ${C.amber}55`, paddingLeft: 22, flex: 1 }}>
+        <ReactMarkdown>{markdown}</ReactMarkdown>
+      </div>
+    </div>
+  );
+}
+
+function FormulaCard({ markdown }: { markdown: string }) {
+  const { formula, explanation } = useMemo(() => extractFormulaParts(markdown), [markdown]);
+  return (
+    <div>
+      <div style={{
+        textAlign: "center", padding: "30px 20px", borderRadius: 12,
+        background: C.bg, border: `1px solid ${C.amber}44`, boxShadow: `0 0 24px ${C.amber}22`,
+      }}>
+        <span style={{ font: `700 clamp(20px,4vw,28px)/1.4 ${MONO}`, color: C.amber }}>{formula}</span>
+      </div>
+      {explanation && (
+        <div className="tw-academy-card-prose" style={{ marginTop: 20, fontSize: 14 }}>
+          <ReactMarkdown>{explanation}</ReactMarkdown>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ExampleCard({ markdown }: { markdown: string }) {
+  const { setup, steps } = useMemo(() => extractExampleParts(markdown), [markdown]);
+  return (
+    <div className="tw-academy-example-grid">
+      <div>
+        <div style={{ font: `600 10px/1 ${MONO}`, letterSpacing: ".08em", textTransform: "uppercase", color: C.faint, marginBottom: 10 }}>
+          Problem
+        </div>
+        <div className="tw-academy-card-prose" style={{ fontSize: 14 }}>
+          <ReactMarkdown>{setup || markdown}</ReactMarkdown>
+        </div>
+      </div>
+      <div>
+        <div style={{ font: `600 10px/1 ${MONO}`, letterSpacing: ".08em", textTransform: "uppercase", color: C.faint, marginBottom: 10 }}>
+          Solution
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          {steps.length > 0 ? steps.map((step, i) => (
+            <div key={i} style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
+              <CheckCircle2 size={16} color={C.green} style={{ flexShrink: 0, marginTop: 2 }} />
+              <span style={{ font: `400 13px/1.6 ${SANS}`, color: C.cardBody }}>{step}</span>
+            </div>
+          )) : (
+            <span style={{ font: `400 13px/1.6 ${SANS}`, color: C.faint }}>See the worked steps above.</span>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ComparisonCard({ markdown }: { markdown: string }) {
+  const { leftLabel, rightLabel, leftItems, rightItems } = useMemo(() => extractComparisonParts(markdown), [markdown]);
+
+  if (leftItems.length === 0 && rightItems.length === 0) {
+    return <div className="tw-academy-card-prose"><ReactMarkdown>{markdown}</ReactMarkdown></div>;
+  }
+
+  return (
+    <div className="tw-academy-comparison-grid">
+      <div style={{ background: "rgba(90,150,255,0.08)", border: "1px solid rgba(90,150,255,0.3)", borderRadius: 12, padding: 20 }}>
+        <div style={{ font: `700 13px/1.3 ${DISPLAY}`, color: "#7AAAFF", marginBottom: 12 }}>{leftLabel}</div>
+        {leftItems.map((item, i) => (
+          <div key={i} style={{ display: "flex", gap: 8, marginBottom: 8 }}>
+            <ArrowLeftRight size={14} color="#7AAAFF" style={{ flexShrink: 0, marginTop: 2 }} />
+            <span style={{ font: `400 13px/1.5 ${SANS}`, color: C.cardBody }}>{item}</span>
+          </div>
+        ))}
+      </div>
+      <div style={{ background: C.amberSoft, border: `1px solid ${C.amber}44`, borderRadius: 12, padding: 20 }}>
+        <div style={{ font: `700 13px/1.3 ${DISPLAY}`, color: C.amber, marginBottom: 12 }}>{rightLabel}</div>
+        {rightItems.map((item, i) => (
+          <div key={i} style={{ display: "flex", gap: 8, marginBottom: 8 }}>
+            <ArrowLeftRight size={14} color={C.amber} style={{ flexShrink: 0, marginTop: 2 }} />
+            <span style={{ font: `400 13px/1.5 ${SANS}`, color: C.cardBody }}>{item}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function KeyInsightCard({ markdown }: { markdown: string }) {
+  const statement = useMemo(() => stripMarkdownEmphasis(markdown), [markdown]);
+  return (
+    <div style={{ display: "flex", gap: 18, alignItems: "flex-start" }}>
+      <Lightbulb size={28} color="#0A0A0A" style={{ flexShrink: 0 }} />
+      <p style={{ font: `700 clamp(17px,2.4vw,20px)/1.5 ${DISPLAY}`, color: "#0A0A0A", margin: 0 }}>{statement}</p>
+    </div>
+  );
+}
+
+function ImageCardView({ url, caption }: { url: string; caption: string }) {
+  return (
+    <div>
+      <div style={{ borderRadius: 12, overflow: "hidden", border: `1px solid ${C.line}` }}>
+        <img src={url} alt={caption} loading="lazy" style={{ display: "block", width: "100%", height: "auto" }} />
+      </div>
+      <p style={{ font: `500 13px/1.5 ${SANS}`, color: C.mute, marginTop: 12, textAlign: "center" }}>{caption}</p>
+    </div>
+  );
+}
+
+function outerCardStyle(card: PositionedCard): CSSProperties {
+  if (card.kind === "text" && card.type === "hero") {
+    return {
+      position: "relative", overflow: "hidden",
+      background: `linear-gradient(160deg, ${C.panel} 0%, #0A0E17 60%, ${C.bg} 100%)`,
+      border: `1px solid ${C.line}`, borderRadius: 20, padding: "56px 40px",
+    };
+  }
+  const bg = card.kind === "image" ? C.panel
+    : card.type === "formula" ? "#080B12"
+    : card.type === "example" ? "#0A1A10"
+    : card.type === "keyInsight" ? C.amber
+    : C.panel;
+  return {
+    position: "relative", background: bg, borderRadius: 16, padding: 40,
+    border: card.kind === "text" && card.type === "keyInsight" ? "none" : `1px solid ${C.line}`,
+  };
+}
+
+function enterAnimClass(card: PositionedCard): string {
+  if (card.kind === "image") return "tw-academy-card-anim-image";
+  if (card.type === "hero") return "tw-academy-card-anim-hero";
+  if (card.type === "keyInsight") return "tw-academy-card-anim-keyinsight";
+  return "tw-academy-card-anim-fadeup";
+}
+
+function badgeForCard(card: PositionedCard): { label: string; color: string; bg: string } | null {
+  if (card.kind === "image") return { label: "Visual", color: C.faint, bg: "transparent" };
+  switch (card.type) {
+    case "hero": return null;
+    case "formula": return { label: "Formula", color: C.amber, bg: C.amberSoft };
+    case "example": return { label: "Example", color: C.green, bg: C.greenSoft };
+    case "keyInsight": return { label: "Key Insight", color: "#0A0A0A", bg: "rgba(10,10,10,0.14)" };
+    // Comparison isn't in the badge label set, so it borrows the neutral
+    // "Concept" chip — it still gets its own distinct panel layout below.
+    case "comparison":
+    case "concept":
+    default:
+      return { label: "Concept", color: C.faint, bg: "transparent" };
+  }
+}
+
 // ---------- content section (paced card-by-card reveal) ----------
 
 function ContentCardSkeleton() {
@@ -185,7 +547,7 @@ function ContentSection({
   onComplete: () => void;
 }) {
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
-  const [cards, setCards] = useState<string[]>([]);
+  const [cards, setCards] = useState<PositionedCard[]>([]);
   const [cardIndex, setCardIndex] = useState(0);
   const [phase, setPhase] = useState<"idle" | "entering" | "exiting">("idle");
 
@@ -195,8 +557,8 @@ function ContentSection({
     setCardIndex(0);
     try {
       let acc = "";
-      await streamAnthropicContent(section.topic_brief, (fullTextSoFar) => { acc = fullTextSoFar; });
-      setCards(splitIntoCards(acc));
+      await streamAnthropicContent(section.topic_brief, (fullTextSoFar) => { acc = fullTextSoFar; }, 1500);
+      setCards(buildContentCards(acc));
       setCardIndex(0);
       setStatus("ready");
       setPhase("entering");
@@ -258,15 +620,22 @@ function ContentSection({
 
   // Already completed — static, fully-visible recap (no pacing/keyboard nav).
   if (!isActive) {
+    const recap = cards.filter((c): c is TextContentCard => c.kind === "text").map((c) => c.markdown).join("\n\n");
     return (
       <div>
         <h2 style={{ font: `700 clamp(20px,3vw,26px)/1.2 ${DISPLAY}`, color: C.text, margin: "0 0 18px" }}>{section.title}</h2>
         <div className="tw-academy-card-prose">
-          <ReactMarkdown>{cards.join("\n\n")}</ReactMarkdown>
+          <ReactMarkdown>{recap}</ReactMarkdown>
         </div>
       </div>
     );
   }
+
+  const card = cards[cardIndex];
+  const isHero = card.kind === "text" && card.type === "hero";
+  const isKeyInsight = card.kind === "text" && card.type === "keyInsight";
+  const badge = badgeForCard(card);
+  const animClass = phase === "exiting" ? "tw-academy-card-exit" : phase === "entering" ? enterAnimClass(card) : undefined;
 
   return (
     <div style={{ maxWidth: 680, margin: "0 auto" }}>
@@ -276,36 +645,41 @@ function ContentSection({
         Section {sectionNumber} of {totalSections} · {section.title}
       </div>
 
-      <div
-        key={cardIndex}
-        className={phase === "exiting" ? "tw-academy-card-exit" : phase === "entering" ? "tw-academy-card-enter" : undefined}
-        style={{ position: "relative", background: C.panel, border: `1px solid ${C.line}`, borderRadius: 16, padding: 40 }}
-      >
-        <span style={{ position: "absolute", top: 18, right: 22, font: `500 11px/1 ${MONO}`, color: C.faint }}>
-          Card {cardIndex + 1} of {cards.length}
-        </span>
+      <div key={cardIndex} className={animClass} style={outerCardStyle(card)}>
+        {!isHero && (
+          <span style={{ position: "absolute", top: 18, left: 22, font: `500 11px/1 ${MONO}`, color: isKeyInsight ? "#0A0A0A99" : C.faint }}>
+            {cardIndex + 1} / {cards.length}
+          </span>
+        )}
+        {badge && <CardTypeBadge {...badge} />}
 
-        <div className="tw-academy-card-prose">
-          <ReactMarkdown>{cards[cardIndex]}</ReactMarkdown>
-        </div>
+        {card.kind === "text" && card.type === "hero" && <HeroCard title={section.title} hook={firstSentence(card.markdown)} onNext={goNext} />}
+        {card.kind === "text" && card.type === "concept" && <ConceptCard number={cardIndex + 1} markdown={card.markdown} />}
+        {card.kind === "text" && card.type === "formula" && <FormulaCard markdown={card.markdown} />}
+        {card.kind === "text" && card.type === "example" && <ExampleCard markdown={card.markdown} />}
+        {card.kind === "text" && card.type === "comparison" && <ComparisonCard markdown={card.markdown} />}
+        {card.kind === "text" && card.type === "keyInsight" && <KeyInsightCard markdown={card.markdown} />}
+        {card.kind === "image" && <ImageCardView url={card.url} caption={card.caption} />}
 
-        <div style={{ marginTop: 28 }}>
-          {isLastCard ? (
-            <ContinueButton onClick={goNext} label={nextLabel} />
-          ) : (
-            <div style={{ display: "flex", justifyContent: "flex-end" }}>
-              <button
-                onClick={goNext}
-                style={{
-                  background: C.amber, color: "#0A0A0A", border: "none", borderRadius: 8,
-                  padding: "10px 18px", font: `600 13px/1 ${SANS}`, cursor: "pointer",
-                }}
-              >
-                Next →
-              </button>
-            </div>
-          )}
-        </div>
+        {!isHero && (
+          <div style={{ marginTop: 28 }}>
+            {isLastCard ? (
+              <ContinueButton onClick={goNext} label={nextLabel} />
+            ) : (
+              <div style={{ display: "flex", justifyContent: isKeyInsight ? "flex-start" : "flex-end" }}>
+                <button
+                  onClick={goNext}
+                  style={{
+                    background: isKeyInsight ? "#0A0A0A" : C.amber, color: isKeyInsight ? C.amber : "#0A0A0A",
+                    border: "none", borderRadius: 8, padding: "10px 18px", font: `600 13px/1 ${SANS}`, cursor: "pointer",
+                  }}
+                >
+                  Next →
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       <div style={{ display: "flex", justifyContent: "center", gap: 7, marginTop: 18 }}>
@@ -793,13 +1167,27 @@ function AcademyModulePlayerPage() {
         @keyframes tw-academy-player-pulse{0%,100%{box-shadow:0 0 0 0 ${C.amber}66;}50%{box-shadow:0 0 0 5px ${C.amber}00;}}
         .tw-academy-player-fadein{animation:tw-academy-player-fadein .4s ease both;}
         .tw-academy-player-pulse{animation:tw-academy-player-pulse 1.6s ease-in-out infinite;}
-        @keyframes tw-academy-card-in{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
         @keyframes tw-academy-card-out{to{opacity:0;transform:translateY(-20px);}}
-        .tw-academy-card-enter{animation:tw-academy-card-in .32s ease both;}
-        .tw-academy-card-exit{animation:tw-academy-card-out .2s ease both;}
+        .tw-academy-card-exit{animation:tw-academy-card-out .2s cubic-bezier(0.22,1,0.36,1) both;}
+        @keyframes tw-academy-card-fadeup{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+        @keyframes tw-academy-card-scalein{from{opacity:0;transform:scale(.96);}to{opacity:1;transform:scale(1);}}
+        @keyframes tw-academy-card-slideleft{from{opacity:0;transform:translateX(-30px);}to{opacity:1;transform:translateX(0);}}
+        @keyframes tw-academy-card-fadein{from{opacity:0;}to{opacity:1;}}
+        .tw-academy-card-anim-fadeup{animation:tw-academy-card-fadeup .4s cubic-bezier(0.22,1,0.36,1) both;}
+        .tw-academy-card-anim-hero{animation:tw-academy-card-scalein .5s cubic-bezier(0.22,1,0.36,1) both;}
+        .tw-academy-card-anim-keyinsight{animation:tw-academy-card-slideleft .4s cubic-bezier(0.22,1,0.36,1) both;}
+        .tw-academy-card-anim-image{animation:tw-academy-card-fadein .3s cubic-bezier(0.22,1,0.36,1) both;}
+        @keyframes tw-academy-hero-float{0%,100%{transform:translateY(0) rotate(-4deg);}50%{transform:translateY(-6px) rotate(4deg);}}
+        .tw-academy-hero-icon{animation:tw-academy-hero-float 3.4s ease-in-out infinite;}
+        .tw-academy-example-grid{display:grid;grid-template-columns:1fr 1fr;gap:28px;}
+        .tw-academy-comparison-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+        @media(max-width:560px){
+          .tw-academy-example-grid,.tw-academy-comparison-grid{grid-template-columns:1fr;}
+        }
         @media(prefers-reduced-motion:reduce){
-          .tw-academy-player-spin,.tw-academy-player-fadein,.tw-academy-player-pulse,
-          .tw-academy-card-enter,.tw-academy-card-exit{animation:none;}
+          .tw-academy-player-spin,.tw-academy-player-fadein,.tw-academy-player-pulse,.tw-academy-card-exit,
+          .tw-academy-card-anim-fadeup,.tw-academy-card-anim-hero,.tw-academy-card-anim-keyinsight,
+          .tw-academy-card-anim-image,.tw-academy-hero-icon{animation:none;}
         }
         .tw-academy-player-prose p{margin:0 0 14px;}
         .tw-academy-player-prose h1,.tw-academy-player-prose h2,.tw-academy-player-prose h3{
