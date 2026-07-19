@@ -525,7 +525,7 @@ function ContentCardSkeleton() {
     <div
       className="tw-academy-player-pulse"
       style={{
-        maxWidth: 680, margin: "0 auto", background: C.panel, border: `1px solid ${C.line}`,
+        maxWidth: 880, margin: "0 auto", background: C.panel, border: `1px solid ${C.line}`,
         borderRadius: 16, padding: 40, display: "flex", flexDirection: "column",
         alignItems: "center", gap: 14, textAlign: "center",
       }}
@@ -647,7 +647,7 @@ function ContentSection({
   const animClass = phase === "exiting" ? "tw-academy-card-exit" : phase === "entering" ? enterAnimClass(card) : undefined;
 
   return (
-    <div style={{ maxWidth: 680, margin: "0 auto" }}>
+    <div style={{ maxWidth: 880, margin: "0 auto" }}>
       <div style={{
         font: `600 11px/1 ${MONO}`, letterSpacing: ".08em", textTransform: "uppercase", color: C.faint, marginBottom: 14,
       }}>
@@ -1027,7 +1027,7 @@ function FinalTestSection({
           background: "rgba(8,11,18,.92)", backdropFilter: "blur(10px)", borderTop: `1px solid ${C.line}`,
           padding: "16px clamp(20px,4vw,44px)", display: "flex", justifyContent: "center",
         }}>
-          <div style={{ width: "100%", maxWidth: 760 }}>
+          <div style={{ width: "100%", maxWidth: 960 }}>
             <button
               onClick={submit}
               disabled={!allAnswered || saving}
@@ -1278,7 +1278,7 @@ function AcademyModulePlayerPage() {
         )}
       </div>
 
-      <div style={{ maxWidth: 760, margin: "0 auto", padding: "clamp(28px,4vw,48px) clamp(20px,4vw,44px)" }}>
+      <div style={{ maxWidth: 960, margin: "0 auto", padding: "clamp(28px,4vw,48px) clamp(20px,4vw,44px)" }}>
         {moduleTitle && (
           <h1 style={{ font: `700 clamp(20px,3vw,26px)/1.2 ${DISPLAY}`, color: C.text, margin: "0 0 24px" }}>{moduleTitle}</h1>
         )}

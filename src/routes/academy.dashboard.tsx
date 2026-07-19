@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Plane, LogOut, Clock, ChevronDown, CheckCircle2, Circle } from "lucide-react";
+import { ArrowLeft, Plane, LogOut, Clock, ChevronDown, CheckCircle2, Circle } from "lucide-react";
 import type { AcademyCourse, AcademyModule, AcademyUser } from "@/lib/academy-auth";
 import { getCourseModules } from "@/lib/academy-auth";
 
@@ -201,8 +201,15 @@ function AcademyDashboardPage() {
       <div style={{
         position: "sticky", top: 0, zIndex: 5, background: "rgba(8,11,18,.82)", backdropFilter: "blur(10px)",
         borderBottom: `1px solid ${C.line}`, padding: "14px clamp(20px,4vw,44px)",
-        display: "flex", alignItems: "center", gap: 16,
+        display: "flex", alignItems: "center", gap: 14,
       }}>
+        <button
+          onClick={() => navigate({ to: "/" })}
+          style={{ background: "transparent", border: "none", color: C.mute, cursor: "pointer", display: "flex", padding: 4 }}
+          aria-label="Back to home"
+        >
+          <ArrowLeft size={18} />
+        </button>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <div style={{ width: 30, height: 30, borderRadius: 7, background: C.amberSoft, border: `1px solid ${C.amber}44`, display: "grid", placeItems: "center" }}>
             <Plane size={15} color={C.amber} />
