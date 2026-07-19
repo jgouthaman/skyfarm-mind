@@ -52,3 +52,49 @@ export async function setModuleComplete(userId: string, moduleId: string, done: 
   } as any);
   if (error) throw error;
 }
+
+export type AcademyModuleSectionType = "content" | "quiz" | "final_test";
+
+export interface AcademyModuleSection {
+  id: string;
+  module_id: string;
+  order_index: number;
+  section_type: AcademyModuleSectionType;
+  title: string;
+  topic_brief: string;
+}
+
+export async function getModuleSections(moduleId: string): Promise<AcademyModuleSection[]> {
+  const { data, error } = await supabase
+    .from("academy_module_sections" as any)
+    .select("*")
+    .eq("module_id", moduleId)
+    .order("order_index");
+  if (error) throw error;
+  return (data as unknown as AcademyModuleSection[]) ?? [];
+}
+
+export interface SaveQuizAttemptInput {
+  user_id: string;
+  section_id: string;
+  generated_questions: unknown;
+  user_answers: Record<number, string>;
+  score: number;
+  total: number;
+  passed: boolean;
+}
+
+export async function saveQuizAttempt(input: SaveQuizAttemptInput): Promise<void> {
+  const { count, error: countError } = await supabase
+    .from("academy_quiz_attempts" as any)
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", input.user_id)
+    .eq("section_id", input.section_id);
+  if (countError) throw countError;
+
+  const { error } = await supabase.from("academy_quiz_attempts" as any).insert({
+    ...input,
+    attempt_number: (count ?? 0) + 1,
+  } as any);
+  if (error) throw error;
+}
