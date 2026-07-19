@@ -18,6 +18,7 @@ const C = {
   amber: "#FFB020", amberSoft: "rgba(255,176,32,0.10)",
   green: "#4FD08A", greenSoft: "rgba(79,208,138,0.10)",
   red: "#F27D7D", redSoft: "rgba(242,125,125,0.10)",
+  cardBody: "#B0B8C8", codeBg: "#131A28",
 };
 const DISPLAY = "'Space Grotesk', system-ui, -apple-system, sans-serif";
 const MONO = "'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace";
@@ -88,22 +89,118 @@ function scoreFromAnswers(answers: Record<number, string>, questions: GeneratedQ
   );
 }
 
-// ---------- content section ----------
+// ---------- content card parsing ----------
 
-function ContentSection({ section, onComplete }: { section: AcademyModuleSection; onComplete: () => void }) {
-  const [text, setText] = useState("");
-  const [status, setStatus] = useState<"loading" | "streaming" | "done" | "error">("loading");
+const MAX_CARD_CHARS = 400;
+
+function plainTextLength(md: string): number {
+  return md
+    .replace(/^#{1,6}\s+/gm, "")
+    .replace(/[*_`>]/g, "")
+    .replace(/\s+/g, " ")
+    .trim().length;
+}
+
+function splitLongChunk(chunk: string): string[] {
+  if (plainTextLength(chunk) <= MAX_CARD_CHARS) return [chunk];
+  const paragraphs = chunk.split(/\n\s*\n/).filter((p) => p.trim());
+  if (paragraphs.length <= 1) return [chunk];
+
+  const out: string[] = [];
+  let buf = "";
+  for (const p of paragraphs) {
+    const candidate = buf ? `${buf}\n\n${p}` : p;
+    if (buf && plainTextLength(candidate) > MAX_CARD_CHARS) {
+      out.push(buf);
+      buf = p;
+    } else {
+      buf = candidate;
+    }
+  }
+  if (buf) out.push(buf);
+  return out;
+}
+
+// Splits streamed markdown into one card per concept: a chunk starts at a
+// ## / ### heading (kept with its body) and ends at the next heading or an
+// --- rule (the rule itself is dropped, it's just a divider). Chunks over
+// MAX_CARD_CHARS of plain text are further split at paragraph boundaries.
+function splitIntoCards(markdown: string): string[] {
+  const lines = markdown.replace(/\r\n/g, "\n").split("\n");
+  const chunks: string[] = [];
+  let current: string[] = [];
+
+  const flush = () => {
+    const text = current.join("\n").trim();
+    if (text) chunks.push(text);
+    current = [];
+  };
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    const isHeading = /^#{2,3}\s+\S/.test(trimmed);
+    const isRule = /^-{3,}$/.test(trimmed);
+
+    if (isRule) {
+      flush();
+      continue;
+    }
+    if (isHeading && current.some((l) => l.trim().length > 0)) {
+      flush();
+    }
+    current.push(line);
+  }
+  flush();
+
+  if (chunks.length === 0) return [markdown.trim()];
+  return chunks.flatMap(splitLongChunk);
+}
+
+// ---------- content section (paced card-by-card reveal) ----------
+
+function ContentCardSkeleton() {
+  return (
+    <div
+      className="tw-academy-player-pulse"
+      style={{
+        maxWidth: 680, margin: "0 auto", background: C.panel, border: `1px solid ${C.line}`,
+        borderRadius: 16, padding: 40, display: "flex", flexDirection: "column",
+        alignItems: "center", gap: 14, textAlign: "center",
+      }}
+    >
+      <Loader2 size={22} className="tw-academy-player-spin" color={C.amber} />
+      <span style={{ font: `500 14px/1 ${SANS}`, color: C.mute }}>Generating content…</span>
+    </div>
+  );
+}
+
+function ContentSection({
+  section, sectionNumber, totalSections, isActive, nextLabel, onComplete,
+}: {
+  section: AcademyModuleSection;
+  sectionNumber: number;
+  totalSections: number;
+  isActive: boolean;
+  nextLabel: string;
+  onComplete: () => void;
+}) {
+  const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
+  const [cards, setCards] = useState<string[]>([]);
+  const [cardIndex, setCardIndex] = useState(0);
+  const [phase, setPhase] = useState<"idle" | "entering" | "exiting">("idle");
 
   const generate = useCallback(async () => {
     setStatus("loading");
-    setText("");
+    setCards([]);
+    setCardIndex(0);
     try {
-      let started = false;
-      await streamAnthropicContent(section.topic_brief, (acc) => {
-        if (!started) { started = true; setStatus("streaming"); }
-        setText(acc);
-      });
-      setStatus("done");
+      let acc = "";
+      await streamAnthropicContent(section.topic_brief, (fullTextSoFar) => { acc = fullTextSoFar; });
+      setCards(splitIntoCards(acc));
+      setCardIndex(0);
+      setStatus("ready");
+      setPhase("entering");
+      window.setTimeout(() => setPhase("idle"), 340);
     } catch (err) {
       console.error("[Academy] content generation failed:", err);
       setStatus("error");
@@ -112,18 +209,117 @@ function ContentSection({ section, onComplete }: { section: AcademyModuleSection
 
   useEffect(() => { generate(); }, [generate]);
 
-  return (
-    <div>
-      <h2 style={{ font: `700 clamp(20px,3vw,26px)/1.2 ${DISPLAY}`, color: C.text, margin: "0 0 18px" }}>{section.title}</h2>
+  const isLastCard = cardIndex >= cards.length - 1;
 
-      {status === "loading" && <Skeleton label="Generating content…" />}
-      {status === "error" && <ErrorRetry message="Content generation failed. Try again." onRetry={generate} />}
-      {(status === "streaming" || status === "done") && (
-        <div className="tw-academy-player-prose" style={{ font: `400 15px/1.7 ${SANS}`, color: C.text }}>
-          <ReactMarkdown>{text}</ReactMarkdown>
+  const goNext = useCallback(() => {
+    if (phase !== "idle") return;
+    if (cardIndex >= cards.length - 1) { onComplete(); return; }
+    setPhase("exiting");
+    window.setTimeout(() => {
+      setCardIndex((i) => i + 1);
+      setPhase("entering");
+      window.setTimeout(() => setPhase("idle"), 320);
+    }, 200);
+  }, [phase, cardIndex, cards.length, onComplete]);
+
+  const goPrev = useCallback(() => {
+    if (phase !== "idle" || cardIndex === 0) return;
+    setPhase("exiting");
+    window.setTimeout(() => {
+      setCardIndex((i) => Math.max(0, i - 1));
+      setPhase("entering");
+      window.setTimeout(() => setPhase("idle"), 320);
+    }, 200);
+  }, [phase, cardIndex]);
+
+  useEffect(() => {
+    if (!isActive || status !== "ready") return;
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "ArrowRight" || e.key === " ") { e.preventDefault(); goNext(); }
+      else if (e.key === "ArrowLeft") { e.preventDefault(); goPrev(); }
+      // Escape is intentionally a no-op — don't navigate away accidentally.
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [isActive, status, goNext, goPrev]);
+
+  if (status === "error") {
+    return (
+      <div>
+        <h2 style={{ font: `700 clamp(20px,3vw,26px)/1.2 ${DISPLAY}`, color: C.text, margin: "0 0 18px" }}>{section.title}</h2>
+        <ErrorRetry message="Content generation failed. Try again." onRetry={generate} />
+      </div>
+    );
+  }
+
+  if (status === "loading" || cards.length === 0) {
+    return <ContentCardSkeleton />;
+  }
+
+  // Already completed — static, fully-visible recap (no pacing/keyboard nav).
+  if (!isActive) {
+    return (
+      <div>
+        <h2 style={{ font: `700 clamp(20px,3vw,26px)/1.2 ${DISPLAY}`, color: C.text, margin: "0 0 18px" }}>{section.title}</h2>
+        <div className="tw-academy-card-prose">
+          <ReactMarkdown>{cards.join("\n\n")}</ReactMarkdown>
         </div>
-      )}
-      {status === "done" && <ContinueButton onClick={onComplete} />}
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ maxWidth: 680, margin: "0 auto" }}>
+      <div style={{
+        font: `600 11px/1 ${MONO}`, letterSpacing: ".08em", textTransform: "uppercase", color: C.faint, marginBottom: 14,
+      }}>
+        Section {sectionNumber} of {totalSections} · {section.title}
+      </div>
+
+      <div
+        key={cardIndex}
+        className={phase === "exiting" ? "tw-academy-card-exit" : phase === "entering" ? "tw-academy-card-enter" : undefined}
+        style={{ position: "relative", background: C.panel, border: `1px solid ${C.line}`, borderRadius: 16, padding: 40 }}
+      >
+        <span style={{ position: "absolute", top: 18, right: 22, font: `500 11px/1 ${MONO}`, color: C.faint }}>
+          Card {cardIndex + 1} of {cards.length}
+        </span>
+
+        <div className="tw-academy-card-prose">
+          <ReactMarkdown>{cards[cardIndex]}</ReactMarkdown>
+        </div>
+
+        <div style={{ marginTop: 28 }}>
+          {isLastCard ? (
+            <ContinueButton onClick={goNext} label={nextLabel} />
+          ) : (
+            <div style={{ display: "flex", justifyContent: "flex-end" }}>
+              <button
+                onClick={goNext}
+                style={{
+                  background: C.amber, color: "#0A0A0A", border: "none", borderRadius: 8,
+                  padding: "10px 18px", font: `600 13px/1 ${SANS}`, cursor: "pointer",
+                }}
+              >
+                Next →
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div style={{ display: "flex", justifyContent: "center", gap: 7, marginTop: 18 }}>
+        {cards.map((_, i) => (
+          <span
+            key={i}
+            style={{
+              width: 7, height: 7, borderRadius: "50%",
+              background: i <= cardIndex ? C.amber : "transparent",
+              border: i <= cardIndex ? "none" : `1.5px solid ${C.line2}`,
+            }}
+          />
+        ))}
+      </div>
     </div>
   );
 }
@@ -559,6 +755,14 @@ function AcademyModulePlayerPage() {
     sectionRefs.current[s.id]?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
+  function nextContentLabel(index: number): string {
+    const next = sections?.[index + 1];
+    if (!next) return "Continue";
+    if (next.section_type === "quiz") return "Continue to Quiz";
+    if (next.section_type === "final_test") return "Continue to Final Assessment";
+    return "Continue";
+  }
+
   function handleRestudy() {
     setAssessmentInProgress(false);
     loadSections();
@@ -589,7 +793,14 @@ function AcademyModulePlayerPage() {
         @keyframes tw-academy-player-pulse{0%,100%{box-shadow:0 0 0 0 ${C.amber}66;}50%{box-shadow:0 0 0 5px ${C.amber}00;}}
         .tw-academy-player-fadein{animation:tw-academy-player-fadein .4s ease both;}
         .tw-academy-player-pulse{animation:tw-academy-player-pulse 1.6s ease-in-out infinite;}
-        @media(prefers-reduced-motion:reduce){.tw-academy-player-spin,.tw-academy-player-fadein,.tw-academy-player-pulse{animation:none;}}
+        @keyframes tw-academy-card-in{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+        @keyframes tw-academy-card-out{to{opacity:0;transform:translateY(-20px);}}
+        .tw-academy-card-enter{animation:tw-academy-card-in .32s ease both;}
+        .tw-academy-card-exit{animation:tw-academy-card-out .2s ease both;}
+        @media(prefers-reduced-motion:reduce){
+          .tw-academy-player-spin,.tw-academy-player-fadein,.tw-academy-player-pulse,
+          .tw-academy-card-enter,.tw-academy-card-exit{animation:none;}
+        }
         .tw-academy-player-prose p{margin:0 0 14px;}
         .tw-academy-player-prose h1,.tw-academy-player-prose h2,.tw-academy-player-prose h3{
           font-family:${DISPLAY};color:${C.text};margin:22px 0 10px;
@@ -600,6 +811,25 @@ function AcademyModulePlayerPage() {
         .tw-academy-player-prose pre{background:${C.panel};border:1px solid ${C.line};border-radius:8px;padding:12px 14px;overflow-x:auto;}
         .tw-academy-player-prose strong{color:${C.text};}
         .tw-academy-player-prose a{color:${C.amber};}
+        .tw-academy-card-prose{font:400 16px/1.7 ${SANS};color:${C.cardBody};}
+        .tw-academy-card-prose p{margin:0 0 16px;}
+        .tw-academy-card-prose p:last-child{margin-bottom:0;}
+        .tw-academy-card-prose h1,.tw-academy-card-prose h2,.tw-academy-card-prose h3{
+          font:700 22px/1.3 ${DISPLAY};color:${C.text};margin:0 0 14px;
+        }
+        .tw-academy-card-prose ul,.tw-academy-card-prose ol{
+          margin:0 0 16px;padding-left:16px;border-left:3px solid ${C.amber};
+        }
+        .tw-academy-card-prose li{margin-bottom:8px;padding-left:8px;}
+        .tw-academy-card-prose code{
+          font-family:${MONO};background:${C.codeBg};color:${C.amber};padding:2px 6px;border-radius:4px;font-size:0.9em;
+        }
+        .tw-academy-card-prose pre{
+          font-family:${MONO};background:${C.codeBg};color:${C.amber};padding:12px;border-radius:8px;overflow-x:auto;
+        }
+        .tw-academy-card-prose pre code{background:transparent;padding:0;}
+        .tw-academy-card-prose strong{color:${C.text};}
+        .tw-academy-card-prose a{color:${C.amber};}
       `}</style>
 
       <div ref={pageTopRef} style={{ position: "sticky", top: 0, zIndex: 5, background: "rgba(8,11,18,.92)", backdropFilter: "blur(10px)", borderBottom: `1px solid ${C.line}` }}>
@@ -683,7 +913,14 @@ function AcademyModulePlayerPage() {
                 >
                   {isLocked && <LockedSection title={s.title} />}
                   {!isLocked && s.section_type === "content" && (
-                    <ContentSection section={s} onComplete={() => markSectionComplete(s.id)} />
+                    <ContentSection
+                      section={s}
+                      sectionNumber={i + 1}
+                      totalSections={sections.length}
+                      isActive={isCurrent}
+                      nextLabel={nextContentLabel(i)}
+                      onComplete={() => markSectionComplete(s.id)}
+                    />
                   )}
                   {!isLocked && s.section_type === "quiz" && (
                     <QuizSection section={s} user={user} onComplete={() => markSectionComplete(s.id)} />
