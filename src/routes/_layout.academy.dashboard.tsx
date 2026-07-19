@@ -94,7 +94,7 @@ function AcademyDashboardPage() {
       <div style={{
         position: "sticky", top: 0, zIndex: 5, background: "rgba(8,11,18,.82)", backdropFilter: "blur(10px)",
         borderBottom: `1px solid ${C.line}`, padding: "14px clamp(20px,4vw,44px)",
-        display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16,
+        display: "flex", alignItems: "center", gap: 16,
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <div style={{ width: 30, height: 30, borderRadius: 7, background: C.amberSoft, border: `1px solid ${C.amber}44`, display: "grid", placeItems: "center" }}>
@@ -102,23 +102,27 @@ function AcademyDashboardPage() {
           </div>
           <span style={{ font: `600 12px/1 ${MONO}`, letterSpacing: ".16em", color: C.text }}>TORQWINGS ACADEMY</span>
         </div>
-        <button
-          onClick={handleSignOut}
-          style={{
-            display: "flex", alignItems: "center", gap: 7, background: "transparent",
-            border: `1px solid ${C.line2}`, color: C.mute, borderRadius: 8, padding: "8px 12px",
-            font: `500 12px/1 ${SANS}`, cursor: "pointer",
-          }}
-        >
-          <LogOut size={14} /> Sign out
-        </button>
       </div>
 
       <div style={{ maxWidth: 920, margin: "0 auto", padding: "clamp(28px,4vw,48px) clamp(20px,4vw,44px)" }}>
-        <div style={{ font: `500 11px/1 ${MONO}`, letterSpacing: ".18em", color: C.amber, marginBottom: 12 }}>● MISSION CONTROL</div>
-        <h1 style={{ font: `700 clamp(26px,4vw,38px)/1.05 ${DISPLAY}`, letterSpacing: "-.02em", color: C.text, margin: 0 }}>
-          Welcome back, {firstName}.
-        </h1>
+        <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
+          <div>
+            <div style={{ font: `500 11px/1 ${MONO}`, letterSpacing: ".18em", color: C.amber, marginBottom: 12 }}>● MISSION CONTROL</div>
+            <h1 style={{ font: `700 clamp(26px,4vw,38px)/1.05 ${DISPLAY}`, letterSpacing: "-.02em", color: C.text, margin: 0 }}>
+              Welcome back, {firstName}.
+            </h1>
+          </div>
+          <button
+            onClick={handleSignOut}
+            style={{
+              display: "flex", alignItems: "center", gap: 7, background: "transparent",
+              border: `1px solid ${C.line2}`, color: C.mute, borderRadius: 8, padding: "8px 12px",
+              font: `500 12px/1 ${SANS}`, cursor: "pointer",
+            }}
+          >
+            <LogOut size={14} /> Sign out
+          </button>
+        </div>
 
         <div style={{ marginTop: 30, display: "flex", flexDirection: "column", gap: 12 }}>
           {user.courses.length === 0 ? (
