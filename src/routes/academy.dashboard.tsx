@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Plane, LogOut, Clock, ChevronDown, ArrowRight } from "lucide-react";
+import { Plane, LogOut, Clock, ChevronDown, CheckCircle2, Circle } from "lucide-react";
 import type { AcademyCourse, AcademyModule, AcademyUser } from "@/lib/academy-auth";
 import { getCourseModules } from "@/lib/academy-auth";
 
@@ -13,6 +13,7 @@ const C = {
   line: "#1E2838", line2: "#2A3648",
   text: "#E8ECF2", mute: "#8A94A6", faint: "#5C6678",
   amber: "#FFB020", amberSoft: "rgba(255,176,32,0.10)",
+  green: "#3DD68C",
 };
 const DISPLAY = "'Space Grotesk', system-ui, -apple-system, sans-serif";
 const MONO = "'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace";
@@ -23,16 +24,26 @@ function formatPrice(price: number | null): string | null {
   return `₹${price.toLocaleString("en-IN")}`;
 }
 
+function courseProgressLabel(modules: AcademyModule[] | undefined): string | null {
+  if (!modules || modules.length === 0) return null;
+  const done = modules.filter((m) => m.completed).length;
+  if (done === modules.length) return "Completed";
+  return `${done} of ${modules.length} modules done`;
+}
+
 function CourseCard({
-  course, isExpanded, modules, isLoading, onToggle, onStartCourse,
+  course, isExpanded, modules, isLoading, onToggle, onStartModule,
 }: {
   course: AcademyCourse;
   isExpanded: boolean;
   modules: AcademyModule[] | undefined;
   isLoading: boolean;
   onToggle: () => void;
-  onStartCourse: () => void;
+  onStartModule: (moduleId: string, e: React.MouseEvent) => void;
 }) {
+  const progressLabel = courseProgressLabel(modules);
+  const isComplete = progressLabel === "Completed";
+
   return (
     <div style={{ border: `1px solid ${isExpanded ? C.line2 : C.line}`, borderRadius: 14, background: C.panel, overflow: "hidden", transition: "border-color .2s" }}>
       <div
@@ -51,6 +62,16 @@ function CourseCard({
           )}
           <div style={{ font: `600 16px/1.3 ${DISPLAY}`, color: C.text, marginTop: 9 }}>{course.title}</div>
           <div style={{ font: `500 11px/1 ${MONO}`, color: C.faint, marginTop: 4 }}>{course.slug}</div>
+          {progressLabel && (
+            <div style={{
+              display: "inline-flex", alignItems: "center", gap: 5, marginTop: 8,
+              font: `600 10px/1 ${MONO}`, letterSpacing: ".06em", textTransform: "uppercase",
+              color: isComplete ? C.green : C.mute,
+            }}>
+              {isComplete && <CheckCircle2 size={12} color={C.green} />}
+              {progressLabel}
+            </div>
+          )}
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 14, flexShrink: 0 }}>
           <div style={{ textAlign: "right" }}>
@@ -81,32 +102,35 @@ function CourseCard({
           ) : (
             <div style={{ marginTop: 4 }}>
               {modules.map((m) => (
-                <div key={m.id} style={{ display: "flex", gap: 13, padding: "10px 0", borderTop: `1px solid ${C.line}` }}>
-                  <span style={{ font: `600 11px/1 ${MONO}`, color: C.faint, width: 22, flexShrink: 0, marginTop: 1 }}>
+                <div key={m.id} style={{ display: "flex", alignItems: "start", gap: 13, padding: "10px 0", borderTop: `1px solid ${C.line}` }}>
+                  <span style={{ font: `600 11px/1 ${MONO}`, color: C.faint, width: 22, flexShrink: 0, marginTop: 2 }}>
                     {String(m.order_index).padStart(2, "0")}
                   </span>
-                  <div>
+                  {m.completed ? (
+                    <CheckCircle2 size={16} color={C.green} style={{ flexShrink: 0, marginTop: 1 }} />
+                  ) : (
+                    <Circle size={16} color={C.faint} style={{ flexShrink: 0, marginTop: 1 }} />
+                  )}
+                  <div style={{ flex: 1 }}>
                     <div style={{ font: `500 14px/1.35 ${SANS}`, color: C.text }}>{m.title}</div>
                     {m.description && (
                       <div style={{ font: `400 12px/1.5 ${SANS}`, color: C.mute, marginTop: 2 }}>{m.description}</div>
                     )}
                   </div>
+                  <button
+                    onClick={(e) => onStartModule(m.id, e)}
+                    style={{
+                      flexShrink: 0, background: "transparent", color: C.amber,
+                      border: `1px solid ${C.amber}44`, borderRadius: 7, padding: "5px 10px",
+                      font: `600 11px/1 ${SANS}`, cursor: "pointer",
+                    }}
+                  >
+                    Start
+                  </button>
                 </div>
               ))}
             </div>
           )}
-
-          <div style={{ marginTop: 16, display: "flex", justifyContent: "flex-end" }}>
-            <button
-              onClick={onStartCourse}
-              style={{
-                display: "flex", alignItems: "center", gap: 7, background: C.amber, color: "#0A0A0A",
-                border: "none", borderRadius: 8, padding: "9px 16px", font: `600 12px/1 ${SANS}`, cursor: "pointer",
-              }}
-            >
-              Start course <ArrowRight size={14} />
-            </button>
-          </div>
         </div>
       )}
     </div>
@@ -141,10 +165,11 @@ function AcademyDashboardPage() {
     }
     setExpandedCourseId(courseId);
     if (courseId in modulesByCourseId) return; // already cached, don't refetch
+    if (!user) return;
 
     setLoadingCourseId(courseId);
     try {
-      const modules = await getCourseModules(courseId);
+      const modules = await getCourseModules(courseId, user.id);
       setModulesByCourseId((m) => ({ ...m, [courseId]: modules }));
     } catch (err) {
       console.error("[Academy] failed to load modules:", err);
@@ -154,8 +179,9 @@ function AcademyDashboardPage() {
     }
   }
 
-  function handleStartCourse(course: AcademyCourse) {
-    navigate({ to: "/academy/courses/$slug/learn", params: { slug: course.slug } });
+  function handleStartModule(course: AcademyCourse, moduleId: string, e: React.MouseEvent) {
+    e.stopPropagation();
+    navigate({ to: "/academy/courses/$slug/modules/$moduleId", params: { slug: course.slug, moduleId } });
   }
 
   if (!user) return null;
@@ -219,7 +245,7 @@ function AcademyDashboardPage() {
                 modules={modulesByCourseId[course.id]}
                 isLoading={loadingCourseId === course.id}
                 onToggle={() => handleToggleCourse(course.id)}
-                onStartCourse={() => handleStartCourse(course)}
+                onStartModule={(moduleId, e) => handleStartModule(course, moduleId, e)}
               />
             ))
           )}

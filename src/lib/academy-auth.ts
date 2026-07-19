@@ -32,12 +32,23 @@ export interface AcademyModule {
   title: string;
   description: string | null;
   order_index: number;
+  completed: boolean;
 }
 
-export async function getCourseModules(courseId: string): Promise<AcademyModule[]> {
-  const { data, error } = await supabase.rpc("get_course_modules" as any, {
+export async function getCourseModules(courseId: string, userId: string): Promise<AcademyModule[]> {
+  const { data, error } = await supabase.rpc("get_course_modules_for_user" as any, {
     p_course_id: courseId,
+    p_user_id: userId,
   } as any);
   if (error) throw error;
   return (data as AcademyModule[]) ?? [];
+}
+
+export async function setModuleComplete(userId: string, moduleId: string, done: boolean): Promise<void> {
+  const { error } = await supabase.rpc("set_module_complete" as any, {
+    p_user_id: userId,
+    p_module_id: moduleId,
+    p_done: done,
+  } as any);
+  if (error) throw error;
 }

@@ -72,6 +72,7 @@ import { Route as MissionHubTorqwingsDesignStudioAdvisorRouteImport } from './ro
 import { Route as LayoutLearnDroneDesignFundamentalsRouteImport } from './routes/_layout.learn.drone-design-fundamentals'
 import { Route as LayoutAuthCallbackRouteImport } from './routes/_layout.auth.callback'
 import { Route as AcademyCoursesSlugLearnRouteImport } from './routes/academy.courses.$slug.learn'
+import { Route as AcademyCoursesSlugModulesModuleIdRouteImport } from './routes/academy.courses.$slug.modules.$moduleId'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -412,6 +413,12 @@ const AcademyCoursesSlugLearnRoute = AcademyCoursesSlugLearnRouteImport.update({
   path: '/courses/$slug/learn',
   getParentRoute: () => AcademyRoute,
 } as any)
+const AcademyCoursesSlugModulesModuleIdRoute =
+  AcademyCoursesSlugModulesModuleIdRouteImport.update({
+    id: '/courses/$slug/modules/$moduleId',
+    path: '/courses/$slug/modules/$moduleId',
+    getParentRoute: () => AcademyRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof LayoutIndexRoute
@@ -476,6 +483,7 @@ export interface FileRoutesByFullPath {
   '/mission-hub/torqwings-design-studio/': typeof MissionHubTorqwingsDesignStudioIndexRoute
   '/pilot/missions/': typeof PilotMissionsIndexRoute
   '/academy/courses/$slug/learn': typeof AcademyCoursesSlugLearnRoute
+  '/academy/courses/$slug/modules/$moduleId': typeof AcademyCoursesSlugModulesModuleIdRoute
 }
 export interface FileRoutesByTo {
   '/academy': typeof AcademyRouteWithChildren
@@ -537,6 +545,7 @@ export interface FileRoutesByTo {
   '/mission-hub/torqwings-design-studio': typeof MissionHubTorqwingsDesignStudioIndexRoute
   '/pilot/missions': typeof PilotMissionsIndexRoute
   '/academy/courses/$slug/learn': typeof AcademyCoursesSlugLearnRoute
+  '/academy/courses/$slug/modules/$moduleId': typeof AcademyCoursesSlugModulesModuleIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -603,6 +612,7 @@ export interface FileRoutesById {
   '/mission-hub/torqwings-design-studio/': typeof MissionHubTorqwingsDesignStudioIndexRoute
   '/pilot/missions/': typeof PilotMissionsIndexRoute
   '/academy/courses/$slug/learn': typeof AcademyCoursesSlugLearnRoute
+  '/academy/courses/$slug/modules/$moduleId': typeof AcademyCoursesSlugModulesModuleIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -669,6 +679,7 @@ export interface FileRouteTypes {
     | '/mission-hub/torqwings-design-studio/'
     | '/pilot/missions/'
     | '/academy/courses/$slug/learn'
+    | '/academy/courses/$slug/modules/$moduleId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/academy'
@@ -730,6 +741,7 @@ export interface FileRouteTypes {
     | '/mission-hub/torqwings-design-studio'
     | '/pilot/missions'
     | '/academy/courses/$slug/learn'
+    | '/academy/courses/$slug/modules/$moduleId'
   id:
     | '__root__'
     | '/_layout'
@@ -795,6 +807,7 @@ export interface FileRouteTypes {
     | '/mission-hub/torqwings-design-studio/'
     | '/pilot/missions/'
     | '/academy/courses/$slug/learn'
+    | '/academy/courses/$slug/modules/$moduleId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -1249,6 +1262,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AcademyCoursesSlugLearnRouteImport
       parentRoute: typeof AcademyRoute
     }
+    '/academy/courses/$slug/modules/$moduleId': {
+      id: '/academy/courses/$slug/modules/$moduleId'
+      path: '/courses/$slug/modules/$moduleId'
+      fullPath: '/academy/courses/$slug/modules/$moduleId'
+      preLoaderRoute: typeof AcademyCoursesSlugModulesModuleIdRouteImport
+      parentRoute: typeof AcademyRoute
+    }
   }
 }
 
@@ -1304,12 +1324,15 @@ interface AcademyRouteChildren {
   AcademyDashboardRoute: typeof AcademyDashboardRoute
   AcademySignInRoute: typeof AcademySignInRoute
   AcademyCoursesSlugLearnRoute: typeof AcademyCoursesSlugLearnRoute
+  AcademyCoursesSlugModulesModuleIdRoute: typeof AcademyCoursesSlugModulesModuleIdRoute
 }
 
 const AcademyRouteChildren: AcademyRouteChildren = {
   AcademyDashboardRoute: AcademyDashboardRoute,
   AcademySignInRoute: AcademySignInRoute,
   AcademyCoursesSlugLearnRoute: AcademyCoursesSlugLearnRoute,
+  AcademyCoursesSlugModulesModuleIdRoute:
+    AcademyCoursesSlugModulesModuleIdRoute,
 }
 
 const AcademyRouteWithChildren =
