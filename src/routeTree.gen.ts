@@ -74,6 +74,8 @@ import { Route as MissionHubTorqwingsDesignStudioAdvisorRouteImport } from './ro
 import { Route as LayoutLearnDroneDesignFundamentalsRouteImport } from './routes/_layout.learn.drone-design-fundamentals'
 import { Route as LayoutAuthCallbackRouteImport } from './routes/_layout.auth.callback'
 import { Route as AcademyCoursesSlugLearnRouteImport } from './routes/academy.courses.$slug.learn'
+import { Route as AcademyModuleModuleIdQuizQuizIdRouteImport } from './routes/academy.module.$moduleId.quiz.$quizId'
+import { Route as AcademyModuleModuleIdLessonLessonIdRouteImport } from './routes/academy.module.$moduleId.lesson.$lessonId'
 import { Route as AcademyCoursesSlugModulesModuleIdRouteImport } from './routes/academy.courses.$slug.modules.$moduleId'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -425,6 +427,18 @@ const AcademyCoursesSlugLearnRoute = AcademyCoursesSlugLearnRouteImport.update({
   path: '/courses/$slug/learn',
   getParentRoute: () => AcademyRoute,
 } as any)
+const AcademyModuleModuleIdQuizQuizIdRoute =
+  AcademyModuleModuleIdQuizQuizIdRouteImport.update({
+    id: '/module/$moduleId/quiz/$quizId',
+    path: '/module/$moduleId/quiz/$quizId',
+    getParentRoute: () => AcademyRoute,
+  } as any)
+const AcademyModuleModuleIdLessonLessonIdRoute =
+  AcademyModuleModuleIdLessonLessonIdRouteImport.update({
+    id: '/module/$moduleId/lesson/$lessonId',
+    path: '/module/$moduleId/lesson/$lessonId',
+    getParentRoute: () => AcademyRoute,
+  } as any)
 const AcademyCoursesSlugModulesModuleIdRoute =
   AcademyCoursesSlugModulesModuleIdRouteImport.update({
     id: '/courses/$slug/modules/$moduleId',
@@ -498,6 +512,8 @@ export interface FileRoutesByFullPath {
   '/pilot/missions/': typeof PilotMissionsIndexRoute
   '/academy/courses/$slug/learn': typeof AcademyCoursesSlugLearnRoute
   '/academy/courses/$slug/modules/$moduleId': typeof AcademyCoursesSlugModulesModuleIdRoute
+  '/academy/module/$moduleId/lesson/$lessonId': typeof AcademyModuleModuleIdLessonLessonIdRoute
+  '/academy/module/$moduleId/quiz/$quizId': typeof AcademyModuleModuleIdQuizQuizIdRoute
 }
 export interface FileRoutesByTo {
   '/field': typeof FieldRoute
@@ -560,6 +576,8 @@ export interface FileRoutesByTo {
   '/pilot/missions': typeof PilotMissionsIndexRoute
   '/academy/courses/$slug/learn': typeof AcademyCoursesSlugLearnRoute
   '/academy/courses/$slug/modules/$moduleId': typeof AcademyCoursesSlugModulesModuleIdRoute
+  '/academy/module/$moduleId/lesson/$lessonId': typeof AcademyModuleModuleIdLessonLessonIdRoute
+  '/academy/module/$moduleId/quiz/$quizId': typeof AcademyModuleModuleIdQuizQuizIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -629,6 +647,8 @@ export interface FileRoutesById {
   '/pilot/missions/': typeof PilotMissionsIndexRoute
   '/academy/courses/$slug/learn': typeof AcademyCoursesSlugLearnRoute
   '/academy/courses/$slug/modules/$moduleId': typeof AcademyCoursesSlugModulesModuleIdRoute
+  '/academy/module/$moduleId/lesson/$lessonId': typeof AcademyModuleModuleIdLessonLessonIdRoute
+  '/academy/module/$moduleId/quiz/$quizId': typeof AcademyModuleModuleIdQuizQuizIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -698,6 +718,8 @@ export interface FileRouteTypes {
     | '/pilot/missions/'
     | '/academy/courses/$slug/learn'
     | '/academy/courses/$slug/modules/$moduleId'
+    | '/academy/module/$moduleId/lesson/$lessonId'
+    | '/academy/module/$moduleId/quiz/$quizId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/field'
@@ -760,6 +782,8 @@ export interface FileRouteTypes {
     | '/pilot/missions'
     | '/academy/courses/$slug/learn'
     | '/academy/courses/$slug/modules/$moduleId'
+    | '/academy/module/$moduleId/lesson/$lessonId'
+    | '/academy/module/$moduleId/quiz/$quizId'
   id:
     | '__root__'
     | '/_layout'
@@ -828,6 +852,8 @@ export interface FileRouteTypes {
     | '/pilot/missions/'
     | '/academy/courses/$slug/learn'
     | '/academy/courses/$slug/modules/$moduleId'
+    | '/academy/module/$moduleId/lesson/$lessonId'
+    | '/academy/module/$moduleId/quiz/$quizId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -1296,6 +1322,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AcademyCoursesSlugLearnRouteImport
       parentRoute: typeof AcademyRoute
     }
+    '/academy/module/$moduleId/quiz/$quizId': {
+      id: '/academy/module/$moduleId/quiz/$quizId'
+      path: '/module/$moduleId/quiz/$quizId'
+      fullPath: '/academy/module/$moduleId/quiz/$quizId'
+      preLoaderRoute: typeof AcademyModuleModuleIdQuizQuizIdRouteImport
+      parentRoute: typeof AcademyRoute
+    }
+    '/academy/module/$moduleId/lesson/$lessonId': {
+      id: '/academy/module/$moduleId/lesson/$lessonId'
+      path: '/module/$moduleId/lesson/$lessonId'
+      fullPath: '/academy/module/$moduleId/lesson/$lessonId'
+      preLoaderRoute: typeof AcademyModuleModuleIdLessonLessonIdRouteImport
+      parentRoute: typeof AcademyRoute
+    }
     '/academy/courses/$slug/modules/$moduleId': {
       id: '/academy/courses/$slug/modules/$moduleId'
       path: '/courses/$slug/modules/$moduleId'
@@ -1360,6 +1400,8 @@ interface AcademyRouteChildren {
   AcademyIndexRoute: typeof AcademyIndexRoute
   AcademyCoursesSlugLearnRoute: typeof AcademyCoursesSlugLearnRoute
   AcademyCoursesSlugModulesModuleIdRoute: typeof AcademyCoursesSlugModulesModuleIdRoute
+  AcademyModuleModuleIdLessonLessonIdRoute: typeof AcademyModuleModuleIdLessonLessonIdRoute
+  AcademyModuleModuleIdQuizQuizIdRoute: typeof AcademyModuleModuleIdQuizQuizIdRoute
 }
 
 const AcademyRouteChildren: AcademyRouteChildren = {
@@ -1369,6 +1411,9 @@ const AcademyRouteChildren: AcademyRouteChildren = {
   AcademyCoursesSlugLearnRoute: AcademyCoursesSlugLearnRoute,
   AcademyCoursesSlugModulesModuleIdRoute:
     AcademyCoursesSlugModulesModuleIdRoute,
+  AcademyModuleModuleIdLessonLessonIdRoute:
+    AcademyModuleModuleIdLessonLessonIdRoute,
+  AcademyModuleModuleIdQuizQuizIdRoute: AcademyModuleModuleIdQuizQuizIdRoute,
 }
 
 const AcademyRouteWithChildren =

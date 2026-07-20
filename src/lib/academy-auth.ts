@@ -53,6 +53,28 @@ export async function setModuleComplete(userId: string, moduleId: string, done: 
   if (error) throw error;
 }
 
+// Fallback for the lesson/quiz routes' "back to module" link when the page is
+// opened directly (no ?slug= carried over from the grid page). Two queries
+// because academy_course_modules doesn't carry the course slug itself.
+export async function getCourseSlugForModule(moduleId: string): Promise<string | null> {
+  const { data: moduleRows, error: moduleError } = await supabase
+    .from("academy_course_modules" as any)
+    .select("course_id")
+    .eq("id", moduleId)
+    .limit(1);
+  if (moduleError) throw moduleError;
+  const courseId = (moduleRows as any)?.[0]?.course_id as string | undefined;
+  if (!courseId) return null;
+
+  const { data: courseRows, error: courseError } = await supabase
+    .from("academy_courses" as any)
+    .select("slug")
+    .eq("id", courseId)
+    .limit(1);
+  if (courseError) throw courseError;
+  return ((courseRows as any)?.[0]?.slug as string | undefined) ?? null;
+}
+
 export type AcademyModuleSectionType = "content" | "quiz" | "final_test";
 
 export interface AcademyModuleSection {
