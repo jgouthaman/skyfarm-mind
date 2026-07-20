@@ -741,25 +741,27 @@ export function AuthoredContentSection({
       }}>
         Section {sectionNumber} of {totalSections} · {sectionTitle}
       </div>
-      <div className="lesson-viewer lv-embedded lv-shell lv-with-sidebar">
-        <ChapterNav
-          chapters={chapters}
-          activeIndex={activeChapterIndex}
-          onJump={(i) => slideDeckRef.current?.scrollToChapter(lesson.slides[i].id)}
-        />
-        <div className="lv-lessoncol">
-          {lesson.missionBrief && <MissionBrief text={lesson.missionBrief} />}
-          <SlideDeck
-            ref={slideDeckRef}
-            layout="scroll"
-            slides={lesson.slides}
-            customComponents={academyCustomSlideComponents}
-            onActiveChapterChange={setActiveChapterIndex}
-            onComplete={onComplete}
-            completeLabel={isActive ? nextLabel : "Back to module →"}
+      <div className="lesson-viewer lv-embedded">
+        <div className="lv-shell lv-with-sidebar">
+          <ChapterNav
+            chapters={chapters}
+            activeIndex={activeChapterIndex}
+            onJump={(i) => slideDeckRef.current?.scrollToChapter(lesson.slides[i].id)}
           />
+          <div className="lv-lessoncol">
+            {lesson.missionBrief && <MissionBrief text={lesson.missionBrief} />}
+            <SlideDeck
+              ref={slideDeckRef}
+              layout="scroll"
+              slides={lesson.slides}
+              customComponents={academyCustomSlideComponents}
+              onActiveChapterChange={setActiveChapterIndex}
+              onComplete={onComplete}
+              completeLabel={isActive ? nextLabel : "Back to module →"}
+            />
+          </div>
+          {quickRefData && <QuickRefRail data={quickRefData} />}
         </div>
-        {quickRefData && <QuickRefRail data={quickRefData} />}
       </div>
     </div>
   );

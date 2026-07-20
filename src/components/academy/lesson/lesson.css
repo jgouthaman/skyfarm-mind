@@ -67,7 +67,12 @@
   background: none;
   background-image: none;
 }
-.lesson-viewer.lv-embedded .lv-quickref { top: 16px; }
+/* Embedded mode has no topbar/progress of its own (that chrome lives in the
+   surrounding module-player page) but that page's own topbar is still
+   sticky above it, so the sticky offset needs to clear that instead of the
+   16px gap that made sense before this page grew a sticky topbar. */
+.lesson-viewer.lv-embedded .lv-quickref,
+.lesson-viewer.lv-embedded .lv-chapternav { top: 90px; }
 
 .lesson-viewer h1,
 .lesson-viewer h2,
