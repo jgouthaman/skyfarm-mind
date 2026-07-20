@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { Plane, Trophy, Loader2, RotateCcw, Lock, Lightbulb, CheckCircle2, ArrowLeftRight } from "lucide-react";
 import type { AcademyModuleSection, AcademyUser } from "@/lib/academy-auth";
 import { cacheModuleContent, saveQuizAttempt, setModuleComplete } from "@/lib/academy-auth";
@@ -245,10 +246,20 @@ function pickImageForContext(precedingText: string, position: number): { url: st
   return { url: img.url, caption: heading ?? img.caption };
 }
 
+// Section titles already come from `section.title` and are rendered by
+// HeroCard directly. If the generated/cached markdown *also* opens with
+// a bare "# Title" line, that line becomes an isolated first chunk with
+// no other text in it, and HeroCard's hook (firstSentence of chunk[0])
+// ends up echoing the title back verbatim. Stripping a leading
+// standalone H1 avoids that duplicate.
+function stripLeadingTitleLine(markdown: string): string {
+  return markdown.replace(/^\s*#\s+.+\n+/, "");
+}
+
 // First card is always the hero. Every 4th text card thereafter (except the
 // very last) is followed by a supporting diagram card.
 function buildContentCards(rawMarkdown: string): PositionedCard[] {
-  const chunks = mergeShortCards(splitIntoCards(rawMarkdown));
+  const chunks = mergeShortCards(splitIntoCards(stripLeadingTitleLine(rawMarkdown)));
   const cards: PositionedCard[] = [];
   let imagesInserted = 0;
 
@@ -362,7 +373,7 @@ function ConceptCard({ number, markdown }: { number: number; markdown: string })
         {String(number).padStart(2, "0")}
       </div>
       <div className="tw-academy-card-prose" style={{ borderLeft: `2px solid ${C.amber}55`, paddingLeft: 22, flex: 1 }}>
-        <ReactMarkdown>{markdown}</ReactMarkdown>
+        <ReactMarkdown remarkPlugins={[remarkGfm]}>{markdown}</ReactMarkdown>
       </div>
     </div>
   );
@@ -380,7 +391,7 @@ function FormulaCard({ markdown }: { markdown: string }) {
       </div>
       {explanation && (
         <div className="tw-academy-card-prose" style={{ marginTop: 20, fontSize: 14 }}>
-          <ReactMarkdown>{explanation}</ReactMarkdown>
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>{explanation}</ReactMarkdown>
         </div>
       )}
     </div>
@@ -396,7 +407,7 @@ function ExampleCard({ markdown }: { markdown: string }) {
           Problem
         </div>
         <div className="tw-academy-card-prose" style={{ fontSize: 14 }}>
-          <ReactMarkdown>{setup || markdown}</ReactMarkdown>
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>{setup || markdown}</ReactMarkdown>
         </div>
       </div>
       <div>
@@ -422,7 +433,7 @@ function ComparisonCard({ markdown }: { markdown: string }) {
   const { leftLabel, rightLabel, leftItems, rightItems } = useMemo(() => extractComparisonParts(markdown), [markdown]);
 
   if (leftItems.length === 0 && rightItems.length === 0) {
-    return <div className="tw-academy-card-prose"><ReactMarkdown>{markdown}</ReactMarkdown></div>;
+    return <div className="tw-academy-card-prose"><ReactMarkdown remarkPlugins={[remarkGfm]}>{markdown}</ReactMarkdown></div>;
   }
 
   return (
@@ -628,7 +639,7 @@ export function ContentSection({
       <div>
         <h2 style={{ font: `700 clamp(20px,3vw,26px)/1.2 ${DISPLAY}`, color: C.text, margin: "0 0 18px" }}>{section.title}</h2>
         <div className="tw-academy-card-prose">
-          <ReactMarkdown>{recap}</ReactMarkdown>
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>{recap}</ReactMarkdown>
         </div>
       </div>
     );
