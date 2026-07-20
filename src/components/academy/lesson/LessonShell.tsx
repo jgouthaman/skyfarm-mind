@@ -3,13 +3,15 @@ import { ArrowLeft, Plane } from "lucide-react";
 import "./lesson.css";
 
 export function LessonShell({
-  title, sectionIndex, totalSections, onBack, children,
+  title, sectionIndex, totalSections, onBack, children, sidebar,
 }: {
   title: string;
   sectionIndex: number;
   totalSections: number;
   onBack: () => void;
   children: ReactNode;
+  /** Optional left sidebar (e.g. ChapterNav) — adds a third grid column ahead of the content. */
+  sidebar?: ReactNode;
 }) {
   const progressPct = totalSections > 1 ? ((sectionIndex - 1) / (totalSections - 1)) * 100 : 0;
 
@@ -39,7 +41,10 @@ export function LessonShell({
         </div>
       </div>
 
-      <div className="lv-shell">{children}</div>
+      <div className={`lv-shell${sidebar ? " lv-with-sidebar" : ""}`}>
+        {sidebar}
+        {children}
+      </div>
     </div>
   );
 }

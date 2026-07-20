@@ -126,8 +126,12 @@ export interface RowBlock {
 export interface Slide {
   id: string;
   eyebrow: string;
+  /** Short label for the chapter sidebar nav — falls back to `eyebrow` when omitted. */
+  navTitle?: string;
   readTime?: string;
   blocks: SlideBlock[];
+  /** Overrides the lesson-level quickRef while this chapter is active. */
+  quickRef?: QuickRefData;
 }
 
 export interface QuickRefFact {
@@ -147,6 +151,8 @@ export interface Lesson {
   title: string;
   sectionIndex: number;
   totalSections: number;
+  /** "Mission brief" banner at the top of the lesson — what the learner will be able to do by the end. */
+  missionBrief?: RichText;
   slides: Slide[];
   quickRef?: QuickRefData;
 }

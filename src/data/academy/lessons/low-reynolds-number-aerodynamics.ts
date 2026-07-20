@@ -9,6 +9,7 @@ export const lowReynoldsNumberAerodynamicsLesson: Lesson = {
   title: "Low Reynolds Number Aerodynamics",
   sectionIndex: 2,
   totalSections: 11,
+  missionBrief: richText("By the end of this lesson you'll be able to compute the Reynolds number for a given wing, explain why it separates laminar from turbulent flow, and place a small-drone wing correctly on the low-Re spectrum."),
   quickRef: {
     formula: "Re = ρVL / μ",
     facts: [
@@ -24,6 +25,7 @@ export const lowReynoldsNumberAerodynamicsLesson: Lesson = {
     {
       id: "formula",
       eyebrow: "Foundation · Low-Re Aerodynamics",
+      navTitle: "The Formula",
       readTime: "~2 min",
       blocks: [
         { type: "heading", level: 1, text: "What is Reynolds Number?" },
@@ -95,6 +97,7 @@ export const lowReynoldsNumberAerodynamicsLesson: Lesson = {
     {
       id: "intuition",
       eyebrow: "Foundation · Low-Re Aerodynamics",
+      navTitle: "Physical Intuition",
       readTime: "~2 min",
       blocks: [
         { type: "heading", level: 2, text: "The physical intuition" },
@@ -146,6 +149,7 @@ export const lowReynoldsNumberAerodynamicsLesson: Lesson = {
     {
       id: "regime",
       eyebrow: "Foundation · Low-Re Aerodynamics",
+      navTitle: "The Low-Re Regime",
       readTime: "~1 min",
       blocks: [
         { type: "heading", level: 2, text: "What \"low Reynolds number\" means" },
@@ -214,6 +218,7 @@ export const lowReynoldsNumberAerodynamicsLesson: Lesson = {
     {
       id: "example-problem",
       eyebrow: "Foundation · Low-Re Aerodynamics",
+      navTitle: "Worked Example: Setup",
       readTime: "~1 min",
       blocks: [
         { type: "heading", level: 2, text: "Worked example" },
@@ -254,6 +259,7 @@ export const lowReynoldsNumberAerodynamicsLesson: Lesson = {
     {
       id: "solve",
       eyebrow: "Foundation · Low-Re Aerodynamics",
+      navTitle: "Worked Example: Solve",
       readTime: "~1 min",
       blocks: [
         { type: "heading", level: 2, text: "Solve" },
