@@ -13,6 +13,7 @@ export const lowReynoldsNumberAerodynamicsQuiz: Quiz = {
       id: "q1",
       chapterId: "formula",
       chapterTitle: "The Formula",
+      shortLabel: "the force ratio",
       question: "What does the Reynolds number formula Re = ρVL / μ represent?",
       correctOptionId: "a",
       options: [
@@ -26,6 +27,7 @@ export const lowReynoldsNumberAerodynamicsQuiz: Quiz = {
       id: "q2",
       chapterId: "intuition",
       chapterTitle: "Physical Intuition",
+      shortLabel: "viscous dominance",
       question: "Why does a low Reynolds number mean viscous forces matter more?",
       correctOptionId: "a",
       options: [
@@ -39,6 +41,7 @@ export const lowReynoldsNumberAerodynamicsQuiz: Quiz = {
       id: "q3",
       chapterId: "regime",
       chapterTitle: "The Low-Re Regime",
+      shortLabel: "small-drone Re band",
       question: "Where do small drones typically sit on the Reynolds number spectrum?",
       correctOptionId: "b",
       options: [
@@ -52,6 +55,7 @@ export const lowReynoldsNumberAerodynamicsQuiz: Quiz = {
       id: "q4",
       chapterId: "example-problem",
       chapterTitle: "Worked Example: Setup",
+      shortLabel: "known values",
       question: "A drone wing has a 250 mm chord and cruises at 10 m/s at sea level. Which values do you need to compute its Reynolds number?",
       correctOptionId: "a",
       options: [
@@ -65,6 +69,7 @@ export const lowReynoldsNumberAerodynamicsQuiz: Quiz = {
       id: "q5",
       chapterId: "solve",
       chapterTitle: "Worked Example: Solve",
+      shortLabel: "design implication",
       question: "Solving Re = (1.225 × 10 × 0.25) / 1.789×10⁻⁵ gives approximately 171,000. What does this tell the designer?",
       correctOptionId: "a",
       options: [

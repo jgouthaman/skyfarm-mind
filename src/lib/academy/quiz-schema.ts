@@ -19,6 +19,8 @@ export interface QuizQuestion {
   chapterId: string;
   chapterTitle: string;
   question: string;
+  /** 2-4 word summary for the condensed result row, e.g. "the force ratio". */
+  shortLabel: string;
   options: QuizAnswerOption[];
   correctOptionId: string;
 }

@@ -163,7 +163,7 @@ const ScrollSlideDeck = forwardRef<SlideDeckHandle, Omit<SlideDeckProps, "layout
             className="lv-slide lv-active lv-scrollchapter"
           >
             <div className="lv-meta">
-              <p className="lv-eyebrow">{slide.eyebrow}</p>
+              <p className="lv-eyebrow">Chapter {i + 1}</p>
               {slide.readTime && <span className="lv-readtime">🕑 {slide.readTime}</span>}
             </div>
             {slide.blocks.map((block, bi) => (

@@ -18,6 +18,7 @@ export function ChapterNav({
 
   return (
     <nav className="lv-chapternav" aria-label="Lesson chapters">
+      <p className="lv-chapternav-title">In this lesson</p>
       <div className="lv-chapternav-list">
         {chapters.map((chapter, i) => (
           <button

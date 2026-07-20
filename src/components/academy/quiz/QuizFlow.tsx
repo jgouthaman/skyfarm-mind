@@ -1,33 +1,32 @@
-import { useEffect, useState } from "react";
-import { CheckCircle2, XCircle } from "lucide-react";
+import { useState } from "react";
+import { X } from "lucide-react";
 import type { Quiz } from "@/lib/academy/quiz-schema";
 
 export type QuizAnswers = Record<string, string>;
 
-// Forward-only, one question at a time: once an option is picked it's
-// locked in (no re-selecting, no back button) and immediate feedback shows
-// on the option itself plus a reasoning line below, before "Next question"
-// becomes available. Chrome (topbar + "Question N of M" progress bar) is
-// owned by the caller via LessonShell, matching the lesson page's pattern —
-// this component only renders the question card.
+// Forward-only, one question at a time, self-contained: the card owns its
+// own close/eyebrow/counter header and progress bar rather than relying on
+// page-level chrome for progress. Once an option is picked it's locked in
+// (no re-selecting, no back button) — immediate feedback shows on the
+// option itself plus a one-line reasoning note before "Next question"
+// becomes available.
 export function QuizFlow({
-  quiz, onFinish, onQuestionChange,
+  quiz, onFinish, onClose,
 }: {
   quiz: Quiz;
   onFinish: (answers: QuizAnswers) => void;
-  onQuestionChange?: (index: number) => void;
+  onClose: () => void;
 }) {
   const [qIndex, setQIndex] = useState(0);
   const [answers, setAnswers] = useState<QuizAnswers>({});
   const [selected, setSelected] = useState<string | null>(null);
-
-  useEffect(() => { onQuestionChange?.(qIndex); }, [qIndex, onQuestionChange]);
 
   const question = quiz.questions[qIndex];
   const isLast = qIndex === quiz.questions.length - 1;
   const isCorrect = selected === question.correctOptionId;
   const selectedOption = selected ? question.options.find((o) => o.id === selected) ?? null : null;
   const correctOption = question.options.find((o) => o.id === question.correctOptionId) ?? null;
+  const progressPct = ((qIndex + (selected ? 1 : 0)) / quiz.questions.length) * 100;
 
   function selectOption(optionId: string) {
     if (selected) return;
@@ -46,7 +45,17 @@ export function QuizFlow({
   return (
     <div className="lv-quiz-shell">
       <div className="lv-quiz-card">
-        <p className="lv-quiz-eyebrow">{question.chapterTitle}</p>
+        <div className="lv-quiz-head">
+          <button type="button" className="lv-quiz-close" onClick={onClose} aria-label="Close quiz">
+            <X size={16} />
+          </button>
+          <p className="lv-quiz-eyebrow">Test Your Knowledge</p>
+          <span className="lv-quiz-counter">Question {qIndex + 1} of {quiz.questions.length}</span>
+        </div>
+        <div className="lv-quiz-track">
+          <span className="lv-quiz-track-fill" style={{ width: `${progressPct}%` }} />
+        </div>
+
         <p className="lv-quiz-question">{question.question}</p>
 
         <div className="lv-quiz-opts">
@@ -65,9 +74,11 @@ export function QuizFlow({
                 disabled={selected != null}
                 onClick={() => selectOption(opt.id)}
               >
-                <span className="lv-quiz-opt-text">{opt.text}</span>
-                {revealed && isOptCorrect && <CheckCircle2 size={16} />}
-                {revealed && isSelected && !isOptCorrect && <XCircle size={16} />}
+                <span className="lv-quiz-opt-dot">
+                  {revealed && isOptCorrect && "✓"}
+                  {revealed && isSelected && !isOptCorrect && "✕"}
+                </span>
+                <span>{opt.text}</span>
               </button>
             );
           })}
@@ -75,8 +86,9 @@ export function QuizFlow({
 
         {selected && (
           <div className={`lv-quiz-reasoning ${isCorrect ? "lv-quiz-reasoning-ok" : "lv-quiz-reasoning-bad"}`}>
-            <p className="lv-h">{isCorrect ? "Correct" : "Not quite"}</p>
-            <p>{selectedOption?.reasoning}</p>
+            <p>
+              <strong>{isCorrect ? "Correct." : "Not quite."}</strong> {selectedOption?.reasoning}
+            </p>
             {!isCorrect && correctOption && (
               <p className="lv-quiz-correct-answer">Correct answer: {correctOption.text}</p>
             )}
@@ -86,7 +98,7 @@ export function QuizFlow({
         <button
           type="button"
           className="lv-btn lv-primary"
-          style={{ width: "100%", marginTop: 20 }}
+          style={{ width: "100%", marginTop: 16 }}
           disabled={!selected}
           onClick={next}
         >
