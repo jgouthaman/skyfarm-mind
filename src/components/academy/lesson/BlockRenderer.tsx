@@ -76,7 +76,11 @@ export function BlockRenderer({
       return <p><RichTextView nodes={block.text} /></p>;
 
     case "formula":
-      return <p className={`lv-formula lv-${block.size ?? "md"}`}>{block.expression}</p>;
+      return (
+        <div className="lv-formula-card">
+          <p className={`lv-formula lv-${block.size ?? "md"}`}>{block.expression}</p>
+        </div>
+      );
 
     case "callout":
       return (
