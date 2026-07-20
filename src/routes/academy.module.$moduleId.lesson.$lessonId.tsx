@@ -104,7 +104,7 @@ function AcademyLessonPage() {
         </div>
       </ModuleTopBar>
 
-      <div style={{ maxWidth: 960, margin: "0 auto", padding: "clamp(28px,4vw,48px) clamp(20px,4vw,44px)" }}>
+      <div style={{ maxWidth: 1340, margin: "0 auto", padding: "clamp(28px,4vw,48px) clamp(20px,4vw,44px)" }}>
         {sections === null && !sectionsError && <Skeleton label="Loading lesson…" />}
         {sectionsError && <ErrorRetry message="Couldn't load this lesson. Try again." onRetry={loadSections} />}
 

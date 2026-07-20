@@ -4,9 +4,10 @@ import { Plane, Trophy, Loader2, RotateCcw, Lock, Lightbulb, CheckCircle2, Arrow
 import type { AcademyModuleSection, AcademyUser } from "@/lib/academy-auth";
 import { cacheModuleContent, saveQuizAttempt, setModuleComplete } from "@/lib/academy-auth";
 import { streamAnthropicContent, generateAnthropicQuestions, type GeneratedQuestion } from "@/lib/academy/anthropic-client";
-import { SlideDeck } from "@/components/academy/lesson/SlideDeck";
+import { SlideDeck, type SlideDeckHandle } from "@/components/academy/lesson/SlideDeck";
 import { QuickRefRail } from "@/components/academy/lesson/QuickRefRail";
-import { BlockRenderer } from "@/components/academy/lesson/BlockRenderer";
+import { ChapterNav } from "@/components/academy/lesson/ChapterNav";
+import { MissionBrief } from "@/components/academy/lesson/MissionBrief";
 import { academyCustomSlideComponents } from "@/components/academy/lesson/custom/registry";
 import { authoredLessonsBySectionTitle, normalizeSectionTitle } from "@/data/academy/lessons/registry";
 import type { Lesson } from "@/lib/academy/lesson-schema";
@@ -707,6 +708,14 @@ export function ContentSection({
 // the AI-generated ContentSection above. Used when a section's title has a
 // matching entry in authoredLessonsBySectionTitle — see that registry for
 // which real DB sections currently opt into this.
+//
+// Same chapter-sidebar/scroll treatment as the standalone /academy/lesson-demo
+// page (this is the real page students navigate through, so it needs the
+// same redesign, not just the reference demo). Continuous-scroll mode makes
+// the old isActive-gated "paced vs. static recap" split unnecessary — every
+// chapter is always visible either way — so isActive now only changes the
+// completion button's label; re-clicking it on an already-completed section
+// is a harmless no-op re-navigation back to the module grid.
 export function AuthoredContentSection({
   lesson, sectionNumber, totalSections, sectionTitle, isActive, nextLabel, onComplete,
 }: {
@@ -718,18 +727,12 @@ export function AuthoredContentSection({
   nextLabel: string;
   onComplete: () => void;
 }) {
-  if (!isActive) {
-    return (
-      <div>
-        <h2 style={{ font: `700 clamp(20px,3vw,26px)/1.2 ${DISPLAY}`, color: C.text, margin: "0 0 18px" }}>{sectionTitle}</h2>
-        <div className="lesson-viewer lv-embedded">
-          {lesson.slides.flatMap((slide) => slide.blocks).map((block, i) => (
-            <BlockRenderer key={i} block={block} customComponents={academyCustomSlideComponents} />
-          ))}
-        </div>
-      </div>
-    );
-  }
+  const slideDeckRef = useRef<SlideDeckHandle>(null);
+  const [activeChapterIndex, setActiveChapterIndex] = useState(0);
+
+  const chapters = lesson.slides.map((slide) => ({ id: slide.id, label: slide.navTitle ?? slide.eyebrow }));
+  const activeSlide = lesson.slides[activeChapterIndex];
+  const quickRefData = activeSlide?.quickRef ?? lesson.quickRef;
 
   return (
     <div>
@@ -738,14 +741,25 @@ export function AuthoredContentSection({
       }}>
         Section {sectionNumber} of {totalSections} · {sectionTitle}
       </div>
-      <div className="lesson-viewer lv-embedded lv-shell">
-        <SlideDeck
-          slides={lesson.slides}
-          customComponents={academyCustomSlideComponents}
-          onComplete={onComplete}
-          completeLabel={nextLabel}
+      <div className="lesson-viewer lv-embedded lv-shell lv-with-sidebar">
+        <ChapterNav
+          chapters={chapters}
+          activeIndex={activeChapterIndex}
+          onJump={(i) => slideDeckRef.current?.scrollToChapter(lesson.slides[i].id)}
         />
-        {lesson.quickRef && <QuickRefRail data={lesson.quickRef} />}
+        <div className="lv-lessoncol">
+          {lesson.missionBrief && <MissionBrief text={lesson.missionBrief} />}
+          <SlideDeck
+            ref={slideDeckRef}
+            layout="scroll"
+            slides={lesson.slides}
+            customComponents={academyCustomSlideComponents}
+            onActiveChapterChange={setActiveChapterIndex}
+            onComplete={onComplete}
+            completeLabel={isActive ? nextLabel : "Back to module →"}
+          />
+        </div>
+        {quickRefData && <QuickRefRail data={quickRefData} />}
       </div>
     </div>
   );
