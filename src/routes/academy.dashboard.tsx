@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, Plane, LogOut, Clock, ChevronDown, CheckCircle2, Circle } from "lucide-react";
+import { ArrowLeft, Plane, LogOut, Clock, ChevronDown, CheckCircle2 } from "lucide-react";
 import type { AcademyCourse, AcademyModule, AcademyUser } from "@/lib/academy-auth";
 import { getCourseModules } from "@/lib/academy-auth";
 
@@ -106,10 +106,8 @@ function CourseCard({
                   <span style={{ font: `600 11px/1 ${MONO}`, color: C.faint, width: 22, flexShrink: 0, marginTop: 2 }}>
                     {String(m.order_index).padStart(2, "0")}
                   </span>
-                  {m.completed ? (
+                  {m.completed && (
                     <CheckCircle2 size={16} color={C.green} style={{ flexShrink: 0, marginTop: 1 }} />
-                  ) : (
-                    <Circle size={16} color={C.faint} style={{ flexShrink: 0, marginTop: 1 }} />
                   )}
                   <div style={{ flex: 1 }}>
                     <div style={{ font: `500 14px/1.35 ${SANS}`, color: C.text }}>{m.title}</div>

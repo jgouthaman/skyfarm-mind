@@ -44,6 +44,7 @@ import { Route as MissionHubKnowledgeUavRouteImport } from './routes/mission-hub
 import { Route as MissionHubDesignStudioRouteImport } from './routes/mission-hub.design-studio'
 import { Route as MissionHubDashboardRouteImport } from './routes/mission-hub.dashboard'
 import { Route as MissionHubContactsRouteImport } from './routes/mission-hub.contacts'
+import { Route as AcademyLessonDemoRouteImport } from './routes/academy.lesson-demo'
 import { Route as AcademyDashboardRouteImport } from './routes/academy.dashboard'
 import { Route as LayoutTechnologyRouteImport } from './routes/_layout.technology'
 import { Route as LayoutSolutionsRouteImport } from './routes/_layout.solutions'
@@ -261,6 +262,11 @@ const MissionHubContactsRoute = MissionHubContactsRouteImport.update({
   path: '/contacts',
   getParentRoute: () => MissionHubRoute,
 } as any)
+const AcademyLessonDemoRoute = AcademyLessonDemoRouteImport.update({
+  id: '/lesson-demo',
+  path: '/lesson-demo',
+  getParentRoute: () => AcademyRoute,
+} as any)
 const AcademyDashboardRoute = AcademyDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -444,6 +450,7 @@ export interface FileRoutesByFullPath {
   '/solutions': typeof LayoutSolutionsRoute
   '/technology': typeof LayoutTechnologyRoute
   '/academy/dashboard': typeof AcademyDashboardRoute
+  '/academy/lesson-demo': typeof AcademyLessonDemoRoute
   '/mission-hub/contacts': typeof MissionHubContactsRoute
   '/mission-hub/dashboard': typeof MissionHubDashboardRoute
   '/mission-hub/design-studio': typeof MissionHubDesignStudioRoute
@@ -505,6 +512,7 @@ export interface FileRoutesByTo {
   '/solutions': typeof LayoutSolutionsRoute
   '/technology': typeof LayoutTechnologyRoute
   '/academy/dashboard': typeof AcademyDashboardRoute
+  '/academy/lesson-demo': typeof AcademyLessonDemoRoute
   '/mission-hub/contacts': typeof MissionHubContactsRoute
   '/mission-hub/dashboard': typeof MissionHubDashboardRoute
   '/mission-hub/design-studio': typeof MissionHubDesignStudioRoute
@@ -572,6 +580,7 @@ export interface FileRoutesById {
   '/_layout/solutions': typeof LayoutSolutionsRoute
   '/_layout/technology': typeof LayoutTechnologyRoute
   '/academy/dashboard': typeof AcademyDashboardRoute
+  '/academy/lesson-demo': typeof AcademyLessonDemoRoute
   '/mission-hub/contacts': typeof MissionHubContactsRoute
   '/mission-hub/dashboard': typeof MissionHubDashboardRoute
   '/mission-hub/design-studio': typeof MissionHubDesignStudioRoute
@@ -641,6 +650,7 @@ export interface FileRouteTypes {
     | '/solutions'
     | '/technology'
     | '/academy/dashboard'
+    | '/academy/lesson-demo'
     | '/mission-hub/contacts'
     | '/mission-hub/dashboard'
     | '/mission-hub/design-studio'
@@ -702,6 +712,7 @@ export interface FileRouteTypes {
     | '/solutions'
     | '/technology'
     | '/academy/dashboard'
+    | '/academy/lesson-demo'
     | '/mission-hub/contacts'
     | '/mission-hub/dashboard'
     | '/mission-hub/design-studio'
@@ -768,6 +779,7 @@ export interface FileRouteTypes {
     | '/_layout/solutions'
     | '/_layout/technology'
     | '/academy/dashboard'
+    | '/academy/lesson-demo'
     | '/mission-hub/contacts'
     | '/mission-hub/dashboard'
     | '/mission-hub/design-studio'
@@ -1074,6 +1086,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MissionHubContactsRouteImport
       parentRoute: typeof MissionHubRoute
     }
+    '/academy/lesson-demo': {
+      id: '/academy/lesson-demo'
+      path: '/lesson-demo'
+      fullPath: '/academy/lesson-demo'
+      preLoaderRoute: typeof AcademyLessonDemoRouteImport
+      parentRoute: typeof AcademyRoute
+    }
     '/academy/dashboard': {
       id: '/academy/dashboard'
       path: '/dashboard'
@@ -1337,6 +1356,7 @@ const LayoutRouteWithChildren =
 
 interface AcademyRouteChildren {
   AcademyDashboardRoute: typeof AcademyDashboardRoute
+  AcademyLessonDemoRoute: typeof AcademyLessonDemoRoute
   AcademyIndexRoute: typeof AcademyIndexRoute
   AcademyCoursesSlugLearnRoute: typeof AcademyCoursesSlugLearnRoute
   AcademyCoursesSlugModulesModuleIdRoute: typeof AcademyCoursesSlugModulesModuleIdRoute
@@ -1344,6 +1364,7 @@ interface AcademyRouteChildren {
 
 const AcademyRouteChildren: AcademyRouteChildren = {
   AcademyDashboardRoute: AcademyDashboardRoute,
+  AcademyLessonDemoRoute: AcademyLessonDemoRoute,
   AcademyIndexRoute: AcademyIndexRoute,
   AcademyCoursesSlugLearnRoute: AcademyCoursesSlugLearnRoute,
   AcademyCoursesSlugModulesModuleIdRoute:

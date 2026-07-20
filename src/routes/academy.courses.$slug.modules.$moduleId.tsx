@@ -1,11 +1,18 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import ReactMarkdown from "react-markdown";
-import { ArrowLeft, Plane, Trophy, Loader2, RotateCcw, Lock, Lightbulb, CheckCircle2, ArrowLeftRight } from "lucide-react";
+import { ArrowLeft, Plane, Trophy, Loader2, RotateCcw, Lock, Lightbulb, CheckCircle2, ArrowLeftRight, ChevronUp } from "lucide-react";
 import type { AcademyModuleSection, AcademyUser } from "@/lib/academy-auth";
 import { cacheModuleContent, getModuleSections, saveQuizAttempt, setModuleComplete } from "@/lib/academy-auth";
 import { streamAnthropicContent, generateAnthropicQuestions, type GeneratedQuestion } from "@/lib/academy/anthropic-client";
 import { supabase } from "@/integrations/supabase/client";
+import { SlideDeck } from "@/components/academy/lesson/SlideDeck";
+import { QuickRefRail } from "@/components/academy/lesson/QuickRefRail";
+import { BlockRenderer } from "@/components/academy/lesson/BlockRenderer";
+import { academyCustomSlideComponents } from "@/components/academy/lesson/custom/registry";
+import { authoredLessonsBySectionTitle, normalizeSectionTitle } from "@/data/academy/lessons/registry";
+import type { Lesson } from "@/lib/academy/lesson-schema";
+import "@/components/academy/lesson/lesson.css";
 
 export const Route = createFileRoute("/academy/courses/$slug/modules/$moduleId")({
   component: AcademyModulePlayerPage,
@@ -707,6 +714,56 @@ function ContentSection({
   );
 }
 
+// ---------- authored slide-deck section (hand-built lesson content) ----------
+
+// Renders a hand-authored Lesson (see src/data/academy/lessons) in place of
+// the AI-generated ContentSection above. Used when a section's title has a
+// matching entry in authoredLessonsBySectionTitle — see that registry for
+// which real DB sections currently opt into this.
+function AuthoredContentSection({
+  lesson, sectionNumber, totalSections, sectionTitle, isActive, nextLabel, onComplete,
+}: {
+  lesson: Lesson;
+  sectionNumber: number;
+  totalSections: number;
+  sectionTitle: string;
+  isActive: boolean;
+  nextLabel: string;
+  onComplete: () => void;
+}) {
+  if (!isActive) {
+    return (
+      <div>
+        <h2 style={{ font: `700 clamp(20px,3vw,26px)/1.2 ${DISPLAY}`, color: C.text, margin: "0 0 18px" }}>{sectionTitle}</h2>
+        <div className="lesson-viewer lv-embedded">
+          {lesson.slides.flatMap((slide) => slide.blocks).map((block, i) => (
+            <BlockRenderer key={i} block={block} customComponents={academyCustomSlideComponents} />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <div style={{
+        font: `600 11px/1 ${MONO}`, letterSpacing: ".08em", textTransform: "uppercase", color: C.faint, marginBottom: 14,
+      }}>
+        Section {sectionNumber} of {totalSections} · {sectionTitle}
+      </div>
+      <div className="lesson-viewer lv-embedded lv-shell">
+        <SlideDeck
+          slides={lesson.slides}
+          customComponents={academyCustomSlideComponents}
+          onComplete={onComplete}
+          completeLabel={nextLabel}
+        />
+        {lesson.quickRef && <QuickRefRail data={lesson.quickRef} />}
+      </div>
+    </div>
+  );
+}
+
 // ---------- quiz section (3 questions, one at a time) ----------
 
 function QuizSection({
@@ -1060,6 +1117,22 @@ function LockedSection({ title }: { title: string }) {
   );
 }
 
+// A finished section collapses to this compact row — click to re-expand it for review.
+function CompletedLessonRow({ title, onExpand }: { title: string; onExpand: () => void }) {
+  return (
+    <button
+      onClick={onExpand}
+      style={{
+        display: "flex", alignItems: "center", gap: 12, width: "100%",
+        background: "transparent", border: "none", padding: 0, cursor: "pointer", textAlign: "left",
+      }}
+    >
+      <CheckCircle2 size={16} color={C.green} style={{ flexShrink: 0 }} />
+      <span style={{ font: `500 14px/1.4 ${SANS}`, color: C.mute }}>{title}</span>
+    </button>
+  );
+}
+
 // ---------- page ----------
 
 function AcademyModulePlayerPage() {
@@ -1072,6 +1145,7 @@ function AcademyModulePlayerPage() {
   const [sectionsError, setSectionsError] = useState(false);
   const [completedSections, setCompletedSections] = useState<Set<string>>(new Set());
   const [frontierIndex, setFrontierIndex] = useState(0);
+  const [reviewingSectionId, setReviewingSectionId] = useState<string | null>(null);
   const [resetKey, setResetKey] = useState(0);
   const [assessmentInProgress, setAssessmentInProgress] = useState(false);
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
@@ -1104,6 +1178,7 @@ function AcademyModulePlayerPage() {
     setSections(null);
     setCompletedSections(new Set());
     setFrontierIndex(0);
+    setReviewingSectionId(null);
     setResetKey((k) => k + 1);
     try {
       const rows = await getModuleSections(moduleId);
@@ -1266,7 +1341,7 @@ function AcademyModulePlayerPage() {
                     className={isCurrent ? "tw-academy-player-pulse" : undefined}
                     style={{
                       width: 10, height: 10, borderRadius: "50%", padding: 0,
-                      background: isLocked ? "transparent" : C.amber,
+                      background: isLocked ? "transparent" : isComplete ? C.green : C.amber,
                       border: isLocked ? `1.5px solid ${C.line2}` : "none",
                       cursor: isLocked ? "default" : "pointer",
                     }}
@@ -1291,11 +1366,24 @@ function AcademyModulePlayerPage() {
         )}
 
         {sections !== null && sections.length > 0 && (
+          <div style={{
+            display: "flex", alignItems: "center", gap: 6, marginBottom: 16,
+            font: `600 10px/1 ${MONO}`, letterSpacing: ".06em", textTransform: "uppercase",
+            color: completedSections.size === sections.length ? C.green : C.mute,
+          }}>
+            {completedSections.size === sections.length && <CheckCircle2 size={12} color={C.green} />}
+            {completedSections.size} of {sections.length} lessons completed
+          </div>
+        )}
+
+        {sections !== null && sections.length > 0 && (
           <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
             {sections.map((s, i) => {
               const isComplete = completedSections.has(s.id);
               const isCurrent = i === frontierIndex && !isComplete;
               const isLocked = i > frontierIndex;
+              const isReviewing = isComplete && reviewingSectionId === s.id;
+              const showCompact = isComplete && !isReviewing;
               const borderColor = isLocked ? C.line2 : isCurrent ? C.amber : C.green;
 
               return (
@@ -1305,32 +1393,64 @@ function AcademyModulePlayerPage() {
                   className={!isLocked ? "tw-academy-player-fadein" : undefined}
                   style={{
                     border: `1px solid ${C.line}`, borderLeft: `3px solid ${borderColor}`, borderRadius: 14,
-                    background: C.panel, padding: isLocked ? "18px 22px" : "24px 26px",
+                    background: C.panel, padding: isLocked || showCompact ? "18px 22px" : "24px 26px",
                   }}
                 >
                   {isLocked && <LockedSection title={s.title} />}
-                  {!isLocked && s.section_type === "content" && (
-                    <ContentSection
-                      section={s}
-                      sectionNumber={i + 1}
-                      totalSections={sections.length}
-                      isActive={isCurrent}
-                      nextLabel={nextContentLabel(i)}
-                      onComplete={() => markSectionComplete(s.id)}
-                    />
+                  {!isLocked && showCompact && (
+                    <CompletedLessonRow title={s.title} onExpand={() => setReviewingSectionId(s.id)} />
                   )}
-                  {!isLocked && s.section_type === "quiz" && (
-                    <QuizSection section={s} user={user} onComplete={() => markSectionComplete(s.id)} />
-                  )}
-                  {!isLocked && s.section_type === "final_test" && (
-                    <FinalTestSection
-                      section={s}
-                      user={user}
-                      moduleId={moduleId}
-                      onPass={() => navigate({ to: "/academy/dashboard" })}
-                      onRestudy={handleRestudy}
-                      onInProgressChange={setAssessmentInProgress}
-                    />
+                  {!isLocked && !showCompact && (
+                    <>
+                      {isReviewing && (
+                        <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 10 }}>
+                          <button
+                            onClick={() => setReviewingSectionId(null)}
+                            style={{
+                              display: "flex", alignItems: "center", gap: 4, background: "transparent",
+                              border: "none", color: C.faint, font: `600 11px/1 ${SANS}`, cursor: "pointer", padding: 0,
+                            }}
+                          >
+                            <ChevronUp size={12} /> Collapse
+                          </button>
+                        </div>
+                      )}
+                      {s.section_type === "content" && (
+                        authoredLessonsBySectionTitle[normalizeSectionTitle(s.title)] ? (
+                          <AuthoredContentSection
+                            lesson={authoredLessonsBySectionTitle[normalizeSectionTitle(s.title)]}
+                            sectionNumber={i + 1}
+                            totalSections={sections.length}
+                            sectionTitle={s.title}
+                            isActive={isCurrent}
+                            nextLabel={nextContentLabel(i)}
+                            onComplete={() => markSectionComplete(s.id)}
+                          />
+                        ) : (
+                          <ContentSection
+                            section={s}
+                            sectionNumber={i + 1}
+                            totalSections={sections.length}
+                            isActive={isCurrent}
+                            nextLabel={nextContentLabel(i)}
+                            onComplete={() => markSectionComplete(s.id)}
+                          />
+                        )
+                      )}
+                      {s.section_type === "quiz" && (
+                        <QuizSection section={s} user={user} onComplete={() => markSectionComplete(s.id)} />
+                      )}
+                      {s.section_type === "final_test" && (
+                        <FinalTestSection
+                          section={s}
+                          user={user}
+                          moduleId={moduleId}
+                          onPass={() => navigate({ to: "/academy/dashboard" })}
+                          onRestudy={handleRestudy}
+                          onInProgressChange={setAssessmentInProgress}
+                        />
+                      )}
+                    </>
                   )}
                 </div>
               );

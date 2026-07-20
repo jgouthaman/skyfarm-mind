@@ -1,0 +1,628 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>TorqWings Academy — Module Template</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+
+<style>
+:root{
+  --void:#090c11; --panel:#0e141c; --raised:#141c26; --raised-2:#18212d;
+  --hairline:#212c3a; --hairline-soft:#1a2330;
+  --ink:#e8eef5; --body:#adbaca; --dim:#6c7889;
+  --amber:#f2a71b; --amber-bright:#ffc247; --amber-dim:#8a6a2a;
+  --tip:#f2a71b; --analogy:#a78bfa; --key:#ffc247; --problem:#2dd4bf; --note:#60a5fa;
+  --force-blue:#5b9be6; --force-red:#f26a6f; --ok:#4ade80; --warn:#f2a71b;
+
+  --f-display:"Space Grotesk","Inter",-apple-system,"Segoe UI",system-ui,sans-serif;
+  --f-body:"Inter",-apple-system,"Segoe UI",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,monospace;
+
+  --fs-eyebrow:0.72rem; --fs-h1:clamp(1.4rem, 1.05rem + 1.4vw, 1.85rem);
+  --fs-h2:1.18rem; --fs-h3:1rem; --fs-body:0.97rem; --fs-small:0.83rem;
+  --lh-body:1.6;
+
+  --measure:700px; --rail:220px; --pad:clamp(18px, 4vw, 40px);
+}
+html{ font-size:16px; } /* JS adjusts this for font-size control; everything below is rem-based */
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  background:radial-gradient(1200px 600px at 78% -8%, rgba(242,167,27,0.05), transparent 60%), var(--void);
+  color:var(--body); font-family:var(--f-body); font-size:var(--fs-body); line-height:var(--lh-body);
+  -webkit-font-smoothing:antialiased;
+  display:flex; flex-direction:column; overflow:hidden;
+}
+body::before{
+  content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.5;
+  background-image:linear-gradient(var(--hairline-soft) 1px, transparent 1px),linear-gradient(90deg, var(--hairline-soft) 1px, transparent 1px);
+  background-size:44px 44px;
+  -webkit-mask-image:radial-gradient(1000px 700px at 50% 0%, #000 0%, transparent 78%);
+          mask-image:radial-gradient(1000px 700px at 50% 0%, #000 0%, transparent 78%);
+}
+
+/* ===== TOP BAR ===== */
+.topbar{flex:none; display:flex; align-items:center; gap:14px; padding:12px var(--pad); background:rgba(9,12,17,.82); backdrop-filter:blur(10px); border-bottom:1px solid var(--hairline); z-index:30}
+.back{color:var(--dim);text-decoration:none;font-size:1.1rem;line-height:1;padding:6px;border-radius:8px}
+.back:hover{color:var(--ink);background:var(--raised)}
+.brandmark{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;background:linear-gradient(160deg,#2a2410,#191204);border:1px solid var(--amber-dim);color:var(--amber);font-size:1rem}
+.brand{font-family:var(--f-mono);font-size:.74rem;letter-spacing:.18em;text-transform:uppercase;color:var(--ink);font-weight:600}
+.fontctl{margin-left:auto;display:flex;align-items:center;gap:2px;border:1px solid var(--hairline);border-radius:8px;overflow:hidden}
+.fontctl button{width:28px;height:28px;background:var(--raised);border:none;color:var(--body);cursor:pointer;font-family:var(--f-mono);font-size:.78rem;font-weight:600}
+.fontctl button:hover{background:var(--raised-2);color:var(--ink)}
+.fontctl button:first-child{border-right:1px solid var(--hairline)}
+
+/* ===== PROGRESS ===== */
+.progress{flex:none;padding:10px var(--pad);background:rgba(9,12,17,.72);backdrop-filter:blur(8px);border-bottom:1px solid var(--hairline-soft);z-index:15}
+.progress .label{font-family:var(--f-mono);font-size:var(--fs-eyebrow);letter-spacing:.16em;text-transform:uppercase;color:var(--amber);margin-bottom:8px}
+.track{position:relative;height:2px;background:var(--hairline);border-radius:2px;max-width:620px}
+.track .fill{position:absolute;inset:0 auto 0 0;width:18%;background:linear-gradient(90deg,var(--amber),var(--amber-bright));border-radius:2px}
+.dots{display:flex;gap:9px;margin-top:9px}
+.dots i{width:8px;height:8px;border-radius:50%;background:var(--hairline);border:1px solid var(--hairline)}
+.dots i.done{background:var(--amber-dim)}
+.dots i.now{background:var(--amber);box-shadow:0 0 0 3px rgba(242,167,27,.18)}
+
+/* ===== SHELL ===== */
+.shell{flex:1; min-height:0; position:relative; z-index:1; max-width:calc(var(--measure) + var(--rail) + 72px); width:100%; margin:0 auto; padding:clamp(12px,2.6vh,24px) var(--pad) 0; display:grid; grid-template-columns:minmax(0,var(--measure)) var(--rail); gap:44px; justify-content:center; overflow:hidden}
+@media(max-width:1080px){ .shell{grid-template-columns:minmax(0,var(--measure));max-width:var(--measure)} .quickref{display:none} }
+
+/* ===== SLIDES ===== */
+.slidewrap{min-width:0; display:flex; flex-direction:column; min-height:0; overflow:hidden}
+.slides{position:relative; flex:1; min-height:0; touch-action:pan-y}
+.slide{position:absolute; inset:0; display:none; flex-direction:column; overflow-y:auto; padding-right:4px; animation:rise .32s ease}
+.slide.active{display:flex}
+@keyframes rise{ from{opacity:0; transform:translateY(10px)} to{opacity:1; transform:translateY(0)} }
+
+.meta{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+.eyebrow{font-family:var(--f-mono);font-size:var(--fs-eyebrow);letter-spacing:.15em;text-transform:uppercase;color:var(--amber);margin:0}
+.readtime{font-family:var(--f-mono);font-size:.68rem;letter-spacing:.06em;color:var(--dim);white-space:nowrap;display:flex;align-items:center;gap:4px}
+h1{font-family:var(--f-display);font-weight:700;font-size:var(--fs-h1);color:var(--ink);line-height:1.14;letter-spacing:-.01em;margin:0 0 8px}
+.lede{font-size:1rem;color:#c3cddb;margin:0 0 4px}
+h2{font-family:var(--f-display);font-weight:600;font-size:var(--fs-h2);color:var(--ink);line-height:1.22;margin:0 0 12px;position:relative;padding-left:16px}
+h2::before{content:"";position:absolute;left:0;top:8px;width:6px;height:6px;background:var(--amber);transform:rotate(45deg)}
+h3{font-family:var(--f-display);font-weight:600;font-size:var(--fs-h3);color:var(--ink);margin:16px 0 8px}
+p{margin:0 0 12px;max-width:66ch}
+strong{color:var(--ink);font-weight:600}
+em{color:#c3cddb}
+
+/* tables */
+.tbl-wrap{margin:12px 0;border:1px solid var(--hairline);border-radius:12px;overflow:hidden;overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.85rem}
+thead th{background:var(--raised-2);color:var(--ink);text-align:left;font-weight:600;font-family:var(--f-mono);font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;padding:9px 14px;border-bottom:1px solid var(--hairline);white-space:nowrap}
+tbody td{padding:8px 14px;border-bottom:1px solid var(--hairline-soft);color:var(--body)}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:nth-child(even){background:rgba(255,255,255,.012)}
+tbody td:first-child{color:var(--ink);font-family:var(--f-mono);font-size:.82rem}
+
+/* callouts */
+.callout{--c:var(--amber);display:grid;grid-template-columns:auto 1fr;gap:12px;margin:12px 0;padding:12px 14px;border-radius:12px;background:color-mix(in srgb, var(--c) 8%, var(--panel));border:1px solid color-mix(in srgb, var(--c) 26%, var(--hairline));border-left:3px solid var(--c)}
+.callout .ico{font-size:1rem;line-height:1.5}
+.callout .h{font-family:var(--f-display);font-weight:600;color:var(--ink);margin:0 0 3px;font-size:.9rem}
+.callout p{margin:0;max-width:none;font-size:.88rem}
+.callout.tip{--c:var(--tip)} .callout.analogy{--c:var(--analogy)} .callout.key{--c:var(--key)} .callout.problem{--c:var(--problem)} .callout.note{--c:var(--note)}
+
+/* spec (force) lists */
+.spec{--c:var(--force-blue);margin:10px 0;padding:2px 0 2px 16px;border-left:2px solid color-mix(in srgb,var(--c) 55%,var(--hairline))}
+.spec.red{--c:var(--force-red)}
+.spec .head{display:flex;align-items:center;gap:8px;margin:0 0 8px}
+.spec .dot{width:10px;height:10px;border-radius:50%;background:var(--c);flex:none}
+.spec .head h3{margin:0;font-size:.92rem}
+.spec ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:5px}
+.spec ul li{color:var(--body);font-size:.86rem;line-height:1.5}
+
+.marklist{list-style:none;margin:10px 0;padding:0;display:flex;flex-direction:column;gap:6px}
+.marklist li{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start;font-size:.88rem}
+
+/* illustrations */
+.illus{margin:12px 0;padding:12px 14px 9px;border:1px solid var(--hairline);border-radius:12px;background:var(--panel)}
+.illus svg{width:100%;height:auto;display:block}
+.illus .cap{font-family:var(--f-mono);font-size:.64rem;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);margin-top:7px;text-align:center}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:620px){.grid2{grid-template-columns:1fr}}
+
+/* glossary term + tooltip */
+.term{border-bottom:1px dotted var(--dim);cursor:help;color:var(--ink);position:relative;font-weight:500}
+.term:hover, .term:focus{color:var(--amber-bright);border-color:var(--amber)}
+.tooltip{position:absolute;left:0;top:100%;margin-top:6px;background:var(--raised-2);border:1px solid var(--hairline);border-radius:8px;padding:9px 11px;font-size:.78rem;line-height:1.5;color:var(--body);width:230px;z-index:40;display:none;box-shadow:0 10px 28px rgba(0,0,0,.45)}
+.tooltip.open{display:block}
+.tooltip b{color:var(--amber-bright);display:block;margin-bottom:3px;font-family:var(--f-mono);font-size:.68rem;letter-spacing:.06em;text-transform:uppercase}
+
+/* interactive calculator */
+.calc{margin:14px 0;padding:14px 16px;border:1px solid var(--amber-dim);border-radius:12px;background:color-mix(in srgb, var(--amber) 6%, var(--panel))}
+.calc-head{font-family:var(--f-display);font-weight:600;color:var(--ink);font-size:.92rem;margin-bottom:10px;display:flex;align-items:center;gap:7px}
+.calc-row{display:grid;grid-template-columns:110px 1fr 52px;align-items:center;gap:10px;margin-bottom:8px}
+.calc-row label{font-size:.8rem;color:var(--dim);font-family:var(--f-mono)}
+.calc-row input[type=range]{width:100%;accent-color:var(--amber)}
+.calc-row .val{font-family:var(--f-mono);font-size:.82rem;color:var(--ink);text-align:right}
+.calc-result{margin-top:10px;padding-top:10px;border-top:1px solid var(--hairline-soft);text-align:center;font-size:.95rem;color:var(--body)}
+.calc-result strong{color:var(--amber-bright);font-family:var(--f-mono);font-size:1.05rem}
+.calc-bar-wrap{margin-top:10px}
+
+/* quick check */
+.qcheck{margin:14px 0;padding:14px 16px;border:1px solid var(--hairline);border-radius:12px;background:var(--raised)}
+.qcheck .q{font-family:var(--f-display);font-weight:600;color:var(--ink);font-size:.9rem;margin:0 0 10px;display:flex;gap:7px;align-items:flex-start}
+.qcheck .opts{display:flex;flex-direction:column;gap:7px}
+.qcheck .opt{text-align:left;padding:9px 12px;border-radius:9px;border:1px solid var(--hairline);background:var(--panel);color:var(--body);font-size:.86rem;cursor:pointer;font-family:var(--f-body)}
+.qcheck .opt:hover{border-color:var(--amber-dim)}
+.qcheck .opt.correct{border-color:var(--ok);background:color-mix(in srgb, var(--ok) 12%, var(--panel));color:var(--ink)}
+.qcheck .opt.wrong{border-color:var(--force-red);background:color-mix(in srgb, var(--force-red) 12%, var(--panel));color:var(--ink)}
+.qcheck .opt:disabled{cursor:default}
+.qcheck .fb{margin-top:9px;font-size:.82rem;color:var(--dim);display:none}
+.qcheck .fb.show{display:block}
+
+/* ===== QUICK REFERENCE RAIL ===== */
+.quickref{position:sticky; top:0; align-self:start; padding-top:2px}
+.quickref .card{border:1px solid var(--hairline);border-radius:14px;background:var(--panel);padding:16px}
+.quickref .cap{font-family:var(--f-mono);font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);margin-bottom:10px}
+.quickref .formula{text-align:center;font-size:1.1rem;color:var(--ink);margin:6px 0 12px}
+.quickref dl{margin:0;display:flex;flex-direction:column;gap:7px}
+.quickref dl div{display:flex;justify-content:space-between;gap:8px;font-size:.82rem}
+.quickref dl dt{color:var(--dim);font-family:var(--f-mono)}
+.quickref dl dd{margin:0;color:var(--body);text-align:right}
+.quickref .divider{height:1px;background:var(--hairline);margin:12px 0}
+.quickref .re-val{font-family:var(--f-mono);color:var(--amber-bright);font-size:1rem;font-weight:600;text-align:center}
+.quickref .re-lbl{text-align:center;font-size:.72rem;color:var(--dim);margin-top:2px}
+.quickref .dlbtn{width:100%;margin-top:14px;padding:9px;border-radius:9px;border:1px solid var(--hairline);background:var(--raised);color:var(--body);font-family:var(--f-body);font-weight:600;font-size:.82rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px}
+.quickref .dlbtn:hover{border-color:var(--amber-dim);color:var(--ink);background:var(--raised-2)}
+.quickref .resume{margin-top:10px;font-size:.72rem;color:var(--dim);text-align:center;font-family:var(--f-mono)}
+
+/* ===== BOTTOM SLIDE NAV ===== */
+.slidenav{flex:none; display:flex; align-items:center; justify-content:space-between; gap:14px; padding:12px var(--pad) 16px; border-top:1px solid var(--hairline); max-width:calc(var(--measure) + var(--rail) + 72px); width:100%; margin:0 auto}
+.btn{font-family:var(--f-body);font-weight:600;font-size:.86rem;padding:10px 18px;border-radius:10px;cursor:pointer;border:1px solid var(--hairline);background:var(--raised);color:var(--body)}
+.btn:hover{border-color:var(--hairline);color:var(--ink);background:var(--raised-2)}
+.btn.primary{background:linear-gradient(180deg,var(--amber-bright),var(--amber));border:none;color:#1a1204}
+.btn.primary:hover{filter:brightness(1.05)}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+.slidedots{display:flex;align-items:center;gap:8px}
+.slidedots button{width:7px;height:7px;border-radius:50%;background:var(--hairline);border:none;padding:0;cursor:pointer}
+.slidedots button.active{background:var(--amber);width:20px;border-radius:4px;transition:.2s}
+
+/* print sheet */
+#printSheet{display:none}
+@media print{
+  body *{visibility:hidden}
+  #printSheet, #printSheet *{visibility:visible}
+  #printSheet{display:block;position:absolute;top:0;left:0;width:100%;padding:24px;color:#000;background:#fff}
+  #printSheet h2{color:#000;font-family:Arial,sans-serif}
+  #printSheet table{width:100%;border-collapse:collapse}
+  #printSheet td,#printSheet th{border:1px solid #999;padding:6px 10px;font-size:12px}
+}
+
+@media (prefers-reduced-motion:reduce){ .slide{animation:none} }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <a class="back" href="#" aria-label="Back">←</a>
+  <span class="brandmark">✈</span>
+  <span class="brand">TorqWings Academy</span>
+  <div class="fontctl" aria-label="Text size">
+    <button id="fontDown" aria-label="Decrease text size">A−</button>
+    <button id="fontUp" aria-label="Increase text size">A+</button>
+  </div>
+</header>
+
+<div class="progress">
+  <div class="label">Low Reynolds Number Aerodynamics · Section 2 of 11</div>
+  <div class="track"><span class="fill"></span></div>
+  <div class="dots">
+    <i class="done"></i><i class="now"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+  </div>
+</div>
+
+<div class="shell">
+  <div class="slidewrap">
+    <div class="slides" id="slides">
+
+      <!-- SLIDE 1 — Formula + calculator -->
+      <section class="slide active">
+        <div class="meta"><p class="eyebrow">Foundation · Low-Re Aerodynamics</p><span class="readtime">🕑 ~2 min</span></div>
+        <h1>What is Reynolds Number?</h1>
+        <p class="lede">Before we design effective wings for small drones, we need the single most important dimensionless parameter governing their aerodynamic behaviour.</p>
+
+        <h2>The formula</h2>
+        <p style="text-align:center;font-size:1.1rem">$$Re = \frac{\rho V L}{\mu}$$</p>
+        <p>Where V is the
+          <span class="term" tabindex="0">freestream<span class="tooltip"><b>Freestream</b>The undisturbed airflow ahead of the wing, unaffected by its presence.</span></span> velocity, L is the
+          <span class="term" tabindex="0">chord<span class="tooltip"><b>Chord</b>The straight-line distance from a wing's leading edge to its trailing edge.</span></span> length, and μ is the fluid's
+          <span class="term" tabindex="0">dynamic viscosity<span class="tooltip"><b>Dynamic viscosity</b>A fluid's internal resistance to flow — its "thickness."</span></span>.
+        </p>
+
+        <div class="illus">
+          <svg viewBox="0 0 640 150" xmlns="http://www.w3.org/2000/svg">
+            <path d="M40 95 Q 220 55 480 78 Q 560 84 600 70" fill="none" stroke="var(--amber)" stroke-width="2.5"/>
+            <path d="M40 95 Q 220 130 480 105 Q 560 100 600 70" fill="none" stroke="var(--amber-dim)" stroke-width="2" opacity=".6"/>
+            <g stroke="var(--force-blue)" stroke-width="2" fill="none">
+              <line x1="20" y1="40" x2="70" y2="40"/><polygon points="70,40 62,35 62,45" fill="var(--force-blue)"/>
+              <line x1="20" y1="60" x2="70" y2="60"/><polygon points="70,60 62,55 62,65" fill="var(--force-blue)"/>
+            </g>
+            <text x="12" y="30" fill="var(--force-blue)" font-family="JetBrains Mono" font-size="13">V</text>
+            <line x1="40" y1="118" x2="480" y2="105" stroke="var(--dim)" stroke-width="1" stroke-dasharray="3 3"/>
+            <line x1="40" y1="112" x2="40" y2="124" stroke="var(--dim)" stroke-width="1"/>
+            <line x1="480" y1="99" x2="480" y2="111" stroke="var(--dim)" stroke-width="1"/>
+            <text x="245" y="140" fill="var(--dim)" font-family="JetBrains Mono" font-size="13" text-anchor="middle">L (chord)</text>
+            <g fill="var(--amber-dim)" opacity=".8">
+              <circle cx="140" cy="25" r="2.5"/><circle cx="170" cy="18" r="2.5"/><circle cx="120" cy="15" r="2.5"/>
+              <circle cx="310" cy="28" r="2.5"/><circle cx="340" cy="20" r="2.5"/><circle cx="290" cy="14" r="2.5"/>
+            </g>
+            <text x="220" y="8" fill="var(--dim)" font-family="JetBrains Mono" font-size="11">ρ (air density, surrounding field)</text>
+          </svg>
+          <p class="cap">V, L, and ρ mapped onto a wing section</p>
+        </div>
+
+        <div class="calc">
+          <div class="calc-head">🧮 Try it yourself — drag to change the wing</div>
+          <div class="calc-row"><label>Velocity V</label><input type="range" id="calcV" min="2" max="30" value="10" step="1"><span class="val"><span id="calcVval">10</span> m/s</span></div>
+          <div class="calc-row"><label>Chord L</label><input type="range" id="calcL" min="50" max="500" value="250" step="10"><span class="val"><span id="calcLval">250</span> mm</span></div>
+          <div class="calc-result">Re ≈ <strong id="calcRe">171,000</strong></div>
+          <div class="calc-bar-wrap illus" style="margin:10px 0 0;padding:10px 12px 6px">
+            <svg viewBox="0 0 640 60" xmlns="http://www.w3.org/2000/svg">
+              <defs><linearGradient id="regimeCalc" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="var(--force-red)"/><stop offset="35%" stop-color="var(--amber)"/>
+                <stop offset="75%" stop-color="var(--note)"/><stop offset="100%" stop-color="var(--force-blue)"/>
+              </linearGradient></defs>
+              <rect x="20" y="26" width="600" height="8" rx="4" fill="url(#regimeCalc)" opacity=".85"/>
+              <line id="calcMarkerLine" x1="428" y1="14" x2="428" y2="42" stroke="var(--ink)" stroke-width="2"/>
+              <circle id="calcMarkerDot" cx="428" cy="14" r="4" fill="var(--amber-bright)"/>
+              <text x="20" y="56" fill="var(--dim)" font-family="JetBrains Mono" font-size="9">10³</text>
+              <text x="600" y="56" fill="var(--dim)" font-family="JetBrains Mono" font-size="9">10⁶·³</text>
+            </svg>
+          </div>
+        </div>
+
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Symbol</th><th>Parameter</th><th>Units</th><th>Typical (sea level)</th></tr></thead>
+            <tbody>
+              <tr><td>ρ</td><td>Air density</td><td>kg/m³</td><td>1.225 kg/m³</td></tr>
+              <tr><td>V</td><td>Freestream velocity</td><td>m/s</td><td>Mission-dependent</td></tr>
+              <tr><td>L</td><td>Reference chord</td><td>m</td><td>Mission-dependent</td></tr>
+              <tr><td>μ</td><td>Dynamic viscosity</td><td>Pa·s</td><td>1.789 × 10⁻⁵ Pa·s</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout tip">
+          <div class="ico">💡</div>
+          <div class="body"><p class="h">Quick tip</p>
+          <p>You'll sometimes see Re written with kinematic viscosity <em>ν = μ/ρ</em>, giving <strong>Re = VL/ν</strong>. Same number, different form.</p></div>
+        </div>
+      </section>
+
+      <!-- SLIDE 2 — Physical intuition + quick check -->
+      <section class="slide">
+        <div class="meta"><p class="eyebrow">Foundation · Low-Re Aerodynamics</p><span class="readtime">🕑 ~2 min</span></div>
+        <h2>The physical intuition</h2>
+        <p>Reynolds Number is a ratio of forces — this is the insight that separates engineers who <em>use</em> Re from those who truly <em>understand</em> it:</p>
+        <p style="text-align:center;font-size:1.1rem">$$Re = \frac{\text{Inertial Forces}}{\text{Viscous Forces}}$$</p>
+
+        <div class="illus">
+          <svg viewBox="0 0 640 130" xmlns="http://www.w3.org/2000/svg">
+            <line x1="320" y1="18" x2="320" y2="40" stroke="var(--dim)" stroke-width="2"/>
+            <g transform="rotate(-4 320 40)">
+              <line x1="150" y1="40" x2="490" y2="40" stroke="var(--dim)" stroke-width="2" stroke-linecap="round"/>
+              <line x1="150" y1="40" x2="150" y2="72" stroke="var(--force-blue)" stroke-width="2"/>
+              <rect x="105" y="72" width="90" height="26" rx="6" fill="color-mix(in srgb, var(--force-blue) 18%, var(--panel))" stroke="var(--force-blue)"/>
+              <text x="150" y="89" fill="var(--force-blue)" font-family="JetBrains Mono" font-size="11" text-anchor="middle">ρVL</text>
+              <line x1="490" y1="40" x2="490" y2="64" stroke="var(--force-red)" stroke-width="2"/>
+              <rect x="445" y="64" width="90" height="26" rx="6" fill="color-mix(in srgb, var(--force-red) 18%, var(--panel))" stroke="var(--force-red)"/>
+              <text x="490" y="81" fill="var(--force-red)" font-family="JetBrains Mono" font-size="11" text-anchor="middle">μ</text>
+            </g>
+            <polygon points="320,18 312,30 328,30" fill="var(--amber)"/>
+            <text x="150" y="112" fill="var(--dim)" font-family="Inter" font-size="11" text-anchor="middle">Inertial</text>
+            <text x="490" y="112" fill="var(--dim)" font-family="Inter" font-size="11" text-anchor="middle">Viscous</text>
+          </svg>
+          <p class="cap">At low Re the two sides sit close in weight — viscosity keeps competing for control of the flow</p>
+        </div>
+
+        <div class="grid2">
+          <div class="spec">
+            <div class="head"><span class="dot"></span><h3>Inertial (ρVL)</h3></div>
+            <ul><li>Momentum of the fluid</li><li>Flow "wants to keep going"</li><li>Sustains motion, resists change</li></ul>
+          </div>
+          <div class="spec red">
+            <div class="head"><span class="dot"></span><h3>Viscous (μ)</h3></div>
+            <ul><li>Internal friction — the fluid's "stickiness"</li><li>Damps disturbances</li><li>Keeps flow ordered and laminar</li></ul>
+          </div>
+        </div>
+
+        <div class="callout analogy">
+          <div class="ico">🌀</div>
+          <div class="body"><p class="h">Engineering analogy</p>
+          <p>Pushing your hand through honey (high viscosity, low Re) versus through water at speed (low viscosity, high Re) — your drone wing sits somewhere on this spectrum.</p></div>
+        </div>
+
+        <div class="qcheck" data-answer="0">
+          <p class="q">✅ Quick check — a fluid with very high viscosity and low velocity has:</p>
+          <div class="opts">
+            <button class="opt">Low Re — viscous forces dominate</button>
+            <button class="opt">High Re — inertial forces dominate</button>
+            <button class="opt">Re is undefined in this case</button>
+          </div>
+          <p class="fb"></p>
+        </div>
+      </section>
+
+      <!-- SLIDE 3 — Where small drones sit -->
+      <section class="slide">
+        <div class="meta"><p class="eyebrow">Foundation · Low-Re Aerodynamics</p><span class="readtime">🕑 ~1 min</span></div>
+        <h2>What "low Reynolds number" means</h2>
+        <p>Commercial aircraft cruise at Re of <strong>10⁷–10⁸</strong>. Small drones operate in a very different band:</p>
+        <p style="text-align:center;font-size:1.05rem">$$10{,}000 \leq Re \leq 200{,}000$$</p>
+
+        <div class="illus">
+          <svg viewBox="0 0 640 100" xmlns="http://www.w3.org/2000/svg">
+            <defs><linearGradient id="regime" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="var(--force-red)"/><stop offset="35%" stop-color="var(--amber)"/>
+              <stop offset="75%" stop-color="var(--note)"/><stop offset="100%" stop-color="var(--force-blue)"/>
+            </linearGradient></defs>
+            <rect x="20" y="46" width="600" height="10" rx="5" fill="url(#regime)" opacity=".85"/>
+            <rect x="200" y="40" width="240" height="22" rx="11" fill="none" stroke="var(--amber-bright)" stroke-width="2" stroke-dasharray="4 3"/>
+            <text x="320" y="34" fill="var(--amber-bright)" font-family="JetBrains Mono" font-size="11" text-anchor="middle">YOU ARE HERE — small drones</text>
+            <text x="20" y="78" fill="var(--dim)" font-family="JetBrains Mono" font-size="10">10⁴</text>
+            <text x="200" y="78" fill="var(--dim)" font-family="JetBrains Mono" font-size="10">2×10⁵</text>
+            <text x="440" y="78" fill="var(--dim)" font-family="JetBrains Mono" font-size="10">10⁶</text>
+            <text x="600" y="78" fill="var(--dim)" font-family="JetBrains Mono" font-size="10">10⁸</text>
+          </svg>
+          <p class="cap">Micro-insects & dust → small drones → transition zone → full-scale aircraft</p>
+        </div>
+
+        <ul class="marklist">
+          <li><span style="color:var(--ok)">✅</span><span>Not dominated by viscosity alone (unlike a microorganism at Re &lt; 1)</span></li>
+          <li><span style="color:var(--ok)">✅</span><span>Not turbulent enough to behave like a large aircraft wing</span></li>
+          <li><span style="color:var(--warn)">⚠️</span><span>
+            <span class="term" tabindex="0">Laminar Separation Bubbles<span class="tooltip"><b>LSB</b>A region where laminar flow detaches then reattaches turbulently, common at low Re.</span></span>
+            form readily and hurt performance</span></li>
+          <li><span style="color:var(--warn)">⚠️</span><span>Classic high-Re airfoil theory <strong>breaks down</strong></span></li>
+        </ul>
+
+        <div class="callout key">
+          <div class="ico">⚡</div>
+          <div class="body"><p class="h">Key takeaway</p>
+          <p>A wing that performs beautifully at Re = 10⁶ can perform <em>catastrophically</em> at Re = 50,000. Dedicated low-Re airfoil families — <strong>Eppler, Selig, Drela</strong> — exist precisely because of this.</p></div>
+        </div>
+      </section>
+
+      <!-- SLIDE 4 — Worked example problem -->
+      <section class="slide">
+        <div class="meta"><p class="eyebrow">Foundation · Low-Re Aerodynamics</p><span class="readtime">🕑 ~1 min</span></div>
+        <h2>Worked example</h2>
+        <div class="callout problem">
+          <div class="ico">📋</div>
+          <div class="body"><p class="h">Problem</p>
+          <p>A fixed-wing surveillance drone has a <strong>250 mm chord</strong>, cruising at <strong>10 m/s</strong> at sea level. Find Re.</p></div>
+        </div>
+        <h3>Known values</h3>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Parameter</th><th>Symbol</th><th>Value</th></tr></thead>
+            <tbody>
+              <tr><td>Air density</td><td>ρ</td><td>1.225 kg/m³</td></tr>
+              <tr><td>Cruise velocity</td><td>V</td><td>10 m/s</td></tr>
+              <tr><td>Wing chord</td><td>L</td><td>0.25 m</td></tr>
+              <tr><td>Dynamic viscosity</td><td>μ</td><td>1.789 × 10⁻⁵ Pa·s</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="qcheck" data-answer="1">
+          <p class="q">✅ Quick check — before solving, estimate: is this Re closer to...</p>
+          <div class="opts">
+            <button class="opt">~1,000 (way below the drone band)</button>
+            <button class="opt">~170,000 (inside the drone band)</button>
+            <button class="opt">~5,000,000 (aircraft-scale)</button>
+          </div>
+          <p class="fb"></p>
+        </div>
+      </section>
+
+      <!-- SLIDE 5 — Solve -->
+      <section class="slide">
+        <div class="meta"><p class="eyebrow">Foundation · Low-Re Aerodynamics</p><span class="readtime">🕑 ~1 min</span></div>
+        <h2>Solve</h2>
+        <p style="text-align:center;font-size:1.05rem">$$Re = \frac{1.225 \times 10 \times 0.25}{1.789 \times 10^{-5}} \approx 171{,}000$$</p>
+
+        <div class="illus">
+          <svg viewBox="0 0 640 100" xmlns="http://www.w3.org/2000/svg">
+            <defs><linearGradient id="regime2" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="var(--force-red)"/><stop offset="35%" stop-color="var(--amber)"/>
+              <stop offset="75%" stop-color="var(--note)"/><stop offset="100%" stop-color="var(--force-blue)"/>
+            </linearGradient></defs>
+            <rect x="20" y="46" width="600" height="10" rx="5" fill="url(#regime2)" opacity=".85"/>
+            <line x1="428" y1="30" x2="428" y2="66" stroke="var(--ink)" stroke-width="2"/>
+            <circle cx="428" cy="30" r="4" fill="var(--amber-bright)"/>
+            <text x="428" y="20" fill="var(--ink)" font-family="JetBrains Mono" font-size="11" text-anchor="middle">Re ≈ 171,000</text>
+            <text x="20" y="78" fill="var(--dim)" font-family="JetBrains Mono" font-size="10">10⁴</text>
+            <text x="600" y="78" fill="var(--dim)" font-family="JetBrains Mono" font-size="10">10⁸</text>
+          </svg>
+          <p class="cap">Lands squarely in the low-Re design band from the previous section</p>
+        </div>
+
+        <p>This wing must use a dedicated low-Re airfoil, not a scaled-down commercial section.</p>
+
+        <div class="callout note">
+          <div class="ico">📝</div>
+          <div class="body"><p class="h">Up next</p>
+          <p>Laminar Separation Bubbles — what they are, why they form at this Re, and how to design around them.</p></div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <aside class="quickref">
+    <div class="card">
+      <div class="cap">Quick reference</div>
+      <div class="formula">$$Re = \frac{\rho V L}{\mu}$$</div>
+      <dl>
+        <div><dt>ρ</dt><dd>1.225 kg/m³</dd></div>
+        <div><dt>μ</dt><dd>1.789×10⁻⁵ Pa·s</dd></div>
+        <div><dt>Low-Re band</dt><dd>10k – 200k</dd></div>
+      </dl>
+      <div class="divider"></div>
+      <div class="re-val">Re ≈ 171,000</div>
+      <div class="re-lbl">this lesson's worked example</div>
+      <button class="dlbtn" id="printBtn">⬇ Download cheat sheet</button>
+      <div class="resume" id="resumeNote"></div>
+    </div>
+  </aside>
+</div>
+
+<div class="slidenav">
+  <button class="btn" id="backBtn">← Back</button>
+  <div class="slidedots" id="dots"></div>
+  <button class="btn primary" id="nextBtn">Next →</button>
+</div>
+
+<!-- Printable cheat sheet: only visible in print/PDF output -->
+<div id="printSheet">
+  <h2>Reynolds Number — Cheat Sheet</h2>
+  <p><strong>Formula:</strong> Re = ρVL / μ &nbsp;(equivalently Re = VL/ν)</p>
+  <table>
+    <tr><th>Symbol</th><th>Parameter</th><th>Units</th><th>Typical (sea level)</th></tr>
+    <tr><td>ρ</td><td>Air density</td><td>kg/m³</td><td>1.225</td></tr>
+    <tr><td>V</td><td>Freestream velocity</td><td>m/s</td><td>Mission-dependent</td></tr>
+    <tr><td>L</td><td>Reference chord</td><td>m</td><td>Mission-dependent</td></tr>
+    <tr><td>μ</td><td>Dynamic viscosity</td><td>Pa·s</td><td>1.789 × 10⁻⁵</td></tr>
+  </table>
+  <p><strong>Small-drone Re band:</strong> 10,000 – 200,000</p>
+  <p><strong>Worked example result:</strong> 250 mm chord, 10 m/s → Re ≈ 171,000</p>
+  <p style="font-size:11px;color:#666">TorqWings Academy — Low Reynolds Number Aerodynamics</p>
+</div>
+
+<script>
+  const slides = Array.from(document.querySelectorAll(".slide"));
+  const dotsWrap = document.getElementById("dots");
+  const backBtn = document.getElementById("backBtn");
+  const nextBtn = document.getElementById("nextBtn");
+  let i = 0;
+
+  // ---- Resume position (in-memory for this demo; production build should
+  // write/read this via the same sessionStorage pattern used elsewhere in
+  // skyfarm-mind, keyed by lesson id) ----
+  let lastVisited = null;
+
+  slides.forEach((_, idx) => {
+    const d = document.createElement("button");
+    d.addEventListener("click", () => go(idx));
+    dotsWrap.appendChild(d);
+  });
+  const dotEls = Array.from(dotsWrap.children);
+
+  function renderMath(scope){
+    if (window.renderMathInElement) {
+      renderMathInElement(scope, {
+        delimiters: [{left:"$$",right:"$$",display:true},{left:"$",right:"$",display:false}],
+        throwOnError:false
+      });
+    }
+  }
+
+  function go(idx){
+    slides[i].classList.remove("active");
+    i = Math.max(0, Math.min(slides.length - 1, idx));
+    slides[i].classList.add("active");
+    slides[i].scrollTop = 0;
+    dotEls.forEach((d, n) => d.classList.toggle("active", n === i));
+    backBtn.disabled = i === 0;
+    nextBtn.textContent = i === slides.length - 1 ? "Next section →" : "Next →";
+    lastVisited = i;
+    document.getElementById("resumeNote").textContent = "Position saved · slide " + (i+1) + " of " + slides.length;
+  }
+
+  backBtn.addEventListener("click", () => go(i - 1));
+  nextBtn.addEventListener("click", () => go(i + 1));
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowRight") go(i + 1);
+    if (e.key === "ArrowLeft") go(i - 1);
+  });
+
+  // ---- Swipe navigation (mobile) ----
+  const slidesEl = document.getElementById("slides");
+  let touchX = null;
+  slidesEl.addEventListener("touchstart", (e) => { touchX = e.touches[0].clientX; }, {passive:true});
+  slidesEl.addEventListener("touchend", (e) => {
+    if (touchX === null) return;
+    const dx = e.changedTouches[0].clientX - touchX;
+    if (Math.abs(dx) > 50) { dx < 0 ? go(i+1) : go(i-1); }
+    touchX = null;
+  }, {passive:true});
+
+  // ---- Font size control (scales all rem-based type via root font-size) ----
+  const steps = [15,16,17,18,19,20];
+  let stepIdx = 1;
+  function applyFont(){ document.documentElement.style.fontSize = steps[stepIdx] + "px"; }
+  document.getElementById("fontUp").addEventListener("click", () => { stepIdx = Math.min(steps.length-1, stepIdx+1); applyFont(); });
+  document.getElementById("fontDown").addEventListener("click", () => { stepIdx = Math.max(0, stepIdx-1); applyFont(); });
+
+  // ---- Glossary tooltips ----
+  document.querySelectorAll(".term").forEach((t) => {
+    t.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const tip = t.querySelector(".tooltip");
+      document.querySelectorAll(".tooltip.open").forEach((o) => { if (o !== tip) o.classList.remove("open"); });
+      tip.classList.toggle("open");
+    });
+  });
+  document.addEventListener("click", () => document.querySelectorAll(".tooltip.open").forEach((o) => o.classList.remove("open")));
+
+  // ---- Quick-check quizzes ----
+  document.querySelectorAll(".qcheck").forEach((q) => {
+    const answer = +q.dataset.answer;
+    const opts = Array.from(q.querySelectorAll(".opt"));
+    const fb = q.querySelector(".fb");
+    opts.forEach((btn, idx) => {
+      btn.addEventListener("click", () => {
+        opts.forEach((b) => b.disabled = true);
+        opts[answer].classList.add("correct");
+        if (idx !== answer) btn.classList.add("wrong");
+        fb.textContent = idx === answer ? "Correct — nice intuition." : "Not quite — correct answer highlighted above.";
+        fb.classList.add("show");
+      });
+    });
+  });
+
+  // ---- Interactive Re calculator, wired to the mini regime bar ----
+  const calcV = document.getElementById("calcV");
+  const calcL = document.getElementById("calcL");
+  const calcVval = document.getElementById("calcVval");
+  const calcLval = document.getElementById("calcLval");
+  const calcRe = document.getElementById("calcRe");
+  const markerLine = document.getElementById("calcMarkerLine");
+  const markerDot = document.getElementById("calcMarkerDot");
+
+  function reToX(re){
+    const lo = 3, hi = 6.3; // log10 bounds matching the bar's labeled range
+    const p = Math.min(1, Math.max(0, (Math.log10(re) - lo) / (hi - lo)));
+    return 20 + p * 600;
+  }
+  function updateCalc(){
+    const v = +calcV.value, Lmm = +calcL.value, Lm = Lmm/1000;
+    const re = (1.225 * v * Lm) / 1.789e-5;
+    calcVval.textContent = v;
+    calcLval.textContent = Lmm;
+    calcRe.textContent = Math.round(re).toLocaleString();
+    const x = reToX(re);
+    markerLine.setAttribute("x1", x); markerLine.setAttribute("x2", x);
+    markerDot.setAttribute("cx", x);
+  }
+  calcV.addEventListener("input", updateCalc);
+  calcL.addEventListener("input", updateCalc);
+
+  // ---- Print cheat sheet ----
+  document.getElementById("printBtn").addEventListener("click", () => window.print());
+
+  document.addEventListener("DOMContentLoaded", () => { renderMath(document.body); go(0); updateCalc(); });
+</script>
+</body>
+</html>
