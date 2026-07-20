@@ -753,12 +753,14 @@ export function AuthoredContentSection({
 
 // ---------- quiz section (3 questions, one at a time) ----------
 
+export interface SectionScoreResult { score: number; total: number }
+
 export function QuizSection({
   section, user, onComplete,
 }: {
   section: AcademyModuleSection;
   user: AcademyUser;
-  onComplete: () => void;
+  onComplete: (result: SectionScoreResult) => void;
 }) {
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
   const [questions, setQuestions] = useState<GeneratedQuestion[]>([]);
@@ -812,7 +814,7 @@ export function QuizSection({
       console.error("[Academy] failed to save quiz attempt:", err);
     } finally {
       setSaving(false);
-      onComplete();
+      onComplete({ score, total: questions.length });
     }
   }
 
@@ -910,7 +912,7 @@ export function FinalTestSection({
   section: AcademyModuleSection;
   user: AcademyUser;
   moduleId: string;
-  onPass: () => void;
+  onPass: (result: SectionScoreResult) => void;
   onRestudy: () => void;
   onInProgressChange: (inProgress: boolean) => void;
 }) {
@@ -994,7 +996,7 @@ export function FinalTestSection({
               <h3 style={{ font: `700 20px/1.3 ${DISPLAY}`, color: C.green, margin: 0 }}>🎉 Congratulations! You passed.</h3>
               <p style={{ font: `600 14px/1 ${MONO}`, color: C.green, marginTop: 10 }}>You scored {score}/{questions.length}</p>
               <button
-                onClick={onPass}
+                onClick={() => onPass({ score, total: questions.length })}
                 style={{
                   marginTop: 18, background: C.amber, color: "#0A0A0A", border: "none", borderRadius: 8,
                   padding: "11px 20px", font: `600 13px/1 ${SANS}`, cursor: "pointer",

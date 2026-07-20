@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { ArrowRight, CheckCircle2, Lock } from "lucide-react";
+import { ArrowRight, CheckCircle2, Lock, Play } from "lucide-react";
 import type { AcademyModuleSection, AcademyUser } from "@/lib/academy-auth";
 import { getModuleSections } from "@/lib/academy-auth";
 import { supabase } from "@/integrations/supabase/client";
-import { getCompletedSectionIds } from "@/lib/academy/module-progress";
-import { buildModuleGrid, computeSectionStates, type SectionState } from "@/lib/academy/module-grid";
+import { getCompletedSectionIds, getSectionScore } from "@/lib/academy/module-progress";
+import { buildModuleGrid, computeSectionStates, pairStatus, type PairStatus, type SectionState } from "@/lib/academy/module-grid";
 import { ErrorRetry, Skeleton } from "@/components/academy/module-player/SectionPlayers";
 import { ModuleTopBar } from "@/components/academy/module-player/ModuleTopBar";
 import { C, DISPLAY, MONO, SANS } from "@/components/academy/module-player/theme";
@@ -14,23 +14,41 @@ export const Route = createFileRoute("/academy/courses/$slug/modules/$moduleId")
   component: AcademyModuleGridPage,
 });
 
-function GridCell({
-  kind, number, state, onOpen, fullWidth,
+type CellKind = "Lesson" | "Quiz" | "Final Assessment";
+
+// A lesson/quiz completion just shows a check + the title. A quiz/final-test
+// completion additionally surfaces its saved score when one is on record —
+// module-progress.ts only has a score for section types that are ever
+// scored, so lessons naturally fall through to the plain "title" case.
+function completionLabel(moduleId: string, state: SectionState): string {
+  if (state.section.section_type === "content") return state.section.title;
+  const scoreInfo = getSectionScore(moduleId, state.section.id);
+  if (scoreInfo && typeof scoreInfo.score === "number" && typeof scoreInfo.total === "number") {
+    return `Test: ${state.section.title} · ${scoreInfo.score}/${scoreInfo.total}`;
+  }
+  return "Completed";
+}
+
+// Lives inside a PairCard/FinalAssessmentCard, which already carries the
+// colored border/background for the row's state — this cell itself stays
+// unstyled (no border of its own) so the two don't visually double up.
+function PairChildCell({
+  kind, number, state, moduleId, onOpen,
 }: {
-  kind: string;
+  kind: CellKind;
   number: number | null;
   state: SectionState | null;
+  moduleId: string;
   onOpen: (state: SectionState) => void;
-  fullWidth?: boolean;
 }) {
   if (!state) {
-    return <div style={{ borderRadius: 12, border: `1px dashed ${C.line}`, minHeight: 56 }} />;
+    return <div style={{ borderRadius: 10, border: `1px dashed ${C.line}`, minHeight: 52 }} />;
   }
 
   const { section, isLocked, isComplete, isCurrent } = state;
   const badge = number !== null ? String(number).padStart(2, "0") : "★";
-  const borderColor = isLocked ? C.line2 : isComplete ? C.green : C.amber;
-  const bg = isLocked ? C.panel : isCurrent ? C.amberSoft : isComplete ? C.greenSoft : C.panel;
+  const label = isComplete ? completionLabel(moduleId, state) : section.title;
+  const iconColor = isLocked ? C.faint : isComplete ? C.green : C.amber;
 
   return (
     <button
@@ -40,31 +58,87 @@ function GridCell({
       title={section.title}
       aria-label={`${kind} ${badge}: ${section.title}${isLocked ? " (locked)" : isComplete ? " (completed)" : ""}`}
       style={{
-        display: "flex", alignItems: "center", gap: 10, textAlign: "left", width: "100%",
-        border: `1px solid ${borderColor}`, borderRadius: 12, background: bg,
-        padding: "12px 14px", minHeight: 56, cursor: isLocked ? "default" : "pointer",
-        opacity: isLocked ? 0.55 : 1, gridColumn: fullWidth ? "1 / -1" : undefined,
-        boxShadow: isCurrent ? `0 0 0 1px ${C.amber}55` : "none",
+        display: "flex", alignItems: "center", gap: 9, textAlign: "left", width: "100%",
+        background: "transparent", border: "none", borderRadius: 8, minWidth: 0,
+        padding: "6px 4px", cursor: isLocked ? "default" : "pointer",
       }}
     >
-      <span style={{ font: `700 11px/1 ${MONO}`, color: isLocked ? C.faint : isComplete ? C.green : C.amber, flexShrink: 0, minWidth: 18 }}>
+      <span style={{ font: `700 10px/1 ${MONO}`, color: iconColor, flexShrink: 0, minWidth: 16 }}>
         {badge}
       </span>
       <span style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ font: `500 10px/1 ${MONO}`, letterSpacing: ".08em", textTransform: "uppercase", color: C.faint, marginBottom: 2 }}>
+        <div style={{ font: `500 9px/1 ${MONO}`, letterSpacing: ".08em", textTransform: "uppercase", color: C.faint, marginBottom: 3 }}>
           {kind}
         </div>
         <div style={{
-          font: `600 13px/1.3 ${SANS}`, color: isLocked ? C.mute : C.text,
+          font: `600 12.5px/1.3 ${SANS}`, color: isLocked ? C.mute : C.text,
           overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
         }}>
-          {section.title}
+          {label}
         </div>
       </span>
-      {isLocked && <Lock size={15} color={C.faint} style={{ flexShrink: 0 }} />}
-      {isComplete && <CheckCircle2 size={16} color={C.green} style={{ flexShrink: 0 }} />}
-      {!isLocked && !isComplete && <ArrowRight size={15} color={C.amber} style={{ flexShrink: 0 }} />}
+      {isLocked && <Lock size={14} color={C.faint} style={{ flexShrink: 0 }} />}
+      {isComplete && <CheckCircle2 size={15} color={C.green} style={{ flexShrink: 0 }} />}
+      {isCurrent && <Play size={14} color={C.amber} style={{ flexShrink: 0 }} />}
     </button>
+  );
+}
+
+// Green only once both sides of the pair are done — grey (not amber) while
+// the lesson is current but the quiz is still locked, since the two aren't
+// "connected" yet.
+function PairConnector({ status }: { status: PairStatus }) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <ArrowRight size={16} color={status === "complete" ? C.green : C.line2} />
+    </div>
+  );
+}
+
+function PairCard({
+  rowIndex, lesson, quiz, moduleId, onOpen,
+}: {
+  rowIndex: number;
+  lesson: SectionState | null;
+  quiz: SectionState | null;
+  moduleId: string;
+  onOpen: (state: SectionState) => void;
+}) {
+  const status = pairStatus(lesson, quiz);
+  const borderColor = status === "complete" ? C.green : status === "current" ? C.amber : C.line2;
+  const bg = status === "complete" ? C.greenSoft : C.panel;
+
+  return (
+    <div style={{
+      border: `1px solid ${borderColor}`, background: bg, borderRadius: 12, padding: 12,
+      opacity: status === "locked" ? 0.55 : 1,
+    }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 24px 1fr", alignItems: "center", gap: 6 }}>
+        <PairChildCell kind="Lesson" number={rowIndex + 1} state={lesson} moduleId={moduleId} onOpen={onOpen} />
+        <PairConnector status={status} />
+        <PairChildCell kind="Quiz" number={rowIndex + 1} state={quiz} moduleId={moduleId} onOpen={onOpen} />
+      </div>
+    </div>
+  );
+}
+
+function FinalAssessmentCard({
+  state, moduleId, onOpen,
+}: {
+  state: SectionState;
+  moduleId: string;
+  onOpen: (state: SectionState) => void;
+}) {
+  const borderColor = state.isLocked ? C.line2 : state.isComplete ? C.green : C.amber;
+  const bg = state.isComplete ? C.greenSoft : C.panel;
+
+  return (
+    <div style={{
+      border: `1px solid ${borderColor}`, background: bg, borderRadius: 12, padding: 12,
+      opacity: state.isLocked ? 0.55 : 1,
+    }}>
+      <PairChildCell kind="Final Assessment" number={null} state={state} moduleId={moduleId} onOpen={onOpen} />
+    </div>
   );
 }
 
@@ -122,6 +196,7 @@ function AcademyModuleGridPage() {
 
   const states = useMemo(() => (sections ? computeSectionStates(sections, completedIds) : []), [sections, completedIds]);
   const grid = useMemo(() => buildModuleGrid(states), [states]);
+  const progressPct = sections && sections.length > 0 ? (completedIds.size / sections.length) * 100 : 0;
 
   function openSection(state: SectionState) {
     if (state.isLocked) return;
@@ -166,21 +241,24 @@ function AcademyModuleGridPage() {
 
         {sections !== null && sections.length > 0 && (
           <>
-            <div style={{
-              display: "flex", alignItems: "center", gap: 6, marginBottom: 18,
-              font: `600 10px/1 ${MONO}`, letterSpacing: ".06em", textTransform: "uppercase",
-              color: completedIds.size === sections.length ? C.green : C.mute,
-            }}>
-              {completedIds.size === sections.length && <CheckCircle2 size={12} color={C.green} />}
-              {completedIds.size} of {sections.length} sections completed
+            <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 10 }}>
+              <span style={{ font: `500 20px/1 ${DISPLAY}`, color: C.text }}>{completedIds.size}</span>
+              <span style={{ font: `400 12px/1 ${SANS}`, color: C.mute }}>of {sections.length} sections completed</span>
+            </div>
+            <div style={{ height: 8, borderRadius: 4, background: `${C.line2}66`, overflow: "hidden", marginBottom: 22 }}>
+              <div style={{
+                height: "100%", borderRadius: 4, background: C.amber,
+                width: `${progressPct}%`, transition: "width 0.3s ease",
+              }} />
             </div>
 
             {grid.rows.length > 0 && (
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 12px", marginBottom: 8 }}>
-                <div style={{ font: `600 10px/1 ${MONO}`, letterSpacing: ".1em", textTransform: "uppercase", color: C.faint, paddingLeft: 2 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 24px 1fr", gap: "0 6px", marginBottom: 8 }}>
+                <div style={{ font: `600 10px/1 ${MONO}`, letterSpacing: ".1em", textTransform: "uppercase", color: C.faint, paddingLeft: 6 }}>
                   Lessons
                 </div>
-                <div style={{ font: `600 10px/1 ${MONO}`, letterSpacing: ".1em", textTransform: "uppercase", color: C.faint, paddingLeft: 2 }}>
+                <div />
+                <div style={{ font: `600 10px/1 ${MONO}`, letterSpacing: ".1em", textTransform: "uppercase", color: C.faint, paddingLeft: 6 }}>
                   Quizzes
                 </div>
               </div>
@@ -188,16 +266,20 @@ function AcademyModuleGridPage() {
 
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {grid.rows.map((row) => (
-                <div key={row.rowIndex} style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                  <GridCell kind="Lesson" number={row.rowIndex + 1} state={row.lesson} onOpen={openSection} />
-                  <GridCell kind="Quiz" number={row.rowIndex + 1} state={row.quiz} onOpen={openSection} />
-                </div>
+                <PairCard
+                  key={row.rowIndex}
+                  rowIndex={row.rowIndex}
+                  lesson={row.lesson}
+                  quiz={row.quiz}
+                  moduleId={moduleId}
+                  onOpen={openSection}
+                />
               ))}
             </div>
 
             {grid.finalTest && (
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginTop: 12 }}>
-                <GridCell kind="Final Assessment" number={null} state={grid.finalTest} onOpen={openSection} fullWidth />
+              <div style={{ marginTop: 12 }}>
+                <FinalAssessmentCard state={grid.finalTest} moduleId={moduleId} onOpen={openSection} />
               </div>
             )}
           </>

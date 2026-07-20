@@ -6,7 +6,7 @@ import { getModuleSections, getCourseSlugForModule } from "@/lib/academy-auth";
 import { clearModuleProgress, getCompletedSectionIds, markSectionComplete } from "@/lib/academy/module-progress";
 import { computeSectionStates } from "@/lib/academy/module-grid";
 import {
-  QuizSection, FinalTestSection, ErrorRetry, Skeleton, LockedSection,
+  QuizSection, FinalTestSection, ErrorRetry, Skeleton, LockedSection, type SectionScoreResult,
 } from "@/components/academy/module-player/SectionPlayers";
 import { PlayerStyles } from "@/components/academy/module-player/PlayerStyles";
 import { ModuleTopBar } from "@/components/academy/module-player/ModuleTopBar";
@@ -75,13 +75,13 @@ function AcademyQuizPage() {
   const states = useMemo(() => (sections ? computeSectionStates(sections, getCompletedSectionIds(moduleId)) : []), [sections, moduleId]);
   const target = states.find((s) => s.section.id === quizId) ?? null;
 
-  function handleQuizComplete() {
-    markSectionComplete(moduleId, quizId);
+  function handleQuizComplete(result: SectionScoreResult) {
+    markSectionComplete(moduleId, quizId, result);
     backToModule();
   }
 
-  function handleFinalPass() {
-    markSectionComplete(moduleId, quizId);
+  function handleFinalPass(result: SectionScoreResult) {
+    markSectionComplete(moduleId, quizId, result);
     navigate({ to: "/academy/dashboard" });
   }
 

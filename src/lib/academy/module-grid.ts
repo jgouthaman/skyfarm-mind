@@ -64,3 +64,18 @@ export function buildModuleGrid(states: SectionState[]): ModuleGrid {
   }));
   return { rows, finalTest };
 }
+
+export type PairStatus = "locked" | "current" | "complete";
+
+// Composes the pair's card-level accent from its two children's states
+// (lesson always precedes its quiz in order_index) instead of tracking a
+// separate "pair" state: locked while the lesson hasn't been reached yet,
+// complete once both sides are done, current for everything in between —
+// including "lesson done, quiz not reached/finished yet".
+export function pairStatus(lesson: SectionState | null, quiz: SectionState | null): PairStatus {
+  const primary = lesson ?? quiz;
+  if (!primary || primary.isLocked) return "locked";
+  const lessonDone = lesson ? lesson.isComplete : true;
+  const quizDone = quiz ? quiz.isComplete : true;
+  return lessonDone && quizDone ? "complete" : "current";
+}
