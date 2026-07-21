@@ -13,6 +13,7 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as PilotRouteImport } from './routes/pilot'
 import { Route as MissionHubRouteImport } from './routes/mission-hub'
 import { Route as FieldRouteImport } from './routes/field'
+import { Route as DestudRouteImport } from './routes/destud'
 import { Route as AcademyRouteImport } from './routes/academy'
 import { Route as LayoutRouteImport } from './routes/_layout'
 import { Route as PilotIndexRouteImport } from './routes/pilot.index'
@@ -98,6 +99,11 @@ const MissionHubRoute = MissionHubRouteImport.update({
 const FieldRoute = FieldRouteImport.update({
   id: '/field',
   path: '/field',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DestudRoute = DestudRouteImport.update({
+  id: '/destud',
+  path: '/destud',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AcademyRoute = AcademyRouteImport.update({
@@ -461,6 +467,7 @@ const AcademyCoursesSlugModulesModuleIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof LayoutIndexRoute
   '/academy': typeof AcademyRouteWithChildren
+  '/destud': typeof DestudRoute
   '/field': typeof FieldRoute
   '/mission-hub': typeof MissionHubRouteWithChildren
   '/pilot': typeof PilotRouteWithChildren
@@ -530,6 +537,7 @@ export interface FileRoutesByFullPath {
   '/academy/module/$moduleId/quiz/$quizId': typeof AcademyModuleModuleIdQuizQuizIdRoute
 }
 export interface FileRoutesByTo {
+  '/destud': typeof DestudRoute
   '/field': typeof FieldRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/about': typeof LayoutAboutRoute
@@ -599,6 +607,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_layout': typeof LayoutRouteWithChildren
   '/academy': typeof AcademyRouteWithChildren
+  '/destud': typeof DestudRoute
   '/field': typeof FieldRoute
   '/mission-hub': typeof MissionHubRouteWithChildren
   '/pilot': typeof PilotRouteWithChildren
@@ -673,6 +682,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/academy'
+    | '/destud'
     | '/field'
     | '/mission-hub'
     | '/pilot'
@@ -742,6 +752,7 @@ export interface FileRouteTypes {
     | '/academy/module/$moduleId/quiz/$quizId'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/destud'
     | '/field'
     | '/sitemap.xml'
     | '/about'
@@ -810,6 +821,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/_layout'
     | '/academy'
+    | '/destud'
     | '/field'
     | '/mission-hub'
     | '/pilot'
@@ -883,6 +895,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   LayoutRoute: typeof LayoutRouteWithChildren
   AcademyRoute: typeof AcademyRouteWithChildren
+  DestudRoute: typeof DestudRoute
   FieldRoute: typeof FieldRoute
   MissionHubRoute: typeof MissionHubRouteWithChildren
   PilotRoute: typeof PilotRouteWithChildren
@@ -917,6 +930,13 @@ declare module '@tanstack/react-router' {
       path: '/field'
       fullPath: '/field'
       preLoaderRoute: typeof FieldRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/destud': {
+      id: '/destud'
+      path: '/destud'
+      fullPath: '/destud'
+      preLoaderRoute: typeof DestudRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/academy': {
@@ -1591,6 +1611,7 @@ const PilotRouteWithChildren = PilotRoute._addFileChildren(PilotRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   LayoutRoute: LayoutRouteWithChildren,
   AcademyRoute: AcademyRouteWithChildren,
+  DestudRoute: DestudRoute,
   FieldRoute: FieldRoute,
   MissionHubRoute: MissionHubRouteWithChildren,
   PilotRoute: PilotRouteWithChildren,

@@ -6,7 +6,7 @@ import {
   ChevronDown, ChevronRight,
 } from "lucide-react";
 import { useMissionHubAuth } from "@/lib/mission-hub/context";
-import { ALL_VERTICALS, VERTICAL_LABELS, type Vertical } from "@/lib/mission-hub/types";
+import { VERTICAL_LABELS, type Vertical } from "@/lib/mission-hub/types";
 import { toast } from "sonner";
 
 const verticalIcon: Record<Vertical, any> = {
@@ -14,10 +14,6 @@ const verticalIcon: Record<Vertical, any> = {
   guardsky: Shield, labs: FlaskConical, academy: GraduationCap,
   "design-studio": Cpu,
 };
-
-// The Industries group holds only the actual industry verticals. Design
-// Studio, Labs, and Academy render as top-level nav items instead.
-const INDUSTRY_VERTICALS: Vertical[] = ["agrisky", "infrasky", "geosky", "guardsky"];
 
 export function MissionHubShell({ title, children }: { title: string; children: ReactNode }) {
   const { profile, verticals, loading, signOut } = useMissionHubAuth();
@@ -76,7 +72,7 @@ export function MissionHubShell({ title, children }: { title: string; children: 
   );
 }
 
-type Section = "business" | "industries" | "twbc" | "knowledge" | "config";
+type Section = "business" | "twbc" | "knowledge" | "config";
 
 function getSectionFromPath(path: string, role?: string): Section | null {
   if (path === "/mission-hub/twbc-drone-proven-designs") {
@@ -84,7 +80,6 @@ function getSectionFromPath(path: string, role?: string): Section | null {
   }
   if (path === "/mission-hub/waitlist" || path === "/mission-hub/contacts" || path === "/mission-hub/academy-users") return "business";
   if (path.startsWith("/mission-hub/twbc-") || path === "/mission-hub/knowledge-uav") return "twbc";
-  if (INDUSTRY_VERTICALS.some((v) => path === `/mission-hub/verticals/${v}`)) return "industries";
   if (path === "/mission-hub/users" || path.startsWith("/mission-hub/settings")) return "config";
   return null;
 }
@@ -136,8 +131,6 @@ function Sidebar({
   const [twbcOpen, setTwbcOpen] = useState(() => getTwbcOpenFromPath(path));
   const toggleTwbc = (k: keyof typeof twbcOpen) => setTwbcOpen(s => ({ ...s, [k]: !s[k] }));
 
-  const visibleVerticals: Vertical[] = isAdmin ? ALL_VERTICALS : verticals;
-  const industryVerticals = visibleVerticals.filter((v) => INDUSTRY_VERTICALS.includes(v));
   const hasVertical = (v: Vertical) => isAdmin || verticals.includes(v);
   const hasDesignStudio = hasVertical("design-studio");
 
@@ -185,28 +178,6 @@ function Sidebar({
           </>
         )}
 
-        {industryVerticals.length > 0 && (
-          <button
-            type="button"
-            onClick={() => toggle("industries")}
-            className="mt-5 mb-2 flex w-full items-center px-3 text-[10px] uppercase tracking-wider text-white/70 hover:text-white/90 transition-colors"
-          >
-            <span className="flex-1 text-left">Industries</span>
-            {openSection === "industries"
-              ? <ChevronDown className="h-3 w-3" />
-              : <ChevronRight className="h-3 w-3" />}
-          </button>
-        )}
-        {openSection === "industries" && industryVerticals.map((v) => {
-          const Icon = verticalIcon[v];
-          const to = `/mission-hub/verticals/${v}`;
-          return (
-            <NavLink key={v} to={to} icon={Icon} active={path === to} onClick={onClose}>
-              {VERTICAL_LABELS[v]}
-            </NavLink>
-          );
-        })}
-
         {/* ── Top-level: Design Studio (primary product surface), then the
             secondary Labs / Academy surfaces — not nested in any section. ── */}
         {hasDesignStudio && (
@@ -220,16 +191,6 @@ function Sidebar({
               {VERTICAL_LABELS["design-studio"]}
             </NavLink>
           </div>
-        )}
-        {hasVertical("labs") && (
-          <NavLink
-            to="/mission-hub/verticals/labs"
-            icon={verticalIcon.labs}
-            active={path === "/mission-hub/verticals/labs"}
-            onClick={onClose}
-          >
-            {VERTICAL_LABELS.labs}
-          </NavLink>
         )}
         {hasVertical("academy") && (
           <NavLink
