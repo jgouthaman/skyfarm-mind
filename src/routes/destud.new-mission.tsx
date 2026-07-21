@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useDestudUser, resolveDestudTier, destudDashboardPath } from "@/lib/destud-auth";
 import { MissionWizard } from "@/components/design-studio/wizard/MissionWizard";
+import { Topbar } from "@/components/destud/Topbar";
 
 export const Route = createFileRoute("/destud/new-mission")({
   component: DestudNewMission,
@@ -22,8 +23,14 @@ function DestudNewMission() {
   const resolution = resolveDestudTier(user.plan);
   const tier = resolution.kind === "resolved" ? resolution.tier : "explorer";
 
+  function handleSignOut() {
+    sessionStorage.removeItem("destud_user");
+    navigate({ to: "/destud" });
+  }
+
   return (
     <div style={{ background: "#0a0f1c", color: "#fff", minHeight: "100vh" }}>
+      <Topbar fullName={user.full_name} tier={tier} onSignOut={handleSignOut} />
       <MissionWizard
         userId={user.id}
         stepStorageKey="destud:wizard-step"
