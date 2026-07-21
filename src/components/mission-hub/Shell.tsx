@@ -178,8 +178,8 @@ function Sidebar({
             {openSection === "business" && (
               <>
                 <NavLink to="/mission-hub/waitlist" icon={Clock}    active={path === "/mission-hub/waitlist"} onClick={onClose}>DeStud Users</NavLink>
-                <NavLink to="/mission-hub/contacts" icon={BookUser} active={path === "/mission-hub/contacts"} onClick={onClose}>Contacts</NavLink>
                 <NavLink to="/mission-hub/academy-users" icon={GraduationCap} active={path === "/mission-hub/academy-users"} onClick={onClose}>Academy Users</NavLink>
+                <NavLink to="/mission-hub/contacts" icon={BookUser} active={path === "/mission-hub/contacts"} onClick={onClose}>Contacts</NavLink>
               </>
             )}
           </>

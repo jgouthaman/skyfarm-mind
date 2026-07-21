@@ -4,10 +4,9 @@ import { MhCard } from "@/components/mission-hub/Shell";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-type Tab = "waitlist" | "courses" | "modules" | "users";
+type Tab = "courses" | "modules" | "users";
 
 const TABS: { id: Tab; label: string }[] = [
-  { id: "waitlist", label: "Waitlist" },
   { id: "courses", label: "Courses" },
   { id: "modules", label: "Modules" },
   { id: "users", label: "Users" },
@@ -36,56 +35,36 @@ type ModuleRow = {
   course_id: string;
 };
 
-type WaitlistRow = {
-  id: string;
-  email: string;
-  name: string | null;
-  course_id: string | null;
-  created_at: string;
-  status: string;
-};
-
-type EnrollmentRow = {
-  id: string;
-  user_id: string;
-  course_id: string | null;
-  enrolled_at: string;
-  status: string;
-};
-
 type AcademyUserRow = {
   id: string;
   full_name: string;
   email: string;
+  status: string;
+  course_id: string | null;
+  activated_at: string;
 };
 
 export function AcademyVerticalTabs() {
-  const [tab, setTab] = useState<Tab>("waitlist");
+  const [tab, setTab] = useState<Tab>("courses");
   const [loading, setLoading] = useState(true);
   const [courses, setCourses] = useState<CourseRow[]>([]);
   const [modules, setModules] = useState<ModuleRow[]>([]);
-  const [waitlist, setWaitlist] = useState<WaitlistRow[]>([]);
-  const [enrollments, setEnrollments] = useState<EnrollmentRow[]>([]);
   const [academyUsers, setAcademyUsers] = useState<AcademyUserRow[]>([]);
-  const [promotingId, setPromotingId] = useState<string | null>(null);
 
   async function loadAll() {
-    const [coursesRes, modulesRes, waitlistRes, enrollmentsRes, academyUsersRes] = await Promise.all([
+    const [coursesRes, modulesRes, academyUsersRes] = await Promise.all([
       supabase.from("academy_courses" as any).select("*").order("order_index", { ascending: true }),
       supabase.from("academy_course_modules" as any).select("*").order("order_index", { ascending: true }),
-      supabase.from("academy_waitlist" as any).select("*").neq("status", "converted").order("created_at", { ascending: false }),
-      supabase.from("enrollments" as any).select("*").order("enrolled_at", { ascending: false }),
-      supabase.from("academy_users" as any).select("id, full_name, email"),
+      supabase.from("academy_users" as any)
+        .select("id, full_name, email, status, course_id, activated_at")
+        .eq("status", "active")
+        .order("activated_at", { ascending: false }),
     ]);
     if (coursesRes.error) console.error("[Academy] failed to load courses:", coursesRes.error);
     if (modulesRes.error) console.error("[Academy] failed to load modules:", modulesRes.error);
-    if (waitlistRes.error) console.error("[Academy] failed to load waitlist:", waitlistRes.error);
-    if (enrollmentsRes.error) console.error("[Academy] failed to load enrollments:", enrollmentsRes.error);
     if (academyUsersRes.error) console.error("[Academy] failed to load academy_users:", academyUsersRes.error);
     setCourses((coursesRes.data ?? []) as unknown as CourseRow[]);
     setModules((modulesRes.data ?? []) as unknown as ModuleRow[]);
-    setWaitlist((waitlistRes.data ?? []) as unknown as WaitlistRow[]);
-    setEnrollments((enrollmentsRes.data ?? []) as unknown as EnrollmentRow[]);
     setAcademyUsers((academyUsersRes.data ?? []) as unknown as AcademyUserRow[]);
   }
 
@@ -98,23 +77,28 @@ export function AcademyVerticalTabs() {
   }, []);
 
   const courseById = new Map(courses.map((c) => [c.id, c]));
-  const academyUserById = new Map(academyUsers.map((u) => [u.id, u]));
 
-  async function handlePromote(row: WaitlistRow) {
-    if (row.status !== "pending" || promotingId) return;
-    const confirmed = window.confirm(`Promote ${row.email} to an active Academy user?`);
-    if (!confirmed) return;
-
-    setPromotingId(row.id);
-    const { error } = await (supabase.rpc as any)("promote_waitlist_to_active", { p_waitlist_id: row.id });
+  async function handleAddCourse(input: {
+    title: string; slug: string; level: string; price: number; hours: number; project_count: number;
+  }) {
+    const nextOrderIndex = courses.reduce((max, c) => Math.max(max, c.order_index ?? 0), 0) + 1;
+    const { error } = await supabase.from("academy_courses" as any).insert({
+      title: input.title,
+      slug: input.slug,
+      level: input.level,
+      price: input.price,
+      hours: input.hours,
+      project_count: input.project_count,
+      status: "coming_soon",
+      order_index: nextOrderIndex,
+    } as any);
     if (error) {
       toast.error(error.message);
-      setPromotingId(null);
-      return;
+      return false;
     }
-    toast.success(`${row.email} promoted to an active user`);
+    toast.success("Course added");
     await loadAll();
-    setPromotingId(null);
+    return true;
   }
 
   async function handleStatusChange(id: string, newStatus: string) {
@@ -162,19 +146,11 @@ export function AcademyVerticalTabs() {
         <p className="text-sm text-white/40">Loading…</p>
       ) : (
         <>
-          {tab === "waitlist" && (
-            <WaitlistTab
-              rows={waitlist}
-              courseById={courseById}
-              onPromote={handlePromote}
-              promotingId={promotingId}
-            />
+          {tab === "courses" && (
+            <CoursesTab rows={courses} onStatusChange={handleStatusChange} onAdd={handleAddCourse} />
           )}
-          {tab === "courses" && <CoursesTab rows={courses} onStatusChange={handleStatusChange} />}
           {tab === "modules" && <ModulesTab modules={modules} courses={courses} />}
-          {tab === "users" && (
-            <UsersTab rows={enrollments} courseById={courseById} academyUserById={academyUserById} />
-          )}
+          {tab === "users" && <UsersTab rows={academyUsers} courseById={courseById} />}
         </>
       )}
     </div>
@@ -207,87 +183,172 @@ function TableShell({ headers, children }: { headers: string[]; children: React.
   );
 }
 
-function WaitlistTab({
-  rows, courseById, onPromote, promotingId,
+function slugify(title: string): string {
+  return title.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+}
+
+const EMPTY_COURSE_FORM = { title: "", slug: "", level: "Foundation", price: "", hours: "", project_count: "" };
+
+function AddCourseForm({
+  onAdd, onDone,
 }: {
-  rows: WaitlistRow[];
-  courseById: Map<string, CourseRow>;
-  onPromote: (row: WaitlistRow) => void;
-  promotingId: string | null;
+  onAdd: (input: { title: string; slug: string; level: string; price: number; hours: number; project_count: number }) => Promise<boolean>;
+  onDone: () => void;
 }) {
+  const [form, setForm] = useState(EMPTY_COURSE_FORM);
+  const [slugTouched, setSlugTouched] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  function setTitle(title: string) {
+    setForm((f) => ({ ...f, title, slug: slugTouched ? f.slug : slugify(title) }));
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!form.title.trim() || !form.slug.trim()) {
+      toast.error("Title and slug are required.");
+      return;
+    }
+    setSaving(true);
+    const ok = await onAdd({
+      title: form.title.trim(),
+      slug: form.slug.trim(),
+      level: form.level,
+      price: Number(form.price) || 0,
+      hours: Number(form.hours) || 0,
+      project_count: Number(form.project_count) || 0,
+    });
+    setSaving(false);
+    if (ok) onDone();
+  }
+
   return (
-    <MhCard className="overflow-hidden">
-      {rows.length === 0 ? (
-        <EmptyState message="No pending waitlist entries." />
-      ) : (
-        <TableShell headers={["Email", "Name", "Course", "Date", "Status"]}>
-          {rows.map((r) => {
-            const isPending = r.status === "pending";
-            const isPromoting = promotingId === r.id;
-            const isLocked = promotingId !== null;
-            return (
-              <tr
-                key={r.id}
-                onDoubleClick={() => isPending && !isLocked && onPromote(r)}
-                title={isPending ? "Double-click to promote to an active user" : undefined}
-                className="border-t border-white/[0.05]"
-                style={{
-                  cursor: isPending && !isLocked ? "pointer" : "default",
-                  opacity: isPromoting ? 0.5 : 1,
-                }}
-              >
-                <td className="px-4 py-3 text-white/85">{r.email}</td>
-                <td className="px-4 py-3 text-white/70 text-[12px]">{r.name ?? "—"}</td>
-                <td className="px-4 py-3 text-white/70 text-[12px]">
-                  {r.course_id ? (courseById.get(r.course_id)?.title ?? "—") : "Full bundle"}
-                </td>
-                <td className="px-4 py-3 text-[12px] text-white/60">{new Date(r.created_at).toLocaleDateString()}</td>
-                <td className="px-4 py-3 text-[12px] text-white/70">
-                  {isPromoting ? "Promoting…" : r.status}
-                </td>
-              </tr>
-            );
-          })}
-        </TableShell>
-      )}
-    </MhCard>
+    <form onSubmit={handleSubmit} className="px-5 py-4 border-b border-white/[0.08] grid grid-cols-2 gap-3">
+      <label className="flex flex-col gap-1 text-[11px] text-white/50">
+        Title
+        <input
+          value={form.title}
+          onChange={(e) => setTitle(e.target.value)}
+          className="bg-transparent border border-white/[0.1] rounded px-2 py-1.5 text-sm text-white"
+          required
+        />
+      </label>
+      <label className="flex flex-col gap-1 text-[11px] text-white/50">
+        Slug
+        <input
+          value={form.slug}
+          onChange={(e) => { setSlugTouched(true); setForm((f) => ({ ...f, slug: e.target.value })); }}
+          className="bg-transparent border border-white/[0.1] rounded px-2 py-1.5 text-sm text-white"
+          required
+        />
+      </label>
+      <label className="flex flex-col gap-1 text-[11px] text-white/50">
+        Level
+        <input
+          value={form.level}
+          onChange={(e) => setForm((f) => ({ ...f, level: e.target.value }))}
+          className="bg-transparent border border-white/[0.1] rounded px-2 py-1.5 text-sm text-white"
+        />
+      </label>
+      <label className="flex flex-col gap-1 text-[11px] text-white/50">
+        Price (₹)
+        <input
+          type="number" min={0} value={form.price}
+          onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))}
+          className="bg-transparent border border-white/[0.1] rounded px-2 py-1.5 text-sm text-white"
+        />
+      </label>
+      <label className="flex flex-col gap-1 text-[11px] text-white/50">
+        Hours
+        <input
+          type="number" min={0} value={form.hours}
+          onChange={(e) => setForm((f) => ({ ...f, hours: e.target.value }))}
+          className="bg-transparent border border-white/[0.1] rounded px-2 py-1.5 text-sm text-white"
+        />
+      </label>
+      <label className="flex flex-col gap-1 text-[11px] text-white/50">
+        Projects
+        <input
+          type="number" min={0} value={form.project_count}
+          onChange={(e) => setForm((f) => ({ ...f, project_count: e.target.value }))}
+          className="bg-transparent border border-white/[0.1] rounded px-2 py-1.5 text-sm text-white"
+        />
+      </label>
+      <div className="col-span-2 flex items-center gap-2 mt-1">
+        <button
+          type="submit"
+          disabled={saving}
+          className="rounded-lg px-4 py-1.5 text-sm"
+          style={{ background: "#2BB3B0", color: "#0a0f1c", fontWeight: 500, opacity: saving ? 0.6 : 1 }}
+        >
+          {saving ? "Adding…" : "Add course"}
+        </button>
+        <button
+          type="button"
+          onClick={onDone}
+          className="rounded-lg px-4 py-1.5 text-sm text-white/60 hover:text-white"
+        >
+          Cancel
+        </button>
+      </div>
+    </form>
   );
 }
 
 function CoursesTab({
-  rows, onStatusChange,
-}: { rows: CourseRow[]; onStatusChange: (id: string, newStatus: string) => void }) {
+  rows, onStatusChange, onAdd,
+}: {
+  rows: CourseRow[];
+  onStatusChange: (id: string, newStatus: string) => void;
+  onAdd: (input: { title: string; slug: string; level: string; price: number; hours: number; project_count: number }) => Promise<boolean>;
+}) {
+  const [showAdd, setShowAdd] = useState(false);
+
   return (
-    <MhCard className="overflow-hidden">
-      {rows.length === 0 ? (
-        <EmptyState message="No courses found." />
-      ) : (
-        <TableShell headers={["Title", "Level", "Price", "Hours", "Projects", "Status"]}>
-          {rows.map((r) => (
-            <tr key={r.id} className="border-t border-white/[0.05]">
-              <td className="px-4 py-3 text-white/85">{r.title}</td>
-              <td className="px-4 py-3 text-white/70 text-[12px]">{r.level}</td>
-              <td className="px-4 py-3 text-white/70 text-[12px]">₹{Number(r.price).toLocaleString("en-IN")}</td>
-              <td className="px-4 py-3 text-white/70 text-[12px]">{r.hours}</td>
-              <td className="px-4 py-3 text-white/70 text-[12px]">{r.project_count}</td>
-              <td className="px-4 py-3">
-                <select
-                  value={r.status}
-                  onChange={(e) => onStatusChange(r.id, e.target.value)}
-                  className="bg-transparent border border-white/[0.1] rounded px-2 py-1 text-[11px] text-white"
-                >
-                  {Object.entries(STATUS_DISPLAY_LABEL).map(([value, label]) => (
-                    <option key={value} value={value} style={{ color: "#fff", background: "#1a2035" }}>
-                      {label}
-                    </option>
-                  ))}
-                </select>
-              </td>
-            </tr>
-          ))}
-        </TableShell>
-      )}
-    </MhCard>
+    <div className="space-y-3">
+      <div className="flex justify-end">
+        {!showAdd && (
+          <button
+            onClick={() => setShowAdd(true)}
+            className="rounded-lg px-4 py-1.5 text-sm"
+            style={{ background: "#2BB3B0", color: "#0a0f1c", fontWeight: 500 }}
+          >
+            + Add course
+          </button>
+        )}
+      </div>
+      <MhCard className="overflow-hidden">
+        {showAdd && <AddCourseForm onAdd={onAdd} onDone={() => setShowAdd(false)} />}
+        {rows.length === 0 ? (
+          <EmptyState message="No courses found." />
+        ) : (
+          <TableShell headers={["Title", "Level", "Price", "Hours", "Projects", "Status"]}>
+            {rows.map((r) => (
+              <tr key={r.id} className="border-t border-white/[0.05]">
+                <td className="px-4 py-3 text-white/85">{r.title}</td>
+                <td className="px-4 py-3 text-white/70 text-[12px]">{r.level}</td>
+                <td className="px-4 py-3 text-white/70 text-[12px]">₹{Number(r.price).toLocaleString("en-IN")}</td>
+                <td className="px-4 py-3 text-white/70 text-[12px]">{r.hours}</td>
+                <td className="px-4 py-3 text-white/70 text-[12px]">{r.project_count}</td>
+                <td className="px-4 py-3">
+                  <select
+                    value={r.status}
+                    onChange={(e) => onStatusChange(r.id, e.target.value)}
+                    className="bg-transparent border border-white/[0.1] rounded px-2 py-1 text-[11px] text-white"
+                  >
+                    {Object.entries(STATUS_DISPLAY_LABEL).map(([value, label]) => (
+                      <option key={value} value={value} style={{ color: "#fff", background: "#1a2035" }}>
+                        {label}
+                      </option>
+                    ))}
+                  </select>
+                </td>
+              </tr>
+            ))}
+          </TableShell>
+        )}
+      </MhCard>
+    </div>
   );
 }
 
@@ -330,31 +391,26 @@ function ModulesTab({ modules, courses }: { modules: ModuleRow[]; courses: Cours
 }
 
 function UsersTab({
-  rows, courseById, academyUserById,
+  rows, courseById,
 }: {
-  rows: EnrollmentRow[];
+  rows: AcademyUserRow[];
   courseById: Map<string, CourseRow>;
-  academyUserById: Map<string, AcademyUserRow>;
 }) {
   return (
     <MhCard className="overflow-hidden">
       {rows.length === 0 ? (
-        <EmptyState message="No enrollments yet." />
+        <EmptyState message="No active academy users yet." />
       ) : (
-        <TableShell headers={["User", "Email", "Course", "Status", "Enrolled"]}>
+        <TableShell headers={["User", "Email", "Course", "Status", "Activated"]}>
           {rows.map((r) => (
             <tr key={r.id} className="border-t border-white/[0.05]">
-              <td className="px-4 py-3 text-white/70 text-[12px]">
-                {academyUserById.get(r.user_id)?.full_name ?? r.user_id}
-              </td>
-              <td className="px-4 py-3 text-white/70 text-[12px]">
-                {academyUserById.get(r.user_id)?.email ?? "—"}
-              </td>
+              <td className="px-4 py-3 text-white/70 text-[12px]">{r.full_name}</td>
+              <td className="px-4 py-3 text-white/70 text-[12px]">{r.email}</td>
               <td className="px-4 py-3 text-white/70 text-[12px]">
                 {r.course_id ? (courseById.get(r.course_id)?.title ?? "—") : "—"}
               </td>
               <td className="px-4 py-3 text-[12px] text-white/70">{r.status}</td>
-              <td className="px-4 py-3 text-[12px] text-white/60">{new Date(r.enrolled_at).toLocaleDateString()}</td>
+              <td className="px-4 py-3 text-[12px] text-white/60">{new Date(r.activated_at).toLocaleDateString()}</td>
             </tr>
           ))}
         </TableShell>
