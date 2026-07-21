@@ -308,18 +308,8 @@ function DestudSignInPage() {
   );
 }
 
-// Wizard entry point — IMPORTANT ASSUMPTION:
-// /mission-hub/torqwings-design-studio/new is the only "first step of the
-// Design Studio wizard" that exists in this codebase today. It is nested
-// under MissionHubShell + an AccessGate (src/routes/mission-hub.
-// torqwings-design-studio.tsx) that both require a REAL Supabase Auth
-// session tied to a mission_hub_users row (role admin/super_admin, or
-// verticals including "design-studio") — not the lightweight name+email
-// check this page performs. A destud_users-verified visitor has neither, so
-// today they will be bounced to /mission-hub/login by that gate, and even if
-// the gate were bypassed, the wizard's final save step
-// (mission-hub.torqwings-design-studio.new.tsx's handleSubmit) requires a
-// real mission_hub_users.id to create a project. Wiring this correctly needs
-// a follow-up decision: either auto-provision a real (restricted) Mission
-// Hub account for converted DeStud users, or build a separate public
-// wizard/data-ownership path that doesn't require Mission Hub staff auth.
+// Wizard entry point resolved: the "+ New Mission" CTA on both tier
+// dashboards routes to /destud/new-mission, a DeStud-native wizard entry
+// (destud.new-mission.tsx) built on the same MissionWizard component the
+// Mission Hub staff wizard uses, but owned by the DeStud user's own id
+// instead of requiring a real Supabase Auth / mission_hub_users session.

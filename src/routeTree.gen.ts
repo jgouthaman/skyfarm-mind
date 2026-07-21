@@ -47,6 +47,7 @@ import { Route as MissionHubDesignStudioRouteImport } from './routes/mission-hub
 import { Route as MissionHubDashboardRouteImport } from './routes/mission-hub.dashboard'
 import { Route as MissionHubContactsRouteImport } from './routes/mission-hub.contacts'
 import { Route as MissionHubAcademyUsersRouteImport } from './routes/mission-hub.academy-users'
+import { Route as DestudNewMissionRouteImport } from './routes/destud.new-mission'
 import { Route as AcademyQuizDemoRouteImport } from './routes/academy.quiz-demo'
 import { Route as AcademyLessonDemoRouteImport } from './routes/academy.lesson-demo'
 import { Route as AcademyDashboardRouteImport } from './routes/academy.dashboard'
@@ -285,6 +286,11 @@ const MissionHubAcademyUsersRoute = MissionHubAcademyUsersRouteImport.update({
   path: '/academy-users',
   getParentRoute: () => MissionHubRoute,
 } as any)
+const DestudNewMissionRoute = DestudNewMissionRouteImport.update({
+  id: '/new-mission',
+  path: '/new-mission',
+  getParentRoute: () => DestudRoute,
+} as any)
 const AcademyQuizDemoRoute = AcademyQuizDemoRouteImport.update({
   id: '/quiz-demo',
   path: '/quiz-demo',
@@ -503,6 +509,7 @@ export interface FileRoutesByFullPath {
   '/academy/dashboard': typeof AcademyDashboardRoute
   '/academy/lesson-demo': typeof AcademyLessonDemoRoute
   '/academy/quiz-demo': typeof AcademyQuizDemoRoute
+  '/destud/new-mission': typeof DestudNewMissionRoute
   '/mission-hub/academy-users': typeof MissionHubAcademyUsersRoute
   '/mission-hub/contacts': typeof MissionHubContactsRoute
   '/mission-hub/dashboard': typeof MissionHubDashboardRoute
@@ -572,6 +579,7 @@ export interface FileRoutesByTo {
   '/academy/dashboard': typeof AcademyDashboardRoute
   '/academy/lesson-demo': typeof AcademyLessonDemoRoute
   '/academy/quiz-demo': typeof AcademyQuizDemoRoute
+  '/destud/new-mission': typeof DestudNewMissionRoute
   '/mission-hub/academy-users': typeof MissionHubAcademyUsersRoute
   '/mission-hub/contacts': typeof MissionHubContactsRoute
   '/mission-hub/dashboard': typeof MissionHubDashboardRoute
@@ -648,6 +656,7 @@ export interface FileRoutesById {
   '/academy/dashboard': typeof AcademyDashboardRoute
   '/academy/lesson-demo': typeof AcademyLessonDemoRoute
   '/academy/quiz-demo': typeof AcademyQuizDemoRoute
+  '/destud/new-mission': typeof DestudNewMissionRoute
   '/mission-hub/academy-users': typeof MissionHubAcademyUsersRoute
   '/mission-hub/contacts': typeof MissionHubContactsRoute
   '/mission-hub/dashboard': typeof MissionHubDashboardRoute
@@ -726,6 +735,7 @@ export interface FileRouteTypes {
     | '/academy/dashboard'
     | '/academy/lesson-demo'
     | '/academy/quiz-demo'
+    | '/destud/new-mission'
     | '/mission-hub/academy-users'
     | '/mission-hub/contacts'
     | '/mission-hub/dashboard'
@@ -795,6 +805,7 @@ export interface FileRouteTypes {
     | '/academy/dashboard'
     | '/academy/lesson-demo'
     | '/academy/quiz-demo'
+    | '/destud/new-mission'
     | '/mission-hub/academy-users'
     | '/mission-hub/contacts'
     | '/mission-hub/dashboard'
@@ -870,6 +881,7 @@ export interface FileRouteTypes {
     | '/academy/dashboard'
     | '/academy/lesson-demo'
     | '/academy/quiz-demo'
+    | '/destud/new-mission'
     | '/mission-hub/academy-users'
     | '/mission-hub/contacts'
     | '/mission-hub/dashboard'
@@ -1204,6 +1216,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MissionHubAcademyUsersRouteImport
       parentRoute: typeof MissionHubRoute
     }
+    '/destud/new-mission': {
+      id: '/destud/new-mission'
+      path: '/new-mission'
+      fullPath: '/destud/new-mission'
+      preLoaderRoute: typeof DestudNewMissionRouteImport
+      parentRoute: typeof DestudRoute
+    }
     '/academy/quiz-demo': {
       id: '/academy/quiz-demo'
       path: '/quiz-demo'
@@ -1535,12 +1554,14 @@ const AcademyRouteWithChildren =
   AcademyRoute._addFileChildren(AcademyRouteChildren)
 
 interface DestudRouteChildren {
+  DestudNewMissionRoute: typeof DestudNewMissionRoute
   DestudIndexRoute: typeof DestudIndexRoute
   DestudDashboardEngineerRoute: typeof DestudDashboardEngineerRoute
   DestudDashboardExplorerRoute: typeof DestudDashboardExplorerRoute
 }
 
 const DestudRouteChildren: DestudRouteChildren = {
+  DestudNewMissionRoute: DestudNewMissionRoute,
   DestudIndexRoute: DestudIndexRoute,
   DestudDashboardEngineerRoute: DestudDashboardEngineerRoute,
   DestudDashboardExplorerRoute: DestudDashboardExplorerRoute,

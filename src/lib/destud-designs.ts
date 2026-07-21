@@ -2,12 +2,11 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { DesignSummary } from "@/components/destud/DesignCard";
 
-// KNOWN GAP: studio_projects.user_id is always a mission_hub_users id (set
-// by the staff-only wizard's handleSubmit — see project-service.ts), never a
-// destud_users id. A DeStud (name+email) visitor has no way to create a
-// studio_projects row today, so this query is real (no mock data) but will
-// always return empty until that identity link exists. See the "Wizard
-// entry point" note in src/routes/destud.tsx for the same underlying gap.
+// studio_projects.user_id holds whichever id created it — a
+// mission_hub_users.id for the staff wizard, or a destud_users.id for
+// missions created via /destud/new-mission (MissionWizard is shared between
+// both entry points; see its userId doc comment). No FK ties the column to
+// either table specifically.
 export function useDestudDesigns(destudUserId: string): DesignSummary[] | null {
   const [designs, setDesigns] = useState<DesignSummary[] | null>(null);
 

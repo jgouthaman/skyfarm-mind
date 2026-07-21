@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { ArrowRight, Plus, Sparkles } from "lucide-react";
-import { useDestudSession, DESTUD_WIZARD_ROUTE } from "@/lib/destud-auth";
+import { useDestudSession } from "@/lib/destud-auth";
 import { useDestudDesigns, designsThisMonth } from "@/lib/destud-designs";
 import { Topbar } from "@/components/destud/Topbar";
 import { Meter } from "@/components/destud/Meter";
@@ -60,7 +60,7 @@ function ExplorerDashboard() {
             </h1>
           </div>
           <button
-            onClick={() => navigate({ to: DESTUD_WIZARD_ROUTE })}
+            onClick={() => navigate({ to: "/destud/new-mission" })}
             style={{
               display: "flex", alignItems: "center", gap: 8, background: C.amber, color: "#0A0A0A",
               border: "none", borderRadius: 9, padding: "11px 18px", font: `600 13px/1 ${SANS}`, cursor: "pointer",

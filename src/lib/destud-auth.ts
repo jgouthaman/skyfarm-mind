@@ -43,13 +43,25 @@ export function destudDashboardPath(tier: DestudTier): "/destud/dashboard/explor
   return tier === "engineer" ? "/destud/dashboard/engineer" : "/destud/dashboard/explorer";
 }
 
-// Same wizard entry point the /destud sign-in flow used to redirect into
-// directly. See destud.tsx's routing note: this route is staff-gated
-// (MissionHubShell + AccessGate, real Supabase Auth) and does not yet accept
-// destud_users sessions — the "+ New Mission" CTA on both dashboards points
-// here as instructed, but will currently bounce to /mission-hub/login for a
-// DeStud-only visitor.
-export const DESTUD_WIZARD_ROUTE = "/mission-hub/torqwings-design-studio/new";
+// Any-tier session read for pages (like the wizard) that any signed-in
+// DeStud user can reach regardless of plan — unlike useDestudSession below,
+// this doesn't redirect based on tier, just bounces to /destud if there's no
+// session at all.
+export function useDestudUser(): DestudUser | null {
+  const navigate = useNavigate();
+  const [user, setUser] = useState<DestudUser | null>(null);
+
+  useEffect(() => {
+    const raw = sessionStorage.getItem("destud_user");
+    if (!raw) {
+      navigate({ to: "/destud" });
+      return;
+    }
+    setUser(JSON.parse(raw) as DestudUser);
+  }, [navigate]);
+
+  return user;
+}
 
 // Shared session guard for both tier dashboards: bounces back to /destud if
 // there's no cached session, and redirects to the *other* tier's dashboard
