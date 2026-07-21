@@ -101,6 +101,24 @@ export function AcademyVerticalTabs() {
     return true;
   }
 
+  async function handleAddModule(input: { course_id: string; title: string }) {
+    const nextOrderIndex = modules
+      .filter((m) => m.course_id === input.course_id)
+      .reduce((max, m) => Math.max(max, m.order_index ?? 0), 0) + 1;
+    const { error } = await supabase.from("academy_course_modules" as any).insert({
+      course_id: input.course_id,
+      title: input.title,
+      order_index: nextOrderIndex,
+    } as any);
+    if (error) {
+      toast.error(error.message);
+      return false;
+    }
+    toast.success("Module added");
+    await loadAll();
+    return true;
+  }
+
   async function handleStatusChange(id: string, newStatus: string) {
     const prevCourse = courses.find((c) => c.id === id);
     if (!prevCourse || prevCourse.status === newStatus) return;
@@ -149,7 +167,9 @@ export function AcademyVerticalTabs() {
           {tab === "courses" && (
             <CoursesTab rows={courses} onStatusChange={handleStatusChange} onAdd={handleAddCourse} />
           )}
-          {tab === "modules" && <ModulesTab modules={modules} courses={courses} />}
+          {tab === "modules" && (
+            <ModulesTab modules={modules} courses={courses} onAdd={handleAddModule} />
+          )}
           {tab === "users" && <UsersTab rows={academyUsers} courseById={courseById} />}
         </>
       )}
@@ -352,40 +372,145 @@ function CoursesTab({
   );
 }
 
-function ModulesTab({ modules, courses }: { modules: ModuleRow[]; courses: CourseRow[] }) {
-  if (modules.length === 0) {
+function AddModuleForm({
+  courses, onAdd, onDone,
+}: {
+  courses: CourseRow[];
+  onAdd: (input: { course_id: string; title: string }) => Promise<boolean>;
+  onDone: () => void;
+}) {
+  const sortedCourses = [...courses].sort((a, b) => (a.order_index ?? 0) - (b.order_index ?? 0));
+  const [courseId, setCourseId] = useState(sortedCourses[0]?.id ?? "");
+  const [title, setTitle] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!courseId || !title.trim()) {
+      toast.error("Course and title are required.");
+      return;
+    }
+    setSaving(true);
+    const ok = await onAdd({ course_id: courseId, title: title.trim() });
+    setSaving(false);
+    if (ok) onDone();
+  }
+
+  if (sortedCourses.length === 0) {
     return (
-      <MhCard className="overflow-hidden">
-        <EmptyState message="No modules found." />
-      </MhCard>
+      <div className="px-5 py-4 border-b border-white/[0.08] text-sm text-white/50">
+        Add a course first — modules need a course to belong to.
+      </div>
     );
   }
-  const sortedCourses = [...courses].sort((a, b) => (a.order_index ?? 0) - (b.order_index ?? 0));
+
   return (
-    <div className="space-y-5">
-      {sortedCourses.map((course) => {
-        const courseModules = modules
-          .filter((m) => m.course_id === course.id)
-          .sort((a, b) => a.order_index - b.order_index);
-        if (courseModules.length === 0) return null;
-        return (
-          <MhCard key={course.id} className="overflow-hidden">
-            <div className="px-5 py-3 border-b border-white/[0.08]">
-              <h3 className="text-white text-sm" style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 500 }}>
-                {course.title}
-              </h3>
-            </div>
-            <TableShell headers={["#", "Module"]}>
-              {courseModules.map((m) => (
-                <tr key={m.id} className="border-t border-white/[0.05]">
-                  <td className="px-4 py-3 text-white/50 text-[12px]">{m.order_index}</td>
-                  <td className="px-4 py-3 text-white/85">{m.title}</td>
-                </tr>
-              ))}
-            </TableShell>
-          </MhCard>
-        );
-      })}
+    <form onSubmit={handleSubmit} className="px-5 py-4 border-b border-white/[0.08] grid grid-cols-2 gap-3">
+      <label className="flex flex-col gap-1 text-[11px] text-white/50">
+        Course
+        <select
+          value={courseId}
+          onChange={(e) => setCourseId(e.target.value)}
+          className="bg-transparent border border-white/[0.1] rounded px-2 py-1.5 text-sm text-white"
+        >
+          {sortedCourses.map((c) => (
+            <option key={c.id} value={c.id} style={{ color: "#fff", background: "#1a2035" }}>
+              {c.title}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label className="flex flex-col gap-1 text-[11px] text-white/50">
+        Module title
+        <input
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          className="bg-transparent border border-white/[0.1] rounded px-2 py-1.5 text-sm text-white"
+          required
+        />
+      </label>
+      <div className="col-span-2 flex items-center gap-2 mt-1">
+        <button
+          type="submit"
+          disabled={saving}
+          className="rounded-lg px-4 py-1.5 text-sm"
+          style={{ background: "#2BB3B0", color: "#0a0f1c", fontWeight: 500, opacity: saving ? 0.6 : 1 }}
+        >
+          {saving ? "Adding…" : "Add module"}
+        </button>
+        <button
+          type="button"
+          onClick={onDone}
+          className="rounded-lg px-4 py-1.5 text-sm text-white/60 hover:text-white"
+        >
+          Cancel
+        </button>
+      </div>
+    </form>
+  );
+}
+
+function ModulesTab({
+  modules, courses, onAdd,
+}: {
+  modules: ModuleRow[];
+  courses: CourseRow[];
+  onAdd: (input: { course_id: string; title: string }) => Promise<boolean>;
+}) {
+  const [showAdd, setShowAdd] = useState(false);
+  const sortedCourses = [...courses].sort((a, b) => (a.order_index ?? 0) - (b.order_index ?? 0));
+
+  return (
+    <div className="space-y-3">
+      <div className="flex justify-end">
+        {!showAdd && (
+          <button
+            onClick={() => setShowAdd(true)}
+            className="rounded-lg px-4 py-1.5 text-sm"
+            style={{ background: "#2BB3B0", color: "#0a0f1c", fontWeight: 500 }}
+          >
+            + Add module
+          </button>
+        )}
+      </div>
+
+      {showAdd && (
+        <MhCard className="overflow-hidden">
+          <AddModuleForm courses={courses} onAdd={onAdd} onDone={() => setShowAdd(false)} />
+        </MhCard>
+      )}
+
+      {modules.length === 0 ? (
+        <MhCard className="overflow-hidden">
+          <EmptyState message="No modules found." />
+        </MhCard>
+      ) : (
+        <div className="space-y-5">
+          {sortedCourses.map((course) => {
+            const courseModules = modules
+              .filter((m) => m.course_id === course.id)
+              .sort((a, b) => a.order_index - b.order_index);
+            if (courseModules.length === 0) return null;
+            return (
+              <MhCard key={course.id} className="overflow-hidden">
+                <div className="px-5 py-3 border-b border-white/[0.08]">
+                  <h3 className="text-white text-sm" style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 500 }}>
+                    {course.title}
+                  </h3>
+                </div>
+                <TableShell headers={["#", "Module"]}>
+                  {courseModules.map((m) => (
+                    <tr key={m.id} className="border-t border-white/[0.05]">
+                      <td className="px-4 py-3 text-white/50 text-[12px]">{m.order_index}</td>
+                      <td className="px-4 py-3 text-white/85">{m.title}</td>
+                    </tr>
+                  ))}
+                </TableShell>
+              </MhCard>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
