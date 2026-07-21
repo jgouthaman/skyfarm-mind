@@ -12,6 +12,7 @@ export const Route = createFileRoute("/mission-hub/waitlist")({
 const STATUS = [
   { value: "new", label: "New", color: "#378ADD", bg: "rgba(55,138,221,0.15)" },
   { value: "contacted", label: "Contacted", color: "#EF9F27", bg: "rgba(239,159,39,0.15)" },
+  { value: "converted", label: "Converted", color: "#1D9E75", bg: "rgba(29,158,117,0.15)" },
   { value: "not_interested", label: "Not interested", color: "rgba(255,255,255,0.6)", bg: "rgba(255,255,255,0.06)" },
 ];
 

@@ -18,6 +18,7 @@ import { Route as AcademyRouteImport } from './routes/academy'
 import { Route as LayoutRouteImport } from './routes/_layout'
 import { Route as PilotIndexRouteImport } from './routes/pilot.index'
 import { Route as MissionHubIndexRouteImport } from './routes/mission-hub.index'
+import { Route as DestudIndexRouteImport } from './routes/destud.index'
 import { Route as AcademyIndexRouteImport } from './routes/academy.index'
 import { Route as LayoutIndexRouteImport } from './routes/_layout.index'
 import { Route as PilotTrackingRouteImport } from './routes/pilot.tracking'
@@ -126,6 +127,11 @@ const MissionHubIndexRoute = MissionHubIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => MissionHubRoute,
+} as any)
+const DestudIndexRoute = DestudIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => DestudRoute,
 } as any)
 const AcademyIndexRoute = AcademyIndexRouteImport.update({
   id: '/',
@@ -524,6 +530,7 @@ export interface FileRoutesByFullPath {
   '/pilot/sync': typeof PilotSyncRoute
   '/pilot/tracking': typeof PilotTrackingRoute
   '/academy/': typeof AcademyIndexRoute
+  '/destud/': typeof DestudIndexRoute
   '/mission-hub/': typeof MissionHubIndexRoute
   '/pilot/': typeof PilotIndexRoute
   '/auth/callback': typeof LayoutAuthCallbackRoute
@@ -551,7 +558,6 @@ export interface FileRoutesByFullPath {
   '/academy/module/$moduleId/quiz/$quizId': typeof AcademyModuleModuleIdQuizQuizIdRoute
 }
 export interface FileRoutesByTo {
-  '/destud': typeof DestudRouteWithChildren
   '/field': typeof FieldRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/about': typeof LayoutAboutRoute
@@ -593,6 +599,7 @@ export interface FileRoutesByTo {
   '/pilot/tracking': typeof PilotTrackingRoute
   '/': typeof LayoutIndexRoute
   '/academy': typeof AcademyIndexRoute
+  '/destud': typeof DestudIndexRoute
   '/mission-hub': typeof MissionHubIndexRoute
   '/pilot': typeof PilotIndexRoute
   '/auth/callback': typeof LayoutAuthCallbackRoute
@@ -669,6 +676,7 @@ export interface FileRoutesById {
   '/pilot/tracking': typeof PilotTrackingRoute
   '/_layout/': typeof LayoutIndexRoute
   '/academy/': typeof AcademyIndexRoute
+  '/destud/': typeof DestudIndexRoute
   '/mission-hub/': typeof MissionHubIndexRoute
   '/pilot/': typeof PilotIndexRoute
   '/_layout/auth/callback': typeof LayoutAuthCallbackRoute
@@ -745,6 +753,7 @@ export interface FileRouteTypes {
     | '/pilot/sync'
     | '/pilot/tracking'
     | '/academy/'
+    | '/destud/'
     | '/mission-hub/'
     | '/pilot/'
     | '/auth/callback'
@@ -772,7 +781,6 @@ export interface FileRouteTypes {
     | '/academy/module/$moduleId/quiz/$quizId'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/destud'
     | '/field'
     | '/sitemap.xml'
     | '/about'
@@ -814,6 +822,7 @@ export interface FileRouteTypes {
     | '/pilot/tracking'
     | '/'
     | '/academy'
+    | '/destud'
     | '/mission-hub'
     | '/pilot'
     | '/auth/callback'
@@ -889,6 +898,7 @@ export interface FileRouteTypes {
     | '/pilot/tracking'
     | '/_layout/'
     | '/academy/'
+    | '/destud/'
     | '/mission-hub/'
     | '/pilot/'
     | '/_layout/auth/callback'
@@ -990,6 +1000,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/mission-hub/'
       preLoaderRoute: typeof MissionHubIndexRouteImport
       parentRoute: typeof MissionHubRoute
+    }
+    '/destud/': {
+      id: '/destud/'
+      path: '/'
+      fullPath: '/destud/'
+      preLoaderRoute: typeof DestudIndexRouteImport
+      parentRoute: typeof DestudRoute
     }
     '/academy/': {
       id: '/academy/'
@@ -1518,11 +1535,13 @@ const AcademyRouteWithChildren =
   AcademyRoute._addFileChildren(AcademyRouteChildren)
 
 interface DestudRouteChildren {
+  DestudIndexRoute: typeof DestudIndexRoute
   DestudDashboardEngineerRoute: typeof DestudDashboardEngineerRoute
   DestudDashboardExplorerRoute: typeof DestudDashboardExplorerRoute
 }
 
 const DestudRouteChildren: DestudRouteChildren = {
+  DestudIndexRoute: DestudIndexRoute,
   DestudDashboardEngineerRoute: DestudDashboardEngineerRoute,
   DestudDashboardExplorerRoute: DestudDashboardExplorerRoute,
 }
