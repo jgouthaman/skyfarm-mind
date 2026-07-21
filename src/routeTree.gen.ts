@@ -44,6 +44,7 @@ import { Route as MissionHubKnowledgeUavRouteImport } from './routes/mission-hub
 import { Route as MissionHubDesignStudioRouteImport } from './routes/mission-hub.design-studio'
 import { Route as MissionHubDashboardRouteImport } from './routes/mission-hub.dashboard'
 import { Route as MissionHubContactsRouteImport } from './routes/mission-hub.contacts'
+import { Route as MissionHubAcademyUsersRouteImport } from './routes/mission-hub.academy-users'
 import { Route as AcademyQuizDemoRouteImport } from './routes/academy.quiz-demo'
 import { Route as AcademyLessonDemoRouteImport } from './routes/academy.lesson-demo'
 import { Route as AcademyDashboardRouteImport } from './routes/academy.dashboard'
@@ -265,6 +266,11 @@ const MissionHubContactsRoute = MissionHubContactsRouteImport.update({
   path: '/contacts',
   getParentRoute: () => MissionHubRoute,
 } as any)
+const MissionHubAcademyUsersRoute = MissionHubAcademyUsersRouteImport.update({
+  id: '/academy-users',
+  path: '/academy-users',
+  getParentRoute: () => MissionHubRoute,
+} as any)
 const AcademyQuizDemoRoute = AcademyQuizDemoRouteImport.update({
   id: '/quiz-demo',
   path: '/quiz-demo',
@@ -472,6 +478,7 @@ export interface FileRoutesByFullPath {
   '/academy/dashboard': typeof AcademyDashboardRoute
   '/academy/lesson-demo': typeof AcademyLessonDemoRoute
   '/academy/quiz-demo': typeof AcademyQuizDemoRoute
+  '/mission-hub/academy-users': typeof MissionHubAcademyUsersRoute
   '/mission-hub/contacts': typeof MissionHubContactsRoute
   '/mission-hub/dashboard': typeof MissionHubDashboardRoute
   '/mission-hub/design-studio': typeof MissionHubDesignStudioRoute
@@ -537,6 +544,7 @@ export interface FileRoutesByTo {
   '/academy/dashboard': typeof AcademyDashboardRoute
   '/academy/lesson-demo': typeof AcademyLessonDemoRoute
   '/academy/quiz-demo': typeof AcademyQuizDemoRoute
+  '/mission-hub/academy-users': typeof MissionHubAcademyUsersRoute
   '/mission-hub/contacts': typeof MissionHubContactsRoute
   '/mission-hub/dashboard': typeof MissionHubDashboardRoute
   '/mission-hub/design-studio': typeof MissionHubDesignStudioRoute
@@ -608,6 +616,7 @@ export interface FileRoutesById {
   '/academy/dashboard': typeof AcademyDashboardRoute
   '/academy/lesson-demo': typeof AcademyLessonDemoRoute
   '/academy/quiz-demo': typeof AcademyQuizDemoRoute
+  '/mission-hub/academy-users': typeof MissionHubAcademyUsersRoute
   '/mission-hub/contacts': typeof MissionHubContactsRoute
   '/mission-hub/dashboard': typeof MissionHubDashboardRoute
   '/mission-hub/design-studio': typeof MissionHubDesignStudioRoute
@@ -681,6 +690,7 @@ export interface FileRouteTypes {
     | '/academy/dashboard'
     | '/academy/lesson-demo'
     | '/academy/quiz-demo'
+    | '/mission-hub/academy-users'
     | '/mission-hub/contacts'
     | '/mission-hub/dashboard'
     | '/mission-hub/design-studio'
@@ -746,6 +756,7 @@ export interface FileRouteTypes {
     | '/academy/dashboard'
     | '/academy/lesson-demo'
     | '/academy/quiz-demo'
+    | '/mission-hub/academy-users'
     | '/mission-hub/contacts'
     | '/mission-hub/dashboard'
     | '/mission-hub/design-studio'
@@ -816,6 +827,7 @@ export interface FileRouteTypes {
     | '/academy/dashboard'
     | '/academy/lesson-demo'
     | '/academy/quiz-demo'
+    | '/mission-hub/academy-users'
     | '/mission-hub/contacts'
     | '/mission-hub/dashboard'
     | '/mission-hub/design-studio'
@@ -1122,6 +1134,13 @@ declare module '@tanstack/react-router' {
       path: '/contacts'
       fullPath: '/mission-hub/contacts'
       preLoaderRoute: typeof MissionHubContactsRouteImport
+      parentRoute: typeof MissionHubRoute
+    }
+    '/mission-hub/academy-users': {
+      id: '/mission-hub/academy-users'
+      path: '/academy-users'
+      fullPath: '/mission-hub/academy-users'
+      preLoaderRoute: typeof MissionHubAcademyUsersRouteImport
       parentRoute: typeof MissionHubRoute
     }
     '/academy/quiz-demo': {
@@ -1486,6 +1505,7 @@ const MissionHubTorqwingsDesignStudioRouteWithChildren =
   )
 
 interface MissionHubRouteChildren {
+  MissionHubAcademyUsersRoute: typeof MissionHubAcademyUsersRoute
   MissionHubContactsRoute: typeof MissionHubContactsRoute
   MissionHubDashboardRoute: typeof MissionHubDashboardRoute
   MissionHubDesignStudioRoute: typeof MissionHubDesignStudioRoute
@@ -1512,6 +1532,7 @@ interface MissionHubRouteChildren {
 }
 
 const MissionHubRouteChildren: MissionHubRouteChildren = {
+  MissionHubAcademyUsersRoute: MissionHubAcademyUsersRoute,
   MissionHubContactsRoute: MissionHubContactsRoute,
   MissionHubDashboardRoute: MissionHubDashboardRoute,
   MissionHubDesignStudioRoute: MissionHubDesignStudioRoute,

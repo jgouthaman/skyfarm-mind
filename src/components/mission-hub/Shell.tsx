@@ -82,7 +82,7 @@ function getSectionFromPath(path: string, role?: string): Section | null {
   if (path === "/mission-hub/twbc-drone-proven-designs") {
     return role === "super_admin" ? "twbc" : "knowledge";
   }
-  if (path === "/mission-hub/waitlist" || path === "/mission-hub/contacts") return "business";
+  if (path === "/mission-hub/waitlist" || path === "/mission-hub/contacts" || path === "/mission-hub/academy-users") return "business";
   if (path.startsWith("/mission-hub/twbc-") || path === "/mission-hub/knowledge-uav") return "twbc";
   if (INDUSTRY_VERTICALS.some((v) => path === `/mission-hub/verticals/${v}`)) return "industries";
   if (path === "/mission-hub/users" || path.startsWith("/mission-hub/settings")) return "config";
@@ -177,8 +177,9 @@ function Sidebar({
             </button>
             {openSection === "business" && (
               <>
-                <NavLink to="/mission-hub/waitlist" icon={Clock}    active={path === "/mission-hub/waitlist"} onClick={onClose}>Subscriptions</NavLink>
-                <NavLink to="/mission-hub/contacts" icon={BookUser} active={path === "/mission-hub/contacts"} onClick={onClose}>Leads</NavLink>
+                <NavLink to="/mission-hub/waitlist" icon={Clock}    active={path === "/mission-hub/waitlist"} onClick={onClose}>DeStud Users</NavLink>
+                <NavLink to="/mission-hub/contacts" icon={BookUser} active={path === "/mission-hub/contacts"} onClick={onClose}>Contacts</NavLink>
+                <NavLink to="/mission-hub/academy-users" icon={GraduationCap} active={path === "/mission-hub/academy-users"} onClick={onClose}>Academy Users</NavLink>
               </>
             )}
           </>
