@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Cpu, Lock, User, Mail, ArrowRight, Award, Loader2 } from "lucide-react";
-import { verifyDestudUser } from "@/lib/destud-auth";
+import { verifyDestudUser, resolveDestudTier, destudDashboardPath, type DestudUser } from "@/lib/destud-auth";
 
 export const Route = createFileRoute("/destud")({
   component: DestudSignInPage,
@@ -23,9 +23,24 @@ const STATS: [string, string][] = [
 
 const WIZARD_STEPS = ["Mission", "Constraints", "Platform", "Payload", "Scoring", "Blueprint"];
 
-// Redirect target for a verified sign-in — see the "Wizard entry point" note
-// at the bottom of this file for the auth assumption this depends on.
-const WIZARD_ROUTE = "/mission-hub/torqwings-design-studio/new";
+// Phase 1 only supports Explorer/Engineer. Routes a verified user to their
+// tier dashboard; returns null (and navigates nowhere) for a plan value this
+// phase doesn't support, so the caller can show the "contact support"
+// fallback instead of guessing or crashing.
+function routeAfterSignIn(user: DestudUser, navigate: (opts: { to: string }) => void): "unsupported" | null {
+  const resolution = resolveDestudTier(user.plan);
+  if (resolution.kind === "resolved") {
+    navigate({ to: destudDashboardPath(resolution.tier) });
+    return null;
+  }
+  if (resolution.kind === "missing") {
+    console.warn(`[DeStud] user ${user.id} has no plan set — defaulting to Explorer.`);
+    navigate({ to: destudDashboardPath("explorer") });
+    return null;
+  }
+  console.warn(`[DeStud] user ${user.id} has unsupported plan "${resolution.raw}" — Phase 1 only supports Explorer/Engineer.`);
+  return "unsupported";
+}
 
 function Field({
   icon: Icon, label, value, onChange, onKeyDown, placeholder, err, type = "text",
@@ -75,11 +90,15 @@ function DestudSignInPage() {
   const [email, setEmail] = useState("");
   const [state, setState] = useState<"idle" | "loading" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [unsupportedPlan, setUnsupportedPlan] = useState(false);
 
   // Skip the form entirely if this browser already verified in this session.
   useEffect(() => {
-    if (sessionStorage.getItem("destud_user")) {
-      navigate({ to: WIZARD_ROUTE });
+    const raw = sessionStorage.getItem("destud_user");
+    if (!raw) return;
+    const cached = JSON.parse(raw) as DestudUser;
+    if (routeAfterSignIn(cached, navigate) === "unsupported") {
+      setUnsupportedPlan(true);
     }
   }, [navigate]);
 
@@ -98,16 +117,36 @@ function DestudSignInPage() {
         return;
       }
       sessionStorage.setItem("destud_user", JSON.stringify(user));
-      navigate({ to: WIZARD_ROUTE });
+      if (routeAfterSignIn(user, navigate) === "unsupported") {
+        setUnsupportedPlan(true);
+      }
     } catch (err) {
       console.error("[DeStud] verifyDestudUser failed:", err);
       setState("error");
       setErrorMessage("Couldn't verify right now, try again.");
+    } finally {
+      setState("idle");
     }
   }
 
   function onKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === "Enter") submit();
+  }
+
+  // Safety net, not a real code path: Phase 1 only onboards Explorer/Engineer,
+  // so no destud_users row should have any other plan value. If one somehow
+  // does, this simply stops rather than guessing or crashing.
+  if (unsupportedPlan) {
+    return (
+      <div style={{ background: C.bg, color: C.text, minHeight: "100vh", fontFamily: SANS, display: "grid", placeItems: "center", padding: 24 }}>
+        <div style={{ textAlign: "center", maxWidth: 380 }}>
+          <h1 style={{ font: `600 20px/1.3 ${DISPLAY}`, margin: "0 0 10px" }}>Your dashboard isn't available yet</h1>
+          <p style={{ font: `400 14px/1.6 ${SANS}`, color: C.mute }}>
+            Contact support and we'll get your account sorted out.
+          </p>
+        </div>
+      </div>
+    );
   }
 
   return (

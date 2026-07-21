@@ -74,6 +74,8 @@ import { Route as MissionHubTorqwingsDesignStudioDesignRouteImport } from './rou
 import { Route as MissionHubTorqwingsDesignStudioComponentsRouteImport } from './routes/mission-hub.torqwings-design-studio.components'
 import { Route as MissionHubTorqwingsDesignStudioComplianceRouteImport } from './routes/mission-hub.torqwings-design-studio.compliance'
 import { Route as MissionHubTorqwingsDesignStudioAdvisorRouteImport } from './routes/mission-hub.torqwings-design-studio.advisor'
+import { Route as DestudDashboardExplorerRouteImport } from './routes/destud.dashboard.explorer'
+import { Route as DestudDashboardEngineerRouteImport } from './routes/destud.dashboard.engineer'
 import { Route as LayoutLearnDroneDesignFundamentalsRouteImport } from './routes/_layout.learn.drone-design-fundamentals'
 import { Route as LayoutAuthCallbackRouteImport } from './routes/_layout.auth.callback'
 import { Route as AcademyCoursesSlugLearnRouteImport } from './routes/academy.courses.$slug.learn'
@@ -429,6 +431,16 @@ const MissionHubTorqwingsDesignStudioAdvisorRoute =
     path: '/advisor',
     getParentRoute: () => MissionHubTorqwingsDesignStudioRoute,
   } as any)
+const DestudDashboardExplorerRoute = DestudDashboardExplorerRouteImport.update({
+  id: '/dashboard/explorer',
+  path: '/dashboard/explorer',
+  getParentRoute: () => DestudRoute,
+} as any)
+const DestudDashboardEngineerRoute = DestudDashboardEngineerRouteImport.update({
+  id: '/dashboard/engineer',
+  path: '/dashboard/engineer',
+  getParentRoute: () => DestudRoute,
+} as any)
 const LayoutLearnDroneDesignFundamentalsRoute =
   LayoutLearnDroneDesignFundamentalsRouteImport.update({
     id: '/drone-design-fundamentals',
@@ -467,7 +479,7 @@ const AcademyCoursesSlugModulesModuleIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof LayoutIndexRoute
   '/academy': typeof AcademyRouteWithChildren
-  '/destud': typeof DestudRoute
+  '/destud': typeof DestudRouteWithChildren
   '/field': typeof FieldRoute
   '/mission-hub': typeof MissionHubRouteWithChildren
   '/pilot': typeof PilotRouteWithChildren
@@ -516,6 +528,8 @@ export interface FileRoutesByFullPath {
   '/pilot/': typeof PilotIndexRoute
   '/auth/callback': typeof LayoutAuthCallbackRoute
   '/learn/drone-design-fundamentals': typeof LayoutLearnDroneDesignFundamentalsRoute
+  '/destud/dashboard/engineer': typeof DestudDashboardEngineerRoute
+  '/destud/dashboard/explorer': typeof DestudDashboardExplorerRoute
   '/mission-hub/torqwings-design-studio/advisor': typeof MissionHubTorqwingsDesignStudioAdvisorRoute
   '/mission-hub/torqwings-design-studio/compliance': typeof MissionHubTorqwingsDesignStudioComplianceRoute
   '/mission-hub/torqwings-design-studio/components': typeof MissionHubTorqwingsDesignStudioComponentsRoute
@@ -537,7 +551,7 @@ export interface FileRoutesByFullPath {
   '/academy/module/$moduleId/quiz/$quizId': typeof AcademyModuleModuleIdQuizQuizIdRoute
 }
 export interface FileRoutesByTo {
-  '/destud': typeof DestudRoute
+  '/destud': typeof DestudRouteWithChildren
   '/field': typeof FieldRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/about': typeof LayoutAboutRoute
@@ -583,6 +597,8 @@ export interface FileRoutesByTo {
   '/pilot': typeof PilotIndexRoute
   '/auth/callback': typeof LayoutAuthCallbackRoute
   '/learn/drone-design-fundamentals': typeof LayoutLearnDroneDesignFundamentalsRoute
+  '/destud/dashboard/engineer': typeof DestudDashboardEngineerRoute
+  '/destud/dashboard/explorer': typeof DestudDashboardExplorerRoute
   '/mission-hub/torqwings-design-studio/advisor': typeof MissionHubTorqwingsDesignStudioAdvisorRoute
   '/mission-hub/torqwings-design-studio/compliance': typeof MissionHubTorqwingsDesignStudioComplianceRoute
   '/mission-hub/torqwings-design-studio/components': typeof MissionHubTorqwingsDesignStudioComponentsRoute
@@ -607,7 +623,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_layout': typeof LayoutRouteWithChildren
   '/academy': typeof AcademyRouteWithChildren
-  '/destud': typeof DestudRoute
+  '/destud': typeof DestudRouteWithChildren
   '/field': typeof FieldRoute
   '/mission-hub': typeof MissionHubRouteWithChildren
   '/pilot': typeof PilotRouteWithChildren
@@ -657,6 +673,8 @@ export interface FileRoutesById {
   '/pilot/': typeof PilotIndexRoute
   '/_layout/auth/callback': typeof LayoutAuthCallbackRoute
   '/_layout/learn/drone-design-fundamentals': typeof LayoutLearnDroneDesignFundamentalsRoute
+  '/destud/dashboard/engineer': typeof DestudDashboardEngineerRoute
+  '/destud/dashboard/explorer': typeof DestudDashboardExplorerRoute
   '/mission-hub/torqwings-design-studio/advisor': typeof MissionHubTorqwingsDesignStudioAdvisorRoute
   '/mission-hub/torqwings-design-studio/compliance': typeof MissionHubTorqwingsDesignStudioComplianceRoute
   '/mission-hub/torqwings-design-studio/components': typeof MissionHubTorqwingsDesignStudioComponentsRoute
@@ -731,6 +749,8 @@ export interface FileRouteTypes {
     | '/pilot/'
     | '/auth/callback'
     | '/learn/drone-design-fundamentals'
+    | '/destud/dashboard/engineer'
+    | '/destud/dashboard/explorer'
     | '/mission-hub/torqwings-design-studio/advisor'
     | '/mission-hub/torqwings-design-studio/compliance'
     | '/mission-hub/torqwings-design-studio/components'
@@ -798,6 +818,8 @@ export interface FileRouteTypes {
     | '/pilot'
     | '/auth/callback'
     | '/learn/drone-design-fundamentals'
+    | '/destud/dashboard/engineer'
+    | '/destud/dashboard/explorer'
     | '/mission-hub/torqwings-design-studio/advisor'
     | '/mission-hub/torqwings-design-studio/compliance'
     | '/mission-hub/torqwings-design-studio/components'
@@ -871,6 +893,8 @@ export interface FileRouteTypes {
     | '/pilot/'
     | '/_layout/auth/callback'
     | '/_layout/learn/drone-design-fundamentals'
+    | '/destud/dashboard/engineer'
+    | '/destud/dashboard/explorer'
     | '/mission-hub/torqwings-design-studio/advisor'
     | '/mission-hub/torqwings-design-studio/compliance'
     | '/mission-hub/torqwings-design-studio/components'
@@ -895,7 +919,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   LayoutRoute: typeof LayoutRouteWithChildren
   AcademyRoute: typeof AcademyRouteWithChildren
-  DestudRoute: typeof DestudRoute
+  DestudRoute: typeof DestudRouteWithChildren
   FieldRoute: typeof FieldRoute
   MissionHubRoute: typeof MissionHubRouteWithChildren
   PilotRoute: typeof PilotRouteWithChildren
@@ -1359,6 +1383,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MissionHubTorqwingsDesignStudioAdvisorRouteImport
       parentRoute: typeof MissionHubTorqwingsDesignStudioRoute
     }
+    '/destud/dashboard/explorer': {
+      id: '/destud/dashboard/explorer'
+      path: '/dashboard/explorer'
+      fullPath: '/destud/dashboard/explorer'
+      preLoaderRoute: typeof DestudDashboardExplorerRouteImport
+      parentRoute: typeof DestudRoute
+    }
+    '/destud/dashboard/engineer': {
+      id: '/destud/dashboard/engineer'
+      path: '/dashboard/engineer'
+      fullPath: '/destud/dashboard/engineer'
+      preLoaderRoute: typeof DestudDashboardEngineerRouteImport
+      parentRoute: typeof DestudRoute
+    }
     '/_layout/learn/drone-design-fundamentals': {
       id: '/_layout/learn/drone-design-fundamentals'
       path: '/drone-design-fundamentals'
@@ -1478,6 +1516,19 @@ const AcademyRouteChildren: AcademyRouteChildren = {
 
 const AcademyRouteWithChildren =
   AcademyRoute._addFileChildren(AcademyRouteChildren)
+
+interface DestudRouteChildren {
+  DestudDashboardEngineerRoute: typeof DestudDashboardEngineerRoute
+  DestudDashboardExplorerRoute: typeof DestudDashboardExplorerRoute
+}
+
+const DestudRouteChildren: DestudRouteChildren = {
+  DestudDashboardEngineerRoute: DestudDashboardEngineerRoute,
+  DestudDashboardExplorerRoute: DestudDashboardExplorerRoute,
+}
+
+const DestudRouteWithChildren =
+  DestudRoute._addFileChildren(DestudRouteChildren)
 
 interface MissionHubTorqwingsDesignStudioRouteChildren {
   MissionHubTorqwingsDesignStudioAdvisorRoute: typeof MissionHubTorqwingsDesignStudioAdvisorRoute
@@ -1611,7 +1662,7 @@ const PilotRouteWithChildren = PilotRoute._addFileChildren(PilotRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   LayoutRoute: LayoutRouteWithChildren,
   AcademyRoute: AcademyRouteWithChildren,
-  DestudRoute: DestudRoute,
+  DestudRoute: DestudRouteWithChildren,
   FieldRoute: FieldRoute,
   MissionHubRoute: MissionHubRouteWithChildren,
   PilotRoute: PilotRouteWithChildren,

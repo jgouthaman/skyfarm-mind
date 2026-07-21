@@ -13,7 +13,7 @@ stable
 security definer
 set search_path = public
 as $$
-  select jsonb_build_object('id', id, 'full_name', full_name, 'email', email)
+  select jsonb_build_object('id', id, 'full_name', full_name, 'email', email, 'plan', plan)
   from public.destud_users
   where lower(email) = lower(trim(p_email))
     and lower(full_name) = lower(trim(p_name))
