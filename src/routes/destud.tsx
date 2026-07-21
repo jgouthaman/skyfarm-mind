@@ -23,23 +23,23 @@ const STATS: [string, string][] = [
 
 const WIZARD_STEPS = ["Mission", "Constraints", "Platform", "Payload", "Scoring", "Blueprint"];
 
-// Phase 1 only supports Explorer/Engineer. Routes a verified user to their
-// tier dashboard; returns null (and navigates nowhere) for a plan value this
-// phase doesn't support, so the caller can show the "contact support"
-// fallback instead of guessing or crashing.
-function routeAfterSignIn(user: DestudUser, navigate: (opts: { to: string }) => void): "unsupported" | null {
+// Phase 1 only supports Explorer/Engineer. Both a missing plan and any
+// unsupported value (e.g. "Studio"/"Squadron"/"Campus", which shouldn't
+// occur in Phase 1) default to the Explorer dashboard with a logged warning
+// rather than blocking the user — this is a defensive fallback, not a real
+// code path.
+function routeAfterSignIn(user: DestudUser, navigate: (opts: { to: string }) => void): void {
   const resolution = resolveDestudTier(user.plan);
   if (resolution.kind === "resolved") {
     navigate({ to: destudDashboardPath(resolution.tier) });
-    return null;
+    return;
   }
   if (resolution.kind === "missing") {
     console.warn(`[DeStud] user ${user.id} has no plan set — defaulting to Explorer.`);
-    navigate({ to: destudDashboardPath("explorer") });
-    return null;
+  } else {
+    console.warn(`[DeStud] user ${user.id} has unsupported plan "${resolution.raw}" — Phase 1 only supports Explorer/Engineer. Defaulting to Explorer.`);
   }
-  console.warn(`[DeStud] user ${user.id} has unsupported plan "${resolution.raw}" — Phase 1 only supports Explorer/Engineer.`);
-  return "unsupported";
+  navigate({ to: destudDashboardPath("explorer") });
 }
 
 function Field({
@@ -84,69 +84,73 @@ function Field({
   );
 }
 
+type SubmitStatus = "idle" | "loading" | "error" | "not_found";
+
 function DestudSignInPage() {
   const navigate = useNavigate();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
-  const [state, setState] = useState<"idle" | "loading" | "error">("idle");
+  const [status, setStatus] = useState<SubmitStatus>("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [unsupportedPlan, setUnsupportedPlan] = useState(false);
+  const [checkingSession, setCheckingSession] = useState(false);
 
-  // Skip the form entirely if this browser already verified in this session.
+  // Returning visit: don't trust the cached plan — re-verify against
+  // destud_users so a since-changed/removed account is caught rather than
+  // silently honoring stale sessionStorage.
   useEffect(() => {
     const raw = sessionStorage.getItem("destud_user");
     if (!raw) return;
-    const cached = JSON.parse(raw) as DestudUser;
-    if (routeAfterSignIn(cached, navigate) === "unsupported") {
-      setUnsupportedPlan(true);
+    let cached: DestudUser;
+    try {
+      cached = JSON.parse(raw) as DestudUser;
+    } catch {
+      sessionStorage.removeItem("destud_user");
+      return;
     }
+    setCheckingSession(true);
+    verifyDestudUser(cached.full_name, cached.email)
+      .then((user) => {
+        if (!user) {
+          sessionStorage.removeItem("destud_user");
+          setStatus("not_found");
+          setCheckingSession(false);
+          return;
+        }
+        sessionStorage.setItem("destud_user", JSON.stringify(user));
+        routeAfterSignIn(user, navigate);
+      })
+      .catch((err) => {
+        console.error("[DeStud] returning-visit re-verify failed:", err);
+        sessionStorage.removeItem("destud_user");
+        setStatus("not_found");
+        setCheckingSession(false);
+      });
   }, [navigate]);
 
   async function submit() {
     if (!fullName.trim() || !email.trim()) {
-      setState("error");
+      setStatus("error");
       setErrorMessage("Enter both your name and email.");
       return;
     }
-    setState("loading");
+    setStatus("loading");
     try {
       const user = await verifyDestudUser(fullName, email);
       if (!user) {
-        setState("error");
-        setErrorMessage("No matching account. Check your name and email.");
+        setStatus("not_found");
         return;
       }
       sessionStorage.setItem("destud_user", JSON.stringify(user));
-      if (routeAfterSignIn(user, navigate) === "unsupported") {
-        setUnsupportedPlan(true);
-      }
+      routeAfterSignIn(user, navigate);
     } catch (err) {
       console.error("[DeStud] verifyDestudUser failed:", err);
-      setState("error");
+      setStatus("error");
       setErrorMessage("Couldn't verify right now, try again.");
-    } finally {
-      setState("idle");
     }
   }
 
   function onKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === "Enter") submit();
-  }
-
-  // Safety net, not a real code path: Phase 1 only onboards Explorer/Engineer,
-  // so no destud_users row should have any other plan value. If one somehow
-  // does, this simply stops rather than guessing or crashing.
-  if (unsupportedPlan) {
-    return (
-      <div style={{ background: C.bg, color: C.text, minHeight: "100vh", fontFamily: SANS, display: "grid", placeItems: "center", padding: 24 }}>
-        <div style={{ textAlign: "center", maxWidth: 380 }}>
-          <h1 style={{ font: `600 20px/1.3 ${DISPLAY}`, margin: "0 0 10px" }}>Your dashboard isn't available yet</h1>
-          <p style={{ font: `400 14px/1.6 ${SANS}`, color: C.mute }}>
-            Contact support and we'll get your account sorted out.
-          </p>
-        </div>
-      </div>
-    );
   }
 
   return (
@@ -171,6 +175,13 @@ function DestudSignInPage() {
         @media(prefers-reduced-motion:reduce){.tw-destud-scan{display:none;}.tw-destud-spin{animation:none;}}
       `}</style>
 
+      {checkingSession ? (
+        <div style={{ minHeight: "100vh", display: "grid", placeItems: "center" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, font: `500 13px/1 ${SANS}`, color: C.mute }}>
+            <Loader2 size={16} className="tw-destud-spin" /> Checking your session…
+          </div>
+        </div>
+      ) : (
       <div className="tw-destud-grid" style={{ minHeight: "100vh" }}>
         {/* left: identity */}
         <div style={{ padding: "clamp(28px,5vw,64px)", display: "flex", flexDirection: "column", justifyContent: "center", position: "relative", overflow: "hidden" }}>
@@ -249,34 +260,41 @@ function DestudSignInPage() {
 
             <Field
               icon={User} label="Full name" value={fullName}
-              onChange={(v) => { setFullName(v); setState("idle"); }}
-              onKeyDown={onKeyDown} placeholder="Jothi Gouthaman" err={state === "error"}
+              onChange={(v) => { setFullName(v); setStatus("idle"); }}
+              onKeyDown={onKeyDown} placeholder="Jothi Gouthaman" err={status === "error" || status === "not_found"}
             />
             <div style={{ height: 14 }} />
             <Field
               icon={Mail} label="Email" value={email}
-              onChange={(v) => { setEmail(v); setState("idle"); }}
-              onKeyDown={onKeyDown} placeholder="you@example.com" err={state === "error"} type="email"
+              onChange={(v) => { setEmail(v); setStatus("idle"); }}
+              onKeyDown={onKeyDown} placeholder="you@example.com" err={status === "error" || status === "not_found"} type="email"
             />
 
-            {state === "error" && (
+            {status === "error" && (
               <div style={{ font: `500 12px/1.4 ${SANS}`, color: "#F27D7D", marginTop: 12 }}>
                 {errorMessage}
+              </div>
+            )}
+            {status === "not_found" && (
+              <div style={{ font: `500 12px/1.4 ${SANS}`, color: "#F27D7D", marginTop: 12 }}>
+                We couldn't find a DeStud account for this email. Please contact{" "}
+                <a href="mailto:support@torqwings.com" style={{ color: "#F27D7D" }}>support@torqwings.com</a>{" "}
+                for help.
               </div>
             )}
 
             <button
               className="tw-destud-cta"
               onClick={submit}
-              disabled={state === "loading"}
+              disabled={status === "loading"}
               style={{
                 marginTop: 22, width: "100%", height: 46, border: "none", borderRadius: 9,
                 background: C.amber, color: "#0A0A0A", font: `600 14px/1 ${SANS}`, cursor: "pointer",
                 display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-                opacity: state === "loading" ? 0.7 : 1,
+                opacity: status === "loading" ? 0.7 : 1,
               }}
             >
-              {state === "loading" ? (
+              {status === "loading" ? (
                 <><Loader2 size={16} className="tw-destud-spin" /> Verifying…</>
               ) : (
                 <>Enter DeStud <ArrowRight size={16} /></>
@@ -285,6 +303,7 @@ function DestudSignInPage() {
           </div>
         </div>
       </div>
+      )}
     </div>
   );
 }
