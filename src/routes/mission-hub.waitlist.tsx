@@ -27,9 +27,9 @@ function WaitlistPage() {
   }, [loading, profile, navigate]);
 
   return (
-    <MissionHubShell title="Subscriptions">
+    <MissionHubShell title="DeStud Users">
       <RecordsTable
-        table="design_studio_leads"
+        table="destud_waitlist"
         searchFields={["full_name", "email"]}
         csvFilename="waitlist.csv"
         columns={[

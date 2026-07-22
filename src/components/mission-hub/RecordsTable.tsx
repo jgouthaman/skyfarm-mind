@@ -12,11 +12,13 @@ export type ColumnDef = {
 };
 
 type Props = {
-  table: "design_studio_leads" | "contacts";
+  table: "destud_waitlist" | "destud_users" | "contacts";
+  title?: string;
   searchFields: string[];
   columns: ColumnDef[];
   filters?: { key: string; label: string; options: { value: string; label: string }[] }[];
-  statusOptions: { value: string; label: string; color: string; bg: string }[];
+  statusOptions?: { value: string; label: string; color: string; bg: string }[];
+  showStatus?: boolean;
   detailFields: { key: string; label: string }[];
   csvFilename: string;
   initialFilters?: Record<string, string>;
@@ -25,7 +27,7 @@ type Props = {
 const PAGE_SIZE = 20;
 
 export function RecordsTable({
-  table, searchFields, columns, filters = [], statusOptions, detailFields, csvFilename, initialFilters = {},
+  table, title, searchFields, columns, filters = [], statusOptions = [], showStatus = true, detailFields, csvFilename, initialFilters = {},
 }: Props) {
   const [rows, setRows] = useState<any[]>([]);
   const [count, setCount] = useState(0);
@@ -71,6 +73,16 @@ export function RecordsTable({
   }, [debounced, filterValues, statusFilter, dateFrom, dateTo, page, table]);
 
   async function updateStatus(id: string, newStatus: string) {
+    if (table === "destud_waitlist" && newStatus === "converted") {
+      if (!window.confirm("Convert this entry to a DeStud user? This moves it out of the waitlist.")) return;
+      const { error } = await supabase.rpc("convert_destud_waitlist_entry" as any, { p_id: id } as any);
+      if (error) { toast.error(error.message); return; }
+      toast.success("Converted to DeStud user");
+      setRows((r) => r.filter((row) => row.id !== id));
+      setCount((c) => Math.max(0, c - 1));
+      if (selected?.id === id) setSelected(null);
+      return;
+    }
     const { error } = await supabase.from(table as any).update({ status: newStatus }).eq("id", id);
     if (error) { toast.error(error.message); return; }
     toast.success("Saved");
@@ -115,7 +127,7 @@ export function RecordsTable({
       <div className="flex items-center justify-between gap-3 mb-5">
         <div className="flex items-center gap-2.5">
           <h2 className="text-[22px] text-white" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-            {table === "design_studio_leads" ? "Subscriptions" : "Leads"}
+            {title ?? (table === "destud_waitlist" ? "DeStud Users" : "Contacts")}
           </h2>
           <span
             className="text-[12px] px-2.5 py-0.5 rounded-full"
@@ -155,14 +167,16 @@ export function RecordsTable({
               {f.options.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
             </select>
           ))}
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="bg-[#0a0f1c] border border-white/[0.1] rounded-lg px-3 py-2 text-sm text-white"
-          >
-            <option value="">All statuses</option>
-            {statusOptions.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
-          </select>
+          {showStatus && (
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="bg-[#0a0f1c] border border-white/[0.1] rounded-lg px-3 py-2 text-sm text-white"
+            >
+              <option value="">All statuses</option>
+              {statusOptions.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
+            </select>
+          )}
           <input
             type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)}
             className="bg-[#0a0f1c] border border-white/[0.1] rounded-lg px-3 py-2 text-sm text-white"
@@ -186,17 +200,17 @@ export function RecordsTable({
             <thead>
               <tr className="bg-[#0a0f1c] text-[11px] uppercase tracking-wider text-white/40 text-left">
                 {columns.map((c) => <th key={c.key} className="px-4 py-3 font-normal">{c.label}</th>)}
-                <th className="px-4 py-3 font-normal">Status</th>
+                {showStatus && <th className="px-4 py-3 font-normal">Status</th>}
                 <th className="px-4 py-3 font-normal">Submitted</th>
                 <th className="px-4 py-3 font-normal text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
               {loading && (
-                <tr><td colSpan={columns.length + 3} className="px-4 py-10 text-center text-white/40">Loading…</td></tr>
+                <tr><td colSpan={columns.length + (showStatus ? 3 : 2)} className="px-4 py-10 text-center text-white/40">Loading…</td></tr>
               )}
               {!loading && !rows.length && (
-                <tr><td colSpan={columns.length + 3} className="px-4 py-10 text-center text-white/40">No records</td></tr>
+                <tr><td colSpan={columns.length + (showStatus ? 3 : 2)} className="px-4 py-10 text-center text-white/40">No records</td></tr>
               )}
               {!loading && rows.map((row) => {
                 const ss = statusStyle(row.status);
@@ -205,16 +219,18 @@ export function RecordsTable({
                     {columns.map((c) => (
                       <td key={c.key} className="px-4 py-3 text-white/85">{c.render ? c.render(row) : row[c.key]}</td>
                     ))}
-                    <td className="px-4 py-3">
-                      <select
-                        value={row.status}
-                        onChange={(e) => updateStatus(row.id, e.target.value)}
-                        className="bg-transparent border border-white/[0.1] rounded px-2 py-1 text-[11px]"
-                        style={ss ? { color: ss.color, background: ss.bg } : undefined}
-                      >
-                        {statusOptions.map((o) => <option key={o.value} value={o.value} style={{ color: "#fff", background: "#1a2035" }}>{o.label}</option>)}
-                      </select>
-                    </td>
+                    {showStatus && (
+                      <td className="px-4 py-3">
+                        <select
+                          value={row.status}
+                          onChange={(e) => updateStatus(row.id, e.target.value)}
+                          className="bg-transparent border border-white/[0.1] rounded px-2 py-1 text-[11px]"
+                          style={ss ? { color: ss.color, background: ss.bg } : undefined}
+                        >
+                          {statusOptions.map((o) => <option key={o.value} value={o.value} style={{ color: "#fff", background: "#1a2035" }}>{o.label}</option>)}
+                        </select>
+                      </td>
+                    )}
                     <td className="px-4 py-3 text-white/60 text-[12px] whitespace-nowrap">
                       {new Date(row.created_at).toLocaleDateString()}
                     </td>
@@ -271,23 +287,34 @@ export function RecordsTable({
               label="Submitted"
               value={new Date(selected.created_at).toLocaleString()}
             />
-            <div className="mt-4">
-              <label className="block text-[10px] uppercase tracking-wider text-white/40 mb-1.5">Status</label>
-              <select
-                value={selected.status}
-                onChange={(e) => updateStatus(selected.id, e.target.value)}
-                className="w-full bg-[#0a0f1c] border border-white/[0.1] rounded-lg px-3 py-2 text-sm text-white"
-              >
-                {statusOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
-              </select>
-            </div>
-            {table === "design_studio_leads" && selected.status !== "contacted" && (
+            {showStatus && (
+              <div className="mt-4">
+                <label className="block text-[10px] uppercase tracking-wider text-white/40 mb-1.5">Status</label>
+                <select
+                  value={selected.status}
+                  onChange={(e) => updateStatus(selected.id, e.target.value)}
+                  className="w-full bg-[#0a0f1c] border border-white/[0.1] rounded-lg px-3 py-2 text-sm text-white"
+                >
+                  {statusOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+                </select>
+              </div>
+            )}
+            {table === "destud_waitlist" && selected.status !== "contacted" && (
               <button
                 onClick={() => updateStatus(selected.id, "contacted")}
                 className="mt-4 w-full rounded-lg py-2.5 text-sm font-medium text-[#0a0f1c]"
                 style={{ background: "#EF9F27" }}
               >
                 Mark as contacted
+              </button>
+            )}
+            {table === "destud_waitlist" && (
+              <button
+                onClick={() => updateStatus(selected.id, "converted")}
+                className="mt-2.5 w-full rounded-lg py-2.5 text-sm font-medium text-[#0a0f1c]"
+                style={{ background: "#1D9E75" }}
+              >
+                Convert to DeStud user
               </button>
             )}
           </>
