@@ -1,11 +1,12 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { MissionHubShell, MhCard } from "@/components/mission-hub/Shell";
+import { RecordsTable } from "@/components/mission-hub/RecordsTable";
 import { useMissionHubAuth } from "@/lib/mission-hub/context";
 import { fetchProjectStats, fetchProjectsPage } from "@/lib/design-studio/project-service";
 import { RISK_TONE } from "@/lib/design-studio/constants";
 import { toast } from "sonner";
-import { ArrowUpRight, Inbox, Plus } from "lucide-react";
+import { ArrowUpRight, Inbox } from "lucide-react";
 
 const PAGE_SIZE = 10;
 
@@ -32,23 +33,38 @@ function DesignStudioPage() {
 
   return (
     <MissionHubShell title="Design Studio">
-      <LaunchBanner />
       <MyProjects isAdmin={isAdmin} userId={profile.id} />
+      {isAdmin && (
+        <div className="mt-8">
+          <RecordsTable
+            table="destud_users"
+            title="DeStud Users"
+            searchFields={["full_name", "email"]}
+            csvFilename="destud-users.csv"
+            columns={[
+              { key: "full_name", label: "Name" },
+              { key: "email", label: "Email" },
+              { key: "phone", label: "Phone" },
+              { key: "organisation", label: "Organisation" },
+              { key: "role", label: "Role" },
+              { key: "plan", label: "Plan" },
+              { key: "location", label: "Location" },
+            ]}
+            showStatus={false}
+            detailFields={[
+              { key: "full_name", label: "Full name" },
+              { key: "email", label: "Email" },
+              { key: "phone", label: "Phone" },
+              { key: "organisation", label: "Organisation" },
+              { key: "role", label: "Role" },
+              { key: "location", label: "Location" },
+              { key: "plan", label: "Plan" },
+              { key: "message", label: "Message" },
+            ]}
+          />
+        </div>
+      )}
     </MissionHubShell>
-  );
-}
-
-function LaunchBanner() {
-  return (
-    <div className="flex justify-end mb-6">
-      <Link
-        to="/mission-hub/torqwings-design-studio/new"
-        className="inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-[13px] text-white"
-        style={{ background: "#185FA5" }}
-      >
-        <Plus className="h-4 w-4" /> New project
-      </Link>
-    </div>
   );
 }
 
@@ -155,7 +171,7 @@ function MyProjects({ isAdmin, userId }: { isAdmin: boolean; userId: string }) {
           <div className="text-center py-12 text-white/40">
             <Inbox className="h-8 w-8 mx-auto mb-3" />
             <p className="text-sm">No projects yet</p>
-            <p className="text-[12px] mt-1">Click "New project" above to start your first drone design.</p>
+            <p className="text-[12px] mt-1">No drone designs have been started yet.</p>
           </div>
         ) : (
           <>

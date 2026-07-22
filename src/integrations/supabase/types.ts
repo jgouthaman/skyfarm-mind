@@ -262,7 +262,52 @@ export type Database = {
         }
         Relationships: []
       }
-      design_studio_leads: {
+      destud_waitlist: {
+        Row: {
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          location: string
+          message: string | null
+          organisation: string | null
+          phone: string
+          plan: string
+          role: string
+          source: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          location: string
+          message?: string | null
+          organisation?: string | null
+          phone: string
+          plan: string
+          role: string
+          source?: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          location?: string
+          message?: string | null
+          organisation?: string | null
+          phone?: string
+          plan?: string
+          role?: string
+          source?: string
+          status?: string
+        }
+        Relationships: []
+      }
+      destud_users: {
         Row: {
           created_at: string
           email: string

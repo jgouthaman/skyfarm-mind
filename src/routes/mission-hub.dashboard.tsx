@@ -35,12 +35,12 @@ function AdminDashboard() {
     (async () => {
       const since = new Date(Date.now() - 7 * 86400000).toISOString();
       const [a, b, c, d, e, leads, contacts] = await Promise.all([
-        supabase.from("design_studio_leads").select("*", { count: "exact", head: true }),
+        supabase.from("destud_waitlist").select("*", { count: "exact", head: true }),
         supabase.from("contacts").select("*", { count: "exact", head: true }),
         supabase.from("mission_hub_users").select("*", { count: "exact", head: true }),
-        supabase.from("design_studio_leads").select("*", { count: "exact", head: true }).gte("created_at", since),
+        supabase.from("destud_waitlist").select("*", { count: "exact", head: true }).gte("created_at", since),
         supabase.from("contacts").select("*", { count: "exact", head: true }).gte("created_at", since),
-        supabase.from("design_studio_leads").select("*").order("created_at", { ascending: false }).limit(5),
+        supabase.from("destud_waitlist").select("*").order("created_at", { ascending: false }).limit(5),
         supabase.from("contacts").select("*").order("created_at", { ascending: false }).limit(5),
       ]);
       setStats({
