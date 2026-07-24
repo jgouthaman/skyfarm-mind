@@ -117,8 +117,8 @@ const TIERS: MainTier[] = [
     ctaClass: "bg-[#185FA5] hover:bg-[#378ADD] text-white",
   },
   {
-    key: "studio",
-    name: "Studio",
+    key: "workshop",
+    name: "Workshop",
     tagline: "For small aerial platform companies and design teams",
     badgeLabel: "New tier ✦",
     badgeBg: "rgba(239,159,39,0.15)",
@@ -158,7 +158,7 @@ const TIERS: MainTier[] = [
     annualBillingLine: "billed ₹95,988 / year",
     strikethrough: 12999,
     included: [
-      { text: "Everything in Studio" },
+      { text: "Everything in Workshop" },
       { text: "Unlimited team members" },
       { text: "2,000 AI advisor queries / month", badge: "flagship" },
       { text: "Overage: ₹1 / extra query", muted: true },
@@ -359,7 +359,7 @@ export function DesignStudioPricing() {
                   if (!t.topPill) e.currentTarget.style.border = t.cardBorder;
                 }}
               >
-                {/* Centred pill — Engineer "Most popular" / Studio "Coming Soon" */}
+                {/* Centred pill — Engineer "Most popular" / Workshop "Coming Soon" */}
                 {t.topPill && (
                   <span
                     className="absolute -top-3.5 left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] font-semibold uppercase tracking-[0.18em] px-3 py-1 rounded-full"
