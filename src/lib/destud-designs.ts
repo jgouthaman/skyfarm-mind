@@ -2,11 +2,14 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { DesignSummary } from "@/components/destud/DesignCard";
 
-// studio_projects.user_id holds whichever id created it — a
-// mission_hub_users.id for the staff wizard, or a destud_users.id for
-// missions created via /destud/new-mission (MissionWizard is shared between
-// both entry points; see its userId doc comment). No FK ties the column to
-// either table specifically.
+// studio_projects' RLS only allows SELECT to the `authenticated` role with
+// user_id = auth.uid() (20260617104400) — a DeStud anon session can't
+// satisfy that, so a direct .from("studio_projects") query here always came
+// back empty (or errored) regardless of how many missions the user had
+// actually created. Missions saved via /destud/new-mission are owned via the
+// separate destud_user_id column instead, read through the same
+// SECURITY DEFINER RPC (get_destud_studio_projects) the wizard's save path
+// uses to bypass that RLS safely.
 export function useDestudDesigns(destudUserId: string): DesignSummary[] | null {
   const [designs, setDesigns] = useState<DesignSummary[] | null>(null);
 
@@ -14,10 +17,7 @@ export function useDestudDesigns(destudUserId: string): DesignSummary[] | null {
     let cancelled = false;
     setDesigns(null);
     supabase
-      .from("studio_projects" as any)
-      .select("id, project_name, vertical, purpose, status, updated_at, created_at")
-      .eq("user_id", destudUserId)
-      .order("updated_at", { ascending: false })
+      .rpc("get_destud_studio_projects" as any, { p_destud_user_id: destudUserId } as any)
       .then(({ data, error }: any) => {
         if (cancelled) return;
         if (error) {
