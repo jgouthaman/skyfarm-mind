@@ -8,12 +8,12 @@ export const Route = createFileRoute("/destud/new-mission")({
 });
 
 // Runs the same wizard steps as the Mission Hub staff flow
-// (mission-hub.torqwings-design-studio.new.tsx), but owned by the DeStud
-// user's own id (studio_projects.user_id has no FK tying it to
-// mission_hub_users specifically, and RLS on that table is open to anon —
-// see MissionWizard's userId doc comment) so it works without a real
-// Supabase Auth session, and returns to the correct tier dashboard instead
-// of the staff-only design-review route.
+// (mission-hub.torqwings-design-studio.new.tsx), but saved via
+// ownerKind="destud" — a SECURITY DEFINER RPC path (studio_projects.user_id
+// has a hard FK to auth.users and authenticated-only RLS, which a DeStud
+// anon session can't satisfy; see MissionWizard's ownerKind doc comment) —
+// and returns to the correct tier dashboard instead of the staff-only
+// design-review route.
 function DestudNewMission() {
   const navigate = useNavigate();
   const user = useDestudUser();
@@ -33,6 +33,7 @@ function DestudNewMission() {
       <Topbar fullName={user.full_name} tier={tier} onSignOut={handleSignOut} />
       <MissionWizard
         userId={user.id}
+        ownerKind="destud"
         stepStorageKey="destud:wizard-step"
         formStorageKey="destud:wizard-form"
         onSubmitted={() => navigate({ to: destudDashboardPath(tier) })}

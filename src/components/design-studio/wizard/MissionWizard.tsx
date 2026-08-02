@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { INITIAL_FORM } from "@/lib/design-studio/wizard-types";
 import type { WizardFormState } from "@/lib/design-studio/wizard-types";
-import { buildInsertPayload, createProject } from "@/lib/design-studio/project-service";
+import { buildInsertPayload, createProject, createDestudProject } from "@/lib/design-studio/project-service";
 import { WizardProgress } from "./WizardProgress";
 import { StepVehicleType } from "./StepVehicleType";
 import { StepScope } from "./StepScope";
@@ -20,9 +20,13 @@ const TOTAL = 7;
 
 export interface MissionWizardProps {
   // Whoever owns the resulting studio_projects row — a mission_hub_users.id
-  // for staff, or a destud_users.id for a DeStud customer. studio_projects.
-  // user_id has no FK constraint tying it to either table specifically.
+  // (== auth.uid()) for staff, or a destud_users.id for a DeStud customer.
+  // These are NOT interchangeable: user_id has a hard FK to auth.users and
+  // RLS restricted to the `authenticated` role (20260617104400), which a
+  // DeStud (anon) session can never satisfy. ownerKind picks the right save
+  // path below.
   userId: string;
+  ownerKind?: "mission-hub" | "destud";
   onSubmitted: (projectId: string) => void;
   // Distinct sessionStorage keys per caller so the Mission Hub wizard and the
   // DeStud wizard don't clobber each other's in-progress draft in the same
@@ -53,7 +57,7 @@ function loadInitialForm(key: string): WizardFormState {
 }
 
 export function MissionWizard({
-  userId, onSubmitted,
+  userId, ownerKind = "mission-hub", onSubmitted,
   stepStorageKey = "torqwings-studio:wizard-step",
   formStorageKey = "torqwings-studio:wizard-form",
   allowBaseDesign = false,
@@ -153,8 +157,9 @@ export function MissionWizard({
   async function handleSubmit() {
     setSaving(true);
     try {
-      const payload = buildInsertPayload(form, userId, recommendation, acceptedSource);
-      const result  = await createProject(payload);
+      const result = ownerKind === "destud"
+        ? await createDestudProject(userId, form, recommendation, acceptedSource)
+        : await createProject(buildInsertPayload(form, userId, recommendation, acceptedSource));
       if (result?.id) {
         sessionStorage.removeItem(stepStorageKey);
         sessionStorage.removeItem(formStorageKey);

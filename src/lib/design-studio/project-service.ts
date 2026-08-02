@@ -57,6 +57,36 @@ export async function createProject(
   return data;
 }
 
+// studio_projects' RLS only allows INSERT/SELECT to the `authenticated` role
+// with user_id = auth.uid() (see 20260617104400) — a DeStud session has
+// neither, since it's an anon session identified by a destud_users row, not
+// a real Supabase Auth user. This goes through a SECURITY DEFINER RPC
+// instead, which verifies the destud_users row itself and stores ownership
+// in a separate destud_user_id column (not user_id, which has a hard FK to
+// auth.users).
+export async function createDestudProject(
+  destudUserId: string,
+  form: WizardFormState,
+  recommendation: IntelligenceResult | null = null,
+  acceptedSource: 'rule' | 'reference' = 'rule',
+): Promise<{ id: string } | null> {
+  const payload = buildInsertPayload(form, destudUserId, recommendation, acceptedSource);
+  const { data, error } = await supabase.rpc("create_destud_studio_project" as any, {
+    p_destud_user_id: destudUserId,
+    p_project_name: payload.project_name,
+    p_vehicle_type: payload.vehicle_type,
+    p_vertical: payload.vertical,
+    p_purpose: payload.purpose,
+    p_user_type: payload.user_type,
+    p_requirements: payload.requirements,
+    p_payload_details: payload.payload_details,
+    p_safety: payload.safety,
+    p_design_recommendation: payload.design_recommendation,
+  } as any);
+  if (error) throw new Error(error.message);
+  return data ? { id: data as unknown as string } : null;
+}
+
 export async function fetchProjectStats(userId: string, isAdmin: boolean) {
   const makeQuery = (status?: string) => {
     let q = supabase
