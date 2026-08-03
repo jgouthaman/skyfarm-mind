@@ -155,6 +155,25 @@ export function MissionWizard({
     }
   }
 
+  // Manual escape hatch: clears this wizard's own sessionStorage draft and
+  // resets its local state back to a fresh session. Does not touch anything
+  // outside the wizard (destud auth session, tier info, etc.) — those live
+  // under separate sessionStorage keys and separate state entirely.
+  function handleStartOver() {
+    if (!window.confirm("Start over? This clears all progress on this mission and can't be undone.")) {
+      return;
+    }
+    sessionStorage.removeItem(stepStorageKey);
+    sessionStorage.removeItem(formStorageKey);
+    setStep(1);
+    setForm(INITIAL_FORM);
+    setRecommendation(null);
+    setEngineLoading(false);
+    setEngineError(null);
+    setAcceptedSource('rule');
+    setBaseName(null);
+  }
+
   async function handleSubmit() {
     setSaving(true);
     try {
@@ -194,6 +213,7 @@ export function MissionWizard({
         projectName={form.projectName}
         vertical={form.vertical}
         purpose={form.purpose}
+        onStartOver={handleStartOver}
       />
 
       {step === 1 && (

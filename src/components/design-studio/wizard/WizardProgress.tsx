@@ -4,9 +4,10 @@ interface Props {
   projectName?:  string;
   vertical?:     string;
   purpose?:      string;
+  onStartOver:   () => void;
 }
 
-export function WizardProgress({ step, total, projectName, vertical, purpose }: Props) {
+export function WizardProgress({ step, total, projectName, vertical, purpose, onStartOver }: Props) {
   return (
     <div>
       {step > 1 && projectName && (
@@ -26,9 +27,18 @@ export function WizardProgress({ step, total, projectName, vertical, purpose }: 
         ))}
       </div>
 
-      <p className="text-xs text-white/40 mt-2">
-        Step {step} of {total}
-      </p>
+      <div className="flex items-center justify-between mt-2">
+        <p className="text-xs text-white/40">
+          Step {step} of {total}
+        </p>
+        <button
+          type="button"
+          onClick={onStartOver}
+          className="text-xs text-white/30 hover:text-white/60 underline underline-offset-2 transition-colors"
+        >
+          Start over
+        </button>
+      </div>
     </div>
   );
 }
