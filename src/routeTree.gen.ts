@@ -76,6 +76,7 @@ import { Route as MissionHubTorqwingsDesignStudioDesignRouteImport } from './rou
 import { Route as MissionHubTorqwingsDesignStudioComponentsRouteImport } from './routes/mission-hub.torqwings-design-studio.components'
 import { Route as MissionHubTorqwingsDesignStudioComplianceRouteImport } from './routes/mission-hub.torqwings-design-studio.compliance'
 import { Route as MissionHubTorqwingsDesignStudioAdvisorRouteImport } from './routes/mission-hub.torqwings-design-studio.advisor'
+import { Route as DestudProjectsProjectIdRouteImport } from './routes/destud.projects.$projectId'
 import { Route as DestudDashboardExplorerRouteImport } from './routes/destud.dashboard.explorer'
 import { Route as DestudDashboardEngineerRouteImport } from './routes/destud.dashboard.engineer'
 import { Route as LayoutLearnDroneDesignFundamentalsRouteImport } from './routes/_layout.learn.drone-design-fundamentals'
@@ -443,6 +444,11 @@ const MissionHubTorqwingsDesignStudioAdvisorRoute =
     path: '/advisor',
     getParentRoute: () => MissionHubTorqwingsDesignStudioRoute,
   } as any)
+const DestudProjectsProjectIdRoute = DestudProjectsProjectIdRouteImport.update({
+  id: '/projects/$projectId',
+  path: '/projects/$projectId',
+  getParentRoute: () => DestudRoute,
+} as any)
 const DestudDashboardExplorerRoute = DestudDashboardExplorerRouteImport.update({
   id: '/dashboard/explorer',
   path: '/dashboard/explorer',
@@ -544,6 +550,7 @@ export interface FileRoutesByFullPath {
   '/learn/drone-design-fundamentals': typeof LayoutLearnDroneDesignFundamentalsRoute
   '/destud/dashboard/engineer': typeof DestudDashboardEngineerRoute
   '/destud/dashboard/explorer': typeof DestudDashboardExplorerRoute
+  '/destud/projects/$projectId': typeof DestudProjectsProjectIdRoute
   '/mission-hub/torqwings-design-studio/advisor': typeof MissionHubTorqwingsDesignStudioAdvisorRoute
   '/mission-hub/torqwings-design-studio/compliance': typeof MissionHubTorqwingsDesignStudioComplianceRoute
   '/mission-hub/torqwings-design-studio/components': typeof MissionHubTorqwingsDesignStudioComponentsRoute
@@ -614,6 +621,7 @@ export interface FileRoutesByTo {
   '/learn/drone-design-fundamentals': typeof LayoutLearnDroneDesignFundamentalsRoute
   '/destud/dashboard/engineer': typeof DestudDashboardEngineerRoute
   '/destud/dashboard/explorer': typeof DestudDashboardExplorerRoute
+  '/destud/projects/$projectId': typeof DestudProjectsProjectIdRoute
   '/mission-hub/torqwings-design-studio/advisor': typeof MissionHubTorqwingsDesignStudioAdvisorRoute
   '/mission-hub/torqwings-design-studio/compliance': typeof MissionHubTorqwingsDesignStudioComplianceRoute
   '/mission-hub/torqwings-design-studio/components': typeof MissionHubTorqwingsDesignStudioComponentsRoute
@@ -692,6 +700,7 @@ export interface FileRoutesById {
   '/_layout/learn/drone-design-fundamentals': typeof LayoutLearnDroneDesignFundamentalsRoute
   '/destud/dashboard/engineer': typeof DestudDashboardEngineerRoute
   '/destud/dashboard/explorer': typeof DestudDashboardExplorerRoute
+  '/destud/projects/$projectId': typeof DestudProjectsProjectIdRoute
   '/mission-hub/torqwings-design-studio/advisor': typeof MissionHubTorqwingsDesignStudioAdvisorRoute
   '/mission-hub/torqwings-design-studio/compliance': typeof MissionHubTorqwingsDesignStudioComplianceRoute
   '/mission-hub/torqwings-design-studio/components': typeof MissionHubTorqwingsDesignStudioComponentsRoute
@@ -770,6 +779,7 @@ export interface FileRouteTypes {
     | '/learn/drone-design-fundamentals'
     | '/destud/dashboard/engineer'
     | '/destud/dashboard/explorer'
+    | '/destud/projects/$projectId'
     | '/mission-hub/torqwings-design-studio/advisor'
     | '/mission-hub/torqwings-design-studio/compliance'
     | '/mission-hub/torqwings-design-studio/components'
@@ -840,6 +850,7 @@ export interface FileRouteTypes {
     | '/learn/drone-design-fundamentals'
     | '/destud/dashboard/engineer'
     | '/destud/dashboard/explorer'
+    | '/destud/projects/$projectId'
     | '/mission-hub/torqwings-design-studio/advisor'
     | '/mission-hub/torqwings-design-studio/compliance'
     | '/mission-hub/torqwings-design-studio/components'
@@ -917,6 +928,7 @@ export interface FileRouteTypes {
     | '/_layout/learn/drone-design-fundamentals'
     | '/destud/dashboard/engineer'
     | '/destud/dashboard/explorer'
+    | '/destud/projects/$projectId'
     | '/mission-hub/torqwings-design-studio/advisor'
     | '/mission-hub/torqwings-design-studio/compliance'
     | '/mission-hub/torqwings-design-studio/components'
@@ -1419,6 +1431,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MissionHubTorqwingsDesignStudioAdvisorRouteImport
       parentRoute: typeof MissionHubTorqwingsDesignStudioRoute
     }
+    '/destud/projects/$projectId': {
+      id: '/destud/projects/$projectId'
+      path: '/projects/$projectId'
+      fullPath: '/destud/projects/$projectId'
+      preLoaderRoute: typeof DestudProjectsProjectIdRouteImport
+      parentRoute: typeof DestudRoute
+    }
     '/destud/dashboard/explorer': {
       id: '/destud/dashboard/explorer'
       path: '/dashboard/explorer'
@@ -1558,6 +1577,7 @@ interface DestudRouteChildren {
   DestudIndexRoute: typeof DestudIndexRoute
   DestudDashboardEngineerRoute: typeof DestudDashboardEngineerRoute
   DestudDashboardExplorerRoute: typeof DestudDashboardExplorerRoute
+  DestudProjectsProjectIdRoute: typeof DestudProjectsProjectIdRoute
 }
 
 const DestudRouteChildren: DestudRouteChildren = {
@@ -1565,6 +1585,7 @@ const DestudRouteChildren: DestudRouteChildren = {
   DestudIndexRoute: DestudIndexRoute,
   DestudDashboardEngineerRoute: DestudDashboardEngineerRoute,
   DestudDashboardExplorerRoute: DestudDashboardExplorerRoute,
+  DestudProjectsProjectIdRoute: DestudProjectsProjectIdRoute,
 }
 
 const DestudRouteWithChildren =

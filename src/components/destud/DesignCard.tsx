@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import { C, DISPLAY, MONO, SANS } from "./theme";
 
 export interface DesignSummary {
@@ -12,9 +13,12 @@ export interface DesignSummary {
 
 export function DesignCard({ design }: { design: DesignSummary }) {
   return (
-    <div
+    <Link
+      to="/destud/projects/$projectId"
+      params={{ projectId: design.id }}
       style={{
-        textAlign: "left", border: `1px solid ${C.line}`, borderRadius: 12, background: C.panel,
+        display: "block", textAlign: "left", textDecoration: "none", cursor: "pointer",
+        border: `1px solid ${C.line}`, borderRadius: 12, background: C.panel,
         padding: "16px 18px",
       }}
     >
@@ -40,6 +44,6 @@ export function DesignCard({ design }: { design: DesignSummary }) {
       <div style={{ font: `500 11px/1 ${MONO}`, color: C.faint, marginTop: 10 }}>
         Updated {new Date(design.updated_at).toLocaleDateString()}
       </div>
-    </div>
+    </Link>
   );
 }

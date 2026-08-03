@@ -1,6 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { WizardFormState, StudioProjectInsert } from "./wizard-types";
 import type { IntelligenceResult } from "@/lib/intelligence/types";
+import type { DesignStudioSource } from "@/lib/intelligence/designStudioBuilder";
 import { DEFAULT_VEHICLE_TYPE } from "@/constants/vehicleTypes.constants";
 
 export function buildInsertPayload(
@@ -85,6 +86,40 @@ export async function createDestudProject(
   } as any);
   if (error) throw new Error(error.message);
   return data ? { id: data as unknown as string } : null;
+}
+
+// design_recommendation is exactly what buildInsertPayload() stored:
+// { ...IntelligenceResult, accepted_source: acceptedSource }. requirements
+// is buildInsertPayload()'s own requirements object — { payloadWeight,
+// requiredFlightTime, missionArea, ... } — the raw WizardFormState string
+// fields, not payload_details (a different jsonb column, unrelated
+// per-vertical payload config that buildDesignStudioOutput never reads).
+export interface DestudProjectDetail {
+  id: string;
+  project_name: string;
+  vertical: string;
+  purpose: string;
+  status: string;
+  created_at: string;
+  requirements: Record<string, unknown> | null;
+  design_recommendation: (IntelligenceResult & { accepted_source: DesignStudioSource }) | null;
+}
+
+// studio_projects' RLS is authenticated-only (same as createDestudProject's
+// comment above) — reads for a DeStud (anon) session go through this
+// SECURITY DEFINER RPC instead, which also enforces that a DeStud user can
+// only ever fetch their own project (destud_user_id = p_destud_user_id is
+// baked into the RPC's WHERE clause, not just a status check).
+export async function fetchDestudProject(
+  destudUserId: string,
+  projectId: string,
+): Promise<DestudProjectDetail | null> {
+  const { data, error } = await supabase.rpc("get_destud_studio_project_by_id" as any, {
+    p_destud_user_id: destudUserId,
+    p_project_id: projectId,
+  } as any);
+  if (error) throw new Error(error.message);
+  return (data as DestudProjectDetail) ?? null;
 }
 
 export async function fetchProjectStats(userId: string, isAdmin: boolean) {
