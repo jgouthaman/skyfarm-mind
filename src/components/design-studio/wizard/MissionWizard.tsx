@@ -145,7 +145,7 @@ export function MissionWizard({
     setEngineLoading(true);
     setEngineError(null);
     try {
-      const result = await runIntelligenceEngine(buildEngineInput(f));
+      const result = await runIntelligenceEngine(buildEngineInput(f), ownerKind);
       setRecommendation(result);
     } catch (err: any) {
       setEngineError(err?.message ?? "Something went wrong while analysing your requirements.");

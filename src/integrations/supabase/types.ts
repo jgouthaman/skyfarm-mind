@@ -12,844 +12,934 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
-      agrisky_drones: {
+      academy_course_module_progress: {
         Row: {
-          capacity_litres: number | null
-          created_at: string
+          completed_at: string
           id: string
-          model: string | null
-          name: string
-          notes: string | null
-          serial_no: string | null
-          status: string
+          module_id: string
+          user_id: string
         }
         Insert: {
-          capacity_litres?: number | null
-          created_at?: string
+          completed_at?: string
           id?: string
-          model?: string | null
-          name: string
-          notes?: string | null
-          serial_no?: string | null
-          status?: string
+          module_id: string
+          user_id: string
         }
         Update: {
-          capacity_litres?: number | null
-          created_at?: string
+          completed_at?: string
           id?: string
-          model?: string | null
-          name?: string
-          notes?: string | null
-          serial_no?: string | null
-          status?: string
-        }
-        Relationships: []
-      }
-      agrisky_farms: {
-        Row: {
-          created_at: string
-          crop: string | null
-          farmer: string | null
-          id: string
-          location: string | null
-          name: string
-          service_needed: string | null
-          size_acres: number | null
-        }
-        Insert: {
-          created_at?: string
-          crop?: string | null
-          farmer?: string | null
-          id?: string
-          location?: string | null
-          name: string
-          service_needed?: string | null
-          size_acres?: number | null
-        }
-        Update: {
-          created_at?: string
-          crop?: string | null
-          farmer?: string | null
-          id?: string
-          location?: string | null
-          name?: string
-          service_needed?: string | null
-          size_acres?: number | null
-        }
-        Relationships: []
-      }
-      agrisky_field_uploads: {
-        Row: {
-          caption: string | null
-          captured_at: string
-          created_at: string
-          farm_id: string | null
-          id: string
-          image_url: string
-          lat: number | null
-          lng: number | null
-          mission_id: string | null
-          pilot_id: string | null
-        }
-        Insert: {
-          caption?: string | null
-          captured_at?: string
-          created_at?: string
-          farm_id?: string | null
-          id?: string
-          image_url: string
-          lat?: number | null
-          lng?: number | null
-          mission_id?: string | null
-          pilot_id?: string | null
-        }
-        Update: {
-          caption?: string | null
-          captured_at?: string
-          created_at?: string
-          farm_id?: string | null
-          id?: string
-          image_url?: string
-          lat?: number | null
-          lng?: number | null
-          mission_id?: string | null
-          pilot_id?: string | null
+          module_id?: string
+          user_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "agrisky_field_uploads_farm_id_fkey"
-            columns: ["farm_id"]
+            foreignKeyName: "academy_course_module_progress_module_id_fkey"
+            columns: ["module_id"]
             isOneToOne: false
-            referencedRelation: "agrisky_farms"
+            referencedRelation: "academy_course_modules"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "agrisky_field_uploads_mission_id_fkey"
-            columns: ["mission_id"]
+            foreignKeyName: "academy_course_module_progress_user_id_fkey"
+            columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "agrisky_missions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "agrisky_field_uploads_pilot_id_fkey"
-            columns: ["pilot_id"]
-            isOneToOne: false
-            referencedRelation: "agrisky_pilots"
+            referencedRelation: "academy_users"
             referencedColumns: ["id"]
           },
         ]
       }
-      agrisky_missions: {
+      academy_course_modules: {
         Row: {
-          created_at: string
-          drone_id: string | null
-          farm_id: string
+          course_id: string | null
+          created_at: string | null
+          description: string | null
           id: string
-          notes: string | null
-          pilot_id: string | null
-          scheduled_at: string | null
-          service: string
-          status: string
+          order_index: number
+          title: string
         }
         Insert: {
-          created_at?: string
-          drone_id?: string | null
-          farm_id: string
+          course_id?: string | null
+          created_at?: string | null
+          description?: string | null
           id?: string
-          notes?: string | null
-          pilot_id?: string | null
-          scheduled_at?: string | null
-          service: string
-          status?: string
+          order_index: number
+          title: string
         }
         Update: {
-          created_at?: string
-          drone_id?: string | null
-          farm_id?: string
+          course_id?: string | null
+          created_at?: string | null
+          description?: string | null
           id?: string
-          notes?: string | null
-          pilot_id?: string | null
-          scheduled_at?: string | null
-          service?: string
-          status?: string
+          order_index?: number
+          title?: string
         }
         Relationships: [
           {
-            foreignKeyName: "agrisky_missions_drone_id_fkey"
-            columns: ["drone_id"]
+            foreignKeyName: "modules_course_id_fkey"
+            columns: ["course_id"]
             isOneToOne: false
-            referencedRelation: "agrisky_drones"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "agrisky_missions_farm_id_fkey"
-            columns: ["farm_id"]
-            isOneToOne: false
-            referencedRelation: "agrisky_farms"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "agrisky_missions_pilot_id_fkey"
-            columns: ["pilot_id"]
-            isOneToOne: false
-            referencedRelation: "agrisky_pilots"
+            referencedRelation: "academy_courses"
             referencedColumns: ["id"]
           },
         ]
       }
-      agrisky_pilots: {
+      academy_courses: {
         Row: {
-          created_at: string
+          created_at: string | null
+          description: string | null
+          hours: number | null
           id: string
-          name: string
-          phone: string
+          level: string | null
+          modules: string[] | null
+          order_index: number | null
+          outcome: string | null
+          prerequisite: string | null
+          price: number | null
+          project_count: number | null
+          slug: string
+          status: string | null
+          title: string
+          vertical: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          hours?: number | null
+          id?: string
+          level?: string | null
+          modules?: string[] | null
+          order_index?: number | null
+          outcome?: string | null
+          prerequisite?: string | null
+          price?: number | null
+          project_count?: number | null
+          slug: string
+          status?: string | null
+          title: string
+          vertical?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          hours?: number | null
+          id?: string
+          level?: string | null
+          modules?: string[] | null
+          order_index?: number | null
+          outcome?: string | null
+          prerequisite?: string | null
+          price?: number | null
+          project_count?: number | null
+          slug?: string
+          status?: string | null
+          title?: string
+          vertical?: string | null
+        }
+        Relationships: []
+      }
+      academy_enrollments: {
+        Row: {
+          course_id: string | null
+          enrolled_at: string | null
+          id: string
+          status: string | null
+          user_id: string
+        }
+        Insert: {
+          course_id?: string | null
+          enrolled_at?: string | null
+          id?: string
+          status?: string | null
+          user_id: string
+        }
+        Update: {
+          course_id?: string | null
+          enrolled_at?: string | null
+          id?: string
+          status?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "academy_enrollments_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "academy_courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      academy_module_sections: {
+        Row: {
+          cached_at: string | null
+          cached_content: string | null
+          created_at: string | null
+          id: string
+          module_id: string
+          order_index: number
+          section_type: string
+          title: string
+          topic_brief: string
+        }
+        Insert: {
+          cached_at?: string | null
+          cached_content?: string | null
+          created_at?: string | null
+          id?: string
+          module_id: string
+          order_index: number
+          section_type: string
+          title: string
+          topic_brief: string
+        }
+        Update: {
+          cached_at?: string | null
+          cached_content?: string | null
+          created_at?: string | null
+          id?: string
+          module_id?: string
+          order_index?: number
+          section_type?: string
+          title?: string
+          topic_brief?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "academy_module_sections_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "academy_course_modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      academy_quiz_attempts: {
+        Row: {
+          attempt_number: number
+          attempted_at: string | null
+          generated_questions: Json
+          id: string
+          passed: boolean
+          score: number
+          section_id: string
+          total: number
+          user_answers: Json
+          user_id: string
+        }
+        Insert: {
+          attempt_number?: number
+          attempted_at?: string | null
+          generated_questions: Json
+          id?: string
+          passed?: boolean
+          score?: number
+          section_id: string
+          total: number
+          user_answers?: Json
+          user_id: string
+        }
+        Update: {
+          attempt_number?: number
+          attempted_at?: string | null
+          generated_questions?: Json
+          id?: string
+          passed?: boolean
+          score?: number
+          section_id?: string
+          total?: number
+          user_answers?: Json
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "academy_quiz_attempts_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "academy_module_sections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "academy_quiz_attempts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "academy_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      academy_users: {
+        Row: {
+          access_url: string | null
+          activated_at: string
+          course_id: string | null
+          created_at: string
+          email: string
+          full_name: string
+          id: string
           status: string
         }
         Insert: {
+          access_url?: string | null
+          activated_at?: string
+          course_id?: string | null
           created_at?: string
+          email: string
+          full_name: string
           id?: string
-          name: string
-          phone: string
           status?: string
         }
         Update: {
+          access_url?: string | null
+          activated_at?: string
+          course_id?: string | null
           created_at?: string
+          email?: string
+          full_name?: string
           id?: string
-          name?: string
-          phone?: string
           status?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "academy_users_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "academy_courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      academy_waitlist: {
+        Row: {
+          course_id: string | null
+          created_at: string | null
+          email: string
+          id: string
+          name: string
+          notified_at: string | null
+          source: string
+          status: string | null
+        }
+        Insert: {
+          course_id?: string | null
+          created_at?: string | null
+          email: string
+          id?: string
+          name: string
+          notified_at?: string | null
+          source?: string
+          status?: string | null
+        }
+        Update: {
+          course_id?: string | null
+          created_at?: string | null
+          email?: string
+          id?: string
+          name?: string
+          notified_at?: string | null
+          source?: string
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "academy_waitlist_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "academy_courses"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       contacts: {
         Row: {
           created_at: string
-          email: string | null
+          email: string
           id: string
           location: string | null
           message: string | null
           name: string
           organisation: string | null
-          phone: string | null
+          phone: string
+          source: string
           status: string
           vertical_interest: string | null
         }
         Insert: {
           created_at?: string
-          email?: string | null
+          email: string
           id?: string
           location?: string | null
           message?: string | null
           name: string
           organisation?: string | null
-          phone?: string | null
+          phone: string
+          source?: string
           status?: string
           vertical_interest?: string | null
         }
         Update: {
           created_at?: string
-          email?: string | null
+          email?: string
           id?: string
           location?: string | null
           message?: string | null
           name?: string
           organisation?: string | null
-          phone?: string | null
+          phone?: string
+          source?: string
           status?: string
           vertical_interest?: string | null
+        }
+        Relationships: []
+      }
+      design_rules: {
+        Row: {
+          automation_level: string | null
+          battery_config: string | null
+          budget_range: string | null
+          confidence_level: number | null
+          cost_max_inr: number | null
+          cost_min_inr: number | null
+          created_at: string
+          created_by: string | null
+          drone_type: string | null
+          engineer_name: string
+          engineer_notes: string | null
+          esc_rating: string | null
+          fallback_count: number
+          flight_controller: string | null
+          flight_time_max: number | null
+          flight_time_min: number | null
+          frame_size: string | null
+          gps_type: string | null
+          id: string
+          last_matched_at: string | null
+          match_count: number
+          motor_class: string | null
+          motor_count: number | null
+          payload_max_kg: number | null
+          payload_min_kg: number | null
+          payload_system: string | null
+          propeller_spec: string | null
+          purpose: string
+          risk_flags: string[] | null
+          risk_level: string | null
+          rule_name: string | null
+          status: string
+          terrain_types: string[] | null
+          twr_min: number | null
+          updated_at: string
+          user_type: string | null
+          vehicle_type: string
+          vertical: string
+          wind_condition: string | null
+        }
+        Insert: {
+          automation_level?: string | null
+          battery_config?: string | null
+          budget_range?: string | null
+          confidence_level?: number | null
+          cost_max_inr?: number | null
+          cost_min_inr?: number | null
+          created_at?: string
+          created_by?: string | null
+          drone_type?: string | null
+          engineer_name: string
+          engineer_notes?: string | null
+          esc_rating?: string | null
+          fallback_count?: number
+          flight_controller?: string | null
+          flight_time_max?: number | null
+          flight_time_min?: number | null
+          frame_size?: string | null
+          gps_type?: string | null
+          id?: string
+          last_matched_at?: string | null
+          match_count?: number
+          motor_class?: string | null
+          motor_count?: number | null
+          payload_max_kg?: number | null
+          payload_min_kg?: number | null
+          payload_system?: string | null
+          propeller_spec?: string | null
+          purpose: string
+          risk_flags?: string[] | null
+          risk_level?: string | null
+          rule_name?: string | null
+          status?: string
+          terrain_types?: string[] | null
+          twr_min?: number | null
+          updated_at?: string
+          user_type?: string | null
+          vehicle_type?: string
+          vertical: string
+          wind_condition?: string | null
+        }
+        Update: {
+          automation_level?: string | null
+          battery_config?: string | null
+          budget_range?: string | null
+          confidence_level?: number | null
+          cost_max_inr?: number | null
+          cost_min_inr?: number | null
+          created_at?: string
+          created_by?: string | null
+          drone_type?: string | null
+          engineer_name?: string
+          engineer_notes?: string | null
+          esc_rating?: string | null
+          fallback_count?: number
+          flight_controller?: string | null
+          flight_time_max?: number | null
+          flight_time_min?: number | null
+          frame_size?: string | null
+          gps_type?: string | null
+          id?: string
+          last_matched_at?: string | null
+          match_count?: number
+          motor_class?: string | null
+          motor_count?: number | null
+          payload_max_kg?: number | null
+          payload_min_kg?: number | null
+          payload_system?: string | null
+          propeller_spec?: string | null
+          purpose?: string
+          risk_flags?: string[] | null
+          risk_level?: string | null
+          rule_name?: string | null
+          status?: string
+          terrain_types?: string[] | null
+          twr_min?: number | null
+          updated_at?: string
+          user_type?: string | null
+          vehicle_type?: string
+          vertical?: string
+          wind_condition?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "design_rules_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "mission_hub_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      destud_users: {
+        Row: {
+          created_at: string
+          email: string | null
+          full_name: string | null
+          id: string
+          Industry: string | null
+          location: string | null
+          message: string | null
+          organisation: string | null
+          phone: string | null
+          plan: string | null
+          role: string | null
+          source: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          Industry?: string | null
+          location?: string | null
+          message?: string | null
+          organisation?: string | null
+          phone?: string | null
+          plan?: string | null
+          role?: string | null
+          source?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          Industry?: string | null
+          location?: string | null
+          message?: string | null
+          organisation?: string | null
+          phone?: string | null
+          plan?: string | null
+          role?: string | null
+          source?: string
+          status?: string
+          updated_at?: string
         }
         Relationships: []
       }
       destud_waitlist: {
         Row: {
-          created_at: string
-          email: string
-          full_name: string
-          id: string
-          location: string
-          message: string | null
-          organisation: string | null
-          phone: string
-          plan: string
-          role: string
-          source: string
-          status: string
-        }
-        Insert: {
-          created_at?: string
-          email: string
-          full_name: string
-          id?: string
-          location: string
-          message?: string | null
-          organisation?: string | null
-          phone: string
-          plan: string
-          role: string
-          source?: string
-          status?: string
-        }
-        Update: {
-          created_at?: string
-          email?: string
-          full_name?: string
-          id?: string
-          location?: string
-          message?: string | null
-          organisation?: string | null
-          phone?: string
-          plan?: string
-          role?: string
-          source?: string
-          status?: string
-        }
-        Relationships: []
-      }
-      destud_users: {
-        Row: {
-          created_at: string
-          email: string
-          full_name: string
-          id: string
-          location: string
-          message: string | null
-          organisation: string | null
-          phone: string
-          plan: string
-          role: string
-          source: string
-          status: string
-        }
-        Insert: {
-          created_at?: string
-          email: string
-          full_name: string
-          id?: string
-          location: string
-          message?: string | null
-          organisation?: string | null
-          phone: string
-          plan: string
-          role: string
-          source?: string
-          status?: string
-        }
-        Update: {
-          created_at?: string
-          email?: string
-          full_name?: string
-          id?: string
-          location?: string
-          message?: string | null
-          organisation?: string | null
-          phone?: string
-          plan?: string
-          role?: string
-          source?: string
-          status?: string
-        }
-        Relationships: []
-      }
-      profiles: {
-        Row: {
-          created_at: string
-          created_by: string | null
+          created_at: string | null
           email: string | null
           full_name: string | null
           id: string
-          is_active: boolean
-          notification_prefs: Json
-          phone: string | null
-          role: string
-          updated_at: string
-          user_id: string
+          Industry: string | null
+          location: string | null
+          message: string | null
+          organisation: string | null
+          phone: string
+          plan: string
+          role: string | null
+          source: string | null
+          status: string
+          updated_at: string | null
         }
         Insert: {
-          created_at?: string
-          created_by?: string | null
+          created_at?: string | null
           email?: string | null
           full_name?: string | null
           id?: string
-          is_active?: boolean
-          notification_prefs?: Json
-          phone?: string | null
-          role?: string
-          updated_at?: string
-          user_id: string
+          Industry?: string | null
+          location?: string | null
+          message?: string | null
+          organisation?: string | null
+          phone: string
+          plan: string
+          role?: string | null
+          source?: string | null
+          status?: string
+          updated_at?: string | null
         }
         Update: {
-          created_at?: string
-          created_by?: string | null
+          created_at?: string | null
           email?: string | null
           full_name?: string | null
           id?: string
-          is_active?: boolean
-          notification_prefs?: Json
-          phone?: string | null
-          role?: string
-          updated_at?: string
-          user_id?: string
+          Industry?: string | null
+          location?: string | null
+          message?: string | null
+          organisation?: string | null
+          phone?: string
+          plan?: string
+          role?: string | null
+          source?: string | null
+          status?: string
+          updated_at?: string | null
         }
         Relationships: []
+      }
+      drone_components: {
+        Row: {
+          category: string
+          compatible_verticals: string[] | null
+          created_at: string
+          created_by: string | null
+          datasheet_url: string | null
+          id: string
+          in_stock: boolean
+          lead_time_days: number | null
+          manufacturer: string
+          name: string
+          part_number: string | null
+          specs: Json | null
+          status: string
+          supplier_name: string | null
+          supplier_url: string | null
+          tags: string[] | null
+          unit_price_inr: number | null
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          compatible_verticals?: string[] | null
+          created_at?: string
+          created_by?: string | null
+          datasheet_url?: string | null
+          id?: string
+          in_stock?: boolean
+          lead_time_days?: number | null
+          manufacturer: string
+          name: string
+          part_number?: string | null
+          specs?: Json | null
+          status?: string
+          supplier_name?: string | null
+          supplier_url?: string | null
+          tags?: string[] | null
+          unit_price_inr?: number | null
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          compatible_verticals?: string[] | null
+          created_at?: string
+          created_by?: string | null
+          datasheet_url?: string | null
+          id?: string
+          in_stock?: boolean
+          lead_time_days?: number | null
+          manufacturer?: string
+          name?: string
+          part_number?: string | null
+          specs?: Json | null
+          status?: string
+          supplier_name?: string | null
+          supplier_url?: string | null
+          tags?: string[] | null
+          unit_price_inr?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "drone_components_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "mission_hub_users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       industries: {
         Row: {
           id: string
           name: string
-          slug: string | null
-          color: string | null
-          sort_order: number | null
-          created_at: string
+          slug: string
         }
         Insert: {
           id?: string
           name: string
-          slug?: string | null
-          color?: string | null
-          sort_order?: number | null
-          created_at?: string
+          slug: string
         }
         Update: {
           id?: string
           name?: string
-          slug?: string | null
-          color?: string | null
-          sort_order?: number | null
-          created_at?: string
+          slug?: string
         }
         Relationships: []
       }
       mission_hub_users: {
         Row: {
-          id: string
           auth_user_id: string | null
-          full_name: string | null
-          email: string | null
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          industries: string[] | null
+          notification_prefs: Json | null
           role: string
           status: string
-          industries: string[]
-          notification_prefs: Json
-          created_at: string
         }
         Insert: {
-          id?: string
           auth_user_id?: string | null
-          full_name?: string | null
-          email?: string | null
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          industries?: string[] | null
+          notification_prefs?: Json | null
           role?: string
           status?: string
-          industries?: string[]
-          notification_prefs?: Json
-          created_at?: string
         }
         Update: {
-          id?: string
           auth_user_id?: string | null
-          full_name?: string | null
-          email?: string | null
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          industries?: string[] | null
+          notification_prefs?: Json | null
           role?: string
           status?: string
-          industries?: string[]
-          notification_prefs?: Json
-          created_at?: string
         }
         Relationships: []
       }
       reference_designs: {
         Row: {
-          id: string
-          name: string
-          description: string | null
-          purpose: string | null
-          vertical: string | null
-          vehicle_type: string
-          drone_type: string | null
-          frame_size: string | null
-          payload_weight: string | null
-          estimated_flight_time: number | null
-          motor_class: string | null
-          battery: string | null
-          component_list: Json | null
-          requirements: Json | null
-          confidence_score: number
-          engineer_notes: string | null
           approval_status: string
           approved_by: string | null
-          is_active: boolean
+          battery: string | null
+          component_list: Json | null
+          confidence_score: number | null
+          created_at: string
           created_by: string | null
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          name: string
-          description?: string | null
-          purpose?: string | null
-          vertical?: string | null
-          vehicle_type?: string
-          drone_type?: string | null
-          frame_size?: string | null
-          payload_weight?: string | null
-          estimated_flight_time?: number | null
-          motor_class?: string | null
-          battery?: string | null
-          component_list?: Json | null
-          requirements?: Json | null
-          confidence_score?: number
-          engineer_notes?: string | null
-          approval_status?: string
-          approved_by?: string | null
-          is_active?: boolean
-          created_by?: string | null
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          name?: string
-          description?: string | null
-          purpose?: string | null
-          vertical?: string | null
-          vehicle_type?: string
-          drone_type?: string | null
-          frame_size?: string | null
-          payload_weight?: string | null
-          estimated_flight_time?: number | null
-          motor_class?: string | null
-          battery?: string | null
-          component_list?: Json | null
-          requirements?: Json | null
-          confidence_score?: number
-          engineer_notes?: string | null
-          approval_status?: string
-          approved_by?: string | null
-          is_active?: boolean
-          created_by?: string | null
-          created_at?: string
-        }
-        Relationships: []
-      }
-      studio_components: {
-        Row: {
-          created_at: string
+          description: string | null
+          drone_type: string
+          engineer_notes: string | null
+          estimated_flight_time: number | null
+          frame_size: string | null
           id: string
-          payload: Json
-          project_id: string
+          is_active: boolean | null
+          motor_class: string | null
+          name: string
+          payload_weight: number | null
+          purpose: string
+          requirements: Json | null
+          risk_level: string | null
+          source_project_id: string | null
+          tags: string[] | null
+          updated_at: string
+          user_type: string | null
+          vehicle_type: string
+          vertical: string
         }
         Insert: {
+          approval_status?: string
+          approved_by?: string | null
+          battery?: string | null
+          component_list?: Json | null
+          confidence_score?: number | null
           created_at?: string
+          created_by?: string | null
+          description?: string | null
+          drone_type: string
+          engineer_notes?: string | null
+          estimated_flight_time?: number | null
+          frame_size?: string | null
           id?: string
-          payload?: Json
-          project_id: string
+          is_active?: boolean | null
+          motor_class?: string | null
+          name: string
+          payload_weight?: number | null
+          purpose: string
+          requirements?: Json | null
+          risk_level?: string | null
+          source_project_id?: string | null
+          tags?: string[] | null
+          updated_at?: string
+          user_type?: string | null
+          vehicle_type?: string
+          vertical: string
         }
         Update: {
+          approval_status?: string
+          approved_by?: string | null
+          battery?: string | null
+          component_list?: Json | null
+          confidence_score?: number | null
           created_at?: string
+          created_by?: string | null
+          description?: string | null
+          drone_type?: string
+          engineer_notes?: string | null
+          estimated_flight_time?: number | null
+          frame_size?: string | null
           id?: string
-          payload?: Json
-          project_id?: string
+          is_active?: boolean | null
+          motor_class?: string | null
+          name?: string
+          payload_weight?: number | null
+          purpose?: string
+          requirements?: Json | null
+          risk_level?: string | null
+          source_project_id?: string | null
+          tags?: string[] | null
+          updated_at?: string
+          user_type?: string | null
+          vehicle_type?: string
+          vertical?: string
         }
         Relationships: [
           {
-            foreignKeyName: "studio_components_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: true
-            referencedRelation: "studio_projects"
+            foreignKeyName: "reference_designs_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "mission_hub_users"
             referencedColumns: ["id"]
           },
-        ]
-      }
-      studio_designs: {
-        Row: {
-          created_at: string
-          id: string
-          payload: Json
-          project_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          payload?: Json
-          project_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          payload?: Json
-          project_id?: string
-        }
-        Relationships: [
           {
-            foreignKeyName: "studio_designs_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: true
-            referencedRelation: "studio_projects"
+            foreignKeyName: "reference_designs_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "mission_hub_users"
             referencedColumns: ["id"]
           },
         ]
       }
       studio_projects: {
         Row: {
-          advisor_messages: Json
+          advisor_messages: Json | null
           created_at: string
+          design_recommendation: Json | null
           id: string
+          payload_details: Json | null
           project_name: string
-          purpose: string | null
+          purpose: string
+          recommended_design: Json | null
+          requirements: Json | null
           risk_level: string | null
+          safety: Json | null
+          simulation_results: Json | null
           status: string
           updated_at: string
-          user_id: string | null
-          user_type: string | null
+          user_id: string
+          user_type: string
           vehicle_type: string
           vertical: string
         }
         Insert: {
-          advisor_messages?: Json
+          advisor_messages?: Json | null
           created_at?: string
+          design_recommendation?: Json | null
           id?: string
+          payload_details?: Json | null
           project_name: string
-          purpose?: string | null
+          purpose: string
+          recommended_design?: Json | null
+          requirements?: Json | null
           risk_level?: string | null
+          safety?: Json | null
+          simulation_results?: Json | null
           status?: string
           updated_at?: string
-          user_id?: string | null
-          user_type?: string | null
+          user_id: string
+          user_type?: string
           vehicle_type?: string
           vertical: string
         }
         Update: {
-          advisor_messages?: Json
+          advisor_messages?: Json | null
           created_at?: string
+          design_recommendation?: Json | null
           id?: string
+          payload_details?: Json | null
           project_name?: string
-          purpose?: string | null
+          purpose?: string
+          recommended_design?: Json | null
+          requirements?: Json | null
           risk_level?: string | null
+          safety?: Json | null
+          simulation_results?: Json | null
           status?: string
           updated_at?: string
-          user_id?: string | null
-          user_type?: string | null
+          user_id?: string
+          user_type?: string
           vehicle_type?: string
-          vertical?: string
-        }
-        Relationships: []
-      }
-      studio_purposes: {
-        Row: {
-          active: boolean
-          created_at: string
-          id: string
-          name: string
-          sort_order: number
-        }
-        Insert: {
-          active?: boolean
-          created_at?: string
-          id?: string
-          name: string
-          sort_order?: number
-        }
-        Update: {
-          active?: boolean
-          created_at?: string
-          id?: string
-          name?: string
-          sort_order?: number
-        }
-        Relationships: []
-      }
-      studio_reports: {
-        Row: {
-          created_at: string
-          id: string
-          project_id: string
-          snapshot: Json
-          title: string | null
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          project_id: string
-          snapshot?: Json
-          title?: string | null
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          project_id?: string
-          snapshot?: Json
-          title?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "studio_reports_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "studio_projects"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      studio_requirements: {
-        Row: {
-          created_at: string
-          id: string
-          payload: Json
-          project_id: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          payload?: Json
-          project_id: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          payload?: Json
-          project_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "studio_requirements_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: true
-            referencedRelation: "studio_projects"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      studio_simulations: {
-        Row: {
-          created_at: string
-          finalized: boolean
-          id: string
-          inputs: Json
-          label: string | null
-          outcome: Json
-          project_id: string
-          risk_level: string | null
-        }
-        Insert: {
-          created_at?: string
-          finalized?: boolean
-          id?: string
-          inputs?: Json
-          label?: string | null
-          outcome?: Json
-          project_id: string
-          risk_level?: string | null
-        }
-        Update: {
-          created_at?: string
-          finalized?: boolean
-          id?: string
-          inputs?: Json
-          label?: string | null
-          outcome?: Json
-          project_id?: string
-          risk_level?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "studio_simulations_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "studio_projects"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      studio_user_types: {
-        Row: {
-          active: boolean
-          created_at: string
-          id: string
-          name: string
-          sort_order: number
-        }
-        Insert: {
-          active?: boolean
-          created_at?: string
-          id?: string
-          name: string
-          sort_order?: number
-        }
-        Update: {
-          active?: boolean
-          created_at?: string
-          id?: string
-          name?: string
-          sort_order?: number
-        }
-        Relationships: []
-      }
-      studio_verticals: {
-        Row: {
-          active: boolean
-          created_at: string
-          id: string
-          name: string
-          sort_order: number
-        }
-        Insert: {
-          active?: boolean
-          created_at?: string
-          id?: string
-          name: string
-          sort_order?: number
-        }
-        Update: {
-          active?: boolean
-          created_at?: string
-          id?: string
-          name?: string
-          sort_order?: number
-        }
-        Relationships: []
-      }
-      user_roles: {
-        Row: {
-          created_at: string
-          id: string
-          role: Database["public"]["Enums"]["app_role"]
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          role: Database["public"]["Enums"]["app_role"]
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          role?: Database["public"]["Enums"]["app_role"]
-          user_id?: string
-        }
-        Relationships: []
-      }
-      user_verticals: {
-        Row: {
-          id: string
-          mapped_at: string
-          mapped_by: string | null
-          user_id: string
-          vertical: string
-        }
-        Insert: {
-          id?: string
-          mapped_at?: string
-          mapped_by?: string | null
-          user_id: string
-          vertical: string
-        }
-        Update: {
-          id?: string
-          mapped_at?: string
-          mapped_by?: string | null
-          user_id?: string
           vertical?: string
         }
         Relationships: []
@@ -859,23 +949,59 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      can_access_studio_project: {
-        Args: { _project_id: string }
-        Returns: boolean
+      cache_module_section_content: {
+        Args: { p_content: string; p_section_id: string }
+        Returns: undefined
       }
-      get_current_user_role: { Args: never; Returns: string }
-      has_role: {
-        Args: {
-          _role: Database["public"]["Enums"]["app_role"]
-          _user_id: string
-        }
-        Returns: boolean
+      convert_destud_waitlist_entry: {
+        Args: { p_id: string }
+        Returns: undefined
       }
-      is_mh_admin: { Args: never; Returns: boolean }
-      is_mh_super_admin: { Args: never; Returns: boolean }
+      enroll_waitlist_user: {
+        Args: { p_waitlist_id: string }
+        Returns: undefined
+      }
+      get_course_modules: {
+        Args: { p_course_id: string }
+        Returns: {
+          description: string
+          id: string
+          order_index: number
+          title: string
+        }[]
+      }
+      get_course_modules_for_user: {
+        Args: { p_course_id: string; p_user_id: string }
+        Returns: {
+          completed: boolean
+          description: string
+          id: string
+          order_index: number
+          title: string
+        }[]
+      }
+      is_mhu_admin: { Args: never; Returns: boolean }
+      promote_waitlist_to_active: {
+        Args: { p_access_url?: string; p_waitlist_id: string }
+        Returns: string
+      }
+      set_module_complete: {
+        Args: { p_done: boolean; p_module_id: string; p_user_id: string }
+        Returns: undefined
+      }
+      show_limit: { Args: never; Returns: number }
+      show_trgm: { Args: { "": string }; Returns: string[] }
+      verify_academy_user: {
+        Args: { p_email: string; p_name: string }
+        Returns: Json
+      }
+      verify_destud_user: {
+        Args: { p_email: string; p_name: string }
+        Returns: Json
+      }
     }
     Enums: {
-      app_role: "admin" | "sme"
+      [_ in never]: never
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1001,9 +1127,10 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
-    Enums: {
-      app_role: ["admin", "sme"],
-    },
+    Enums: {},
   },
 } as const

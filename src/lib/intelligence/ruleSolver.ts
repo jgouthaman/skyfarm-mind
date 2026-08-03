@@ -20,6 +20,15 @@ export async function solveRule(input: IntelligenceInput): Promise<{
 
   // ── Phase 1A: exact match ──────────────────────────────────────────
   // vertical + purpose + payload within range
+  //
+  // NOTE: input.vertical is compared as-is, with no display-name→slug
+  // mapping. Confirmed via direct query that design_rules.vertical stores
+  // display names ("GuardSky", "AgriSky", ...) — the same format the wizard
+  // sends — so this already works correctly. reference_designs.vertical
+  // stores slugs instead ("surveillance", "agriculture", ...), which is why
+  // referenceMatcher.ts maps through VERTICAL_TO_SLUG before querying.
+  // design_rules and reference_designs use different vertical formats —
+  // don't "fix" this by unifying the two without re-checking both tables.
   const { data: exactData, error: exactError } = await supabase
     .from('design_rules')
     .select(SELECT_COLS)
@@ -39,7 +48,7 @@ export async function solveRule(input: IntelligenceInput): Promise<{
     const best = pickBest(candidates);
     return {
       rule: toMatchedRule(best),
-      confidence_score: Math.min(100, (best.confidence_level ?? 1) * 20),
+      confidence_score: Math.min(100, (best.confidence_level as number ?? 1) * 20),
       is_fallback: false,
       fallback_reason: null,
     };

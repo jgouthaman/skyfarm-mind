@@ -18,6 +18,7 @@ import {
   type YesNoUnsure,
 } from "@/lib/intelligence/vehicleTypeRecommender";
 import { WizardInput, WizardSelect } from "./WizardField";
+import { VehicleTypeReasonModal } from "./VehicleTypeReasonModal";
 import type { WizardFormState } from "@/lib/design-studio/wizard-types";
 
 interface Props {
@@ -67,6 +68,7 @@ export function StepVehicleType({ form, onChange, onNext }: Props) {
   const [runwayAvailable, setRunwayAvailable] = useState<YesNoUnsure>(form.recommendRunwayAvailable ?? "unsure");
   const [missionType, setMissionType] = useState(() => deriveMissionType(form.vertical));
   const [error, setError] = useState("");
+  const [reasonOpen, setReasonOpen] = useState(false);
   const [recommendation, setRecommendation] = useState<VehicleTypeRecommendation | null>(() => {
     if (form.recommendPayloadKg && form.recommendRangeKm && form.recommendEnduranceMin) {
       return recommendVehicleType({
@@ -337,17 +339,27 @@ export function StepVehicleType({ form, onChange, onNext }: Props) {
             <Icon className="h-6 w-6" style={{ color: "#378ADD" }} aria-hidden="true" />
             <h3 className="text-lg font-semibold text-white">{match.label}</h3>
             {confidence && (
-              <span
-                className={`text-[10px] uppercase tracking-widest px-2 py-0.5 rounded-full border ${
-                  confidence === "high"
-                    ? "text-emerald-400 border-emerald-500/30 bg-emerald-500/10"
-                    : confidence === "medium"
-                    ? "text-amber-400 border-amber-500/30 bg-amber-500/10"
-                    : "text-red-400 border-red-500/30 bg-red-500/10"
-                }`}
-              >
-                {confidence} confidence
-              </span>
+              <>
+                <span
+                  className={`text-[10px] uppercase tracking-widest px-2 py-0.5 rounded-full border ${
+                    confidence === "high"
+                      ? "text-emerald-400 border-emerald-500/30 bg-emerald-500/10"
+                      : confidence === "medium"
+                      ? "text-amber-400 border-amber-500/30 bg-amber-500/10"
+                      : "text-red-400 border-red-500/30 bg-red-500/10"
+                  }`}
+                >
+                  {confidence} confidence
+                </span>
+                <span className="text-white/20 text-[11px]">·</span>
+                <button
+                  type="button"
+                  onClick={() => setReasonOpen(true)}
+                  className="text-[11px] text-white/50 hover:text-white/80 underline underline-offset-2 transition-colors"
+                >
+                  Reason
+                </button>
+              </>
             )}
           </div>
 
@@ -391,6 +403,12 @@ export function StepVehicleType({ form, onChange, onNext }: Props) {
             </button>
           </div>
         </div>
+
+        <VehicleTypeReasonModal
+          open={reasonOpen}
+          onOpenChange={setReasonOpen}
+          recommendation={recommendation}
+        />
       </div>
     );
   }
