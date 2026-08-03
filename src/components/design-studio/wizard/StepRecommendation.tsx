@@ -143,9 +143,9 @@ export function StepRecommendation({ result, onAccept, onBack, onRetry, isLoadin
         </div>
       )}
 
-      {/* ── Section B — Two columns ── */}
+      {/* ── Section B — Three columns ── */}
       <p className="text-xs text-white/40">Select the recommendation to use as your design base</p>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 
         {/* Left — Matched Rule */}
         <div
@@ -316,6 +316,19 @@ export function StepRecommendation({ result, onAccept, onBack, onRetry, isLoadin
               <p className="text-white/40 text-sm">No proven design found</p>
             </div>
           )}
+        </div>
+
+        {/* Third — AI-Generated Design (placeholder, not selectable) */}
+        <div className="relative rounded-xl border p-5 space-y-3 transition-all border-white/10 opacity-40">
+          <p className="text-[11px] uppercase tracking-widest text-white/30 font-medium">
+            AI-Generated Design
+          </p>
+          <div className="py-8 text-center space-y-1">
+            <p className="text-white/40 text-sm">Coming soon</p>
+            <p className="text-white/25 text-[12px]">
+              AI Advisor will be available once outcome data collection is live.
+            </p>
+          </div>
         </div>
       </div>
 
