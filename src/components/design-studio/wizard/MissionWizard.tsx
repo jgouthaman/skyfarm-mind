@@ -13,10 +13,11 @@ import { StepPayload } from "./StepPayload";
 import { StepSafety } from "./StepSafety";
 import { StepReview } from "./StepReview";
 import { StepRecommendation } from "./StepRecommendation";
+import { StepDesignStudio } from "./StepDesignStudio";
 import { runIntelligenceEngine } from "@/lib/intelligence/orchestrator";
 import type { IntelligenceResult, IntelligenceInput } from "@/lib/intelligence/types";
 
-const TOTAL = 7;
+const TOTAL = 8;
 
 export interface MissionWizardProps {
   // Whoever owns the resulting studio_projects row — a mission_hub_users.id
@@ -251,10 +252,19 @@ export function MissionWizard({
           onAccept={(choice) => { setAcceptedSource(choice); setStep(7); }}
         />
       )}
-      {step === 7 && (
-        <StepReview
+      {step === 7 && recommendation && (
+        <StepDesignStudio
+          recommendation={recommendation}
+          acceptedSource={acceptedSource}
           form={form}
           onBack={() => setStep(6)}
+          onNext={() => setStep(8)}
+        />
+      )}
+      {step === 8 && (
+        <StepReview
+          form={form}
+          onBack={() => setStep(7)}
           onSubmit={handleSubmit}
           saving={saving}
         />

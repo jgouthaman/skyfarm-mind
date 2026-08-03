@@ -131,5 +131,7 @@ function toMatchedRule(r: Record<string, unknown>): MatchedRule {
     cost_max_inr: r.cost_max_inr as number | null,
     flight_time_min: r.flight_time_min as number | null,
     flight_time_max: r.flight_time_max as number | null,
+    payload_min_kg: r.payload_min_kg as number | null,
+    payload_max_kg: r.payload_max_kg as number | null,
   };
 }
