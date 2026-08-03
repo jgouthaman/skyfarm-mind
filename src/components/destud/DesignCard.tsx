@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 import { C, DISPLAY, MONO, SANS } from "./theme";
 
 export interface DesignSummary {
@@ -12,12 +12,14 @@ export interface DesignSummary {
 }
 
 export function DesignCard({ design }: { design: DesignSummary }) {
+  const navigate = useNavigate();
+
   return (
-    <Link
-      to="/destud/projects/$projectId"
-      params={{ projectId: design.id }}
+    <div
+      onDoubleClick={() => navigate({ to: "/destud/projects/$projectId", params: { projectId: design.id } })}
+      title="Double-click to open"
       style={{
-        display: "block", textAlign: "left", textDecoration: "none", cursor: "pointer",
+        textAlign: "left", cursor: "pointer", userSelect: "none",
         border: `1px solid ${C.line}`, borderRadius: 12, background: C.panel,
         padding: "16px 18px",
       }}
@@ -44,6 +46,6 @@ export function DesignCard({ design }: { design: DesignSummary }) {
       <div style={{ font: `500 11px/1 ${MONO}`, color: C.faint, marginTop: 10 }}>
         Updated {new Date(design.updated_at).toLocaleDateString()}
       </div>
-    </Link>
+    </div>
   );
 }
