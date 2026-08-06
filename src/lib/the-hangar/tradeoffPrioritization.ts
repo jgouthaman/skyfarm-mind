@@ -44,7 +44,9 @@ const EMPHASIS_PATTERN = /\b(maxim(?:um|ize)|priorit(?:y|ize)|most important|cri
 const DEPRIORITIZE_PATTERN =
   /\b(not a concern|doesn'?t matter|not important|not a priority|no constraint on)\b/i;
 
-function isGateTierConstraint(c: IdentifiedConstraint): boolean {
+// Exported — Stage 2.3's finalizeKpis (missionSpecAssembly.ts) reuses this
+// same gate-tier test to decide which KPIs get priority "critical".
+export function isGateTierConstraint(c: IdentifiedConstraint): boolean {
   // Gate tier (Section 4.2.1): (1) safety-implicated constraints, (2)
   // regulatory constraints (source: "regulation"). Safety detection is a
   // keyword check on name/value — the domain rules table (domainRules.ts)
@@ -116,7 +118,10 @@ function effectiveWeights(prioritySignals: string[]): {
   return { weights, overrides };
 }
 
-function formatKpiItem(kpi: DerivedKpi): string {
+// Exported — Stage 2.3's finalizeKpis (missionSpecAssembly.ts) reuses this
+// to line a KPI back up against its entry in prioritizedTradeoffs, to read
+// off its score-tier rank.
+export function formatKpiItem(kpi: DerivedKpi): string {
   return `${kpi.name} (target: ${kpi.target}${kpi.unit ? ` ${kpi.unit}` : ""})`;
 }
 

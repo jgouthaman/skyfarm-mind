@@ -9,18 +9,23 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TheHangarRouteImport } from './routes/the-hangar'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as PilotRouteImport } from './routes/pilot'
 import { Route as MissionHubRouteImport } from './routes/mission-hub'
+import { Route as HangarStage3ManualtestRouteImport } from './routes/hangar-stage3-manualtest'
 import { Route as FieldRouteImport } from './routes/field'
 import { Route as DestudRouteImport } from './routes/destud'
 import { Route as AcademyRouteImport } from './routes/academy'
 import { Route as LayoutRouteImport } from './routes/_layout'
+import { Route as TheHangarIndexRouteImport } from './routes/the-hangar.index'
 import { Route as PilotIndexRouteImport } from './routes/pilot.index'
 import { Route as MissionHubIndexRouteImport } from './routes/mission-hub.index'
 import { Route as DestudIndexRouteImport } from './routes/destud.index'
 import { Route as AcademyIndexRouteImport } from './routes/academy.index'
 import { Route as LayoutIndexRouteImport } from './routes/_layout.index'
+import { Route as TheHangarWelcomeRouteImport } from './routes/the-hangar.welcome'
+import { Route as TheHangarMissionRouteImport } from './routes/the-hangar.mission'
 import { Route as PilotTrackingRouteImport } from './routes/pilot.tracking'
 import { Route as PilotSyncRouteImport } from './routes/pilot.sync'
 import { Route as PilotProfileRouteImport } from './routes/pilot.profile'
@@ -86,6 +91,11 @@ import { Route as AcademyModuleModuleIdQuizQuizIdRouteImport } from './routes/ac
 import { Route as AcademyModuleModuleIdLessonLessonIdRouteImport } from './routes/academy.module.$moduleId.lesson.$lessonId'
 import { Route as AcademyCoursesSlugModulesModuleIdRouteImport } from './routes/academy.courses.$slug.modules.$moduleId'
 
+const TheHangarRoute = TheHangarRouteImport.update({
+  id: '/the-hangar',
+  path: '/the-hangar',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
@@ -99,6 +109,11 @@ const PilotRoute = PilotRouteImport.update({
 const MissionHubRoute = MissionHubRouteImport.update({
   id: '/mission-hub',
   path: '/mission-hub',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HangarStage3ManualtestRoute = HangarStage3ManualtestRouteImport.update({
+  id: '/hangar-stage3-manualtest',
+  path: '/hangar-stage3-manualtest',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FieldRoute = FieldRouteImport.update({
@@ -119,6 +134,11 @@ const AcademyRoute = AcademyRouteImport.update({
 const LayoutRoute = LayoutRouteImport.update({
   id: '/_layout',
   getParentRoute: () => rootRouteImport,
+} as any)
+const TheHangarIndexRoute = TheHangarIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => TheHangarRoute,
 } as any)
 const PilotIndexRoute = PilotIndexRouteImport.update({
   id: '/',
@@ -144,6 +164,16 @@ const LayoutIndexRoute = LayoutIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => LayoutRoute,
+} as any)
+const TheHangarWelcomeRoute = TheHangarWelcomeRouteImport.update({
+  id: '/welcome',
+  path: '/welcome',
+  getParentRoute: () => TheHangarRoute,
+} as any)
+const TheHangarMissionRoute = TheHangarMissionRouteImport.update({
+  id: '/mission',
+  path: '/mission',
+  getParentRoute: () => TheHangarRoute,
 } as any)
 const PilotTrackingRoute = PilotTrackingRouteImport.update({
   id: '/tracking',
@@ -499,9 +529,11 @@ export interface FileRoutesByFullPath {
   '/academy': typeof AcademyRouteWithChildren
   '/destud': typeof DestudRouteWithChildren
   '/field': typeof FieldRoute
+  '/hangar-stage3-manualtest': typeof HangarStage3ManualtestRoute
   '/mission-hub': typeof MissionHubRouteWithChildren
   '/pilot': typeof PilotRouteWithChildren
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/the-hangar': typeof TheHangarRouteWithChildren
   '/about': typeof LayoutAboutRoute
   '/agrisky': typeof LayoutAgriskyRoute
   '/contact': typeof LayoutContactRoute
@@ -542,10 +574,13 @@ export interface FileRoutesByFullPath {
   '/pilot/profile': typeof PilotProfileRoute
   '/pilot/sync': typeof PilotSyncRoute
   '/pilot/tracking': typeof PilotTrackingRoute
+  '/the-hangar/mission': typeof TheHangarMissionRoute
+  '/the-hangar/welcome': typeof TheHangarWelcomeRoute
   '/academy/': typeof AcademyIndexRoute
   '/destud/': typeof DestudIndexRoute
   '/mission-hub/': typeof MissionHubIndexRoute
   '/pilot/': typeof PilotIndexRoute
+  '/the-hangar/': typeof TheHangarIndexRoute
   '/auth/callback': typeof LayoutAuthCallbackRoute
   '/learn/drone-design-fundamentals': typeof LayoutLearnDroneDesignFundamentalsRoute
   '/destud/dashboard/engineer': typeof DestudDashboardEngineerRoute
@@ -573,6 +608,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/field': typeof FieldRoute
+  '/hangar-stage3-manualtest': typeof HangarStage3ManualtestRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/about': typeof LayoutAboutRoute
   '/agrisky': typeof LayoutAgriskyRoute
@@ -612,11 +648,14 @@ export interface FileRoutesByTo {
   '/pilot/profile': typeof PilotProfileRoute
   '/pilot/sync': typeof PilotSyncRoute
   '/pilot/tracking': typeof PilotTrackingRoute
+  '/the-hangar/mission': typeof TheHangarMissionRoute
+  '/the-hangar/welcome': typeof TheHangarWelcomeRoute
   '/': typeof LayoutIndexRoute
   '/academy': typeof AcademyIndexRoute
   '/destud': typeof DestudIndexRoute
   '/mission-hub': typeof MissionHubIndexRoute
   '/pilot': typeof PilotIndexRoute
+  '/the-hangar': typeof TheHangarIndexRoute
   '/auth/callback': typeof LayoutAuthCallbackRoute
   '/learn/drone-design-fundamentals': typeof LayoutLearnDroneDesignFundamentalsRoute
   '/destud/dashboard/engineer': typeof DestudDashboardEngineerRoute
@@ -648,9 +687,11 @@ export interface FileRoutesById {
   '/academy': typeof AcademyRouteWithChildren
   '/destud': typeof DestudRouteWithChildren
   '/field': typeof FieldRoute
+  '/hangar-stage3-manualtest': typeof HangarStage3ManualtestRoute
   '/mission-hub': typeof MissionHubRouteWithChildren
   '/pilot': typeof PilotRouteWithChildren
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/the-hangar': typeof TheHangarRouteWithChildren
   '/_layout/about': typeof LayoutAboutRoute
   '/_layout/agrisky': typeof LayoutAgriskyRoute
   '/_layout/contact': typeof LayoutContactRoute
@@ -691,11 +732,14 @@ export interface FileRoutesById {
   '/pilot/profile': typeof PilotProfileRoute
   '/pilot/sync': typeof PilotSyncRoute
   '/pilot/tracking': typeof PilotTrackingRoute
+  '/the-hangar/mission': typeof TheHangarMissionRoute
+  '/the-hangar/welcome': typeof TheHangarWelcomeRoute
   '/_layout/': typeof LayoutIndexRoute
   '/academy/': typeof AcademyIndexRoute
   '/destud/': typeof DestudIndexRoute
   '/mission-hub/': typeof MissionHubIndexRoute
   '/pilot/': typeof PilotIndexRoute
+  '/the-hangar/': typeof TheHangarIndexRoute
   '/_layout/auth/callback': typeof LayoutAuthCallbackRoute
   '/_layout/learn/drone-design-fundamentals': typeof LayoutLearnDroneDesignFundamentalsRoute
   '/destud/dashboard/engineer': typeof DestudDashboardEngineerRoute
@@ -728,9 +772,11 @@ export interface FileRouteTypes {
     | '/academy'
     | '/destud'
     | '/field'
+    | '/hangar-stage3-manualtest'
     | '/mission-hub'
     | '/pilot'
     | '/sitemap.xml'
+    | '/the-hangar'
     | '/about'
     | '/agrisky'
     | '/contact'
@@ -771,10 +817,13 @@ export interface FileRouteTypes {
     | '/pilot/profile'
     | '/pilot/sync'
     | '/pilot/tracking'
+    | '/the-hangar/mission'
+    | '/the-hangar/welcome'
     | '/academy/'
     | '/destud/'
     | '/mission-hub/'
     | '/pilot/'
+    | '/the-hangar/'
     | '/auth/callback'
     | '/learn/drone-design-fundamentals'
     | '/destud/dashboard/engineer'
@@ -802,6 +851,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/field'
+    | '/hangar-stage3-manualtest'
     | '/sitemap.xml'
     | '/about'
     | '/agrisky'
@@ -841,11 +891,14 @@ export interface FileRouteTypes {
     | '/pilot/profile'
     | '/pilot/sync'
     | '/pilot/tracking'
+    | '/the-hangar/mission'
+    | '/the-hangar/welcome'
     | '/'
     | '/academy'
     | '/destud'
     | '/mission-hub'
     | '/pilot'
+    | '/the-hangar'
     | '/auth/callback'
     | '/learn/drone-design-fundamentals'
     | '/destud/dashboard/engineer'
@@ -876,9 +929,11 @@ export interface FileRouteTypes {
     | '/academy'
     | '/destud'
     | '/field'
+    | '/hangar-stage3-manualtest'
     | '/mission-hub'
     | '/pilot'
     | '/sitemap.xml'
+    | '/the-hangar'
     | '/_layout/about'
     | '/_layout/agrisky'
     | '/_layout/contact'
@@ -919,11 +974,14 @@ export interface FileRouteTypes {
     | '/pilot/profile'
     | '/pilot/sync'
     | '/pilot/tracking'
+    | '/the-hangar/mission'
+    | '/the-hangar/welcome'
     | '/_layout/'
     | '/academy/'
     | '/destud/'
     | '/mission-hub/'
     | '/pilot/'
+    | '/the-hangar/'
     | '/_layout/auth/callback'
     | '/_layout/learn/drone-design-fundamentals'
     | '/destud/dashboard/engineer'
@@ -955,13 +1013,22 @@ export interface RootRouteChildren {
   AcademyRoute: typeof AcademyRouteWithChildren
   DestudRoute: typeof DestudRouteWithChildren
   FieldRoute: typeof FieldRoute
+  HangarStage3ManualtestRoute: typeof HangarStage3ManualtestRoute
   MissionHubRoute: typeof MissionHubRouteWithChildren
   PilotRoute: typeof PilotRouteWithChildren
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  TheHangarRoute: typeof TheHangarRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/the-hangar': {
+      id: '/the-hangar'
+      path: '/the-hangar'
+      fullPath: '/the-hangar'
+      preLoaderRoute: typeof TheHangarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sitemap.xml': {
       id: '/sitemap.xml'
       path: '/sitemap.xml'
@@ -981,6 +1048,13 @@ declare module '@tanstack/react-router' {
       path: '/mission-hub'
       fullPath: '/mission-hub'
       preLoaderRoute: typeof MissionHubRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hangar-stage3-manualtest': {
+      id: '/hangar-stage3-manualtest'
+      path: '/hangar-stage3-manualtest'
+      fullPath: '/hangar-stage3-manualtest'
+      preLoaderRoute: typeof HangarStage3ManualtestRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/field': {
@@ -1010,6 +1084,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof LayoutRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/the-hangar/': {
+      id: '/the-hangar/'
+      path: '/'
+      fullPath: '/the-hangar/'
+      preLoaderRoute: typeof TheHangarIndexRouteImport
+      parentRoute: typeof TheHangarRoute
     }
     '/pilot/': {
       id: '/pilot/'
@@ -1045,6 +1126,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof LayoutIndexRouteImport
       parentRoute: typeof LayoutRoute
+    }
+    '/the-hangar/welcome': {
+      id: '/the-hangar/welcome'
+      path: '/welcome'
+      fullPath: '/the-hangar/welcome'
+      preLoaderRoute: typeof TheHangarWelcomeRouteImport
+      parentRoute: typeof TheHangarRoute
+    }
+    '/the-hangar/mission': {
+      id: '/the-hangar/mission'
+      path: '/mission'
+      fullPath: '/the-hangar/mission'
+      preLoaderRoute: typeof TheHangarMissionRouteImport
+      parentRoute: typeof TheHangarRoute
     }
     '/pilot/tracking': {
       id: '/pilot/tracking'
@@ -1720,14 +1815,32 @@ const PilotRouteChildren: PilotRouteChildren = {
 
 const PilotRouteWithChildren = PilotRoute._addFileChildren(PilotRouteChildren)
 
+interface TheHangarRouteChildren {
+  TheHangarMissionRoute: typeof TheHangarMissionRoute
+  TheHangarWelcomeRoute: typeof TheHangarWelcomeRoute
+  TheHangarIndexRoute: typeof TheHangarIndexRoute
+}
+
+const TheHangarRouteChildren: TheHangarRouteChildren = {
+  TheHangarMissionRoute: TheHangarMissionRoute,
+  TheHangarWelcomeRoute: TheHangarWelcomeRoute,
+  TheHangarIndexRoute: TheHangarIndexRoute,
+}
+
+const TheHangarRouteWithChildren = TheHangarRoute._addFileChildren(
+  TheHangarRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   LayoutRoute: LayoutRouteWithChildren,
   AcademyRoute: AcademyRouteWithChildren,
   DestudRoute: DestudRouteWithChildren,
   FieldRoute: FieldRoute,
+  HangarStage3ManualtestRoute: HangarStage3ManualtestRoute,
   MissionHubRoute: MissionHubRouteWithChildren,
   PilotRoute: PilotRouteWithChildren,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  TheHangarRoute: TheHangarRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

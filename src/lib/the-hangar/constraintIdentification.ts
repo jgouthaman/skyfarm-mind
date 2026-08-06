@@ -32,8 +32,21 @@ export interface ConstraintIdentificationInput {
   attachedRegulations: string[];
 }
 
+// Extends IdentifiedConstraint (the spec's own MissionReasoningResult shape,
+// used as-is) with a `sourceLabel` — a specific traceability tag (a domain
+// rule ID like "REG-001", or "Stage 2.1 hint", or "LLM inference (Stage
+// 2.2)"), not just the coarse user/regulation/inferred category. Added for
+// Stage 2.3 (Section 4.3.1 Step 2): "merge the contributing rule IDs into
+// one sources[] array" needs more than the category tag to do that — the
+// doc's own MissionReasoningResult schema (Section 12.1) only carries
+// `source`, not per-rule IDs, so this is additive plumbing specific to this
+// result type, not a change to the shared IdentifiedConstraint contract.
+export interface TracedConstraint extends IdentifiedConstraint {
+  sourceLabel: string;
+}
+
 export interface ConstraintAndKpiResult {
-  identifiedConstraints: IdentifiedConstraint[];
+  identifiedConstraints: TracedConstraint[];
   derivedKpis: DerivedKpi[];
   mock: boolean;
 }
@@ -120,6 +133,16 @@ const STOPWORDS = new Set([
   "be",
   "per",
   "on",
+  // "constraint"/"constraints" show up as filler inside nearly every
+  // domain-rule constraint VALUE (e.g. "... constraint", "additional
+  // certification constraint") regardless of what the constraint is
+  // actually about — left in, two completely unrelated constraints (e.g.
+  // a budget hint and an imaging-payload rule) can share just enough
+  // incidental overlap (this word plus one synonym-collapsed token) to
+  // cross OVERLAP_THRESHOLD. Caught via real-content testing — see
+  // MissionAgent.md Stage 2.3 session.
+  "constraint",
+  "constraints",
 ]);
 
 // Curated aliases for this domain's vocabulary — each group's first entry
@@ -205,17 +228,23 @@ export const identifyConstraintsAndKpis = createServerFn({ method: "POST" })
   .handler(async ({ data }): Promise<ConstraintAndKpiResult> => {
     // Step 2a — domain rules (deterministic).
     const ctx = buildDomainRuleContext(data);
-    const ruleConstraints = evaluateDomainRules(ctx).map(({ ruleId: _ruleId, ...c }) => c);
+    const ruleConstraints: TracedConstraint[] = evaluateDomainRules(ctx).map((c) => ({
+      name: c.name,
+      value: c.value,
+      source: c.source,
+      sourceLabel: c.ruleId,
+    }));
 
     // Dedup Stage 2.1's hints against the rules that actually fired.
     const { kept: keptHints } = dedupeConstraintHints(
       data.extractedEntities.constraintHints,
       ruleConstraints,
     );
-    const hintConstraints: IdentifiedConstraint[] = keptHints.map((hint) => ({
+    const hintConstraints: TracedConstraint[] = keptHints.map((hint) => ({
       name: hint,
       value: "",
       source: "inferred",
+      sourceLabel: "Stage 2.1 hint",
     }));
 
     const knownConstraints = [...ruleConstraints, ...hintConstraints];
@@ -245,12 +274,12 @@ Return:
 
 function parseConstraintAndKpiResponse(
   raw: string,
-): { identifiedConstraints: IdentifiedConstraint[]; derivedKpis: DerivedKpi[] } | null {
+): { identifiedConstraints: TracedConstraint[]; derivedKpis: DerivedKpi[] } | null {
   try {
     const obj = JSON.parse(stripJsonFences(raw));
     if (!Array.isArray(obj.identified_constraints) || !Array.isArray(obj.derived_kpis)) return null;
 
-    const identifiedConstraints: IdentifiedConstraint[] = obj.identified_constraints
+    const identifiedConstraints: TracedConstraint[] = obj.identified_constraints
       .filter((c: unknown): c is Record<string, unknown> => typeof c === "object" && c !== null)
       .filter(
         (c: Record<string, unknown>) => typeof c.name === "string" && typeof c.value === "string",
@@ -259,6 +288,7 @@ function parseConstraintAndKpiResponse(
         name: c.name as string,
         value: c.value as string,
         source: "inferred" as const,
+        sourceLabel: "LLM inference (Stage 2.2)",
       }));
 
     const derivedKpis: DerivedKpi[] = obj.derived_kpis
