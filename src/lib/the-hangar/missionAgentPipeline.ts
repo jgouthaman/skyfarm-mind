@@ -62,11 +62,15 @@ export interface RunMissionAgentInput {
 
 export interface RunMissionAgentResult {
   missionId: string;
+  /** Hangar_missions.mission_code — the self-generated human-readable code (Section 16), for the Dashboard View header (Section 13.1, item 1); missionId alone is a raw UUID. */
+  missionCode: string;
   missionSpecs: Record<string, unknown>;
   constraints: unknown[];
   kpis: unknown[];
   summary: string;
   confidenceScore: number;
+  /** Not part of Section 12's core output schema — added so the Dashboard View (Section 13.1, item 6) has something to render; computed in Stage 2.1 but otherwise only ever logged to Hangar_agent_runs. */
+  validationFlags: string[];
 }
 
 export async function runMissionAgent(input: RunMissionAgentInput): Promise<RunMissionAgentResult> {
@@ -226,11 +230,13 @@ export async function runMissionAgent(input: RunMissionAgentInput): Promise<RunM
 
     return {
       missionId,
+      missionCode: mission.mission_code,
       missionSpecs: missionSpecsRecord,
       constraints: stage3.constraints,
       kpis: stage3.kpis,
       summary: stage3.summary,
       confidenceScore: stage3.confidenceScore,
+      validationFlags,
     };
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);

@@ -125,14 +125,17 @@ export const Route = createFileRoute("/api/hangar/process-mission")({
           // Section 12's I/O contract (Section 11) — snake_case at the top
           // level; constraints[]/kpis[] entries already use plain field
           // names (name/value/sources, name/target/unit/priority), no
-          // renaming needed inside those.
+          // renaming needed inside those. validation_flags is an addition
+          // beyond Section 12's core schema — see RunMissionAgentResult.
           return Response.json({
             mission_id: result.missionId,
+            mission_code: result.missionCode,
             mission_specs: result.missionSpecs,
             constraints: result.constraints,
             kpis: result.kpis,
             summary: result.summary,
             confidence_score: result.confidenceScore,
+            validation_flags: result.validationFlags,
           });
         } catch (err) {
           // Section 12.1: "No silent failures ... surfaced to the UI as a
