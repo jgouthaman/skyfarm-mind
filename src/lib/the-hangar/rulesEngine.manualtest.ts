@@ -16,7 +16,8 @@ function check(name: string, actual: unknown, expected: unknown): void {
   console.log(`${pass ? "PASS" : "FAIL"}  ${name}`);
   console.log(`      expected: ${JSON.stringify(expected)}`);
   console.log(`      actual:   ${JSON.stringify(actual)}`);
-  pass ? passCount++ : failCount++;
+  if (pass) passCount++;
+  else failCount++;
 }
 
 function checkThrows(name: string, fn: () => void, expectedMessageContains: string): void {
@@ -32,7 +33,8 @@ function checkThrows(name: string, fn: () => void, expectedMessageContains: stri
     console.log(`${pass ? "PASS" : "FAIL"}  ${name}`);
     console.log(`      expected: throws containing "${expectedMessageContains}"`);
     console.log(`      actual:   threw "${message}"`);
-    pass ? passCount++ : failCount++;
+    if (pass) passCount++;
+    else failCount++;
   }
 }
 
