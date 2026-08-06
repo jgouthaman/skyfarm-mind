@@ -84,6 +84,7 @@ import { Route as MissionHubTorqwingsDesignStudioAdvisorRouteImport } from './ro
 import { Route as DestudProjectsProjectIdRouteImport } from './routes/destud.projects.$projectId'
 import { Route as DestudDashboardExplorerRouteImport } from './routes/destud.dashboard.explorer'
 import { Route as DestudDashboardEngineerRouteImport } from './routes/destud.dashboard.engineer'
+import { Route as ApiHangarProcessMissionRouteImport } from './routes/api.hangar.process-mission'
 import { Route as LayoutLearnDroneDesignFundamentalsRouteImport } from './routes/_layout.learn.drone-design-fundamentals'
 import { Route as LayoutAuthCallbackRouteImport } from './routes/_layout.auth.callback'
 import { Route as AcademyCoursesSlugLearnRouteImport } from './routes/academy.courses.$slug.learn'
@@ -489,6 +490,11 @@ const DestudDashboardEngineerRoute = DestudDashboardEngineerRouteImport.update({
   path: '/dashboard/engineer',
   getParentRoute: () => DestudRoute,
 } as any)
+const ApiHangarProcessMissionRoute = ApiHangarProcessMissionRouteImport.update({
+  id: '/api/hangar/process-mission',
+  path: '/api/hangar/process-mission',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LayoutLearnDroneDesignFundamentalsRoute =
   LayoutLearnDroneDesignFundamentalsRouteImport.update({
     id: '/drone-design-fundamentals',
@@ -583,6 +589,7 @@ export interface FileRoutesByFullPath {
   '/the-hangar/': typeof TheHangarIndexRoute
   '/auth/callback': typeof LayoutAuthCallbackRoute
   '/learn/drone-design-fundamentals': typeof LayoutLearnDroneDesignFundamentalsRoute
+  '/api/hangar/process-mission': typeof ApiHangarProcessMissionRoute
   '/destud/dashboard/engineer': typeof DestudDashboardEngineerRoute
   '/destud/dashboard/explorer': typeof DestudDashboardExplorerRoute
   '/destud/projects/$projectId': typeof DestudProjectsProjectIdRoute
@@ -658,6 +665,7 @@ export interface FileRoutesByTo {
   '/the-hangar': typeof TheHangarIndexRoute
   '/auth/callback': typeof LayoutAuthCallbackRoute
   '/learn/drone-design-fundamentals': typeof LayoutLearnDroneDesignFundamentalsRoute
+  '/api/hangar/process-mission': typeof ApiHangarProcessMissionRoute
   '/destud/dashboard/engineer': typeof DestudDashboardEngineerRoute
   '/destud/dashboard/explorer': typeof DestudDashboardExplorerRoute
   '/destud/projects/$projectId': typeof DestudProjectsProjectIdRoute
@@ -742,6 +750,7 @@ export interface FileRoutesById {
   '/the-hangar/': typeof TheHangarIndexRoute
   '/_layout/auth/callback': typeof LayoutAuthCallbackRoute
   '/_layout/learn/drone-design-fundamentals': typeof LayoutLearnDroneDesignFundamentalsRoute
+  '/api/hangar/process-mission': typeof ApiHangarProcessMissionRoute
   '/destud/dashboard/engineer': typeof DestudDashboardEngineerRoute
   '/destud/dashboard/explorer': typeof DestudDashboardExplorerRoute
   '/destud/projects/$projectId': typeof DestudProjectsProjectIdRoute
@@ -826,6 +835,7 @@ export interface FileRouteTypes {
     | '/the-hangar/'
     | '/auth/callback'
     | '/learn/drone-design-fundamentals'
+    | '/api/hangar/process-mission'
     | '/destud/dashboard/engineer'
     | '/destud/dashboard/explorer'
     | '/destud/projects/$projectId'
@@ -901,6 +911,7 @@ export interface FileRouteTypes {
     | '/the-hangar'
     | '/auth/callback'
     | '/learn/drone-design-fundamentals'
+    | '/api/hangar/process-mission'
     | '/destud/dashboard/engineer'
     | '/destud/dashboard/explorer'
     | '/destud/projects/$projectId'
@@ -984,6 +995,7 @@ export interface FileRouteTypes {
     | '/the-hangar/'
     | '/_layout/auth/callback'
     | '/_layout/learn/drone-design-fundamentals'
+    | '/api/hangar/process-mission'
     | '/destud/dashboard/engineer'
     | '/destud/dashboard/explorer'
     | '/destud/projects/$projectId'
@@ -1018,6 +1030,7 @@ export interface RootRouteChildren {
   PilotRoute: typeof PilotRouteWithChildren
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TheHangarRoute: typeof TheHangarRouteWithChildren
+  ApiHangarProcessMissionRoute: typeof ApiHangarProcessMissionRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1547,6 +1560,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DestudDashboardEngineerRouteImport
       parentRoute: typeof DestudRoute
     }
+    '/api/hangar/process-mission': {
+      id: '/api/hangar/process-mission'
+      path: '/api/hangar/process-mission'
+      fullPath: '/api/hangar/process-mission'
+      preLoaderRoute: typeof ApiHangarProcessMissionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_layout/learn/drone-design-fundamentals': {
       id: '/_layout/learn/drone-design-fundamentals'
       path: '/drone-design-fundamentals'
@@ -1841,6 +1861,7 @@ const rootRouteChildren: RootRouteChildren = {
   PilotRoute: PilotRouteWithChildren,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TheHangarRoute: TheHangarRouteWithChildren,
+  ApiHangarProcessMissionRoute: ApiHangarProcessMissionRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
