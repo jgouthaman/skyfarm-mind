@@ -218,10 +218,26 @@ export function dedupeConstraintHints(
 
 // ── Combined LLM call: Section 4.2.1 Step 2b (constraint inference) + Step 3
 // (KPI derivation), merged into one prompt/response per the doc's efficiency
-// note. SYSTEM/USER content below is a direct merge of both of the doc's
-// verbatim templates — not a rewrite of either. ──
+// note. SYSTEM content below is a merge of both of the doc's verbatim
+// templates, plus one added sentence (last one, below) that isn't in the
+// doc: a canonical-naming requirement for the payload/range/endurance KPIs
+// specifically.
+//
+// Why: confidenceScore.ts's field_completeness term (Section 4.3.1) checks
+// derivedKpis for exact-match "payload"/"range"/"endurance" names — modeled
+// on Section 11's own example KPI names, which are exactly that clean
+// ("Payload", "Range", "Endurance"). Without this instruction, the LLM is
+// free to write "Flight endurance" or "Operational radius" instead, which
+// carries the same information but reads as 0 core fields present to an
+// exact-match check — confirmed happening on real output (18 KPIs derived,
+// field_completeness scored 0 because none matched verbatim). Fixing the
+// naming at the source keeps confidenceScore.ts's check simple/exact and
+// stable (per its own stability requirement) rather than loosening it to
+// substring/keyword matching, which would just re-introduce the same kind
+// of false-positive risk dedupeConstraintHints already had to fix once.
+// Every other KPI name stays unrestricted — only these three are pinned.
 
-const SYSTEM = `You identify constraints a mission implies but the user never stated explicitly, and derive performance, cost, and safety KPIs for the mission, in one response. Only infer a constraint if it's a reasonable, defensible consequence of the mission elements below — do not speculate broadly. Tag every constraint you return with source "inferred". For any KPI already implied directly by a listed constraint, copy that value — do not re-derive it. Only infer new KPI values where no constraint already states one. Stay within realistic bounds for a small UAS. Return JSON only.`;
+const SYSTEM = `You identify constraints a mission implies but the user never stated explicitly, and derive performance, cost, and safety KPIs for the mission, in one response. Only infer a constraint if it's a reasonable, defensible consequence of the mission elements below — do not speculate broadly. Tag every constraint you return with source "inferred". For any KPI already implied directly by a listed constraint, copy that value — do not re-derive it. Only infer new KPI values where no constraint already states one. Stay within realistic bounds for a small UAS. If you derive a KPI covering payload capacity, operational range, or flight endurance, name it exactly "Payload", "Range", or "Endurance" respectively — no other wording or qualifiers for these three. Every other KPI you derive can be named freely. Return JSON only.`;
 
 export const identifyConstraintsAndKpis = createServerFn({ method: "POST" })
   .validator((d: ConstraintIdentificationInput) => d)
