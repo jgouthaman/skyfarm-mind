@@ -31,15 +31,34 @@ export interface ParsedMissionInput {
   validationFlags: string[];
 }
 
+// Named separately from MissionReasoningResult (structurally identical to
+// the doc's inline shapes) so Stage 2.2's files — domainRules.ts,
+// constraintIdentification.ts, tradeoffPrioritization.ts — share one
+// definition instead of repeating the same inline object type in each.
+export type ConstraintSource = "user" | "regulation" | "inferred";
+
+export interface IdentifiedConstraint {
+  name: string;
+  value: string;
+  source: ConstraintSource;
+}
+
+export interface DerivedKpi {
+  name: string;
+  target: string;
+  unit: string;
+}
+
+export interface PrioritizedTradeoff {
+  item: string;
+  rationale: string;
+}
+
 export interface MissionReasoningResult {
   decomposedElements: string[];
-  identifiedConstraints: {
-    name: string;
-    value: string;
-    source: "user" | "regulation" | "inferred";
-  }[];
-  derivedKpis: { name: string; target: string; unit: string }[];
-  prioritizedTradeoffs: { item: string; rationale: string }[];
+  identifiedConstraints: IdentifiedConstraint[];
+  derivedKpis: DerivedKpi[];
+  prioritizedTradeoffs: PrioritizedTradeoff[];
 }
 
 export interface MissionSpec {

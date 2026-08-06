@@ -1,12 +1,10 @@
 import { createServerFn } from "@tanstack/react-start";
+import { callLlmGateway, stripJsonFences } from "./llmGateway.ts";
 
 // Stage 2.1, Step 2 (MissionAgent.md Section 4.1.1) — combined intent
 // understanding + entity extraction, one LLM call covering both, not two
-// round trips. Follows the same pattern as src/lib/design-studio/advisor.functions.ts
-// (the closest precedent in this codebase — there is no ModelProvider
-// interface here to adapt to; none exists anywhere in the repo): a
-// TanStack `createServerFn` that calls the Lovable AI gateway directly,
-// with a mock fallback when no API key is configured.
+// round trips. Uses the shared callLlmGateway helper (llmGateway.ts) for
+// the actual fetch/mock-fallback plumbing.
 //
 // Note on the prompt below: Section 4.1.1 describes this step's input,
 // merge rule, and exact output shape (`{ intent, payload_hint, range_hint,
@@ -35,7 +33,6 @@ export interface IntentExtractionResult {
 export const extractIntentAndEntities = createServerFn({ method: "POST" })
   .validator((d: IntentExtractionInput) => d)
   .handler(async ({ data }): Promise<IntentExtractionResult> => {
-    const key = process.env.LOVABLE_API_KEY;
     const userContent = `Raw mission text: ${data.rawTextCombined}
 Structured fields already provided (do not re-derive these): ${JSON.stringify(data.structuredFields ?? {}, null, 2)}
 Grounding context (from imported project / selected regulations / market data, if any): ${JSON.stringify(data.groundingContext ?? {}, null, 2)}
@@ -43,46 +40,15 @@ Grounding context (from imported project / selected regulations / market data, i
 Return:
 { "intent": "string", "payload_hint": "string | null", "range_hint": "string | null", "endurance_hint": "string | null", "constraint_hints": ["string"] }`;
 
-    if (!key) {
-      return { ...mockExtraction(data), mock: true };
-    }
+    const { content } = await callLlmGateway(SYSTEM, userContent, { jsonMode: true });
+    if (!content) return { ...mockExtraction(data), mock: true };
 
-    try {
-      const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "google/gemini-3-flash-preview",
-          messages: [
-            { role: "system", content: SYSTEM },
-            { role: "user", content: userContent },
-          ],
-          response_format: { type: "json_object" },
-        }),
-      });
-      if (!res.ok) {
-        return { ...mockExtraction(data), mock: true };
-      }
-      const json = await res.json();
-      const raw = json?.choices?.[0]?.message?.content;
-      const parsed = parseExtractionResponse(raw);
-      if (!parsed) return { ...mockExtraction(data), mock: true };
-      return { ...parsed, mock: false };
-    } catch {
-      return { ...mockExtraction(data), mock: true };
-    }
+    const parsed = parseExtractionResponse(content);
+    if (!parsed) return { ...mockExtraction(data), mock: true };
+    return { ...parsed, mock: false };
   });
 
-function stripJsonFences(text: string): string {
-  return text
-    .trim()
-    .replace(/^```(?:json)?\s*/i, "")
-    .replace(/```\s*$/i, "")
-    .trim();
-}
-
-function parseExtractionResponse(raw: unknown): Omit<IntentExtractionResult, "mock"> | null {
-  if (typeof raw !== "string") return null;
+function parseExtractionResponse(raw: string): Omit<IntentExtractionResult, "mock"> | null {
   try {
     const obj = JSON.parse(stripJsonFences(raw));
     if (typeof obj.intent !== "string") return null;
