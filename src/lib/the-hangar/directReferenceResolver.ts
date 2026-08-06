@@ -7,12 +7,10 @@ import type { MissionSourceInput, MissionSpec } from "./types/hangar-mission";
 // via checkboxes/imports, there's nothing to "understand" — they just need
 // fetching. No LLM involved.
 //
-// The Hangar_* tables below (Section 10) don't exist in Supabase yet — per
-// Section 10.2, they land only after the dev/prod split, which the doc
-// calls out as non-negotiable and explicitly "before, not after." This file
-// is written against the spec'd schema so the logic is ready the moment
-// those tables exist; until then, calls here will fail at runtime with a
-// Postgres "relation does not exist" error, which is expected.
+// The Hangar_* tables below (Section 10) exist live in Supabase (project
+// wwauhupegnczmyfnnqjy) with RLS enabled — Phase 1 ran directly against the
+// shared project; the dev/prod split Section 10.2 describes was deliberately
+// deferred pre-launch, a decision made outside this doc.
 //
 // Because the tables aren't in the generated `Database` type yet, the
 // admin client is cast to an untyped shape locally. Drop this cast once
