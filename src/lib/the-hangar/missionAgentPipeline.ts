@@ -5,6 +5,7 @@ import { prioritizeTradeoffs } from "./tradeoffPrioritization.ts";
 import { runOutputGeneration } from "./stage3Orchestrator.ts";
 import { resolveDirectReferences } from "./directReferenceResolver.ts";
 import { parseNaturalLanguageAndFormSources } from "./missionSourceParsing.ts";
+import { hasUsableContent, computeValidationFlags } from "./missionInputValidation.ts";
 import {
   createMission,
   getMission,
@@ -41,6 +42,17 @@ export class MissionAgentError extends Error {
   }
 }
 
+// Section 12.1: "Validate before calling the LLM, not after ... so a bad
+// submission fails fast without burning an API call." Thrown before any
+// Hangar_missions row is touched — there's nothing to attach a stage log
+// to yet, unlike MissionAgentError which always has a real missionId.
+export class InvalidMissionInputError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "InvalidMissionInputError";
+  }
+}
+
 export interface RunMissionAgentInput {
   userId: string;
   /** Omit to create a new Hangar_missions row; pass an existing id to attach to it (Section 4.4.1's persistence step). */
@@ -61,6 +73,12 @@ export async function runMissionAgent(input: RunMissionAgentInput): Promise<RunM
   const { userId, sources } = input;
   const { rawTextCombined, structuredFields, sourceTypesUsed } =
     parseNaturalLanguageAndFormSources(sources);
+
+  if (!hasUsableContent(rawTextCombined, structuredFields)) {
+    throw new InvalidMissionInputError(
+      "Sources contain no usable content (no natural language/document text and no requirements form fields) — rejected before calling the LLM.",
+    );
+  }
 
   // Ordering requirement (Section 12.1): the mission row exists before the
   // pipeline runs, not created inside it — mirrored here as "attach to an
@@ -97,11 +115,18 @@ export async function runMissionAgent(input: RunMissionAgentInput): Promise<RunM
         },
       },
     });
+
+    // Section 4.1.1 Step 4 — validates the merged entities, catches LLM
+    // hallucinations (e.g. a payload_hint of 500000kg per the doc's own
+    // example). Never rejects the mission; feeds confidence_score's real
+    // validationFlagCount below instead of the hardcoded 0 this used to be.
+    const validationFlags = computeValidationFlags(extraction, structuredFields);
+
     await logStageRun(
       missionId,
       "input_processing",
       { rawTextCombined, structuredFields, attachedRegulations: directRefs.attachedRegulations },
-      extraction,
+      { ...extraction, validationFlags },
       "success",
       Date.now() - start,
     );
@@ -146,11 +171,7 @@ export async function runMissionAgent(input: RunMissionAgentInput): Promise<RunM
         missionId,
         detectedIntent: extraction.intent,
         sourceTypesUsedCount: sourceTypesUsed.length,
-        // TODO: wire rulesEngine.ts's validateRange/flagMissingRequired
-        // against the merged entities once Stage 2.1's intake actually
-        // runs them — Section 4.1's rules-engine validation isn't called
-        // anywhere in this pipeline yet, so this is always 0 today.
-        validationFlagCount: 0,
+        validationFlagCount: validationFlags.length,
         operatingEnvironment:
           typeof structuredFields.operating_environment === "string"
             ? structuredFields.operating_environment

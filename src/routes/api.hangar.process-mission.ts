@@ -1,7 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
-import { runMissionAgent, MissionAgentError } from "@/lib/the-hangar/missionAgentPipeline";
+import {
+  runMissionAgent,
+  MissionAgentError,
+  InvalidMissionInputError,
+} from "@/lib/the-hangar/missionAgentPipeline";
 import type { MissionSourceInput, SourceType } from "@/lib/the-hangar/types/hangar-mission";
 
 // Stage 2.4 (MissionAgent.md Section 4.4, Section 12.1) — the actual HTTP
@@ -137,6 +141,12 @@ export const Route = createFileRoute("/api/hangar/process-mission")({
           // flipped Hangar_missions.status to 'error' before this catch —
           // this is just the clean response back to the caller, never a
           // raw exception/stack trace.
+          if (err instanceof InvalidMissionInputError) {
+            // Section 12.1: rejected before any Hangar_missions row was
+            // created — a 400, not a 500, since nothing broke, the
+            // request just had nothing usable in it.
+            return jsonError(400, err.message);
+          }
           if (err instanceof MissionAgentError) {
             return jsonError(500, err.message, err.missionId);
           }
