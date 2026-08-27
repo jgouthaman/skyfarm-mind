@@ -542,6 +542,9 @@ confidence_score ┘
     { "name": "Payload", "target": "25", "unit": "kg", "priority": "critical" },
     { "name": "Endurance", "target": "90", "unit": "min", "priority": 2 }
   ],
+  "prioritized_tradeoffs": [
+    { "item": "Prioritize payload capacity over range", "rationale": "Mission brief specifies heavy sensor payload as primary requirement" }
+  ],
   "summary": "string",
   "confidence_score": 0.92
 }
@@ -1263,6 +1266,9 @@ Hangar does **not** read, write, or depend on `Destud_user` in any way — no sh
   ],
   "kpis": [
     { "name": "string", "target": "string", "unit": "string", "priority": "critical | number" }
+  ],
+  "prioritized_tradeoffs": [
+    { "item": "string", "rationale": "string" }
   ],
   "summary": "string",
   "confidence_score": 0.92
