@@ -92,7 +92,10 @@ export async function getMission(missionId: string): Promise<HangarMissionRow | 
 // directReferenceResolver.ts's own separate local cast; not merged into
 // `db` to keep that one's type matching exactly what the write-path
 // functions above already use.
-type ListQueryResult = Promise<{ data: Record<string, unknown>[] | null; error: { message: string } | null }>;
+type ListQueryResult = Promise<{
+  data: Record<string, unknown>[] | null;
+  error: { message: string } | null;
+}>;
 
 const listDb = supabaseAdmin as unknown as {
   from: (table: string) => {
@@ -132,14 +135,50 @@ export async function listUserMissions(userId: string): Promise<HangarMissionRow
   return (data ?? []) as unknown as HangarMissionRow[];
 }
 
-export async function getSpecsForMissions(missionIds: string[]): Promise<HangarMissionSpecSummary[]> {
+// Batched across mission_ids, so a flat order/limit(1) would only cap the
+// total row count, not cap it per mission. PostgREST has no DISTINCT ON —
+// supabase-js's query builder can't express it — so this orders
+// (mission_id, version desc) at the DB level, same as `distinct on
+// (mission_id) ... order by mission_id, version desc` would, then keeps
+// only the first row seen per mission_id client-side, which is exactly
+// that first-per-group row once the DB has already sorted it there. No
+// behavior change today, since every mission_id currently has exactly one
+// version — this only matters once one accumulates more than one.
+const orderedListDb = supabaseAdmin as unknown as {
+  from: (table: string) => {
+    select: (columns: string) => {
+      in: (
+        column: string,
+        values: string[],
+      ) => {
+        order: (
+          column: string,
+          opts: { ascending: boolean },
+        ) => {
+          order: (column: string, opts: { ascending: boolean }) => ListQueryResult;
+        };
+      };
+    };
+  };
+};
+
+export async function getSpecsForMissions(
+  missionIds: string[],
+): Promise<HangarMissionSpecSummary[]> {
   if (missionIds.length === 0) return [];
-  const { data, error } = await listDb
+  const { data, error } = await orderedListDb
     .from("Hangar_mission_specs")
     .select("mission_id,mission_specs,constraints,kpis,summary,confidence_score")
-    .in("mission_id", missionIds);
+    .in("mission_id", missionIds)
+    .order("mission_id", { ascending: true })
+    .order("version", { ascending: false });
   if (error) throw new Error(`getSpecsForMissions: ${error.message}`);
-  return (data ?? []) as unknown as HangarMissionSpecSummary[];
+  const latestByMission = new Map<string, Record<string, unknown>>();
+  for (const row of data ?? []) {
+    const missionId = row.mission_id as string;
+    if (!latestByMission.has(missionId)) latestByMission.set(missionId, row);
+  }
+  return Array.from(latestByMission.values()) as unknown as HangarMissionSpecSummary[];
 }
 
 // The original brief only lives in each mission's input_processing
@@ -147,7 +186,9 @@ export async function getSpecsForMissions(missionIds: string[]): Promise<HangarM
 // and Hangar_mission_specs never store it directly. Best-effort: a mission
 // with no successful input_processing row (e.g. it failed before logging)
 // just won't have a brief in the returned map.
-export async function getOriginalBriefsForMissions(missionIds: string[]): Promise<Map<string, string>> {
+export async function getOriginalBriefsForMissions(
+  missionIds: string[],
+): Promise<Map<string, string>> {
   const briefs = new Map<string, string>();
   if (missionIds.length === 0) return briefs;
   const { data, error } = await listDb
@@ -177,11 +218,22 @@ export async function updateMissionStatus(
   if (error) throw new Error(`updateMissionStatus: ${error.message}`);
 }
 
+// version was previously hardcoded to 1 — wrong as soon as a mission is
+// persisted more than once (e.g. Section 13.2's "Edit and regenerate"
+// resubmits the same mission_id). get_next_mission_spec_version(p_mission_id)
+// is the source of truth for the next version number for this mission_id.
+async function getNextMissionSpecVersion(missionId: string): Promise<number> {
+  const { data, error } = await (
+    supabaseAdmin as unknown as {
+      rpc: (fn: string, args: { p_mission_id: string }) => DbResult<number>;
+    }
+  ).rpc("get_next_mission_spec_version", { p_mission_id: missionId });
+  if (error) throw new Error(`getNextMissionSpecVersion: ${error.message}`);
+  return data;
+}
+
 // Stage 2.4, component #0 (Section 4.4.1) — Persistence, the prerequisite
-// that blocks everything else. version is hardcoded to 1: every mission
-// this pipeline handles today is its first generation — Section 13.2's
-// "Edit and regenerate" -> version 2 flow is a dashboard/review-step
-// feature that doesn't exist yet (Stage 2.4 is backend-only, no UI wired).
+// that blocks everything else.
 export async function persistMissionSpec(
   missionId: string,
   spec: {
@@ -192,11 +244,12 @@ export async function persistMissionSpec(
     confidenceScore: number;
   },
 ): Promise<HangarMissionSpecRow> {
+  const version = await getNextMissionSpecVersion(missionId);
   const { data, error } = await db
     .from("Hangar_mission_specs")
     .insert({
       mission_id: missionId,
-      version: 1,
+      version,
       mission_specs: spec.missionSpecs,
       constraints: spec.constraints,
       kpis: spec.kpis,
