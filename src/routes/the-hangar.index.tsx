@@ -1,26 +1,29 @@
 import { useEffect, useRef, useState } from "react";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { supabase } from "@/integrations/supabase/client";
 
 // ─────────────────────────────────────────────────────────────────────────
 // The Hangar — public landing page. Faithful port of the-hangar-landing-page.html
 // (reference mockup) into React + TanStack Router. Fully isolated: no
 // imports from destud-auth.ts, destud-designs.ts, or any /destud component.
 //
-// Flight Deck submit is the SAME placeholder credential check the mockup
-// shipped with (h@gmail.com / 63589) — per explicit instruction, this stays
-// a hardcoded client-side stub for today's demo, not real auth against
-// destud_users. Session is tracked under sessionStorage key "hangar_session"
-// — a distinct key from destud's "destud_user", so the two never interact.
+// Flight Deck submit is a real supabase.auth.signInWithPassword() call —
+// same pattern as useMissionHubLogin.ts, the only other real email/password
+// sign-in in this codebase. Chosen over signInWithOAuth() because the modal
+// already has email + password fields, not a provider button; swapping the
+// credential check in place needed no UI restructuring. On success this
+// creates a real Supabase session (so /the-hangar/mission's Authorization:
+// Bearer token check succeeds) AND still sets sessionStorage key
+// "hangar_session" (the-hangar/mission's own session.ts guard reads only
+// that, not the Supabase session, so both are required) — a distinct key
+// from destud's "destud_user", so the two never interact.
 // ─────────────────────────────────────────────────────────────────────────
 
 export const Route = createFileRoute("/the-hangar/")({
   component: TheHangarLanding,
 });
 
-const STUB_EMAIL = "h@gmail.com";
-const STUB_PASSWORD = "63589";
-
-type FlightDeckStatus = "form" | "denied" | "success";
+type FlightDeckStatus = "form" | "submitting" | "denied" | "success";
 
 function TheHangarLanding() {
   const navigate = useNavigate();
@@ -28,14 +31,44 @@ function TheHangarLanding() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [status, setStatus] = useState<FlightDeckStatus>("form");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [currentUserEmail, setCurrentUserEmail] = useState<string | null>(null);
+  // Bumped on every arrival at this page — a fresh route mount (coming from
+  // another page) already replays the doors' CSS animation for free, but
+  // clicking the brand link back to "/the-hangar" while already ON this
+  // route (e.g. from a #stack/#how/#agents scroll position) doesn't remount
+  // anything on its own, so the door elements never get a new mount to
+  // animate. Keying .hgr-doors off this forces that remount every time.
+  const [doorsKey, setDoorsKey] = useState(0);
   const emailRef = useRef<HTMLInputElement>(null);
+
+  // Reflects whatever real Supabase session already exists (e.g. a return
+  // visit after a prior Flight Deck sign-in) as well as one just created by
+  // the modal below — same session the mission API's Bearer check reads.
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      setCurrentUserEmail(data.session?.user.email ?? null);
+    });
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setCurrentUserEmail(session?.user.email ?? null);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
 
   function openFlightDeck() {
     setModalOpen(true);
     setStatus("form");
+    setErrorMessage(null);
     setEmail("");
     setPassword("");
     setTimeout(() => emailRef.current?.focus(), 150);
+  }
+
+  async function signOutOfHangar() {
+    await supabase.auth.signOut();
+    sessionStorage.removeItem("hangar_session");
   }
 
   function closeFlightDeck() {
@@ -43,17 +76,29 @@ function TheHangarLanding() {
     setStatus("form");
   }
 
-  function submitFlightDeck(e: React.FormEvent) {
+  async function submitFlightDeck(e: React.FormEvent) {
     e.preventDefault();
+    if (status === "submitting") return;
     const normalizedEmail = email.trim().toLowerCase();
     const normalizedPassword = password.trim();
-    if (normalizedEmail === STUB_EMAIL && normalizedPassword === STUB_PASSWORD) {
-      setStatus("success");
-      sessionStorage.setItem("hangar_session", "granted");
-      setTimeout(() => navigate({ to: "/the-hangar/welcome" }), 1100);
-    } else {
+
+    setStatus("submitting");
+    setErrorMessage(null);
+
+    const { error } = await supabase.auth.signInWithPassword({
+      email: normalizedEmail,
+      password: normalizedPassword,
+    });
+
+    if (error) {
       setStatus("denied");
+      setErrorMessage(error.message);
+      return;
     }
+
+    setStatus("success");
+    sessionStorage.setItem("hangar_session", "granted");
+    setTimeout(() => navigate({ to: "/the-hangar/welcome" }), 1100);
   }
 
   useEffect(() => {
@@ -71,31 +116,46 @@ function TheHangarLanding() {
 
       <nav>
         <div className="hgr-wrap">
-          <div className="hgr-brand">
+          <Link
+            to="/the-hangar"
+            className="hgr-brand"
+            style={{ textDecoration: "none" }}
+            onClick={() => setDoorsKey((k) => k + 1)}
+          >
             <span className="hgr-torq">TORQWINGS</span><span className="hgr-sep">/</span><span className="hgr-hangar-word">The Hangar</span>
-          </div>
+          </Link>
           <div className="hgr-navlinks">
             <a href="#agents">Agents</a>
             <a href="#how">How it works</a>
             <a href="#stack">Stack</a>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-            <button
-              type="button"
-              className="hgr-btn hgr-btn-ghost"
-              aria-label="Sign in to your TorqWings account"
-              title="Sign in"
-              onClick={openFlightDeck}
-            >
-              Flight Deck
-            </button>
-            <a href="#access" className="hgr-btn hgr-btn-amber">Request Access</a>
+            {currentUserEmail ? (
+              <>
+                <Link to="/the-hangar/welcome" className="hgr-btn hgr-btn-ghost">
+                  Welcome, {currentUserEmail}
+                </Link>
+                <button type="button" className="hgr-btn hgr-btn-ghost" onClick={signOutOfHangar}>
+                  Sign out
+                </button>
+              </>
+            ) : (
+              <button
+                type="button"
+                className="hgr-btn hgr-btn-ghost"
+                aria-label="Sign in to your TorqWings account"
+                title="Sign in"
+                onClick={openFlightDeck}
+              >
+                Flight Deck
+              </button>
+            )}
           </div>
         </div>
       </nav>
 
       <header className="hgr-hero">
-        <div className="hgr-doors">
+        <div className="hgr-doors" key={doorsKey}>
           <div className="hgr-door hgr-door-left" />
           <div className="hgr-door hgr-door-right" />
         </div>
@@ -105,7 +165,6 @@ function TheHangarLanding() {
           BUILD: TORQWINGS
         </div>
         <div className="hgr-wrap hgr-hero-inner">
-          <div className="hgr-eyebrow"><span className="hgr-dot" />Under construction — internal build</div>
           <h1>Fifteen specialist agents.<br />One <span className="hgr-accent">aerospace design engine.</span></h1>
           <p className="hgr-sub">The Hangar houses every AI agent TorqWings has built for autonomous aerial platform design — from mission definition through CFD, structural validation, and certification. Each one does a single job, gates before it scores, and hands off clean data to the next.</p>
           <div className="hgr-ctas">
@@ -151,7 +210,7 @@ function TheHangarLanding() {
         <div className="hgr-wrap">
           <div className="hgr-section-head">
             <div className="hgr-kicker">The fleet</div>
-            <h2>Fifteen bays. Fifteen specialists.</h2>
+            <h2>Fifteen bays. Fifteen specialists Agents.</h2>
             <p>Each agent owns exactly one stage of the design lifecycle, reads from a shared memory layer, and writes its output where the next agent — human or machine — can pick it up.</p>
           </div>
 
@@ -230,15 +289,6 @@ function TheHangarLanding() {
         </div>
       </section>
 
-      <section className="hgr-cta" id="access">
-        <div className="hgr-wrap">
-          <div className="hgr-kicker" style={{ justifyContent: "center", display: "flex" }}>Early access</div>
-          <h2>The Hangar is being built in the open, one bay at a time.</h2>
-          <p>Currently rolling out behind DeStud. Get on the list for early access as each bay comes online.</p>
-          <a href="mailto:support@torqwings.com?subject=The%20Hangar%20—%20Early%20Access" className="hgr-btn hgr-btn-amber">Request Early Access</a>
-        </div>
-      </section>
-
       <footer>
         <div className="hgr-wrap">
           <div className="hgr-f-brand">TORQWINGS <span style={{ color: "var(--hgr-blue-line)" }}>/</span> The Hangar</div>
@@ -270,12 +320,13 @@ function TheHangarLanding() {
 
               <form onSubmit={submitFlightDeck}>
                 <div className="hgr-fd-field">
-                  <label htmlFor="fdEmail">Callsign (email)</label>
+                  <label htmlFor="fdEmail">Email</label>
                   <input
                     ref={emailRef}
                     type="email" id="fdEmail" required placeholder="you@torqwings.com" autoComplete="username"
                     value={email}
-                    onChange={(e) => { setEmail(e.target.value); setStatus("form"); }}
+                    disabled={status === "submitting"}
+                    onChange={(e) => { setEmail(e.target.value); setStatus("form"); setErrorMessage(null); }}
                   />
                 </div>
                 <div className="hgr-fd-field">
@@ -283,15 +334,22 @@ function TheHangarLanding() {
                   <input
                     type="password" id="fdPass" required placeholder="••••••••" autoComplete="current-password"
                     value={password}
-                    onChange={(e) => { setPassword(e.target.value); setStatus("form"); }}
+                    disabled={status === "submitting"}
+                    onChange={(e) => { setPassword(e.target.value); setStatus("form"); setErrorMessage(null); }}
                   />
                 </div>
                 {status === "denied" && (
                   <div style={{ color: "var(--hgr-amber)", fontSize: 12.5, fontFamily: "'IBM Plex Mono',monospace", marginBottom: 14 }}>
-                    ACCESS DENIED — check callsign and access code.
+                    ACCESS DENIED — {errorMessage ?? "check email and access code."}
                   </div>
                 )}
-                <button type="submit" className="hgr-btn hgr-btn-amber hgr-fd-submit">Enter The Hangar →</button>
+                <button
+                  type="submit"
+                  className="hgr-btn hgr-btn-amber hgr-fd-submit"
+                  disabled={status === "submitting"}
+                >
+                  {status === "submitting" ? "Signing in…" : "Enter The Hangar →"}
+                </button>
               </form>
 
               <div className="hgr-fd-foot">New here? <a href="#access" onClick={closeFlightDeck}>Request early access</a></div>
@@ -299,7 +357,7 @@ function TheHangarLanding() {
           ) : (
             <div className="hgr-fd-success" style={{ display: "block" }}>
               <div className="hgr-fd-success-badge">✓</div>
-              <h3>Clearance granted</h3>
+              <h3>Access Granted</h3>
               <p>Taking you into the Hangar…</p>
             </div>
           )}
@@ -388,6 +446,7 @@ const HGR_LANDING_CSS = `
 }
 .hgr-btn-amber{ background:var(--hgr-amber); color:var(--hgr-navy-deep); }
 .hgr-btn-amber:hover{ background:var(--hgr-amber-bright); }
+.hgr-btn:disabled{ opacity:.55; cursor:not-allowed; }
 .hgr-btn-ghost{ border-color:var(--hgr-hairline); color:var(--hgr-paper); background:transparent; }
 .hgr-btn-ghost:hover{ border-color:var(--hgr-blue-bright); color:var(--hgr-blue-bright); }
 
@@ -560,6 +619,7 @@ const HGR_LANDING_CSS = `
   transition:border-color .15s;
 }
 .hgr-fd-field input:focus{ border-color:var(--hgr-blue-bright); }
+.hgr-fd-field input:disabled{ opacity:.5; }
 .hgr-fd-submit{ width:100%; justify-content:center; margin-top:6px; font-size:13.5px; padding:13px 20px; }
 .hgr-fd-foot{ margin-top:20px; text-align:center; font-size:13px; color:var(--hgr-paper-dim); }
 .hgr-fd-foot a{ color:var(--hgr-blue-bright); text-decoration:none; }

@@ -84,9 +84,14 @@ import { Route as MissionHubTorqwingsDesignStudioAdvisorRouteImport } from './ro
 import { Route as DestudProjectsProjectIdRouteImport } from './routes/destud.projects.$projectId'
 import { Route as DestudDashboardExplorerRouteImport } from './routes/destud.dashboard.explorer'
 import { Route as DestudDashboardEngineerRouteImport } from './routes/destud.dashboard.engineer'
-import { Route as ApiHangarProcessMissionRouteImport } from './routes/api.hangar.process-mission'
+import { Route as ApiHangarMissionsRouteImport } from './routes/api.hangar.missions'
 import { Route as LayoutLearnDroneDesignFundamentalsRouteImport } from './routes/_layout.learn.drone-design-fundamentals'
 import { Route as LayoutAuthCallbackRouteImport } from './routes/_layout.auth.callback'
+import { Route as ApiHangarProcessMissionReasoningPlanningRouteImport } from './routes/api.hangar.process-mission.reasoning-planning'
+import { Route as ApiHangarProcessMissionOutputInterfaceRouteImport } from './routes/api.hangar.process-mission.output-interface'
+import { Route as ApiHangarProcessMissionOutputGenerationRouteImport } from './routes/api.hangar.process-mission.output-generation'
+import { Route as ApiHangarProcessMissionInputProcessingRouteImport } from './routes/api.hangar.process-mission.input-processing'
+import { Route as ApiHangarProcessMissionFinalizeRouteImport } from './routes/api.hangar.process-mission.finalize'
 import { Route as AcademyCoursesSlugLearnRouteImport } from './routes/academy.courses.$slug.learn'
 import { Route as AcademyModuleModuleIdQuizQuizIdRouteImport } from './routes/academy.module.$moduleId.quiz.$quizId'
 import { Route as AcademyModuleModuleIdLessonLessonIdRouteImport } from './routes/academy.module.$moduleId.lesson.$lessonId'
@@ -490,9 +495,9 @@ const DestudDashboardEngineerRoute = DestudDashboardEngineerRouteImport.update({
   path: '/dashboard/engineer',
   getParentRoute: () => DestudRoute,
 } as any)
-const ApiHangarProcessMissionRoute = ApiHangarProcessMissionRouteImport.update({
-  id: '/api/hangar/process-mission',
-  path: '/api/hangar/process-mission',
+const ApiHangarMissionsRoute = ApiHangarMissionsRouteImport.update({
+  id: '/api/hangar/missions',
+  path: '/api/hangar/missions',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LayoutLearnDroneDesignFundamentalsRoute =
@@ -506,6 +511,36 @@ const LayoutAuthCallbackRoute = LayoutAuthCallbackRouteImport.update({
   path: '/auth/callback',
   getParentRoute: () => LayoutRoute,
 } as any)
+const ApiHangarProcessMissionReasoningPlanningRoute =
+  ApiHangarProcessMissionReasoningPlanningRouteImport.update({
+    id: '/api/hangar/process-mission/reasoning-planning',
+    path: '/api/hangar/process-mission/reasoning-planning',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiHangarProcessMissionOutputInterfaceRoute =
+  ApiHangarProcessMissionOutputInterfaceRouteImport.update({
+    id: '/api/hangar/process-mission/output-interface',
+    path: '/api/hangar/process-mission/output-interface',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiHangarProcessMissionOutputGenerationRoute =
+  ApiHangarProcessMissionOutputGenerationRouteImport.update({
+    id: '/api/hangar/process-mission/output-generation',
+    path: '/api/hangar/process-mission/output-generation',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiHangarProcessMissionInputProcessingRoute =
+  ApiHangarProcessMissionInputProcessingRouteImport.update({
+    id: '/api/hangar/process-mission/input-processing',
+    path: '/api/hangar/process-mission/input-processing',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiHangarProcessMissionFinalizeRoute =
+  ApiHangarProcessMissionFinalizeRouteImport.update({
+    id: '/api/hangar/process-mission/finalize',
+    path: '/api/hangar/process-mission/finalize',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AcademyCoursesSlugLearnRoute = AcademyCoursesSlugLearnRouteImport.update({
   id: '/courses/$slug/learn',
   path: '/courses/$slug/learn',
@@ -589,7 +624,7 @@ export interface FileRoutesByFullPath {
   '/the-hangar/': typeof TheHangarIndexRoute
   '/auth/callback': typeof LayoutAuthCallbackRoute
   '/learn/drone-design-fundamentals': typeof LayoutLearnDroneDesignFundamentalsRoute
-  '/api/hangar/process-mission': typeof ApiHangarProcessMissionRoute
+  '/api/hangar/missions': typeof ApiHangarMissionsRoute
   '/destud/dashboard/engineer': typeof DestudDashboardEngineerRoute
   '/destud/dashboard/explorer': typeof DestudDashboardExplorerRoute
   '/destud/projects/$projectId': typeof DestudProjectsProjectIdRoute
@@ -609,6 +644,11 @@ export interface FileRoutesByFullPath {
   '/mission-hub/torqwings-design-studio/': typeof MissionHubTorqwingsDesignStudioIndexRoute
   '/pilot/missions/': typeof PilotMissionsIndexRoute
   '/academy/courses/$slug/learn': typeof AcademyCoursesSlugLearnRoute
+  '/api/hangar/process-mission/finalize': typeof ApiHangarProcessMissionFinalizeRoute
+  '/api/hangar/process-mission/input-processing': typeof ApiHangarProcessMissionInputProcessingRoute
+  '/api/hangar/process-mission/output-generation': typeof ApiHangarProcessMissionOutputGenerationRoute
+  '/api/hangar/process-mission/output-interface': typeof ApiHangarProcessMissionOutputInterfaceRoute
+  '/api/hangar/process-mission/reasoning-planning': typeof ApiHangarProcessMissionReasoningPlanningRoute
   '/academy/courses/$slug/modules/$moduleId': typeof AcademyCoursesSlugModulesModuleIdRoute
   '/academy/module/$moduleId/lesson/$lessonId': typeof AcademyModuleModuleIdLessonLessonIdRoute
   '/academy/module/$moduleId/quiz/$quizId': typeof AcademyModuleModuleIdQuizQuizIdRoute
@@ -665,7 +705,7 @@ export interface FileRoutesByTo {
   '/the-hangar': typeof TheHangarIndexRoute
   '/auth/callback': typeof LayoutAuthCallbackRoute
   '/learn/drone-design-fundamentals': typeof LayoutLearnDroneDesignFundamentalsRoute
-  '/api/hangar/process-mission': typeof ApiHangarProcessMissionRoute
+  '/api/hangar/missions': typeof ApiHangarMissionsRoute
   '/destud/dashboard/engineer': typeof DestudDashboardEngineerRoute
   '/destud/dashboard/explorer': typeof DestudDashboardExplorerRoute
   '/destud/projects/$projectId': typeof DestudProjectsProjectIdRoute
@@ -685,6 +725,11 @@ export interface FileRoutesByTo {
   '/mission-hub/torqwings-design-studio': typeof MissionHubTorqwingsDesignStudioIndexRoute
   '/pilot/missions': typeof PilotMissionsIndexRoute
   '/academy/courses/$slug/learn': typeof AcademyCoursesSlugLearnRoute
+  '/api/hangar/process-mission/finalize': typeof ApiHangarProcessMissionFinalizeRoute
+  '/api/hangar/process-mission/input-processing': typeof ApiHangarProcessMissionInputProcessingRoute
+  '/api/hangar/process-mission/output-generation': typeof ApiHangarProcessMissionOutputGenerationRoute
+  '/api/hangar/process-mission/output-interface': typeof ApiHangarProcessMissionOutputInterfaceRoute
+  '/api/hangar/process-mission/reasoning-planning': typeof ApiHangarProcessMissionReasoningPlanningRoute
   '/academy/courses/$slug/modules/$moduleId': typeof AcademyCoursesSlugModulesModuleIdRoute
   '/academy/module/$moduleId/lesson/$lessonId': typeof AcademyModuleModuleIdLessonLessonIdRoute
   '/academy/module/$moduleId/quiz/$quizId': typeof AcademyModuleModuleIdQuizQuizIdRoute
@@ -750,7 +795,7 @@ export interface FileRoutesById {
   '/the-hangar/': typeof TheHangarIndexRoute
   '/_layout/auth/callback': typeof LayoutAuthCallbackRoute
   '/_layout/learn/drone-design-fundamentals': typeof LayoutLearnDroneDesignFundamentalsRoute
-  '/api/hangar/process-mission': typeof ApiHangarProcessMissionRoute
+  '/api/hangar/missions': typeof ApiHangarMissionsRoute
   '/destud/dashboard/engineer': typeof DestudDashboardEngineerRoute
   '/destud/dashboard/explorer': typeof DestudDashboardExplorerRoute
   '/destud/projects/$projectId': typeof DestudProjectsProjectIdRoute
@@ -770,6 +815,11 @@ export interface FileRoutesById {
   '/mission-hub/torqwings-design-studio/': typeof MissionHubTorqwingsDesignStudioIndexRoute
   '/pilot/missions/': typeof PilotMissionsIndexRoute
   '/academy/courses/$slug/learn': typeof AcademyCoursesSlugLearnRoute
+  '/api/hangar/process-mission/finalize': typeof ApiHangarProcessMissionFinalizeRoute
+  '/api/hangar/process-mission/input-processing': typeof ApiHangarProcessMissionInputProcessingRoute
+  '/api/hangar/process-mission/output-generation': typeof ApiHangarProcessMissionOutputGenerationRoute
+  '/api/hangar/process-mission/output-interface': typeof ApiHangarProcessMissionOutputInterfaceRoute
+  '/api/hangar/process-mission/reasoning-planning': typeof ApiHangarProcessMissionReasoningPlanningRoute
   '/academy/courses/$slug/modules/$moduleId': typeof AcademyCoursesSlugModulesModuleIdRoute
   '/academy/module/$moduleId/lesson/$lessonId': typeof AcademyModuleModuleIdLessonLessonIdRoute
   '/academy/module/$moduleId/quiz/$quizId': typeof AcademyModuleModuleIdQuizQuizIdRoute
@@ -835,7 +885,7 @@ export interface FileRouteTypes {
     | '/the-hangar/'
     | '/auth/callback'
     | '/learn/drone-design-fundamentals'
-    | '/api/hangar/process-mission'
+    | '/api/hangar/missions'
     | '/destud/dashboard/engineer'
     | '/destud/dashboard/explorer'
     | '/destud/projects/$projectId'
@@ -855,6 +905,11 @@ export interface FileRouteTypes {
     | '/mission-hub/torqwings-design-studio/'
     | '/pilot/missions/'
     | '/academy/courses/$slug/learn'
+    | '/api/hangar/process-mission/finalize'
+    | '/api/hangar/process-mission/input-processing'
+    | '/api/hangar/process-mission/output-generation'
+    | '/api/hangar/process-mission/output-interface'
+    | '/api/hangar/process-mission/reasoning-planning'
     | '/academy/courses/$slug/modules/$moduleId'
     | '/academy/module/$moduleId/lesson/$lessonId'
     | '/academy/module/$moduleId/quiz/$quizId'
@@ -911,7 +966,7 @@ export interface FileRouteTypes {
     | '/the-hangar'
     | '/auth/callback'
     | '/learn/drone-design-fundamentals'
-    | '/api/hangar/process-mission'
+    | '/api/hangar/missions'
     | '/destud/dashboard/engineer'
     | '/destud/dashboard/explorer'
     | '/destud/projects/$projectId'
@@ -931,6 +986,11 @@ export interface FileRouteTypes {
     | '/mission-hub/torqwings-design-studio'
     | '/pilot/missions'
     | '/academy/courses/$slug/learn'
+    | '/api/hangar/process-mission/finalize'
+    | '/api/hangar/process-mission/input-processing'
+    | '/api/hangar/process-mission/output-generation'
+    | '/api/hangar/process-mission/output-interface'
+    | '/api/hangar/process-mission/reasoning-planning'
     | '/academy/courses/$slug/modules/$moduleId'
     | '/academy/module/$moduleId/lesson/$lessonId'
     | '/academy/module/$moduleId/quiz/$quizId'
@@ -995,7 +1055,7 @@ export interface FileRouteTypes {
     | '/the-hangar/'
     | '/_layout/auth/callback'
     | '/_layout/learn/drone-design-fundamentals'
-    | '/api/hangar/process-mission'
+    | '/api/hangar/missions'
     | '/destud/dashboard/engineer'
     | '/destud/dashboard/explorer'
     | '/destud/projects/$projectId'
@@ -1015,6 +1075,11 @@ export interface FileRouteTypes {
     | '/mission-hub/torqwings-design-studio/'
     | '/pilot/missions/'
     | '/academy/courses/$slug/learn'
+    | '/api/hangar/process-mission/finalize'
+    | '/api/hangar/process-mission/input-processing'
+    | '/api/hangar/process-mission/output-generation'
+    | '/api/hangar/process-mission/output-interface'
+    | '/api/hangar/process-mission/reasoning-planning'
     | '/academy/courses/$slug/modules/$moduleId'
     | '/academy/module/$moduleId/lesson/$lessonId'
     | '/academy/module/$moduleId/quiz/$quizId'
@@ -1030,7 +1095,12 @@ export interface RootRouteChildren {
   PilotRoute: typeof PilotRouteWithChildren
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TheHangarRoute: typeof TheHangarRouteWithChildren
-  ApiHangarProcessMissionRoute: typeof ApiHangarProcessMissionRoute
+  ApiHangarMissionsRoute: typeof ApiHangarMissionsRoute
+  ApiHangarProcessMissionFinalizeRoute: typeof ApiHangarProcessMissionFinalizeRoute
+  ApiHangarProcessMissionInputProcessingRoute: typeof ApiHangarProcessMissionInputProcessingRoute
+  ApiHangarProcessMissionOutputGenerationRoute: typeof ApiHangarProcessMissionOutputGenerationRoute
+  ApiHangarProcessMissionOutputInterfaceRoute: typeof ApiHangarProcessMissionOutputInterfaceRoute
+  ApiHangarProcessMissionReasoningPlanningRoute: typeof ApiHangarProcessMissionReasoningPlanningRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1560,11 +1630,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DestudDashboardEngineerRouteImport
       parentRoute: typeof DestudRoute
     }
-    '/api/hangar/process-mission': {
-      id: '/api/hangar/process-mission'
-      path: '/api/hangar/process-mission'
-      fullPath: '/api/hangar/process-mission'
-      preLoaderRoute: typeof ApiHangarProcessMissionRouteImport
+    '/api/hangar/missions': {
+      id: '/api/hangar/missions'
+      path: '/api/hangar/missions'
+      fullPath: '/api/hangar/missions'
+      preLoaderRoute: typeof ApiHangarMissionsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_layout/learn/drone-design-fundamentals': {
@@ -1580,6 +1650,41 @@ declare module '@tanstack/react-router' {
       fullPath: '/auth/callback'
       preLoaderRoute: typeof LayoutAuthCallbackRouteImport
       parentRoute: typeof LayoutRoute
+    }
+    '/api/hangar/process-mission/reasoning-planning': {
+      id: '/api/hangar/process-mission/reasoning-planning'
+      path: '/api/hangar/process-mission/reasoning-planning'
+      fullPath: '/api/hangar/process-mission/reasoning-planning'
+      preLoaderRoute: typeof ApiHangarProcessMissionReasoningPlanningRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/hangar/process-mission/output-interface': {
+      id: '/api/hangar/process-mission/output-interface'
+      path: '/api/hangar/process-mission/output-interface'
+      fullPath: '/api/hangar/process-mission/output-interface'
+      preLoaderRoute: typeof ApiHangarProcessMissionOutputInterfaceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/hangar/process-mission/output-generation': {
+      id: '/api/hangar/process-mission/output-generation'
+      path: '/api/hangar/process-mission/output-generation'
+      fullPath: '/api/hangar/process-mission/output-generation'
+      preLoaderRoute: typeof ApiHangarProcessMissionOutputGenerationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/hangar/process-mission/input-processing': {
+      id: '/api/hangar/process-mission/input-processing'
+      path: '/api/hangar/process-mission/input-processing'
+      fullPath: '/api/hangar/process-mission/input-processing'
+      preLoaderRoute: typeof ApiHangarProcessMissionInputProcessingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/hangar/process-mission/finalize': {
+      id: '/api/hangar/process-mission/finalize'
+      path: '/api/hangar/process-mission/finalize'
+      fullPath: '/api/hangar/process-mission/finalize'
+      preLoaderRoute: typeof ApiHangarProcessMissionFinalizeRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/academy/courses/$slug/learn': {
       id: '/academy/courses/$slug/learn'
@@ -1861,7 +1966,16 @@ const rootRouteChildren: RootRouteChildren = {
   PilotRoute: PilotRouteWithChildren,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TheHangarRoute: TheHangarRouteWithChildren,
-  ApiHangarProcessMissionRoute: ApiHangarProcessMissionRoute,
+  ApiHangarMissionsRoute: ApiHangarMissionsRoute,
+  ApiHangarProcessMissionFinalizeRoute: ApiHangarProcessMissionFinalizeRoute,
+  ApiHangarProcessMissionInputProcessingRoute:
+    ApiHangarProcessMissionInputProcessingRoute,
+  ApiHangarProcessMissionOutputGenerationRoute:
+    ApiHangarProcessMissionOutputGenerationRoute,
+  ApiHangarProcessMissionOutputInterfaceRoute:
+    ApiHangarProcessMissionOutputInterfaceRoute,
+  ApiHangarProcessMissionReasoningPlanningRoute:
+    ApiHangarProcessMissionReasoningPlanningRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

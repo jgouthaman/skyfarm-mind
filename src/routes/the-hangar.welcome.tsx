@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useHangarSession } from "@/lib/the-hangar/session";
+import { supabase } from "@/integrations/supabase/client";
 
 // ─────────────────────────────────────────────────────────────────────────
 // The Hangar — agent console welcome page. Faithful port of welcome.html
@@ -143,9 +144,25 @@ function TheHangarWelcome() {
   const [drawnLines, setDrawnLines] = useState<Set<string>>(new Set());
   const [liveText, setLiveText] = useState("Idle — click a bay, or run the sequence.");
   const [running, setRunning] = useState(false);
+  const [currentUserEmail, setCurrentUserEmail] = useState<string | null>(null);
   const timeouts = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   useEffect(() => () => { timeouts.current.forEach(clearTimeout); }, []);
+
+  // Same real Supabase session Flight Deck's sign-in creates (session.ts's
+  // own useHangarSession guard above only checks the sessionStorage flag,
+  // not this) — read here purely to show who's signed in.
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      setCurrentUserEmail(data.session?.user.email ?? null);
+    });
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setCurrentUserEmail(session?.user.email ?? null);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
 
   if (!ready) return null;
 
@@ -167,6 +184,15 @@ function TheHangarWelcome() {
   function resetDiagram() {
     setDrawnLines(new Set());
     setNodeStatus({});
+  }
+
+  // "Exit Hangar" is a full logout, not just navigation — clears both the
+  // real Supabase session and the hangar_session flag, so /the-hangar shows
+  // "Flight Deck" again afterward instead of "Welcome, {email}".
+  async function exitHangar() {
+    await supabase.auth.signOut();
+    sessionStorage.removeItem("hangar_session");
+    navigate({ to: "/the-hangar" });
   }
 
   function runSequence() {
@@ -221,13 +247,24 @@ function TheHangarWelcome() {
           <div className="hgr-w-brand">
             <span className="hgr-w-torq">TORQWINGS</span><span className="hgr-w-sep">/</span><span className="hgr-w-hangar-word">The Hangar</span>
           </div>
-          <Link to="/" className="hgr-w-exit">← Exit to site</Link>
+          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+            {currentUserEmail && (
+              <span className="hgr-w-mono" style={{ fontSize: 12.5, color: "var(--hgr-w-paper-dim)" }}>
+                Welcome, {currentUserEmail}
+              </span>
+            )}
+            <button type="button" className="hgr-w-exit" onClick={exitHangar}>Exit Hangar</button>
+          </div>
         </div>
       </nav>
 
       <main>
         <div className="hgr-w-wrap">
           <div className="hgr-w-head-row">
+            <div className="hgr-w-doors">
+              <div className="hgr-w-door hgr-w-door-left" />
+              <div className="hgr-w-door hgr-w-door-right" />
+            </div>
             <div>
               <div className="hgr-w-eyebrow"><span className="hgr-w-dot" />Flight Deck — clearance granted</div>
               <h1>Welcome to <span>The Hangar</span>.</h1>
@@ -361,7 +398,7 @@ const HGR_WELCOME_CSS = `
 .hgr-w-torq{ color:var(--hgr-w-paper-dim); font-weight:500; }
 .hgr-w-sep{ color:var(--hgr-w-blue-line); }
 .hgr-w-hangar-word{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:18px; }
-.hgr-w-exit{ font-family:'IBM Plex Mono',monospace; font-size:12.5px; color:var(--hgr-w-paper-dim); text-decoration:none; border:1px solid var(--hgr-w-hairline); padding:9px 16px; border-radius:2px; transition:.15s; }
+.hgr-w-exit{ font-family:'IBM Plex Mono',monospace; font-size:12.5px; color:var(--hgr-w-paper-dim); text-decoration:none; border:1px solid var(--hgr-w-hairline); padding:9px 16px; border-radius:2px; transition:.15s; background:none; cursor:pointer; }
 .hgr-w-exit:hover{ color:var(--hgr-w-paper); border-color:var(--hgr-w-blue-bright); }
 
 .hgr-w main{ padding:56px 0 90px; }
@@ -370,7 +407,17 @@ const HGR_WELCOME_CSS = `
   color:var(--hgr-w-amber); margin-bottom:14px; display:flex; align-items:center; gap:10px;
 }
 .hgr-w-eyebrow .hgr-w-dot{ width:6px; height:6px; border-radius:50%; background:var(--hgr-w-green); box-shadow:0 0 8px var(--hgr-w-green); }
-.hgr-w-head-row{ display:flex; justify-content:space-between; align-items:flex-end; gap:32px; flex-wrap:wrap; margin-bottom:36px; }
+.hgr-w-head-row{ display:flex; justify-content:space-between; align-items:flex-end; gap:32px; flex-wrap:wrap; margin-bottom:36px; position:relative; overflow:hidden; }
+.hgr-w-doors{ position:absolute; inset:0; z-index:5; display:flex; pointer-events:none; }
+.hgr-w-door{ flex:1; background: repeating-linear-gradient(90deg, #0C1E30 0 78px, #08131F 78px 80px); position:relative; }
+.hgr-w-door::after{ content:""; position:absolute; top:0; bottom:0; width:2px; background:var(--hgr-w-blue-line); opacity:.5; }
+.hgr-w-door-left{ animation: hgr-w-openLeft 1.4s cubic-bezier(.77,0,.18,1) .3s forwards; }
+.hgr-w-door-right{ animation: hgr-w-openRight 1.4s cubic-bezier(.77,0,.18,1) .3s forwards; }
+.hgr-w-door-left::after{ right:0; }
+.hgr-w-door-right::after{ left:0; }
+@keyframes hgr-w-openLeft{ from{ transform:translateX(0);} to{ transform:translateX(-100%);} }
+@keyframes hgr-w-openRight{ from{ transform:translateX(0);} to{ transform:translateX(100%);} }
+@media (prefers-reduced-motion: reduce){ .hgr-w-doors{ display:none; } }
 .hgr-w main h1{ font-size:clamp(28px,4vw,44px); margin-bottom:10px; }
 .hgr-w main h1 span{ color:var(--hgr-w-blue-bright); }
 .hgr-w-lead{ color:var(--hgr-w-paper-dim); font-size:15.5px; max-width:480px; }
