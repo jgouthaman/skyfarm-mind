@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mission Agent — Bay 01 — The Hangar — TorqWings</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy-deep:#08131F; --navy-panel:#0F2136; --navy-panel-2:#132A44;
+    --blue-line:#3E7CA6; --blue-bright:#6FB4E0;
+    --amber:#E8A33D; --amber-bright:#F6C374;
+    --paper:#ECEFF3; --paper-dim:#8FA5BB;
+    --grid:rgba(111,180,224,0.08); --hairline:rgba(111,180,224,0.20);
+    --green:#5FBF8F; --idle-node:#16324E;
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  body{
+    background:var(--navy-deep); color:var(--paper); font-family:'IBM Plex Sans', sans-serif;
+    background-image:linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size:44px 44px;
+  }
+  h1,h2,h3{ font-family:'Space Grotesk', sans-serif; font-weight:600; letter-spacing:-0.01em; }
+  .mono{ font-family:'IBM Plex Mono', monospace; }
+  .wrap{ max-width:1180px; margin:0 auto; padding:0 32px; }
+  a{ color:inherit; }
+
+  nav{ border-bottom:1px solid var(--hairline); position:sticky; top:0; background:rgba(8,19,31,0.9); backdrop-filter:blur(8px); z-index:20; }
+  nav .wrap{ display:flex; align-items:center; justify-content:space-between; height:68px; }
+  .crumbs{ font-size:14px; color:var(--paper-dim); display:flex; align-items:center; gap:8px; }
+  .crumbs a{ text-decoration:none; color:var(--paper-dim); }
+  .crumbs a:hover{ color:var(--blue-bright); }
+  .crumbs .sep{ color:var(--blue-line); }
+  .crumbs .cur{ color:var(--paper); font-weight:500; }
+  .exit{ font-family:'IBM Plex Mono',monospace; font-size:12.5px; color:var(--paper-dim); text-decoration:none; border:1px solid var(--hairline); padding:8px 15px; border-radius:2px; }
+  .exit:hover{ color:var(--paper); border-color:var(--blue-bright); }
+
+  main{ padding-bottom:100px; }
+
+  /* ---------- HERO ---------- */
+  .hero{ padding:64px 0 44px; border-bottom:1px solid var(--hairline); }
+  .status-row{ display:flex; align-items:center; gap:12px; margin-bottom:22px; flex-wrap:wrap; }
+  .badge{
+    font-family:'IBM Plex Mono',monospace; font-size:11.5px; letter-spacing:.1em; text-transform:uppercase;
+    padding:6px 13px; border-radius:2px; display:inline-flex; align-items:center; gap:8px;
+  }
+  .badge.dev{ color:var(--amber); border:1px solid rgba(232,163,61,.4); }
+  .badge.dev .dot{ width:6px; height:6px; border-radius:50%; background:var(--amber); animation:pulse 1.6s ease-in-out infinite; }
+  @keyframes pulse{ 0%,100%{ opacity:1; } 50%{ opacity:.3; } }
+  .badge.bay{ color:var(--paper-dim); border:1px solid var(--hairline); }
+
+  .hero h1{ font-size:clamp(34px,5vw,58px); margin-bottom:14px; }
+  .hero .lead{ color:var(--paper-dim); font-size:16.5px; max-width:600px; line-height:1.65; margin-bottom:8px; }
+  .hero .lead b{ color:var(--paper); font-weight:600; }
+
+  /* ---------- WHERE IT SITS ---------- */
+  section{ padding:60px 0; border-bottom:1px solid var(--hairline); }
+  .kicker{ font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--amber); margin-bottom:12px; }
+  .sec-title{ font-size:clamp(22px,2.6vw,30px); margin-bottom:10px; }
+  .sec-sub{ color:var(--paper-dim); font-size:14.5px; max-width:600px; margin-bottom:36px; }
+
+  .placement{ display:flex; align-items:center; gap:0; overflow-x:auto; padding-bottom:8px; }
+  .p-node{
+    flex-shrink:0; width:150px; text-align:center; padding:20px 14px; border-radius:2px;
+    border:1px solid var(--hairline); background:var(--navy-panel);
+  }
+  .p-node.here{ border-color:var(--amber); background:#1B3A57; box-shadow:0 0 18px rgba(232,163,61,0.25); }
+  .p-node .b{ font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--paper-dim); margin-bottom:6px; }
+  .p-node.here .b{ color:var(--amber); }
+  .p-node .n{ font-size:14px; font-weight:500; }
+  .p-node .s{ font-family:'IBM Plex Mono',monospace; font-size:9.5px; text-transform:uppercase; margin-top:8px; color:var(--paper-dim); }
+  .p-node.here .s{ color:var(--amber); }
+  .p-arrow{ flex-shrink:0; width:40px; text-align:center; color:var(--blue-line); font-size:18px; }
+  .p-hub{ flex-shrink:0; margin-left:24px; padding-left:24px; border-left:1px dashed var(--hairline); text-align:center; width:130px; }
+  .p-hub .circ{ width:56px; height:56px; border-radius:50%; border:1px dashed var(--blue-line); display:flex; align-items:center; justify-content:center; margin:0 auto 8px; font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--blue-bright); }
+  .p-hub .n{ font-size:12.5px; color:var(--paper-dim); }
+  .see-all{ margin-top:24px; font-family:'IBM Plex Mono',monospace; font-size:12.5px; color:var(--blue-bright); text-decoration:none; display:inline-flex; align-items:center; gap:6px; }
+  .see-all:hover{ text-decoration:underline; }
+
+  /* ---------- HOW IT WORKS ---------- */
+  .stages{ display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--hairline); border:1px solid var(--hairline); }
+  @media(max-width:900px){ .stages{ grid-template-columns:1fr 1fr; } }
+  @media(max-width:560px){ .stages{ grid-template-columns:1fr; } }
+  .stage{ background:var(--navy-panel); padding:24px 22px; position:relative; }
+  .stage .num{ font-family:'IBM Plex Mono',monospace; color:var(--amber); font-size:11px; margin-bottom:10px; }
+  .stage h4{ font-family:'Space Grotesk',sans-serif; font-size:15.5px; font-weight:600; margin-bottom:14px; }
+  .stage ul{ list-style:none; }
+  .stage li{ font-size:13px; color:var(--paper-dim); padding:6px 0; border-top:1px dashed var(--hairline); }
+  .stage li:first-child{ border-top:none; }
+  .stage li b{ color:var(--paper); font-weight:500; display:block; margin-bottom:1px; }
+
+  /* ---------- TOOLS / DATA ---------- */
+  .chip-groups{ display:grid; grid-template-columns:1fr 1fr; gap:40px; }
+  @media(max-width:760px){ .chip-groups{ grid-template-columns:1fr; } }
+  .chip-group h4{ font-family:'IBM Plex Mono',monospace; font-size:11.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--paper-dim); margin-bottom:14px; }
+  .chips{ display:flex; flex-wrap:wrap; gap:9px; }
+  .chip{ font-family:'IBM Plex Mono',monospace; font-size:12.5px; color:var(--paper-dim); border:1px solid var(--hairline); padding:7px 13px; border-radius:2px; }
+
+  /* ---------- CONTRACT ---------- */
+  .contract{ display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--hairline); border:1px solid var(--hairline); }
+  @media(max-width:760px){ .contract{ grid-template-columns:1fr; } }
+  .contract-panel{ background:var(--navy-panel); }
+  .contract-panel .ch{ padding:14px 20px; border-bottom:1px solid var(--hairline); font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--paper-dim); }
+  .contract-panel pre{ padding:20px; font-family:'IBM Plex Mono',monospace; font-size:12px; line-height:1.7; color:var(--blue-bright); overflow-x:auto; }
+  .contract-panel pre .k{ color:var(--paper-dim); }
+  .contract-panel pre .v{ color:var(--amber-bright); }
+
+  /* ---------- BUILD PROGRESS ---------- */
+  .checklist{ border:1px solid var(--hairline); background:var(--navy-panel); }
+  .cl-item{ display:flex; align-items:center; gap:16px; padding:18px 22px; border-bottom:1px dashed var(--hairline); }
+  .cl-item:last-child{ border-bottom:none; }
+  .cl-box{ width:20px; height:20px; border:1.5px solid var(--hairline); border-radius:3px; flex-shrink:0; }
+  .cl-txt b{ font-weight:500; display:block; font-size:14px; margin-bottom:2px; }
+  .cl-txt span{ font-size:12.5px; color:var(--paper-dim); }
+  .cl-tag{ margin-left:auto; font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.06em; text-transform:uppercase; color:var(--paper-dim); flex-shrink:0; }
+
+  /* ---------- FOOTER CTA ---------- */
+  .foot-cta{ text-align:center; padding:70px 0 0; border-bottom:none; }
+  .foot-cta h2{ font-size:clamp(24px,3vw,34px); margin-bottom:14px; }
+  .foot-cta p{ color:var(--paper-dim); max-width:480px; margin:0 auto 30px; font-size:14.5px; }
+  .btn{ font-family:'IBM Plex Mono',monospace; font-size:13px; padding:12px 22px; border-radius:2px; display:inline-flex; align-items:center; gap:8px; text-decoration:none; }
+  .btn-ghost{ border:1px solid var(--hairline); color:var(--paper-dim); }
+  .btn-ghost:hover{ color:var(--paper); border-color:var(--blue-bright); }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <div class="crumbs">
+      <a href="index.html">TorqWings</a><span class="sep">/</span>
+      <a href="welcome.html">The Hangar</a><span class="sep">/</span>
+      <span class="cur">Bay 01 — Mission Agent</span>
+    </div>
+    <a href="welcome.html" class="exit">← Back to Hangar</a>
+  </div>
+</nav>
+
+<main>
+  <div class="hero">
+    <div class="wrap">
+      <div class="status-row">
+        <span class="badge dev"><span class="dot"></span>In development — build started today</span>
+        <span class="badge bay">BAY 01 OF 15</span>
+      </div>
+      <h1>Mission Agent</h1>
+      <p class="lead">The first agent every mission passes through. It takes a brief in plain language and turns it into a <b>structured, gate-ready spec</b> — payload, range, endurance, constraints, KPIs — that Concept Agent and everything downstream builds against.</p>
+    </div>
+  </div>
+
+  <section>
+    <div class="wrap">
+      <div class="kicker">Where it sits</div>
+      <h2 class="sec-title">First bay in the pipeline.</h2>
+      <p class="sec-sub">Mission Agent has no upstream agent — it's the entry point. Its output is the one thing every other bay in The Hangar can trace itself back to.</p>
+
+      <div class="placement">
+        <div class="p-node here">
+          <div class="b">BAY 01</div>
+          <div class="n">Mission Agent</div>
+          <div class="s">You are here</div>
+        </div>
+        <div class="p-arrow">→</div>
+        <div class="p-node">
+          <div class="b">BAY 02</div>
+          <div class="n">Concept Agent</div>
+          <div class="s">Next in line</div>
+        </div>
+        <div class="p-arrow">→</div>
+        <div class="p-node">
+          <div class="b">BAY 03</div>
+          <div class="n">Aircraft Design</div>
+          <div class="s">In design</div>
+        </div>
+
+        <div class="p-hub">
+          <div class="circ">B15</div>
+          <div class="n">Reads &amp; writes<br>Knowledge Agent</div>
+        </div>
+      </div>
+
+      <a href="welcome.html" class="see-all">See the full 15-bay circuit →</a>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="kicker">How it works</div>
+      <h2 class="sec-title">Brief in, structured spec out.</h2>
+      <p class="sec-sub">Four internal stages — this is the actual architecture being built today, not a simplified version of it.</p>
+
+      <div class="stages">
+        <div class="stage">
+          <div class="num">01 · INPUT PROCESSING</div>
+          <h4>Understand the brief</h4>
+          <ul>
+            <li><b>Intent understanding</b>LLM parses free-form input</li>
+            <li><b>Entity extraction</b>Mission, constraints, KPIs</li>
+            <li><b>Context retrieval</b>RAG against Knowledge Base</li>
+            <li><b>Validation &amp; normalization</b>Rules engine</li>
+          </ul>
+        </div>
+        <div class="stage">
+          <div class="num">02 · REASONING &amp; PLANNING</div>
+          <h4>Decompose the mission</h4>
+          <ul>
+            <li><b>Mission decomposition</b>LLM + prompt templates</li>
+            <li><b>Constraint identification</b>Domain rules + LLM</li>
+            <li><b>KPI derivation</b>Performance, cost, safety</li>
+            <li><b>Trade-off prioritization</b>Heuristic / multi-criteria</li>
+          </ul>
+        </div>
+        <div class="stage">
+          <div class="num">03 · OUTPUT GENERATION</div>
+          <h4>Structure the spec</h4>
+          <ul>
+            <li><b>Mission specification</b>Structured JSON</li>
+            <li><b>Constraints list</b>Structured</li>
+            <li><b>KPIs &amp; targets</b>Structured</li>
+            <li><b>Mission summary</b>Natural language</li>
+          </ul>
+        </div>
+        <div class="stage">
+          <div class="num">04 · OUTPUT INTERFACE</div>
+          <h4>Hand off downstream</h4>
+          <ul>
+            <li><b>Structured data API</b>JSON</li>
+            <li><b>Dashboard view</b>Mission overview UI</li>
+            <li><b>Export</b>PDF / DOCX / Excel</li>
+            <li><b>Event publish</b>To shared event bus</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="kicker">Tools &amp; memory</div>
+      <h2 class="sec-title">What it reaches for.</h2>
+      <p class="sec-sub">Nothing exotic — the same categories every other bay in The Hangar uses, scoped to mission definition.</p>
+
+      <div class="chip-groups">
+        <div class="chip-group">
+          <h4>Tools used</h4>
+          <div class="chips">
+            <span class="chip">LLM (GPT-4o / Llama 3)</span>
+            <span class="chip">RAG / Vector Search</span>
+            <span class="chip">Rules Engine</span>
+            <span class="chip">Knowledge Graph</span>
+            <span class="chip">Document Parser</span>
+            <span class="chip">Calculator</span>
+            <span class="chip">Prompt Templates</span>
+          </div>
+        </div>
+        <div class="chip-group">
+          <h4>Reads / writes</h4>
+          <div class="chips">
+            <span class="chip">Mission DB — write</span>
+            <span class="chip">Projects DB — read/write</span>
+            <span class="chip">Knowledge Base — read</span>
+            <span class="chip">Concept DB — read</span>
+            <span class="chip">Regulations DB — read</span>
+            <span class="chip">Audit / Logs DB — write</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="kicker">Interface contract</div>
+      <h2 class="sec-title">What Concept Agent actually receives.</h2>
+      <p class="sec-sub">The exact I/O shape — this is what "done" looks like for Bay 01's handoff.</p>
+
+      <div class="contract">
+        <div class="contract-panel">
+          <div class="ch">Input</div>
+          <pre><span class="k">{</span>
+  <span class="k">"project_id"</span>: <span class="v">"uuid"</span>,
+  <span class="k">"user_id"</span>: <span class="v">"uuid"</span>,
+  <span class="k">"mission_brief"</span>: <span class="v">"string"</span>,
+  <span class="k">"goals"</span>: [<span class="v">"string"</span>],
+  <span class="k">"constraints"</span>: [<span class="v">"string"</span>],
+  <span class="k">"attachments"</span>: [<span class="v">"file_id"</span>],
+  <span class="k">"context"</span>: {
+    <span class="k">"domain"</span>: <span class="v">"UAV"</span>,
+    <span class="k">"phase"</span>: <span class="v">"Conceptual"</span>
+  }
+<span class="k">}</span></pre>
+        </div>
+        <div class="contract-panel">
+          <div class="ch">Output</div>
+          <pre><span class="k">{</span>
+  <span class="k">"mission_id"</span>: <span class="v">"uuid"</span>,
+  <span class="k">"mission_specs"</span>: { <span class="v">...</span> },
+  <span class="k">"constraints"</span>: [ <span class="v">...</span> ],
+  <span class="k">"kpis"</span>: {
+    <span class="k">"name"</span>: <span class="v">"Range"</span>,
+    <span class="k">"target"</span>: <span class="v">"1000 km"</span>,
+    <span class="k">"unit"</span>: <span class="v">"km"</span>
+  },
+  <span class="k">"summary"</span>: <span class="v">"string"</span>,
+  <span class="k">"confidence_score"</span>: <span class="v">0.92</span>
+<span class="k">}</span></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="border-bottom:none;">
+    <div class="wrap">
+      <div class="kicker">Build progress</div>
+      <h2 class="sec-title">What's real today.</h2>
+      <p class="sec-sub">Honest status — updated as each piece actually ships, not before.</p>
+
+      <div class="checklist">
+        <div class="cl-item">
+          <div class="cl-box"></div>
+          <div class="cl-txt"><b>Input intake</b><span>Chat, form, and file-upload capture of the mission brief</span></div>
+          <div class="cl-tag">Not started</div>
+        </div>
+        <div class="cl-item">
+          <div class="cl-box"></div>
+          <div class="cl-txt"><b>LLM reasoning &amp; decomposition</b><span>Mission decomposition, constraint identification, KPI derivation</span></div>
+          <div class="cl-tag">Not started</div>
+        </div>
+        <div class="cl-item">
+          <div class="cl-box"></div>
+          <div class="cl-txt"><b>Structured output + Mission DB write</b><span>Validated JSON spec persisted and published to the event bus</span></div>
+          <div class="cl-tag">Not started</div>
+        </div>
+        <div class="cl-item">
+          <div class="cl-box"></div>
+          <div class="cl-txt"><b>Handoff to Concept Agent</b><span>Downstream bay reads the spec and starts generating options</span></div>
+          <div class="cl-tag">Not started</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="foot-cta">
+    <div class="wrap">
+      <h2>Bay 01 goes live the moment this checklist clears.</h2>
+      <p>This page updates in step with the build — check back as items move from Not Started to Done.</p>
+      <a href="welcome.html" class="btn btn-ghost">← Back to The Hangar</a>
+    </div>
+  </div>
+</main>
+
+</body>
+</html>
