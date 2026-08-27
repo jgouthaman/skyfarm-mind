@@ -273,17 +273,25 @@ Return:
 
     const { content } = await callLlmGateway(SYSTEM, userContent, { jsonMode: true });
     if (!content) {
-      return { identifiedConstraints: knownConstraints, derivedKpis: mockKpis(data), mock: true };
+      return {
+        identifiedConstraints: knownConstraints,
+        derivedKpis: applyStructuredKpiOverrides(mockKpis(data), data.structuredFields),
+        mock: true,
+      };
     }
 
     const parsed = parseConstraintAndKpiResponse(content);
     if (!parsed) {
-      return { identifiedConstraints: knownConstraints, derivedKpis: mockKpis(data), mock: true };
+      return {
+        identifiedConstraints: knownConstraints,
+        derivedKpis: applyStructuredKpiOverrides(mockKpis(data), data.structuredFields),
+        mock: true,
+      };
     }
 
     return {
       identifiedConstraints: [...knownConstraints, ...parsed.identifiedConstraints],
-      derivedKpis: parsed.derivedKpis,
+      derivedKpis: applyStructuredKpiOverrides(parsed.derivedKpis, data.structuredFields),
       mock: false,
     };
   });
@@ -323,6 +331,44 @@ function parseConstraintAndKpiResponse(
   } catch {
     return null;
   }
+}
+
+// Section 4.1.1's merge rule ("explicit structured field values always win")
+// is only actually enforced up at Stage 2.1 (intentExtraction.ts is told
+// not to re-guess a *hint* when a structured field exists) — nothing
+// downstream ever threads payload_kg/range_km/endurance_min into what this
+// LLM call sees (its userContent above is built from decomposedElements +
+// knownConstraints only), so the "Payload"/"Range"/"Endurance" KPI targets
+// were always an LLM re-guess, even when the caller supplied an exact
+// number. Confirmed live: resubmitting an already-known payload value
+// through the confidence-boost UI came back as a *different* number on the
+// next generation — LLM non-determinism, not a bug in the resubmission
+// itself. Fixed here, deterministically, rather than by prompting harder:
+// when a structured value exists for one of these three, it wins outright,
+// no LLM involved for that field at all.
+const STRUCTURED_KPI_OVERRIDES: Record<
+  string,
+  { name: "Payload" | "Range" | "Endurance"; unit: string }
+> = {
+  payload_kg: { name: "Payload", unit: "kg" },
+  range_km: { name: "Range", unit: "km" },
+  endurance_min: { name: "Endurance", unit: "min" },
+};
+
+function applyStructuredKpiOverrides(
+  kpis: DerivedKpi[],
+  structuredFields: Record<string, unknown>,
+): DerivedKpi[] {
+  const result = [...kpis];
+  for (const [key, { name, unit }] of Object.entries(STRUCTURED_KPI_OVERRIDES)) {
+    const value = structuredFields[key];
+    if (typeof value !== "number") continue;
+    const idx = result.findIndex((k) => k.name.trim().toLowerCase() === name.toLowerCase());
+    const kpi: DerivedKpi = { name, target: String(value), unit };
+    if (idx >= 0) result[idx] = kpi;
+    else result.push(kpi);
+  }
+  return result;
 }
 
 function mockKpis(data: ConstraintIdentificationInput): DerivedKpi[] {

@@ -86,6 +86,86 @@ export async function getMission(missionId: string): Promise<HangarMissionRow | 
   return data as HangarMissionRow | null;
 }
 
+// Separate, more capable cast for the list/history queries below (order-by,
+// in-array) — same "cast supabaseAdmin to only the shape this file
+// currently needs" pattern as the `db` cast above and as
+// directReferenceResolver.ts's own separate local cast; not merged into
+// `db` to keep that one's type matching exactly what the write-path
+// functions above already use.
+type ListQueryResult = Promise<{ data: Record<string, unknown>[] | null; error: { message: string } | null }>;
+
+const listDb = supabaseAdmin as unknown as {
+  from: (table: string) => {
+    select: (columns: string) => {
+      eq: (
+        column: string,
+        value: string,
+      ) => {
+        order: (column: string, opts: { ascending: boolean }) => ListQueryResult;
+        in: (column: string, values: string[]) => ListQueryResult;
+      };
+      in: (column: string, values: string[]) => ListQueryResult;
+    };
+  };
+};
+
+export interface HangarMissionSpecSummary {
+  mission_id: string;
+  mission_specs: Record<string, unknown>;
+  constraints: unknown[];
+  kpis: unknown[];
+  summary: string;
+  confidence_score: number;
+}
+
+// "Your missions" list (this session's own feature, not in MissionAgent.md)
+// — every mission this user has ever submitted, most recent first, so the
+// intake page can let them reopen a past spec instead of only ever seeing
+// the one they're currently working on.
+export async function listUserMissions(userId: string): Promise<HangarMissionRow[]> {
+  const { data, error } = await listDb
+    .from("Hangar_missions")
+    .select("*")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false });
+  if (error) throw new Error(`listUserMissions: ${error.message}`);
+  return (data ?? []) as unknown as HangarMissionRow[];
+}
+
+export async function getSpecsForMissions(missionIds: string[]): Promise<HangarMissionSpecSummary[]> {
+  if (missionIds.length === 0) return [];
+  const { data, error } = await listDb
+    .from("Hangar_mission_specs")
+    .select("mission_id,mission_specs,constraints,kpis,summary,confidence_score")
+    .in("mission_id", missionIds);
+  if (error) throw new Error(`getSpecsForMissions: ${error.message}`);
+  return (data ?? []) as unknown as HangarMissionSpecSummary[];
+}
+
+// The original brief only lives in each mission's input_processing
+// Hangar_agent_runs row (input_snapshot.rawTextCombined) — Hangar_missions
+// and Hangar_mission_specs never store it directly. Best-effort: a mission
+// with no successful input_processing row (e.g. it failed before logging)
+// just won't have a brief in the returned map.
+export async function getOriginalBriefsForMissions(missionIds: string[]): Promise<Map<string, string>> {
+  const briefs = new Map<string, string>();
+  if (missionIds.length === 0) return briefs;
+  const { data, error } = await listDb
+    .from("Hangar_agent_runs")
+    .select("mission_id,input_snapshot")
+    .eq("stage", "input_processing")
+    .in("mission_id", missionIds);
+  if (error) throw new Error(`getOriginalBriefsForMissions: ${error.message}`);
+  for (const row of data ?? []) {
+    const missionId = row.mission_id as string;
+    const snapshot = row.input_snapshot as { rawTextCombined?: unknown } | null;
+    if (!briefs.has(missionId) && typeof snapshot?.rawTextCombined === "string") {
+      briefs.set(missionId, snapshot.rawTextCombined);
+    }
+  }
+  return briefs;
+}
+
 export async function updateMissionStatus(
   missionId: string,
   status: MissionStatus,
