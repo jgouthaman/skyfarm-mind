@@ -9,18 +9,23 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TheHangarRouteImport } from './routes/the-hangar'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as PilotRouteImport } from './routes/pilot'
 import { Route as MissionHubRouteImport } from './routes/mission-hub'
+import { Route as HangarStage3ManualtestRouteImport } from './routes/hangar-stage3-manualtest'
 import { Route as FieldRouteImport } from './routes/field'
 import { Route as DestudRouteImport } from './routes/destud'
 import { Route as AcademyRouteImport } from './routes/academy'
 import { Route as LayoutRouteImport } from './routes/_layout'
+import { Route as TheHangarIndexRouteImport } from './routes/the-hangar.index'
 import { Route as PilotIndexRouteImport } from './routes/pilot.index'
 import { Route as MissionHubIndexRouteImport } from './routes/mission-hub.index'
 import { Route as DestudIndexRouteImport } from './routes/destud.index'
 import { Route as AcademyIndexRouteImport } from './routes/academy.index'
 import { Route as LayoutIndexRouteImport } from './routes/_layout.index'
+import { Route as TheHangarWelcomeRouteImport } from './routes/the-hangar.welcome'
+import { Route as TheHangarMissionRouteImport } from './routes/the-hangar.mission'
 import { Route as PilotTrackingRouteImport } from './routes/pilot.tracking'
 import { Route as PilotSyncRouteImport } from './routes/pilot.sync'
 import { Route as PilotProfileRouteImport } from './routes/pilot.profile'
@@ -76,15 +81,27 @@ import { Route as MissionHubTorqwingsDesignStudioDesignRouteImport } from './rou
 import { Route as MissionHubTorqwingsDesignStudioComponentsRouteImport } from './routes/mission-hub.torqwings-design-studio.components'
 import { Route as MissionHubTorqwingsDesignStudioComplianceRouteImport } from './routes/mission-hub.torqwings-design-studio.compliance'
 import { Route as MissionHubTorqwingsDesignStudioAdvisorRouteImport } from './routes/mission-hub.torqwings-design-studio.advisor'
+import { Route as DestudProjectsProjectIdRouteImport } from './routes/destud.projects.$projectId'
 import { Route as DestudDashboardExplorerRouteImport } from './routes/destud.dashboard.explorer'
 import { Route as DestudDashboardEngineerRouteImport } from './routes/destud.dashboard.engineer'
+import { Route as ApiHangarMissionsRouteImport } from './routes/api.hangar.missions'
 import { Route as LayoutLearnDroneDesignFundamentalsRouteImport } from './routes/_layout.learn.drone-design-fundamentals'
 import { Route as LayoutAuthCallbackRouteImport } from './routes/_layout.auth.callback'
+import { Route as ApiHangarProcessMissionReasoningPlanningRouteImport } from './routes/api.hangar.process-mission.reasoning-planning'
+import { Route as ApiHangarProcessMissionOutputInterfaceRouteImport } from './routes/api.hangar.process-mission.output-interface'
+import { Route as ApiHangarProcessMissionOutputGenerationRouteImport } from './routes/api.hangar.process-mission.output-generation'
+import { Route as ApiHangarProcessMissionInputProcessingRouteImport } from './routes/api.hangar.process-mission.input-processing'
+import { Route as ApiHangarProcessMissionFinalizeRouteImport } from './routes/api.hangar.process-mission.finalize'
 import { Route as AcademyCoursesSlugLearnRouteImport } from './routes/academy.courses.$slug.learn'
 import { Route as AcademyModuleModuleIdQuizQuizIdRouteImport } from './routes/academy.module.$moduleId.quiz.$quizId'
 import { Route as AcademyModuleModuleIdLessonLessonIdRouteImport } from './routes/academy.module.$moduleId.lesson.$lessonId'
 import { Route as AcademyCoursesSlugModulesModuleIdRouteImport } from './routes/academy.courses.$slug.modules.$moduleId'
 
+const TheHangarRoute = TheHangarRouteImport.update({
+  id: '/the-hangar',
+  path: '/the-hangar',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
@@ -98,6 +115,11 @@ const PilotRoute = PilotRouteImport.update({
 const MissionHubRoute = MissionHubRouteImport.update({
   id: '/mission-hub',
   path: '/mission-hub',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HangarStage3ManualtestRoute = HangarStage3ManualtestRouteImport.update({
+  id: '/hangar-stage3-manualtest',
+  path: '/hangar-stage3-manualtest',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FieldRoute = FieldRouteImport.update({
@@ -118,6 +140,11 @@ const AcademyRoute = AcademyRouteImport.update({
 const LayoutRoute = LayoutRouteImport.update({
   id: '/_layout',
   getParentRoute: () => rootRouteImport,
+} as any)
+const TheHangarIndexRoute = TheHangarIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => TheHangarRoute,
 } as any)
 const PilotIndexRoute = PilotIndexRouteImport.update({
   id: '/',
@@ -143,6 +170,16 @@ const LayoutIndexRoute = LayoutIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => LayoutRoute,
+} as any)
+const TheHangarWelcomeRoute = TheHangarWelcomeRouteImport.update({
+  id: '/welcome',
+  path: '/welcome',
+  getParentRoute: () => TheHangarRoute,
+} as any)
+const TheHangarMissionRoute = TheHangarMissionRouteImport.update({
+  id: '/mission',
+  path: '/mission',
+  getParentRoute: () => TheHangarRoute,
 } as any)
 const PilotTrackingRoute = PilotTrackingRouteImport.update({
   id: '/tracking',
@@ -443,6 +480,11 @@ const MissionHubTorqwingsDesignStudioAdvisorRoute =
     path: '/advisor',
     getParentRoute: () => MissionHubTorqwingsDesignStudioRoute,
   } as any)
+const DestudProjectsProjectIdRoute = DestudProjectsProjectIdRouteImport.update({
+  id: '/projects/$projectId',
+  path: '/projects/$projectId',
+  getParentRoute: () => DestudRoute,
+} as any)
 const DestudDashboardExplorerRoute = DestudDashboardExplorerRouteImport.update({
   id: '/dashboard/explorer',
   path: '/dashboard/explorer',
@@ -452,6 +494,11 @@ const DestudDashboardEngineerRoute = DestudDashboardEngineerRouteImport.update({
   id: '/dashboard/engineer',
   path: '/dashboard/engineer',
   getParentRoute: () => DestudRoute,
+} as any)
+const ApiHangarMissionsRoute = ApiHangarMissionsRouteImport.update({
+  id: '/api/hangar/missions',
+  path: '/api/hangar/missions',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const LayoutLearnDroneDesignFundamentalsRoute =
   LayoutLearnDroneDesignFundamentalsRouteImport.update({
@@ -464,6 +511,36 @@ const LayoutAuthCallbackRoute = LayoutAuthCallbackRouteImport.update({
   path: '/auth/callback',
   getParentRoute: () => LayoutRoute,
 } as any)
+const ApiHangarProcessMissionReasoningPlanningRoute =
+  ApiHangarProcessMissionReasoningPlanningRouteImport.update({
+    id: '/api/hangar/process-mission/reasoning-planning',
+    path: '/api/hangar/process-mission/reasoning-planning',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiHangarProcessMissionOutputInterfaceRoute =
+  ApiHangarProcessMissionOutputInterfaceRouteImport.update({
+    id: '/api/hangar/process-mission/output-interface',
+    path: '/api/hangar/process-mission/output-interface',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiHangarProcessMissionOutputGenerationRoute =
+  ApiHangarProcessMissionOutputGenerationRouteImport.update({
+    id: '/api/hangar/process-mission/output-generation',
+    path: '/api/hangar/process-mission/output-generation',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiHangarProcessMissionInputProcessingRoute =
+  ApiHangarProcessMissionInputProcessingRouteImport.update({
+    id: '/api/hangar/process-mission/input-processing',
+    path: '/api/hangar/process-mission/input-processing',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiHangarProcessMissionFinalizeRoute =
+  ApiHangarProcessMissionFinalizeRouteImport.update({
+    id: '/api/hangar/process-mission/finalize',
+    path: '/api/hangar/process-mission/finalize',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AcademyCoursesSlugLearnRoute = AcademyCoursesSlugLearnRouteImport.update({
   id: '/courses/$slug/learn',
   path: '/courses/$slug/learn',
@@ -493,9 +570,11 @@ export interface FileRoutesByFullPath {
   '/academy': typeof AcademyRouteWithChildren
   '/destud': typeof DestudRouteWithChildren
   '/field': typeof FieldRoute
+  '/hangar-stage3-manualtest': typeof HangarStage3ManualtestRoute
   '/mission-hub': typeof MissionHubRouteWithChildren
   '/pilot': typeof PilotRouteWithChildren
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/the-hangar': typeof TheHangarRouteWithChildren
   '/about': typeof LayoutAboutRoute
   '/agrisky': typeof LayoutAgriskyRoute
   '/contact': typeof LayoutContactRoute
@@ -536,14 +615,19 @@ export interface FileRoutesByFullPath {
   '/pilot/profile': typeof PilotProfileRoute
   '/pilot/sync': typeof PilotSyncRoute
   '/pilot/tracking': typeof PilotTrackingRoute
+  '/the-hangar/mission': typeof TheHangarMissionRoute
+  '/the-hangar/welcome': typeof TheHangarWelcomeRoute
   '/academy/': typeof AcademyIndexRoute
   '/destud/': typeof DestudIndexRoute
   '/mission-hub/': typeof MissionHubIndexRoute
   '/pilot/': typeof PilotIndexRoute
+  '/the-hangar/': typeof TheHangarIndexRoute
   '/auth/callback': typeof LayoutAuthCallbackRoute
   '/learn/drone-design-fundamentals': typeof LayoutLearnDroneDesignFundamentalsRoute
+  '/api/hangar/missions': typeof ApiHangarMissionsRoute
   '/destud/dashboard/engineer': typeof DestudDashboardEngineerRoute
   '/destud/dashboard/explorer': typeof DestudDashboardExplorerRoute
+  '/destud/projects/$projectId': typeof DestudProjectsProjectIdRoute
   '/mission-hub/torqwings-design-studio/advisor': typeof MissionHubTorqwingsDesignStudioAdvisorRoute
   '/mission-hub/torqwings-design-studio/compliance': typeof MissionHubTorqwingsDesignStudioComplianceRoute
   '/mission-hub/torqwings-design-studio/components': typeof MissionHubTorqwingsDesignStudioComponentsRoute
@@ -560,12 +644,18 @@ export interface FileRoutesByFullPath {
   '/mission-hub/torqwings-design-studio/': typeof MissionHubTorqwingsDesignStudioIndexRoute
   '/pilot/missions/': typeof PilotMissionsIndexRoute
   '/academy/courses/$slug/learn': typeof AcademyCoursesSlugLearnRoute
+  '/api/hangar/process-mission/finalize': typeof ApiHangarProcessMissionFinalizeRoute
+  '/api/hangar/process-mission/input-processing': typeof ApiHangarProcessMissionInputProcessingRoute
+  '/api/hangar/process-mission/output-generation': typeof ApiHangarProcessMissionOutputGenerationRoute
+  '/api/hangar/process-mission/output-interface': typeof ApiHangarProcessMissionOutputInterfaceRoute
+  '/api/hangar/process-mission/reasoning-planning': typeof ApiHangarProcessMissionReasoningPlanningRoute
   '/academy/courses/$slug/modules/$moduleId': typeof AcademyCoursesSlugModulesModuleIdRoute
   '/academy/module/$moduleId/lesson/$lessonId': typeof AcademyModuleModuleIdLessonLessonIdRoute
   '/academy/module/$moduleId/quiz/$quizId': typeof AcademyModuleModuleIdQuizQuizIdRoute
 }
 export interface FileRoutesByTo {
   '/field': typeof FieldRoute
+  '/hangar-stage3-manualtest': typeof HangarStage3ManualtestRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/about': typeof LayoutAboutRoute
   '/agrisky': typeof LayoutAgriskyRoute
@@ -605,15 +695,20 @@ export interface FileRoutesByTo {
   '/pilot/profile': typeof PilotProfileRoute
   '/pilot/sync': typeof PilotSyncRoute
   '/pilot/tracking': typeof PilotTrackingRoute
+  '/the-hangar/mission': typeof TheHangarMissionRoute
+  '/the-hangar/welcome': typeof TheHangarWelcomeRoute
   '/': typeof LayoutIndexRoute
   '/academy': typeof AcademyIndexRoute
   '/destud': typeof DestudIndexRoute
   '/mission-hub': typeof MissionHubIndexRoute
   '/pilot': typeof PilotIndexRoute
+  '/the-hangar': typeof TheHangarIndexRoute
   '/auth/callback': typeof LayoutAuthCallbackRoute
   '/learn/drone-design-fundamentals': typeof LayoutLearnDroneDesignFundamentalsRoute
+  '/api/hangar/missions': typeof ApiHangarMissionsRoute
   '/destud/dashboard/engineer': typeof DestudDashboardEngineerRoute
   '/destud/dashboard/explorer': typeof DestudDashboardExplorerRoute
+  '/destud/projects/$projectId': typeof DestudProjectsProjectIdRoute
   '/mission-hub/torqwings-design-studio/advisor': typeof MissionHubTorqwingsDesignStudioAdvisorRoute
   '/mission-hub/torqwings-design-studio/compliance': typeof MissionHubTorqwingsDesignStudioComplianceRoute
   '/mission-hub/torqwings-design-studio/components': typeof MissionHubTorqwingsDesignStudioComponentsRoute
@@ -630,6 +725,11 @@ export interface FileRoutesByTo {
   '/mission-hub/torqwings-design-studio': typeof MissionHubTorqwingsDesignStudioIndexRoute
   '/pilot/missions': typeof PilotMissionsIndexRoute
   '/academy/courses/$slug/learn': typeof AcademyCoursesSlugLearnRoute
+  '/api/hangar/process-mission/finalize': typeof ApiHangarProcessMissionFinalizeRoute
+  '/api/hangar/process-mission/input-processing': typeof ApiHangarProcessMissionInputProcessingRoute
+  '/api/hangar/process-mission/output-generation': typeof ApiHangarProcessMissionOutputGenerationRoute
+  '/api/hangar/process-mission/output-interface': typeof ApiHangarProcessMissionOutputInterfaceRoute
+  '/api/hangar/process-mission/reasoning-planning': typeof ApiHangarProcessMissionReasoningPlanningRoute
   '/academy/courses/$slug/modules/$moduleId': typeof AcademyCoursesSlugModulesModuleIdRoute
   '/academy/module/$moduleId/lesson/$lessonId': typeof AcademyModuleModuleIdLessonLessonIdRoute
   '/academy/module/$moduleId/quiz/$quizId': typeof AcademyModuleModuleIdQuizQuizIdRoute
@@ -640,9 +740,11 @@ export interface FileRoutesById {
   '/academy': typeof AcademyRouteWithChildren
   '/destud': typeof DestudRouteWithChildren
   '/field': typeof FieldRoute
+  '/hangar-stage3-manualtest': typeof HangarStage3ManualtestRoute
   '/mission-hub': typeof MissionHubRouteWithChildren
   '/pilot': typeof PilotRouteWithChildren
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/the-hangar': typeof TheHangarRouteWithChildren
   '/_layout/about': typeof LayoutAboutRoute
   '/_layout/agrisky': typeof LayoutAgriskyRoute
   '/_layout/contact': typeof LayoutContactRoute
@@ -683,15 +785,20 @@ export interface FileRoutesById {
   '/pilot/profile': typeof PilotProfileRoute
   '/pilot/sync': typeof PilotSyncRoute
   '/pilot/tracking': typeof PilotTrackingRoute
+  '/the-hangar/mission': typeof TheHangarMissionRoute
+  '/the-hangar/welcome': typeof TheHangarWelcomeRoute
   '/_layout/': typeof LayoutIndexRoute
   '/academy/': typeof AcademyIndexRoute
   '/destud/': typeof DestudIndexRoute
   '/mission-hub/': typeof MissionHubIndexRoute
   '/pilot/': typeof PilotIndexRoute
+  '/the-hangar/': typeof TheHangarIndexRoute
   '/_layout/auth/callback': typeof LayoutAuthCallbackRoute
   '/_layout/learn/drone-design-fundamentals': typeof LayoutLearnDroneDesignFundamentalsRoute
+  '/api/hangar/missions': typeof ApiHangarMissionsRoute
   '/destud/dashboard/engineer': typeof DestudDashboardEngineerRoute
   '/destud/dashboard/explorer': typeof DestudDashboardExplorerRoute
+  '/destud/projects/$projectId': typeof DestudProjectsProjectIdRoute
   '/mission-hub/torqwings-design-studio/advisor': typeof MissionHubTorqwingsDesignStudioAdvisorRoute
   '/mission-hub/torqwings-design-studio/compliance': typeof MissionHubTorqwingsDesignStudioComplianceRoute
   '/mission-hub/torqwings-design-studio/components': typeof MissionHubTorqwingsDesignStudioComponentsRoute
@@ -708,6 +815,11 @@ export interface FileRoutesById {
   '/mission-hub/torqwings-design-studio/': typeof MissionHubTorqwingsDesignStudioIndexRoute
   '/pilot/missions/': typeof PilotMissionsIndexRoute
   '/academy/courses/$slug/learn': typeof AcademyCoursesSlugLearnRoute
+  '/api/hangar/process-mission/finalize': typeof ApiHangarProcessMissionFinalizeRoute
+  '/api/hangar/process-mission/input-processing': typeof ApiHangarProcessMissionInputProcessingRoute
+  '/api/hangar/process-mission/output-generation': typeof ApiHangarProcessMissionOutputGenerationRoute
+  '/api/hangar/process-mission/output-interface': typeof ApiHangarProcessMissionOutputInterfaceRoute
+  '/api/hangar/process-mission/reasoning-planning': typeof ApiHangarProcessMissionReasoningPlanningRoute
   '/academy/courses/$slug/modules/$moduleId': typeof AcademyCoursesSlugModulesModuleIdRoute
   '/academy/module/$moduleId/lesson/$lessonId': typeof AcademyModuleModuleIdLessonLessonIdRoute
   '/academy/module/$moduleId/quiz/$quizId': typeof AcademyModuleModuleIdQuizQuizIdRoute
@@ -719,9 +831,11 @@ export interface FileRouteTypes {
     | '/academy'
     | '/destud'
     | '/field'
+    | '/hangar-stage3-manualtest'
     | '/mission-hub'
     | '/pilot'
     | '/sitemap.xml'
+    | '/the-hangar'
     | '/about'
     | '/agrisky'
     | '/contact'
@@ -762,14 +876,19 @@ export interface FileRouteTypes {
     | '/pilot/profile'
     | '/pilot/sync'
     | '/pilot/tracking'
+    | '/the-hangar/mission'
+    | '/the-hangar/welcome'
     | '/academy/'
     | '/destud/'
     | '/mission-hub/'
     | '/pilot/'
+    | '/the-hangar/'
     | '/auth/callback'
     | '/learn/drone-design-fundamentals'
+    | '/api/hangar/missions'
     | '/destud/dashboard/engineer'
     | '/destud/dashboard/explorer'
+    | '/destud/projects/$projectId'
     | '/mission-hub/torqwings-design-studio/advisor'
     | '/mission-hub/torqwings-design-studio/compliance'
     | '/mission-hub/torqwings-design-studio/components'
@@ -786,12 +905,18 @@ export interface FileRouteTypes {
     | '/mission-hub/torqwings-design-studio/'
     | '/pilot/missions/'
     | '/academy/courses/$slug/learn'
+    | '/api/hangar/process-mission/finalize'
+    | '/api/hangar/process-mission/input-processing'
+    | '/api/hangar/process-mission/output-generation'
+    | '/api/hangar/process-mission/output-interface'
+    | '/api/hangar/process-mission/reasoning-planning'
     | '/academy/courses/$slug/modules/$moduleId'
     | '/academy/module/$moduleId/lesson/$lessonId'
     | '/academy/module/$moduleId/quiz/$quizId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/field'
+    | '/hangar-stage3-manualtest'
     | '/sitemap.xml'
     | '/about'
     | '/agrisky'
@@ -831,15 +956,20 @@ export interface FileRouteTypes {
     | '/pilot/profile'
     | '/pilot/sync'
     | '/pilot/tracking'
+    | '/the-hangar/mission'
+    | '/the-hangar/welcome'
     | '/'
     | '/academy'
     | '/destud'
     | '/mission-hub'
     | '/pilot'
+    | '/the-hangar'
     | '/auth/callback'
     | '/learn/drone-design-fundamentals'
+    | '/api/hangar/missions'
     | '/destud/dashboard/engineer'
     | '/destud/dashboard/explorer'
+    | '/destud/projects/$projectId'
     | '/mission-hub/torqwings-design-studio/advisor'
     | '/mission-hub/torqwings-design-studio/compliance'
     | '/mission-hub/torqwings-design-studio/components'
@@ -856,6 +986,11 @@ export interface FileRouteTypes {
     | '/mission-hub/torqwings-design-studio'
     | '/pilot/missions'
     | '/academy/courses/$slug/learn'
+    | '/api/hangar/process-mission/finalize'
+    | '/api/hangar/process-mission/input-processing'
+    | '/api/hangar/process-mission/output-generation'
+    | '/api/hangar/process-mission/output-interface'
+    | '/api/hangar/process-mission/reasoning-planning'
     | '/academy/courses/$slug/modules/$moduleId'
     | '/academy/module/$moduleId/lesson/$lessonId'
     | '/academy/module/$moduleId/quiz/$quizId'
@@ -865,9 +1000,11 @@ export interface FileRouteTypes {
     | '/academy'
     | '/destud'
     | '/field'
+    | '/hangar-stage3-manualtest'
     | '/mission-hub'
     | '/pilot'
     | '/sitemap.xml'
+    | '/the-hangar'
     | '/_layout/about'
     | '/_layout/agrisky'
     | '/_layout/contact'
@@ -908,15 +1045,20 @@ export interface FileRouteTypes {
     | '/pilot/profile'
     | '/pilot/sync'
     | '/pilot/tracking'
+    | '/the-hangar/mission'
+    | '/the-hangar/welcome'
     | '/_layout/'
     | '/academy/'
     | '/destud/'
     | '/mission-hub/'
     | '/pilot/'
+    | '/the-hangar/'
     | '/_layout/auth/callback'
     | '/_layout/learn/drone-design-fundamentals'
+    | '/api/hangar/missions'
     | '/destud/dashboard/engineer'
     | '/destud/dashboard/explorer'
+    | '/destud/projects/$projectId'
     | '/mission-hub/torqwings-design-studio/advisor'
     | '/mission-hub/torqwings-design-studio/compliance'
     | '/mission-hub/torqwings-design-studio/components'
@@ -933,6 +1075,11 @@ export interface FileRouteTypes {
     | '/mission-hub/torqwings-design-studio/'
     | '/pilot/missions/'
     | '/academy/courses/$slug/learn'
+    | '/api/hangar/process-mission/finalize'
+    | '/api/hangar/process-mission/input-processing'
+    | '/api/hangar/process-mission/output-generation'
+    | '/api/hangar/process-mission/output-interface'
+    | '/api/hangar/process-mission/reasoning-planning'
     | '/academy/courses/$slug/modules/$moduleId'
     | '/academy/module/$moduleId/lesson/$lessonId'
     | '/academy/module/$moduleId/quiz/$quizId'
@@ -943,13 +1090,28 @@ export interface RootRouteChildren {
   AcademyRoute: typeof AcademyRouteWithChildren
   DestudRoute: typeof DestudRouteWithChildren
   FieldRoute: typeof FieldRoute
+  HangarStage3ManualtestRoute: typeof HangarStage3ManualtestRoute
   MissionHubRoute: typeof MissionHubRouteWithChildren
   PilotRoute: typeof PilotRouteWithChildren
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  TheHangarRoute: typeof TheHangarRouteWithChildren
+  ApiHangarMissionsRoute: typeof ApiHangarMissionsRoute
+  ApiHangarProcessMissionFinalizeRoute: typeof ApiHangarProcessMissionFinalizeRoute
+  ApiHangarProcessMissionInputProcessingRoute: typeof ApiHangarProcessMissionInputProcessingRoute
+  ApiHangarProcessMissionOutputGenerationRoute: typeof ApiHangarProcessMissionOutputGenerationRoute
+  ApiHangarProcessMissionOutputInterfaceRoute: typeof ApiHangarProcessMissionOutputInterfaceRoute
+  ApiHangarProcessMissionReasoningPlanningRoute: typeof ApiHangarProcessMissionReasoningPlanningRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/the-hangar': {
+      id: '/the-hangar'
+      path: '/the-hangar'
+      fullPath: '/the-hangar'
+      preLoaderRoute: typeof TheHangarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sitemap.xml': {
       id: '/sitemap.xml'
       path: '/sitemap.xml'
@@ -969,6 +1131,13 @@ declare module '@tanstack/react-router' {
       path: '/mission-hub'
       fullPath: '/mission-hub'
       preLoaderRoute: typeof MissionHubRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hangar-stage3-manualtest': {
+      id: '/hangar-stage3-manualtest'
+      path: '/hangar-stage3-manualtest'
+      fullPath: '/hangar-stage3-manualtest'
+      preLoaderRoute: typeof HangarStage3ManualtestRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/field': {
@@ -998,6 +1167,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof LayoutRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/the-hangar/': {
+      id: '/the-hangar/'
+      path: '/'
+      fullPath: '/the-hangar/'
+      preLoaderRoute: typeof TheHangarIndexRouteImport
+      parentRoute: typeof TheHangarRoute
     }
     '/pilot/': {
       id: '/pilot/'
@@ -1033,6 +1209,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof LayoutIndexRouteImport
       parentRoute: typeof LayoutRoute
+    }
+    '/the-hangar/welcome': {
+      id: '/the-hangar/welcome'
+      path: '/welcome'
+      fullPath: '/the-hangar/welcome'
+      preLoaderRoute: typeof TheHangarWelcomeRouteImport
+      parentRoute: typeof TheHangarRoute
+    }
+    '/the-hangar/mission': {
+      id: '/the-hangar/mission'
+      path: '/mission'
+      fullPath: '/the-hangar/mission'
+      preLoaderRoute: typeof TheHangarMissionRouteImport
+      parentRoute: typeof TheHangarRoute
     }
     '/pilot/tracking': {
       id: '/pilot/tracking'
@@ -1419,6 +1609,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MissionHubTorqwingsDesignStudioAdvisorRouteImport
       parentRoute: typeof MissionHubTorqwingsDesignStudioRoute
     }
+    '/destud/projects/$projectId': {
+      id: '/destud/projects/$projectId'
+      path: '/projects/$projectId'
+      fullPath: '/destud/projects/$projectId'
+      preLoaderRoute: typeof DestudProjectsProjectIdRouteImport
+      parentRoute: typeof DestudRoute
+    }
     '/destud/dashboard/explorer': {
       id: '/destud/dashboard/explorer'
       path: '/dashboard/explorer'
@@ -1433,6 +1630,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DestudDashboardEngineerRouteImport
       parentRoute: typeof DestudRoute
     }
+    '/api/hangar/missions': {
+      id: '/api/hangar/missions'
+      path: '/api/hangar/missions'
+      fullPath: '/api/hangar/missions'
+      preLoaderRoute: typeof ApiHangarMissionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_layout/learn/drone-design-fundamentals': {
       id: '/_layout/learn/drone-design-fundamentals'
       path: '/drone-design-fundamentals'
@@ -1446,6 +1650,41 @@ declare module '@tanstack/react-router' {
       fullPath: '/auth/callback'
       preLoaderRoute: typeof LayoutAuthCallbackRouteImport
       parentRoute: typeof LayoutRoute
+    }
+    '/api/hangar/process-mission/reasoning-planning': {
+      id: '/api/hangar/process-mission/reasoning-planning'
+      path: '/api/hangar/process-mission/reasoning-planning'
+      fullPath: '/api/hangar/process-mission/reasoning-planning'
+      preLoaderRoute: typeof ApiHangarProcessMissionReasoningPlanningRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/hangar/process-mission/output-interface': {
+      id: '/api/hangar/process-mission/output-interface'
+      path: '/api/hangar/process-mission/output-interface'
+      fullPath: '/api/hangar/process-mission/output-interface'
+      preLoaderRoute: typeof ApiHangarProcessMissionOutputInterfaceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/hangar/process-mission/output-generation': {
+      id: '/api/hangar/process-mission/output-generation'
+      path: '/api/hangar/process-mission/output-generation'
+      fullPath: '/api/hangar/process-mission/output-generation'
+      preLoaderRoute: typeof ApiHangarProcessMissionOutputGenerationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/hangar/process-mission/input-processing': {
+      id: '/api/hangar/process-mission/input-processing'
+      path: '/api/hangar/process-mission/input-processing'
+      fullPath: '/api/hangar/process-mission/input-processing'
+      preLoaderRoute: typeof ApiHangarProcessMissionInputProcessingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/hangar/process-mission/finalize': {
+      id: '/api/hangar/process-mission/finalize'
+      path: '/api/hangar/process-mission/finalize'
+      fullPath: '/api/hangar/process-mission/finalize'
+      preLoaderRoute: typeof ApiHangarProcessMissionFinalizeRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/academy/courses/$slug/learn': {
       id: '/academy/courses/$slug/learn'
@@ -1558,6 +1797,7 @@ interface DestudRouteChildren {
   DestudIndexRoute: typeof DestudIndexRoute
   DestudDashboardEngineerRoute: typeof DestudDashboardEngineerRoute
   DestudDashboardExplorerRoute: typeof DestudDashboardExplorerRoute
+  DestudProjectsProjectIdRoute: typeof DestudProjectsProjectIdRoute
 }
 
 const DestudRouteChildren: DestudRouteChildren = {
@@ -1565,6 +1805,7 @@ const DestudRouteChildren: DestudRouteChildren = {
   DestudIndexRoute: DestudIndexRoute,
   DestudDashboardEngineerRoute: DestudDashboardEngineerRoute,
   DestudDashboardExplorerRoute: DestudDashboardExplorerRoute,
+  DestudProjectsProjectIdRoute: DestudProjectsProjectIdRoute,
 }
 
 const DestudRouteWithChildren =
@@ -1699,14 +1940,42 @@ const PilotRouteChildren: PilotRouteChildren = {
 
 const PilotRouteWithChildren = PilotRoute._addFileChildren(PilotRouteChildren)
 
+interface TheHangarRouteChildren {
+  TheHangarMissionRoute: typeof TheHangarMissionRoute
+  TheHangarWelcomeRoute: typeof TheHangarWelcomeRoute
+  TheHangarIndexRoute: typeof TheHangarIndexRoute
+}
+
+const TheHangarRouteChildren: TheHangarRouteChildren = {
+  TheHangarMissionRoute: TheHangarMissionRoute,
+  TheHangarWelcomeRoute: TheHangarWelcomeRoute,
+  TheHangarIndexRoute: TheHangarIndexRoute,
+}
+
+const TheHangarRouteWithChildren = TheHangarRoute._addFileChildren(
+  TheHangarRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   LayoutRoute: LayoutRouteWithChildren,
   AcademyRoute: AcademyRouteWithChildren,
   DestudRoute: DestudRouteWithChildren,
   FieldRoute: FieldRoute,
+  HangarStage3ManualtestRoute: HangarStage3ManualtestRoute,
   MissionHubRoute: MissionHubRouteWithChildren,
   PilotRoute: PilotRouteWithChildren,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  TheHangarRoute: TheHangarRouteWithChildren,
+  ApiHangarMissionsRoute: ApiHangarMissionsRoute,
+  ApiHangarProcessMissionFinalizeRoute: ApiHangarProcessMissionFinalizeRoute,
+  ApiHangarProcessMissionInputProcessingRoute:
+    ApiHangarProcessMissionInputProcessingRoute,
+  ApiHangarProcessMissionOutputGenerationRoute:
+    ApiHangarProcessMissionOutputGenerationRoute,
+  ApiHangarProcessMissionOutputInterfaceRoute:
+    ApiHangarProcessMissionOutputInterfaceRoute,
+  ApiHangarProcessMissionReasoningPlanningRoute:
+    ApiHangarProcessMissionReasoningPlanningRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

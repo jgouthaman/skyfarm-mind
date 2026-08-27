@@ -110,10 +110,10 @@ export async function getModuleSections(moduleId: string): Promise<AcademyModule
 // Best-effort: a failure here shouldn't block the learner, so callers should
 // swallow/log errors rather than surface them.
 export async function cacheModuleContent(sectionId: string, content: string): Promise<void> {
-  const { error } = await supabase
-    .from("academy_module_sections" as any)
-    .update({ cached_content: content, cached_at: new Date().toISOString() } as any)
-    .eq("id", sectionId);
+  const { error } = await supabase.rpc("cache_module_section_content" as any, {
+    p_section_id: sectionId,
+    p_content: content,
+  } as any);
   if (error) throw error;
 }
 

@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useDestudUser, resolveDestudTier, destudDashboardPath } from "@/lib/destud-auth";
+import { useDestudUser, resolveDestudTier } from "@/lib/destud-auth";
 import { MissionWizard } from "@/components/design-studio/wizard/MissionWizard";
 import { Topbar } from "@/components/destud/Topbar";
 
@@ -36,7 +36,7 @@ function DestudNewMission() {
         ownerKind="destud"
         stepStorageKey="destud:wizard-step"
         formStorageKey="destud:wizard-form"
-        onSubmitted={() => navigate({ to: destudDashboardPath(tier) })}
+        onSubmitted={(projectId) => navigate({ to: "/destud/projects/$projectId", params: { projectId } })}
       />
     </div>
   );

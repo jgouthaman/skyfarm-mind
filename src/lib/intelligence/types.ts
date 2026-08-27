@@ -29,6 +29,11 @@ export interface MatchedRule {
   cost_max_inr: number | null;
   flight_time_min: number | null;
   flight_time_max: number | null;
+  // Already selected in ruleSolver.ts's SELECT_COLS (needed for the Phase 1B
+  // nearest-fallback distance calc) but not previously mapped onto this
+  // type — added for designStudioBuilder.ts's "Payload fit" confidence metric.
+  payload_min_kg: number | null;
+  payload_max_kg: number | null;
 }
 
 export interface MatchedReference {
@@ -42,6 +47,24 @@ export interface MatchedReference {
   battery: string | null;
   component_list: Record<string, unknown> | null;
   requirements: Record<string, unknown> | null;
+  engineer_notes: string | null;
+  confidence_score: number | null;
+}
+
+// Placeholder shape for the future AI Advisor output (Phase 3, currently on
+// hold — no design doc or reference file for it exists in this repo, so this
+// is a reasonable placeholder mirroring MatchedRule/MatchedReference's
+// common fields, just enough for buildFromAI (designStudioBuilder.ts) to
+// type-check against something real once AI Advisor actually ships. Revisit
+// this shape against the real Phase 3 spec when that work resumes.
+export interface AIGeneratedDesign {
+  id: string;
+  name: string;
+  drone_type: string | null;
+  frame_size: string | null;
+  motor_class: string | null;
+  battery_config: string | null;
+  component_list: Record<string, unknown> | null;
   engineer_notes: string | null;
   confidence_score: number | null;
 }

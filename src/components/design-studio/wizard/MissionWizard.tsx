@@ -13,10 +13,11 @@ import { StepPayload } from "./StepPayload";
 import { StepSafety } from "./StepSafety";
 import { StepReview } from "./StepReview";
 import { StepRecommendation } from "./StepRecommendation";
+import { StepDesignStudio } from "./StepDesignStudio";
 import { runIntelligenceEngine } from "@/lib/intelligence/orchestrator";
 import type { IntelligenceResult, IntelligenceInput } from "@/lib/intelligence/types";
 
-const TOTAL = 7;
+const TOTAL = 8;
 
 export interface MissionWizardProps {
   // Whoever owns the resulting studio_projects row — a mission_hub_users.id
@@ -145,13 +146,32 @@ export function MissionWizard({
     setEngineLoading(true);
     setEngineError(null);
     try {
-      const result = await runIntelligenceEngine(buildEngineInput(f));
+      const result = await runIntelligenceEngine(buildEngineInput(f), ownerKind);
       setRecommendation(result);
     } catch (err: any) {
       setEngineError(err?.message ?? "Something went wrong while analysing your requirements.");
     } finally {
       setEngineLoading(false);
     }
+  }
+
+  // Manual escape hatch: clears this wizard's own sessionStorage draft and
+  // resets its local state back to a fresh session. Does not touch anything
+  // outside the wizard (destud auth session, tier info, etc.) — those live
+  // under separate sessionStorage keys and separate state entirely.
+  function handleStartOver() {
+    if (!window.confirm("Start over? This clears all progress on this mission and can't be undone.")) {
+      return;
+    }
+    sessionStorage.removeItem(stepStorageKey);
+    sessionStorage.removeItem(formStorageKey);
+    setStep(1);
+    setForm(INITIAL_FORM);
+    setRecommendation(null);
+    setEngineLoading(false);
+    setEngineError(null);
+    setAcceptedSource('rule');
+    setBaseName(null);
   }
 
   async function handleSubmit() {
@@ -193,6 +213,7 @@ export function MissionWizard({
         projectName={form.projectName}
         vertical={form.vertical}
         purpose={form.purpose}
+        onStartOver={handleStartOver}
       />
 
       {step === 1 && (
@@ -251,10 +272,19 @@ export function MissionWizard({
           onAccept={(choice) => { setAcceptedSource(choice); setStep(7); }}
         />
       )}
-      {step === 7 && (
-        <StepReview
+      {step === 7 && recommendation && (
+        <StepDesignStudio
+          recommendation={recommendation}
+          acceptedSource={acceptedSource}
           form={form}
           onBack={() => setStep(6)}
+          onNext={() => setStep(8)}
+        />
+      )}
+      {step === 8 && (
+        <StepReview
+          form={form}
+          onBack={() => setStep(7)}
           onSubmit={handleSubmit}
           saving={saving}
         />

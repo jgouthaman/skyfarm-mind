@@ -1,3 +1,4 @@
+import { useNavigate } from "@tanstack/react-router";
 import { C, DISPLAY, MONO, SANS } from "./theme";
 
 export interface DesignSummary {
@@ -11,10 +12,15 @@ export interface DesignSummary {
 }
 
 export function DesignCard({ design }: { design: DesignSummary }) {
+  const navigate = useNavigate();
+
   return (
     <div
+      onDoubleClick={() => navigate({ to: "/destud/projects/$projectId", params: { projectId: design.id } })}
+      title="Double-click to open"
       style={{
-        textAlign: "left", border: `1px solid ${C.line}`, borderRadius: 12, background: C.panel,
+        textAlign: "left", cursor: "pointer", userSelect: "none",
+        border: `1px solid ${C.line}`, borderRadius: 12, background: C.panel,
         padding: "16px 18px",
       }}
     >
