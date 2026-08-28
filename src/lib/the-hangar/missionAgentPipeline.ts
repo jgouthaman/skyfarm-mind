@@ -3,7 +3,11 @@ import { decomposeMission } from "./missionDecomposition.ts";
 import { identifyConstraintsAndKpis, type TracedConstraint } from "./constraintIdentification.ts";
 import { prioritizeTradeoffs } from "./tradeoffPrioritization.ts";
 import { runOutputGeneration, type Stage3Output } from "./stage3Orchestrator.ts";
-import type { FinalizedConstraint, FinalizedKpi, MissionSpecsFields } from "./missionSpecAssembly.ts";
+import type {
+  FinalizedConstraint,
+  FinalizedKpi,
+  MissionSpecsFields,
+} from "./missionSpecAssembly.ts";
 import { resolveDirectReferences } from "./directReferenceResolver.ts";
 import { parseNaturalLanguageAndFormSources } from "./missionSourceParsing.ts";
 import { hasUsableContent, computeValidationFlags } from "./missionInputValidation.ts";
@@ -20,8 +24,18 @@ import {
   type HangarMissionRow,
   type MissionStatus,
 } from "./missionPersistence.ts";
-import { stubExport, stubEventPublish, type StubResult, type EventStubResult } from "./exportAndEventStubs.ts";
-import type { DerivedKpi, MissionSourceInput, PrioritizedTradeoff, SourceType } from "./types/hangar-mission";
+import {
+  stubExport,
+  stubEventPublish,
+  type StubResult,
+  type EventStubResult,
+} from "./exportAndEventStubs.ts";
+import type {
+  DerivedKpi,
+  MissionSourceInput,
+  PrioritizedTradeoff,
+  SourceType,
+} from "./types/hangar-mission";
 
 // Stage 2.4 orchestrator (MissionAgent.md Section 12.1's `runMissionAgent`,
 // adapted) — split into 4 independently-callable stage functions so the UI
@@ -59,7 +73,10 @@ export class InvalidMissionInputError extends Error {
 // of them, not just optionally. Without this, any authenticated user who
 // learns/guesses a missionId could advance or corrupt someone else's
 // in-flight mission.
-async function assertMissionOwnership(missionId: string, userId: string): Promise<HangarMissionRow> {
+async function assertMissionOwnership(
+  missionId: string,
+  userId: string,
+): Promise<HangarMissionRow> {
   const mission = await getMission(missionId);
   if (!mission) {
     throw new Error(`No Hangar_missions row found for missionId "${missionId}"`);
@@ -252,7 +269,14 @@ export async function runOutputGenerationStage(request: Stage3Request): Promise<
   const start = Date.now();
   try {
     const stage3 = await runOutputGeneration({ data: { missionId, ...stage3Input } });
-    await logStageRun(missionId, "output_generation", { missionId }, stage3, "success", Date.now() - start);
+    await logStageRun(
+      missionId,
+      "output_generation",
+      { missionId },
+      stage3,
+      "success",
+      Date.now() - start,
+    );
     return stage3;
   } catch (err) {
     throw await recordStageFailure(missionId, "output_generation", err);
@@ -355,7 +379,9 @@ export interface FinalizeMissionResult {
   status: "finalized";
 }
 
-export async function finalizeMission(request: FinalizeMissionRequest): Promise<FinalizeMissionResult> {
+export async function finalizeMission(
+  request: FinalizeMissionRequest,
+): Promise<FinalizeMissionResult> {
   const { userId, missionId } = request;
   await assertMissionOwnership(missionId, userId);
   await updateMissionStatus(missionId, "finalized");
@@ -384,8 +410,11 @@ export interface MissionListEntry {
   confidenceScore: number | null;
 }
 
-export async function listMissionsForUser(userId: string): Promise<MissionListEntry[]> {
-  const missions = await listUserMissions(userId);
+export async function listMissionsForUser(
+  userId: string,
+  statusFilter?: MissionStatus,
+): Promise<MissionListEntry[]> {
+  const missions = await listUserMissions(userId, statusFilter);
   const missionIds = missions.map((m) => m.id);
   const [specs, briefs] = await Promise.all([
     getSpecsForMissions(missionIds),

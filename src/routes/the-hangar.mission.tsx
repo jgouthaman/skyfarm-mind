@@ -2,7 +2,11 @@ import { useEffect, useRef, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useHangarSession } from "@/lib/the-hangar/session";
 import { supabase } from "@/integrations/supabase/client";
-import type { Stage1Result, Stage2Result, MissionListEntry } from "@/lib/the-hangar/missionAgentPipeline";
+import type {
+  Stage1Result,
+  Stage2Result,
+  MissionListEntry,
+} from "@/lib/the-hangar/missionAgentPipeline";
 import type { Stage3Output } from "@/lib/the-hangar/stage3Orchestrator";
 import type { FinalMissionResponse } from "@/lib/the-hangar/types/mission-pipeline-api";
 
@@ -93,7 +97,10 @@ const STAGE_TOOLS: Record<StageKey, StageTool[]> = {
   ],
   reasoning_planning: [
     { tool: "Claude Sonnet 5 (Anthropic)", purpose: "Mission decomposition" },
-    { tool: "Domain Rules Engine", purpose: "Gate-tier constraint identification (regulatory/safety)" },
+    {
+      tool: "Domain Rules Engine",
+      purpose: "Gate-tier constraint identification (regulatory/safety)",
+    },
     { tool: "Claude Sonnet 5 (Anthropic)", purpose: "Constraint & KPI derivation" },
     { tool: "Trade-off Prioritization", purpose: "Deterministic ranking of constraints & KPIs" },
   ],
@@ -105,7 +112,10 @@ const STAGE_TOOLS: Record<StageKey, StageTool[]> = {
   output_interface: [
     { tool: "Supabase (Postgres)", purpose: "Persist the mission spec" },
     { tool: "Export (stub)", purpose: "PDF / DOCX / Excel — not yet built" },
-    { tool: "Event Publish (stub)", purpose: "Notify downstream bay — Concept Agent not yet built" },
+    {
+      tool: "Event Publish (stub)",
+      purpose: "Notify downstream bay — Concept Agent not yet built",
+    },
   ],
 };
 
@@ -198,7 +208,9 @@ function computeConfidenceBreakdown(
   sourceTypesUsedCount: number,
   validationFlagCount: number,
 ): ConfidenceBreakdown {
-  const foundFields = CORE_FIELDS.filter((f) => kpis.some((k) => k.name.trim().toLowerCase() === f));
+  const foundFields = CORE_FIELDS.filter((f) =>
+    kpis.some((k) => k.name.trim().toLowerCase() === f),
+  );
   const missingFields = CORE_FIELDS.filter((f) => !foundFields.includes(f));
   return {
     sourceTypesUsedCount,
@@ -235,7 +247,8 @@ function getFieldChanges(prev: KpiView[] | null, next: KpiView[]): FieldChange[]
       label: field.charAt(0).toUpperCase() + field.slice(1),
       prevDisplay: p ? `${p.target} ${p.unit}` : null,
       newDisplay: n ? `${n.target} ${n.unit}` : "still missing",
-      changed: (p?.target ?? null) !== (n?.target ?? null) || (p?.unit ?? null) !== (n?.unit ?? null),
+      changed:
+        (p?.target ?? null) !== (n?.target ?? null) || (p?.unit ?? null) !== (n?.unit ?? null),
     };
   });
 }
@@ -246,10 +259,21 @@ function getFieldChanges(prev: KpiView[] | null, next: KpiView[]): FieldChange[]
 // completeness term AND the validation-flag penalty in one pass, per field.
 type CoreField = (typeof CORE_FIELDS)[number];
 
-const BOOST_QUESTIONS: Record<CoreField, { question: string; unit: string; structuredKey: string }> = {
-  payload: { question: "What's the required payload capacity?", unit: "kg", structuredKey: "payload_kg" },
+const BOOST_QUESTIONS: Record<
+  CoreField,
+  { question: string; unit: string; structuredKey: string }
+> = {
+  payload: {
+    question: "What's the required payload capacity?",
+    unit: "kg",
+    structuredKey: "payload_kg",
+  },
   range: { question: "What's the required range?", unit: "km", structuredKey: "range_km" },
-  endurance: { question: "What's the required endurance / battery life?", unit: "min", structuredKey: "endurance_min" },
+  endurance: {
+    question: "What's the required endurance / battery life?",
+    unit: "min",
+    structuredKey: "endurance_min",
+  },
 };
 
 function parseLeadingNumberClient(text: string): number | null {
@@ -264,7 +288,9 @@ function parseLeadingNumberClient(text: string): number | null {
 // list completely: if a field isn't in this list, Stage 1 already found a
 // real value for it, structured or not.
 function getMissingCoreFields(validationFlags: string[]): CoreField[] {
-  return CORE_FIELDS.filter((f) => validationFlags.includes(`${f}: no value extracted or provided`));
+  return CORE_FIELDS.filter((f) =>
+    validationFlags.includes(`${f}: no value extracted or provided`),
+  );
 }
 
 // Grouped by where each constraint actually came from — the same
@@ -272,7 +298,12 @@ function getMissingCoreFields(validationFlags: string[]): CoreField[] {
 // used to cluster the list instead of repeating on every single card what
 // category it belongs to. Fixed display order: hard rules first (least
 // negotiable), user-stated last (most directly traceable to the brief).
-const CONSTRAINT_GROUP_ORDER = ["Domain Rules", "Regulatory", "LLM-Inferred", "From Your Brief"] as const;
+const CONSTRAINT_GROUP_ORDER = [
+  "Domain Rules",
+  "Regulatory",
+  "LLM-Inferred",
+  "From Your Brief",
+] as const;
 
 function categorizeConstraint(sources: string[]): (typeof CONSTRAINT_GROUP_ORDER)[number] {
   if (sources.some((s) => /^DOM-/.test(s))) return "Domain Rules";
@@ -281,7 +312,9 @@ function categorizeConstraint(sources: string[]): (typeof CONSTRAINT_GROUP_ORDER
   return "From Your Brief";
 }
 
-function groupConstraints(constraints: ConstraintView[]): { label: string; items: ConstraintView[] }[] {
+function groupConstraints(
+  constraints: ConstraintView[],
+): { label: string; items: ConstraintView[] }[] {
   const groups = new Map<string, ConstraintView[]>();
   for (const c of constraints) {
     const label = categorizeConstraint(c.sources);
@@ -297,7 +330,11 @@ function groupConstraints(constraints: ConstraintView[]): { label: string; items
 
 // ── Gated stage flow state ──
 
-type StageKey = "input_processing" | "reasoning_planning" | "output_generation" | "output_interface";
+type StageKey =
+  | "input_processing"
+  | "reasoning_planning"
+  | "output_generation"
+  | "output_interface";
 
 interface StageSlot<TResult> {
   status: "pending" | "running" | "complete" | "error";
@@ -399,7 +436,10 @@ async function callStageApi<TResult>(
   } catch (err) {
     return {
       ok: false,
-      error: err instanceof Error ? err.message : "Unexpected error — check your connection and try again.",
+      error:
+        err instanceof Error
+          ? err.message
+          : "Unexpected error — check your connection and try again.",
     };
   }
 }
@@ -419,7 +459,9 @@ function TheHangarMission() {
   const [progressStepIdx, setProgressStepIdx] = useState(0);
   const [currentUserEmail, setCurrentUserEmail] = useState<string | null>(null);
   const [missionsList, setMissionsList] = useState<MissionListEntry[] | null>(null);
-  const [missionsListStatus, setMissionsListStatus] = useState<"idle" | "loading" | "error">("idle");
+  const [missionsListStatus, setMissionsListStatus] = useState<"idle" | "loading" | "error">(
+    "idle",
+  );
   const [selectedMission, setSelectedMission] = useState<MissionListEntry | null>(null);
   const [planExpanded, setPlanExpanded] = useState(false);
   const [missionsExpanded, setMissionsExpanded] = useState(false);
@@ -516,7 +558,13 @@ function TheHangarMission() {
   // locked (routed to PastMissionDetail instead — see the click handler in
   // MissionsListPanel's render below).
   function resumeMission(m: MissionListEntry) {
-    if (!m.missionSpecs || !m.constraints || !m.kpis || m.summary === null || m.confidenceScore === null) {
+    if (
+      !m.missionSpecs ||
+      !m.constraints ||
+      !m.kpis ||
+      m.summary === null ||
+      m.confidenceScore === null
+    ) {
       // No persisted spec to resume (failed/abandoned before spec_ready) —
       // fall back to the read-only view, which already handles this case
       // (shows the status message instead of a spec).
@@ -583,7 +631,8 @@ function TheHangarMission() {
   }
 
   async function saveAsFinal() {
-    if (!flow.missionId || finalizeState.status === "saving" || finalizeState.status === "saved") return;
+    if (!flow.missionId || finalizeState.status === "saving" || finalizeState.status === "saved")
+      return;
     setFinalizeState({ status: "saving", errorMessage: null });
     const outcome = await callStageApi<{ missionId: string; status: string }>(
       "/api/hangar/process-mission/finalize",
@@ -621,13 +670,19 @@ function TheHangarMission() {
     }, 2500);
 
     const sources = [{ source_type: "natural_language", raw_input: { text: briefText.trim() } }];
-    const outcome = await callStageApi<Stage1Result>("/api/hangar/process-mission/input-processing", {
-      sources,
-    });
+    const outcome = await callStageApi<Stage1Result>(
+      "/api/hangar/process-mission/input-processing",
+      {
+        sources,
+      },
+    );
     if (progressTimer.current) clearInterval(progressTimer.current);
 
     if (!outcome.ok) {
-      setFlow((f) => ({ ...f, stage1: { status: "error", result: null, errorMessage: outcome.error } }));
+      setFlow((f) => ({
+        ...f,
+        stage1: { status: "error", result: null, errorMessage: outcome.error },
+      }));
       return;
     }
     setFlow((f) => ({
@@ -642,7 +697,9 @@ function TheHangarMission() {
     // Stage 2's KPI derivation with a silently-guessed number.
     const missing = getMissingCoreFields(outcome.data.validationFlags);
     setGapWizard(
-      missing.length > 0 ? { active: true, questionIndex: 0, answers: {} } : { active: false, questionIndex: 0, answers: {} },
+      missing.length > 0
+        ? { active: true, questionIndex: 0, answers: {} }
+        : { active: false, questionIndex: 0, answers: {} },
     );
     setGapAnswerDraft("");
   }
@@ -661,27 +718,42 @@ function TheHangarMission() {
       if (num !== null) structuredFields[BOOST_QUESTIONS[field as CoreField].structuredKey] = num;
     }
     setFlow((f) => ({ ...f, stage2: { status: "running", result: null, errorMessage: null } }));
-    const outcome = await callStageApi<Stage2Result>("/api/hangar/process-mission/reasoning-planning", {
-      missionId,
-      extraction: stage1.result.extraction,
-      structuredFields,
-      attachedRegulations: stage1.result.attachedRegulations,
-    });
+    const outcome = await callStageApi<Stage2Result>(
+      "/api/hangar/process-mission/reasoning-planning",
+      {
+        missionId,
+        extraction: stage1.result.extraction,
+        structuredFields,
+        attachedRegulations: stage1.result.attachedRegulations,
+      },
+    );
     if (!outcome.ok) {
-      setFlow((f) => ({ ...f, stage2: { status: "error", result: null, errorMessage: outcome.error } }));
+      setFlow((f) => ({
+        ...f,
+        stage2: { status: "error", result: null, errorMessage: outcome.error },
+      }));
       return;
     }
-    setFlow((f) => ({ ...f, stage2: { status: "complete", result: outcome.data, errorMessage: null } }));
+    setFlow((f) => ({
+      ...f,
+      stage2: { status: "complete", result: outcome.data, errorMessage: null },
+    }));
   }
 
   function submitGapAnswer() {
-    const missing = flow.stage1.result ? getMissingCoreFields(flow.stage1.result.validationFlags) : [];
+    const missing = flow.stage1.result
+      ? getMissingCoreFields(flow.stage1.result.validationFlags)
+      : [];
     const field = missing[gapWizard.questionIndex];
     if (!field || !gapAnswerDraft.trim()) return;
     const nextAnswers = { ...gapWizard.answers, [field]: gapAnswerDraft.trim() };
     setGapAnswerDraft("");
     if (gapWizard.questionIndex < missing.length - 1) {
-      setGapWizard({ active: true, questionIndex: gapWizard.questionIndex + 1, answers: nextAnswers });
+      setGapWizard({
+        active: true,
+        questionIndex: gapWizard.questionIndex + 1,
+        answers: nextAnswers,
+      });
       return;
     }
     setGapWizard({ active: false, questionIndex: 0, answers: nextAnswers });
@@ -691,45 +763,63 @@ function TheHangarMission() {
     const { missionId, stage1, stage2 } = flow;
     if (!missionId || !stage1.result || !stage2.result) return;
     setFlow((f) => ({ ...f, stage3: { status: "running", result: null, errorMessage: null } }));
-    const outcome = await callStageApi<Stage3Output>("/api/hangar/process-mission/output-generation", {
-      missionId,
-      detectedIntent: stage1.result.extraction.intent,
-      sourceTypesUsedCount: stage1.result.sourceTypesUsed.length,
-      validationFlagCount: stage1.result.validationFlags.length,
-      operatingEnvironment:
-        typeof stage1.result.structuredFields.operating_environment === "string"
-          ? stage1.result.structuredFields.operating_environment
-          : null,
-      decomposedElements: stage2.result.decomposedElements,
-      identifiedConstraints: stage2.result.identifiedConstraints,
-      derivedKpis: stage2.result.derivedKpis,
-      prioritizedTradeoffs: stage2.result.prioritizedTradeoffs,
-    });
+    const outcome = await callStageApi<Stage3Output>(
+      "/api/hangar/process-mission/output-generation",
+      {
+        missionId,
+        detectedIntent: stage1.result.extraction.intent,
+        sourceTypesUsedCount: stage1.result.sourceTypesUsed.length,
+        validationFlagCount: stage1.result.validationFlags.length,
+        operatingEnvironment:
+          typeof stage1.result.structuredFields.operating_environment === "string"
+            ? stage1.result.structuredFields.operating_environment
+            : null,
+        decomposedElements: stage2.result.decomposedElements,
+        identifiedConstraints: stage2.result.identifiedConstraints,
+        derivedKpis: stage2.result.derivedKpis,
+        prioritizedTradeoffs: stage2.result.prioritizedTradeoffs,
+      },
+    );
     if (!outcome.ok) {
-      setFlow((f) => ({ ...f, stage3: { status: "error", result: null, errorMessage: outcome.error } }));
+      setFlow((f) => ({
+        ...f,
+        stage3: { status: "error", result: null, errorMessage: outcome.error },
+      }));
       return;
     }
-    setFlow((f) => ({ ...f, stage3: { status: "complete", result: outcome.data, errorMessage: null } }));
+    setFlow((f) => ({
+      ...f,
+      stage3: { status: "complete", result: outcome.data, errorMessage: null },
+    }));
   }
 
   async function proceedToStage4() {
     const { missionId, stage1, stage3 } = flow;
     if (!missionId || !stage1.result || !stage3.result) return;
     setFlow((f) => ({ ...f, stage4: { status: "running", result: null, errorMessage: null } }));
-    const outcome = await callStageApi<FinalMissionResponse>("/api/hangar/process-mission/output-interface", {
-      missionId,
-      missionSpecs: stage3.result.missionSpecs,
-      constraints: stage3.result.constraints,
-      kpis: stage3.result.kpis,
-      summary: stage3.result.summary,
-      confidenceScore: stage3.result.confidenceScore,
-      validation_flags: stage1.result.validationFlags,
-    });
+    const outcome = await callStageApi<FinalMissionResponse>(
+      "/api/hangar/process-mission/output-interface",
+      {
+        missionId,
+        missionSpecs: stage3.result.missionSpecs,
+        constraints: stage3.result.constraints,
+        kpis: stage3.result.kpis,
+        summary: stage3.result.summary,
+        confidenceScore: stage3.result.confidenceScore,
+        validation_flags: stage1.result.validationFlags,
+      },
+    );
     if (!outcome.ok) {
-      setFlow((f) => ({ ...f, stage4: { status: "error", result: null, errorMessage: outcome.error } }));
+      setFlow((f) => ({
+        ...f,
+        stage4: { status: "error", result: null, errorMessage: outcome.error },
+      }));
       return;
     }
-    setFlow((f) => ({ ...f, stage4: { status: "complete", result: outcome.data, errorMessage: null } }));
+    setFlow((f) => ({
+      ...f,
+      stage4: { status: "complete", result: outcome.data, errorMessage: null },
+    }));
   }
 
   // Self-contained 4-stage run driven by local variables, not by reading
@@ -748,9 +838,15 @@ function TheHangarMission() {
     setFinalizeState({ status: "idle", errorMessage: null });
 
     setFlow((f) => ({ ...f, stage1: { status: "running", result: null, errorMessage: null } }));
-    const stage1 = await callStageApi<Stage1Result>("/api/hangar/process-mission/input-processing", { sources });
+    const stage1 = await callStageApi<Stage1Result>(
+      "/api/hangar/process-mission/input-processing",
+      { sources },
+    );
     if (!stage1.ok) {
-      setFlow((f) => ({ ...f, stage1: { status: "error", result: null, errorMessage: stage1.error } }));
+      setFlow((f) => ({
+        ...f,
+        stage1: { status: "error", result: null, errorMessage: stage1.error },
+      }));
       return { ok: false, error: stage1.error };
     }
     setFlow((f) => ({
@@ -761,54 +857,81 @@ function TheHangarMission() {
     }));
 
     setFlow((f) => ({ ...f, stage2: { status: "running", result: null, errorMessage: null } }));
-    const stage2 = await callStageApi<Stage2Result>("/api/hangar/process-mission/reasoning-planning", {
-      missionId: stage1.data.missionId,
-      extraction: stage1.data.extraction,
-      structuredFields: stage1.data.structuredFields,
-      attachedRegulations: stage1.data.attachedRegulations,
-    });
+    const stage2 = await callStageApi<Stage2Result>(
+      "/api/hangar/process-mission/reasoning-planning",
+      {
+        missionId: stage1.data.missionId,
+        extraction: stage1.data.extraction,
+        structuredFields: stage1.data.structuredFields,
+        attachedRegulations: stage1.data.attachedRegulations,
+      },
+    );
     if (!stage2.ok) {
-      setFlow((f) => ({ ...f, stage2: { status: "error", result: null, errorMessage: stage2.error } }));
+      setFlow((f) => ({
+        ...f,
+        stage2: { status: "error", result: null, errorMessage: stage2.error },
+      }));
       return { ok: false, error: stage2.error };
     }
-    setFlow((f) => ({ ...f, stage2: { status: "complete", result: stage2.data, errorMessage: null } }));
+    setFlow((f) => ({
+      ...f,
+      stage2: { status: "complete", result: stage2.data, errorMessage: null },
+    }));
 
     setFlow((f) => ({ ...f, stage3: { status: "running", result: null, errorMessage: null } }));
-    const stage3 = await callStageApi<Stage3Output>("/api/hangar/process-mission/output-generation", {
-      missionId: stage1.data.missionId,
-      detectedIntent: stage1.data.extraction.intent,
-      sourceTypesUsedCount: stage1.data.sourceTypesUsed.length,
-      validationFlagCount: stage1.data.validationFlags.length,
-      operatingEnvironment:
-        typeof stage1.data.structuredFields.operating_environment === "string"
-          ? stage1.data.structuredFields.operating_environment
-          : null,
-      decomposedElements: stage2.data.decomposedElements,
-      identifiedConstraints: stage2.data.identifiedConstraints,
-      derivedKpis: stage2.data.derivedKpis,
-      prioritizedTradeoffs: stage2.data.prioritizedTradeoffs,
-    });
+    const stage3 = await callStageApi<Stage3Output>(
+      "/api/hangar/process-mission/output-generation",
+      {
+        missionId: stage1.data.missionId,
+        detectedIntent: stage1.data.extraction.intent,
+        sourceTypesUsedCount: stage1.data.sourceTypesUsed.length,
+        validationFlagCount: stage1.data.validationFlags.length,
+        operatingEnvironment:
+          typeof stage1.data.structuredFields.operating_environment === "string"
+            ? stage1.data.structuredFields.operating_environment
+            : null,
+        decomposedElements: stage2.data.decomposedElements,
+        identifiedConstraints: stage2.data.identifiedConstraints,
+        derivedKpis: stage2.data.derivedKpis,
+        prioritizedTradeoffs: stage2.data.prioritizedTradeoffs,
+      },
+    );
     if (!stage3.ok) {
-      setFlow((f) => ({ ...f, stage3: { status: "error", result: null, errorMessage: stage3.error } }));
+      setFlow((f) => ({
+        ...f,
+        stage3: { status: "error", result: null, errorMessage: stage3.error },
+      }));
       return { ok: false, error: stage3.error };
     }
-    setFlow((f) => ({ ...f, stage3: { status: "complete", result: stage3.data, errorMessage: null } }));
+    setFlow((f) => ({
+      ...f,
+      stage3: { status: "complete", result: stage3.data, errorMessage: null },
+    }));
 
     setFlow((f) => ({ ...f, stage4: { status: "running", result: null, errorMessage: null } }));
-    const stage4 = await callStageApi<FinalMissionResponse>("/api/hangar/process-mission/output-interface", {
-      missionId: stage1.data.missionId,
-      missionSpecs: stage3.data.missionSpecs,
-      constraints: stage3.data.constraints,
-      kpis: stage3.data.kpis,
-      summary: stage3.data.summary,
-      confidenceScore: stage3.data.confidenceScore,
-      validation_flags: stage1.data.validationFlags,
-    });
+    const stage4 = await callStageApi<FinalMissionResponse>(
+      "/api/hangar/process-mission/output-interface",
+      {
+        missionId: stage1.data.missionId,
+        missionSpecs: stage3.data.missionSpecs,
+        constraints: stage3.data.constraints,
+        kpis: stage3.data.kpis,
+        summary: stage3.data.summary,
+        confidenceScore: stage3.data.confidenceScore,
+        validation_flags: stage1.data.validationFlags,
+      },
+    );
     if (!stage4.ok) {
-      setFlow((f) => ({ ...f, stage4: { status: "error", result: null, errorMessage: stage4.error } }));
+      setFlow((f) => ({
+        ...f,
+        stage4: { status: "error", result: null, errorMessage: stage4.error },
+      }));
       return { ok: false, error: stage4.error };
     }
-    setFlow((f) => ({ ...f, stage4: { status: "complete", result: stage4.data, errorMessage: null } }));
+    setFlow((f) => ({
+      ...f,
+      stage4: { status: "complete", result: stage4.data, errorMessage: null },
+    }));
 
     return { ok: true, final: stage4.data };
   }
@@ -832,7 +955,11 @@ function TheHangarMission() {
       const prevKpisView = prevResult.kpis as unknown as KpiView[];
       setPreviousKpis(prevKpisView);
       setPreviousBreakdown(
-        computeConfidenceBreakdown(prevKpisView, flow.sourceTypesUsedCount ?? 0, prevResult.validation_flags.length),
+        computeConfidenceBreakdown(
+          prevKpisView,
+          flow.sourceTypesUsedCount ?? 0,
+          prevResult.validation_flags.length,
+        ),
       );
     } else {
       setPreviousKpis(null);
@@ -863,7 +990,11 @@ function TheHangarMission() {
     const nextAnswers = { ...boostWizard.answers, [field]: answerText };
 
     if (boostWizard.questionIndex < missingFields.length - 1) {
-      setBoostWizard({ active: true, questionIndex: boostWizard.questionIndex + 1, answers: nextAnswers });
+      setBoostWizard({
+        active: true,
+        questionIndex: boostWizard.questionIndex + 1,
+        answers: nextAnswers,
+      });
       return;
     }
 
@@ -904,7 +1035,9 @@ function TheHangarMission() {
   // apply as a label, and only in this state does it make sense to
   // collapse the form away by default.
   const isIdle = flow.stage1.status === "pending" && activeStage !== "done";
-  const missingCoreFields = flow.stage1.result ? getMissingCoreFields(flow.stage1.result.validationFlags) : [];
+  const missingCoreFields = flow.stage1.result
+    ? getMissingCoreFields(flow.stage1.result.validationFlags)
+    : [];
 
   return (
     <div className="hgr-m">
@@ -921,7 +1054,10 @@ function TheHangarMission() {
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             {currentUserEmail && (
-              <span className="hgr-m-mono" style={{ fontSize: 12.5, color: "var(--hgr-m-paper-dim)" }}>
+              <span
+                className="hgr-m-mono"
+                style={{ fontSize: 12.5, color: "var(--hgr-m-paper-dim)" }}
+              >
                 Welcome, {currentUserEmail}
               </span>
             )}
@@ -963,22 +1099,30 @@ function TheHangarMission() {
             <p className="hgr-m-sec-sub">
               Runs the real Stage 1.1 → 1.4 pipeline — intent extraction, decomposition,
               constraint/KPI derivation, spec assembly, and persistence. Your natural-language
-              description is converted into a spec through 4 sequential steps involving multiple
-              LLM calls, so this can take a while — review each stage's findings and proceed to
-              the next when you're ready.
+              description is converted into a spec through 4 sequential steps involving multiple LLM
+              calls, so this can take a while — review each stage's findings and proceed to the next
+              when you're ready.
             </p>
 
-            {missionsListStatus !== "error" && missionsList && missionsList.length > 0 && !selectedMission && (
-              <MissionsListPanel
-                missions={missionsList}
-                expanded={missionsExpanded}
-                onToggleExpanded={() => setMissionsExpanded((v) => !v)}
-                onSelect={(m) => (m.status === "finalized" ? setSelectedMission(m) : resumeMission(m))}
-              />
-            )}
+            {missionsListStatus !== "error" &&
+              missionsList &&
+              missionsList.length > 0 &&
+              !selectedMission && (
+                <MissionsListPanel
+                  missions={missionsList}
+                  expanded={missionsExpanded}
+                  onToggleExpanded={() => setMissionsExpanded((v) => !v)}
+                  onSelect={(m) =>
+                    m.status === "finalized" ? setSelectedMission(m) : resumeMission(m)
+                  }
+                />
+              )}
 
             {selectedMission ? (
-              <PastMissionDetail mission={selectedMission} onBack={() => setSelectedMission(null)} />
+              <PastMissionDetail
+                mission={selectedMission}
+                onBack={() => setSelectedMission(null)}
+              />
             ) : (
               // The "Plan a new mission" collapsible only applies before
               // anything has started — once a mission is running, resumed
@@ -994,191 +1138,247 @@ function TheHangarMission() {
                     aria-expanded={planExpanded}
                   >
                     <span>Plan a new mission</span>
-                    <span className={`hgr-m-missions-arrow${planExpanded ? " hgr-m-missions-arrow-open" : ""}`}>▸</span>
+                    <span
+                      className={`hgr-m-missions-arrow${planExpanded ? " hgr-m-missions-arrow-open" : ""}`}
+                    >
+                      ▸
+                    </span>
                   </button>
                 )}
                 {(!isIdle || planExpanded) && (
                   <div className={isIdle ? "hgr-m-plan-panel-body" : undefined}>
-            <div className="hgr-m-stage-tracker">
-              {STAGE_ORDER.map((key) => {
-                const complete = STAGE_ORDER.indexOf(key) < STAGE_ORDER.indexOf(activeStage as StageKey) || activeStage === "done";
-                const isActive = key === activeStage;
-                const cls = complete
-                  ? "hgr-m-stage-tracker-item-complete"
-                  : isActive
-                    ? "hgr-m-stage-tracker-item-active"
-                    : "";
-                return (
-                  <div key={key} className={`hgr-m-stage-tracker-item ${cls}`}>
-                    <div className="hgr-m-stage-tracker-num">{complete ? "✓" : ""}</div>
-                    <div className="hgr-m-stage-tracker-label">{STAGE_TITLES[key]}</div>
-                  </div>
-                );
-              })}
-            </div>
-
-            {activeStage !== "done" && (
-              <>
-                <div className="hgr-m-process-grid">
-                  <div>
-                    {(flow.stage1.status === "pending" || flow.stage1.status === "error") && (
-                      <form className="hgr-m-intake" onSubmit={submitBrief}>
-                        <div className="hgr-m-field">
-                          <label htmlFor="hgrBrief">Mission brief</label>
-                          <textarea
-                            id="hgrBrief"
-                            rows={5}
-                            placeholder="e.g. Need a drone for crop monitoring over 200 hectares, budget under ₹5 lakh, must operate in Tamil Nadu."
-                            value={briefText}
-                            onChange={(e) => setBriefText(e.target.value)}
-                          />
-                        </div>
-                        <button type="submit" className="hgr-m-btn hgr-m-btn-amber" disabled={!briefText.trim()}>
-                          Process Mission →
-                        </button>
-                      </form>
-                    )}
-
-                    {flow.stage1.status !== "pending" && flow.stage1.status !== "error" && (
-                      <div className="hgr-m-intake-summary">
-                        <span className="hgr-m-intake-summary-label">Mission brief</span>
-                        <p>{briefText}</p>
-                      </div>
-                    )}
-
-                    {flow.stage1.status === "error" && (
-                      <StageErrorCard title="Couldn't process the input." message={flow.stage1.errorMessage} onRetry={runStage1} />
-                    )}
-                  </div>
-
-                  <div className="hgr-m-status-panel">
-                    <div className="hgr-m-status-panel-title">{STAGE_TITLES[activeStage]}</div>
-                    {activeStage === "input_processing" && flow.stage1.status === "running" ? (
-                      PROGRESS_STEPS.map((label, i) => {
-                        const state = i < progressStepIdx ? "done" : i === progressStepIdx ? "active" : "pending";
+                    <div className="hgr-m-stage-tracker">
+                      {STAGE_ORDER.map((key) => {
+                        const complete =
+                          STAGE_ORDER.indexOf(key) < STAGE_ORDER.indexOf(activeStage as StageKey) ||
+                          activeStage === "done";
+                        const isActive = key === activeStage;
+                        const cls = complete
+                          ? "hgr-m-stage-tracker-item-complete"
+                          : isActive
+                            ? "hgr-m-stage-tracker-item-active"
+                            : "";
                         return (
-                          <div key={label} className={`hgr-m-status-step hgr-m-status-step-${state}`}>
-                            <span className="hgr-m-status-icon">
-                              {state === "done" && "✓"}
-                              {state === "active" && <span className="hgr-m-status-spinner" />}
-                            </span>
-                            <span className="hgr-m-status-text">{label}</span>
+                          <div key={key} className={`hgr-m-stage-tracker-item ${cls}`}>
+                            <div className="hgr-m-stage-tracker-num">{complete ? "✓" : ""}</div>
+                            <div className="hgr-m-stage-tracker-label">{STAGE_TITLES[key]}</div>
                           </div>
                         );
-                      })
-                    ) : (
-                      <StatusPanelBody flow={flow} activeStage={activeStage} />
-                    )}
+                      })}
+                    </div>
 
-                    {activeStage === "reasoning_planning" &&
-                      flow.stage2.status === "pending" &&
-                      gapWizard.active &&
-                      missingCoreFields.length > 0 && (
-                        <div className="hgr-m-gap-card">
-                          <div className="hgr-m-gap-card-title">
-                            {missingCoreFields.length} key parameter{missingCoreFields.length > 1 ? "s" : ""}{" "}
-                            weren't found in your brief —{" "}
-                            {missingCoreFields
-                              .map((f) => (f === "endurance" ? "Endurance (battery life)" : f.charAt(0).toUpperCase() + f.slice(1)))
-                              .join(", ")}
-                            . These feed the mission's KPIs directly, so guessing any of them here would
-                            carry an assumption into every stage after this one.
+                    {activeStage !== "done" && (
+                      <>
+                        <div className="hgr-m-process-grid">
+                          <div>
+                            {(flow.stage1.status === "pending" ||
+                              flow.stage1.status === "error") && (
+                              <form className="hgr-m-intake" onSubmit={submitBrief}>
+                                <div className="hgr-m-field">
+                                  <label htmlFor="hgrBrief">Mission brief</label>
+                                  <textarea
+                                    id="hgrBrief"
+                                    rows={5}
+                                    placeholder="e.g. Need a drone for crop monitoring over 200 hectares, budget under ₹5 lakh, must operate in Tamil Nadu."
+                                    value={briefText}
+                                    onChange={(e) => setBriefText(e.target.value)}
+                                  />
+                                </div>
+                                <button
+                                  type="submit"
+                                  className="hgr-m-btn hgr-m-btn-amber"
+                                  disabled={!briefText.trim()}
+                                >
+                                  Process Mission →
+                                </button>
+                              </form>
+                            )}
+
+                            {flow.stage1.status !== "pending" && flow.stage1.status !== "error" && (
+                              <div className="hgr-m-intake-summary">
+                                <span className="hgr-m-intake-summary-label">Mission brief</span>
+                                <p>{briefText}</p>
+                              </div>
+                            )}
+
+                            {flow.stage1.status === "error" && (
+                              <StageErrorCard
+                                title="Couldn't process the input."
+                                message={flow.stage1.errorMessage}
+                                onRetry={runStage1}
+                              />
+                            )}
                           </div>
-                          <div className="hgr-m-gap-card-question">
-                            Question {gapWizard.questionIndex + 1} of {missingCoreFields.length}:{" "}
-                            {BOOST_QUESTIONS[missingCoreFields[gapWizard.questionIndex]].question}
-                          </div>
-                          <div className="hgr-m-gap-card-row">
-                            <input
-                              type="text"
-                              className="hgr-m-boost-input"
-                              autoFocus
-                              value={gapAnswerDraft}
-                              onChange={(e) => setGapAnswerDraft(e.target.value)}
-                              onKeyDown={(e) => {
-                                if (e.key === "Enter") submitGapAnswer();
-                              }}
-                              placeholder={`e.g. 12 ${BOOST_QUESTIONS[missingCoreFields[gapWizard.questionIndex]].unit}`}
-                            />
-                            <button
-                              type="button"
-                              className="hgr-m-btn hgr-m-btn-amber"
-                              disabled={!gapAnswerDraft.trim()}
-                              onClick={submitGapAnswer}
-                            >
-                              {gapWizard.questionIndex < missingCoreFields.length - 1 ? "Next →" : "Continue →"}
-                            </button>
+
+                          <div className="hgr-m-status-panel">
+                            <div className="hgr-m-status-panel-title">
+                              {STAGE_TITLES[activeStage]}
+                            </div>
+                            {activeStage === "input_processing" &&
+                            flow.stage1.status === "running" ? (
+                              PROGRESS_STEPS.map((label, i) => {
+                                const state =
+                                  i < progressStepIdx
+                                    ? "done"
+                                    : i === progressStepIdx
+                                      ? "active"
+                                      : "pending";
+                                return (
+                                  <div
+                                    key={label}
+                                    className={`hgr-m-status-step hgr-m-status-step-${state}`}
+                                  >
+                                    <span className="hgr-m-status-icon">
+                                      {state === "done" && "✓"}
+                                      {state === "active" && (
+                                        <span className="hgr-m-status-spinner" />
+                                      )}
+                                    </span>
+                                    <span className="hgr-m-status-text">{label}</span>
+                                  </div>
+                                );
+                              })
+                            ) : (
+                              <StatusPanelBody flow={flow} activeStage={activeStage} />
+                            )}
+
+                            {activeStage === "reasoning_planning" &&
+                              flow.stage2.status === "pending" &&
+                              gapWizard.active &&
+                              missingCoreFields.length > 0 && (
+                                <div className="hgr-m-gap-card">
+                                  <div className="hgr-m-gap-card-title">
+                                    {missingCoreFields.length} key parameter
+                                    {missingCoreFields.length > 1 ? "s" : ""} weren't found in your
+                                    brief —{" "}
+                                    {missingCoreFields
+                                      .map((f) =>
+                                        f === "endurance"
+                                          ? "Endurance (battery life)"
+                                          : f.charAt(0).toUpperCase() + f.slice(1),
+                                      )
+                                      .join(", ")}
+                                    . These feed the mission's KPIs directly, so guessing any of
+                                    them here would carry an assumption into every stage after this
+                                    one.
+                                  </div>
+                                  <div className="hgr-m-gap-card-question">
+                                    Question {gapWizard.questionIndex + 1} of{" "}
+                                    {missingCoreFields.length}:{" "}
+                                    {
+                                      BOOST_QUESTIONS[missingCoreFields[gapWizard.questionIndex]]
+                                        .question
+                                    }
+                                  </div>
+                                  <div className="hgr-m-gap-card-row">
+                                    <input
+                                      type="text"
+                                      className="hgr-m-boost-input"
+                                      autoFocus
+                                      value={gapAnswerDraft}
+                                      onChange={(e) => setGapAnswerDraft(e.target.value)}
+                                      onKeyDown={(e) => {
+                                        if (e.key === "Enter") submitGapAnswer();
+                                      }}
+                                      placeholder={`e.g. 12 ${BOOST_QUESTIONS[missingCoreFields[gapWizard.questionIndex]].unit}`}
+                                    />
+                                    <button
+                                      type="button"
+                                      className="hgr-m-btn hgr-m-btn-amber"
+                                      disabled={!gapAnswerDraft.trim()}
+                                      onClick={submitGapAnswer}
+                                    >
+                                      {gapWizard.questionIndex < missingCoreFields.length - 1
+                                        ? "Next →"
+                                        : "Continue →"}
+                                    </button>
+                                  </div>
+                                </div>
+                              )}
+                            {activeStage === "reasoning_planning" &&
+                              flow.stage2.status === "pending" &&
+                              !gapWizard.active && (
+                                <ProceedRow
+                                  label="Proceed to Reasoning & Planning →"
+                                  onClick={proceedToStage2}
+                                />
+                              )}
+                            {activeStage === "reasoning_planning" &&
+                              flow.stage2.status === "error" && (
+                                <StageErrorCard
+                                  title="Couldn't complete Reasoning & Planning."
+                                  message={flow.stage2.errorMessage}
+                                  onRetry={proceedToStage2}
+                                />
+                              )}
+                            {activeStage === "output_generation" &&
+                              flow.stage3.status === "pending" && (
+                                <ProceedRow
+                                  label="Proceed to Output Generation →"
+                                  onClick={proceedToStage3}
+                                />
+                              )}
+                            {activeStage === "output_generation" &&
+                              flow.stage3.status === "error" && (
+                                <StageErrorCard
+                                  title="Couldn't complete Output Generation."
+                                  message={flow.stage3.errorMessage}
+                                  onRetry={proceedToStage3}
+                                />
+                              )}
+                            {activeStage === "output_interface" &&
+                              flow.stage4.status === "pending" && (
+                                <ProceedRow
+                                  label="Proceed to Output Interface →"
+                                  onClick={proceedToStage4}
+                                />
+                              )}
+                            {activeStage === "output_interface" &&
+                              flow.stage4.status === "error" && (
+                                <StageErrorCard
+                                  title="Couldn't complete Output Interface."
+                                  message={flow.stage4.errorMessage}
+                                  onRetry={proceedToStage4}
+                                />
+                              )}
                           </div>
                         </div>
-                      )}
-                    {activeStage === "reasoning_planning" && flow.stage2.status === "pending" && !gapWizard.active && (
-                      <ProceedRow label="Proceed to Reasoning & Planning →" onClick={proceedToStage2} />
-                    )}
-                    {activeStage === "reasoning_planning" && flow.stage2.status === "error" && (
-                      <StageErrorCard
-                        title="Couldn't complete Reasoning & Planning."
-                        message={flow.stage2.errorMessage}
-                        onRetry={proceedToStage2}
-                      />
-                    )}
-                    {activeStage === "output_generation" && flow.stage3.status === "pending" && (
-                      <ProceedRow label="Proceed to Output Generation →" onClick={proceedToStage3} />
-                    )}
-                    {activeStage === "output_generation" && flow.stage3.status === "error" && (
-                      <StageErrorCard
-                        title="Couldn't complete Output Generation."
-                        message={flow.stage3.errorMessage}
-                        onRetry={proceedToStage3}
-                      />
-                    )}
-                    {activeStage === "output_interface" && flow.stage4.status === "pending" && (
-                      <ProceedRow label="Proceed to Output Interface →" onClick={proceedToStage4} />
-                    )}
-                    {activeStage === "output_interface" && flow.stage4.status === "error" && (
-                      <StageErrorCard
-                        title="Couldn't complete Output Interface."
-                        message={flow.stage4.errorMessage}
-                        onRetry={proceedToStage4}
-                      />
-                    )}
-                  </div>
-                </div>
 
-                {/* Findings appear side by side as each stage completes, instead of
+                        {/* Findings appear side by side as each stage completes, instead of
                     stacking into a long vertical scroll — each new card fades/slides
                     in as it arrives. */}
-                <div className="hgr-m-findings-track">
-                  {flow.stage1.result && <Stage1Findings result={flow.stage1.result} />}
-                  {flow.stage2.result && <Stage2Findings result={flow.stage2.result} />}
-                  {flow.stage3.result && <Stage3Findings result={flow.stage3.result} />}
-                </div>
-              </>
-            )}
+                        <div className="hgr-m-findings-track">
+                          {flow.stage1.result && <Stage1Findings result={flow.stage1.result} />}
+                          {flow.stage2.result && <Stage2Findings result={flow.stage2.result} />}
+                          {flow.stage3.result && <Stage3Findings result={flow.stage3.result} />}
+                        </div>
+                      </>
+                    )}
 
-            {activeStage === "done" && flow.stage4.result && (
-              <>
-                <PhasePreviewStrip flow={flow} />
-                <MissionDashboard
-                  result={toMissionResult(flow.stage4.result)}
-                  briefText={briefText}
-                  sourceTypesUsedCount={flow.sourceTypesUsedCount ?? 0}
-                  onStartNew={resetFlow}
-                  onEditAndRegenerate={editAndRegenerate}
-                  finalizeState={finalizeState}
-                  onSaveAsFinal={saveAsFinal}
-                  boostWizard={boostWizard}
-                  boostRunning={boostRunning}
-                  boostError={boostError}
-                  previousConfidenceScore={previousConfidenceScore}
-                  previousBreakdown={previousBreakdown}
-                  previousKpis={previousKpis}
-                  onStartBoost={startBoost}
-                  onCancelBoost={cancelBoost}
-                  onSubmitBoostAnswer={submitBoostAnswer}
-                  onBoostWithKnownValues={boostWithKnownValues}
-                />
-              </>
-            )}
+                    {activeStage === "done" && flow.stage4.result && (
+                      <>
+                        <PhasePreviewStrip flow={flow} />
+                        <MissionDashboard
+                          result={toMissionResult(flow.stage4.result)}
+                          briefText={briefText}
+                          sourceTypesUsedCount={flow.sourceTypesUsedCount ?? 0}
+                          onStartNew={resetFlow}
+                          onEditAndRegenerate={editAndRegenerate}
+                          finalizeState={finalizeState}
+                          onSaveAsFinal={saveAsFinal}
+                          boostWizard={boostWizard}
+                          boostRunning={boostRunning}
+                          boostError={boostError}
+                          previousConfidenceScore={previousConfidenceScore}
+                          previousBreakdown={previousBreakdown}
+                          previousKpis={previousKpis}
+                          onStartBoost={startBoost}
+                          onCancelBoost={cancelBoost}
+                          onSubmitBoostAnswer={submitBoostAnswer}
+                          onBoostWithKnownValues={boostWithKnownValues}
+                        />
+                      </>
+                    )}
                   </div>
                 )}
               </div>
@@ -1268,12 +1468,22 @@ function TheHangarMission() {
 // Right-hand panel content for stages 2-4 (not sub-stepped like Stage 1) —
 // a single spinner line while running, or a quiet "waiting on you" note
 // once the stage is done and sitting on its findings card, waiting for Proceed.
-function StatusPanelBody({ flow, activeStage }: { flow: MissionFlowState; activeStage: StageKey | "done" }) {
+function StatusPanelBody({
+  flow,
+  activeStage,
+}: {
+  flow: MissionFlowState;
+  activeStage: StageKey | "done";
+}) {
   if (activeStage === "done") return null;
-  const slot = activeStage === "input_processing" ? flow.stage1
-    : activeStage === "reasoning_planning" ? flow.stage2
-    : activeStage === "output_generation" ? flow.stage3
-    : flow.stage4;
+  const slot =
+    activeStage === "input_processing"
+      ? flow.stage1
+      : activeStage === "reasoning_planning"
+        ? flow.stage2
+        : activeStage === "output_generation"
+          ? flow.stage3
+          : flow.stage4;
 
   if (slot.status === "running") {
     return (
@@ -1323,7 +1533,9 @@ function StageErrorCard({
 
 function MockBadge({ show }: { show: boolean }) {
   if (!show) return null;
-  return <span className="hgr-m-findings-mock">Simulated response — no ANTHROPIC_API_KEY reply</span>;
+  return (
+    <span className="hgr-m-findings-mock">Simulated response — no ANTHROPIC_API_KEY reply</span>
+  );
 }
 
 // Once the spec is ready, the full stacked findings cards are gone (the
@@ -1358,12 +1570,19 @@ function MissionsListPanel({
         aria-expanded={expanded}
       >
         <span>Your missions ({missions.length})</span>
-        <span className={`hgr-m-missions-arrow${expanded ? " hgr-m-missions-arrow-open" : ""}`}>▸</span>
+        <span className={`hgr-m-missions-arrow${expanded ? " hgr-m-missions-arrow-open" : ""}`}>
+          ▸
+        </span>
       </button>
       {expanded && (
         <div className="hgr-m-missions-list">
           {missions.map((m) => (
-            <button key={m.missionId} type="button" className="hgr-m-mission-row" onClick={() => onSelect(m)}>
+            <button
+              key={m.missionId}
+              type="button"
+              className="hgr-m-mission-row"
+              onClick={() => onSelect(m)}
+            >
               <span className="hgr-m-mission-row-code">{m.missionCode}</span>
               <span className="hgr-m-mission-row-type">{m.missionSpecs?.missionType ?? "—"}</span>
               <span className={`hgr-m-mission-row-status hgr-m-mission-row-status-${m.status}`}>
@@ -1372,7 +1591,9 @@ function MissionsListPanel({
               <span className="hgr-m-mission-row-confidence">
                 {m.confidenceScore !== null ? `${Math.round(m.confidenceScore * 100)}%` : "—"}
               </span>
-              <span className="hgr-m-mission-row-date">{new Date(m.createdAt).toLocaleDateString()}</span>
+              <span className="hgr-m-mission-row-date">
+                {new Date(m.createdAt).toLocaleDateString()}
+              </span>
             </button>
           ))}
         </div>
@@ -1388,19 +1609,24 @@ function MissionsListPanel({
 // past mission being viewed isn't that — the one action offered is getting
 // back out, either to the list or to a genuinely new brief.
 function PastMissionDetail({ mission, onBack }: { mission: MissionListEntry; onBack: () => void }) {
-  const hasSpec = mission.missionSpecs && mission.constraints && mission.kpis && mission.summary !== null;
+  const hasSpec =
+    mission.missionSpecs && mission.constraints && mission.kpis && mission.summary !== null;
 
   return (
     <div className="hgr-m-dash">
       <div className="hgr-m-dash-header">
         <div>
-          <div className="hgr-m-dash-badge">{MISSION_STATUS_LABEL[mission.status] ?? mission.status}</div>
+          <div className="hgr-m-dash-badge">
+            {MISSION_STATUS_LABEL[mission.status] ?? mission.status}
+          </div>
           <h3>{mission.missionSpecs?.missionType ?? mission.missionCode}</h3>
           <div className="hgr-m-dash-id">{mission.missionCode}</div>
         </div>
         {mission.confidenceScore !== null && (
           <div className="hgr-m-dash-confidence">
-            <div className="hgr-m-dash-confidence-num">{Math.round(mission.confidenceScore * 100)}%</div>
+            <div className="hgr-m-dash-confidence-num">
+              {Math.round(mission.confidenceScore * 100)}%
+            </div>
             <div className="hgr-m-dash-confidence-label">Confidence</div>
           </div>
         )}
@@ -1658,7 +1884,11 @@ function MissionDashboard({
   onEditAndRegenerate: () => void;
   finalizeState: { status: "idle" | "saving" | "saved" | "error"; errorMessage: string | null };
   onSaveAsFinal: () => void;
-  boostWizard: { active: boolean; questionIndex: number; answers: Partial<Record<CoreField, string>> };
+  boostWizard: {
+    active: boolean;
+    questionIndex: number;
+    answers: Partial<Record<CoreField, string>>;
+  };
   boostRunning: boolean;
   boostError: string | null;
   previousConfidenceScore: number | null;
@@ -1681,7 +1911,8 @@ function MissionDashboard({
   // used — today that's realistically 1 (just the brief) unless a boost
   // has already added a requirements_form source, so there's still a real
   // lever to pull up to that 3-type cap.
-  const canBoost = !boostRunning && (hasMissingFields || confidenceBreakdown.sourceTypesUsedCount < 3);
+  const canBoost =
+    !boostRunning && (hasMissingFields || confidenceBreakdown.sourceTypesUsedCount < 3);
 
   return (
     <div className="hgr-m-dash">
@@ -1701,7 +1932,9 @@ function MissionDashboard({
               <button
                 type="button"
                 className="hgr-m-boost-arrow"
-                onClick={() => (hasMissingFields ? onStartBoost() : onBoostWithKnownValues(result.kpis))}
+                onClick={() =>
+                  hasMissingFields ? onStartBoost() : onBoostWithKnownValues(result.kpis)
+                }
                 title={
                   hasMissingFields
                     ? "Answer what's missing to increase this score"
@@ -1714,7 +1947,8 @@ function MissionDashboard({
           </div>
           {previousConfidenceScore !== null && (
             <div className="hgr-m-boost-delta">
-              {Math.round(previousConfidenceScore * 100)}% → {Math.round(result.confidenceScore * 100)}%
+              {Math.round(previousConfidenceScore * 100)}% →{" "}
+              {Math.round(result.confidenceScore * 100)}%
             </div>
           )}
           <div className="hgr-m-dash-confidence-label-row">
@@ -1731,14 +1965,16 @@ function MissionDashboard({
                   </p>
                   <b className="hgr-m-info-panel-subhead">Applied to this mission</b>
                   <p>
-                    Source completeness: {confidenceBreakdown.sourceTypesUsedCount}/3 input types used →{" "}
-                    {confidenceBreakdown.sourceCompletenessPct}%.
+                    Source completeness: {confidenceBreakdown.sourceTypesUsedCount}/3 input types
+                    used → {confidenceBreakdown.sourceCompletenessPct}%.
                     <br />
                     Field completeness: {confidenceBreakdown.foundFields.length}/3 core fields found
-                    {confidenceBreakdown.foundFields.length > 0 && ` (${confidenceBreakdown.foundFields.join(", ")})`} →{" "}
-                    {confidenceBreakdown.fieldCompletenessPct}%.
+                    {confidenceBreakdown.foundFields.length > 0 &&
+                      ` (${confidenceBreakdown.foundFields.join(", ")})`}{" "}
+                    → {confidenceBreakdown.fieldCompletenessPct}%.
                     <br />
-                    Validation flags: {confidenceBreakdown.validationFlagCount} → −{confidenceBreakdown.penaltyPct}%.
+                    Validation flags: {confidenceBreakdown.validationFlagCount} → −
+                    {confidenceBreakdown.penaltyPct}%.
                   </p>
                 </span>
               </span>
@@ -1751,24 +1987,28 @@ function MissionDashboard({
         <div className="hgr-m-boost-explain">
           <b>Why the score changed</b>
           <ul>
-            {previousBreakdown.sourceCompletenessPct !== confidenceBreakdown.sourceCompletenessPct && (
+            {previousBreakdown.sourceCompletenessPct !==
+              confidenceBreakdown.sourceCompletenessPct && (
               <li>
                 Source completeness: {previousBreakdown.sourceCompletenessPct}% →{" "}
-                {confidenceBreakdown.sourceCompletenessPct}% ({previousBreakdown.sourceTypesUsedCount}/3 →{" "}
+                {confidenceBreakdown.sourceCompletenessPct}% (
+                {previousBreakdown.sourceTypesUsedCount}/3 →{" "}
                 {confidenceBreakdown.sourceTypesUsedCount}/3 input types used)
               </li>
             )}
-            {previousBreakdown.fieldCompletenessPct !== confidenceBreakdown.fieldCompletenessPct && (
+            {previousBreakdown.fieldCompletenessPct !==
+              confidenceBreakdown.fieldCompletenessPct && (
               <li>
                 Field completeness: {previousBreakdown.fieldCompletenessPct}% →{" "}
-                {confidenceBreakdown.fieldCompletenessPct}% ({previousBreakdown.foundFields.length}/3 →{" "}
-                {confidenceBreakdown.foundFields.length}/3 core fields found)
+                {confidenceBreakdown.fieldCompletenessPct}% ({previousBreakdown.foundFields.length}
+                /3 → {confidenceBreakdown.foundFields.length}/3 core fields found)
               </li>
             )}
             {previousBreakdown.penaltyPct !== confidenceBreakdown.penaltyPct && (
               <li>
-                Validation flag penalty: −{previousBreakdown.penaltyPct}% → −{confidenceBreakdown.penaltyPct}% (
-                {previousBreakdown.validationFlagCount} → {confidenceBreakdown.validationFlagCount} flags)
+                Validation flag penalty: −{previousBreakdown.penaltyPct}% → −
+                {confidenceBreakdown.penaltyPct}% ({previousBreakdown.validationFlagCount} →{" "}
+                {confidenceBreakdown.validationFlagCount} flags)
               </li>
             )}
           </ul>
@@ -1778,9 +2018,9 @@ function MissionDashboard({
                 <span className="hgr-m-boost-field-label">{fc.label}</span>
                 {!fc.changed ? (
                   <span className="hgr-m-boost-field-detail">
-                    Unchanged — <b>{fc.newDisplay}</b>, already correctly found in the first pass. The
-                    score moved because this value is now explicit structured input instead of text
-                    the model had to infer, which is what source completeness measures.
+                    Unchanged — <b>{fc.newDisplay}</b>, already correctly found in the first pass.
+                    The score moved because this value is now explicit structured input instead of
+                    text the model had to infer, which is what source completeness measures.
                   </span>
                 ) : fc.prevDisplay === null ? (
                   <span className="hgr-m-boost-field-detail">
@@ -1790,8 +2030,8 @@ function MissionDashboard({
                   </span>
                 ) : (
                   <span className="hgr-m-boost-field-detail">
-                    Was <b>{fc.prevDisplay}</b> (inferred from your brief) → now <b>{fc.newDisplay}</b>{" "}
-                    (confirmed directly).
+                    Was <b>{fc.prevDisplay}</b> (inferred from your brief) → now{" "}
+                    <b>{fc.newDisplay}</b> (confirmed directly).
                   </span>
                 )}
               </div>
@@ -1804,7 +2044,11 @@ function MissionDashboard({
         <div className="hgr-m-boost-card">
           <div className="hgr-m-boost-card-question">
             Question {boostWizard.questionIndex + 1} of {confidenceBreakdown.missingFields.length}:{" "}
-            {BOOST_QUESTIONS[confidenceBreakdown.missingFields[boostWizard.questionIndex] as CoreField].question}
+            {
+              BOOST_QUESTIONS[
+                confidenceBreakdown.missingFields[boostWizard.questionIndex] as CoreField
+              ].question
+            }
           </div>
           <div className="hgr-m-boost-card-row">
             <input
@@ -1820,7 +2064,10 @@ function MissionDashboard({
               className="hgr-m-btn hgr-m-btn-amber"
               disabled={!boostAnswerDraft.trim()}
               onClick={() => {
-                onSubmitBoostAnswer(confidenceBreakdown.missingFields as CoreField[], boostAnswerDraft.trim());
+                onSubmitBoostAnswer(
+                  confidenceBreakdown.missingFields as CoreField[],
+                  boostAnswerDraft.trim(),
+                );
                 setBoostAnswerDraft("");
               }}
             >
@@ -1838,12 +2085,14 @@ function MissionDashboard({
       {boostRunning && (
         <div className="hgr-m-boost-running">
           <span className="hgr-m-status-spinner" />
-          Re-running the pipeline with your answers — a new mission, real LLM calls, so this can take a
-          minute…
+          Re-running the pipeline with your answers — a new mission, real LLM calls, so this can
+          take a minute…
         </div>
       )}
 
-      {boostError && <p className="hgr-m-dash-finalize-error">Couldn't re-run with your answers: {boostError}</p>}
+      {boostError && (
+        <p className="hgr-m-dash-finalize-error">Couldn't re-run with your answers: {boostError}</p>
+      )}
 
       {/* Original brief, as submitted */}
       <div className="hgr-m-dash-section">
@@ -1930,20 +2179,21 @@ function MissionDashboard({
         >
           Edit and regenerate
         </button>
-        <button
-          type="button"
+        <Link
+          to="/the-hangar/concept"
           className="hgr-m-btn hgr-m-btn-ghost"
-          disabled
-          title="Bay 02 not yet built"
+          style={{ textDecoration: "none" }}
         >
           Continue to Concept Agent →
-        </button>
+        </Link>
         <button type="button" className="hgr-m-btn hgr-m-btn-amber" onClick={onStartNew}>
           Start a new mission
         </button>
       </div>
       {finalizeState.status === "error" && (
-        <p className="hgr-m-dash-finalize-error">Couldn't save as final: {finalizeState.errorMessage}</p>
+        <p className="hgr-m-dash-finalize-error">
+          Couldn't save as final: {finalizeState.errorMessage}
+        </p>
       )}
     </div>
   );
@@ -1967,7 +2217,8 @@ function SpecFieldsGrid({ specs }: { specs: MissionSpecsView }) {
 }
 
 function ConstraintsSection({ constraints }: { constraints: ConstraintView[] }) {
-  if (constraints.length === 0) return <p className="hgr-m-dash-empty">No constraints identified.</p>;
+  if (constraints.length === 0)
+    return <p className="hgr-m-dash-empty">No constraints identified.</p>;
   return (
     <>
       {groupConstraints(constraints).map((group) => (
@@ -2007,10 +2258,15 @@ function KpisSection({ kpis }: { kpis: KpiView[] }) {
   return (
     <div className="hgr-m-dash-kpis">
       {orderedKpis.map((k, i) => (
-        <div key={i} className={`hgr-m-dash-kpi${k.priority === "critical" ? " hgr-m-dash-kpi-critical" : ""}`}>
+        <div
+          key={i}
+          className={`hgr-m-dash-kpi${k.priority === "critical" ? " hgr-m-dash-kpi-critical" : ""}`}
+        >
           <div className="hgr-m-dash-kpi-name">{k.name}</div>
           <div className="hgr-m-dash-kpi-target">{formatKpiDisplay(k.name, k.target, k.unit)}</div>
-          <div className="hgr-m-dash-kpi-priority">{k.priority === "critical" ? "CRITICAL" : `#${k.priority}`}</div>
+          <div className="hgr-m-dash-kpi-priority">
+            {k.priority === "critical" ? "CRITICAL" : `#${k.priority}`}
+          </div>
         </div>
       ))}
     </div>
