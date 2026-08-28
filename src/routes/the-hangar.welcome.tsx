@@ -45,58 +45,208 @@ interface NodeData {
 }
 
 const NODES: NodeData[] = [
-  { id: 1, x: 90, y: 140, bay: "01", name: "Mission", title: "Mission Agent", status: "online", href: "/the-hangar/mission",
+  {
+    id: 1,
+    x: 90,
+    y: 140,
+    bay: "01",
+    name: "Mission",
+    title: "Mission Agent",
+    status: "online",
+    href: "/the-hangar/mission",
     desc: "Turns a mission brief into a structured spec — payload, range, endurance, constraints and KPIs the rest of the fleet builds against.",
-    inp: "Chat, docs, forms", tools: "LLM, RAG, rule engine", out: "Mission spec (JSON)" },
-  { id: 2, x: 270, y: 140, bay: "02", name: "Concept", title: "Concept Agent", status: "design",
+    inp: "Chat, docs, forms",
+    tools: "LLM, RAG, rule engine",
+    out: "Mission spec (JSON)",
+  },
+  {
+    id: 2,
+    x: 270,
+    y: 140,
+    bay: "02",
+    name: "Concept",
+    title: "Concept Agent",
+    status: "online",
+    href: "/the-hangar/concept",
     desc: "Generates and ranks concept options against benchmarks, trends and design preferences before anything is committed to.",
-    inp: "Mission spec", tools: "LLM, knowledge graph", out: "Ranked concept options" },
-  { id: 3, x: 450, y: 140, bay: "03", name: "Aircraft Design", title: "Aircraft Design Agent", status: "design",
+    inp: "Mission spec",
+    tools: "LLM, knowledge graph",
+    out: "Ranked concept options",
+  },
+  {
+    id: 3,
+    x: 450,
+    y: 140,
+    bay: "03",
+    name: "Aircraft Design",
+    title: "Aircraft Design Agent",
+    status: "design",
     desc: "Selects configuration and design parameters — gate-then-score against rules and reference designs, never a guess.",
-    inp: "Concept, airfoil DB", tools: "OpenVSP, XFLR5", out: "Aircraft geometry preview" },
-  { id: 4, x: 630, y: 140, bay: "04", name: "CAD", title: "CAD Agent", status: "design",
+    inp: "Concept, airfoil DB",
+    tools: "OpenVSP, XFLR5",
+    out: "Aircraft geometry preview",
+  },
+  {
+    id: 4,
+    x: 630,
+    y: 140,
+    bay: "04",
+    name: "CAD",
+    title: "CAD Agent",
+    status: "design",
     desc: "Builds real CAD geometry and assemblies from the validated design parameters — the first fully physical output.",
-    inp: "Geometry, design params", tools: "FreeCAD, OpenCascade", out: "CAD model & assembly" },
-  { id: 5, x: 810, y: 140, bay: "05", name: "Sim Orchestrator", title: "Simulation Orchestrator", status: "design",
+    inp: "Geometry, design params",
+    tools: "FreeCAD, OpenCascade",
+    out: "CAD model & assembly",
+  },
+  {
+    id: 5,
+    x: 810,
+    y: 140,
+    bay: "05",
+    name: "Sim Orchestrator",
+    title: "Simulation Orchestrator",
+    status: "design",
     desc: "Prepares the simulation plan and dispatches jobs to CFD, structural and other physics agents in parallel.",
-    inp: "CAD model", tools: "Python orchestrator, job scheduler", out: "Simulation plan & job list" },
-  { id: 6, x: 720, y: 300, bay: "06", name: "CFD", title: "CFD Agent", status: "design",
+    inp: "CAD model",
+    tools: "Python orchestrator, job scheduler",
+    out: "Simulation plan & job list",
+  },
+  {
+    id: 6,
+    x: 720,
+    y: 300,
+    bay: "06",
+    name: "CFD",
+    title: "CFD Agent",
+    status: "design",
     desc: "Runs computational fluid dynamics — forces, coefficients, fields — against the candidate geometry.",
-    inp: "CAD geometry, sim plan", tools: "OpenFOAM, SALOME", out: "CFD results" },
-  { id: 7, x: 900, y: 300, bay: "07", name: "Structural", title: "Structural Agent", status: "design",
+    inp: "CAD geometry, sim plan",
+    tools: "OpenFOAM, SALOME",
+    out: "CFD results",
+  },
+  {
+    id: 7,
+    x: 900,
+    y: 300,
+    bay: "07",
+    name: "Structural",
+    title: "Structural Agent",
+    status: "design",
     desc: "Runs FEA for stress, deformation and safety factor against loads and boundary conditions.",
-    inp: "CAD geometry, loads", tools: "CalculiX, Code_Aster", out: "FEA results" },
-  { id: 8, x: 810, y: 420, bay: "08", name: "Optimization", title: "Optimization Agent", status: "design",
+    inp: "CAD geometry, loads",
+    tools: "CalculiX, Code_Aster",
+    out: "FEA results",
+  },
+  {
+    id: 8,
+    x: 810,
+    y: 420,
+    bay: "08",
+    name: "Optimization",
+    title: "Optimization Agent",
+    status: "design",
     desc: "Searches the design space across CFD and structural results for Pareto-optimal candidates.",
-    inp: "CFD + FEA results", tools: "Optuna, PyGMO, surrogate models", out: "Optimized designs (Pareto set)" },
-  { id: 9, x: 810, y: 540, bay: "09", name: "Validation", title: "Validation Agent", status: "design",
+    inp: "CFD + FEA results",
+    tools: "Optuna, PyGMO, surrogate models",
+    out: "Optimized designs (Pareto set)",
+  },
+  {
+    id: 9,
+    x: 810,
+    y: 540,
+    bay: "09",
+    name: "Validation",
+    title: "Validation Agent",
+    status: "design",
     desc: "Checks the optimized design against the original mission spec and rules — issues a pass or fail, with reasons.",
-    inp: "Results, mission spec, rules", tools: "Rule engine, LLM reasoning", out: "Validation report (pass/fail)" },
-  { id: 10, x: 150, y: 640, bay: "10", name: "Materials", title: "Materials Agent", status: "design",
+    inp: "Results, mission spec, rules",
+    tools: "Rule engine, LLM reasoning",
+    out: "Validation report (pass/fail)",
+  },
+  {
+    id: 10,
+    x: 150,
+    y: 640,
+    bay: "10",
+    name: "Materials",
+    title: "Materials Agent",
+    status: "design",
     desc: "Recommends materials against requirements, operating environment and constraints, with justification.",
-    inp: "Requirements, environment", tools: "Materials DB, RAG", out: "Material recommendations" },
-  { id: 11, x: 365, y: 640, bay: "11", name: "Manufacturing", title: "Manufacturing Agent", status: "design",
+    inp: "Requirements, environment",
+    tools: "Materials DB, RAG",
+    out: "Material recommendations",
+  },
+  {
+    id: 11,
+    x: 365,
+    y: 640,
+    bay: "11",
+    name: "Manufacturing",
+    title: "Manufacturing Agent",
+    status: "design",
     desc: "Checks manufacturability against the CAD model and produces a build plan and bill of materials.",
-    inp: "CAD model", tools: "DFM rule engine, cost models", out: "DFM report & manufacturing plan" },
-  { id: 12, x: 580, y: 640, bay: "12", name: "Certification", title: "Certification Agent", status: "design",
+    inp: "CAD model",
+    tools: "DFM rule engine, cost models",
+    out: "DFM report & manufacturing plan",
+  },
+  {
+    id: 12,
+    x: 580,
+    y: 640,
+    bay: "12",
+    name: "Certification",
+    title: "Certification Agent",
+    status: "design",
     desc: "Maps the design against applicable regulations and standards and flags compliance gaps early.",
-    inp: "Design data, regulations", tools: "Regulations DB, RAG, LLM", out: "Compliance checklist" },
-  { id: 13, x: 795, y: 640, bay: "13", name: "Documentation", title: "Documentation Agent", status: "design",
+    inp: "Design data, regulations",
+    tools: "Regulations DB, RAG, LLM",
+    out: "Compliance checklist",
+  },
+  {
+    id: 13,
+    x: 795,
+    y: 640,
+    bay: "13",
+    name: "Documentation",
+    title: "Documentation Agent",
+    status: "design",
     desc: "Compiles final reports, drawings and summary documentation from every upstream agent's output.",
-    inp: "All design data", tools: "LLM, template engine", out: "Reports, SLR, drawings" },
-  { id: 14, x: 1010, y: 640, bay: "14", name: "Collaboration", title: "Collaboration Agent", status: "design",
+    inp: "All design data",
+    tools: "LLM, template engine",
+    out: "Reports, SLR, drawings",
+  },
+  {
+    id: 14,
+    x: 1010,
+    y: 640,
+    bay: "14",
+    name: "Collaboration",
+    title: "Collaboration Agent",
+    status: "design",
     desc: "Keeps the team synced — tasks, agent updates, comments and notifications, all in one feed.",
-    inp: "Tasks, agent updates", tools: "Task manager API, webhooks", out: "Collaboration feed" },
-  { id: 15, x: 1100, y: 340, bay: "15", name: "Knowledge", title: "Knowledge Agent", status: "design", hub: true, r: 44,
+    inp: "Tasks, agent updates",
+    tools: "Task manager API, webhooks",
+    out: "Collaboration feed",
+  },
+  {
+    id: 15,
+    x: 1100,
+    y: 340,
+    bay: "15",
+    name: "Knowledge",
+    title: "Knowledge Agent",
+    status: "design",
+    hub: true,
+    r: 44,
     desc: "The memory every other bay reads from and writes to — past projects, rules, standards and outcomes, always on.",
-    inp: "Natural-language queries", tools: "Knowledge graph, vector DB, RAG + LLM", out: "Answers & insight" },
+    inp: "Natural-language queries",
+    tools: "Knowledge graph, vector DB, RAG + LLM",
+    out: "Answers & insight",
+  },
 ];
 
-const HUB_LINES = [
-  "M1100,340 L124,140",
-  "M1100,340 L810,540",
-  "M1100,340 L795,640",
-];
+const HUB_LINES = ["M1100,340 L124,140", "M1100,340 L810,540", "M1100,340 L795,640"];
 
 const LEAD_LINES: { id: string; d: string }[] = [
   { id: "ln-1-2", d: "M124,140 H236" },
@@ -124,14 +274,42 @@ interface Stage {
 const STAGES: Stage[] = [
   { lines: [], nodes: [1], text: "BAY 01 — Mission Agent — parsing mission brief…" },
   { lines: ["ln-1-2"], nodes: [2], text: "BAY 02 — Concept Agent — generating trade studies…" },
-  { lines: ["ln-2-3"], nodes: [3], text: "BAY 03 — Aircraft Design Agent — gating and scoring configurations…" },
+  {
+    lines: ["ln-2-3"],
+    nodes: [3],
+    text: "BAY 03 — Aircraft Design Agent — gating and scoring configurations…",
+  },
   { lines: ["ln-3-4"], nodes: [4], text: "BAY 04 — CAD Agent — building geometry & assembly…" },
-  { lines: ["ln-4-5"], nodes: [5], text: "BAY 05 — Simulation Orchestrator — preparing simulation plan…" },
-  { lines: ["ln-5-6", "ln-5-7"], nodes: [6, 7], text: "BAY 06 / 07 — CFD + Structural — running in parallel…" },
-  { lines: ["ln-6-8", "ln-7-8"], nodes: [8], text: "BAY 08 — Optimization Agent — searching for Pareto-optimal designs…" },
-  { lines: ["ln-8-9"], nodes: [9], text: "BAY 09 — Validation Agent — checking result against mission spec…" },
-  { lines: ["ln-9-10", "ln-9-11", "ln-9-12", "ln-9-13", "ln-9-14"], nodes: [10, 11, 12, 13, 14], text: "BAY 10–14 — Materials, Manufacturing, Certification, Documentation, Collaboration…" },
-  { lines: [], nodes: [15], text: "BAY 15 — Knowledge Agent — outcome written to shared memory. Sequence complete." },
+  {
+    lines: ["ln-4-5"],
+    nodes: [5],
+    text: "BAY 05 — Simulation Orchestrator — preparing simulation plan…",
+  },
+  {
+    lines: ["ln-5-6", "ln-5-7"],
+    nodes: [6, 7],
+    text: "BAY 06 / 07 — CFD + Structural — running in parallel…",
+  },
+  {
+    lines: ["ln-6-8", "ln-7-8"],
+    nodes: [8],
+    text: "BAY 08 — Optimization Agent — searching for Pareto-optimal designs…",
+  },
+  {
+    lines: ["ln-8-9"],
+    nodes: [9],
+    text: "BAY 09 — Validation Agent — checking result against mission spec…",
+  },
+  {
+    lines: ["ln-9-10", "ln-9-11", "ln-9-12", "ln-9-13", "ln-9-14"],
+    nodes: [10, 11, 12, 13, 14],
+    text: "BAY 10–14 — Materials, Manufacturing, Certification, Documentation, Collaboration…",
+  },
+  {
+    lines: [],
+    nodes: [15],
+    text: "BAY 15 — Knowledge Agent — outcome written to shared memory. Sequence complete.",
+  },
 ];
 
 type DynamicStatus = "idle" | "active" | "seen";
@@ -147,7 +325,12 @@ function TheHangarWelcome() {
   const [currentUserEmail, setCurrentUserEmail] = useState<string | null>(null);
   const timeouts = useRef<ReturnType<typeof setTimeout>[]>([]);
 
-  useEffect(() => () => { timeouts.current.forEach(clearTimeout); }, []);
+  useEffect(
+    () => () => {
+      timeouts.current.forEach(clearTimeout);
+    },
+    [],
+  );
 
   // Same real Supabase session Flight Deck's sign-in creates (session.ts's
   // own useHangarSession guard above only checks the sessionStorage flag,
@@ -175,7 +358,7 @@ function TheHangarWelcome() {
   // back to the same preview behavior. Mirrors the mockup's activate().
   function activate(n: NodeData) {
     if (n.href) {
-      navigate({ to: n.href as "/the-hangar/mission" });
+      navigate({ to: n.href as "/the-hangar/mission" | "/the-hangar/concept" });
     } else {
       setSelected(n);
     }
@@ -245,15 +428,22 @@ function TheHangarWelcome() {
       <nav>
         <div className="hgr-w-wrap">
           <div className="hgr-w-brand">
-            <span className="hgr-w-torq">TORQWINGS</span><span className="hgr-w-sep">/</span><span className="hgr-w-hangar-word">The Hangar</span>
+            <span className="hgr-w-torq">TORQWINGS</span>
+            <span className="hgr-w-sep">/</span>
+            <span className="hgr-w-hangar-word">The Hangar</span>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
             {currentUserEmail && (
-              <span className="hgr-w-mono" style={{ fontSize: 12.5, color: "var(--hgr-w-paper-dim)" }}>
+              <span
+                className="hgr-w-mono"
+                style={{ fontSize: 12.5, color: "var(--hgr-w-paper-dim)" }}
+              >
                 Welcome, {currentUserEmail}
               </span>
             )}
-            <button type="button" className="hgr-w-exit" onClick={exitHangar}>Exit Hangar</button>
+            <button type="button" className="hgr-w-exit" onClick={exitHangar}>
+              Exit Hangar
+            </button>
           </div>
         </div>
       </nav>
@@ -266,12 +456,24 @@ function TheHangarWelcome() {
               <div className="hgr-w-door hgr-w-door-right" />
             </div>
             <div>
-              <div className="hgr-w-eyebrow"><span className="hgr-w-dot" />Flight Deck — clearance granted</div>
-              <h1>Welcome to <span>The Hangar</span>.</h1>
-              <p className="hgr-w-lead">This is the live circuit — how a mission actually moves through all 15 agents. Hover any bay to read what it does, or run the sequence to watch it happen.</p>
+              <div className="hgr-w-eyebrow">
+                <span className="hgr-w-dot" />
+                Flight Deck — clearance granted
+              </div>
+              <h1>
+                Welcome to <span>The Hangar</span>.
+              </h1>
+              <p className="hgr-w-lead">
+                This is the live circuit — how a mission actually moves through all 15 agents. Hover
+                any bay to read what it does, or run the sequence to watch it happen.
+              </p>
             </div>
             <div className="hgr-w-runbar">
-              <button className="hgr-w-btn hgr-w-btn-amber" disabled={running} onClick={runSequence}>
+              <button
+                className="hgr-w-btn hgr-w-btn-amber"
+                disabled={running}
+                onClick={runSequence}
+              >
                 ▶ Run Mission Sequence
               </button>
             </div>
@@ -279,7 +481,12 @@ function TheHangarWelcome() {
 
           <div className="hgr-w-rig">
             <div className="hgr-w-diagram-pane">
-              <svg viewBox="0 0 1200 720" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="The Hangar agent pipeline diagram">
+              <svg
+                viewBox="0 0 1200 720"
+                xmlns="http://www.w3.org/2000/svg"
+                role="img"
+                aria-label="The Hangar agent pipeline diagram"
+              >
                 {HUB_LINES.map((d, i) => (
                   <path key={i} className="hgr-w-hub-line" d={d} />
                 ))}
@@ -303,24 +510,35 @@ function TheHangarWelcome() {
                         onMouseEnter={() => preview(n)}
                         onFocus={() => preview(n)}
                         onClick={() => activate(n)}
-                        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); activate(n); } }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            activate(n);
+                          }
+                        }}
                       >
                         <circle cx={n.x} cy={n.y} r={r} className={nodeCircleClassName(n)} />
-                        <text x={n.x} y={n.y - (n.hub ? 2 : 1)} className="hgr-w-node-num">{"B" + n.bay}</text>
+                        <text x={n.x} y={n.y - (n.hub ? 2 : 1)} className="hgr-w-node-num">
+                          {"B" + n.bay}
+                        </text>
                         <text
-                          x={n.x} y={n.y + 14}
+                          x={n.x}
+                          y={n.y + 14}
                           className={`hgr-w-status-badge ${n.status === "online" ? "hgr-w-online-badge" : "hgr-w-design-badge"}`}
                         >
                           {n.status === "online" ? "LIVE" + (n.href ? " ↗" : "") : ""}
                         </text>
-                        <text x={n.x} y={n.y + r + 20} className="hgr-w-node-label">{n.name}</text>
+                        <text x={n.x} y={n.y + r + 20} className="hgr-w-node-label">
+                          {n.name}
+                        </text>
                       </g>
                     );
                   })}
                 </g>
               </svg>
               <div className="hgr-w-live-line hgr-w-mono">
-                <span className="hgr-w-caret" /><span>{liveText}</span>
+                <span className="hgr-w-caret" />
+                <span>{liveText}</span>
               </div>
             </div>
 
@@ -328,24 +546,37 @@ function TheHangarWelcome() {
               {!selected ? (
                 <div className="hgr-w-info-empty">
                   <span className="hgr-w-hint">→ Select a bay</span>
-                  Every agent in The Hangar reads and writes through a shared memory layer — hover or tap any bay in the circuit to see what it does, what it reads, and what it produces.
+                  Every agent in The Hangar reads and writes through a shared memory layer — hover
+                  or tap any bay in the circuit to see what it does, what it reads, and what it
+                  produces.
                 </div>
               ) : (
                 <div className="hgr-w-info-content show">
-                  <span className={`hgr-w-info-tag ${selected.status === "online" ? "hgr-w-online-tag" : "hgr-w-design-tag"}`}>
+                  <span
+                    className={`hgr-w-info-tag ${selected.status === "online" ? "hgr-w-online-tag" : "hgr-w-design-tag"}`}
+                  >
                     {selected.status === "online" ? "LIVE NOW" : "IN DESIGN"}
                   </span>
                   <span className="hgr-w-bay-tag">{"BAY " + selected.bay}</span>
                   <h3>{selected.title}</h3>
                   <p>{selected.desc}</p>
                   <div className="hgr-w-info-meta">
-                    <div><span>Reads</span><span>{selected.inp}</span></div>
-                    <div><span>Tools</span><span>{selected.tools}</span></div>
-                    <div><span>Writes</span><span>{selected.out}</span></div>
+                    <div>
+                      <span>Reads</span>
+                      <span>{selected.inp}</span>
+                    </div>
+                    <div>
+                      <span>Tools</span>
+                      <span>{selected.tools}</span>
+                    </div>
+                    <div>
+                      <span>Writes</span>
+                      <span>{selected.out}</span>
+                    </div>
                   </div>
                   {selected.href && (
                     <Link
-                      to={selected.href as "/the-hangar/mission"}
+                      to={selected.href as "/the-hangar/mission" | "/the-hangar/concept"}
                       className="hgr-w-btn hgr-w-btn-amber"
                       style={{ justifyContent: "center", marginTop: 18, textDecoration: "none" }}
                     >
@@ -354,7 +585,10 @@ function TheHangarWelcome() {
                   )}
                 </div>
               )}
-              <div className="hgr-w-foot-note">Mission Agent is running against real logic today. Every other bay is shown exactly as it's designed — it goes live here the moment it ships.</div>
+              <div className="hgr-w-foot-note">
+                Mission Agent is running against real logic today. Every other bay is shown exactly
+                as it's designed — it goes live here the moment it ships.
+              </div>
             </div>
           </div>
         </div>
