@@ -1,6 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 import { MissionAgentError, InvalidMissionInputError } from "./missionAgentPipeline.ts";
+import { ConceptAgentError, InvalidConceptInputError } from "./conceptAgentPipeline.ts";
 
 // Shared auth + response helpers for the 4 Mission Agent stage routes
 // (api.hangar.process-mission.*.ts) — extracted so each route file stays a
@@ -29,16 +30,22 @@ export async function resolveUserId(request: Request): Promise<string> {
       ...(!SUPABASE_URL ? ["SUPABASE_URL"] : []),
       ...(!SUPABASE_PUBLISHABLE_KEY ? ["SUPABASE_PUBLISHABLE_KEY"] : []),
     ];
-    throw new Error(`Auth configuration error: Missing Supabase environment variable(s): ${missing.join(", ")}`);
+    throw new Error(
+      `Auth configuration error: Missing Supabase environment variable(s): ${missing.join(", ")}`,
+    );
   }
 
   const authHeader = request.headers.get("authorization");
   if (!authHeader?.startsWith("Bearer ")) {
-    throw new UnauthorizedError("Unauthorized: a valid Authorization: Bearer <token> header is required");
+    throw new UnauthorizedError(
+      "Unauthorized: a valid Authorization: Bearer <token> header is required",
+    );
   }
   const token = authHeader.replace("Bearer ", "");
   if (!token) {
-    throw new UnauthorizedError("Unauthorized: a valid Authorization: Bearer <token> header is required");
+    throw new UnauthorizedError(
+      "Unauthorized: a valid Authorization: Bearer <token> header is required",
+    );
   }
 
   const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
@@ -48,7 +55,9 @@ export async function resolveUserId(request: Request): Promise<string> {
 
   const { data, error } = await supabase.auth.getClaims(token);
   if (error || !data?.claims?.sub) {
-    throw new UnauthorizedError("Unauthorized: a valid Authorization: Bearer <token> header is required");
+    throw new UnauthorizedError(
+      "Unauthorized: a valid Authorization: Bearer <token> header is required",
+    );
   }
   return data.claims.sub;
 }
@@ -73,6 +82,12 @@ export function errorResponse(err: unknown): Response {
   }
   if (err instanceof MissionAgentError) {
     return jsonResponse({ error: err.message, mission_id: err.missionId, stage: err.stage }, 500);
+  }
+  if (err instanceof InvalidConceptInputError) {
+    return jsonResponse({ error: err.message, concept_id: null }, 400);
+  }
+  if (err instanceof ConceptAgentError) {
+    return jsonResponse({ error: err.message, concept_id: err.conceptId, stage: err.stage }, 500);
   }
   const message = err instanceof Error ? err.message : String(err);
   return jsonResponse({ error: message, mission_id: null }, 500);

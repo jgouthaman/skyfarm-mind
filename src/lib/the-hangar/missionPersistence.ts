@@ -97,16 +97,18 @@ type ListQueryResult = Promise<{
   error: { message: string } | null;
 }>;
 
+// Self-referencing so `.eq()` can be chained more than once (e.g. filtering
+// by both user_id and status) — plain object-literal typing can't express
+// "returns the same shape as itself" without a named type.
+type EqChain = {
+  eq: (column: string, value: string) => EqChain;
+  order: (column: string, opts: { ascending: boolean }) => ListQueryResult;
+  in: (column: string, values: string[]) => ListQueryResult;
+};
+
 const listDb = supabaseAdmin as unknown as {
   from: (table: string) => {
-    select: (columns: string) => {
-      eq: (
-        column: string,
-        value: string,
-      ) => {
-        order: (column: string, opts: { ascending: boolean }) => ListQueryResult;
-        in: (column: string, values: string[]) => ListQueryResult;
-      };
+    select: (columns: string) => EqChain & {
       in: (column: string, values: string[]) => ListQueryResult;
     };
   };
@@ -125,12 +127,13 @@ export interface HangarMissionSpecSummary {
 // — every mission this user has ever submitted, most recent first, so the
 // intake page can let them reopen a past spec instead of only ever seeing
 // the one they're currently working on.
-export async function listUserMissions(userId: string): Promise<HangarMissionRow[]> {
-  const { data, error } = await listDb
-    .from("Hangar_missions")
-    .select("*")
-    .eq("user_id", userId)
-    .order("created_at", { ascending: false });
+export async function listUserMissions(
+  userId: string,
+  statusFilter?: MissionStatus,
+): Promise<HangarMissionRow[]> {
+  let query = listDb.from("Hangar_missions").select("*").eq("user_id", userId);
+  if (statusFilter) query = query.eq("status", statusFilter);
+  const { data, error } = await query.order("created_at", { ascending: false });
   if (error) throw new Error(`listUserMissions: ${error.message}`);
   return (data ?? []) as unknown as HangarMissionRow[];
 }
