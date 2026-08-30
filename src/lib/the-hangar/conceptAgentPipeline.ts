@@ -53,7 +53,10 @@ export class InvalidConceptInputError extends Error {
   }
 }
 
-async function assertConceptOwnership(
+// Exported for aircraftDesignAgentPipeline.ts (Bay 03) — its Stage 1 must
+// independently re-verify a client-supplied concept_id belongs to the
+// caller, same as every stage here does, rather than duplicate this logic.
+export async function assertConceptOwnership(
   conceptId: string,
   userId: string,
 ): Promise<HangarConceptRow> {
@@ -73,7 +76,10 @@ async function assertConceptOwnership(
 // actually finalized. Mirrors assertConceptOwnership's style (a getter +
 // existence check + ownership check), with the added status gate this
 // check specifically needs.
-async function assertMissionOwnership(sourceMissionId: string, userId: string) {
+// Exported for the same reason as assertConceptOwnership above —
+// AircraftDesignAgent.md Section 3.g calls for Bay 03 to re-verify this
+// transitively as defense in depth, even though Bay 02 now checks it too.
+export async function assertMissionOwnership(sourceMissionId: string, userId: string) {
   const mission = await getMission(sourceMissionId);
   if (!mission) {
     throw new Error("Source mission not found");
