@@ -506,27 +506,34 @@ function TheHangarMission() {
 
   // "Your missions" — loaded once on arrival, and again after each mission
   // reaches spec_ready/finalized so a just-finished mission shows up without
-  // a manual refresh.
-  useEffect(() => {
+  // a manual refresh. Extracted into a named function so a "Retry" button
+  // (ListFetchError, below) can re-invoke the exact same fetch on failure —
+  // previously this list just went silently blank on a fetch error, with
+  // no way to retry short of reloading the page.
+  async function fetchMissionsList() {
     if (!currentUserEmail) return;
     setMissionsListStatus("loading");
-    supabase.auth.getSession().then(async ({ data }) => {
-      const token = data.session?.access_token;
-      if (!token) {
-        setMissionsListStatus("error");
-        return;
-      }
-      try {
-        const res = await fetch("/api/hangar/missions", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        setMissionsList(await res.json());
-        setMissionsListStatus("idle");
-      } catch {
-        setMissionsListStatus("error");
-      }
-    });
+    const { data } = await supabase.auth.getSession();
+    const token = data.session?.access_token;
+    if (!token) {
+      setMissionsListStatus("error");
+      return;
+    }
+    try {
+      const res = await fetch("/api/hangar/missions", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      setMissionsList(await res.json());
+      setMissionsListStatus("idle");
+    } catch {
+      setMissionsListStatus("error");
+    }
+  }
+
+  useEffect(() => {
+    fetchMissionsList();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUserEmail, flow.stage4.status]);
 
   useEffect(
@@ -1104,6 +1111,8 @@ function TheHangarMission() {
               when you're ready.
             </p>
 
+            {missionsListStatus === "error" && <ListFetchError onRetry={fetchMissionsList} />}
+
             {missionsListStatus !== "error" &&
               missionsList &&
               missionsList.length > 0 &&
@@ -1506,6 +1515,22 @@ function ProceedRow({ label, onClick }: { label: string; onClick: () => void }) 
     <div className="hgr-m-proceed-row">
       <button type="button" className="hgr-m-btn hgr-m-btn-amber" onClick={onClick}>
         {label}
+      </button>
+    </div>
+  );
+}
+
+// NEW — this list's fetch failure previously rendered nothing at all
+// (missionsListStatus !== "error" && ... simply excluded the panel, no
+// message, no retry short of reloading). Retrofitted in the same pass
+// Bay 03's aircraft-design page introduced this pattern — it isn't
+// Bay-03-only.
+function ListFetchError({ onRetry }: { onRetry: () => void }) {
+  return (
+    <div className="hgr-m-list-fetch-error">
+      <p>Couldn't load this list — check your connection and try again.</p>
+      <button type="button" className="hgr-m-btn hgr-m-btn-ghost" onClick={onRetry}>
+        Retry
       </button>
     </div>
   );
@@ -2508,6 +2533,8 @@ const HGR_MISSION_CSS = `
   border:1px solid rgba(232,163,61,.4); background:rgba(232,163,61,.08); border-radius:2px;
   padding:20px 22px; max-width:640px; margin-top:20px;
 }
+.hgr-m-list-fetch-error{ display:flex; align-items:center; justify-content:space-between; gap:16px; padding:14px 18px; margin-bottom:20px; border:1px solid rgba(232,163,61,.4); background:rgba(232,163,61,.08); border-radius:2px; }
+.hgr-m-list-fetch-error p{ margin:0; color:var(--hgr-m-paper-dim); font-size:13.5px; }
 .hgr-m-error b{ color:var(--hgr-m-amber-bright); display:block; margin-bottom:6px; font-size:14px; }
 .hgr-m-error p{ color:var(--hgr-m-paper-dim); font-size:13.5px; margin:0 0 16px; line-height:1.6; }
 
