@@ -130,6 +130,86 @@ export async function persistAircraftDesignSpec(
   return data as unknown as HangarAircraftDesignSpecRow;
 }
 
+// Same list/history cast pattern as conceptPersistence.ts's listDb.
+type ListQueryResult = Promise<{
+  data: Record<string, unknown>[] | null;
+  error: { message: string } | null;
+}>;
+
+const listDb = supabaseAdmin as unknown as {
+  from: (table: string) => {
+    select: (columns: string) => {
+      eq: (
+        column: string,
+        value: string,
+      ) => {
+        order: (column: string, opts: { ascending: boolean }) => ListQueryResult;
+      };
+    };
+  };
+};
+
+// Same dedup-by-latest-version pattern as conceptPersistence.ts's
+// getSpecsForConcepts — designs can be regenerated against the same
+// source concept too, so this must not assume one spec per aircraft_design_id.
+const orderedListDb = supabaseAdmin as unknown as {
+  from: (table: string) => {
+    select: (columns: string) => {
+      in: (
+        column: string,
+        values: string[],
+      ) => {
+        order: (
+          column: string,
+          opts: { ascending: boolean },
+        ) => {
+          order: (column: string, opts: { ascending: boolean }) => ListQueryResult;
+        };
+      };
+    };
+  };
+};
+
+export interface HangarAircraftDesignSpecSummary {
+  aircraft_design_id: string;
+  geometry_parameters: Record<string, unknown>;
+  component_selections: unknown[];
+  design_rationale: string;
+  confidence_score: number;
+  source_was_mock: boolean;
+}
+
+export async function listUserAircraftDesigns(userId: string): Promise<HangarAircraftDesignRow[]> {
+  const { data, error } = await listDb
+    .from("Hangar_aircraft_designs")
+    .select("*")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false });
+  if (error) throw new Error(`listUserAircraftDesigns: ${error.message}`);
+  return (data ?? []) as unknown as HangarAircraftDesignRow[];
+}
+
+export async function getSpecsForAircraftDesigns(
+  aircraftDesignIds: string[],
+): Promise<HangarAircraftDesignSpecSummary[]> {
+  if (aircraftDesignIds.length === 0) return [];
+  const { data, error } = await orderedListDb
+    .from("Hangar_aircraft_design_specs")
+    .select(
+      "aircraft_design_id,geometry_parameters,component_selections,design_rationale,confidence_score,source_was_mock",
+    )
+    .in("aircraft_design_id", aircraftDesignIds)
+    .order("aircraft_design_id", { ascending: true })
+    .order("version", { ascending: false });
+  if (error) throw new Error(`getSpecsForAircraftDesigns: ${error.message}`);
+  const latestByDesign = new Map<string, Record<string, unknown>>();
+  for (const row of data ?? []) {
+    const id = row.aircraft_design_id as string;
+    if (!latestByDesign.has(id)) latestByDesign.set(id, row);
+  }
+  return Array.from(latestByDesign.values()) as unknown as HangarAircraftDesignSpecSummary[];
+}
+
 export type AircraftDesignRunStage =
   | "geometry_generation"
   | "component_selection"

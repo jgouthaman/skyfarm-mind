@@ -12,7 +12,10 @@ import {
   updateAircraftDesignStatus,
   persistAircraftDesignSpec,
   logAircraftDesignStageRun,
+  listUserAircraftDesigns,
+  getSpecsForAircraftDesigns,
   type AircraftDesignRunStage,
+  type AircraftDesignStatus,
 } from "./aircraftDesignPersistence.ts";
 
 // Aircraft Design Agent (Bay 03) orchestrator — mirrors
@@ -284,4 +287,45 @@ export async function runGeometryGenerationStage(request: Stage1Request): Promis
   } catch (err) {
     throw await recordStageFailure(aircraftDesignId, "geometry_generation", err);
   }
+}
+
+// ── "Your aircraft designs" list ─────────────────────────────────────────
+
+export interface AircraftDesignListEntry {
+  aircraftDesignId: string;
+  designCode: string;
+  sourceConceptId: string;
+  status: AircraftDesignStatus;
+  createdAt: string;
+  geometryParameters: GeometryParameters | null;
+  componentSelections: ComponentSelection[] | null;
+  designRationale: string | null;
+  confidenceScore: number | null;
+  sourceWasMock: boolean | null;
+}
+
+export async function listAircraftDesignsForUser(
+  userId: string,
+): Promise<AircraftDesignListEntry[]> {
+  const designs = await listUserAircraftDesigns(userId);
+  const ids = designs.map((d) => d.id);
+  const specs = await getSpecsForAircraftDesigns(ids);
+  const specsByDesign = new Map(specs.map((s) => [s.aircraft_design_id, s]));
+  return designs.map((d): AircraftDesignListEntry => {
+    const spec = specsByDesign.get(d.id);
+    return {
+      aircraftDesignId: d.id,
+      designCode: d.design_code,
+      sourceConceptId: d.source_concept_id,
+      status: d.status,
+      createdAt: d.created_at,
+      geometryParameters: spec ? (spec.geometry_parameters as unknown as GeometryParameters) : null,
+      componentSelections: spec
+        ? (spec.component_selections as unknown as ComponentSelection[])
+        : null,
+      designRationale: spec?.design_rationale ?? null,
+      confidenceScore: spec?.confidence_score ?? null,
+      sourceWasMock: spec?.source_was_mock ?? null,
+    };
+  });
 }
