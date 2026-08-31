@@ -4,8 +4,9 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 // Hangar_concept_specs / Hangar_concept_runs — mirrors missionPersistence.ts
 // file-for-file (same supabaseAdmin-cast pattern, same function shapes),
 // adapted to the concept schema. Server-only, same reason as
-// missionPersistence.ts: only ever imported from conceptAgentPipeline.ts,
-// which only ever runs inside a server route.
+// missionPersistence.ts: only ever imported from conceptAgentPipeline.ts
+// and, as of Bay 03, aircraftDesignAgentPipeline.ts — both only ever run
+// inside a server route.
 
 type DbResult<T> = Promise<{ data: T; error: { message: string } | null }>;
 
@@ -163,6 +164,42 @@ export async function getSpecsForConcepts(
     if (!latestByConcept.has(conceptId)) latestByConcept.set(conceptId, row);
   }
   return Array.from(latestByConcept.values()) as unknown as HangarConceptSpecSummary[];
+}
+
+// AircraftDesignAgent.md Section 3.c — Bay 03's single-concept lookup is
+// exactly the shape get_latest_concept_spec was built for; this is that
+// RPC's first real caller (it existed live but unused until now).
+export async function getLatestConceptSpec(
+  conceptId: string,
+): Promise<HangarConceptSpecRow | null> {
+  const { data, error } = await (
+    supabaseAdmin as unknown as {
+      rpc: (fn: string, args: { p_concept_id: string }) => DbResult<Record<string, unknown>>;
+    }
+  ).rpc("get_latest_concept_spec", { p_concept_id: conceptId });
+  if (error) throw new Error(`getLatestConceptSpec: ${error.message}`);
+  // Returns a single row of nulls (not no rows) when nothing matches —
+  // confirmed live — so check a real column, not just truthiness of data.
+  if (!data || data.id === null) return null;
+  return data as unknown as HangarConceptSpecRow;
+}
+
+// AircraftDesignAgent.md Section 3.e — the mock flag from Concept Agent's
+// Stage 1/2 never made it into Hangar_concept_specs (persistConceptSpec
+// never wrote it); it only ever existed in each stage's own
+// Hangar_concept_runs.output_snapshot.mock. This is the only place it can
+// still be recovered from.
+export async function getConceptStageMockFlags(conceptId: string): Promise<boolean> {
+  const { data, error } = await listDb
+    .from("Hangar_concept_runs")
+    .select("output_snapshot")
+    .eq("concept_id", conceptId)
+    .order("created_at", { ascending: true });
+  if (error) throw new Error(`getConceptStageMockFlags: ${error.message}`);
+  return (data ?? []).some((row) => {
+    const snapshot = row.output_snapshot as { mock?: unknown } | null;
+    return snapshot?.mock === true;
+  });
 }
 
 // Mirrors missionPersistence.ts's getNextMissionSpecVersion — same reason:
