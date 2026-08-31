@@ -9,6 +9,7 @@ import {
 } from "./aircraftDesignGeneration.ts";
 import {
   createAircraftDesign,
+  getAircraftDesign,
   updateAircraftDesignStatus,
   persistAircraftDesignSpec,
   logAircraftDesignStageRun,
@@ -16,6 +17,7 @@ import {
   getSpecsForAircraftDesigns,
   type AircraftDesignRunStage,
   type AircraftDesignStatus,
+  type HangarAircraftDesignRow,
 } from "./aircraftDesignPersistence.ts";
 
 // Aircraft Design Agent (Bay 03) orchestrator — mirrors
@@ -41,6 +43,28 @@ export class InvalidAircraftDesignInputError extends Error {
     super(message);
     this.name = "InvalidAircraftDesignInputError";
   }
+}
+
+// New with Bay 04 — Bay 03 itself never needed this: Stage 1 always creates
+// a fresh Hangar_aircraft_designs row, so there was nothing pre-existing to
+// check ownership on. Bay 04 is the first bay that reads an *existing*
+// aircraft design by a client-supplied id, so it needs the same
+// never-trust-a-client-supplied-id check assertConceptOwnership already
+// applies for concepts.
+export async function assertAircraftDesignOwnership(
+  aircraftDesignId: string,
+  userId: string,
+): Promise<HangarAircraftDesignRow> {
+  const design = await getAircraftDesign(aircraftDesignId);
+  if (!design) {
+    throw new Error(
+      `No Hangar_aircraft_designs row found for aircraftDesignId "${aircraftDesignId}"`,
+    );
+  }
+  if (design.user_id !== userId) {
+    throw new Error(`Aircraft design "${design.id}" does not belong to user "${userId}"`);
+  }
+  return design;
 }
 
 async function recordStageFailure(

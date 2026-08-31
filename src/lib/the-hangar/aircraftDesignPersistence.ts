@@ -91,6 +91,29 @@ export async function updateAircraftDesignStatus(
   if (error) throw new Error(`updateAircraftDesignStatus: ${error.message}`);
 }
 
+// Bay 04's first real caller — get_latest_aircraft_design_spec has existed
+// live since Bay 03's own migration but had no caller until now (same
+// "speculative RPC, later real caller" pattern get_latest_concept_spec went
+// through with Bay 03). Unlike get_latest_concept_spec (returns one row of
+// nulls on no match), this RPC is `setof` — confirmed live: an unmatched id
+// returns an empty set, not a row of nulls — so the empty-array case is
+// checked here instead.
+export async function getLatestAircraftDesignSpec(
+  aircraftDesignId: string,
+): Promise<HangarAircraftDesignSpecRow | null> {
+  const { data, error } = await (
+    supabaseAdmin as unknown as {
+      rpc: (
+        fn: string,
+        args: { p_aircraft_design_id: string },
+      ) => DbResult<Record<string, unknown>[] | null>;
+    }
+  ).rpc("get_latest_aircraft_design_spec", { p_aircraft_design_id: aircraftDesignId });
+  if (error) throw new Error(`getLatestAircraftDesignSpec: ${error.message}`);
+  if (!data || data.length === 0) return null;
+  return data[0] as unknown as HangarAircraftDesignSpecRow;
+}
+
 // Mirrors conceptPersistence.ts's getNextConceptSpecVersion.
 async function getNextAircraftDesignSpecVersion(aircraftDesignId: string): Promise<number> {
   const { data, error } = await (
