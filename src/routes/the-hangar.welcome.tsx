@@ -524,6 +524,16 @@ function TheHangarWelcome() {
                         <text x={n.x} y={n.y - (n.hub ? 2 : 1)} className="hgr-w-node-num">
                           {"B" + n.bay}
                         </text>
+                        {n.status === "online" && (
+                          <rect
+                            x={n.x - 25}
+                            y={n.y + 4}
+                            width={50}
+                            height={17}
+                            rx={8.5}
+                            className="hgr-w-live-pill"
+                          />
+                        )}
                         <text
                           x={n.x}
                           y={n.y + 14}
@@ -619,6 +629,7 @@ const HGR_WELCOME_CSS = `
   --hgr-w-grid:rgba(111,180,224,0.08);
   --hgr-w-hairline:rgba(111,180,224,0.20);
   --hgr-w-green:#5FBF8F;
+  --hgr-w-green-bright:#9CF0C4;
   --hgr-w-idle-line:rgba(111,180,224,0.28);
   --hgr-w-idle-node:#16324E;
 
@@ -701,8 +712,12 @@ const HGR_WELCOME_CSS = `
 .hgr-w-hub-line{ fill:none; stroke:var(--hgr-w-blue-line); stroke-width:1; stroke-dasharray:2 5; opacity:.5; }
 
 .hgr-w-status-badge{ font-family:'IBM Plex Mono',monospace; font-size:9.5px; text-anchor:middle; letter-spacing:.05em; }
-.hgr-w-online-badge{ fill:var(--hgr-w-green); }
+.hgr-w-online-badge{ fill:var(--hgr-w-green-bright); font-size:10.5px; font-weight:700; }
 .hgr-w-design-badge{ fill:var(--hgr-w-paper-dim); opacity:.7; }
+.hgr-w-live-pill{
+  fill:rgba(18,59,46,0.92); stroke:var(--hgr-w-green); stroke-width:1.2;
+  filter:drop-shadow(0 0 6px rgba(95,191,143,0.75)); pointer-events:none;
+}
 
 .hgr-w-live-line{
   padding:12px 20px; border-top:1px solid var(--hgr-w-hairline);
