@@ -94,10 +94,11 @@ const NODES: NodeData[] = [
     bay: "04",
     name: "CAD",
     title: "CAD Agent",
-    status: "design",
+    status: "online",
+    href: "/the-hangar/cad-design",
     desc: "Builds real CAD geometry and assemblies from the validated design parameters — the first fully physical output.",
-    inp: "Geometry, design params",
-    tools: "FreeCAD, OpenCascade",
+    inp: "Aircraft design",
+    tools: "Claude Sonnet 5, rule engine",
     out: "CAD model & assembly",
   },
   {
@@ -360,7 +361,11 @@ function TheHangarWelcome() {
   function activate(n: NodeData) {
     if (n.href) {
       navigate({
-        to: n.href as "/the-hangar/mission" | "/the-hangar/concept" | "/the-hangar/aircraft-design",
+        to: n.href as
+          | "/the-hangar/mission"
+          | "/the-hangar/concept"
+          | "/the-hangar/aircraft-design"
+          | "/the-hangar/cad-design",
       });
     } else {
       setSelected(n);
@@ -594,6 +599,7 @@ function TheHangarWelcome() {
                           | "/the-hangar/mission"
                           | "/the-hangar/concept"
                           | "/the-hangar/aircraft-design"
+                          | "/the-hangar/cad-design"
                       }
                       className="hgr-w-btn hgr-w-btn-amber"
                       style={{ justifyContent: "center", marginTop: 18, textDecoration: "none" }}
