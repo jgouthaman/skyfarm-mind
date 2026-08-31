@@ -80,10 +80,11 @@ const NODES: NodeData[] = [
     bay: "03",
     name: "Aircraft Design",
     title: "Aircraft Design Agent",
-    status: "design",
+    status: "online",
+    href: "/the-hangar/aircraft-design",
     desc: "Selects configuration and design parameters — gate-then-score against rules and reference designs, never a guess.",
-    inp: "Concept, airfoil DB",
-    tools: "OpenVSP, XFLR5",
+    inp: "Concept",
+    tools: "Claude Sonnet 5, rule engine",
     out: "Aircraft geometry preview",
   },
   {
@@ -358,7 +359,9 @@ function TheHangarWelcome() {
   // back to the same preview behavior. Mirrors the mockup's activate().
   function activate(n: NodeData) {
     if (n.href) {
-      navigate({ to: n.href as "/the-hangar/mission" | "/the-hangar/concept" });
+      navigate({
+        to: n.href as "/the-hangar/mission" | "/the-hangar/concept" | "/the-hangar/aircraft-design",
+      });
     } else {
       setSelected(n);
     }
@@ -576,7 +579,12 @@ function TheHangarWelcome() {
                   </div>
                   {selected.href && (
                     <Link
-                      to={selected.href as "/the-hangar/mission" | "/the-hangar/concept"}
+                      to={
+                        selected.href as
+                          | "/the-hangar/mission"
+                          | "/the-hangar/concept"
+                          | "/the-hangar/aircraft-design"
+                      }
                       className="hgr-w-btn hgr-w-btn-amber"
                       style={{ justifyContent: "center", marginTop: 18, textDecoration: "none" }}
                     >
