@@ -101,6 +101,7 @@ import { Route as ApiHangarProcessConceptRankingScoringRouteImport } from './rou
 import { Route as ApiHangarProcessConceptOutputInterfaceRouteImport } from './routes/api.hangar.process-concept.output-interface'
 import { Route as ApiHangarProcessConceptFinalizeRouteImport } from './routes/api.hangar.process-concept.finalize'
 import { Route as ApiHangarProcessConceptConceptIdeationRouteImport } from './routes/api.hangar.process-concept.concept-ideation'
+import { Route as ApiHangarProcessCadDesignModelGenerationRouteImport } from './routes/api.hangar.process-cad-design.model-generation'
 import { Route as ApiHangarProcessAircraftDesignGeometryGenerationRouteImport } from './routes/api.hangar.process-aircraft-design.geometry-generation'
 import { Route as AcademyCoursesSlugLearnRouteImport } from './routes/academy.courses.$slug.learn'
 import { Route as AcademyModuleModuleIdQuizQuizIdRouteImport } from './routes/academy.module.$moduleId.quiz.$quizId'
@@ -602,6 +603,12 @@ const ApiHangarProcessConceptConceptIdeationRoute =
     path: '/api/hangar/process-concept/concept-ideation',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiHangarProcessCadDesignModelGenerationRoute =
+  ApiHangarProcessCadDesignModelGenerationRouteImport.update({
+    id: '/api/hangar/process-cad-design/model-generation',
+    path: '/api/hangar/process-cad-design/model-generation',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiHangarProcessAircraftDesignGeometryGenerationRoute =
   ApiHangarProcessAircraftDesignGeometryGenerationRouteImport.update({
     id: '/api/hangar/process-aircraft-design/geometry-generation',
@@ -716,6 +723,7 @@ export interface FileRoutesByFullPath {
   '/pilot/missions/': typeof PilotMissionsIndexRoute
   '/academy/courses/$slug/learn': typeof AcademyCoursesSlugLearnRoute
   '/api/hangar/process-aircraft-design/geometry-generation': typeof ApiHangarProcessAircraftDesignGeometryGenerationRoute
+  '/api/hangar/process-cad-design/model-generation': typeof ApiHangarProcessCadDesignModelGenerationRoute
   '/api/hangar/process-concept/concept-ideation': typeof ApiHangarProcessConceptConceptIdeationRoute
   '/api/hangar/process-concept/finalize': typeof ApiHangarProcessConceptFinalizeRoute
   '/api/hangar/process-concept/output-interface': typeof ApiHangarProcessConceptOutputInterfaceRoute
@@ -807,6 +815,7 @@ export interface FileRoutesByTo {
   '/pilot/missions': typeof PilotMissionsIndexRoute
   '/academy/courses/$slug/learn': typeof AcademyCoursesSlugLearnRoute
   '/api/hangar/process-aircraft-design/geometry-generation': typeof ApiHangarProcessAircraftDesignGeometryGenerationRoute
+  '/api/hangar/process-cad-design/model-generation': typeof ApiHangarProcessCadDesignModelGenerationRoute
   '/api/hangar/process-concept/concept-ideation': typeof ApiHangarProcessConceptConceptIdeationRoute
   '/api/hangar/process-concept/finalize': typeof ApiHangarProcessConceptFinalizeRoute
   '/api/hangar/process-concept/output-interface': typeof ApiHangarProcessConceptOutputInterfaceRoute
@@ -907,6 +916,7 @@ export interface FileRoutesById {
   '/pilot/missions/': typeof PilotMissionsIndexRoute
   '/academy/courses/$slug/learn': typeof AcademyCoursesSlugLearnRoute
   '/api/hangar/process-aircraft-design/geometry-generation': typeof ApiHangarProcessAircraftDesignGeometryGenerationRoute
+  '/api/hangar/process-cad-design/model-generation': typeof ApiHangarProcessCadDesignModelGenerationRoute
   '/api/hangar/process-concept/concept-ideation': typeof ApiHangarProcessConceptConceptIdeationRoute
   '/api/hangar/process-concept/finalize': typeof ApiHangarProcessConceptFinalizeRoute
   '/api/hangar/process-concept/output-interface': typeof ApiHangarProcessConceptOutputInterfaceRoute
@@ -1007,6 +1017,7 @@ export interface FileRouteTypes {
     | '/pilot/missions/'
     | '/academy/courses/$slug/learn'
     | '/api/hangar/process-aircraft-design/geometry-generation'
+    | '/api/hangar/process-cad-design/model-generation'
     | '/api/hangar/process-concept/concept-ideation'
     | '/api/hangar/process-concept/finalize'
     | '/api/hangar/process-concept/output-interface'
@@ -1098,6 +1109,7 @@ export interface FileRouteTypes {
     | '/pilot/missions'
     | '/academy/courses/$slug/learn'
     | '/api/hangar/process-aircraft-design/geometry-generation'
+    | '/api/hangar/process-cad-design/model-generation'
     | '/api/hangar/process-concept/concept-ideation'
     | '/api/hangar/process-concept/finalize'
     | '/api/hangar/process-concept/output-interface'
@@ -1197,6 +1209,7 @@ export interface FileRouteTypes {
     | '/pilot/missions/'
     | '/academy/courses/$slug/learn'
     | '/api/hangar/process-aircraft-design/geometry-generation'
+    | '/api/hangar/process-cad-design/model-generation'
     | '/api/hangar/process-concept/concept-ideation'
     | '/api/hangar/process-concept/finalize'
     | '/api/hangar/process-concept/output-interface'
@@ -1226,6 +1239,7 @@ export interface RootRouteChildren {
   ApiHangarConceptsRoute: typeof ApiHangarConceptsRoute
   ApiHangarMissionsRoute: typeof ApiHangarMissionsRoute
   ApiHangarProcessAircraftDesignGeometryGenerationRoute: typeof ApiHangarProcessAircraftDesignGeometryGenerationRoute
+  ApiHangarProcessCadDesignModelGenerationRoute: typeof ApiHangarProcessCadDesignModelGenerationRoute
   ApiHangarProcessConceptConceptIdeationRoute: typeof ApiHangarProcessConceptConceptIdeationRoute
   ApiHangarProcessConceptFinalizeRoute: typeof ApiHangarProcessConceptFinalizeRoute
   ApiHangarProcessConceptOutputInterfaceRoute: typeof ApiHangarProcessConceptOutputInterfaceRoute
@@ -1884,6 +1898,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiHangarProcessConceptConceptIdeationRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/hangar/process-cad-design/model-generation': {
+      id: '/api/hangar/process-cad-design/model-generation'
+      path: '/api/hangar/process-cad-design/model-generation'
+      fullPath: '/api/hangar/process-cad-design/model-generation'
+      preLoaderRoute: typeof ApiHangarProcessCadDesignModelGenerationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/hangar/process-aircraft-design/geometry-generation': {
       id: '/api/hangar/process-aircraft-design/geometry-generation'
       path: '/api/hangar/process-aircraft-design/geometry-generation'
@@ -2180,6 +2201,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiHangarMissionsRoute: ApiHangarMissionsRoute,
   ApiHangarProcessAircraftDesignGeometryGenerationRoute:
     ApiHangarProcessAircraftDesignGeometryGenerationRoute,
+  ApiHangarProcessCadDesignModelGenerationRoute:
+    ApiHangarProcessCadDesignModelGenerationRoute,
   ApiHangarProcessConceptConceptIdeationRoute:
     ApiHangarProcessConceptConceptIdeationRoute,
   ApiHangarProcessConceptFinalizeRoute: ApiHangarProcessConceptFinalizeRoute,
