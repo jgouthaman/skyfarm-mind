@@ -11,9 +11,12 @@ import {
   getSimulation,
   updateSimulationStatus,
   persistSimulationSpec,
+  listUserSimulations,
+  getSpecsForSimulations,
   logSimulationStageRun,
   getLatestCADDesignSpec,
   type SimulationRunStage,
+  type SimulationStatus,
   type HangarSimulationRow,
 } from "./simDesignPersistence.ts";
 
@@ -277,4 +280,45 @@ export async function runFlightDynamicsAssessmentStage(
   } catch (err) {
     throw await recordStageFailure(simulationId, "flight_dynamics_assessment", err);
   }
+}
+
+// ── "Your simulations" list ──────────────────────────────────────────────
+
+export interface SimulationListEntry {
+  simulationId: string;
+  simulationCode: string;
+  sourceCadDesignId: string;
+  status: SimulationStatus;
+  createdAt: string;
+  flightEnvelope: FlightEnvelope | null;
+  stability: StabilityAssessment | null;
+  performanceScore: number | null;
+  riskFlags: string[] | null;
+  confidenceScore: number | null;
+  reasoningSummary: string | null;
+  sourceWasMock: boolean | null;
+}
+
+export async function listSimulationsForUser(userId: string): Promise<SimulationListEntry[]> {
+  const simulations = await listUserSimulations(userId);
+  const ids = simulations.map((s) => s.id);
+  const specs = await getSpecsForSimulations(ids);
+  const specsBySimulation = new Map(specs.map((s) => [s.simulation_id, s]));
+  return simulations.map((s): SimulationListEntry => {
+    const spec = specsBySimulation.get(s.id);
+    return {
+      simulationId: s.id,
+      simulationCode: s.simulation_code,
+      sourceCadDesignId: s.source_cad_design_id,
+      status: s.status,
+      createdAt: s.created_at,
+      flightEnvelope: spec ? (spec.flight_envelope as unknown as FlightEnvelope) : null,
+      stability: spec ? (spec.stability as unknown as StabilityAssessment) : null,
+      performanceScore: spec?.performance_score ?? null,
+      riskFlags: spec?.risk_flags ?? null,
+      confidenceScore: spec?.confidence_score ?? null,
+      reasoningSummary: spec?.reasoning_summary ?? null,
+      sourceWasMock: spec?.source_was_mock ?? null,
+    };
+  });
 }
