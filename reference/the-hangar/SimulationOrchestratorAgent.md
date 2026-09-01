@@ -44,7 +44,7 @@ AI agent for flight simulation assessment, stability analysis, and performance e
 - Certification Agent
 - All downstream agents
 
-**Stored in:** `Hangar_SimulationRuns`, `Hangar_Projects`, Knowledge Base
+**Stored in:** `Hangar_Simulations` (parent), `Hangar_Simulation_specs` (versioned results), `Hangar_Simulation_runs` (per-stage audit trail), `Hangar_Projects`, Knowledge Base
 
 ## 4. Tools Used
 - LLM (direct Claude API — GPT-4o/Claude/Llama labels on the architecture slide are illustrative; actual implementation uses direct Anthropic Claude API only, per standing architecture rule)
@@ -57,8 +57,10 @@ AI agent for flight simulation assessment, stability analysis, and performance e
 
 | Store | Access | Contents |
 |---|---|---|
-| `Hangar_SimulationRuns` | Write | Simulation results, versions |
-| `Hangar_CADDesigns` | Read | CAD params, mass properties (Bay 04 output) |
+| `Hangar_Simulations` | Write | Parent record — status, confidence_score, source_cad_design_id |
+| `Hangar_Simulation_specs` | Write | Versioned results — flight_envelope, stability, risk_flags |
+| `Hangar_Simulation_runs` | Write | Per-stage audit trail — input/output snapshots, status, duration |
+| `Hangar_CADDesigns` / via `get_latest_cad_design_spec` RPC | Read | CAD params, mass properties (Bay 04 output, added to Bay 04 schema for this bay's benefit) |
 | `Hangar_Projects` | Read/Write | Project info, history, links |
 | Regulations DB | Read | FAR, EASA, MIL, ISO |
 | Knowledge Base | Read | Standards, best practices |
@@ -110,7 +112,7 @@ broke from established convention without a real reason to.
 }
 ```
 
-**Persisted record (pipeline layer adds ids before writing to `Hangar_SimulationRuns`):**
+**Persisted record (pipeline layer adds ids before writing — parent row in `Hangar_Simulations`, versioned result in `Hangar_Simulation_specs`, per-stage audit entries in `Hangar_Simulation_runs`):**
 ```json
 {
   "simulation_id": "uuid",
@@ -125,7 +127,10 @@ LangChain/LangGraph (orchestration) · Direct Anthropic Claude API (LLM) · Supa
 ## Implementation Notes (carry forward from Bay 01–04)
 
 - Files to build, mirroring Bay 04's naming: `simDesignRules.ts`, `simDesignGeneration.ts`, `simDesignPersistence.ts`, `simDesignAgentPipeline.ts`
-- Table prefix: `Hangar_SimulationRuns` (RPC conventions: `LANGUAGE sql`, `STABLE`, `SET search_path = ''`, not `SECURITY DEFINER` unless it needs to bypass RLS for a client-callable function)
+- Tables: `Hangar_Simulations` (parent) / `Hangar_Simulation_specs` (versioned, `unique(simulation_id, version)`) / `Hangar_Simulation_runs` (per-stage audit trail) — mirrors Bay 04's `Hangar_CADDesigns`/`_specs`/`_runs` split exactly, not a flat table (an earlier flat `Hangar_SimulationRuns` table was created and dropped before this pattern was confirmed)
+- `get_next_simulation_spec_version` RPC for version numbering, matching `get_next_cad_design_spec_version`
+- Reads Bay 04 output via the new `get_latest_cad_design_spec` RPC, added to Bay 04's schema specifically because Bay 05 is the consumer that RPC was deferred for
+- RPC conventions: `LANGUAGE sql`, `STABLE`, `SET search_path = ''`, not `SECURITY DEFINER` unless it needs to bypass RLS for a client-callable function
 - Ownership pattern: add `assertSimulationOwnership`, called at all relevant call sites, alongside existing `assertCADDesignOwnership`
 - `supabaseAdmin` used throughout pipeline persistence (RLS inert but retained as defense-in-depth)
 - `source_was_mock` set honestly on both sides of the pipeline, surfaced durably (result view, list row badge, past-design detail) — same as Bay 03/04, not transient like Bay 02
