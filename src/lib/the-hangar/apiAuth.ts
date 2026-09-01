@@ -2,6 +2,11 @@ import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 import { MissionAgentError, InvalidMissionInputError } from "./missionAgentPipeline.ts";
 import { ConceptAgentError, InvalidConceptInputError } from "./conceptAgentPipeline.ts";
+import {
+  AircraftDesignAgentError,
+  InvalidAircraftDesignInputError,
+} from "./aircraftDesignAgentPipeline.ts";
+import { CADDesignAgentError, InvalidCADDesignInputError } from "./cadDesignAgentPipeline.ts";
 
 // Shared auth + response helpers for the 4 Mission Agent stage routes
 // (api.hangar.process-mission.*.ts) — extracted so each route file stays a
@@ -88,6 +93,24 @@ export function errorResponse(err: unknown): Response {
   }
   if (err instanceof ConceptAgentError) {
     return jsonResponse({ error: err.message, concept_id: err.conceptId, stage: err.stage }, 500);
+  }
+  if (err instanceof InvalidAircraftDesignInputError) {
+    return jsonResponse({ error: err.message, aircraft_design_id: null }, 400);
+  }
+  if (err instanceof AircraftDesignAgentError) {
+    return jsonResponse(
+      { error: err.message, aircraft_design_id: err.aircraftDesignId, stage: err.stage },
+      500,
+    );
+  }
+  if (err instanceof InvalidCADDesignInputError) {
+    return jsonResponse({ error: err.message, cad_design_id: null }, 400);
+  }
+  if (err instanceof CADDesignAgentError) {
+    return jsonResponse(
+      { error: err.message, cad_design_id: err.cadDesignId, stage: err.stage },
+      500,
+    );
   }
   const message = err instanceof Error ? err.message : String(err);
   return jsonResponse({ error: message, mission_id: null }, 500);

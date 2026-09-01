@@ -6,6 +6,7 @@ import type {
   FinalizedKpi,
   MissionSpecsFields,
 } from "./missionSpecAssembly.ts";
+import { getMission } from "./missionPersistence.ts";
 import {
   createConcept,
   getConcept,
@@ -52,7 +53,10 @@ export class InvalidConceptInputError extends Error {
   }
 }
 
-async function assertConceptOwnership(
+// Exported for aircraftDesignAgentPipeline.ts (Bay 03) — its Stage 1 must
+// independently re-verify a client-supplied concept_id belongs to the
+// caller, same as every stage here does, rather than duplicate this logic.
+export async function assertConceptOwnership(
   conceptId: string,
   userId: string,
 ): Promise<HangarConceptRow> {
@@ -64,6 +68,29 @@ async function assertConceptOwnership(
     throw new Error(`Concept "${concept.id}" does not belong to user "${userId}"`);
   }
   return concept;
+}
+
+// Closes the gap documented in ConceptAgent.md Section 11 / AircraftDesignAgent.md
+// Section 3.g/3.a: Stage 1 previously trusted a client-supplied
+// sourceMissionId with no check that it belongs to the caller or is
+// actually finalized. Mirrors assertConceptOwnership's style (a getter +
+// existence check + ownership check), with the added status gate this
+// check specifically needs.
+// Exported for the same reason as assertConceptOwnership above —
+// AircraftDesignAgent.md Section 3.g calls for Bay 03 to re-verify this
+// transitively as defense in depth, even though Bay 02 now checks it too.
+export async function assertMissionOwnership(sourceMissionId: string, userId: string) {
+  const mission = await getMission(sourceMissionId);
+  if (!mission) {
+    throw new Error("Source mission not found");
+  }
+  if (mission.user_id !== userId) {
+    throw new Error("Source mission does not belong to this user");
+  }
+  if (mission.status !== "finalized") {
+    throw new Error("Source mission is not finalized");
+  }
+  return mission;
 }
 
 async function recordStageFailure(
@@ -100,6 +127,7 @@ export async function runConceptIdeationStage(request: Stage1Request): Promise<S
   if (!sourceMissionId) {
     throw new InvalidConceptInputError("A saved spec must be selected before generating concepts.");
   }
+  await assertMissionOwnership(sourceMissionId, userId);
 
   const concept = await createConcept(userId, sourceMissionId);
   const conceptId = concept.id;

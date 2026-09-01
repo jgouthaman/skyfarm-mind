@@ -166,51 +166,62 @@ function TheHangarConcept() {
 
   // "Your saved specs" — finalized mission specs only, reusing
   // /api/hangar/missions (Mission Agent's own list route) with a status
-  // filter, rather than a parallel query.
-  useEffect(() => {
+  // filter, rather than a parallel query. Extracted into a named function
+  // so Retry (ListFetchError) can re-invoke it — previously silently blank
+  // on error.
+  async function fetchSavedSpecs() {
     if (!currentUserEmail) return;
     setSavedSpecsStatus("loading");
-    supabase.auth.getSession().then(async ({ data }) => {
-      const token = data.session?.access_token;
-      if (!token) {
-        setSavedSpecsStatus("error");
-        return;
-      }
-      try {
-        const res = await fetch("/api/hangar/missions?status=finalized", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        setSavedSpecs(await res.json());
-        setSavedSpecsStatus("idle");
-      } catch {
-        setSavedSpecsStatus("error");
-      }
-    });
+    const { data } = await supabase.auth.getSession();
+    const token = data.session?.access_token;
+    if (!token) {
+      setSavedSpecsStatus("error");
+      return;
+    }
+    try {
+      const res = await fetch("/api/hangar/missions?status=finalized", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      setSavedSpecs(await res.json());
+      setSavedSpecsStatus("idle");
+    } catch {
+      setSavedSpecsStatus("error");
+    }
+  }
+
+  useEffect(() => {
+    fetchSavedSpecs();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUserEmail]);
 
   // "Your concepts" — refetched whenever a concept reaches spec_ready, same
-  // pattern as Mission Agent's "Your missions" refresh trigger.
-  useEffect(() => {
+  // pattern as Mission Agent's "Your missions" refresh trigger. Extracted
+  // for the same Retry reason as fetchSavedSpecs above.
+  async function fetchConceptsList() {
     if (!currentUserEmail) return;
     setConceptsStatus("loading");
-    supabase.auth.getSession().then(async ({ data }) => {
-      const token = data.session?.access_token;
-      if (!token) {
-        setConceptsStatus("error");
-        return;
-      }
-      try {
-        const res = await fetch("/api/hangar/concepts", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        setConcepts(await res.json());
-        setConceptsStatus("idle");
-      } catch {
-        setConceptsStatus("error");
-      }
-    });
+    const { data } = await supabase.auth.getSession();
+    const token = data.session?.access_token;
+    if (!token) {
+      setConceptsStatus("error");
+      return;
+    }
+    try {
+      const res = await fetch("/api/hangar/concepts", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      setConcepts(await res.json());
+      setConceptsStatus("idle");
+    } catch {
+      setConceptsStatus("error");
+    }
+  }
+
+  useEffect(() => {
+    fetchConceptsList();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUserEmail, flow.stage4.status]);
 
   function resetFlow() {
@@ -484,6 +495,8 @@ function TheHangarConcept() {
               and proceed when you're ready.
             </p>
 
+            {savedSpecsStatus === "error" && <ListFetchError onRetry={fetchSavedSpecs} />}
+
             {savedSpecsStatus !== "error" &&
               savedSpecs &&
               savedSpecs.length > 0 &&
@@ -524,6 +537,8 @@ function TheHangarConcept() {
                 generate concepts from it.
               </p>
             )}
+
+            {conceptsStatus === "error" && <ListFetchError onRetry={fetchConceptsList} />}
 
             {concepts && concepts.length > 0 && !selectedConcept && (
               <ListPanel
@@ -800,6 +815,20 @@ function ProceedRow({ label, onClick }: { label: string; onClick: () => void }) 
     <div className="hgr-c-proceed-row">
       <button type="button" className="hgr-c-btn hgr-c-btn-amber" onClick={onClick}>
         {label}
+      </button>
+    </div>
+  );
+}
+
+// NEW — both of this page's list-fetch failures previously rendered
+// nothing at all. Retrofitted in the same pass Bay 03's aircraft-design
+// page introduced this pattern.
+function ListFetchError({ onRetry }: { onRetry: () => void }) {
+  return (
+    <div className="hgr-c-list-fetch-error">
+      <p>Couldn't load this list — check your connection and try again.</p>
+      <button type="button" className="hgr-c-btn hgr-c-btn-ghost" onClick={onRetry}>
+        Retry
       </button>
     </div>
   );
@@ -1200,6 +1229,8 @@ const HGR_CONCEPT_CSS = `
 /* ── Error ── */
 @keyframes hgr-c-spin{ to{ transform:rotate(360deg); } }
 .hgr-c-error{ border:1px solid rgba(232,163,61,.4); background:rgba(232,163,61,.08); border-radius:2px; padding:20px 22px; max-width:640px; margin-top:20px; }
+.hgr-c-list-fetch-error{ display:flex; align-items:center; justify-content:space-between; gap:16px; padding:14px 18px; margin-bottom:20px; border:1px solid rgba(232,163,61,.4); background:rgba(232,163,61,.08); border-radius:2px; }
+.hgr-c-list-fetch-error p{ margin:0; color:var(--hgr-c-paper-dim); font-size:13.5px; }
 .hgr-c-error b{ color:var(--hgr-c-amber-bright); display:block; margin-bottom:6px; font-size:14px; }
 .hgr-c-error p{ color:var(--hgr-c-paper-dim); font-size:13.5px; margin:0 0 16px; line-height:1.6; }
 
