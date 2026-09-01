@@ -109,10 +109,10 @@ const NODES: NodeData[] = [
     name: "Sim Orchestrator",
     title: "Simulation Orchestrator",
     status: "design",
-    desc: "Prepares the simulation plan and dispatches jobs to CFD, structural and other physics agents in parallel.",
+    desc: "Assesses flight envelope, stability, and performance risk from the CAD design — LLM reasoning bounded by vertical design rules.",
     inp: "CAD model",
-    tools: "Python orchestrator, job scheduler",
-    out: "Simulation plan & job list",
+    tools: "Claude Sonnet 5, rule engine",
+    out: "Simulation result: flight envelope, stability, risk flags",
   },
   {
     id: 6,
