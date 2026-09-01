@@ -6,20 +6,17 @@ import type { HangarCADDesignSpecRow } from "./cadDesignPersistence.ts";
 // mirrors cadDesignPersistence.ts file-for-file, including its .limit(1)
 // (not .single()/.maybeSingle()) convention. Server-only, same reason.
 //
-// assertSimulationOwnership lives here, not in a pipeline file — a
-// deliberate placement deviation, not a mirrored pattern. Checked
-// cadDesignPersistence.ts directly before writing this: it does not
-// implement or call assertCADDesignOwnership at all. That function is a
-// local, unexported helper inside cadDesignAgentPipeline.ts (uses
-// getCADDesign from this file's sibling). The real precedent — Bay 03's
-// assertConceptOwnership, Bay 04's assertCADDesignOwnership, and Bay 03's
-// assertAircraftDesignOwnership — is that ownership-assert functions live
-// in the *AgentPipeline.ts file, not *Persistence.ts. simDesignAgentPipeline.ts
-// doesn't exist yet and is out of scope this pass, so assertSimulationOwnership
-// is exported from here instead, ready for that future pipeline file to
-// import — its internal logic (fetch by id via getSimulation, compare
-// user_id, throw a plain Error on mismatch/not-found) exactly mirrors
-// assertCADDesignOwnership's, just relocated.
+// Placement note (resolved): an earlier version of this file exported
+// assertSimulationOwnership here as a deliberate, documented deviation from
+// the real precedent (ownership-assert functions live in the
+// *AgentPipeline.ts file — see assertConceptOwnership/assertMissionOwnership
+// in conceptAgentPipeline.ts, assertAircraftDesignOwnership in
+// aircraftDesignAgentPipeline.ts, assertCADDesignOwnership in
+// cadDesignAgentPipeline.ts), made only because simDesignAgentPipeline.ts
+// didn't exist yet. Now that it does, assertSimulationOwnership has moved
+// there (local/unexported, using getSimulation below — the same real
+// original state assertCADDesignOwnership had before Bay 05 itself needed
+// it exported) to match precedent exactly.
 
 type DbResult<T> = Promise<{ data: T; error: { message: string } | null }>;
 
@@ -94,23 +91,6 @@ export async function getSimulation(simulationId: string): Promise<HangarSimulat
     .limit(1);
   if (error) throw new Error(`getSimulation: ${error.message}`);
   return (data?.[0] as HangarSimulationRow | undefined) ?? null;
-}
-
-// See file header comment — mirrors assertCADDesignOwnership's exact
-// internal logic, relocated here since simDesignAgentPipeline.ts (where
-// that precedent would normally put this) doesn't exist yet.
-export async function assertSimulationOwnership(
-  simulationId: string,
-  userId: string,
-): Promise<HangarSimulationRow> {
-  const simulation = await getSimulation(simulationId);
-  if (!simulation) {
-    throw new Error(`No Hangar_Simulations row found for simulationId "${simulationId}"`);
-  }
-  if (simulation.user_id !== userId) {
-    throw new Error(`Simulation "${simulation.id}" does not belong to user "${userId}"`);
-  }
-  return simulation;
 }
 
 export async function updateSimulationStatus(
