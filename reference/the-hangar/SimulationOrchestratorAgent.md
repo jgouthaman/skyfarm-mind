@@ -1,97 +1,124 @@
-# Bay 05 — Simulation Orchestrator Agent
+# Simulation Orchestrator Agent (Bay 05) — Spec
 
-## Status
-PLANNED → IN DEVELOPMENT (this doc marks kickoff)
-
-## Position in Pipeline
-Bay 04 (CAD Agent) → **Bay 05 (Simulation Orchestrator Agent)** → Bay 06 (Manufacturing Agent), Certification Agent
+**Agent ID:** `SIMULATION_ORCHESTRATOR_AGENT`
+**Type:** Base Agent (Downstream)
+**Stage:** 5 of 15
+**Status:** Planned — not yet built
 
 ## Purpose
-Given a finalized CAD design (Blueprint.json + CAD outputs from Bay 04), produce a structured simulation
-assessment covering flight dynamics, stability, and performance envelope — expressed as if derived from
-JSBSim/X-Plane 6-DOF simulation, but generated via direct Claude API reasoning over the design parameters
-and physics domain knowledge (no real simulation engine call in MVP). This mirrors the Bay 04 CAD Agent
-pattern: FreeCAD/OpenSCAD were conceptual analogues there; JSBSim/X-Plane are conceptual analogues here.
 
-**Framing discipline:** TorqWings is "an aerospace design engine that uses an LLM as one component."
-This bay's output must be internally labeled and surfaced as LLM-derived (`source_was_mock`), never
-presented to the user as literal simulator output, to preserve that framing.
+AI agent for flight simulation assessment, stability analysis, and performance envelope generation. Consumes Bay 04's CAD model data (geometry, mass properties, structural layout) and produces structured simulation result data — flight envelope, stability classification, risk flags — as JSON. Follows the established Hangar pattern: LLM + rules + structured JSON, no real physics/simulation engine calls (no JSBSim/X-Plane integration in this phase, despite the pattern's "tools" list naming them as the conceptual analogue — same convention as Bay 03's OpenVSP/XFLR5 and Bay 04's FreeCAD/OpenSCAD references).
 
-## Inputs
-- `mission_brief` (from Bay 01)
-- `concept_output` (from Bay 02)
-- `aircraft_design` (from Bay 03)
-- `cad_design` (from Bay 04) — geometry, mass properties, structural layout, `Hangar_CADDesigns` row
-- `design_rules` relevant to the vertical (gate constraints already applied upstream; this bay does not re-gate)
+## 1. Inputs to Simulation Orchestrator Agent
 
-## Outputs (Simulation Result JSON contract)
+| Input | Source |
+|---|---|
+| CAD Model Data | From Bay 04 — CAD Agent |
+| CAD Design ID | Traceable reference |
+| Mass Properties (weight, CG, MOI) | Bay 04 output |
+| Mission KPIs (range, endurance, payload) | Carried from Mission Spec |
+| Vertical-Specific Performance Thresholds | `design_rules` (loiter time, payload-range curves, etc.) |
+| Regulatory Performance Constraints | Regulations DB (FAR/EASA/MIL/ISO) |
+
+## 2. Internal Architecture
+
+### 5.1 Flight Dynamics Assessment
+- **Flight Envelope Estimation** — max speed, stall speed, service ceiling, range, endurance (LLM + prompt templates over mass/geometry params)
+- **Performance Scoring** — 0–100 composite score feeding confidence signal (heuristic/rules)
+
+### 5.2 Stability Analysis
+- **Longitudinal/Lateral Stability Classification** — stable/marginal/unstable (rules engine over CG, control surface, mass distribution — not real 6-DOF integration)
+- **Risk Flagging** — e.g. CG aft of aft limit under full payload, insufficient control authority
+
+### 5.3 Output Generation
+- **Simulation Result Record** — structured params representing a simulation run (not real JSBSim/X-Plane output)
+- **Reasoning Summary** — narrative explanation of the assessment for UI display
+
+### 5.4 Output Interface
+- Structured Data API (JSON to Manufacturing Agent — Bay 06, and Certification Agent)
+- UI Dashboard View (flight envelope + stability summary — rendered from structured params, not real simulation traces)
+- Event Publish (to LangGraph/Event Bus)
+
+## 3. Outputs (Consumed By)
+- Manufacturing Agent (Bay 06)
+- Certification Agent
+- All downstream agents
+
+**Stored in:** `Hangar_SimulationRuns`, `Hangar_Projects`, Knowledge Base
+
+## 4. Tools Used
+- LLM (direct Claude API — GPT-4o/Claude/Llama labels on the architecture slide are illustrative; actual implementation uses direct Anthropic Claude API only, per standing architecture rule)
+- Rules Engine (stability/risk-flag checks against vertical thresholds)
+- Performance Estimator (flight envelope — heuristic)
+- Knowledge Graph (aerospace ontology)
+- Document Parser (PDF/DOCX specs)
+
+## 5. Data Stores (Read/Write)
+
+| Store | Access | Contents |
+|---|---|---|
+| `Hangar_SimulationRuns` | Write | Simulation results, versions |
+| `Hangar_CADDesigns` | Read | CAD params, mass properties (Bay 04 output) |
+| `Hangar_Projects` | Read/Write | Project info, history, links |
+| Regulations DB | Read | FAR, EASA, MIL, ISO |
+| Knowledge Base | Read | Standards, best practices |
+| `Hangar_AuditLogs` | Write | Agent runs, decisions, traces |
+
+## 6. Integrations
+Auth Service, File Storage (Supabase/S3), Event Bus (LangGraph), Workflow Engine (LangGraph), API Gateway, Version Control (Git) — same as Bay 01–04.
+
+## 7. Interface Spec (I/O Contract)
+
+**Input schema (from Bay 04):**
+```json
+{
+  "cad_id": "uuid",
+  "geometry_id": "uuid",
+  "mass_properties": { "weight_kg": 0, "cg": { "x": 0, "y": 0, "z": 0 } },
+  "validation": { "interference_clear": true, "dfm_flags": [] }
+}
+```
+
+**Output schema (proposed):**
 ```json
 {
   "simulation_id": "uuid",
-  "cad_design_id": "uuid (FK)",
+  "cad_id": "uuid",
   "flight_envelope": {
-    "max_speed_kmh": number,
-    "stall_speed_kmh": number,
-    "service_ceiling_m": number,
-    "range_km": number,
-    "endurance_min": number
+    "max_speed_kmh": 0,
+    "stall_speed_kmh": 0,
+    "service_ceiling_m": 0,
+    "range_km": 0,
+    "endurance_min": 0
   },
   "stability": {
     "longitudinal": "stable | marginal | unstable",
     "lateral": "stable | marginal | unstable",
     "notes": "string"
   },
-  "performance_score": number,      // 0-100, feeds confidence signal
-  "risk_flags": ["string"],         // e.g. "CG aft of aft limit under full payload"
-  "confidence_signal": number,      // 0-1
+  "performance_score": 0.0,
+  "risk_flags": ["string"],
+  "confidence_score": 0.0,
   "reasoning_summary": "string",
-  "source_was_mock": true,          // always true for MVP — no real JSBSim/X-Plane call
-  "created_at": "timestamp"
+  "source_was_mock": false
 }
 ```
 
-## Pipeline Steps (mirrors Bay 04 pattern)
-1. `simDesignRules.ts` — load vertical-specific performance thresholds (from `design_rules`) to bound
-   the LLM's reasoning (e.g. GuardSky loiter time minimums, AgriSky payload-vs-range tradeoffs)
-2. `simDesignGeneration.ts` — direct Claude API call: structured prompt with CAD design + design rules →
-   structured JSON simulation result (schema above)
-3. `simDesignPersistence.ts` — write to `Hangar_SimulationRuns`, `assertSimulationOwnership` check
-4. `simDesignAgentPipeline.ts` — orchestrates steps 1–3, matches Bay 01–04 pipeline shape
-5. API route (`/api/hangar/bay05/simulate`)
-6. UI: simulation result view on `/destud` or Hangar bay UI, surfacing `source_was_mock` badge
-   (same 3-location durability pattern as Bay 03+: result view, list row badge, detail view)
-7. End-to-end live test against PR preview deployment
-8. Merge via `feature/the-hangar-bay05` → `dev` → `main`
+## 8. Tech Stack
+LangChain/LangGraph (orchestration) · Direct Anthropic Claude API (LLM) · Supabase Postgres + pgvector (data & vector store) · FastAPI-equivalent route (TanStack Start API route)
 
-## Data Model
-New table: `Hangar_SimulationRuns`
-- `id` (uuid, pk)
-- `cad_design_id` (uuid, fk → `Hangar_CADDesigns`)
-- `user_id` (uuid, fk, RLS + `assertSimulationOwnership`)
-- `flight_envelope` (jsonb)
-- `stability` (jsonb)
-- `performance_score` (numeric)
-- `risk_flags` (jsonb array)
-- `confidence_signal` (numeric)
-- `reasoning_summary` (text)
-- `source_was_mock` (boolean, default true)
-- `created_at` (timestamptz, default now())
+## Implementation Notes (carry forward from Bay 01–04)
 
-Standard patterns applied: `SET search_path = ''`, `supabaseAdmin` in persistence layer, `.limit(1)`
-not `.single()`, RLS + `assertSimulationOwnership` at ownership check site.
-
-## Downstream Consumers
-- **Bay 06 (Manufacturing Agent)** — reads `performance_score`, `risk_flags` to inform manufacturability notes
-- **Certification Agent** — reads full simulation result as part of compliance evidence trail
+- Files to build, mirroring Bay 04's naming: `simDesignRules.ts`, `simDesignGeneration.ts`, `simDesignPersistence.ts`, `simDesignAgentPipeline.ts`
+- Table prefix: `Hangar_SimulationRuns` (RPC conventions: `LANGUAGE sql`, `STABLE`, `SET search_path = ''`, not `SECURITY DEFINER` unless it needs to bypass RLS for a client-callable function)
+- Ownership pattern: add `assertSimulationOwnership`, called at all relevant call sites, alongside existing `assertCADDesignOwnership`
+- `supabaseAdmin` used throughout pipeline persistence (RLS inert but retained as defense-in-depth)
+- `source_was_mock` set honestly on both sides of the pipeline, surfaced durably (result view, list row badge, past-design detail) — same as Bay 03/04, not transient like Bay 02
+- `.limit(1)` not `.single()` on Supabase queries
+- Branch flow: `feature/the-hangar-bay05` → `dev` → `main`
+- Verify this spec doc lands on the correct branch/path before the PR (see: `AircraftDesignAgent.md` incident, and this bay's own repo-root-vs-`reference/the-hangar/` mislocation)
 
 ## Open Questions (resolve before/during scaffolding)
-- Exact vertical-specific performance thresholds per `design_rules.vertical` — need source values for
-  GuardSky/AgriSky/GeoSky/InfraSky (loiter time, payload-range curves, etc.)
-- Whether `risk_flags` should be gate-then-score eligible (i.e., can a severe risk flag block progression
-  to Bay 06?) or advisory-only for MVP
+- Exact vertical-specific performance thresholds per `design_rules.vertical` — need source values for GuardSky/AgriSky/GeoSky/InfraSky (loiter time, payload-range curves, etc.)
+- Whether `risk_flags` should be gate-then-score eligible (can a severe risk flag block progression to Bay 06?) or advisory-only for MVP
 - UI surface: new tab on `/destud`, or a dedicated Hangar bay view?
-
-## Out of Scope for MVP
-- Real JSBSim/X-Plane engine calls
-- Live 6-DOF numerical integration
-- Wind tunnel / CFD data ingestion
