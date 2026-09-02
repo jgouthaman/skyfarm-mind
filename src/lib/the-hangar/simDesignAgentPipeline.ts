@@ -104,6 +104,12 @@ export interface Stage1Result {
   reasoningSummary: string;
   sourceWasMock: boolean;
   specVersion: number;
+  // TEMPORARY DIAGNOSTIC — threaded from simDesignGeneration.ts's own
+  // debugErrorDetail (see that file's header comment for the revert note).
+  // Only present in the API response body when the generation call fell
+  // back to mock; never persisted to Hangar_Simulation_specs, never shown
+  // in the UI.
+  debugErrorDetail?: string;
 }
 
 // SimulationOrchestratorAgent.md Section 5.1: "Performance Scoring — 0-100
@@ -277,6 +283,8 @@ export async function runFlightDynamicsAssessmentStage(
       reasoningSummary,
       sourceWasMock: finalSourceWasMock,
       specVersion: specRow.version,
+      // TEMPORARY DIAGNOSTIC — see this field's own doc comment above.
+      debugErrorDetail: generation.debugErrorDetail,
     };
   } catch (err) {
     throw await recordStageFailure(simulationId, "flight_dynamics_assessment", err);
