@@ -26,10 +26,19 @@ export interface LlmGatewayResult {
 export async function callLlmGateway(
   systemPrompt: string,
   userContent: string,
-  opts?: { model?: string; jsonMode?: boolean },
+  opts?: { model?: string; jsonMode?: boolean; debugLabel?: string },
 ): Promise<LlmGatewayResult> {
   const key = process.env.ANTHROPIC_API_KEY;
-  if (!key) return { content: null };
+  if (!key) {
+    // TEMPORARY DIAGNOSTIC — revert once the real cause of Bay 05's mock
+    // fallback is found. Gated behind opts.debugLabel so every existing
+    // caller (Mission/Concept/AircraftDesign/CAD) that doesn't pass it is
+    // completely unaffected — same silent behavior as before.
+    if (opts?.debugLabel) {
+      console.error(`[${opts.debugLabel}] callLlmGateway: ANTHROPIC_API_KEY is not set`);
+    }
+    return { content: null };
+  }
 
   // jsonMode: no request-level equivalent on the Messages API (no
   // response_format param, and assistant-prefill is removed on Sonnet 5) —
@@ -47,7 +56,14 @@ export async function callLlmGateway(
 
     const textBlock = response.content.find((block) => block.type === "text");
     return { content: textBlock?.text ?? null };
-  } catch {
+  } catch (err) {
+    // TEMPORARY DIAGNOSTIC — same gating/revert note as above. This is the
+    // catch block that was silently swallowing the real cause (invalid
+    // key, network error, non-2xx response, etc.) into a generic
+    // { content: null } for every caller.
+    if (opts?.debugLabel) {
+      console.error(`[${opts.debugLabel}] callLlmGateway: Anthropic call failed:`, err);
+    }
     return { content: null };
   }
 }

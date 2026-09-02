@@ -127,11 +127,28 @@ export async function generateSimDesign(
 
 Return: { "flight_envelope": { "max_speed_kmh": number, "stall_speed_kmh": number, "service_ceiling_m": number, "range_km": number, "endurance_min": number }, "stability": { "longitudinal": "stable | marginal | unstable", "lateral": "stable | marginal | unstable", "notes": "string" }, "performance_score": number, "risk_flags": ["string"], "confidence_score": number, "reasoning_summary": "string" }`;
 
-  const { content } = await callLlmGateway(SYSTEM, userContent, { jsonMode: true });
+  // TEMPORARY DIAGNOSTIC — debugLabel opts into llmGateway.ts's normally-
+  // silent error logging, isolated to this call site only (CAD's own call
+  // doesn't pass it, so its behavior is unchanged). Revert both this and
+  // the console.error below once the real cause of Bay 05's mock fallback
+  // is found.
+  const { content } = await callLlmGateway(SYSTEM, userContent, {
+    jsonMode: true,
+    debugLabel: "simDesignGeneration",
+  });
   if (!content) return mockSimDesign();
 
   const parsed = parseSimDesignResponse(content);
-  if (!parsed) return mockSimDesign();
+  if (!parsed) {
+    // TEMPORARY DIAGNOSTIC — same revert note as above. Covers the
+    // "content came back but failed our own schema validation" case,
+    // which llmGateway.ts's own logging can't see.
+    console.error(
+      "[simDesignGeneration] callLlmGateway returned content but parseSimDesignResponse rejected it. Raw content:",
+      content,
+    );
+    return mockSimDesign();
+  }
   return { ...parsed, sourceWasMock: false };
 }
 
