@@ -1,9 +1,8 @@
-import { createServerFn } from "@tanstack/react-start";
 import { callLlmGateway, stripJsonFences } from "./llmGateway.ts";
 import type { GeometryParameters, ComponentSelection } from "./aircraftDesignGeneration.ts";
 
-// Bay 04 (CAD Agent) Stage 1's generation step — same createServerFn +
-// callLlmGateway + mock-fallback pattern as aircraftDesignGeneration.ts.
+// Bay 04 (CAD Agent) Stage 1's generation step — callLlmGateway +
+// mock-fallback pattern, same as aircraftDesignGeneration.ts.
 // callLlmGateway is already a direct Anthropic SDK call (see its own header
 // comment) despite the filename — no separate "gateway" service, and no
 // second parallel direct-SDK call path is added here. Runs only after
@@ -11,6 +10,24 @@ import type { GeometryParameters, ComponentSelection } from "./aircraftDesignGen
 // is deliberately NOT requested from the model — CADAgent.md frames that as
 // a rules-engine job, computed separately in the pipeline from this
 // function's own output.
+//
+// URGENT PRODUCTION FIX: generateCADDesign was a createServerFn until this
+// change. On real Vercel production (torqwings.com), it started throwing
+// "Server function info not found for <hash>" — its manifest entry not
+// resolving at runtime — identical to the confirmed bug that hit Bay 05's
+// generateSimDesign (see simDesignGeneration.ts's own header comment for
+// the full investigation history: exhaustive source-level comparison found
+// no structural difference, and two different local build reproductions,
+// bare `vite build` and `vercel build`, both proved unreliable as
+// predictors of real Vercel behavior). generateCADDesign has exactly one
+// caller anywhere in the codebase (cadDesignAgentPipeline.ts's
+// runModelGenerationStage, itself only ever reached from the server-only
+// API route handler) and is never invoked from client code — confirmed via
+// a full-codebase search before making this change, same verification done
+// for generateSimDesign — so it never needed the createServerFn RPC/hash
+// dispatch mechanism in the first place; it only ever ran in-process,
+// server-to-server. Removing the wrapper is the identical fix already
+// applied to Bay 05.
 
 const SYSTEM = `You are CAD Agent's model generation step for TorqWings' aerospace design platform. Given one gated aircraft design (geometry parameters and component selections from the Aircraft Design Agent), propose structured CAD model data: model file metadata (STEP/IGES — labels only, not real files), a bill of materials, and mass properties (weight and center of gravity). Every claim must be grounded in the given geometry/components — do not invent requirements not present in the input. Return JSON only.`;
 
@@ -46,20 +63,18 @@ export interface CADGenerationResult {
   mock: boolean;
 }
 
-export const generateCADDesign = createServerFn({ method: "POST" })
-  .validator((d: CADGenerationInput) => d)
-  .handler(async ({ data }): Promise<CADGenerationResult> => {
-    const userContent = `Aircraft design: ${JSON.stringify(data, null, 2)}
+export async function generateCADDesign(data: CADGenerationInput): Promise<CADGenerationResult> {
+  const userContent = `Aircraft design: ${JSON.stringify(data, null, 2)}
 
 Return: { "model_files": { "step": "string", "iges": "string" }, "bom": [{ "part": "string", "qty": number, "material": "string" }], "mass_properties": { "weight_kg": number, "cg": { "x": number, "y": number, "z": number } }, "design_rationale": "string" }`;
 
-    const { content } = await callLlmGateway(SYSTEM, userContent, { jsonMode: true });
-    if (!content) return mockCADDesign();
+  const { content } = await callLlmGateway(SYSTEM, userContent, { jsonMode: true });
+  if (!content) return mockCADDesign();
 
-    const parsed = parseCADResponse(content);
-    if (!parsed) return mockCADDesign();
-    return { ...parsed, mock: false };
-  });
+  const parsed = parseCADResponse(content);
+  if (!parsed) return mockCADDesign();
+  return { ...parsed, mock: false };
+}
 
 function isFiniteNumber(v: unknown): v is number {
   return typeof v === "number" && Number.isFinite(v);

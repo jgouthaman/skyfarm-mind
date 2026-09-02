@@ -177,15 +177,16 @@ export async function runModelGenerationStage(request: Stage1Request): Promise<S
       );
     }
 
-    // GENERATE — the one LLM call in this stage.
+    // GENERATE — the one LLM call in this stage. generateCADDesign is a
+    // plain async function (not a createServerFn — urgent production fix,
+    // see its own header comment), so this is a direct call, not a
+    // { data: {...} } wrapped RPC invocation.
     const generation = await generateCADDesign({
-      data: {
-        cadCode: cadDesign.cad_code,
-        vehicleClass: geometryParameters.vehicleClass,
-        geometryParameters,
-        componentSelections,
-        designRationale: spec.design_rationale,
-      },
+      cadCode: cadDesign.cad_code,
+      vehicleClass: geometryParameters.vehicleClass,
+      geometryParameters,
+      componentSelections,
+      designRationale: spec.design_rationale,
     });
 
     // VALIDATE — deterministic, on the LLM's own output, never LLM-sourced.
