@@ -1,17 +1,45 @@
-import { createServerFn } from "@tanstack/react-start";
 import { callLlmGateway, stripJsonFences } from "./llmGateway.ts";
 import type { MassProperties, BomEntry } from "./cadDesignGeneration.ts";
 import type { PerformanceThresholds } from "./simDesignRules.ts";
 
-// Bay 05 (Simulation Orchestrator Agent) Stage 1's generation step — same
-// createServerFn + callLlmGateway + mock-fallback pattern as
-// cadDesignGeneration.ts. callLlmGateway is already a direct Anthropic SDK
-// call (model + max_tokens, see its own header comment) — it does not
-// expose a temperature parameter, so none is set here; adding one would
-// mean bypassing callLlmGateway and instantiating the SDK directly in this
-// file, which is exactly the "different call pattern" this task said not
-// to invent. Runs only after simDesignRules.ts's evaluateSimulationGate has
-// already passed.
+// Bay 05 (Simulation Orchestrator Agent) Stage 1's generation step —
+// callLlmGateway + mock-fallback pattern, same as cadDesignGeneration.ts.
+// callLlmGateway is already a direct Anthropic SDK call (model + max_tokens,
+// see its own header comment) — it does not expose a temperature parameter,
+// so none is set here; adding one would mean bypassing callLlmGateway and
+// instantiating the SDK directly in this file, which is exactly the
+// "different call pattern" an earlier task said not to invent. Runs only
+// after simDesignRules.ts's evaluateSimulationGate has already passed.
+//
+// Deliberate divergence from cadDesignGeneration.ts: generateCADDesign is a
+// createServerFn; generateSimDesign is a plain async function. This is a
+// confirmed, isolated Vercel production bug workaround, not a stylistic
+// choice or a claim that createServerFn itself is wrong to use elsewhere.
+// On this app's real Vercel deployment, generateSimDesign's compiled
+// createServerFn handler consistently threw "Server function info not
+// found for <hash>" — its manifest entry never resolved at runtime — while
+// generateCADDesign, generateAircraftDesignGeometry, generateConceptIdeas,
+// and Mission Agent's own generateMissionSummary (also nested inside
+// another createServerFn) all confirmed working on the same real
+// deployment. Exhaustive source-level comparison (createServerFn config,
+// validator pattern, import style, route-call shape, file naming/location,
+// the specific commits that touched Bay 05's pipeline) found no difference
+// from Bay 04's working equivalent, and two different local build
+// reproductions (bare `vite build` and `vercel build`, tried against both
+// this branch and a fresh `main` checkout) both proved unreliable — main
+// "failed" locally under both tools despite working correctly on its own
+// real deployment, so neither could be used to isolate a root cause.
+// generateSimDesign has exactly one caller anywhere in the codebase
+// (simDesignAgentPipeline.ts's runFlightDynamicsAssessmentStage, itself
+// only ever reached from the server-only API route handler) and is never
+// invoked from client code — confirmed via a full-codebase search before
+// making this change — so it never needed the createServerFn RPC/hash
+// dispatch mechanism in the first place; it only ever ran in-process,
+// server-to-server. Removing the wrapper sidesteps whatever in Vercel's
+// build/runtime was failing to resolve this specific manifest entry,
+// without touching cadDesignGeneration.ts or any other bay's working
+// createServerFn usage. If a real root cause is found later, this can be
+// revisited.
 //
 // Input shape: SimulationOrchestratorAgent.md Section 7's proposed input
 // schema names `geometry_id`/`cad_id` alongside the CAD data, but neither
@@ -92,20 +120,20 @@ export interface SimDesignGenerationResult {
 
 const SYSTEM = `You are Simulation Orchestrator Agent's flight dynamics and stability assessment step for TorqWings' aerospace design platform. Given one CAD design's mass properties, bill of materials, and manufacturability validation, estimate a flight envelope (max speed, stall speed, service ceiling, range, endurance), classify longitudinal and lateral stability (stable/marginal/unstable) with supporting notes, propose a 0-100 performance score and a 0-1 confidence score, and list any risk flags. Vertical-specific performance thresholds may be supplied as bounds — if a specific threshold is null, that means no confirmed numeric threshold exists for that dimension, not zero: reason qualitatively using general aerospace judgment for that dimension and say so explicitly in reasoning_summary (e.g. "no confirmed stability margin threshold exists for this vertical; assessed qualitatively"). Never treat a null threshold as a target of zero. Every claim must be grounded in the given mass properties/BOM — do not invent requirements not present in the input. This is not a real physics simulation (no JSBSim/X-Plane) — reasoning_summary should read as an engineering estimate, not a claim of simulated results. Return JSON only.`;
 
-export const generateSimDesign = createServerFn({ method: "POST" })
-  .validator((d: SimDesignGenerationInput) => d)
-  .handler(async ({ data }): Promise<SimDesignGenerationResult> => {
-    const userContent = `CAD design: ${JSON.stringify(data, null, 2)}
+export async function generateSimDesign(
+  data: SimDesignGenerationInput,
+): Promise<SimDesignGenerationResult> {
+  const userContent = `CAD design: ${JSON.stringify(data, null, 2)}
 
 Return: { "flight_envelope": { "max_speed_kmh": number, "stall_speed_kmh": number, "service_ceiling_m": number, "range_km": number, "endurance_min": number }, "stability": { "longitudinal": "stable | marginal | unstable", "lateral": "stable | marginal | unstable", "notes": "string" }, "performance_score": number, "risk_flags": ["string"], "confidence_score": number, "reasoning_summary": "string" }`;
 
-    const { content } = await callLlmGateway(SYSTEM, userContent, { jsonMode: true });
-    if (!content) return mockSimDesign();
+  const { content } = await callLlmGateway(SYSTEM, userContent, { jsonMode: true });
+  if (!content) return mockSimDesign();
 
-    const parsed = parseSimDesignResponse(content);
-    if (!parsed) return mockSimDesign();
-    return { ...parsed, sourceWasMock: false };
-  });
+  const parsed = parseSimDesignResponse(content);
+  if (!parsed) return mockSimDesign();
+  return { ...parsed, sourceWasMock: false };
+}
 
 function isFiniteNumber(v: unknown): v is number {
   return typeof v === "number" && Number.isFinite(v);

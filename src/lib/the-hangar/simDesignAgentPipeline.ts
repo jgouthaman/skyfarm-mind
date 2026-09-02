@@ -202,16 +202,17 @@ export async function runFlightDynamicsAssessmentStage(
       );
     }
 
-    // GENERATE — the one LLM call in this stage.
+    // GENERATE — the one LLM call in this stage. generateSimDesign is a
+    // plain async function (not a createServerFn — see its own header
+    // comment for why), so this is a direct call, not a { data: {...} }
+    // wrapped RPC invocation like Bay 04's generateCADDesign call.
     const generation = await generateSimDesign({
-      data: {
-        massProperties,
-        interferenceClear: cadSpec.interference_clear,
-        dfmFlags: cadSpec.dfm_flags,
-        bom,
-        designRationale: cadSpec.design_rationale,
-        thresholds,
-      },
+      massProperties,
+      interferenceClear: cadSpec.interference_clear,
+      dfmFlags: cadSpec.dfm_flags,
+      bom,
+      designRationale: cadSpec.design_rationale,
+      thresholds,
     });
 
     // SCORE — deterministic, pipeline-owned (see computeSimulationPerformanceScore's
