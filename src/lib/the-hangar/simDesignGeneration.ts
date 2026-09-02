@@ -116,11 +116,6 @@ export interface SimDesignGenerationResult {
   // it's the same "did the LLM call actually produce this" signal every
   // other bay already uses.
   sourceWasMock: boolean;
-  // TEMPORARY DIAGNOSTIC — only populated on the mock-fallback path. See
-  // llmGateway.ts's own debugErrorDetail for the revert note; flows from
-  // there, through here, into Stage1Result, into the API response body —
-  // not persisted anywhere, not shown in the UI.
-  debugErrorDetail?: string;
 }
 
 const SYSTEM = `You are Simulation Orchestrator Agent's flight dynamics and stability assessment step for TorqWings' aerospace design platform. Given one CAD design's mass properties, bill of materials, and manufacturability validation, estimate a flight envelope (max speed, stall speed, service ceiling, range, endurance), classify longitudinal and lateral stability (stable/marginal/unstable) with supporting notes, propose a 0-100 performance score and a 0-1 confidence score, and list any risk flags. Vertical-specific performance thresholds may be supplied as bounds — if a specific threshold is null, that means no confirmed numeric threshold exists for that dimension, not zero: reason qualitatively using general aerospace judgment for that dimension and say so explicitly in reasoning_summary (e.g. "no confirmed stability margin threshold exists for this vertical; assessed qualitatively"). Never treat a null threshold as a target of zero. Every claim must be grounded in the given mass properties/BOM — do not invent requirements not present in the input. This is not a real physics simulation (no JSBSim/X-Plane) — reasoning_summary should read as an engineering estimate, not a claim of simulated results. Return JSON only.`;
@@ -132,30 +127,11 @@ export async function generateSimDesign(
 
 Return: { "flight_envelope": { "max_speed_kmh": number, "stall_speed_kmh": number, "service_ceiling_m": number, "range_km": number, "endurance_min": number }, "stability": { "longitudinal": "stable | marginal | unstable", "lateral": "stable | marginal | unstable", "notes": "string" }, "performance_score": number, "risk_flags": ["string"], "confidence_score": number, "reasoning_summary": "string" }`;
 
-  // TEMPORARY DIAGNOSTIC — debugLabel opts into llmGateway.ts's normally-
-  // silent error logging, isolated to this call site only (CAD's own call
-  // doesn't pass it, so its behavior is unchanged). Revert both this and
-  // the console.error below once the real cause of Bay 05's mock fallback
-  // is found.
-  const { content, debugErrorDetail } = await callLlmGateway(SYSTEM, userContent, {
-    jsonMode: true,
-    debugLabel: "simDesignGeneration",
-  });
-  if (!content) return mockSimDesign(debugErrorDetail);
+  const { content } = await callLlmGateway(SYSTEM, userContent, { jsonMode: true });
+  if (!content) return mockSimDesign();
 
   const parsed = parseSimDesignResponse(content);
-  if (!parsed) {
-    // TEMPORARY DIAGNOSTIC — same revert note as above. Covers the
-    // "content came back but failed our own schema validation" case,
-    // which llmGateway.ts's own logging can't see.
-    console.error(
-      "[simDesignGeneration] callLlmGateway returned content but parseSimDesignResponse rejected it. Raw content:",
-      content,
-    );
-    return mockSimDesign(
-      `PARSE_FAILED: response did not match expected schema. Raw content (first 500 chars): ${content.slice(0, 500)}`,
-    );
-  }
+  if (!parsed) return mockSimDesign();
   return { ...parsed, sourceWasMock: false };
 }
 
@@ -228,7 +204,7 @@ function parseSimDesignResponse(
   }
 }
 
-function mockSimDesign(debugErrorDetail?: string): SimDesignGenerationResult {
+function mockSimDesign(): SimDesignGenerationResult {
   return {
     flightEnvelope: {
       maxSpeedKmh: 0,
@@ -250,7 +226,5 @@ function mockSimDesign(debugErrorDetail?: string): SimDesignGenerationResult {
     confidenceScore: 0,
     reasoningSummary: "Mock reasoning summary — no ANTHROPIC_API_KEY reply.",
     sourceWasMock: true,
-    // TEMPORARY DIAGNOSTIC — see the interface field's own revert note.
-    ...(debugErrorDetail ? { debugErrorDetail } : {}),
   };
 }
