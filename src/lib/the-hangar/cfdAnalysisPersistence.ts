@@ -1,7 +1,7 @@
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 // CFD Agent (Bay 06) persistence against Hangar_CFDAnalyses /
-// Hangar_CFDAnalysis_specs / Hangar_CFDAnalysis_runs — same .limit(1)
+// Hangar_CFDAnalysis_inputs / Hangar_CFDAnalysis_runs — same .limit(1)
 // convention as cadDesignPersistence.ts, but the shape here is simpler as a
 // direct consequence of the migration's table-role split (see that file's
 // header comment):
@@ -11,10 +11,13 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 //     is written with a single update on the same row (see
 //     updateCFDAnalysisResult). Contrast cadDesignPersistence.ts's
 //     persistCADDesignSpec, which inserts a new *versioned* row per run.
-//   - Hangar_CFDAnalysis_specs holds INPUT config (solver settings,
+//   - Hangar_CFDAnalysis_inputs holds INPUT config (solver settings,
 //     boundary conditions) and is not versioned (no version column, no
 //     get_next_..._version RPC — see the migration), so persisting it is a
-//     plain insert with no version lookup.
+//     plain insert with no version lookup. Named "_inputs" rather than
+//     "_specs" (renamed before the migration was ever applied) to preserve
+//     the "_specs = versioned OUTPUT" convention every other bay relies
+//     on — see CFDAgent.md Section 12.
 // The upstream Hangar_CADDesigns read reuses cadDesignPersistence.ts's own
 // getCADDesign directly (imported there by cfdAnalysisAgentPipeline.ts)
 // rather than duplicating that query here. Server-only, same reason as
@@ -61,7 +64,7 @@ export interface HangarCFDAnalysisRow {
   updated_at: string;
 }
 
-export interface HangarCFDAnalysisSpecRow {
+export interface HangarCFDAnalysisInputRow {
   id: string;
   cfd_analysis_id: string;
   solver_type: string | null;
@@ -95,28 +98,28 @@ export async function getCFDAnalysis(cfdAnalysisId: string): Promise<HangarCFDAn
   return (data?.[0] as HangarCFDAnalysisRow | undefined) ?? null;
 }
 
-export async function persistCFDAnalysisInputSpec(
+export async function persistCFDAnalysisInput(
   cfdAnalysisId: string,
-  spec: {
+  input: {
     solverType: string | null;
     turbulenceModel: string | null;
     boundaryConditions: Record<string, unknown> | null;
   },
-): Promise<HangarCFDAnalysisSpecRow> {
+): Promise<HangarCFDAnalysisInputRow> {
   const { data, error } = await db
-    .from("Hangar_CFDAnalysis_specs")
+    .from("Hangar_CFDAnalysis_inputs")
     .insert({
       cfd_analysis_id: cfdAnalysisId,
-      solver_type: spec.solverType,
-      turbulence_model: spec.turbulenceModel,
-      boundary_conditions: spec.boundaryConditions,
+      solver_type: input.solverType,
+      turbulence_model: input.turbulenceModel,
+      boundary_conditions: input.boundaryConditions,
     })
     .select("*")
     .limit(1);
-  if (error) throw new Error(`persistCFDAnalysisInputSpec: ${error.message}`);
+  if (error) throw new Error(`persistCFDAnalysisInput: ${error.message}`);
   const row = data?.[0];
-  if (!row) throw new Error("persistCFDAnalysisInputSpec: insert returned no row");
-  return row as unknown as HangarCFDAnalysisSpecRow;
+  if (!row) throw new Error("persistCFDAnalysisInput: insert returned no row");
+  return row as unknown as HangarCFDAnalysisInputRow;
 }
 
 export async function updateCFDAnalysisResult(

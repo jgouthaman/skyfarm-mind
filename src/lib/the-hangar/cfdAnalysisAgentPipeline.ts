@@ -10,7 +10,7 @@ import {
 import {
   createCFDAnalysis,
   getCFDAnalysis,
-  persistCFDAnalysisInputSpec,
+  persistCFDAnalysisInput,
   updateCFDAnalysisResult,
   listUserCFDAnalyses,
   logCFDAnalysisStageRun,
@@ -181,7 +181,7 @@ export async function runOutputGenerationStage(
       );
     }
 
-    await persistCFDAnalysisInputSpec(cfdAnalysisId, {
+    await persistCFDAnalysisInput(cfdAnalysisId, {
       solverType: request.solverType ?? null,
       turbulenceModel: request.turbulenceModel ?? null,
       boundaryConditions: request.boundaryConditions ?? null,

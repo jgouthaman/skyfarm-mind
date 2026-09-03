@@ -99,7 +99,7 @@ Naming follows the real convention confirmed against Bay 04's migration
 (invocation tracking). Entity for this bay: `CFDAnalysis`.
 
 1. `Hangar_CFDAnalyses` — structured CFD output: forces, coefficients, flow summary
-2. `Hangar_CFDAnalysis_specs` — input config: CFD settings, boundary conditions
+2. `Hangar_CFDAnalysis_inputs` — input config: CFD settings, boundary conditions
 3. `Hangar_CFDAnalysis_runs` — one row per invocation: input refs, status, `source_was_mock`, timestamps
 
 Migration file: `supabase/migrations/<timestamp>_hangar_cfd_agent.sql`, mirroring
@@ -158,7 +158,7 @@ so export only if and when a real downstream consumer needs it.
 ## 10. Resolved during Bay 06 kickoff
 
 - ✅ Spec path: `reference/the-hangar/CFDAgent.md`
-- ✅ DB naming: `Hangar_CFDAnalyses` / `Hangar_CFDAnalysis_specs` / `Hangar_CFDAnalysis_runs`
+- ✅ DB naming: `Hangar_CFDAnalyses` / `Hangar_CFDAnalysis_inputs` / `Hangar_CFDAnalysis_runs`
 - ✅ `assertCFDAnalysisOwnership` stays local/unexported (no downstream consumer yet)
 - ✅ Bay 05's real output is a flight-envelope/stability assessment, not a "sim plan" —
   irrelevant to Bay 06's input either way, since Bay 06 stubs the Job Configuration
@@ -167,3 +167,12 @@ so export only if and when a real downstream consumer needs it.
 ## 11. Still to confirm before scaffolding
 
 - [ ] Route path / nav placement for the new UI page (mirror Bay 04's page location)
+
+## 12. Resolved post-scaffold
+
+- Hangar_CFDAnalysis_specs renamed to Hangar_CFDAnalysis_inputs before migration
+  applied, to preserve the _specs = output convention used everywhere else.
+- createServerFn: Bay 06 deliberately uses plain async functions instead of
+  createServerFn, to avoid the 'Server function info not found' bug hit in
+  Bay 04/05. This is now the intentional pattern for worker-class bays
+  (Bay 07 Structural Agent should follow it too, not re-litigate).

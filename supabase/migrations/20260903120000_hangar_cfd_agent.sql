@@ -8,9 +8,13 @@
 --     status row combined — unlike Hangar_CADDesigns (a lightweight
 --     parent/status row only) whose output lives in a separate,
 --     versioned Hangar_CADDesign_specs table.
---   - Hangar_CFDAnalysis_specs holds INPUT config (solver settings,
---     boundary conditions) — the opposite of every other bay's "_specs"
---     table, which holds versioned OUTPUT.
+--   - Hangar_CFDAnalysis_inputs holds INPUT config (solver settings,
+--     boundary conditions). Named "_inputs," not "_specs" like every other
+--     bay's own _specs table, specifically because every other bay's
+--     "_specs" table holds versioned OUTPUT — reusing that suffix here for
+--     an INPUT table would silently invert the convention every other bay
+--     relies on. Renamed from Hangar_CFDAnalysis_specs before this
+--     migration was ever applied (see CFDAgent.md Section 12).
 -- Direct consequence: no get_next_..._version RPC exists in this migration
 -- — neither table is described as versioned in CFDAgent.md, so there's
 -- nothing for a version-generating RPC to serve (unlike every other bay's
@@ -39,7 +43,7 @@ create table public."Hangar_CFDAnalyses" (
   updated_at timestamptz not null default now()
 );
 
-create table public."Hangar_CFDAnalysis_specs" (
+create table public."Hangar_CFDAnalysis_inputs" (
   id uuid primary key default gen_random_uuid(),
   cfd_analysis_id uuid not null references public."Hangar_CFDAnalyses"(id),
   -- Input config (CFDAgent.md Section 2) -- solver type/turbulence model
@@ -66,13 +70,13 @@ create table public."Hangar_CFDAnalysis_runs" (
 );
 
 alter table public."Hangar_CFDAnalyses" enable row level security;
-alter table public."Hangar_CFDAnalysis_specs" enable row level security;
+alter table public."Hangar_CFDAnalysis_inputs" enable row level security;
 alter table public."Hangar_CFDAnalysis_runs" enable row level security;
 
 create policy "Users read/write their own CFD analyses" on public."Hangar_CFDAnalyses"
   for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 
-create policy "Users read/write specs for their own CFD analyses" on public."Hangar_CFDAnalysis_specs"
+create policy "Users read/write inputs for their own CFD analyses" on public."Hangar_CFDAnalysis_inputs"
   for all using (exists (select 1 from public."Hangar_CFDAnalyses" a where a.id = cfd_analysis_id and a.user_id = auth.uid()));
 
 create policy "Users read/write runs for their own CFD analyses" on public."Hangar_CFDAnalysis_runs"
