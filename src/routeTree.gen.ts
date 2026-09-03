@@ -25,6 +25,7 @@ import { Route as DestudIndexRouteImport } from './routes/destud.index'
 import { Route as AcademyIndexRouteImport } from './routes/academy.index'
 import { Route as LayoutIndexRouteImport } from './routes/_layout.index'
 import { Route as TheHangarWelcomeRouteImport } from './routes/the-hangar.welcome'
+import { Route as TheHangarStructuralRouteImport } from './routes/the-hangar.structural'
 import { Route as TheHangarSimulationRouteImport } from './routes/the-hangar.simulation'
 import { Route as TheHangarMissionRouteImport } from './routes/the-hangar.mission'
 import { Route as TheHangarConceptRouteImport } from './routes/the-hangar.concept'
@@ -89,6 +90,7 @@ import { Route as MissionHubTorqwingsDesignStudioAdvisorRouteImport } from './ro
 import { Route as DestudProjectsProjectIdRouteImport } from './routes/destud.projects.$projectId'
 import { Route as DestudDashboardExplorerRouteImport } from './routes/destud.dashboard.explorer'
 import { Route as DestudDashboardEngineerRouteImport } from './routes/destud.dashboard.engineer'
+import { Route as ApiHangarStructuralsRouteImport } from './routes/api.hangar.structurals'
 import { Route as ApiHangarSimulationsRouteImport } from './routes/api.hangar.simulations'
 import { Route as ApiHangarMissionsRouteImport } from './routes/api.hangar.missions'
 import { Route as ApiHangarConceptsRouteImport } from './routes/api.hangar.concepts'
@@ -97,6 +99,7 @@ import { Route as ApiHangarCadDesignsRouteImport } from './routes/api.hangar.cad
 import { Route as ApiHangarAircraftDesignsRouteImport } from './routes/api.hangar.aircraft-designs'
 import { Route as LayoutLearnDroneDesignFundamentalsRouteImport } from './routes/_layout.learn.drone-design-fundamentals'
 import { Route as LayoutAuthCallbackRouteImport } from './routes/_layout.auth.callback'
+import { Route as ApiHangarProcessStructuralStructuralAssessmentRouteImport } from './routes/api.hangar.process-structural.structural-assessment'
 import { Route as ApiHangarProcessSimulationFlightDynamicsAssessmentRouteImport } from './routes/api.hangar.process-simulation.flight-dynamics-assessment'
 import { Route as ApiHangarProcessMissionReasoningPlanningRouteImport } from './routes/api.hangar.process-mission.reasoning-planning'
 import { Route as ApiHangarProcessMissionOutputInterfaceRouteImport } from './routes/api.hangar.process-mission.output-interface'
@@ -193,6 +196,11 @@ const LayoutIndexRoute = LayoutIndexRouteImport.update({
 const TheHangarWelcomeRoute = TheHangarWelcomeRouteImport.update({
   id: '/welcome',
   path: '/welcome',
+  getParentRoute: () => TheHangarRoute,
+} as any)
+const TheHangarStructuralRoute = TheHangarStructuralRouteImport.update({
+  id: '/structural',
+  path: '/structural',
   getParentRoute: () => TheHangarRoute,
 } as any)
 const TheHangarSimulationRoute = TheHangarSimulationRouteImport.update({
@@ -539,6 +547,11 @@ const DestudDashboardEngineerRoute = DestudDashboardEngineerRouteImport.update({
   path: '/dashboard/engineer',
   getParentRoute: () => DestudRoute,
 } as any)
+const ApiHangarStructuralsRoute = ApiHangarStructuralsRouteImport.update({
+  id: '/api/hangar/structurals',
+  path: '/api/hangar/structurals',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiHangarSimulationsRoute = ApiHangarSimulationsRouteImport.update({
   id: '/api/hangar/simulations',
   path: '/api/hangar/simulations',
@@ -581,6 +594,12 @@ const LayoutAuthCallbackRoute = LayoutAuthCallbackRouteImport.update({
   path: '/auth/callback',
   getParentRoute: () => LayoutRoute,
 } as any)
+const ApiHangarProcessStructuralStructuralAssessmentRoute =
+  ApiHangarProcessStructuralStructuralAssessmentRouteImport.update({
+    id: '/api/hangar/process-structural/structural-assessment',
+    path: '/api/hangar/process-structural/structural-assessment',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiHangarProcessSimulationFlightDynamicsAssessmentRoute =
   ApiHangarProcessSimulationFlightDynamicsAssessmentRouteImport.update({
     id: '/api/hangar/process-simulation/flight-dynamics-assessment',
@@ -745,6 +764,7 @@ export interface FileRoutesByFullPath {
   '/the-hangar/concept': typeof TheHangarConceptRoute
   '/the-hangar/mission': typeof TheHangarMissionRoute
   '/the-hangar/simulation': typeof TheHangarSimulationRoute
+  '/the-hangar/structural': typeof TheHangarStructuralRoute
   '/the-hangar/welcome': typeof TheHangarWelcomeRoute
   '/academy/': typeof AcademyIndexRoute
   '/destud/': typeof DestudIndexRoute
@@ -759,6 +779,7 @@ export interface FileRoutesByFullPath {
   '/api/hangar/concepts': typeof ApiHangarConceptsRoute
   '/api/hangar/missions': typeof ApiHangarMissionsRoute
   '/api/hangar/simulations': typeof ApiHangarSimulationsRoute
+  '/api/hangar/structurals': typeof ApiHangarStructuralsRoute
   '/destud/dashboard/engineer': typeof DestudDashboardEngineerRoute
   '/destud/dashboard/explorer': typeof DestudDashboardExplorerRoute
   '/destud/projects/$projectId': typeof DestudProjectsProjectIdRoute
@@ -792,6 +813,7 @@ export interface FileRoutesByFullPath {
   '/api/hangar/process-mission/output-interface': typeof ApiHangarProcessMissionOutputInterfaceRoute
   '/api/hangar/process-mission/reasoning-planning': typeof ApiHangarProcessMissionReasoningPlanningRoute
   '/api/hangar/process-simulation/flight-dynamics-assessment': typeof ApiHangarProcessSimulationFlightDynamicsAssessmentRoute
+  '/api/hangar/process-structural/structural-assessment': typeof ApiHangarProcessStructuralStructuralAssessmentRoute
   '/academy/courses/$slug/modules/$moduleId': typeof AcademyCoursesSlugModulesModuleIdRoute
   '/academy/module/$moduleId/lesson/$lessonId': typeof AcademyModuleModuleIdLessonLessonIdRoute
   '/academy/module/$moduleId/quiz/$quizId': typeof AcademyModuleModuleIdQuizQuizIdRoute
@@ -844,6 +866,7 @@ export interface FileRoutesByTo {
   '/the-hangar/concept': typeof TheHangarConceptRoute
   '/the-hangar/mission': typeof TheHangarMissionRoute
   '/the-hangar/simulation': typeof TheHangarSimulationRoute
+  '/the-hangar/structural': typeof TheHangarStructuralRoute
   '/the-hangar/welcome': typeof TheHangarWelcomeRoute
   '/': typeof LayoutIndexRoute
   '/academy': typeof AcademyIndexRoute
@@ -859,6 +882,7 @@ export interface FileRoutesByTo {
   '/api/hangar/concepts': typeof ApiHangarConceptsRoute
   '/api/hangar/missions': typeof ApiHangarMissionsRoute
   '/api/hangar/simulations': typeof ApiHangarSimulationsRoute
+  '/api/hangar/structurals': typeof ApiHangarStructuralsRoute
   '/destud/dashboard/engineer': typeof DestudDashboardEngineerRoute
   '/destud/dashboard/explorer': typeof DestudDashboardExplorerRoute
   '/destud/projects/$projectId': typeof DestudProjectsProjectIdRoute
@@ -892,6 +916,7 @@ export interface FileRoutesByTo {
   '/api/hangar/process-mission/output-interface': typeof ApiHangarProcessMissionOutputInterfaceRoute
   '/api/hangar/process-mission/reasoning-planning': typeof ApiHangarProcessMissionReasoningPlanningRoute
   '/api/hangar/process-simulation/flight-dynamics-assessment': typeof ApiHangarProcessSimulationFlightDynamicsAssessmentRoute
+  '/api/hangar/process-structural/structural-assessment': typeof ApiHangarProcessStructuralStructuralAssessmentRoute
   '/academy/courses/$slug/modules/$moduleId': typeof AcademyCoursesSlugModulesModuleIdRoute
   '/academy/module/$moduleId/lesson/$lessonId': typeof AcademyModuleModuleIdLessonLessonIdRoute
   '/academy/module/$moduleId/quiz/$quizId': typeof AcademyModuleModuleIdQuizQuizIdRoute
@@ -953,6 +978,7 @@ export interface FileRoutesById {
   '/the-hangar/concept': typeof TheHangarConceptRoute
   '/the-hangar/mission': typeof TheHangarMissionRoute
   '/the-hangar/simulation': typeof TheHangarSimulationRoute
+  '/the-hangar/structural': typeof TheHangarStructuralRoute
   '/the-hangar/welcome': typeof TheHangarWelcomeRoute
   '/_layout/': typeof LayoutIndexRoute
   '/academy/': typeof AcademyIndexRoute
@@ -968,6 +994,7 @@ export interface FileRoutesById {
   '/api/hangar/concepts': typeof ApiHangarConceptsRoute
   '/api/hangar/missions': typeof ApiHangarMissionsRoute
   '/api/hangar/simulations': typeof ApiHangarSimulationsRoute
+  '/api/hangar/structurals': typeof ApiHangarStructuralsRoute
   '/destud/dashboard/engineer': typeof DestudDashboardEngineerRoute
   '/destud/dashboard/explorer': typeof DestudDashboardExplorerRoute
   '/destud/projects/$projectId': typeof DestudProjectsProjectIdRoute
@@ -1001,6 +1028,7 @@ export interface FileRoutesById {
   '/api/hangar/process-mission/output-interface': typeof ApiHangarProcessMissionOutputInterfaceRoute
   '/api/hangar/process-mission/reasoning-planning': typeof ApiHangarProcessMissionReasoningPlanningRoute
   '/api/hangar/process-simulation/flight-dynamics-assessment': typeof ApiHangarProcessSimulationFlightDynamicsAssessmentRoute
+  '/api/hangar/process-structural/structural-assessment': typeof ApiHangarProcessStructuralStructuralAssessmentRoute
   '/academy/courses/$slug/modules/$moduleId': typeof AcademyCoursesSlugModulesModuleIdRoute
   '/academy/module/$moduleId/lesson/$lessonId': typeof AcademyModuleModuleIdLessonLessonIdRoute
   '/academy/module/$moduleId/quiz/$quizId': typeof AcademyModuleModuleIdQuizQuizIdRoute
@@ -1063,6 +1091,7 @@ export interface FileRouteTypes {
     | '/the-hangar/concept'
     | '/the-hangar/mission'
     | '/the-hangar/simulation'
+    | '/the-hangar/structural'
     | '/the-hangar/welcome'
     | '/academy/'
     | '/destud/'
@@ -1077,6 +1106,7 @@ export interface FileRouteTypes {
     | '/api/hangar/concepts'
     | '/api/hangar/missions'
     | '/api/hangar/simulations'
+    | '/api/hangar/structurals'
     | '/destud/dashboard/engineer'
     | '/destud/dashboard/explorer'
     | '/destud/projects/$projectId'
@@ -1110,6 +1140,7 @@ export interface FileRouteTypes {
     | '/api/hangar/process-mission/output-interface'
     | '/api/hangar/process-mission/reasoning-planning'
     | '/api/hangar/process-simulation/flight-dynamics-assessment'
+    | '/api/hangar/process-structural/structural-assessment'
     | '/academy/courses/$slug/modules/$moduleId'
     | '/academy/module/$moduleId/lesson/$lessonId'
     | '/academy/module/$moduleId/quiz/$quizId'
@@ -1162,6 +1193,7 @@ export interface FileRouteTypes {
     | '/the-hangar/concept'
     | '/the-hangar/mission'
     | '/the-hangar/simulation'
+    | '/the-hangar/structural'
     | '/the-hangar/welcome'
     | '/'
     | '/academy'
@@ -1177,6 +1209,7 @@ export interface FileRouteTypes {
     | '/api/hangar/concepts'
     | '/api/hangar/missions'
     | '/api/hangar/simulations'
+    | '/api/hangar/structurals'
     | '/destud/dashboard/engineer'
     | '/destud/dashboard/explorer'
     | '/destud/projects/$projectId'
@@ -1210,6 +1243,7 @@ export interface FileRouteTypes {
     | '/api/hangar/process-mission/output-interface'
     | '/api/hangar/process-mission/reasoning-planning'
     | '/api/hangar/process-simulation/flight-dynamics-assessment'
+    | '/api/hangar/process-structural/structural-assessment'
     | '/academy/courses/$slug/modules/$moduleId'
     | '/academy/module/$moduleId/lesson/$lessonId'
     | '/academy/module/$moduleId/quiz/$quizId'
@@ -1270,6 +1304,7 @@ export interface FileRouteTypes {
     | '/the-hangar/concept'
     | '/the-hangar/mission'
     | '/the-hangar/simulation'
+    | '/the-hangar/structural'
     | '/the-hangar/welcome'
     | '/_layout/'
     | '/academy/'
@@ -1285,6 +1320,7 @@ export interface FileRouteTypes {
     | '/api/hangar/concepts'
     | '/api/hangar/missions'
     | '/api/hangar/simulations'
+    | '/api/hangar/structurals'
     | '/destud/dashboard/engineer'
     | '/destud/dashboard/explorer'
     | '/destud/projects/$projectId'
@@ -1318,6 +1354,7 @@ export interface FileRouteTypes {
     | '/api/hangar/process-mission/output-interface'
     | '/api/hangar/process-mission/reasoning-planning'
     | '/api/hangar/process-simulation/flight-dynamics-assessment'
+    | '/api/hangar/process-structural/structural-assessment'
     | '/academy/courses/$slug/modules/$moduleId'
     | '/academy/module/$moduleId/lesson/$lessonId'
     | '/academy/module/$moduleId/quiz/$quizId'
@@ -1339,6 +1376,7 @@ export interface RootRouteChildren {
   ApiHangarConceptsRoute: typeof ApiHangarConceptsRoute
   ApiHangarMissionsRoute: typeof ApiHangarMissionsRoute
   ApiHangarSimulationsRoute: typeof ApiHangarSimulationsRoute
+  ApiHangarStructuralsRoute: typeof ApiHangarStructuralsRoute
   ApiHangarProcessAircraftDesignGeometryGenerationRoute: typeof ApiHangarProcessAircraftDesignGeometryGenerationRoute
   ApiHangarProcessCadDesignModelGenerationRoute: typeof ApiHangarProcessCadDesignModelGenerationRoute
   ApiHangarProcessCfdAnalysisOutputGenerationRoute: typeof ApiHangarProcessCfdAnalysisOutputGenerationRoute
@@ -1353,6 +1391,7 @@ export interface RootRouteChildren {
   ApiHangarProcessMissionOutputInterfaceRoute: typeof ApiHangarProcessMissionOutputInterfaceRoute
   ApiHangarProcessMissionReasoningPlanningRoute: typeof ApiHangarProcessMissionReasoningPlanningRoute
   ApiHangarProcessSimulationFlightDynamicsAssessmentRoute: typeof ApiHangarProcessSimulationFlightDynamicsAssessmentRoute
+  ApiHangarProcessStructuralStructuralAssessmentRoute: typeof ApiHangarProcessStructuralStructuralAssessmentRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1467,6 +1506,13 @@ declare module '@tanstack/react-router' {
       path: '/welcome'
       fullPath: '/the-hangar/welcome'
       preLoaderRoute: typeof TheHangarWelcomeRouteImport
+      parentRoute: typeof TheHangarRoute
+    }
+    '/the-hangar/structural': {
+      id: '/the-hangar/structural'
+      path: '/structural'
+      fullPath: '/the-hangar/structural'
+      preLoaderRoute: typeof TheHangarStructuralRouteImport
       parentRoute: typeof TheHangarRoute
     }
     '/the-hangar/simulation': {
@@ -1917,6 +1963,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DestudDashboardEngineerRouteImport
       parentRoute: typeof DestudRoute
     }
+    '/api/hangar/structurals': {
+      id: '/api/hangar/structurals'
+      path: '/api/hangar/structurals'
+      fullPath: '/api/hangar/structurals'
+      preLoaderRoute: typeof ApiHangarStructuralsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/hangar/simulations': {
       id: '/api/hangar/simulations'
       path: '/api/hangar/simulations'
@@ -1972,6 +2025,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/auth/callback'
       preLoaderRoute: typeof LayoutAuthCallbackRouteImport
       parentRoute: typeof LayoutRoute
+    }
+    '/api/hangar/process-structural/structural-assessment': {
+      id: '/api/hangar/process-structural/structural-assessment'
+      path: '/api/hangar/process-structural/structural-assessment'
+      fullPath: '/api/hangar/process-structural/structural-assessment'
+      preLoaderRoute: typeof ApiHangarProcessStructuralStructuralAssessmentRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/hangar/process-simulation/flight-dynamics-assessment': {
       id: '/api/hangar/process-simulation/flight-dynamics-assessment'
@@ -2332,6 +2392,7 @@ interface TheHangarRouteChildren {
   TheHangarConceptRoute: typeof TheHangarConceptRoute
   TheHangarMissionRoute: typeof TheHangarMissionRoute
   TheHangarSimulationRoute: typeof TheHangarSimulationRoute
+  TheHangarStructuralRoute: typeof TheHangarStructuralRoute
   TheHangarWelcomeRoute: typeof TheHangarWelcomeRoute
   TheHangarIndexRoute: typeof TheHangarIndexRoute
 }
@@ -2343,6 +2404,7 @@ const TheHangarRouteChildren: TheHangarRouteChildren = {
   TheHangarConceptRoute: TheHangarConceptRoute,
   TheHangarMissionRoute: TheHangarMissionRoute,
   TheHangarSimulationRoute: TheHangarSimulationRoute,
+  TheHangarStructuralRoute: TheHangarStructuralRoute,
   TheHangarWelcomeRoute: TheHangarWelcomeRoute,
   TheHangarIndexRoute: TheHangarIndexRoute,
 }
@@ -2367,6 +2429,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiHangarConceptsRoute: ApiHangarConceptsRoute,
   ApiHangarMissionsRoute: ApiHangarMissionsRoute,
   ApiHangarSimulationsRoute: ApiHangarSimulationsRoute,
+  ApiHangarStructuralsRoute: ApiHangarStructuralsRoute,
   ApiHangarProcessAircraftDesignGeometryGenerationRoute:
     ApiHangarProcessAircraftDesignGeometryGenerationRoute,
   ApiHangarProcessCadDesignModelGenerationRoute:
@@ -2393,6 +2456,8 @@ const rootRouteChildren: RootRouteChildren = {
     ApiHangarProcessMissionReasoningPlanningRoute,
   ApiHangarProcessSimulationFlightDynamicsAssessmentRoute:
     ApiHangarProcessSimulationFlightDynamicsAssessmentRoute,
+  ApiHangarProcessStructuralStructuralAssessmentRoute:
+    ApiHangarProcessStructuralStructuralAssessmentRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
