@@ -1,0 +1,13 @@
+{
+  "settings": {
+    "createdAt": 1782443647223,
+    "framework": "tanstack-start",
+    "devCommand": null,
+    "installCommand": null,
+    "buildCommand": "npm run build",
+    "outputDirectory": "dist/client",
+    "rootDirectory": null,
+    "directoryListing": false,
+    "nodeVersion": "24.x"
+  }
+}
