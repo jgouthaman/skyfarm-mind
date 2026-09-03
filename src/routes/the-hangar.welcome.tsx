@@ -110,7 +110,7 @@ const NODES: NodeData[] = [
     title: "Simulation Orchestrator",
     status: "online",
     href: "/the-hangar/simulation",
-    desc: "Assesses flight envelope, stability, and performance risk from the CAD design � LLM reasoning bounded by vertical design rules.",
+    desc: "Assesses flight envelope, stability, and performance risk from the CAD design — LLM reasoning bounded by vertical design rules.",
     inp: "CAD model",
     tools: "Claude Sonnet 5, rule engine",
     out: "Simulation result: flight envelope, stability, risk flags",
@@ -122,11 +122,12 @@ const NODES: NodeData[] = [
     bay: "06",
     name: "CFD",
     title: "CFD Agent",
-    status: "design",
-    desc: "Runs computational fluid dynamics — forces, coefficients, fields — against the candidate geometry.",
-    inp: "CAD geometry, sim plan",
-    tools: "OpenFOAM, SALOME",
-    out: "CFD results",
+    status: "online",
+    href: "/the-hangar/cfd-analysis",
+    desc: "Reasons about aerodynamic forces, coefficients, and flow behavior from the CAD geometry — Phase 1: LLM reasoning only, no real CFD solver runs yet.",
+    inp: "CAD geometry",
+    tools: "Claude Sonnet 5, rule engine",
+    out: "CFD estimate: forces, coefficients, flow description (Phase 1 — mocked, not simulated)",
   },
   {
     id: 7,
@@ -256,8 +257,15 @@ const LEAD_LINES: { id: string; d: string }[] = [
   { id: "ln-2-3", d: "M304,140 H416" },
   { id: "ln-3-4", d: "M484,140 H596" },
   { id: "ln-4-5", d: "M664,140 H776" },
-  { id: "ln-5-6", d: "M792,168 V220 H720 V266" },
-  { id: "ln-5-7", d: "M828,168 V220 H900 V266" },
+  // Bay 06 (CFD) and Bay 07 (Structural) both source primary input directly
+  // from Bay 04 (CAD Agent), not from Bay 05 — rewired from the stale
+  // Bay05->06/07 edges. Single shared exit point off Bay 04's bottom edge
+  // (630,174) fanning out at y=220, mirroring ln-9-10..ln-9-14's own
+  // single-origin fan-out pattern below, rather than reusing Bay05's old
+  // two-point diagonal-exit shape (which existed because Bay05's two
+  // targets straddled it symmetrically — Bay04's targets don't).
+  { id: "ln-4-6", d: "M630,174 V220 H720 V266" },
+  { id: "ln-4-7", d: "M630,174 V220 H900 V266" },
   { id: "ln-6-8", d: "M720,334 V376 H810 V386" },
   { id: "ln-7-8", d: "M900,334 V376 H810 V386" },
   { id: "ln-8-9", d: "M810,454 V506" },
@@ -289,7 +297,7 @@ const STAGES: Stage[] = [
     text: "BAY 05 — Simulation Orchestrator — preparing simulation plan…",
   },
   {
-    lines: ["ln-5-6", "ln-5-7"],
+    lines: ["ln-4-6", "ln-4-7"],
     nodes: [6, 7],
     text: "BAY 06 / 07 — CFD + Structural — running in parallel…",
   },
@@ -366,7 +374,9 @@ function TheHangarWelcome() {
           | "/the-hangar/mission"
           | "/the-hangar/concept"
           | "/the-hangar/aircraft-design"
-          | "/the-hangar/cad-design",
+          | "/the-hangar/cad-design"
+          | "/the-hangar/simulation"
+          | "/the-hangar/cfd-analysis",
       });
     } else {
       setSelected(n);
@@ -601,6 +611,8 @@ function TheHangarWelcome() {
                           | "/the-hangar/concept"
                           | "/the-hangar/aircraft-design"
                           | "/the-hangar/cad-design"
+                          | "/the-hangar/simulation"
+                          | "/the-hangar/cfd-analysis"
                       }
                       className="hgr-w-btn hgr-w-btn-amber"
                       style={{ justifyContent: "center", marginTop: 18, textDecoration: "none" }}
