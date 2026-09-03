@@ -1,0 +1,224 @@
+import { callLlmGateway, stripJsonFences } from "./llmGateway.ts";
+import type { MassProperties, BomEntry } from "./cadDesignGeneration.ts";
+import type { PerformanceThresholds } from "./simDesignRules.ts";
+
+// Bay 05 (Simulation Orchestrator Agent) Stage 1's generation step —
+// callLlmGateway + mock-fallback pattern, same as cadDesignGeneration.ts.
+// callLlmGateway is already a direct Anthropic SDK call (model + max_tokens,
+// see its own header comment) — it does not expose a temperature parameter,
+// so none is set here; adding one would mean bypassing callLlmGateway and
+// instantiating the SDK directly in this file, which is exactly the
+// "different call pattern" an earlier task said not to invent. Runs only
+// after simDesignRules.ts's evaluateSimulationGate has already passed.
+//
+// Deliberate divergence from cadDesignGeneration.ts: generateCADDesign is a
+// createServerFn; generateSimDesign is a plain async function. This is a
+// confirmed, isolated Vercel production bug workaround, not a stylistic
+// choice or a claim that createServerFn itself is wrong to use elsewhere.
+// On this app's real Vercel deployment, generateSimDesign's compiled
+// createServerFn handler consistently threw "Server function info not
+// found for <hash>" — its manifest entry never resolved at runtime — while
+// generateCADDesign, generateAircraftDesignGeometry, generateConceptIdeas,
+// and Mission Agent's own generateMissionSummary (also nested inside
+// another createServerFn) all confirmed working on the same real
+// deployment. Exhaustive source-level comparison (createServerFn config,
+// validator pattern, import style, route-call shape, file naming/location,
+// the specific commits that touched Bay 05's pipeline) found no difference
+// from Bay 04's working equivalent, and two different local build
+// reproductions (bare `vite build` and `vercel build`, tried against both
+// this branch and a fresh `main` checkout) both proved unreliable — main
+// "failed" locally under both tools despite working correctly on its own
+// real deployment, so neither could be used to isolate a root cause.
+// generateSimDesign has exactly one caller anywhere in the codebase
+// (simDesignAgentPipeline.ts's runFlightDynamicsAssessmentStage, itself
+// only ever reached from the server-only API route handler) and is never
+// invoked from client code — confirmed via a full-codebase search before
+// making this change — so it never needed the createServerFn RPC/hash
+// dispatch mechanism in the first place; it only ever ran in-process,
+// server-to-server. Removing the wrapper sidesteps whatever in Vercel's
+// build/runtime was failing to resolve this specific manifest entry,
+// without touching cadDesignGeneration.ts or any other bay's working
+// createServerFn usage. If a real root cause is found later, this can be
+// revisited.
+//
+// Input shape: SimulationOrchestratorAgent.md Section 7's proposed input
+// schema names `geometry_id`/`cad_id` alongside the CAD data, but neither
+// aircraftDesignGeneration.ts nor cadDesignGeneration.ts thread their own
+// entity's id through generation — that assembly happens in the pipeline
+// layer (aircraftDesignAgentPipeline.ts/cadDesignAgentPipeline.ts create
+// the row and attach the id to the returned Stage1Result themselves; the
+// *Generation.ts file underneath never sees or returns an id at all).
+// Matched exactly here: this function takes only the CAD data + thresholds
+// and returns only the LLM-derived fields — id assembly is
+// simDesignAgentPipeline.ts's job, not yet built.
+//
+// The real fields used below (massProperties, interferenceClear, dfmFlags,
+// bom, designRationale) are exactly what Bay 04's real Stage 1 output
+// (cadDesignAgentPipeline.ts's Stage1Result) actually returns. modelFiles/
+// cadCode/specVersion are left out as pure bookkeeping with no bearing on a
+// flight/stability assessment.
+//
+// performance_score and confidence_score are in Section 7's proposed schema,
+// but not requested from the LLM here, matching cadDesignGeneration.ts's
+// actual pattern exactly: CADGenerationResult has no confidence field at
+// all, because CAD Agent's own confidence_score is entirely a pipeline-
+// computed formula (computeCADDesignConfidence) that the LLM is never asked
+// to produce or reason about. This file used to ask the LLM to
+// self-report both numbers (an earlier, since-corrected design — see git
+// history), which meant simDesignAgentPipeline.ts's own independently-
+// computed performance_score/confidence_score (computeSimulationPerformanceScore/
+// computeSimulationConfidence) would silently diverge from whatever number
+// the LLM's own reasoning_summary narrative happened to cite, since nothing
+// told it not to invent one. Not asking for the fields at all — the fix
+// applied here — removes the mismatch at the source instead of patching the
+// narrative text after the fact.
+
+export type StabilityClassification = "stable" | "marginal" | "unstable";
+
+export interface SimDesignGenerationInput {
+  massProperties: MassProperties;
+  interferenceClear: boolean;
+  dfmFlags: string[];
+  bom: BomEntry[];
+  designRationale: string;
+  thresholds: PerformanceThresholds | null;
+}
+
+export interface FlightEnvelope {
+  maxSpeedKmh: number;
+  stallSpeedKmh: number;
+  serviceCeilingM: number;
+  rangeKm: number;
+  enduranceMin: number;
+}
+
+export interface StabilityAssessment {
+  longitudinal: StabilityClassification;
+  lateral: StabilityClassification;
+  notes: string;
+}
+
+// Matches SimulationOrchestratorAgent.md Section 7's LLM-derived fields:
+// flight_envelope, stability, risk_flags, reasoning_summary, source_was_mock.
+// performance_score/confidence_score are deliberately NOT part of this
+// type — see the file header comment; simulation_id/cad_id also aren't,
+// for the reason already documented there.
+export interface SimDesignGenerationResult {
+  flightEnvelope: FlightEnvelope;
+  stability: StabilityAssessment;
+  riskFlags: string[];
+  reasoningSummary: string;
+  // Same meaning as Bay 03/04's mock flag: false on a successful, parsed
+  // Claude response; true only on the fallback branch (no ANTHROPIC_API_KEY
+  // or an unparseable response). Mirrors cadDesignGeneration.ts's
+  // `{ ...parsed, mock: false }` / `mockCADDesign()`'s `mock: true` split
+  // exactly — this is not a claim that Bay 05 has a real physics engine,
+  // it's the same "did the LLM call actually produce this" signal every
+  // other bay already uses.
+  sourceWasMock: boolean;
+}
+
+const SYSTEM = `You are Simulation Orchestrator Agent's flight dynamics and stability assessment step for TorqWings' aerospace design platform. Given one CAD design's mass properties, bill of materials, and manufacturability validation, estimate a flight envelope (max speed, stall speed, service ceiling, range, endurance), classify longitudinal and lateral stability (stable/marginal/unstable) with supporting notes, and list any risk flags. Explain your overall assessment qualitatively in reasoning_summary — performance and confidence scoring are computed separately from your assessment, not by you, so do not invent or cite a specific performance or confidence number. Vertical-specific performance thresholds may be supplied as bounds — if a specific threshold is null, that means no confirmed numeric threshold exists for that dimension, not zero: reason qualitatively using general aerospace judgment for that dimension and say so explicitly in reasoning_summary (e.g. "no confirmed stability margin threshold exists for this vertical; assessed qualitatively"). Never treat a null threshold as a target of zero. Every claim must be grounded in the given mass properties/BOM — do not invent requirements not present in the input. This is not a real physics simulation (no JSBSim/X-Plane) — reasoning_summary should read as an engineering estimate, not a claim of simulated results. Return JSON only.`;
+
+export async function generateSimDesign(
+  data: SimDesignGenerationInput,
+): Promise<SimDesignGenerationResult> {
+  const userContent = `CAD design: ${JSON.stringify(data, null, 2)}
+
+Return: { "flight_envelope": { "max_speed_kmh": number, "stall_speed_kmh": number, "service_ceiling_m": number, "range_km": number, "endurance_min": number }, "stability": { "longitudinal": "stable | marginal | unstable", "lateral": "stable | marginal | unstable", "notes": "string" }, "risk_flags": ["string"], "reasoning_summary": "string" }`;
+
+  const { content } = await callLlmGateway(SYSTEM, userContent, { jsonMode: true });
+  if (!content) return mockSimDesign();
+
+  const parsed = parseSimDesignResponse(content);
+  if (!parsed) return mockSimDesign();
+  return { ...parsed, sourceWasMock: false };
+}
+
+function isFiniteNumber(v: unknown): v is number {
+  return typeof v === "number" && Number.isFinite(v);
+}
+
+function isStabilityClassification(v: unknown): v is StabilityClassification {
+  return v === "stable" || v === "marginal" || v === "unstable";
+}
+
+function parseSimDesignResponse(
+  raw: string,
+): Omit<SimDesignGenerationResult, "sourceWasMock"> | null {
+  try {
+    const obj = JSON.parse(stripJsonFences(raw));
+
+    const fe = obj.flight_envelope;
+    if (
+      typeof fe !== "object" ||
+      fe === null ||
+      !isFiniteNumber(fe.max_speed_kmh) ||
+      !isFiniteNumber(fe.stall_speed_kmh) ||
+      !isFiniteNumber(fe.service_ceiling_m) ||
+      !isFiniteNumber(fe.range_km) ||
+      !isFiniteNumber(fe.endurance_min)
+    ) {
+      return null;
+    }
+
+    const st = obj.stability;
+    if (
+      typeof st !== "object" ||
+      st === null ||
+      !isStabilityClassification(st.longitudinal) ||
+      !isStabilityClassification(st.lateral) ||
+      typeof st.notes !== "string"
+    ) {
+      return null;
+    }
+
+    if (typeof obj.reasoning_summary !== "string") return null;
+
+    const riskFlags: string[] = Array.isArray(obj.risk_flags)
+      ? obj.risk_flags.filter((f: unknown): f is string => typeof f === "string")
+      : [];
+
+    return {
+      flightEnvelope: {
+        maxSpeedKmh: fe.max_speed_kmh,
+        stallSpeedKmh: fe.stall_speed_kmh,
+        serviceCeilingM: fe.service_ceiling_m,
+        rangeKm: fe.range_km,
+        enduranceMin: fe.endurance_min,
+      },
+      stability: {
+        longitudinal: st.longitudinal,
+        lateral: st.lateral,
+        notes: st.notes,
+      },
+      riskFlags,
+      reasoningSummary: obj.reasoning_summary,
+    };
+  } catch {
+    return null;
+  }
+}
+
+function mockSimDesign(): SimDesignGenerationResult {
+  return {
+    flightEnvelope: {
+      maxSpeedKmh: 0,
+      stallSpeedKmh: 0,
+      serviceCeilingM: 0,
+      rangeKm: 0,
+      enduranceMin: 0,
+    },
+    stability: {
+      longitudinal: "unstable",
+      lateral: "unstable",
+      notes:
+        "Mock fallback — no ANTHROPIC_API_KEY reply or unparseable response; no real assessment was performed.",
+    },
+    riskFlags: [
+      "No real assessment was performed — ANTHROPIC_API_KEY missing or the LLM response was unparseable.",
+    ],
+    reasoningSummary: "Mock reasoning summary — no ANTHROPIC_API_KEY reply.",
+    sourceWasMock: true,
+  };
+}

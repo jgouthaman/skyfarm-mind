@@ -7,6 +7,7 @@ import {
   InvalidAircraftDesignInputError,
 } from "./aircraftDesignAgentPipeline.ts";
 import { CADDesignAgentError, InvalidCADDesignInputError } from "./cadDesignAgentPipeline.ts";
+import { SimulationAgentError, InvalidSimulationInputError } from "./simDesignAgentPipeline.ts";
 
 // Shared auth + response helpers for the 4 Mission Agent stage routes
 // (api.hangar.process-mission.*.ts) — extracted so each route file stays a
@@ -109,6 +110,15 @@ export function errorResponse(err: unknown): Response {
   if (err instanceof CADDesignAgentError) {
     return jsonResponse(
       { error: err.message, cad_design_id: err.cadDesignId, stage: err.stage },
+      500,
+    );
+  }
+  if (err instanceof InvalidSimulationInputError) {
+    return jsonResponse({ error: err.message, simulation_id: null }, 400);
+  }
+  if (err instanceof SimulationAgentError) {
+    return jsonResponse(
+      { error: err.message, simulation_id: err.simulationId, stage: err.stage },
       500,
     );
   }

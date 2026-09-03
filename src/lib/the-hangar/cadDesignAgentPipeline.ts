@@ -47,7 +47,14 @@ export class InvalidCADDesignInputError extends Error {
   }
 }
 
-async function assertCADDesignOwnership(
+// Exported (not local/unexported like the rest of this file's helpers) for
+// the same reason assertConceptOwnership/assertMissionOwnership are exported
+// from conceptAgentPipeline.ts and assertAircraftDesignOwnership from
+// aircraftDesignAgentPipeline.ts — Bay 05's simDesignAgentPipeline.ts is the
+// first downstream caller that needs to verify ownership of a Bay 04 CAD
+// design by a client-supplied id, mirroring the exact cross-bay reuse
+// pattern already established for Bay 03->02 and Bay 04->03.
+export async function assertCADDesignOwnership(
   cadDesignId: string,
   userId: string,
 ): Promise<HangarCADDesignRow> {
