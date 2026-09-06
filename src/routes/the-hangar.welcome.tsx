@@ -136,11 +136,12 @@ const NODES: NodeData[] = [
     bay: "07",
     name: "Structural",
     title: "Structural Agent",
-    status: "design",
-    desc: "Runs FEA for stress, deformation and safety factor against loads and boundary conditions.",
-    inp: "CAD geometry, loads",
-    tools: "CalculiX, Code_Aster",
-    out: "FEA results",
+    status: "online",
+    href: "/the-hangar/structural",
+    desc: "Reasons about stress, deformation and safety factor from the CAD design and load-case assumptions — LLM reasoning only, no real FEA solver runs yet.",
+    inp: "CAD mass properties & validation",
+    tools: "Claude Sonnet 5, rule engine",
+    out: "Structural result: stress/deformation estimate, safety factor, risk flags (Phase 1 — mocked, not solved)",
   },
   {
     id: 8,
@@ -376,7 +377,8 @@ function TheHangarWelcome() {
           | "/the-hangar/aircraft-design"
           | "/the-hangar/cad-design"
           | "/the-hangar/simulation"
-          | "/the-hangar/cfd-analysis",
+          | "/the-hangar/cfd-analysis"
+          | "/the-hangar/structural",
       });
     } else {
       setSelected(n);
@@ -613,6 +615,7 @@ function TheHangarWelcome() {
                           | "/the-hangar/cad-design"
                           | "/the-hangar/simulation"
                           | "/the-hangar/cfd-analysis"
+                          | "/the-hangar/structural"
                       }
                       className="hgr-w-btn hgr-w-btn-amber"
                       style={{ justifyContent: "center", marginTop: 18, textDecoration: "none" }}
