@@ -136,11 +136,12 @@ const NODES: NodeData[] = [
     bay: "07",
     name: "Structural",
     title: "Structural Agent",
-    status: "design",
-    desc: "Runs FEA for stress, deformation and safety factor against loads and boundary conditions.",
-    inp: "CAD geometry, loads",
-    tools: "CalculiX, Code_Aster",
-    out: "FEA results",
+    status: "online",
+    href: "/the-hangar/structural",
+    desc: "Reasons about stress, deformation and safety factor from the CAD design and load-case assumptions — LLM reasoning only, no real FEA solver runs yet.",
+    inp: "CAD mass properties & validation",
+    tools: "Claude Sonnet 5, rule engine",
+    out: "Structural result: stress/deformation estimate, safety factor, risk flags (Phase 1 — mocked, not solved)",
   },
   {
     id: 8,
@@ -149,11 +150,12 @@ const NODES: NodeData[] = [
     bay: "08",
     name: "Optimization",
     title: "Optimization Agent",
-    status: "design",
-    desc: "Searches the design space across CFD and structural results for Pareto-optimal candidates.",
-    inp: "CFD + FEA results",
-    tools: "Optuna, PyGMO, surrogate models",
-    out: "Optimized designs (Pareto set)",
+    status: "online",
+    href: "/the-hangar/optimization",
+    desc: "Reasons about the weight/drag/cost/safety trade-off position from CFD and structural results — LLM reasoning only, no real multi-objective search (Optuna/PyGMO) runs yet.",
+    inp: "CFD + structural results",
+    tools: "Claude Sonnet 5, rule engine",
+    out: "Trade-off assessment: objective scores, recommended adjustments (Phase 1 — reasoning only, not a real Pareto search)",
   },
   {
     id: 9,
@@ -376,7 +378,9 @@ function TheHangarWelcome() {
           | "/the-hangar/aircraft-design"
           | "/the-hangar/cad-design"
           | "/the-hangar/simulation"
-          | "/the-hangar/cfd-analysis",
+          | "/the-hangar/cfd-analysis"
+          | "/the-hangar/structural"
+          | "/the-hangar/optimization",
       });
     } else {
       setSelected(n);
@@ -613,6 +617,8 @@ function TheHangarWelcome() {
                           | "/the-hangar/cad-design"
                           | "/the-hangar/simulation"
                           | "/the-hangar/cfd-analysis"
+                          | "/the-hangar/structural"
+                          | "/the-hangar/optimization"
                       }
                       className="hgr-w-btn hgr-w-btn-amber"
                       style={{ justifyContent: "center", marginTop: 18, textDecoration: "none" }}
