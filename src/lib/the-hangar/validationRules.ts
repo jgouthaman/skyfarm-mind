@@ -9,7 +9,7 @@
 // two-source fan-in — so there is no cross-source lineage check here.
 // OPT-003 (do two sources trace back to the same CAD design?) has no
 // single-source analog; it's replaced by VAL-002 (is the referenced
-// optimization result actually finalized, not still draft/error?), which is
+// optimization result actually spec-ready, not still draft/error?), which is
 // the natural single-source equivalent: never validate a result that isn't
 // done being produced yet.
 
@@ -41,8 +41,8 @@ const VALIDATION_GATE_RULES: ValidationGateRule[] = [
   },
   {
     id: "VAL-002",
-    trigger: "Referenced optimization result is not finalized",
-    matches: (ctx) => ctx.optimizationStatus !== "finalized",
+    trigger: "Referenced optimization result is not spec ready",
+    matches: (ctx) => ctx.optimizationStatus !== "spec_ready",
     reason:
       "The referenced Bay 08 result is still draft, processing, or errored — never validate a result that isn't finished being produced yet.",
   },
