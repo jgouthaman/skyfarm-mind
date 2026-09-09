@@ -10,6 +10,7 @@ import { CADDesignAgentError, InvalidCADDesignInputError } from "./cadDesignAgen
 import { SimulationAgentError, InvalidSimulationInputError } from "./simDesignAgentPipeline.ts";
 import { CFDAnalysisAgentError, InvalidCFDAnalysisInputError } from "./cfdAnalysisAgentPipeline.ts";
 import { StructuralAgentError, InvalidStructuralInputError } from "./structuralAgentPipeline.ts";
+import { OptimizationAgentError, InvalidOptimizationInputError } from "./optimizationAgentPipeline.ts";
 
 // Shared auth + response helpers for the 4 Mission Agent stage routes
 // (api.hangar.process-mission.*.ts) — extracted so each route file stays a
@@ -139,6 +140,15 @@ export function errorResponse(err: unknown): Response {
   if (err instanceof StructuralAgentError) {
     return jsonResponse(
       { error: err.message, structural_id: err.structuralId, stage: err.stage },
+      500,
+    );
+  }
+  if (err instanceof InvalidOptimizationInputError) {
+    return jsonResponse({ error: err.message, optimization_id: null }, 400);
+  }
+  if (err instanceof OptimizationAgentError) {
+    return jsonResponse(
+      { error: err.message, optimization_id: err.optimizationId, stage: err.stage },
       500,
     );
   }

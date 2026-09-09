@@ -150,11 +150,12 @@ const NODES: NodeData[] = [
     bay: "08",
     name: "Optimization",
     title: "Optimization Agent",
-    status: "design",
-    desc: "Searches the design space across CFD and structural results for Pareto-optimal candidates.",
-    inp: "CFD + FEA results",
-    tools: "Optuna, PyGMO, surrogate models",
-    out: "Optimized designs (Pareto set)",
+    status: "online",
+    href: "/the-hangar/optimization",
+    desc: "Reasons about the weight/drag/cost/safety trade-off position from CFD and structural results — LLM reasoning only, no real multi-objective search (Optuna/PyGMO) runs yet.",
+    inp: "CFD + structural results",
+    tools: "Claude Sonnet 5, rule engine",
+    out: "Trade-off assessment: objective scores, recommended adjustments (Phase 1 — reasoning only, not a real Pareto search)",
   },
   {
     id: 9,
@@ -378,7 +379,8 @@ function TheHangarWelcome() {
           | "/the-hangar/cad-design"
           | "/the-hangar/simulation"
           | "/the-hangar/cfd-analysis"
-          | "/the-hangar/structural",
+          | "/the-hangar/structural"
+          | "/the-hangar/optimization",
       });
     } else {
       setSelected(n);
@@ -616,6 +618,7 @@ function TheHangarWelcome() {
                           | "/the-hangar/simulation"
                           | "/the-hangar/cfd-analysis"
                           | "/the-hangar/structural"
+                          | "/the-hangar/optimization"
                       }
                       className="hgr-w-btn hgr-w-btn-amber"
                       style={{ justifyContent: "center", marginTop: 18, textDecoration: "none" }}
