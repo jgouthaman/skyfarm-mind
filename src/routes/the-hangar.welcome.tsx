@@ -3,25 +3,25 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useHangarSession } from "@/lib/the-hangar/session";
 import { supabase } from "@/integrations/supabase/client";
 
-// ─────────────────────────────────────────────────────────────────────────
-// The Hangar — agent console welcome page. Faithful port of welcome.html
+// -----------------------------------------------------------------------
+// The Hangar -- agent console welcome page. Faithful port of welcome.html
 // (reference mockup, see reference/the-hangar/welcome.html): 15-bay SVG
 // circuit, hover/click info panel, "Run Mission Sequence" animation, and
-// Bay 01's click-through to /the-hangar/mission. Fully isolated — no
+// Bay 01's click-through to /the-hangar/mission. Fully isolated -- no
 // imports from destud-auth.ts or any /destud file.
 //
 // Mission Agent (bay 1) is the only bay with status:'online' (LIVE badge)
 // AND the only bay with an `href` (click-through, underline, amber hover
-// ring, CTA button). These are two independent flags — status drives the
-// LIVE badge, href drives all the "linkable" affordances — kept separate
+// ring, CTA button). These are two independent flags -- status drives the
+// LIVE badge, href drives all the "linkable" affordances -- kept separate
 // because a future bay could in principle go LIVE before it gets a
 // dedicated page, or vice versa. Today only Mission Agent has both.
 //
 // Adding the next bay's page (Concept Agent): add `href` to that node's
-// data. Nothing else changes — the underline, hover ring, badge arrow, and
+// data. Nothing else changes -- the underline, hover ring, badge arrow, and
 // info-panel CTA button all key off `href` being present, matching the
 // mockup's own stated pattern.
-// ─────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------
 
 export const Route = createFileRoute("/the-hangar/welcome")({
   component: TheHangarWelcome,
@@ -54,7 +54,7 @@ const NODES: NodeData[] = [
     title: "Mission Agent",
     status: "online",
     href: "/the-hangar/mission",
-    desc: "Turns a mission brief into a structured spec — payload, range, endurance, constraints and KPIs the rest of the fleet builds against.",
+    desc: "Turns a mission brief into a structured spec -- payload, range, endurance, constraints and KPIs the rest of the fleet builds against.",
     inp: "Chat, docs, forms",
     tools: "LLM, RAG, rule engine",
     out: "Mission spec (JSON)",
@@ -82,7 +82,7 @@ const NODES: NodeData[] = [
     title: "Aircraft Design Agent",
     status: "online",
     href: "/the-hangar/aircraft-design",
-    desc: "Selects configuration and design parameters — gate-then-score against rules and reference designs, never a guess.",
+    desc: "Selects configuration and design parameters -- gate-then-score against rules and reference designs, never a guess.",
     inp: "Concept",
     tools: "Claude Sonnet 5, rule engine",
     out: "Aircraft geometry preview",
@@ -96,7 +96,7 @@ const NODES: NodeData[] = [
     title: "CAD Agent",
     status: "online",
     href: "/the-hangar/cad-design",
-    desc: "Builds real CAD geometry and assemblies from the validated design parameters — the first fully physical output.",
+    desc: "Builds real CAD geometry and assemblies from the validated design parameters -- the first fully physical output.",
     inp: "Aircraft design",
     tools: "Claude Sonnet 5, rule engine",
     out: "CAD model & assembly",
@@ -110,7 +110,7 @@ const NODES: NodeData[] = [
     title: "Simulation Orchestrator",
     status: "online",
     href: "/the-hangar/simulation",
-    desc: "Assesses flight envelope, stability, and performance risk from the CAD design — LLM reasoning bounded by vertical design rules.",
+    desc: "Assesses flight envelope, stability, and performance risk from the CAD design -- LLM reasoning bounded by vertical design rules.",
     inp: "CAD model",
     tools: "Claude Sonnet 5, rule engine",
     out: "Simulation result: flight envelope, stability, risk flags",
@@ -124,10 +124,10 @@ const NODES: NodeData[] = [
     title: "CFD Agent",
     status: "online",
     href: "/the-hangar/cfd-analysis",
-    desc: "Reasons about aerodynamic forces, coefficients, and flow behavior from the CAD geometry — Phase 1: LLM reasoning only, no real CFD solver runs yet.",
+    desc: "Reasons about aerodynamic forces, coefficients, and flow behavior from the CAD geometry -- Phase 1: LLM reasoning only, no real CFD solver runs yet.",
     inp: "CAD geometry",
     tools: "Claude Sonnet 5, rule engine",
-    out: "CFD estimate: forces, coefficients, flow description (Phase 1 — mocked, not simulated)",
+    out: "CFD estimate: forces, coefficients, flow description (Phase 1 -- mocked, not simulated)",
   },
   {
     id: 7,
@@ -138,10 +138,10 @@ const NODES: NodeData[] = [
     title: "Structural Agent",
     status: "online",
     href: "/the-hangar/structural",
-    desc: "Reasons about stress, deformation and safety factor from the CAD design and load-case assumptions — LLM reasoning only, no real FEA solver runs yet.",
+    desc: "Reasons about stress, deformation and safety factor from the CAD design and load-case assumptions -- LLM reasoning only, no real FEA solver runs yet.",
     inp: "CAD mass properties & validation",
     tools: "Claude Sonnet 5, rule engine",
-    out: "Structural result: stress/deformation estimate, safety factor, risk flags (Phase 1 — mocked, not solved)",
+    out: "Structural result: stress/deformation estimate, safety factor, risk flags (Phase 1 -- mocked, not solved)",
   },
   {
     id: 8,
@@ -152,10 +152,10 @@ const NODES: NodeData[] = [
     title: "Optimization Agent",
     status: "online",
     href: "/the-hangar/optimization",
-    desc: "Reasons about the weight/drag/cost/safety trade-off position from CFD and structural results — LLM reasoning only, no real multi-objective search (Optuna/PyGMO) runs yet.",
+    desc: "Reasons about the weight/drag/cost/safety trade-off position from CFD and structural results -- LLM reasoning only, no real multi-objective search (Optuna/PyGMO) runs yet.",
     inp: "CFD + structural results",
     tools: "Claude Sonnet 5, rule engine",
-    out: "Trade-off assessment: objective scores, recommended adjustments (Phase 1 — reasoning only, not a real Pareto search)",
+    out: "Trade-off assessment: objective scores, recommended adjustments (Phase 1 -- reasoning only, not a real Pareto search)",
   },
   {
     id: 9,
@@ -164,8 +164,9 @@ const NODES: NodeData[] = [
     bay: "09",
     name: "Validation",
     title: "Validation Agent",
-    status: "design",
-    desc: "Checks the optimized design against the original mission spec and rules — issues a pass or fail, with reasons.",
+    status: "online",
+    href: "/the-hangar/validation",
+    desc: "Checks the optimized design against the original mission spec and rules -- issues a pass or fail, with reasons.",
     inp: "Results, mission spec, rules",
     tools: "Rule engine, LLM reasoning",
     out: "Validation report (pass/fail)",
@@ -230,7 +231,7 @@ const NODES: NodeData[] = [
     name: "Collaboration",
     title: "Collaboration Agent",
     status: "design",
-    desc: "Keeps the team synced — tasks, agent updates, comments and notifications, all in one feed.",
+    desc: "Keeps the team synced -- tasks, agent updates, comments and notifications, all in one feed.",
     inp: "Tasks, agent updates",
     tools: "Task manager API, webhooks",
     out: "Collaboration feed",
@@ -245,7 +246,7 @@ const NODES: NodeData[] = [
     status: "design",
     hub: true,
     r: 44,
-    desc: "The memory every other bay reads from and writes to — past projects, rules, standards and outcomes, always on.",
+    desc: "The memory every other bay reads from and writes to -- past projects, rules, standards and outcomes, always on.",
     inp: "Natural-language queries",
     tools: "Knowledge graph, vector DB, RAG + LLM",
     out: "Answers & insight",
@@ -260,12 +261,12 @@ const LEAD_LINES: { id: string; d: string }[] = [
   { id: "ln-3-4", d: "M484,140 H596" },
   { id: "ln-4-5", d: "M664,140 H776" },
   // Bay 06 (CFD) and Bay 07 (Structural) both source primary input directly
-  // from Bay 04 (CAD Agent), not from Bay 05 — rewired from the stale
+  // from Bay 04 (CAD Agent), not from Bay 05 -- rewired from the stale
   // Bay05->06/07 edges. Single shared exit point off Bay 04's bottom edge
   // (630,174) fanning out at y=220, mirroring ln-9-10..ln-9-14's own
   // single-origin fan-out pattern below, rather than reusing Bay05's old
   // two-point diagonal-exit shape (which existed because Bay05's two
-  // targets straddled it symmetrically — Bay04's targets don't).
+  // targets straddled it symmetrically -- Bay04's targets don't).
   { id: "ln-4-6", d: "M630,174 V220 H720 V266" },
   { id: "ln-4-7", d: "M630,174 V220 H900 V266" },
   { id: "ln-6-8", d: "M720,334 V376 H810 V386" },
@@ -285,43 +286,43 @@ interface Stage {
 }
 
 const STAGES: Stage[] = [
-  { lines: [], nodes: [1], text: "BAY 01 — Mission Agent — parsing mission brief…" },
-  { lines: ["ln-1-2"], nodes: [2], text: "BAY 02 — Concept Agent — generating trade studies…" },
+  { lines: [], nodes: [1], text: "BAY 01 -- Mission Agent -- parsing mission brief..." },
+  { lines: ["ln-1-2"], nodes: [2], text: "BAY 02 -- Concept Agent -- generating trade studies..." },
   {
     lines: ["ln-2-3"],
     nodes: [3],
-    text: "BAY 03 — Aircraft Design Agent — gating and scoring configurations…",
+    text: "BAY 03 -- Aircraft Design Agent -- gating and scoring configurations...",
   },
-  { lines: ["ln-3-4"], nodes: [4], text: "BAY 04 — CAD Agent — building geometry & assembly…" },
+  { lines: ["ln-3-4"], nodes: [4], text: "BAY 04 -- CAD Agent -- building geometry & assembly..." },
   {
     lines: ["ln-4-5"],
     nodes: [5],
-    text: "BAY 05 — Simulation Orchestrator — preparing simulation plan…",
+    text: "BAY 05 -- Simulation Orchestrator -- preparing simulation plan...",
   },
   {
     lines: ["ln-4-6", "ln-4-7"],
     nodes: [6, 7],
-    text: "BAY 06 / 07 — CFD + Structural — running in parallel…",
+    text: "BAY 06 / 07 -- CFD + Structural -- running in parallel...",
   },
   {
     lines: ["ln-6-8", "ln-7-8"],
     nodes: [8],
-    text: "BAY 08 — Optimization Agent — searching for Pareto-optimal designs…",
+    text: "BAY 08 -- Optimization Agent -- searching for Pareto-optimal designs...",
   },
   {
     lines: ["ln-8-9"],
     nodes: [9],
-    text: "BAY 09 — Validation Agent — checking result against mission spec…",
+    text: "BAY 09 -- Validation Agent -- checking result against mission spec...",
   },
   {
     lines: ["ln-9-10", "ln-9-11", "ln-9-12", "ln-9-13", "ln-9-14"],
     nodes: [10, 11, 12, 13, 14],
-    text: "BAY 10–14 — Materials, Manufacturing, Certification, Documentation, Collaboration…",
+    text: "BAY 10-14 -- Materials, Manufacturing, Certification, Documentation, Collaboration...",
   },
   {
     lines: [],
     nodes: [15],
-    text: "BAY 15 — Knowledge Agent — outcome written to shared memory. Sequence complete.",
+    text: "BAY 15 -- Knowledge Agent -- outcome written to shared memory. Sequence complete.",
   },
 ];
 
@@ -333,7 +334,7 @@ function TheHangarWelcome() {
   const [selected, setSelected] = useState<NodeData | null>(null);
   const [nodeStatus, setNodeStatus] = useState<Record<number, DynamicStatus>>({});
   const [drawnLines, setDrawnLines] = useState<Set<string>>(new Set());
-  const [liveText, setLiveText] = useState("Idle — click a bay, or run the sequence.");
+  const [liveText, setLiveText] = useState("Idle -- click a bay, or run the sequence.");
   const [running, setRunning] = useState(false);
   const [currentUserEmail, setCurrentUserEmail] = useState<string | null>(null);
   const timeouts = useRef<ReturnType<typeof setTimeout>[]>([]);
@@ -347,7 +348,7 @@ function TheHangarWelcome() {
 
   // Same real Supabase session Flight Deck's sign-in creates (session.ts's
   // own useHangarSession guard above only checks the sessionStorage flag,
-  // not this) — read here purely to show who's signed in.
+  // not this) -- read here purely to show who's signed in.
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       setCurrentUserEmail(data.session?.user.email ?? null);
@@ -362,12 +363,12 @@ function TheHangarWelcome() {
 
   if (!ready) return null;
 
-  // Hover/focus — preview only, for every bay, unchanged regardless of href.
+  // Hover/focus -- preview only, for every bay, unchanged regardless of href.
   function preview(n: NodeData) {
     setSelected(n);
   }
 
-  // Click/Enter/Space — navigates if the bay has an href, otherwise falls
+  // Click/Enter/Space -- navigates if the bay has an href, otherwise falls
   // back to the same preview behavior. Mirrors the mockup's activate().
   function activate(n: NodeData) {
     if (n.href) {
@@ -380,7 +381,8 @@ function TheHangarWelcome() {
           | "/the-hangar/simulation"
           | "/the-hangar/cfd-analysis"
           | "/the-hangar/structural"
-          | "/the-hangar/optimization",
+          | "/the-hangar/optimization"
+          | "/the-hangar/validation",
       });
     } else {
       setSelected(n);
@@ -392,7 +394,7 @@ function TheHangarWelcome() {
     setNodeStatus({});
   }
 
-  // "Exit Hangar" is a full logout, not just navigation — clears both the
+  // "Exit Hangar" is a full logout, not just navigation -- clears both the
   // real Supabase session and the hangar_session flag, so /the-hangar shows
   // "Flight Deck" again afterward instead of "Welcome, {email}".
   async function exitHangar() {
@@ -481,13 +483,13 @@ function TheHangarWelcome() {
             <div>
               <div className="hgr-w-eyebrow">
                 <span className="hgr-w-dot" />
-                Flight Deck — clearance granted
+                Flight Deck -- clearance granted
               </div>
               <h1>
                 Welcome to <span>The Hangar</span>.
               </h1>
               <p className="hgr-w-lead">
-                This is the live circuit — how a mission actually moves through all 15 agents. Hover
+                This is the live circuit -- how a mission actually moves through all 15 agents. Hover
                 any bay to read what it does, or run the sequence to watch it happen.
               </p>
             </div>
@@ -579,7 +581,7 @@ function TheHangarWelcome() {
               {!selected ? (
                 <div className="hgr-w-info-empty">
                   <span className="hgr-w-hint">→ Select a bay</span>
-                  Every agent in The Hangar reads and writes through a shared memory layer — hover
+                  Every agent in The Hangar reads and writes through a shared memory layer -- hover
                   or tap any bay in the circuit to see what it does, what it reads, and what it
                   produces.
                 </div>
@@ -619,6 +621,7 @@ function TheHangarWelcome() {
                           | "/the-hangar/cfd-analysis"
                           | "/the-hangar/structural"
                           | "/the-hangar/optimization"
+                          | "/the-hangar/validation"
                       }
                       className="hgr-w-btn hgr-w-btn-amber"
                       style={{ justifyContent: "center", marginTop: 18, textDecoration: "none" }}
@@ -630,7 +633,7 @@ function TheHangarWelcome() {
               )}
               <div className="hgr-w-foot-note">
                 Mission Agent is running against real logic today. Every other bay is shown exactly
-                as it's designed — it goes live here the moment it ships.
+                as it's designed -- it goes live here the moment it ships.
               </div>
             </div>
           </div>
