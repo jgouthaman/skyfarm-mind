@@ -178,7 +178,8 @@ const NODES: NodeData[] = [
     bay: "10",
     name: "Materials",
     title: "Materials Agent",
-    status: "design",
+    status: "online",
+    href: "/the-hangar/materials",
     desc: "Recommends materials against requirements, operating environment and constraints, with justification.",
     inp: "Requirements, environment",
     tools: "Materials DB, RAG",
@@ -191,7 +192,8 @@ const NODES: NodeData[] = [
     bay: "11",
     name: "Manufacturing",
     title: "Manufacturing Agent",
-    status: "design",
+    status: "online",
+    href: "/the-hangar/manufacturing",
     desc: "Checks manufacturability against the CAD model and produces a build plan and bill of materials.",
     inp: "CAD model",
     tools: "DFM rule engine, cost models",
@@ -204,7 +206,8 @@ const NODES: NodeData[] = [
     bay: "12",
     name: "Certification",
     title: "Certification Agent",
-    status: "design",
+    status: "online",
+    href: "/the-hangar/certification",
     desc: "Maps the design against applicable regulations and standards and flags compliance gaps early.",
     inp: "Design data, regulations",
     tools: "Regulations DB, RAG, LLM",
@@ -217,7 +220,8 @@ const NODES: NodeData[] = [
     bay: "13",
     name: "Documentation",
     title: "Documentation Agent",
-    status: "design",
+    status: "online",
+    href: "/the-hangar/documentation",
     desc: "Compiles final reports, drawings and summary documentation from every upstream agent's output.",
     inp: "All design data",
     tools: "LLM, template engine",
@@ -382,7 +386,11 @@ function TheHangarWelcome() {
           | "/the-hangar/cfd-analysis"
           | "/the-hangar/structural"
           | "/the-hangar/optimization"
-          | "/the-hangar/validation",
+          | "/the-hangar/validation"
+          | "/the-hangar/materials"
+          | "/the-hangar/manufacturing"
+          | "/the-hangar/certification"
+          | "/the-hangar/documentation",
       });
     } else {
       setSelected(n);
@@ -622,6 +630,10 @@ function TheHangarWelcome() {
                           | "/the-hangar/structural"
                           | "/the-hangar/optimization"
                           | "/the-hangar/validation"
+                          | "/the-hangar/materials"
+                          | "/the-hangar/manufacturing"
+                          | "/the-hangar/certification"
+                          | "/the-hangar/documentation"
                       }
                       className="hgr-w-btn hgr-w-btn-amber"
                       style={{ justifyContent: "center", marginTop: 18, textDecoration: "none" }}
