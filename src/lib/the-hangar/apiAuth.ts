@@ -13,6 +13,7 @@ import { StructuralAgentError, InvalidStructuralInputError } from "./structuralA
 import { OptimizationAgentError, InvalidOptimizationInputError } from "./optimizationAgentPipeline.ts";
 import { ValidationAgentError, InvalidValidationInputError } from "./validationAgentPipeline.ts";
 import { MaterialsAgentError, InvalidMaterialsInputError } from "./materialsAgentPipeline.ts";
+import { ManufacturingAgentError, InvalidManufacturingInputError } from "./manufacturingAgentPipeline.ts";
 
 // Shared auth + response helpers for the 4 Mission Agent stage routes
 // (api.hangar.process-mission.*.ts) -- extracted so each route file stays a
@@ -169,6 +170,15 @@ export function errorResponse(err: unknown): Response {
   if (err instanceof MaterialsAgentError) {
     return jsonResponse(
       { error: err.message, materials_id: err.materialsId, stage: err.stage },
+      500,
+    );
+  }
+  if (err instanceof InvalidManufacturingInputError) {
+    return jsonResponse({ error: err.message, manufacturing_id: null }, 400);
+  }
+  if (err instanceof ManufacturingAgentError) {
+    return jsonResponse(
+      { error: err.message, manufacturing_id: err.manufacturingId, stage: err.stage },
       500,
     );
   }
