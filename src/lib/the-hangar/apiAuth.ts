@@ -11,9 +11,10 @@ import { SimulationAgentError, InvalidSimulationInputError } from "./simDesignAg
 import { CFDAnalysisAgentError, InvalidCFDAnalysisInputError } from "./cfdAnalysisAgentPipeline.ts";
 import { StructuralAgentError, InvalidStructuralInputError } from "./structuralAgentPipeline.ts";
 import { OptimizationAgentError, InvalidOptimizationInputError } from "./optimizationAgentPipeline.ts";
+import { ValidationAgentError, InvalidValidationInputError } from "./validationAgentPipeline.ts";
 
 // Shared auth + response helpers for the 4 Mission Agent stage routes
-// (api.hangar.process-mission.*.ts) — extracted so each route file stays a
+// (api.hangar.process-mission.*.ts) -- extracted so each route file stays a
 // thin resolve-user -> parse-body -> call-stage-function -> respond shell,
 // with the auth verification and error-mapping logic living in exactly one
 // place regardless of route count.
@@ -22,8 +23,8 @@ import { OptimizationAgentError, InvalidOptimizationInputError } from "./optimiz
 // src/integrations/supabase/auth-middleware.ts's requireSupabaseAuth does
 // (Authorization: Bearer <token> -> supabase.auth.getClaims(token) ->
 // claims.sub). That middleware can't be imported and reused directly here:
-// it's built with createMiddleware({ type: "function" }) — server FUNCTION
-// middleware, for createServerFn's .middleware() only — while a file
+// it's built with createMiddleware({ type: "function" }) -- server FUNCTION
+// middleware, for createServerFn's .middleware() only -- while a file
 // route's server.middleware expects request middleware (createMiddleware(),
 // no { type: "function" }), a structurally different branded type.
 // auth-middleware.ts is also marked "automatically generated. Do not edit
@@ -76,16 +77,16 @@ export function jsonResponse(body: unknown, status = 200): Response {
 }
 
 // Section 12.1: "No silent failures ... surfaced to the UI as a real error
-// state — never a blank screen." Each stage function already logged its own
+// state -- never a blank screen." Each stage function already logged its own
 // failure to Hangar_agent_runs and flipped Hangar_missions.status to
-// 'error' before this runs — this is just the clean response back to the
+// 'error' before this runs -- this is just the clean response back to the
 // caller, never a raw exception/stack trace.
 export function errorResponse(err: unknown): Response {
   if (err instanceof UnauthorizedError) {
     return jsonResponse({ error: err.message, mission_id: null }, 401);
   }
   if (err instanceof InvalidMissionInputError) {
-    // Rejected before any Hangar_missions row was created — a 400, not a
+    // Rejected before any Hangar_missions row was created -- a 400, not a
     // 500, since nothing broke, the request just had nothing usable in it.
     return jsonResponse({ error: err.message, mission_id: null }, 400);
   }
@@ -149,6 +150,15 @@ export function errorResponse(err: unknown): Response {
   if (err instanceof OptimizationAgentError) {
     return jsonResponse(
       { error: err.message, optimization_id: err.optimizationId, stage: err.stage },
+      500,
+    );
+  }
+  if (err instanceof InvalidValidationInputError) {
+    return jsonResponse({ error: err.message, validation_id: null }, 400);
+  }
+  if (err instanceof ValidationAgentError) {
+    return jsonResponse(
+      { error: err.message, validation_id: err.validationId, stage: err.stage },
       500,
     );
   }
