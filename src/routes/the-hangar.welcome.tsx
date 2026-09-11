@@ -47,7 +47,7 @@ interface NodeData {
 const NODES: NodeData[] = [
   {
     id: 1,
-    x: 90,
+    x: 215,
     y: 140,
     bay: "01",
     name: "Mission",
@@ -61,7 +61,7 @@ const NODES: NodeData[] = [
   },
   {
     id: 2,
-    x: 270,
+    x: 395,
     y: 140,
     bay: "02",
     name: "Concept",
@@ -75,7 +75,7 @@ const NODES: NodeData[] = [
   },
   {
     id: 3,
-    x: 450,
+    x: 575,
     y: 140,
     bay: "03",
     name: "Aircraft Design",
@@ -89,7 +89,7 @@ const NODES: NodeData[] = [
   },
   {
     id: 4,
-    x: 630,
+    x: 755,
     y: 140,
     bay: "04",
     name: "CAD",
@@ -103,7 +103,7 @@ const NODES: NodeData[] = [
   },
   {
     id: 5,
-    x: 810,
+    x: 935,
     y: 140,
     bay: "05",
     name: "Sim Orchestrator",
@@ -117,7 +117,7 @@ const NODES: NodeData[] = [
   },
   {
     id: 6,
-    x: 720,
+    x: 805,
     y: 300,
     bay: "06",
     name: "CFD",
@@ -131,7 +131,7 @@ const NODES: NodeData[] = [
   },
   {
     id: 7,
-    x: 900,
+    x: 985,
     y: 300,
     bay: "07",
     name: "Structural",
@@ -145,7 +145,7 @@ const NODES: NodeData[] = [
   },
   {
     id: 8,
-    x: 810,
+    x: 895,
     y: 420,
     bay: "08",
     name: "Optimization",
@@ -159,7 +159,7 @@ const NODES: NodeData[] = [
   },
   {
     id: 9,
-    x: 810,
+    x: 895,
     y: 540,
     bay: "09",
     name: "Validation",
@@ -173,12 +173,13 @@ const NODES: NodeData[] = [
   },
   {
     id: 10,
-    x: 150,
+    x: 235,
     y: 640,
     bay: "10",
     name: "Materials",
     title: "Materials Agent",
-    status: "design",
+    status: "online",
+    href: "/the-hangar/materials",
     desc: "Recommends materials against requirements, operating environment and constraints, with justification.",
     inp: "Requirements, environment",
     tools: "Materials DB, RAG",
@@ -186,12 +187,13 @@ const NODES: NodeData[] = [
   },
   {
     id: 11,
-    x: 365,
+    x: 450,
     y: 640,
     bay: "11",
     name: "Manufacturing",
     title: "Manufacturing Agent",
-    status: "design",
+    status: "online",
+    href: "/the-hangar/manufacturing",
     desc: "Checks manufacturability against the CAD model and produces a build plan and bill of materials.",
     inp: "CAD model",
     tools: "DFM rule engine, cost models",
@@ -199,12 +201,13 @@ const NODES: NodeData[] = [
   },
   {
     id: 12,
-    x: 580,
+    x: 665,
     y: 640,
     bay: "12",
     name: "Certification",
     title: "Certification Agent",
-    status: "design",
+    status: "online",
+    href: "/the-hangar/certification",
     desc: "Maps the design against applicable regulations and standards and flags compliance gaps early.",
     inp: "Design data, regulations",
     tools: "Regulations DB, RAG, LLM",
@@ -212,12 +215,13 @@ const NODES: NodeData[] = [
   },
   {
     id: 13,
-    x: 795,
+    x: 880,
     y: 640,
     bay: "13",
     name: "Documentation",
     title: "Documentation Agent",
-    status: "design",
+    status: "online",
+    href: "/the-hangar/documentation",
     desc: "Compiles final reports, drawings and summary documentation from every upstream agent's output.",
     inp: "All design data",
     tools: "LLM, template engine",
@@ -225,27 +229,33 @@ const NODES: NodeData[] = [
   },
   {
     id: 14,
-    x: 1010,
-    y: 640,
+    x: 685,
+    y: 390,
     bay: "14",
-    name: "Collaboration",
-    title: "Collaboration Agent",
+    name: "Bernoulli",
+    title: "Bernoulli Agent",
     status: "design",
-    desc: "Keeps the team synced -- tasks, agent updates, comments and notifications, all in one feed.",
-    inp: "Tasks, agent updates",
-    tools: "Task manager API, webhooks",
-    out: "Collaboration feed",
+    href: "/the-hangar/bernoulli",
+    hub: true,
+    r: 44,
+    desc: "Cross-cutting physics-sanity service -- called by every design and analysis bay to check its output against conservation laws, dimensional consistency and aerospace empiricals before it moves downstream.",
+    inp: "Numeric claims from any bay",
+    tools: "Physics rule engine, dimensional analysis, LLM reasoning",
+    out: "Verdict: consistent / flagged / violation",
   },
   {
     id: 15,
-    x: 1100,
-    y: 340,
+    // x/y unused for rendering -- Bay 15 renders as the two KNOWLEDGE_BAR_*
+    // vertical bars flanking the diagram, not a circle node (see the
+    // knowledgeNode-driven <g> pair in the JSX below). Kept here only so
+    // the info panel / preview() / activate() plumbing every other node
+    // already uses keeps working unchanged for Bay 15 too.
+    x: 600,
+    y: 390,
     bay: "15",
     name: "Knowledge",
     title: "Knowledge Agent",
     status: "design",
-    hub: true,
-    r: 44,
     desc: "The memory every other bay reads from and writes to -- past projects, rules, standards and outcomes, always on.",
     inp: "Natural-language queries",
     tools: "Knowledge graph, vector DB, RAG + LLM",
@@ -253,30 +263,82 @@ const NODES: NodeData[] = [
   },
 ];
 
-const HUB_LINES = ["M1100,340 L124,140", "M1100,340 L810,540", "M1100,340 L795,640"];
+// Bay 14 (Bernoulli) sits at the centroid of the bays that call it, roughly
+// equidistant between the Bay 01 row (y=140) and the Bay 10-13 row
+// (y=640) -- a real hub position, not off to one side, so its 10 fan-out
+// lines to every calling bay read as short, clear spokes instead of long
+// diagonals crossing the whole canvas. Its x (685) is NOT the canvas'
+// own center (600) -- it's the horizontal centroid of the shifted
+// sequential-node cluster below, so Bernoulli stays visually centered
+// relative to the bays around it rather than relative to the two
+// Knowledge bars (which are centered on the canvas independently).
+const PHYSICS_HUB_LINES = [
+  "M685,390 L215,140", // Bay 01 Mission
+  "M685,390 L395,140", // Bay 02 Concept
+  "M685,390 L575,140", // Bay 03 Aircraft Design
+  "M685,390 L755,140", // Bay 04 CAD
+  "M685,390 L935,140", // Bay 05 Sim Orchestrator
+  "M685,390 L805,300", // Bay 06 CFD
+  "M685,390 L985,300", // Bay 07 Structural
+  "M685,390 L895,420", // Bay 08 Optimization
+  "M685,390 L895,540", // Bay 09 Validation
+  "M685,390 L665,640", // Bay 12 Certification
+];
+
+// Bay 15 (Knowledge) renders as two vertical bars flanking the diagram --
+// "always-on shared memory" reads better as an ambient rail every bay sits
+// between than as one more hub circle competing with Bernoulli's. Every
+// sequential/downstream node (01-13) gets one faint dotted line to
+// whichever bar is nearer -- left for x < 600 (the canvas' own vertical
+// center -- the bars themselves are fixed and symmetric about it,
+// independent of where the sequential-node cluster sits), right
+// otherwise. Bernoulli (14) is left unconnected to either bar: it already
+// has its own 10-line fan-out.
+const KNOWLEDGE_BAR_LEFT_X = 40;
+const KNOWLEDGE_BAR_WIDTH = 28;
+const KNOWLEDGE_BAR_RIGHT_X = 1200 - KNOWLEDGE_BAR_LEFT_X - KNOWLEDGE_BAR_WIDTH;
+const KNOWLEDGE_BAR_Y = 100;
+const KNOWLEDGE_BAR_HEIGHT = 580;
+const KNOWLEDGE_BAR_LEFT_CENTER_X = KNOWLEDGE_BAR_LEFT_X + KNOWLEDGE_BAR_WIDTH / 2;
+const KNOWLEDGE_BAR_RIGHT_CENTER_X = KNOWLEDGE_BAR_RIGHT_X + KNOWLEDGE_BAR_WIDTH / 2;
+
+const KNOWLEDGE_BAR_LINES = [
+  `M215,140 H${KNOWLEDGE_BAR_LEFT_CENTER_X}`, // Bay 01
+  `M395,140 H${KNOWLEDGE_BAR_LEFT_CENTER_X}`, // Bay 02
+  `M575,140 H${KNOWLEDGE_BAR_LEFT_CENTER_X}`, // Bay 03
+  `M755,140 H${KNOWLEDGE_BAR_RIGHT_CENTER_X}`, // Bay 04
+  `M935,140 H${KNOWLEDGE_BAR_RIGHT_CENTER_X}`, // Bay 05
+  `M805,300 H${KNOWLEDGE_BAR_RIGHT_CENTER_X}`, // Bay 06
+  `M985,300 H${KNOWLEDGE_BAR_RIGHT_CENTER_X}`, // Bay 07
+  `M895,420 H${KNOWLEDGE_BAR_RIGHT_CENTER_X}`, // Bay 08
+  `M895,540 H${KNOWLEDGE_BAR_RIGHT_CENTER_X}`, // Bay 09
+  `M235,640 H${KNOWLEDGE_BAR_LEFT_CENTER_X}`, // Bay 10
+  `M450,640 H${KNOWLEDGE_BAR_LEFT_CENTER_X}`, // Bay 11
+  `M665,640 H${KNOWLEDGE_BAR_RIGHT_CENTER_X}`, // Bay 12
+  `M880,640 H${KNOWLEDGE_BAR_RIGHT_CENTER_X}`, // Bay 13
+];
 
 const LEAD_LINES: { id: string; d: string }[] = [
-  { id: "ln-1-2", d: "M124,140 H236" },
-  { id: "ln-2-3", d: "M304,140 H416" },
-  { id: "ln-3-4", d: "M484,140 H596" },
-  { id: "ln-4-5", d: "M664,140 H776" },
+  { id: "ln-1-2", d: "M249,140 H361" },
+  { id: "ln-2-3", d: "M429,140 H541" },
+  { id: "ln-3-4", d: "M609,140 H721" },
+  { id: "ln-4-5", d: "M789,140 H901" },
   // Bay 06 (CFD) and Bay 07 (Structural) both source primary input directly
   // from Bay 04 (CAD Agent), not from Bay 05 -- rewired from the stale
   // Bay05->06/07 edges. Single shared exit point off Bay 04's bottom edge
-  // (630,174) fanning out at y=220, mirroring ln-9-10..ln-9-14's own
+  // (755,174) fanning out at y=220, mirroring ln-9-10..ln-9-14's own
   // single-origin fan-out pattern below, rather than reusing Bay05's old
   // two-point diagonal-exit shape (which existed because Bay05's two
   // targets straddled it symmetrically -- Bay04's targets don't).
-  { id: "ln-4-6", d: "M630,174 V220 H720 V266" },
-  { id: "ln-4-7", d: "M630,174 V220 H900 V266" },
-  { id: "ln-6-8", d: "M720,334 V376 H810 V386" },
-  { id: "ln-7-8", d: "M900,334 V376 H810 V386" },
-  { id: "ln-8-9", d: "M810,454 V506" },
-  { id: "ln-9-10", d: "M810,574 V596 H150 V606" },
-  { id: "ln-9-11", d: "M810,574 V596 H365 V606" },
-  { id: "ln-9-12", d: "M810,574 V596 H580 V606" },
-  { id: "ln-9-13", d: "M810,574 V596 H795 V606" },
-  { id: "ln-9-14", d: "M810,574 V596 H1010 V606" },
+  { id: "ln-4-6", d: "M755,174 V220 H805 V266" },
+  { id: "ln-4-7", d: "M755,174 V220 H985 V266" },
+  { id: "ln-6-8", d: "M805,334 V376 H895 V386" },
+  { id: "ln-7-8", d: "M985,334 V376 H895 V386" },
+  { id: "ln-8-9", d: "M895,454 V506" },
+  { id: "ln-9-10", d: "M895,574 V596 H235 V606" },
+  { id: "ln-9-11", d: "M895,574 V596 H450 V606" },
+  { id: "ln-9-12", d: "M895,574 V596 H665 V606" },
+  { id: "ln-9-13", d: "M895,574 V596 H880 V606" },
 ];
 
 interface Stage {
@@ -315,9 +377,9 @@ const STAGES: Stage[] = [
     text: "BAY 09 -- Validation Agent -- checking result against mission spec...",
   },
   {
-    lines: ["ln-9-10", "ln-9-11", "ln-9-12", "ln-9-13", "ln-9-14"],
-    nodes: [10, 11, 12, 13, 14],
-    text: "BAY 10-14 -- Materials, Manufacturing, Certification, Documentation, Collaboration...",
+    lines: ["ln-9-10", "ln-9-11", "ln-9-12", "ln-9-13"],
+    nodes: [10, 11, 12, 13],
+    text: "BAY 10-13 -- Materials, Manufacturing, Certification, Documentation...",
   },
   {
     lines: [],
@@ -382,7 +444,12 @@ function TheHangarWelcome() {
           | "/the-hangar/cfd-analysis"
           | "/the-hangar/structural"
           | "/the-hangar/optimization"
-          | "/the-hangar/validation",
+          | "/the-hangar/validation"
+          | "/the-hangar/materials"
+          | "/the-hangar/manufacturing"
+          | "/the-hangar/certification"
+          | "/the-hangar/documentation"
+          | "/the-hangar/bernoulli",
       });
     } else {
       setSelected(n);
@@ -445,6 +512,19 @@ function TheHangarWelcome() {
     }
     return cls;
   }
+
+  // Bay 15 (Knowledge) has no single circle to style -- it's the two
+  // KNOWLEDGE_BAR_* rects below -- so its nodeStatus[15] drives this
+  // shared class instead of nodeCircleClassName.
+  function barClassName(): string {
+    let cls = "hgr-w-bar";
+    const s = nodeStatus[15];
+    if (s === "active") cls += " hgr-w-bar-active";
+    else if (s === "seen") cls += " hgr-w-bar-seen";
+    return cls;
+  }
+
+  const knowledgeNode = NODES.find((n) => n.id === 15)!;
 
   return (
     <div className="hgr-w">
@@ -512,8 +592,11 @@ function TheHangarWelcome() {
                 role="img"
                 aria-label="The Hangar agent pipeline diagram"
               >
-                {HUB_LINES.map((d, i) => (
-                  <path key={i} className="hgr-w-hub-line" d={d} />
+                {KNOWLEDGE_BAR_LINES.map((d, i) => (
+                  <path key={`kb-${i}`} className="hgr-w-bar-line" d={d} />
+                ))}
+                {PHYSICS_HUB_LINES.map((d, i) => (
+                  <path key={`phy-${i}`} className="hgr-w-hub-line" d={d} />
                 ))}
                 {LEAD_LINES.map((line) => (
                   <path
@@ -523,7 +606,7 @@ function TheHangarWelcome() {
                   />
                 ))}
                 <g>
-                  {NODES.map((n) => {
+                  {NODES.filter((n) => n.id !== 15).map((n) => {
                     const r = n.r || 30;
                     return (
                       <g
@@ -543,32 +626,136 @@ function TheHangarWelcome() {
                         }}
                       >
                         <circle cx={n.x} cy={n.y} r={r} className={nodeCircleClassName(n)} />
-                        <text x={n.x} y={n.y - (n.hub ? 2 : 1)} className="hgr-w-node-num">
-                          {"B" + n.bay}
-                        </text>
-                        {n.status === "online" && (
-                          <rect
-                            x={n.x - 25}
-                            y={n.y + 4}
-                            width={50}
-                            height={17}
-                            rx={8.5}
-                            className="hgr-w-live-pill"
-                          />
-                        )}
+                        <rect
+                          x={n.x - 25}
+                          y={n.y - 8}
+                          width={50}
+                          height={17}
+                          rx={8.5}
+                          className={n.status === "online" ? "hgr-w-live-pill" : "hgr-w-wip-pill"}
+                        />
                         <text
                           x={n.x}
-                          y={n.y + 14}
+                          y={n.y + 2}
                           className={`hgr-w-status-badge ${n.status === "online" ? "hgr-w-online-badge" : "hgr-w-design-badge"}`}
                         >
-                          {n.status === "online" ? "LIVE" + (n.href ? " ↗" : "") : ""}
+                          {n.status === "online" ? "LIVE" + (n.href ? " ↗" : "") : "WIP"}
                         </text>
-                        <text x={n.x} y={n.y + r + 20} className="hgr-w-node-label">
+                        <text
+                          x={n.x}
+                          // Bays 10-13 sit on the bottom row, where the
+                          // ln-9-10..13 fan-out lines route horizontally
+                          // right above them (y=596) -- a label placed
+                          // above the node there sits on top of that line,
+                          // so this row keeps its label below instead.
+                          // Every other row has clear space above.
+                          y={[10, 11, 12, 13].includes(n.id) ? n.y + r + 20 : n.y - r - 14}
+                          className="hgr-w-node-label"
+                        >
                           {n.name}
                         </text>
                       </g>
                     );
                   })}
+
+                  {/* Bay 15 (Knowledge) -- two vertical bars flanking the
+                      diagram instead of a circle, so every bay reads as
+                      sitting "between" the shared memory layer rather than
+                      pointing at one more hub off to the side. */}
+                  <g
+                    className="hgr-w-bar-g"
+                    tabIndex={0}
+                    role="button"
+                    aria-label={knowledgeNode.title}
+                    onMouseEnter={() => preview(knowledgeNode)}
+                    onFocus={() => preview(knowledgeNode)}
+                    onClick={() => activate(knowledgeNode)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        activate(knowledgeNode);
+                      }
+                    }}
+                  >
+                    <rect
+                      x={KNOWLEDGE_BAR_LEFT_X}
+                      y={KNOWLEDGE_BAR_Y}
+                      width={KNOWLEDGE_BAR_WIDTH}
+                      height={KNOWLEDGE_BAR_HEIGHT}
+                      rx={14}
+                      className={barClassName()}
+                    />
+                    <text
+                      x={KNOWLEDGE_BAR_LEFT_CENTER_X}
+                      y={KNOWLEDGE_BAR_Y + KNOWLEDGE_BAR_HEIGHT / 2}
+                      className="hgr-w-bar-label"
+                      transform={`rotate(-90 ${KNOWLEDGE_BAR_LEFT_CENTER_X} ${KNOWLEDGE_BAR_Y + KNOWLEDGE_BAR_HEIGHT / 2})`}
+                    >
+                      KNOWLEDGE AGENT
+                    </text>
+                    <rect
+                      x={KNOWLEDGE_BAR_LEFT_CENTER_X - 12}
+                      y={KNOWLEDGE_BAR_Y + 12}
+                      width={24}
+                      height={16}
+                      rx={8}
+                      className="hgr-w-wip-pill"
+                    />
+                    <text
+                      x={KNOWLEDGE_BAR_LEFT_CENTER_X}
+                      y={KNOWLEDGE_BAR_Y + 24}
+                      className="hgr-w-status-badge hgr-w-design-badge"
+                    >
+                      WIP
+                    </text>
+                  </g>
+                  <g
+                    className="hgr-w-bar-g"
+                    tabIndex={0}
+                    role="button"
+                    aria-label={knowledgeNode.title}
+                    onMouseEnter={() => preview(knowledgeNode)}
+                    onFocus={() => preview(knowledgeNode)}
+                    onClick={() => activate(knowledgeNode)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        activate(knowledgeNode);
+                      }
+                    }}
+                  >
+                    <rect
+                      x={KNOWLEDGE_BAR_RIGHT_X}
+                      y={KNOWLEDGE_BAR_Y}
+                      width={KNOWLEDGE_BAR_WIDTH}
+                      height={KNOWLEDGE_BAR_HEIGHT}
+                      rx={14}
+                      className={barClassName()}
+                    />
+                    <text
+                      x={KNOWLEDGE_BAR_RIGHT_CENTER_X}
+                      y={KNOWLEDGE_BAR_Y + KNOWLEDGE_BAR_HEIGHT / 2}
+                      className="hgr-w-bar-label"
+                      transform={`rotate(-90 ${KNOWLEDGE_BAR_RIGHT_CENTER_X} ${KNOWLEDGE_BAR_Y + KNOWLEDGE_BAR_HEIGHT / 2})`}
+                    >
+                      KNOWLEDGE AGENT
+                    </text>
+                    <rect
+                      x={KNOWLEDGE_BAR_RIGHT_CENTER_X - 12}
+                      y={KNOWLEDGE_BAR_Y + 12}
+                      width={24}
+                      height={16}
+                      rx={8}
+                      className="hgr-w-wip-pill"
+                    />
+                    <text
+                      x={KNOWLEDGE_BAR_RIGHT_CENTER_X}
+                      y={KNOWLEDGE_BAR_Y + 24}
+                      className="hgr-w-status-badge hgr-w-design-badge"
+                    >
+                      WIP
+                    </text>
+                  </g>
                 </g>
               </svg>
               <div className="hgr-w-live-line hgr-w-mono">
@@ -622,6 +809,11 @@ function TheHangarWelcome() {
                           | "/the-hangar/structural"
                           | "/the-hangar/optimization"
                           | "/the-hangar/validation"
+                          | "/the-hangar/materials"
+                          | "/the-hangar/manufacturing"
+                          | "/the-hangar/certification"
+                          | "/the-hangar/documentation"
+                          | "/the-hangar/bernoulli"
                       }
                       className="hgr-w-btn hgr-w-btn-amber"
                       style={{ justifyContent: "center", marginTop: 18, textDecoration: "none" }}
@@ -729,22 +921,35 @@ const HGR_WELCOME_CSS = `
 .hgr-w-node-circle.hgr-w-seen{ fill:#16324E; stroke:var(--hgr-w-blue-bright); }
 .hgr-w-node-g{ outline:none; }
 .hgr-w-node-g:focus .hgr-w-node-circle{ stroke:var(--hgr-w-amber-bright); stroke-width:2.5; }
-.hgr-w-node-num{ font-family:'IBM Plex Mono',monospace; fill:var(--hgr-w-paper-dim); font-size:11px; text-anchor:middle; pointer-events:none; }
-.hgr-w-node-circle.hgr-w-active + .hgr-w-node-num, .hgr-w-node-circle.hgr-w-online + .hgr-w-node-num, .hgr-w-node-circle.hgr-w-seen + .hgr-w-node-num{ fill:var(--hgr-w-paper); }
-.hgr-w-node-label{ font-family:'IBM Plex Sans',sans-serif; fill:var(--hgr-w-paper-dim); font-size:12.5px; text-anchor:middle; pointer-events:none; }
+.hgr-w-node-label{ font-family:'IBM Plex Sans',sans-serif; font-weight:600; fill:var(--hgr-w-paper-dim); font-size:14.5px; text-anchor:middle; pointer-events:none; }
 .hgr-w-node-g:hover .hgr-w-node-circle:not(.hgr-w-hub){ stroke:var(--hgr-w-blue-bright); }
 .hgr-w-node-g:hover .hgr-w-node-label{ fill:var(--hgr-w-paper); }
 
-.hgr-w-lead-line{ fill:none; stroke:var(--hgr-w-idle-line); stroke-width:1.6; transition:stroke .4s, stroke-width .4s; }
+.hgr-w-lead-line{ fill:none; stroke:rgba(111,180,224,0.62); stroke-width:1.8; transition:stroke .4s, stroke-width .4s; }
 .hgr-w-lead-line.drawn{ stroke:var(--hgr-w-blue-bright); stroke-width:2.2; }
 .hgr-w-hub-line{ fill:none; stroke:var(--hgr-w-blue-line); stroke-width:1; stroke-dasharray:2 5; opacity:.5; }
+.hgr-w-bar-line{ fill:none; stroke:var(--hgr-w-blue-line); stroke-width:1; stroke-dasharray:1 6; opacity:.3; }
 
-.hgr-w-status-badge{ font-family:'IBM Plex Mono',monospace; font-size:9.5px; text-anchor:middle; letter-spacing:.05em; }
-.hgr-w-online-badge{ fill:var(--hgr-w-green-bright); font-size:10.5px; font-weight:700; }
-.hgr-w-design-badge{ fill:var(--hgr-w-paper-dim); opacity:.7; }
+/* -- Bay 15 (Knowledge) side bars -- */
+.hgr-w-bar-g{ cursor:pointer; }
+.hgr-w-bar{ fill:#0C2338; stroke:var(--hgr-w-blue-line); stroke-width:1.5; stroke-dasharray:3 3; transition:stroke .3s, filter .3s; }
+.hgr-w-bar-g:hover .hgr-w-bar{ stroke:var(--hgr-w-blue-bright); }
+.hgr-w-bar-g:focus .hgr-w-bar{ stroke:var(--hgr-w-amber-bright); stroke-width:2.5; }
+.hgr-w-bar.hgr-w-bar-active{ stroke:var(--hgr-w-amber); filter:drop-shadow(0 0 10px rgba(232,163,61,0.65)); }
+.hgr-w-bar.hgr-w-bar-seen{ stroke:var(--hgr-w-blue-bright); }
+.hgr-w-bar-label{ font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:12.5px; letter-spacing:.12em; fill:var(--hgr-w-paper-dim); text-anchor:middle; pointer-events:none; transition:fill .3s; }
+.hgr-w-bar-g:hover .hgr-w-bar-label{ fill:var(--hgr-w-paper); }
+
+.hgr-w-status-badge{ font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:10.5px; text-anchor:middle; letter-spacing:.05em; }
+.hgr-w-online-badge{ fill:var(--hgr-w-green-bright); font-size:11.5px; font-weight:700; }
+.hgr-w-design-badge{ fill:var(--hgr-w-amber-bright); font-size:11.5px; font-weight:700; }
 .hgr-w-live-pill{
   fill:rgba(18,59,46,0.92); stroke:var(--hgr-w-green); stroke-width:1.2;
   filter:drop-shadow(0 0 6px rgba(95,191,143,0.75)); pointer-events:none;
+}
+.hgr-w-wip-pill{
+  fill:rgba(59,40,10,0.92); stroke:var(--hgr-w-amber); stroke-width:1.2;
+  filter:drop-shadow(0 0 6px rgba(232,163,61,0.75)); pointer-events:none;
 }
 
 .hgr-w-live-line{

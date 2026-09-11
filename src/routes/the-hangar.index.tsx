@@ -237,7 +237,11 @@ function TheHangarLanding() {
             <Bay num="BAY 11" title="Manufacturing Agent" desc="Checks manufacturability and produces a build plan and BOM." />
             <Bay num="BAY 12" title="Certification Agent" desc="Maps the design against regulations and standards, flags gaps." />
             <Bay num="BAY 13" title="Documentation Agent" desc="Compiles final reports, drawings, and summary documentation." />
-            <Bay num="BAY 14" title="Collaboration Agent" desc="Keeps teams synced on tasks, updates, and project comments." />
+          </div>
+
+          <div className="hgr-bay-group-label">Cross-cutting — physics validation service</div>
+          <div className="hgr-bays" style={{ gridTemplateColumns: "1fr" }}>
+            <Bay num="BAY 14" title="Bernoulli Agent" desc="Called by every design and analysis bay to sanity-check its output against conservation laws, dimensional consistency, and aerospace empiricals before it moves downstream." />
           </div>
 
           <div className="hgr-bay-group-label">Knowledge layer</div>

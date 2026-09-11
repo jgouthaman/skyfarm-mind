@@ -730,6 +730,7 @@ function TheHangarConcept() {
                     {activeStage === "done" && flow.stage4.result && (
                       <ConceptDashboard
                         result={flow.stage4.result}
+                        sourceMissionId={selectedSpec?.missionId ?? null}
                         onStartNew={resetFlow}
                         onEditAndRegenerate={editAndRegenerate}
                         finalizeState={finalizeState}
@@ -966,12 +967,14 @@ function RankedConceptsSection({ rankedConcepts }: { rankedConcepts: RankedConce
 
 function ConceptDashboard({
   result,
+  sourceMissionId,
   onStartNew,
   onEditAndRegenerate,
   finalizeState,
   onSaveAsFinal,
 }: {
   result: Stage4Result;
+  sourceMissionId: string | null;
   onStartNew: () => void;
   onEditAndRegenerate: () => void;
   finalizeState: { status: "idle" | "saving" | "saved" | "error"; errorMessage: string | null };
@@ -991,6 +994,16 @@ function ConceptDashboard({
             {Math.round(result.confidenceScore * 100)}%
           </div>
           <div className="hgr-c-dash-confidence-label">Confidence</div>
+          {sourceMissionId && (
+            <Link
+              to="/the-hangar/bernoulli"
+              search={{ source: "concept", missionId: sourceMissionId, sourceId: "" }}
+              className="hgr-c-dash-bernoulli-link"
+              title="Sanity-check this concept's source mission spec against conservation laws and aerospace empiricals."
+            >
+              Ask Bernoulli →
+            </Link>
+          )}
         </div>
       </div>
 
@@ -1059,6 +1072,16 @@ function PastConceptDetail({ concept, onBack }: { concept: ConceptListEntry; onB
               {Math.round(concept.confidenceScore * 100)}%
             </div>
             <div className="hgr-c-dash-confidence-label">Confidence</div>
+            {hasSpec && (
+              <Link
+                to="/the-hangar/bernoulli"
+                search={{ source: "concept", missionId: concept.sourceMissionId, sourceId: "" }}
+                className="hgr-c-dash-bernoulli-link"
+                title="Sanity-check this concept's source mission spec against conservation laws and aerospace empiricals."
+              >
+                Ask Bernoulli →
+              </Link>
+            )}
           </div>
         )}
       </div>
@@ -1243,6 +1266,12 @@ const HGR_CONCEPT_CSS = `
 .hgr-c-dash-confidence{ text-align:center; flex-shrink:0; }
 .hgr-c-dash-confidence-num{ font-family:'Space Grotesk',sans-serif; font-size:32px; font-weight:700; color:var(--hgr-c-amber-bright); line-height:1; }
 .hgr-c-dash-confidence-label{ font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--hgr-c-paper-dim); }
+.hgr-c-dash-bernoulli-link{
+  display:inline-block; margin-top:10px; font-family:'IBM Plex Mono',monospace; font-size:11px;
+  color:var(--hgr-c-blue-bright); text-decoration:none; border:1px solid var(--hgr-c-hairline);
+  border-radius:2px; padding:5px 10px; white-space:nowrap;
+}
+.hgr-c-dash-bernoulli-link:hover{ border-color:var(--hgr-c-blue-bright); color:var(--hgr-c-paper); }
 .hgr-c-dash-section{ padding:24px 28px; border-bottom:1px solid var(--hgr-c-hairline); }
 .hgr-c-dash-section:last-of-type{ border-bottom:none; }
 .hgr-c-dash-section h4{ font-family:'Space Grotesk',sans-serif; font-size:14.5px; font-weight:600; margin-bottom:16px; }

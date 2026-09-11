@@ -16,6 +16,7 @@ import { MaterialsAgentError, InvalidMaterialsInputError } from "./materialsAgen
 import { ManufacturingAgentError, InvalidManufacturingInputError } from "./manufacturingAgentPipeline.ts";
 import { CertificationAgentError, InvalidCertificationInputError } from "./certificationAgentPipeline.ts";
 import { DocumentationAgentError, InvalidDocumentationInputError } from "./documentationAgentPipeline.ts";
+import { BernoulliAgentError, InvalidBernoulliInputError } from "./bernoulliAgentPipeline.ts";
 
 // Shared auth + response helpers for the 4 Mission Agent stage routes
 // (api.hangar.process-mission.*.ts) -- extracted so each route file stays a
@@ -199,6 +200,15 @@ export function errorResponse(err: unknown): Response {
   if (err instanceof DocumentationAgentError) {
     return jsonResponse(
       { error: err.message, documentation_id: err.documentationId, stage: err.stage },
+      500,
+    );
+  }
+  if (err instanceof InvalidBernoulliInputError) {
+    return jsonResponse({ error: err.message, bernoulli_review_id: null }, 400);
+  }
+  if (err instanceof BernoulliAgentError) {
+    return jsonResponse(
+      { error: err.message, bernoulli_review_id: err.bernoulliReviewId, stage: err.stage },
       500,
     );
   }
