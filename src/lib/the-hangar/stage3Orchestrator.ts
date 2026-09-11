@@ -79,9 +79,7 @@ export const runOutputGeneration = createServerFn({ method: "POST" })
     );
 
     // Step 4 — summary. Only reachable with 1-3's finished results in hand.
-    const summaryResult = await generateMissionSummary({
-      data: { missionSpecs, constraints, kpis },
-    });
+    const summaryResult = await generateMissionSummary({ missionSpecs, constraints, kpis });
 
     // Step 5 — confidence score, last, deterministic.
     const confidenceScore = computeConfidenceScore({
