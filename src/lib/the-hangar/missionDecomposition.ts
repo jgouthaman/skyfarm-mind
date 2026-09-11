@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { callLlmGateway, stripJsonFences } from "./llmGateway.ts";
+import { callLlmGateway, stripJsonFences, type LlmUsage } from "./llmGateway.ts";
 import type { ParsedMissionInput } from "./types/hangar-mission";
 
 // Stage 2.2, Step 1 (MissionAgent.md Section 4.2.1) — Mission Decomposition.
@@ -20,6 +20,7 @@ export interface MissionDecompositionInput {
 export interface MissionDecompositionResult {
   decomposedElements: string[];
   mock: boolean;
+  usage: LlmUsage | null;
 }
 
 export const decomposeMission = createServerFn({ method: "POST" })
@@ -31,15 +32,17 @@ Extracted entities: ${JSON.stringify(data.extractedEntities, null, 2)}
 Return:
 { "decomposed_elements": ["string", ...] }`;
 
-    const { content } = await callLlmGateway(SYSTEM, userContent, { jsonMode: true });
-    if (!content) return { ...mockDecomposition(data), mock: true };
+    const { content, usage } = await callLlmGateway(SYSTEM, userContent, { jsonMode: true });
+    if (!content) return { ...mockDecomposition(data), mock: true, usage: null };
 
     const parsed = parseDecompositionResponse(content);
-    if (!parsed) return { ...mockDecomposition(data), mock: true };
-    return { ...parsed, mock: false };
+    if (!parsed) return { ...mockDecomposition(data), mock: true, usage: null };
+    return { ...parsed, mock: false, usage };
   });
 
-function parseDecompositionResponse(raw: string): Omit<MissionDecompositionResult, "mock"> | null {
+function parseDecompositionResponse(
+  raw: string,
+): Omit<MissionDecompositionResult, "mock" | "usage"> | null {
   try {
     const obj = JSON.parse(stripJsonFences(raw));
     if (!Array.isArray(obj.decomposed_elements)) return null;
@@ -55,7 +58,7 @@ function parseDecompositionResponse(raw: string): Omit<MissionDecompositionResul
 
 function mockDecomposition(
   data: MissionDecompositionInput,
-): Omit<MissionDecompositionResult, "mock"> {
+): Omit<MissionDecompositionResult, "mock" | "usage"> {
   return {
     decomposedElements: [`Mock decomposition of intent: "${data.detectedIntent.slice(0, 80)}"`],
   };

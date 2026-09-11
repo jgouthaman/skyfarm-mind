@@ -18,10 +18,13 @@ import type { PerformanceThresholds } from "./simDesignRules.ts";
 // On this app's real Vercel deployment, generateSimDesign's compiled
 // createServerFn handler consistently threw "Server function info not
 // found for <hash>" — its manifest entry never resolved at runtime — while
-// generateCADDesign, generateAircraftDesignGeometry, generateConceptIdeas,
-// and Mission Agent's own generateMissionSummary (also nested inside
-// another createServerFn) all confirmed working on the same real
-// deployment. Exhaustive source-level comparison (createServerFn config,
+// generateCADDesign, generateAircraftDesignGeometry, and generateConceptIdeas
+// all confirmed working on the same real deployment. (Mission Agent's own
+// generateMissionSummary — also nested inside another createServerFn —
+// was confirmed working here too at the time, but later hit this exact
+// same symptom and got the same plain-function treatment; see its own
+// header comment in missionSummary.ts.) Exhaustive source-level comparison
+// (createServerFn config,
 // validator pattern, import style, route-call shape, file naming/location,
 // the specific commits that touched Bay 05's pipeline) found no difference
 // from Bay 04's working equivalent, and two different local build

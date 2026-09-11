@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { callLlmGateway, stripJsonFences } from "./llmGateway.ts";
+import { callLlmGateway, stripJsonFences, type LlmUsage } from "./llmGateway.ts";
 
 // Stage 2.1, Step 2 (MissionAgent.md Section 4.1.1) — combined intent
 // understanding + entity extraction, one LLM call covering both, not two
@@ -28,6 +28,7 @@ export interface IntentExtractionResult {
   enduranceHint: string | null;
   constraintHints: string[];
   mock: boolean;
+  usage: LlmUsage | null;
 }
 
 export const extractIntentAndEntities = createServerFn({ method: "POST" })
@@ -40,15 +41,17 @@ Grounding context (from imported project / selected regulations / market data, i
 Return:
 { "intent": "string", "payload_hint": "string | null", "range_hint": "string | null", "endurance_hint": "string | null", "constraint_hints": ["string"] }`;
 
-    const { content } = await callLlmGateway(SYSTEM, userContent, { jsonMode: true });
-    if (!content) return { ...mockExtraction(data), mock: true };
+    const { content, usage } = await callLlmGateway(SYSTEM, userContent, { jsonMode: true });
+    if (!content) return { ...mockExtraction(data), mock: true, usage: null };
 
     const parsed = parseExtractionResponse(content);
-    if (!parsed) return { ...mockExtraction(data), mock: true };
-    return { ...parsed, mock: false };
+    if (!parsed) return { ...mockExtraction(data), mock: true, usage: null };
+    return { ...parsed, mock: false, usage };
   });
 
-function parseExtractionResponse(raw: string): Omit<IntentExtractionResult, "mock"> | null {
+function parseExtractionResponse(
+  raw: string,
+): Omit<IntentExtractionResult, "mock" | "usage"> | null {
   try {
     const obj = JSON.parse(stripJsonFences(raw));
     if (typeof obj.intent !== "string") return null;
@@ -66,7 +69,9 @@ function parseExtractionResponse(raw: string): Omit<IntentExtractionResult, "moc
   }
 }
 
-function mockExtraction(data: IntentExtractionInput): Omit<IntentExtractionResult, "mock"> {
+function mockExtraction(
+  data: IntentExtractionInput,
+): Omit<IntentExtractionResult, "mock" | "usage"> {
   return {
     intent: `Mock intent derived from: "${data.rawTextCombined.slice(0, 80)}"`,
     payloadHint: null,

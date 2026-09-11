@@ -9,6 +9,8 @@ import type {
 } from "@/lib/the-hangar/missionAgentPipeline";
 import type { Stage3Output } from "@/lib/the-hangar/stage3Orchestrator";
 import type { FinalMissionResponse } from "@/lib/the-hangar/types/mission-pipeline-api";
+import { DOMAIN_RULES } from "@/lib/the-hangar/domainRules";
+import type { SourceType } from "@/lib/the-hangar/types/hangar-mission";
 
 // ─────────────────────────────────────────────────────────────────────────
 // The Hangar — Bay 01 (Mission Agent) detail page. Faithful port of
@@ -26,107 +28,6 @@ import type { FinalMissionResponse } from "@/lib/the-hangar/types/mission-pipeli
 export const Route = createFileRoute("/the-hangar/mission")({
   component: TheHangarMission,
 });
-
-interface StageItem {
-  label: string;
-  desc: string;
-}
-
-interface Stage {
-  num: string;
-  title: string;
-  items: StageItem[];
-}
-
-const STAGES: Stage[] = [
-  {
-    num: "01 · INPUT PROCESSING",
-    title: "Understand the brief",
-    items: [
-      { label: "Intent understanding", desc: "LLM parses free-form input" },
-      { label: "Entity extraction", desc: "Mission, constraints, KPIs" },
-      { label: "Context retrieval", desc: "RAG against Knowledge Base" },
-      { label: "Validation & normalization", desc: "Rules engine" },
-    ],
-  },
-  {
-    num: "02 · REASONING & PLANNING",
-    title: "Decompose the mission",
-    items: [
-      { label: "Mission decomposition", desc: "LLM + prompt templates" },
-      { label: "Constraint identification", desc: "Domain rules + LLM" },
-      { label: "KPI derivation", desc: "Performance, cost, safety" },
-      { label: "Trade-off prioritization", desc: "Heuristic / multi-criteria" },
-    ],
-  },
-  {
-    num: "03 · OUTPUT GENERATION",
-    title: "Structure the spec",
-    items: [
-      { label: "Mission specification", desc: "Structured JSON" },
-      { label: "Constraints list", desc: "Structured" },
-      { label: "KPIs & targets", desc: "Structured" },
-      { label: "Mission summary", desc: "Natural language" },
-    ],
-  },
-  {
-    num: "04 · OUTPUT INTERFACE",
-    title: "Hand off downstream",
-    items: [
-      { label: "Structured data API", desc: "JSON" },
-      { label: "Dashboard view", desc: "Mission overview UI" },
-      { label: "Export", desc: "PDF / DOCX / Excel" },
-      { label: "Event publish", desc: "To shared event bus" },
-    ],
-  },
-];
-
-interface StageTool {
-  tool: string;
-  purpose: string;
-}
-
-// What each stage genuinely runs today — not an aspirational architecture
-// list. Claude Sonnet 5 is the real model (see llmGateway.ts); the rest are
-// deterministic, no LLM involved. Export/Event Publish are real stubs
-// (exportAndEventStubs.ts), not placeholders for something already live.
-const STAGE_TOOLS: Record<StageKey, StageTool[]> = {
-  input_processing: [
-    { tool: "Claude Sonnet 5 (Anthropic)", purpose: "Intent understanding & entity extraction" },
-    { tool: "Rules Engine", purpose: "Validation & range-checking of extracted values" },
-  ],
-  reasoning_planning: [
-    { tool: "Claude Sonnet 5 (Anthropic)", purpose: "Mission decomposition" },
-    {
-      tool: "Domain Rules Engine",
-      purpose: "Gate-tier constraint identification (regulatory/safety)",
-    },
-    { tool: "Claude Sonnet 5 (Anthropic)", purpose: "Constraint & KPI derivation" },
-    { tool: "Trade-off Prioritization", purpose: "Deterministic ranking of constraints & KPIs" },
-  ],
-  output_generation: [
-    { tool: "Spec Assembly", purpose: "Deterministic mission spec, constraint & KPI finalization" },
-    { tool: "Claude Sonnet 5 (Anthropic)", purpose: "Mission summary generation" },
-    { tool: "Confidence Score", purpose: "Deterministic source/field-completeness formula" },
-  ],
-  output_interface: [
-    { tool: "Supabase (Postgres)", purpose: "Persist the mission spec" },
-    { tool: "Export (stub)", purpose: "PDF / DOCX / Excel — not yet built" },
-    {
-      tool: "Event Publish (stub)",
-      purpose: "Notify downstream bay — Concept Agent not yet built",
-    },
-  ],
-};
-
-const READS_WRITES = [
-  "Mission DB — write",
-  "Projects DB — read/write",
-  "Knowledge Base — read",
-  "Concept DB — read",
-  "Regulations DB — read",
-  "Audit / Logs DB — write",
-];
 
 // ── Live intake form + Dashboard View (Section 13.1) ──
 
@@ -174,6 +75,83 @@ function toMissionResult(r: FinalMissionResponse): MissionResult {
     confidenceScore: r.confidence_score,
     validationFlags: r.validation_flags,
   };
+}
+
+// Beside the Spec ID on both the live dashboard and the past-mission view —
+// date + time (not just date, unlike the "Your missions" row list) since
+// this is the one spot answering "when exactly was this spec generated."
+// Locale-formatted (viewer's own timezone), matching the row list's existing
+// toLocaleDateString() convention rather than a fixed UTC format.
+function formatGeneratedAt(iso: string): string {
+  return new Date(iso).toLocaleString(undefined, {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
+}
+
+// Per-run LLM usage/timing, for the telemetry bar at the top of the live
+// spec dashboard — meant for optimization, not user-facing status, so it's
+// only ever computed for a mission that was actually run THIS session
+// (computeTelemetry below returns null otherwise): a resumed/past mission
+// has no real Stage1-3 results to total, only what MissionsListPanel
+// already knew, same limitation generatedAt's resume path already accepted.
+interface MissionTelemetry {
+  requests: number;
+  inputTokens: number;
+  outputTokens: number;
+  durationMs: number;
+}
+
+// Sums each stage's own request count/token usage/processing time (already
+// measured server-side per stage — see missionAgentPipeline.ts's `start`/
+// `Date.now() - start` pairs) rather than a client-side wall-clock timer:
+// the gated flow lets the user pause between stages to read findings before
+// clicking "Proceed," and that dwell time is the user thinking, not the
+// pipeline working — counting it would make "time taken" useless for
+// judging what to actually optimize.
+function computeTelemetry(flow: MissionFlowState): MissionTelemetry | null {
+  const s1 = flow.stage1.result;
+  const s2 = flow.stage2.result;
+  const s3 = flow.stage3.result;
+  if (!s1 || !s2 || !s3) return null;
+  const s1Usage = s1.extraction.usage;
+  const s3Usage = s3.usage;
+  return {
+    requests: (s1Usage ? 1 : 0) + s2.requestCount + (s3Usage ? 1 : 0),
+    inputTokens: (s1Usage?.inputTokens ?? 0) + s2.usage.inputTokens + (s3Usage?.inputTokens ?? 0),
+    outputTokens:
+      (s1Usage?.outputTokens ?? 0) + s2.usage.outputTokens + (s3Usage?.outputTokens ?? 0),
+    durationMs: s1.durationMs + s2.durationMs + s3.durationMs,
+  };
+}
+
+function formatDuration(ms: number): string {
+  if (ms < 1000) return `${ms}ms`;
+  return `${(ms / 1000).toFixed(1)}s`;
+}
+
+function TelemetryBar({ telemetry }: { telemetry: MissionTelemetry | null }) {
+  if (!telemetry) return null;
+  return (
+    <div className="hgr-m-telemetry" title="LLM usage for this run — not available for resumed/past missions">
+      <div className="hgr-m-telemetry-item">
+        <span className="hgr-m-telemetry-num">{telemetry.requests}</span>
+        <span className="hgr-m-telemetry-label">Requests</span>
+      </div>
+      <div className="hgr-m-telemetry-item">
+        <span className="hgr-m-telemetry-num">{telemetry.inputTokens.toLocaleString()}</span>
+        <span className="hgr-m-telemetry-label">Input tokens</span>
+      </div>
+      <div className="hgr-m-telemetry-item">
+        <span className="hgr-m-telemetry-num">{telemetry.outputTokens.toLocaleString()}</span>
+        <span className="hgr-m-telemetry-label">Output tokens</span>
+      </div>
+      <div className="hgr-m-telemetry-item">
+        <span className="hgr-m-telemetry-num">{formatDuration(telemetry.durationMs)}</span>
+        <span className="hgr-m-telemetry-label">Time taken</span>
+      </div>
+    </div>
+  );
 }
 
 // TorqWings' missions are all India-based (Tamil Nadu, DGCA, etc.) — any
@@ -301,14 +279,23 @@ function getMissingCoreFields(validationFlags: string[]): CoreField[] {
 const CONSTRAINT_GROUP_ORDER = [
   "Domain Rules",
   "Regulatory",
-  "LLM-Inferred",
+  "TorqWings AI",
   "From Your Brief",
 ] as const;
 
+// Was regex-on-text before (`/^DOM-/`, `/FAR|DGCA|regulation/i`) — broke
+// silently for every regulation-sourced constraint, since domainRules.ts
+// tags those with the bare rule ID ("REG-001"), which contains none of
+// "FAR"/"DGCA"/"regulation" as literal text, so they all fell through to
+// "From Your Brief" instead of "Regulatory". Fixed by checking each rule's
+// actual `source` field (via RULE_BY_ID, the same data domainRules.ts
+// itself defines) instead of re-guessing a rule's category from how its ID
+// happens to be spelled — can't drift out of sync with domainRules.ts by
+// construction, the way the old regex could (and did).
 function categorizeConstraint(sources: string[]): (typeof CONSTRAINT_GROUP_ORDER)[number] {
-  if (sources.some((s) => /^DOM-/.test(s))) return "Domain Rules";
-  if (sources.some((s) => /FAR|DGCA|regulation/i.test(s))) return "Regulatory";
-  if (sources.some((s) => /LLM inference/i.test(s))) return "LLM-Inferred";
+  if (sources.some((s) => RULE_BY_ID.get(s)?.source === "regulation")) return "Regulatory";
+  if (sources.some((s) => RULE_BY_ID.has(s))) return "Domain Rules";
+  if (sources.some((s) => s === "LLM inference (Stage 2.2)")) return "TorqWings AI";
   return "From Your Brief";
 }
 
@@ -326,6 +313,43 @@ function groupConstraints(
     label,
     items: groups.get(label)!,
   }));
+}
+
+// One level finer than groupConstraints' 4 coarse buckets — within e.g.
+// "Domain Rules", cluster by the *exact* sourceLabel tag (a specific rule
+// ID like "DOM-001", or "Stage 2.1 hint"), so the tag becomes a subheading
+// instead of a chip repeated under every single constraint. A constraint
+// can carry more than one sourceLabel (finalizeConstraints merges
+// duplicate-named constraints from different stages) — grouped under its
+// first tag only, so it appears exactly once, not once per tag.
+function subGroupBySourceLabel(
+  items: ConstraintView[],
+): { tag: string; items: ConstraintView[] }[] {
+  const order: string[] = [];
+  const groups = new Map<string, ConstraintView[]>();
+  for (const c of items) {
+    const tag = c.sources[0] ?? "—";
+    if (!groups.has(tag)) order.push(tag);
+    const list = groups.get(tag) ?? [];
+    list.push(c);
+    groups.set(tag, list);
+  }
+  return order.map((tag) => ({ tag, items: groups.get(tag)! }));
+}
+
+// Every sourceLabel a constraint can carry (constraintIdentification.ts) is
+// either one of domainRules.ts's own rule IDs, or one of the two literal
+// non-rule tags handled below — one lookup by exact ID, shared by
+// describeSourceTag (subheading text) and categorizeConstraint (top-level
+// bucket) below, so both stay in sync with domainRules.ts automatically
+// and neither one re-derives a rule's identity by pattern-matching its ID
+// string (see categorizeConstraint's comment for why that broke once).
+const RULE_BY_ID = new Map(DOMAIN_RULES.map((r) => [r.id, r]));
+
+function describeSourceTag(tag: string): string {
+  if (tag === "Stage 2.1 hint") return "Noted while first reading your brief";
+  if (tag === "LLM inference (Stage 2.2)") return "Inferred during reasoning & planning";
+  return RULE_BY_ID.get(tag)?.trigger ?? tag;
 }
 
 // ── Gated stage flow state ──
@@ -349,6 +373,12 @@ interface MissionFlowState {
   // (which has no real Stage1Result, only what MissionsListPanel already
   // knew) can still populate it for an accurate confidence breakdown.
   sourceTypesUsedCount: number | null;
+  // When Stage 4 actually finished — client-side timestamp for a mission
+  // generated this session (FinalMissionResponse itself carries no
+  // timestamp), or the mission's real createdAt when reopened via
+  // resumeMission. Shown beside the Spec ID (Section 13.1 dashboard) so
+  // "when was this spec generated" doesn't require opening "Your missions".
+  generatedAt: string | null;
   stage1: StageSlot<Stage1Result>;
   stage2: StageSlot<Stage2Result>;
   stage3: StageSlot<Stage3Output>;
@@ -360,6 +390,7 @@ const EMPTY_SLOT = { status: "pending" as const, result: null, errorMessage: nul
 const INITIAL_FLOW_STATE: MissionFlowState = {
   missionId: null,
   sourceTypesUsedCount: null,
+  generatedAt: null,
   stage1: EMPTY_SLOT,
   stage2: EMPTY_SLOT,
   stage3: EMPTY_SLOT,
@@ -458,6 +489,7 @@ function TheHangarMission() {
   }>({ status: "idle", errorMessage: null });
   const [progressStepIdx, setProgressStepIdx] = useState(0);
   const [currentUserEmail, setCurrentUserEmail] = useState<string | null>(null);
+  const [llmStatus, setLlmStatus] = useState<"checking" | "live" | "offline">("checking");
   const [missionsList, setMissionsList] = useState<MissionListEntry[] | null>(null);
   const [missionsListStatus, setMissionsListStatus] = useState<"idle" | "loading" | "error">(
     "idle",
@@ -502,6 +534,37 @@ function TheHangarMission() {
       setCurrentUserEmail(session?.user.email ?? null);
     });
     return () => subscription.unsubscribe();
+  }, []);
+
+  // "AI" indicator — green when Claude is genuinely reachable through
+  // ANTHROPIC_API_KEY (a real models.list() round-trip server-side, see
+  // checkLlmLiveStatus), amber for anything short of that (no key, bad key,
+  // Anthropic outage) so the badge never quietly lies about whether Stage
+  // 1-3's LLM calls will actually work. Checked once on arrival and again
+  // every 60s so a key that gets fixed/breaks mid-session is reflected
+  // without a page reload.
+  useEffect(() => {
+    let cancelled = false;
+    async function checkLlmStatus() {
+      const { data } = await supabase.auth.getSession();
+      const token = data.session?.access_token;
+      if (!token) return;
+      try {
+        const res = await fetch("/api/hangar/llm-status", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const json = await res.json();
+        if (!cancelled) setLlmStatus(res.ok && json.live ? "live" : "offline");
+      } catch {
+        if (!cancelled) setLlmStatus("offline");
+      }
+    }
+    checkLlmStatus();
+    const interval = setInterval(checkLlmStatus, 60000);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
   }, []);
 
   // "Your missions" — loaded once on arrival, and again after each mission
@@ -581,6 +644,7 @@ function TheHangarMission() {
     setFlow({
       missionId: m.missionId,
       sourceTypesUsedCount: m.sourceTypesUsedCount,
+      generatedAt: m.createdAt,
       stage1: { status: "complete", result: null, errorMessage: null },
       stage2: { status: "complete", result: null, errorMessage: null },
       stage3: { status: "complete", result: null, errorMessage: null },
@@ -825,6 +889,7 @@ function TheHangarMission() {
     }
     setFlow((f) => ({
       ...f,
+      generatedAt: new Date().toISOString(),
       stage4: { status: "complete", result: outcome.data, errorMessage: null },
     }));
   }
@@ -937,6 +1002,7 @@ function TheHangarMission() {
     }
     setFlow((f) => ({
       ...f,
+      generatedAt: new Date().toISOString(),
       stage4: { status: "complete", result: stage4.data, errorMessage: null },
     }));
 
@@ -1087,12 +1153,25 @@ function TheHangarMission() {
           <div className="hgr-m-wrap">
             <div className="hgr-m-status-row">
               <span className="hgr-m-badge hgr-m-badge-bay">BAY 01 OF 15</span>
+              <span
+                className={`hgr-m-badge hgr-m-badge-ai hgr-m-badge-ai-${llmStatus}`}
+                title={
+                  llmStatus === "checking"
+                    ? "Checking connection to Anthropic…"
+                    : llmStatus === "live"
+                      ? "Live — connected to Anthropic (Claude Sonnet 5)"
+                      : "Offline — not connected to Anthropic. Stage LLM calls will fall back to mock output."
+                }
+              >
+                <span className="hgr-m-badge-ai-dot" />
+                AI
+              </span>
             </div>
             <div className="hgr-m-hero-row">
               <h1>Mission Agent</h1>
               <p className="hgr-m-lead">
-                The first agent every mission passes through. It takes a brief in plain language and
-                turns it into a <b>structured, gate-ready spec</b> — payload, range, endurance,
+                The first agent every mission passes through. It takes a brief in plain natural
+                language and turns it into a <b>structured, gate-ready spec</b> — payload, range, endurance,
                 constraints, KPIs — that Concept Agent and everything downstream builds against.
               </p>
             </div>
@@ -1101,16 +1180,6 @@ function TheHangarMission() {
 
         <section id="process-mission">
           <div className="hgr-m-wrap">
-            <div className="hgr-m-kicker">Process a mission</div>
-            <h2 className="hgr-m-sec-title">Turn a brief into a structured spec, live.</h2>
-            <p className="hgr-m-sec-sub">
-              Runs the real Stage 1.1 → 1.4 pipeline — intent extraction, decomposition,
-              constraint/KPI derivation, spec assembly, and persistence. Your natural-language
-              description is converted into a spec through 4 sequential steps involving multiple LLM
-              calls, so this can take a while — review each stage's findings and proceed to the next
-              when you're ready.
-            </p>
-
             {missionsListStatus === "error" && <ListFetchError onRetry={fetchMissionsList} />}
 
             {/* "Your missions" and "+ Plan a new mission" are navigation
@@ -1389,7 +1458,10 @@ function TheHangarMission() {
                         <MissionDashboard
                           result={toMissionResult(flow.stage4.result)}
                           briefText={briefText}
+                          generatedAt={flow.generatedAt}
+                          telemetry={computeTelemetry(flow)}
                           sourceTypesUsedCount={flow.sourceTypesUsedCount ?? 0}
+                          sourceTypesUsed={flow.stage1.result?.sourceTypesUsed ?? null}
                           onStartNew={resetFlow}
                           onEditAndRegenerate={editAndRegenerate}
                           finalizeState={finalizeState}
@@ -1414,81 +1486,6 @@ function TheHangarMission() {
             )}
           </div>
         </section>
-
-        <section>
-          <div className="hgr-m-wrap">
-            <div className="hgr-m-kicker">How it works</div>
-            <h2 className="hgr-m-sec-title">Brief in, structured spec out.</h2>
-            <p className="hgr-m-sec-sub">
-              Four internal stages — this is the actual architecture being built today, not a
-              simplified version of it.
-            </p>
-
-            <div className="hgr-m-stages">
-              {STAGES.map((stage) => (
-                <div key={stage.num} className="hgr-m-stage">
-                  <div className="hgr-m-stage-num">{stage.num}</div>
-                  <h4>{stage.title}</h4>
-                  <ul>
-                    {stage.items.map((item) => (
-                      <li key={item.label}>
-                        <b>{item.label}</b>
-                        {item.desc}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section>
-          <div className="hgr-m-wrap">
-            <div className="hgr-m-kicker">Tools &amp; memory</div>
-            <h2 className="hgr-m-sec-title">What it reaches for.</h2>
-            <p className="hgr-m-sec-sub">
-              Nothing exotic — the same categories every other bay in The Hangar uses, scoped to
-              mission definition.
-            </p>
-
-            <div className="hgr-m-stages">
-              {STAGE_ORDER.map((key, i) => (
-                <div key={key} className="hgr-m-stage">
-                  <div className="hgr-m-stage-num">{`0${i + 1} · ${STAGE_TITLES[key].toUpperCase()}`}</div>
-                  <div className="hgr-m-chips">
-                    {[...new Set(STAGE_TOOLS[key].map((t) => t.tool))].map((tool) => (
-                      <span key={tool} className="hgr-m-chip">
-                        {tool}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="hgr-m-chip-group" style={{ marginTop: 40 }}>
-              <h4>Reads / writes</h4>
-              <div className="hgr-m-chips">
-                {READS_WRITES.map((chip) => (
-                  <span key={chip} className="hgr-m-chip">
-                    {chip}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <div className="hgr-m-foot-cta">
-          <div className="hgr-m-wrap">
-            <h2>Bay 01 is live — Mission Agent runs the real pipeline above.</h2>
-            <p>Bay 02 onward is still in design — see the full circuit for what's next.</p>
-            <Link to="/the-hangar/welcome" className="hgr-m-btn hgr-m-btn-ghost">
-              ← Back to The Hangar
-            </Link>
-          </div>
-        </div>
       </main>
     </div>
   );
@@ -1583,6 +1580,23 @@ function MockBadge({ show }: { show: boolean }) {
   );
 }
 
+// Green = this stage's finding came back from a real Claude call; amber =
+// it fell back to that call's mock (see llmGateway.ts's callLlmGateway —
+// covers both "no ANTHROPIC_API_KEY" and "the call/parse failed", callers
+// can't tell which and don't need to). Same signal MockBadge's text already
+// states in words; this is the same at-a-glance color-coding as the "AI"
+// live-status badge (Bay 01 header), just per-stage instead of per-page.
+function StageStatusBadge({ mock }: { mock: boolean }) {
+  return (
+    <span
+      className={`hgr-m-findings-badge ${mock ? "hgr-m-findings-badge-mock" : "hgr-m-findings-badge-live"}`}
+      title={mock ? "Simulated — no ANTHROPIC_API_KEY reply" : "Live — real Claude response"}
+    >
+      ✓
+    </span>
+  );
+}
+
 // Once the spec is ready, the full stacked findings cards are gone (the
 const MISSION_STATUS_LABEL: Record<string, string> = {
   draft: "Draft",
@@ -1665,7 +1679,10 @@ function PastMissionDetail({ mission, onBack }: { mission: MissionListEntry; onB
             {MISSION_STATUS_LABEL[mission.status] ?? mission.status}
           </div>
           <h3>{mission.missionSpecs?.missionType ?? mission.missionCode}</h3>
-          <div className="hgr-m-dash-id">{mission.missionCode}</div>
+          <div className="hgr-m-dash-id">
+            {mission.missionCode}
+            <span className="hgr-m-dash-generated-at"> · Generated {formatGeneratedAt(mission.createdAt)}</span>
+          </div>
         </div>
         {mission.confidenceScore !== null && (
           <div className="hgr-m-dash-confidence">
@@ -1781,7 +1798,7 @@ function Stage1Findings({ result }: { result: Stage1Result }) {
     <div className="hgr-m-findings-card">
       <div className="hgr-m-findings-card-head">
         <div className="hgr-m-findings-title">
-          <span className="hgr-m-findings-badge">✓</span>
+          <StageStatusBadge mock={result.extraction.mock} />
           Input Processing — findings
         </div>
         <MockBadge show={result.extraction.mock} />
@@ -1837,7 +1854,7 @@ function Stage2Findings({ result }: { result: Stage2Result }) {
     <div className="hgr-m-findings-card">
       <div className="hgr-m-findings-card-head">
         <div className="hgr-m-findings-title">
-          <span className="hgr-m-findings-badge">✓</span>
+          <StageStatusBadge mock={result.mock} />
           Reasoning & Planning — findings
         </div>
         <MockBadge show={result.mock} />
@@ -1893,7 +1910,7 @@ function Stage3Findings({ result }: { result: Stage3Output }) {
     <div className="hgr-m-findings-card">
       <div className="hgr-m-findings-card-head">
         <div className="hgr-m-findings-title">
-          <span className="hgr-m-findings-badge">✓</span>
+          <StageStatusBadge mock={result.mock} />
           Output Generation — findings
         </div>
         <MockBadge show={result.mock} />
@@ -1926,7 +1943,10 @@ function Stage3Findings({ result }: { result: Stage3Output }) {
 function MissionDashboard({
   result,
   briefText,
+  generatedAt,
+  telemetry,
   sourceTypesUsedCount,
+  sourceTypesUsed,
   onStartNew,
   onEditAndRegenerate,
   finalizeState,
@@ -1944,7 +1964,14 @@ function MissionDashboard({
 }: {
   result: MissionResult;
   briefText: string;
+  generatedAt: string | null;
+  telemetry: MissionTelemetry | null;
   sourceTypesUsedCount: number;
+  // The real distinct SourceType values used this run (see
+  // types/hangar-mission.ts) — only available for a mission run THIS
+  // session (Stage 1's own result), same resumed-mission limitation as
+  // generatedAt/telemetry. null falls back to anonymous count-only slots.
+  sourceTypesUsed: SourceType[] | null;
   onStartNew: () => void;
   onEditAndRegenerate: () => void;
   finalizeState: { status: "idle" | "saving" | "saved" | "error"; errorMessage: string | null };
@@ -1981,12 +2008,19 @@ function MissionDashboard({
 
   return (
     <div className="hgr-m-dash">
+      <TelemetryBar telemetry={telemetry} />
+
       {/* 1. Header strip */}
       <div className="hgr-m-dash-header">
         <div>
           <div className="hgr-m-dash-badge">Spec Ready</div>
           <h3>{result.missionSpecs.missionType}</h3>
-          <div className="hgr-m-dash-id">{result.missionCode}</div>
+          <div className="hgr-m-dash-id">
+            {result.missionCode}
+            {generatedAt && (
+              <span className="hgr-m-dash-generated-at"> · Generated {formatGeneratedAt(generatedAt)}</span>
+            )}
+          </div>
         </div>
         <div className="hgr-m-dash-confidence">
           <div className="hgr-m-dash-confidence-top-row">
@@ -2199,30 +2233,22 @@ function MissionDashboard({
         <ConstraintsSection constraints={result.constraints} />
       </div>
 
+      {/* Confidence breakdown — the same 40/40/−5×n formula the header's "?"
+          tooltip already states in words, made visible without a hover so
+          it's something to glance at (and optimize against) directly. */}
+      <div className="hgr-m-dash-section">
+        <h4>Confidence Breakdown</h4>
+        <ConfidenceBreakdownBars
+          breakdown={confidenceBreakdown}
+          score={result.confidenceScore}
+          sourceTypesUsed={sourceTypesUsed}
+        />
+      </div>
+
       {/* 5. KPIs & Targets */}
       <div className="hgr-m-dash-section">
         <h4>KPIs &amp; Targets ({result.kpis.length})</h4>
         <KpisSection kpis={result.kpis} />
-      </div>
-
-      {/* Tools used — what actually ran, per stage, for this mission */}
-      <div className="hgr-m-dash-section">
-        <h4>Tools Used</h4>
-        <div className="hgr-m-dash-tools">
-          {STAGE_ORDER.map((key) => (
-            <div key={key} className="hgr-m-dash-tools-col">
-              <div className="hgr-m-dash-tools-stage">{STAGE_TITLES[key]}</div>
-              <ul>
-                {STAGE_TOOLS[key].map((t, i) => (
-                  <li key={`${t.tool}-${i}`}>
-                    <b>{t.tool}</b>
-                    <span>{t.purpose}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
       </div>
 
       {/* 6. Validation flags (if any) */}
@@ -2270,6 +2296,22 @@ function MissionDashboard({
         <button type="button" className="hgr-m-btn hgr-m-btn-amber" onClick={onStartNew}>
           Start a new mission
         </button>
+        <Link
+          to="/the-hangar/bernoulli"
+          search={{ source: "mission", missionId: result.missionId, sourceId: "" }}
+          className="hgr-m-btn hgr-m-dash-bernoulli-link"
+          style={
+            finalizeState.status === "saved" ? { pointerEvents: "none", opacity: 0.4 } : undefined
+          }
+          aria-disabled={finalizeState.status === "saved"}
+          title={
+            finalizeState.status === "saved"
+              ? "This mission is finalized — a physics check on a locked spec isn't useful groundwork anymore."
+              : "Sanity-check this spec's numbers against conservation laws and aerospace empiricals."
+          }
+        >
+          Ask Bernoulli →
+        </Link>
       </div>
       {finalizeState.status === "error" && (
         <p className="hgr-m-dash-finalize-error">
@@ -2307,28 +2349,168 @@ function ConstraintsSection({ constraints }: { constraints: ConstraintView[] }) 
           <div className="hgr-m-dash-constraint-group-label">
             {group.label} ({group.items.length})
           </div>
-          <div className="hgr-m-dash-constraints">
-            {group.items.map((c, i) => (
-              <div key={i} className="hgr-m-dash-constraint">
-                <div className="hgr-m-dash-constraint-main">
-                  <b>{c.name}</b>: {c.value}
-                </div>
-                <div className="hgr-m-dash-tags">
-                  {c.sources.map((s) => (
-                    <span key={s} className="hgr-m-dash-tag">
-                      {s}
-                    </span>
-                  ))}
-                </div>
+          {subGroupBySourceLabel(group.items).map((sub) => (
+            <div key={sub.tag} className="hgr-m-dash-constraint-subgroup">
+              <div className="hgr-m-dash-constraint-subgroup-label" title={sub.tag}>
+                {describeSourceTag(sub.tag)} ({sub.items.length})
               </div>
-            ))}
-          </div>
+              <div className="hgr-m-dash-constraints">
+                {sub.items.map((c, i) => {
+                  // The subheading above already carries this exact tag —
+                  // repeating it (or the coarse group label) under every
+                  // single row too is redundant. Any OTHER tags this
+                  // constraint also carries (it can have more than one —
+                  // see subGroupBySourceLabel) still show, since those are
+                  // real additional signal.
+                  const extraSources = c.sources.slice(1);
+                  return (
+                    <div key={i} className="hgr-m-dash-constraint">
+                      <div className="hgr-m-dash-constraint-num">{i + 1}</div>
+                      <div className="hgr-m-dash-constraint-body">
+                        <div className="hgr-m-dash-constraint-main">
+                          <b>{c.name}</b>: {c.value}
+                        </div>
+                        {extraSources.length > 0 && (
+                          <div className="hgr-m-dash-tags">
+                            {extraSources.map((s) => (
+                              <span key={s} className="hgr-m-dash-tag" title={s}>
+                                {describeSourceTag(s)}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
         </div>
       ))}
     </>
   );
 }
 
+// All 6 real SourceType values (types/hangar-mission.ts) — only
+// "natural_language" (the brief textarea) and "requirements_form" (the
+// confidence-boost wizard) are actually reachable from this UI today;
+// document/existing_project/regulations/market_data have parser-level
+// plumbing (missionSourceParsing.ts) but no client path that ever sends
+// that source_type yet. Labeled here anyway so a slot that IS used always
+// names itself correctly, whichever type it turns out to be.
+const SOURCE_TYPE_LABEL: Record<SourceType, string> = {
+  natural_language: "Brief text",
+  document: "Document",
+  requirements_form: "Requirements form",
+  existing_project: "Existing project",
+  regulations: "Regulations",
+  market_data: "Market data",
+};
+
+// Same formula the header's "?" info-tip already spells out in words
+// (confidenceScore.ts: 40% source completeness + 40% field completeness −
+// 5% per validation flag) — this just makes it visible as bars instead of
+// requiring a hover, so it's something to glance at while deciding what to
+// fix (e.g. answer a missing core field, or confirm a value as structured
+// input) to actually raise the score.
+function ConfidenceBreakdownBars({
+  breakdown,
+  score,
+  sourceTypesUsed,
+}: {
+  breakdown: ConfidenceBreakdown;
+  score: number;
+  sourceTypesUsed: SourceType[] | null;
+}) {
+  return (
+    <div className="hgr-m-confbars">
+      <div className="hgr-m-confbar-row">
+        <div className="hgr-m-confbar-head">
+          <span className="hgr-m-confbar-label">
+            Source completeness ({breakdown.sourceTypesUsedCount}/3 input types, 40% max)
+          </span>
+          <span className="hgr-m-confbar-value">
+            +{Math.round(breakdown.sourceCompletenessPct * 0.4)}%
+          </span>
+        </div>
+        {/* 3 is the formula's own cap (confidenceScore.ts) — reaching any 3
+            DISTINCT source types (of 6 real ones) earns full credit here,
+            not 3 specific named types. Each slot shows the real type name
+            when we know it (a mission run this session — sourceTypesUsed
+            not null); for a resumed mission (sourceTypesUsed null) it
+            falls back to the plain count, since we only know how many
+            types were used, not which ones. */}
+        <div className="hgr-m-confbar-slots">
+          {[0, 1, 2].map((i) => {
+            const type = sourceTypesUsed?.[i];
+            const achieved = sourceTypesUsed ? Boolean(type) : i < breakdown.sourceTypesUsedCount;
+            const label = type ? SOURCE_TYPE_LABEL[type] : achieved ? "Used" : "Not yet added";
+            return (
+              <div
+                key={i}
+                className={`hgr-m-confbar-slot${achieved ? " hgr-m-confbar-slot-yes" : " hgr-m-confbar-slot-no"}`}
+                title={achieved ? undefined : "Adding another input type (e.g. requirements form) earns credit here"}
+              >
+                {label}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+      <div className="hgr-m-confbar-row">
+        <div className="hgr-m-confbar-head">
+          <span className="hgr-m-confbar-label">
+            Field completeness ({breakdown.foundFields.length}/3 core fields, 40% max)
+          </span>
+          <span className="hgr-m-confbar-value">
+            +{Math.round(breakdown.fieldCompletenessPct * 0.4)}%
+          </span>
+        </div>
+        {/* Unlike source completeness, the exact 3 fields are known — so
+            each slot is named and independently true/false, not just a
+            count. */}
+        <div className="hgr-m-confbar-slots">
+          {CORE_FIELDS.map((field) => {
+            const found = breakdown.foundFields.includes(field);
+            return (
+              <div
+                key={field}
+                className={`hgr-m-confbar-slot${found ? " hgr-m-confbar-slot-yes" : " hgr-m-confbar-slot-no"}`}
+              >
+                {field.charAt(0).toUpperCase() + field.slice(1)}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+      <div className="hgr-m-confbar-row">
+        <div className="hgr-m-confbar-head">
+          <span className="hgr-m-confbar-label">
+            Validation flags ({breakdown.validationFlagCount} raised)
+          </span>
+          <span className="hgr-m-confbar-value">−{breakdown.penaltyPct}%</span>
+        </div>
+        <div className="hgr-m-confbar-track">
+          <div
+            className="hgr-m-confbar-fill hgr-m-confbar-fill-penalty"
+            style={{ width: `${Math.min(breakdown.penaltyPct * 4, 100)}%` }}
+          />
+        </div>
+      </div>
+      <div className="hgr-m-confbar-total">
+        <span>Confidence score</span>
+        <b>{Math.round(score * 100)}%</b>
+      </div>
+    </div>
+  );
+}
+
+// "Instrument Row" layout — one row per KPI: tier badge on the left, then
+// KPI (eyebrow + name) and Target (eyebrow + value, right-aligned) as two
+// explicitly labeled fields, not one blended name+number line. Gate-tier/
+// ranked stat pair up top gives the composition before the reader even
+// reaches the list.
 function KpisSection({ kpis }: { kpis: KpiView[] }) {
   if (kpis.length === 0) return <p className="hgr-m-dash-empty">No KPIs derived.</p>;
   const criticalKpis = kpis.filter((k) => k.priority === "critical");
@@ -2337,20 +2519,39 @@ function KpisSection({ kpis }: { kpis: KpiView[] }) {
     .sort((a, b) => (a.priority as number) - (b.priority as number));
   const orderedKpis = [...criticalKpis, ...rankedKpis];
   return (
-    <div className="hgr-m-dash-kpis">
-      {orderedKpis.map((k, i) => (
-        <div
-          key={i}
-          className={`hgr-m-dash-kpi${k.priority === "critical" ? " hgr-m-dash-kpi-critical" : ""}`}
-        >
-          <div className="hgr-m-dash-kpi-name">{k.name}</div>
-          <div className="hgr-m-dash-kpi-target">{formatKpiDisplay(k.name, k.target, k.unit)}</div>
-          <div className="hgr-m-dash-kpi-priority">
-            {k.priority === "critical" ? "CRITICAL" : `#${k.priority}`}
-          </div>
+    <>
+      <div className="hgr-m-dash-kpi-stats">
+        <div className="hgr-m-dash-kpi-stat hgr-m-dash-kpi-stat-gate">
+          <b>{criticalKpis.length}</b>
+          <span>Gate-tier</span>
         </div>
-      ))}
-    </div>
+        <div className="hgr-m-dash-kpi-stat hgr-m-dash-kpi-stat-ranked">
+          <b>{rankedKpis.length}</b>
+          <span>Ranked</span>
+        </div>
+      </div>
+      <div className="hgr-m-dash-kpis">
+        {orderedKpis.map((k, i) => (
+          <div key={i} className="hgr-m-dash-kpi-row">
+            <div className={`hgr-m-dash-kpi-tier${k.priority === "critical" ? " hgr-m-dash-kpi-tier-gate" : ""}`}>
+              {k.priority === "critical" ? "GATE" : `P${k.priority}`}
+            </div>
+            <div className="hgr-m-dash-kpi-field">
+              <div className="hgr-m-dash-kpi-eyebrow">KPI</div>
+              <div className="hgr-m-dash-kpi-name">{k.name}</div>
+            </div>
+            <div className="hgr-m-dash-kpi-target-field">
+              <div className="hgr-m-dash-kpi-eyebrow">Target</div>
+              <div
+                className={`hgr-m-dash-kpi-target-value${k.priority === "critical" ? " hgr-m-dash-kpi-target-value-gate" : ""}`}
+              >
+                {formatKpiDisplay(k.name, k.target, k.unit)}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </>
   );
 }
 
@@ -2368,6 +2569,7 @@ const HGR_MISSION_CSS = `
   --hgr-m-navy-deep:#08131F; --hgr-m-navy-panel:#0F2136; --hgr-m-navy-panel-2:#132A44;
   --hgr-m-blue-line:#3E7CA6; --hgr-m-blue-bright:#6FB4E0;
   --hgr-m-amber:#E8A33D; --hgr-m-amber-bright:#F6C374;
+  --hgr-m-bernoulli:#9B7FE8; --hgr-m-bernoulli-bright:#B6A2F2;
   --hgr-m-paper:#ECEFF3; --hgr-m-paper-dim:#8FA5BB;
   --hgr-m-grid:rgba(111,180,224,0.08); --hgr-m-hairline:rgba(111,180,224,0.20);
 
@@ -2405,12 +2607,21 @@ const HGR_MISSION_CSS = `
 @keyframes hgr-m-openLeft{ from{ transform:translateX(0);} to{ transform:translateX(-100%);} }
 @keyframes hgr-m-openRight{ from{ transform:translateX(0);} to{ transform:translateX(100%);} }
 @media (prefers-reduced-motion: reduce){ .hgr-m-doors{ display:none; } }
-.hgr-m-status-row{ display:flex; align-items:center; gap:12px; margin-bottom:22px; flex-wrap:wrap; }
+.hgr-m-status-row{ display:flex; align-items:center; gap:12px; margin-top:-12px; margin-bottom:22px; flex-wrap:wrap; }
 .hgr-m-badge{
   font-family:'IBM Plex Mono',monospace; font-size:11.5px; letter-spacing:.1em; text-transform:uppercase;
   padding:6px 13px; border-radius:2px; display:inline-flex; align-items:center; gap:8px;
 }
 .hgr-m-badge-bay{ color:var(--hgr-m-paper-dim); border:1px solid var(--hgr-m-hairline); }
+.hgr-m-badge-ai{ font-weight:700; }
+.hgr-m-badge-ai-dot{ width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+.hgr-m-badge-ai-checking{ color:var(--hgr-m-paper-dim); border:1px solid var(--hgr-m-hairline); }
+.hgr-m-badge-ai-checking .hgr-m-badge-ai-dot{ background:var(--hgr-m-paper-dim); }
+.hgr-m-badge-ai-live{ color:#4ADE80; border:1px solid rgba(74,222,128,.4); background:rgba(74,222,128,.08); }
+.hgr-m-badge-ai-live .hgr-m-badge-ai-dot{ background:#4ADE80; box-shadow:0 0 6px rgba(74,222,128,.8); animation:hgr-m-ai-pulse 2s ease-in-out infinite; }
+.hgr-m-badge-ai-offline{ color:var(--hgr-m-amber); border:1px solid rgba(232,163,61,.4); background:rgba(232,163,61,.08); }
+.hgr-m-badge-ai-offline .hgr-m-badge-ai-dot{ background:var(--hgr-m-amber); box-shadow:0 0 6px rgba(232,163,61,.6); }
+@keyframes hgr-m-ai-pulse{ 0%,100%{ opacity:1; } 50%{ opacity:.4; } }
 
 .hgr-m-hero-row{ display:flex; align-items:center; gap:48px; flex-wrap:wrap; }
 @media(max-width:760px){ .hgr-m-hero-row{ flex-direction:column; align-items:flex-start; gap:16px; } }
@@ -2423,17 +2634,6 @@ const HGR_MISSION_CSS = `
 .hgr-m-kicker{ font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--hgr-m-amber); margin-bottom:12px; }
 .hgr-m-sec-title{ font-size:clamp(22px,2.6vw,30px); margin-bottom:10px; }
 .hgr-m-sec-sub{ color:var(--hgr-m-paper-dim); font-size:14.5px; max-width:600px; margin-bottom:36px; }
-
-.hgr-m-stages{ display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--hgr-m-hairline); border:1px solid var(--hgr-m-hairline); }
-@media(max-width:900px){ .hgr-m-stages{ grid-template-columns:1fr 1fr; } }
-@media(max-width:560px){ .hgr-m-stages{ grid-template-columns:1fr; } }
-.hgr-m-stage{ background:var(--hgr-m-navy-panel); padding:24px 22px; position:relative; }
-.hgr-m-stage-num{ font-family:'IBM Plex Mono',monospace; color:var(--hgr-m-amber); font-size:11px; margin-bottom:10px; }
-.hgr-m-stage h4{ font-family:'Space Grotesk',sans-serif; font-size:15.5px; font-weight:600; margin-bottom:14px; }
-.hgr-m-stage ul{ list-style:none; margin:0; padding:0; }
-.hgr-m-stage li{ font-size:13px; color:var(--hgr-m-paper-dim); padding:6px 0; border-top:1px dashed var(--hgr-m-hairline); }
-.hgr-m-stage li:first-child{ border-top:none; }
-.hgr-m-stage li b{ color:var(--hgr-m-paper); font-weight:500; display:block; margin-bottom:1px; }
 
 .hgr-m-chip-groups{ display:grid; grid-template-columns:1fr 1fr; gap:40px; }
 @media(max-width:760px){ .hgr-m-chip-groups{ grid-template-columns:1fr; } }
@@ -2449,9 +2649,6 @@ const HGR_MISSION_CSS = `
 .hgr-m-k{ color:var(--hgr-m-paper-dim); }
 .hgr-m-v{ color:var(--hgr-m-amber-bright); }
 
-.hgr-m-foot-cta{ text-align:center; padding:70px 0 0; border-bottom:none; }
-.hgr-m-foot-cta h2{ font-size:clamp(24px,3vw,34px); margin-bottom:14px; }
-.hgr-m-foot-cta p{ color:var(--hgr-m-paper-dim); max-width:480px; margin:0 auto 30px; font-size:14.5px; }
 .hgr-m-btn{ font-family:'IBM Plex Mono',monospace; font-size:13px; padding:12px 22px; border-radius:2px; display:inline-flex; align-items:center; gap:8px; text-decoration:none; border:1px solid transparent; cursor:pointer; background:none; }
 .hgr-m-btn-ghost{ border:1px solid var(--hgr-m-hairline); color:var(--hgr-m-paper-dim); }
 .hgr-m-btn-ghost:hover{ color:var(--hgr-m-paper); border-color:var(--hgr-m-blue-bright); }
@@ -2569,6 +2766,8 @@ const HGR_MISSION_CSS = `
 .hgr-m-findings-card-head{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:14px; flex-wrap:wrap; }
 .hgr-m-findings-title{ font-family:'Space Grotesk',sans-serif; font-size:15px; font-weight:600; display:flex; align-items:center; gap:10px; }
 .hgr-m-findings-badge{ width:22px; height:22px; border-radius:50%; background:var(--hgr-m-blue-bright); color:var(--hgr-m-navy-deep); display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; flex-shrink:0; box-shadow:0 0 8px rgba(111,180,224,0.5); }
+.hgr-m-findings-badge-live{ background:#4ADE80; box-shadow:0 0 8px rgba(74,222,128,.5); }
+.hgr-m-findings-badge-mock{ background:var(--hgr-m-amber); box-shadow:0 0 8px rgba(232,163,61,.5); }
 .hgr-m-findings-mock{ font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.05em; text-transform:uppercase; color:var(--hgr-m-amber); border:1px solid rgba(232,163,61,.4); padding:3px 8px; border-radius:2px; }
 .hgr-m-findings-body{ font-size:13px; color:var(--hgr-m-paper-dim); }
 .hgr-m-findings-row{ padding:8px 0; border-top:1px dashed var(--hgr-m-hairline); }
@@ -2618,6 +2817,19 @@ const HGR_MISSION_CSS = `
 
 /* ── Dashboard View (Section 13.1) ── */
 .hgr-m-dash{ border:1px solid var(--hgr-m-hairline); background:var(--hgr-m-navy-panel); }
+.hgr-m-telemetry{
+  display:flex; flex-wrap:wrap; gap:1px; background:var(--hgr-m-hairline);
+  border-bottom:1px solid var(--hgr-m-hairline);
+}
+.hgr-m-telemetry-item{
+  flex:1; min-width:110px; background:var(--hgr-m-navy-deep); padding:12px 16px;
+  display:flex; flex-direction:column; gap:2px;
+}
+.hgr-m-telemetry-num{ font-family:'Space Grotesk',sans-serif; font-size:17px; font-weight:600; }
+.hgr-m-telemetry-label{
+  font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.06em; text-transform:uppercase;
+  color:var(--hgr-m-paper-dim);
+}
 .hgr-m-dash-header{ display:flex; align-items:flex-start; justify-content:space-between; gap:24px; padding:26px 28px; border-bottom:1px solid var(--hgr-m-hairline); flex-wrap:wrap; }
 .hgr-m-dash-badge{
   display:inline-block; font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase;
@@ -2625,17 +2837,31 @@ const HGR_MISSION_CSS = `
 }
 .hgr-m-dash-header h3{ font-size:20px; margin-bottom:6px; }
 .hgr-m-dash-id{ font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--hgr-m-paper-dim); }
+.hgr-m-dash-generated-at{ opacity:.75; }
 .hgr-m-dash-confidence{ text-align:center; flex-shrink:0; }
 .hgr-m-dash-confidence-top-row{ display:flex; align-items:center; gap:8px; }
 .hgr-m-dash-confidence-num{ font-family:'Space Grotesk',sans-serif; font-size:32px; font-weight:700; color:var(--hgr-m-amber-bright); line-height:1; }
 .hgr-m-dash-confidence-label{ font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--hgr-m-paper-dim); }
 .hgr-m-dash-confidence-label-row{ display:flex; align-items:center; justify-content:center; gap:6px; margin-top:6px; }
 .hgr-m-dash-bernoulli-link{
-  display:inline-block; margin-top:10px; font-family:'IBM Plex Mono',monospace; font-size:11px;
-  color:var(--hgr-m-blue-bright); text-decoration:none; border:1px solid var(--hgr-m-hairline);
-  border-radius:2px; padding:5px 10px; white-space:nowrap;
+  display:inline-flex; align-items:center; gap:6px; margin-top:10px; font-family:'IBM Plex Mono',monospace;
+  font-size:12.5px; font-weight:700; color:#160F2E; text-decoration:none;
+  background:var(--hgr-m-bernoulli); border:1px solid var(--hgr-m-bernoulli); border-radius:2px;
+  padding:9px 16px; white-space:nowrap; box-shadow:0 0 14px rgba(155,127,232,.45);
+  transition:background .2s, box-shadow .2s;
 }
-.hgr-m-dash-bernoulli-link:hover{ border-color:var(--hgr-m-blue-bright); color:var(--hgr-m-paper); }
+.hgr-m-dash-bernoulli-link:hover{
+  background:var(--hgr-m-bernoulli-bright); border-color:var(--hgr-m-bernoulli-bright);
+  box-shadow:0 0 18px rgba(155,127,232,.65);
+}
+/* In the bottom actions row (alongside Save as final / Edit and
+   regenerate / etc.) it needs to match those .hgr-m-btn siblings' exact
+   size, not the smaller/offset version used under the confidence score —
+   overriding just the sizing here rather than changing the shared class,
+   since the header usages still need their own margin-top spacing. */
+.hgr-m-dash-actions .hgr-m-dash-bernoulli-link{
+  margin-top:0; padding:12px 22px; font-size:13px;
+}
 
 /* ── Confidence boost wizard ── */
 .hgr-m-boost-arrow{
@@ -2715,31 +2941,81 @@ const HGR_MISSION_CSS = `
   font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.06em; text-transform:uppercase;
   color:var(--hgr-m-amber); margin-bottom:10px;
 }
-.hgr-m-dash-constraints{ display:flex; flex-direction:column; gap:14px; }
-.hgr-m-dash-constraint{ padding:14px 16px; background:var(--hgr-m-navy-deep); border:1px solid var(--hgr-m-hairline); border-radius:2px; }
+.hgr-m-dash-constraint-subgroup{ margin-bottom:16px; }
+.hgr-m-dash-constraint-subgroup:last-child{ margin-bottom:0; }
+.hgr-m-dash-constraint-subgroup-label{
+  font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--hgr-m-paper-dim); margin-bottom:6px;
+}
+.hgr-m-dash-constraints{ background:var(--hgr-m-navy-deep); border:1px solid var(--hgr-m-hairline); border-radius:2px; }
+.hgr-m-dash-constraint{ display:flex; gap:12px; padding:14px 16px; border-top:1px dashed var(--hgr-m-hairline); }
+.hgr-m-dash-constraint:first-child{ border-top:none; }
+.hgr-m-dash-constraint-num{
+  font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--hgr-m-paper-dim);
+  flex-shrink:0; width:20px;
+}
+.hgr-m-dash-constraint-body{ flex:1; min-width:0; }
 .hgr-m-dash-constraint-main{ font-size:13.5px; margin-bottom:8px; }
 .hgr-m-dash-tags{ display:flex; flex-wrap:wrap; gap:6px; }
 .hgr-m-dash-tag{ font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--hgr-m-blue-bright); border:1px solid rgba(111,180,224,.35); padding:3px 9px; border-radius:2px; }
-.hgr-m-dash-kpis{ display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--hgr-m-hairline); border:1px solid var(--hgr-m-hairline); }
-@media(max-width:760px){ .hgr-m-dash-kpis{ grid-template-columns:1fr 1fr; } }
-@media(max-width:480px){ .hgr-m-dash-kpis{ grid-template-columns:1fr; } }
-.hgr-m-dash-kpi{ background:var(--hgr-m-navy-deep); padding:16px 18px; }
-.hgr-m-dash-kpi-critical{ background:#2A2013; box-shadow:inset 0 0 0 1px rgba(232,163,61,.4); }
-.hgr-m-dash-kpi-name{ font-size:12.5px; color:var(--hgr-m-paper-dim); margin-bottom:6px; }
-.hgr-m-dash-kpi-target{ font-family:'Space Grotesk',sans-serif; font-size:17px; font-weight:600; margin-bottom:8px; }
-.hgr-m-dash-kpi-priority{ font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.06em; color:var(--hgr-m-paper-dim); }
-.hgr-m-dash-kpi-critical .hgr-m-dash-kpi-priority{ color:var(--hgr-m-amber-bright); }
+.hgr-m-dash-kpi-stats{ display:flex; gap:28px; margin-bottom:16px; }
+.hgr-m-dash-kpi-stat b{ display:block; font-family:'Space Grotesk',sans-serif; font-size:26px; font-weight:700; font-variant-numeric:tabular-nums; line-height:1; }
+.hgr-m-dash-kpi-stat span{ display:block; font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.06em; text-transform:uppercase; color:var(--hgr-m-paper-dim); margin-top:6px; }
+.hgr-m-dash-kpi-stat-gate b{ color:var(--hgr-m-amber-bright); }
+.hgr-m-dash-kpi-stat-ranked b{ color:var(--hgr-m-blue-bright); }
+.hgr-m-dash-kpis{ background:var(--hgr-m-navy-deep); border:1px solid var(--hgr-m-hairline); border-radius:2px; }
+.hgr-m-dash-kpi-row{
+  display:grid; grid-template-columns:52px 1fr auto; align-items:center; gap:16px;
+  padding:13px 18px; border-top:1px dashed var(--hgr-m-hairline);
+}
+.hgr-m-dash-kpi-row:first-child{ border-top:none; }
+.hgr-m-dash-kpi-tier{
+  font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:600; text-align:center;
+  padding:4px 0; border-radius:2px; letter-spacing:.04em;
+  background:rgba(111,180,224,.1); color:var(--hgr-m-blue-bright); border:1px solid rgba(111,180,224,.3);
+}
+.hgr-m-dash-kpi-tier-gate{
+  background:rgba(232,163,61,.18); color:var(--hgr-m-amber-bright); border-color:rgba(232,163,61,.4);
+}
+.hgr-m-dash-kpi-field{ min-width:0; }
+.hgr-m-dash-kpi-target-field{ text-align:right; }
+.hgr-m-dash-kpi-eyebrow{
+  font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--hgr-m-paper-dim);
+}
+.hgr-m-dash-kpi-name{ font-size:14px; font-weight:500; margin-top:1px; }
+.hgr-m-dash-kpi-target-value{
+  font-family:'IBM Plex Mono',monospace; font-size:15.5px; font-weight:600; color:var(--hgr-m-blue-bright);
+  font-variant-numeric:tabular-nums; margin-top:1px;
+}
+.hgr-m-dash-kpi-target-value-gate{ color:var(--hgr-m-amber-bright); }
+
+.hgr-m-confbars{ background:var(--hgr-m-navy-deep); border:1px solid var(--hgr-m-hairline); border-radius:2px; padding:20px 22px; }
+.hgr-m-confbar-row{ margin-bottom:16px; }
+.hgr-m-confbar-row:last-child{ margin-bottom:0; }
+.hgr-m-confbar-head{ display:flex; justify-content:space-between; align-items:baseline; gap:12px; margin-bottom:6px; flex-wrap:wrap; }
+.hgr-m-confbar-label{ font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.02em; color:var(--hgr-m-paper-dim); }
+.hgr-m-confbar-value{ font-family:'IBM Plex Mono',monospace; font-size:12.5px; font-weight:600; color:var(--hgr-m-paper); font-variant-numeric:tabular-nums; }
+.hgr-m-confbar-track{ height:8px; background:rgba(255,255,255,.05); border-radius:4px; overflow:hidden; }
+.hgr-m-confbar-slots{ display:flex; gap:6px; }
+.hgr-m-confbar-slot{
+  flex:1; height:28px; border-radius:2px; display:flex; align-items:center; justify-content:center;
+  font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:600; letter-spacing:.02em;
+}
+.hgr-m-confbar-slot-yes{ background:rgba(74,222,128,.15); border:1px solid rgba(74,222,128,.5); color:#4ADE80; }
+.hgr-m-confbar-slot-no{ background:rgba(248,113,113,.1); border:1px dashed rgba(248,113,113,.4); color:#F87171; }
+.hgr-m-confbar-fill{ height:100%; border-radius:4px; background:var(--hgr-m-blue-bright); }
+.hgr-m-confbar-fill-penalty{ background:var(--hgr-m-amber-bright); }
+.hgr-m-confbar-total{
+  display:flex; justify-content:space-between; align-items:baseline; margin-top:18px; padding-top:14px;
+  border-top:1px dashed var(--hgr-m-hairline);
+  font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--hgr-m-paper-dim);
+}
+.hgr-m-confbar-total b{
+  font-family:'Space Grotesk',sans-serif; font-size:22px; font-weight:700; color:var(--hgr-m-paper);
+  font-variant-numeric:tabular-nums; text-transform:none; letter-spacing:normal;
+}
 .hgr-m-dash-flags{ margin:0; padding-left:20px; color:var(--hgr-m-paper-dim); font-size:13px; line-height:1.9; }
-.hgr-m-dash-tools{ display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--hgr-m-hairline); border:1px solid var(--hgr-m-hairline); }
-@media(max-width:900px){ .hgr-m-dash-tools{ grid-template-columns:1fr 1fr; } }
-@media(max-width:560px){ .hgr-m-dash-tools{ grid-template-columns:1fr; } }
-.hgr-m-dash-tools-col{ background:var(--hgr-m-navy-deep); padding:16px 18px; }
-.hgr-m-dash-tools-stage{ font-family:'IBM Plex Mono',monospace; color:var(--hgr-m-amber); font-size:10.5px; letter-spacing:.05em; text-transform:uppercase; margin-bottom:10px; }
-.hgr-m-dash-tools-col ul{ list-style:none; margin:0; padding:0; }
-.hgr-m-dash-tools-col li{ font-size:12.5px; padding:6px 0; border-top:1px dashed var(--hgr-m-hairline); }
-.hgr-m-dash-tools-col li:first-child{ border-top:none; }
-.hgr-m-dash-tools-col li b{ color:var(--hgr-m-paper); font-weight:500; display:block; margin-bottom:1px; }
-.hgr-m-dash-tools-col li span{ color:var(--hgr-m-paper-dim); }
 .hgr-m-dash-actions{ display:flex; flex-wrap:wrap; gap:12px; padding:24px 28px; }
 .hgr-m-dash-finalize-error{ margin:0 28px 24px; color:var(--hgr-m-amber-bright); font-size:13px; }
 `;

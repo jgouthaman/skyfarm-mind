@@ -1,5 +1,4 @@
-import { createServerFn } from "@tanstack/react-start";
-import { callLlmGateway, stripJsonFences } from "./llmGateway.ts";
+import { callLlmGateway, stripJsonFences, type LlmUsage } from "./llmGateway.ts";
 import type {
   FinalizedConstraint,
   FinalizedKpi,
@@ -26,7 +25,7 @@ import type {
 // chance to drift, not a copy operation. Numeric fidelity is called out
 // explicitly because that's the failure mode that actually happened, not a
 // hypothetical one.
-const SYSTEM = `Write a concise, plain-language summary of this mission for a human reviewer to confirm before it's saved. 3-5 sentences. State the mission type, the platform class, the top 2-3 constraints, and the primary KPI targets. Do not introduce any information not present in the structured input below — this is a summary, not a new inference. Every number you state (KPI targets, quantities, units) must match the structured input exactly, character-for-character — never round, convert units, or restate a target from memory or context.`;
+const SYSTEM = `Write a concise, plain-language summary of this mission for a human reviewer to confirm before it's saved. 3-5 sentences. State the mission type, the platform class, the top 2-3 constraints, and the primary KPI targets. Do not introduce any information not present in the structured input below — this is a summary, not a new inference. Every number you state (KPI targets, quantities, units) must match the structured input exactly, character-for-character — never round, convert units, or restate a target from memory or context. Return JSON only, no prose outside the JSON object.`;
 
 export interface MissionSummaryInput {
   missionSpecs: MissionSpecsFields;
@@ -37,24 +36,44 @@ export interface MissionSummaryInput {
 export interface MissionSummaryResult {
   summary: string;
   mock: boolean;
+  usage: LlmUsage | null;
 }
 
-export const generateMissionSummary = createServerFn({ method: "POST" })
-  .validator((d: MissionSummaryInput) => d)
-  .handler(async ({ data }): Promise<MissionSummaryResult> => {
-    const userContent = `Mission specification: ${JSON.stringify(data.missionSpecs, null, 2)}
+// Plain async function, not createServerFn — same workaround already
+// applied to simDesignGeneration.ts's generateSimDesign for the identical
+// symptom (see that file's header comment for the full writeup): on this
+// app's real Vercel deployment, this function's compiled createServerFn
+// handler started throwing "Server function info not found for <hash>" —
+// its manifest entry not resolving at runtime — confirmed live against a
+// deployed preview. That earlier investigation found no deterministic
+// source-level cause (nesting one createServerFn inside another isn't
+// itself the trigger — this same nested shape was previously confirmed
+// working here before this broke), so this is not a claim that nested
+// createServerFn calls are generally unsafe, only that THIS specific
+// function hit the same unresolved Vercel-side bug Bay 05 did. Since
+// generateMissionSummary has exactly one caller anywhere in the codebase
+// (stage3Orchestrator.ts's runOutputGeneration, itself only ever reached
+// from the server-only output-generation route handler) and is never
+// invoked from client code, it never needed the createServerFn RPC/hash
+// dispatch mechanism — removing the wrapper sidesteps the bug without
+// touching any other bay's working createServerFn usage. If a real root
+// cause is found later, this can be revisited.
+export async function generateMissionSummary(
+  data: MissionSummaryInput,
+): Promise<MissionSummaryResult> {
+  const userContent = `Mission specification: ${JSON.stringify(data.missionSpecs, null, 2)}
 Constraints: ${JSON.stringify(data.constraints, null, 2)}
 KPIs: ${JSON.stringify(data.kpis, null, 2)}
 
 Return: { "summary": "string" }`;
 
-    const { content } = await callLlmGateway(SYSTEM, userContent, { jsonMode: true });
-    if (!content) return { summary: mockSummary(data), mock: true };
+  const { content, usage } = await callLlmGateway(SYSTEM, userContent, { jsonMode: true });
+  if (!content) return { summary: mockSummary(data), mock: true, usage: null };
 
-    const parsed = parseSummaryResponse(content);
-    if (!parsed) return { summary: mockSummary(data), mock: true };
-    return { summary: parsed, mock: false };
-  });
+  const parsed = parseSummaryResponse(content);
+  if (!parsed) return { summary: mockSummary(data), mock: true, usage: null };
+  return { summary: parsed, mock: false, usage };
+}
 
 function parseSummaryResponse(raw: string): string | null {
   try {
