@@ -583,6 +583,14 @@ function CertificationResultView({
             {Math.round(result.confidenceScore * 100)}%
           </div>
           <div className="hgr-c-dash-confidence-label">Confidence</div>
+          <Link
+            to="/the-hangar/bernoulli"
+            search={{ source: "certification", missionId: "", sourceId: result.certificationId }}
+            className="hgr-c-dash-bernoulli-link"
+            title="Sanity-check this result's origin mission spec against conservation laws and aerospace empiricals."
+          >
+            Ask Bernoulli →
+          </Link>
         </div>
       </div>
 
@@ -637,6 +645,16 @@ function PastCertificationDetail({
               {Math.round(certification.confidenceScore * 100)}%
             </div>
             <div className="hgr-c-dash-confidence-label">Confidence</div>
+            {hasSpec && (
+              <Link
+                to="/the-hangar/bernoulli"
+                search={{ source: "certification", missionId: "", sourceId: certification.certificationId }}
+                className="hgr-c-dash-bernoulli-link"
+                title="Sanity-check this result's origin mission spec against conservation laws and aerospace empiricals."
+              >
+                Ask Bernoulli →
+              </Link>
+            )}
           </div>
         )}
       </div>
@@ -804,6 +822,12 @@ const HGR_CERTIFICATION_CSS = `
 .hgr-c-dash-confidence{ text-align:center; flex-shrink:0; }
 .hgr-c-dash-confidence-num{ font-family:'Space Grotesk',sans-serif; font-size:32px; font-weight:700; color:var(--hgr-c-amber-bright); line-height:1; }
 .hgr-c-dash-confidence-label{ font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--hgr-c-paper-dim); }
+.hgr-c-dash-bernoulli-link{
+  display:inline-block; margin-top:10px; font-family:'IBM Plex Mono',monospace; font-size:11px;
+  color:var(--hgr-c-blue-bright); text-decoration:none; border:1px solid var(--hgr-c-hairline);
+  border-radius:2px; padding:5px 10px; white-space:nowrap;
+}
+.hgr-c-dash-bernoulli-link:hover{ border-color:var(--hgr-c-blue-bright); color:var(--hgr-c-paper); }
 .hgr-c-dash-section{ padding:24px 28px; border-bottom:1px solid var(--hgr-c-hairline); }
 .hgr-c-dash-section:last-of-type{ border-bottom:none; }
 .hgr-c-dash-section h4{ font-family:'Space Grotesk',sans-serif; font-size:14.5px; font-weight:600; margin-bottom:16px; }

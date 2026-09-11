@@ -587,6 +587,14 @@ function CFDResultView({
             {Math.round(result.confidenceScore * 100)}%
           </div>
           <div className="hgr-f-dash-confidence-label">Confidence</div>
+          <Link
+            to="/the-hangar/bernoulli"
+            search={{ source: "cfd", missionId: "", sourceId: result.cfdAnalysisId }}
+            className="hgr-f-dash-bernoulli-link"
+            title="Sanity-check this analysis's origin mission spec against conservation laws and aerospace empiricals."
+          >
+            Ask Bernoulli →
+          </Link>
         </div>
       </div>
 
@@ -654,6 +662,16 @@ function PastCFDAnalysisDetail({
               {Math.round(analysis.confidenceScore * 100)}%
             </div>
             <div className="hgr-f-dash-confidence-label">Confidence</div>
+            {hasOutput && (
+              <Link
+                to="/the-hangar/bernoulli"
+                search={{ source: "cfd", missionId: "", sourceId: analysis.cfdAnalysisId }}
+                className="hgr-f-dash-bernoulli-link"
+                title="Sanity-check this analysis's origin mission spec against conservation laws and aerospace empiricals."
+              >
+                Ask Bernoulli →
+              </Link>
+            )}
           </div>
         )}
       </div>
@@ -818,6 +836,12 @@ const HGR_CFD_ANALYSIS_CSS = `
 .hgr-f-dash-confidence{ text-align:center; flex-shrink:0; }
 .hgr-f-dash-confidence-num{ font-family:'Space Grotesk',sans-serif; font-size:32px; font-weight:700; color:var(--hgr-f-amber-bright); line-height:1; }
 .hgr-f-dash-confidence-label{ font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--hgr-f-paper-dim); }
+.hgr-f-dash-bernoulli-link{
+  display:inline-block; margin-top:10px; font-family:'IBM Plex Mono',monospace; font-size:11px;
+  color:var(--hgr-f-blue-bright); text-decoration:none; border:1px solid var(--hgr-f-hairline);
+  border-radius:2px; padding:5px 10px; white-space:nowrap;
+}
+.hgr-f-dash-bernoulli-link:hover{ border-color:var(--hgr-f-blue-bright); color:var(--hgr-f-paper); }
 .hgr-f-dash-section{ padding:24px 28px; border-bottom:1px solid var(--hgr-f-hairline); }
 .hgr-f-dash-section:last-of-type{ border-bottom:none; }
 .hgr-f-dash-section h4{ font-family:'Space Grotesk',sans-serif; font-size:14.5px; font-weight:600; margin-bottom:16px; }

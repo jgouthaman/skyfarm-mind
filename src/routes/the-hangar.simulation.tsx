@@ -619,6 +619,14 @@ function SimulationResultView({
             {Math.round(result.confidenceScore * 100)}%
           </div>
           <div className="hgr-s-dash-confidence-label">Confidence</div>
+          <Link
+            to="/the-hangar/bernoulli"
+            search={{ source: "simulation", missionId: "", sourceId: result.simulationId }}
+            className="hgr-s-dash-bernoulli-link"
+            title="Sanity-check this simulation's origin mission spec against conservation laws and aerospace empiricals."
+          >
+            Ask Bernoulli →
+          </Link>
         </div>
       </div>
 
@@ -692,6 +700,16 @@ function PastSimulationDetail({
               {Math.round(simulation.confidenceScore * 100)}%
             </div>
             <div className="hgr-s-dash-confidence-label">Confidence</div>
+            {hasSpec && (
+              <Link
+                to="/the-hangar/bernoulli"
+                search={{ source: "simulation", missionId: "", sourceId: simulation.simulationId }}
+                className="hgr-s-dash-bernoulli-link"
+                title="Sanity-check this simulation's origin mission spec against conservation laws and aerospace empiricals."
+              >
+                Ask Bernoulli →
+              </Link>
+            )}
           </div>
         )}
       </div>
@@ -860,6 +878,12 @@ const HGR_SIMULATION_CSS = `
 .hgr-s-dash-confidence{ text-align:center; flex-shrink:0; }
 .hgr-s-dash-confidence-num{ font-family:'Space Grotesk',sans-serif; font-size:32px; font-weight:700; color:var(--hgr-s-amber-bright); line-height:1; }
 .hgr-s-dash-confidence-label{ font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--hgr-s-paper-dim); }
+.hgr-s-dash-bernoulli-link{
+  display:inline-block; margin-top:10px; font-family:'IBM Plex Mono',monospace; font-size:11px;
+  color:var(--hgr-s-blue-bright); text-decoration:none; border:1px solid var(--hgr-s-hairline);
+  border-radius:2px; padding:5px 10px; white-space:nowrap;
+}
+.hgr-s-dash-bernoulli-link:hover{ border-color:var(--hgr-s-blue-bright); color:var(--hgr-s-paper); }
 .hgr-s-dash-section{ padding:24px 28px; border-bottom:1px solid var(--hgr-s-hairline); }
 .hgr-s-dash-section:last-of-type{ border-bottom:none; }
 .hgr-s-dash-section h4{ font-family:'Space Grotesk',sans-serif; font-size:14.5px; font-weight:600; margin-bottom:16px; }
