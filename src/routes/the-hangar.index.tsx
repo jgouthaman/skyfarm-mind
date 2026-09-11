@@ -32,7 +32,6 @@ function TheHangarLanding() {
   const [password, setPassword] = useState("");
   const [status, setStatus] = useState<FlightDeckStatus>("form");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [currentUserEmail, setCurrentUserEmail] = useState<string | null>(null);
   // Bumped on every arrival at this page — a fresh route mount (coming from
   // another page) already replays the doors' CSS animation for free, but
   // clicking the brand link back to "/the-hangar" while already ON this
@@ -42,21 +41,6 @@ function TheHangarLanding() {
   const [doorsKey, setDoorsKey] = useState(0);
   const emailRef = useRef<HTMLInputElement>(null);
 
-  // Reflects whatever real Supabase session already exists (e.g. a return
-  // visit after a prior Flight Deck sign-in) as well as one just created by
-  // the modal below — same session the mission API's Bearer check reads.
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      setCurrentUserEmail(data.session?.user.email ?? null);
-    });
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setCurrentUserEmail(session?.user.email ?? null);
-    });
-    return () => subscription.unsubscribe();
-  }, []);
-
   function openFlightDeck() {
     setModalOpen(true);
     setStatus("form");
@@ -64,11 +48,6 @@ function TheHangarLanding() {
     setEmail("");
     setPassword("");
     setTimeout(() => emailRef.current?.focus(), 150);
-  }
-
-  async function signOutOfHangar() {
-    await supabase.auth.signOut();
-    sessionStorage.removeItem("hangar_session");
   }
 
   function closeFlightDeck() {
@@ -130,26 +109,20 @@ function TheHangarLanding() {
             <a href="#stack">Stack</a>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-            {currentUserEmail ? (
-              <>
-                <Link to="/the-hangar/welcome" className="hgr-btn hgr-btn-ghost">
-                  Welcome, {currentUserEmail}
-                </Link>
-                <button type="button" className="hgr-btn hgr-btn-ghost" onClick={signOutOfHangar}>
-                  Sign out
-                </button>
-              </>
-            ) : (
-              <button
-                type="button"
-                className="hgr-btn hgr-btn-ghost"
-                aria-label="Sign in to your TorqWings account"
-                title="Sign in"
-                onClick={openFlightDeck}
-              >
-                Flight Deck
-              </button>
-            )}
+            {/* Always the signed-out "Flight Deck" state on this landing
+                page, regardless of whatever Supabase session already exists
+                underneath (e.g. a return visit) — bay pages (welcome,
+                mission, etc.) still read and honor that real session as
+                usual; this page just never reflects it in its own nav. */}
+            <button
+              type="button"
+              className="hgr-btn hgr-btn-ghost"
+              aria-label="Sign in to your TorqWings account"
+              title="Sign in"
+              onClick={openFlightDeck}
+            >
+              Flight Deck
+            </button>
           </div>
         </div>
       </nav>

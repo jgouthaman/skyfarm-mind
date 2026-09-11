@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { callLlmGateway, stripJsonFences } from "./llmGateway.ts";
+import { callLlmGateway, stripJsonFences, type LlmUsage } from "./llmGateway.ts";
 import type {
   FinalizedConstraint,
   FinalizedKpi,
@@ -26,7 +26,7 @@ import type {
 // chance to drift, not a copy operation. Numeric fidelity is called out
 // explicitly because that's the failure mode that actually happened, not a
 // hypothetical one.
-const SYSTEM = `Write a concise, plain-language summary of this mission for a human reviewer to confirm before it's saved. 3-5 sentences. State the mission type, the platform class, the top 2-3 constraints, and the primary KPI targets. Do not introduce any information not present in the structured input below — this is a summary, not a new inference. Every number you state (KPI targets, quantities, units) must match the structured input exactly, character-for-character — never round, convert units, or restate a target from memory or context.`;
+const SYSTEM = `Write a concise, plain-language summary of this mission for a human reviewer to confirm before it's saved. 3-5 sentences. State the mission type, the platform class, the top 2-3 constraints, and the primary KPI targets. Do not introduce any information not present in the structured input below — this is a summary, not a new inference. Every number you state (KPI targets, quantities, units) must match the structured input exactly, character-for-character — never round, convert units, or restate a target from memory or context. Return JSON only, no prose outside the JSON object.`;
 
 export interface MissionSummaryInput {
   missionSpecs: MissionSpecsFields;
@@ -37,6 +37,7 @@ export interface MissionSummaryInput {
 export interface MissionSummaryResult {
   summary: string;
   mock: boolean;
+  usage: LlmUsage | null;
 }
 
 export const generateMissionSummary = createServerFn({ method: "POST" })
@@ -48,12 +49,12 @@ KPIs: ${JSON.stringify(data.kpis, null, 2)}
 
 Return: { "summary": "string" }`;
 
-    const { content } = await callLlmGateway(SYSTEM, userContent, { jsonMode: true });
-    if (!content) return { summary: mockSummary(data), mock: true };
+    const { content, usage } = await callLlmGateway(SYSTEM, userContent, { jsonMode: true });
+    if (!content) return { summary: mockSummary(data), mock: true, usage: null };
 
     const parsed = parseSummaryResponse(content);
-    if (!parsed) return { summary: mockSummary(data), mock: true };
-    return { summary: parsed, mock: false };
+    if (!parsed) return { summary: mockSummary(data), mock: true, usage: null };
+    return { summary: parsed, mock: false, usage };
   });
 
 function parseSummaryResponse(raw: string): string | null {

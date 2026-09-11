@@ -2,6 +2,7 @@ import { extractIntentAndEntities, type IntentExtractionResult } from "./intentE
 import { decomposeMission } from "./missionDecomposition.ts";
 import { identifyConstraintsAndKpis, type TracedConstraint } from "./constraintIdentification.ts";
 import { prioritizeTradeoffs } from "./tradeoffPrioritization.ts";
+import { sumUsage, type LlmUsage } from "./llmGateway.ts";
 import { runOutputGeneration, type Stage3Output } from "./stage3Orchestrator.ts";
 import type {
   FinalizedConstraint,
@@ -120,6 +121,7 @@ export interface Stage1Result {
   attachedRegulations: string[];
   extraction: IntentExtractionResult;
   validationFlags: string[];
+  durationMs: number;
 }
 
 export async function runInputProcessingStage(request: Stage1Request): Promise<Stage1Result> {
@@ -153,6 +155,7 @@ export async function runInputProcessingStage(request: Stage1Request): Promise<S
     });
 
     const validationFlags = computeValidationFlags(extraction, structuredFields);
+    const durationMs = Date.now() - start;
 
     await logStageRun(
       missionId,
@@ -160,7 +163,7 @@ export async function runInputProcessingStage(request: Stage1Request): Promise<S
       { rawTextCombined, structuredFields, attachedRegulations: directRefs.attachedRegulations },
       { ...extraction, validationFlags },
       "success",
-      Date.now() - start,
+      durationMs,
     );
 
     return {
@@ -171,6 +174,7 @@ export async function runInputProcessingStage(request: Stage1Request): Promise<S
       attachedRegulations: directRefs.attachedRegulations,
       extraction,
       validationFlags,
+      durationMs,
     };
   } catch (err) {
     throw await recordStageFailure(missionId, "input_processing", err);
@@ -194,6 +198,13 @@ export interface Stage2Result {
   derivedKpis: DerivedKpi[];
   prioritizedTradeoffs: PrioritizedTradeoff[];
   mock: boolean;
+  // This stage makes 2 separate LLM calls (decomposition, then combined
+  // constraint+KPI) — requestCount/usage are the sum across whichever of
+  // those 2 actually reached Claude (mock is true if EITHER failed, but
+  // that alone can't tell you if it was 1 of 2 or 2 of 2).
+  requestCount: number;
+  usage: LlmUsage;
+  durationMs: number;
 }
 
 export async function runReasoningPlanningStage(request: Stage2Request): Promise<Stage2Result> {
@@ -220,6 +231,8 @@ export async function runReasoningPlanningStage(request: Stage2Request): Promise
       prioritySignals: extraction.constraintHints,
     });
 
+    const durationMs = Date.now() - start;
+
     await logStageRun(
       missionId,
       "reasoning_planning",
@@ -230,7 +243,7 @@ export async function runReasoningPlanningStage(request: Stage2Request): Promise
         prioritizedTradeoffs,
       },
       "success",
-      Date.now() - start,
+      durationMs,
     );
 
     return {
@@ -240,6 +253,9 @@ export async function runReasoningPlanningStage(request: Stage2Request): Promise
       derivedKpis: constraintsAndKpis.derivedKpis,
       prioritizedTradeoffs,
       mock: decomposition.mock || constraintsAndKpis.mock,
+      requestCount: (decomposition.mock ? 0 : 1) + (constraintsAndKpis.mock ? 0 : 1),
+      usage: sumUsage(decomposition.usage, constraintsAndKpis.usage),
+      durationMs,
     };
   } catch (err) {
     throw await recordStageFailure(missionId, "reasoning_planning", err);
@@ -269,15 +285,9 @@ export async function runOutputGenerationStage(request: Stage3Request): Promise<
   const start = Date.now();
   try {
     const stage3 = await runOutputGeneration({ data: { missionId, ...stage3Input } });
-    await logStageRun(
-      missionId,
-      "output_generation",
-      { missionId },
-      stage3,
-      "success",
-      Date.now() - start,
-    );
-    return stage3;
+    const durationMs = Date.now() - start;
+    await logStageRun(missionId, "output_generation", { missionId }, stage3, "success", durationMs);
+    return { ...stage3, durationMs };
   } catch (err) {
     throw await recordStageFailure(missionId, "output_generation", err);
   }

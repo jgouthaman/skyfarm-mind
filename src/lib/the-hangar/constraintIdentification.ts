@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { callLlmGateway, stripJsonFences } from "./llmGateway.ts";
+import { callLlmGateway, stripJsonFences, type LlmUsage } from "./llmGateway.ts";
 import { DOMAIN_RULES, evaluateDomainRules, type DomainRuleContext } from "./domainRules.ts";
 import type { DerivedKpi, IdentifiedConstraint, ParsedMissionInput } from "./types/hangar-mission";
 
@@ -49,6 +49,7 @@ export interface ConstraintAndKpiResult {
   identifiedConstraints: TracedConstraint[];
   derivedKpis: DerivedKpi[];
   mock: boolean;
+  usage: LlmUsage | null;
 }
 
 // ── Step 2a input: parse raw hints/structured fields into a clean context ──
@@ -271,12 +272,13 @@ Constraints already known (do not repeat these): ${JSON.stringify(knownConstrain
 Return:
 { "identified_constraints": [ { "name": "string", "value": "string", "source": "inferred" } ], "derived_kpis": [ { "name": "string", "target": "string", "unit": "string" } ] }`;
 
-    const { content } = await callLlmGateway(SYSTEM, userContent, { jsonMode: true });
+    const { content, usage } = await callLlmGateway(SYSTEM, userContent, { jsonMode: true });
     if (!content) {
       return {
         identifiedConstraints: knownConstraints,
         derivedKpis: applyStructuredKpiOverrides(mockKpis(data), data.structuredFields),
         mock: true,
+        usage: null,
       };
     }
 
@@ -286,6 +288,7 @@ Return:
         identifiedConstraints: knownConstraints,
         derivedKpis: applyStructuredKpiOverrides(mockKpis(data), data.structuredFields),
         mock: true,
+        usage: null,
       };
     }
 
@@ -293,6 +296,7 @@ Return:
       identifiedConstraints: [...knownConstraints, ...parsed.identifiedConstraints],
       derivedKpis: applyStructuredKpiOverrides(parsed.derivedKpis, data.structuredFields),
       mock: false,
+      usage,
     };
   });
 

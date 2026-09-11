@@ -8,6 +8,7 @@ import {
   type MissionSpecsFields,
 } from "./missionSpecAssembly.ts";
 import { generateMissionSummary } from "./missionSummary.ts";
+import type { LlmUsage } from "./llmGateway.ts";
 import { computeConfidenceScore } from "./confidenceScore.ts";
 import type { TracedConstraint } from "./constraintIdentification.ts";
 import type { DerivedKpi, PrioritizedTradeoff } from "./types/hangar-mission";
@@ -54,6 +55,11 @@ export interface Stage3Output {
   confidenceScore: number;
   /** True if the summary LLM call fell back to its mock (no LOVABLE_API_KEY, or the call failed). */
   mock: boolean;
+  usage: LlmUsage | null;
+  // Set by missionAgentPipeline.ts's runOutputGenerationStage wrapper (this
+  // function itself only does Steps 1-5, no timing of its own) — 0 here,
+  // never read directly off this function's own return value.
+  durationMs: number;
 }
 
 export const runOutputGeneration = createServerFn({ method: "POST" })
@@ -92,5 +98,7 @@ export const runOutputGeneration = createServerFn({ method: "POST" })
       summary: summaryResult.summary,
       confidenceScore,
       mock: summaryResult.mock,
+      usage: summaryResult.usage,
+      durationMs: 0,
     };
   });

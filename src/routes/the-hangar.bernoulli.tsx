@@ -159,8 +159,28 @@ function TheHangarBernoulli() {
   const [reviewStatus, setReviewStatus] = useState<"idle" | "loading" | "error">("idle");
   const [reviewResult, setReviewResult] = useState<BernoulliReviewView | null>(null);
   const [reviewError, setReviewError] = useState<string | null>(null);
+  // Landing here with nothing at all (e.g. clicking the Bernoulli hub
+  // directly on the welcome page, not "Ask Bernoulli" from a specific
+  // bay) shows just the idle hub circle -- no picker, no legend, no spec
+  // -- until a caller box is clicked. `activeSource` starts at whatever
+  // `search.source` already says (the real "arrived from X" case still
+  // opens straight into the picker); clicking a DIFFERENT box while idle
+  // only updates this local state and reveals the picker, it never
+  // navigates -- only the box matching the true `search.source` is ever
+  // a real back-link (see the caller-box rendering below).
+  const [activeSource, setActiveSource] = useState<string>(search.source);
 
   const selectedMission = missions?.find((m) => m.missionId === selectedMissionId) ?? null;
+
+  function activateSource(key: string) {
+    setActiveSource(key);
+    setSelectedMissionId("");
+    setSpecExpanded(true);
+    setCheckTriggered(false);
+    setReviewResult(null);
+    setReviewStatus("idle");
+    setReviewError(null);
+  }
 
   async function requestCheck() {
     if (!selectedMissionId) return;
@@ -373,12 +393,15 @@ function TheHangarBernoulli() {
               <div className="hgr-ber-hub-col">
                 {LEFT_CALLERS.map((b) =>
                   search.source === b.key ? (
-                    // The highlighted box IS the way back -- no separate
-                    // "Back to X" nav link anymore.
+                    // The box matching where we ACTUALLY arrived from is
+                    // the way back -- no separate "Back to X" nav link
+                    // anymore. Still highlighted only while it's also the
+                    // active one (a later click elsewhere moves the glow,
+                    // not the back-link).
                     <Link
                       key={b.bay}
                       to={b.to}
-                      className="hgr-ber-caller-chip hgr-ber-caller-highlighted"
+                      className={`hgr-ber-caller-chip${activeSource === b.key ? " hgr-ber-caller-highlighted" : ""}`}
                       style={{ textDecoration: "none" }}
                       title={`Back to ${b.name}`}
                     >
@@ -386,15 +409,37 @@ function TheHangarBernoulli() {
                       <span className="hgr-ber-caller-name">{b.name}</span>
                     </Link>
                   ) : (
-                    <div key={b.bay} className="hgr-ber-caller-chip">
+                    // Not where we arrived from -- clicking just activates
+                    // it locally (reveals the picker if we landed idle),
+                    // it never navigates.
+                    <button
+                      key={b.bay}
+                      type="button"
+                      className={`hgr-ber-caller-chip hgr-ber-caller-clickable${activeSource === b.key ? " hgr-ber-caller-highlighted" : ""}`}
+                      onClick={() => activateSource(b.key)}
+                    >
                       <span className="hgr-ber-caller-bay">BAY {b.bay}</span>
                       <span className="hgr-ber-caller-name">{b.name}</span>
-                    </div>
+                    </button>
                   ),
                 )}
               </div>
 
               <div className="hgr-ber-hub-center">
+                {!activeSource ? (
+                  // Landed with no source/missionId/sourceId at all --
+                  // e.g. clicked the Bernoulli hub directly on the welcome
+                  // page, not "Ask Bernoulli" from a specific bay. Show
+                  // just the idle hub circle; clicking any caller box to
+                  // the left/right reveals the picker below instead.
+                  <div className="hgr-ber-hub-idle">
+                    <div className="hgr-ber-hub-idle-circle">
+                      <span>BERNOULLI</span>
+                    </div>
+                    <p className="hgr-ber-hub-idle-hint">Click a bay to pick a mission to review.</p>
+                  </div>
+                ) : (
+                  <>
                 <label className="hgr-ber-hub-select-label" htmlFor="bernoulli-mission-select">
                   Your missions -- spec ready or finalized
                 </label>
@@ -623,6 +668,8 @@ function TheHangarBernoulli() {
                     )}
                   </div>
                 )}
+                  </>
+                )}
               </div>
 
               <div className="hgr-ber-hub-col">
@@ -631,7 +678,7 @@ function TheHangarBernoulli() {
                     <Link
                       key={b.bay}
                       to={b.to}
-                      className="hgr-ber-caller-chip hgr-ber-caller-highlighted"
+                      className={`hgr-ber-caller-chip${activeSource === b.key ? " hgr-ber-caller-highlighted" : ""}`}
                       style={{ textDecoration: "none" }}
                       title={`Back to ${b.name}`}
                     >
@@ -639,10 +686,15 @@ function TheHangarBernoulli() {
                       <span className="hgr-ber-caller-name">{b.name}</span>
                     </Link>
                   ) : (
-                    <div key={b.bay} className="hgr-ber-caller-chip">
+                    <button
+                      key={b.bay}
+                      type="button"
+                      className={`hgr-ber-caller-chip hgr-ber-caller-clickable${activeSource === b.key ? " hgr-ber-caller-highlighted" : ""}`}
+                      onClick={() => activateSource(b.key)}
+                    >
                       <span className="hgr-ber-caller-bay">BAY {b.bay}</span>
                       <span className="hgr-ber-caller-name">{b.name}</span>
-                    </div>
+                    </button>
                   ),
                 )}
               </div>
@@ -750,12 +802,26 @@ const HGR_BERNOULLI_CSS = `
   box-shadow:0 0 0 1px var(--hgr-ber-amber), 0 0 16px rgba(232,163,61,.45);
 }
 .hgr-ber-caller-highlighted:hover{ background:rgba(232,163,61,.18); }
+.hgr-ber-caller-clickable{
+  cursor:pointer; font-family:inherit; text-align:left; color:inherit;
+}
 
 .hgr-ber-hub-center{
   flex:0 0 400px; display:flex; flex-direction:column; align-items:stretch; text-align:left;
   padding-top:12px; gap:10px;
 }
 @media(max-width:900px){ .hgr-ber-hub-center{ padding-top:0; flex:1; } }
+.hgr-ber-hub-idle{
+  flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:16px; padding:40px 0;
+}
+.hgr-ber-hub-idle-circle{
+  width:120px; height:120px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  background:#0C2338; border:1.5px dashed var(--hgr-ber-blue-line);
+  font-family:'IBM Plex Mono',monospace; font-size:12px; font-weight:700; letter-spacing:.06em;
+  color:var(--hgr-ber-paper); text-align:center;
+}
+.hgr-ber-hub-idle-hint{ color:var(--hgr-ber-paper-dim); font-size:12.5px; line-height:1.5; margin:0; text-align:center; }
 .hgr-ber-hub-select-label{ font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--hgr-ber-paper-dim); }
 .hgr-ber-hub-select-row{ display:flex; gap:10px; align-items:stretch; }
 .hgr-ber-hub-select{
