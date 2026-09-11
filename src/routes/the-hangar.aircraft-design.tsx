@@ -437,7 +437,11 @@ function TheHangarAircraftDesign() {
                     )}
 
                     {flow.status === "complete" && flow.result && (
-                      <GeometryResultView result={flow.result} onStartNew={resetFlow} />
+                      <GeometryResultView
+                        result={flow.result}
+                        sourceMissionId={selectedConcept?.sourceMissionId ?? null}
+                        onStartNew={resetFlow}
+                      />
                     )}
                   </div>
                 )}
@@ -573,9 +577,11 @@ function ComponentSelectionsList({ components }: { components: ComponentSelectio
 // button that would call a nonexistent endpoint.
 function GeometryResultView({
   result,
+  sourceMissionId,
   onStartNew,
 }: {
   result: Stage1Result;
+  sourceMissionId: string | null;
   onStartNew: () => void;
 }) {
   return (
@@ -591,6 +597,16 @@ function GeometryResultView({
             {Math.round(result.confidenceScore * 100)}%
           </div>
           <div className="hgr-a-dash-confidence-label">Confidence</div>
+          {sourceMissionId && (
+            <Link
+              to="/the-hangar/bernoulli"
+              search={{ source: "aircraft-design", missionId: sourceMissionId, sourceId: "" }}
+              className="hgr-a-dash-bernoulli-link"
+              title="Sanity-check this design's origin mission spec against conservation laws and aerospace empiricals."
+            >
+              Ask Bernoulli →
+            </Link>
+          )}
         </div>
       </div>
 
@@ -654,6 +670,16 @@ function PastDesignDetail({
               {Math.round(design.confidenceScore * 100)}%
             </div>
             <div className="hgr-a-dash-confidence-label">Confidence</div>
+            {hasSpec && (
+              <Link
+                to="/the-hangar/bernoulli"
+                search={{ source: "aircraft-design", missionId: "", sourceId: design.aircraftDesignId }}
+                className="hgr-a-dash-bernoulli-link"
+                title="Sanity-check this design's origin mission spec against conservation laws and aerospace empiricals."
+              >
+                Ask Bernoulli →
+              </Link>
+            )}
           </div>
         )}
       </div>
@@ -814,6 +840,12 @@ const HGR_AIRCRAFT_DESIGN_CSS = `
 .hgr-a-dash-confidence{ text-align:center; flex-shrink:0; }
 .hgr-a-dash-confidence-num{ font-family:'Space Grotesk',sans-serif; font-size:32px; font-weight:700; color:var(--hgr-a-amber-bright); line-height:1; }
 .hgr-a-dash-confidence-label{ font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--hgr-a-paper-dim); }
+.hgr-a-dash-bernoulli-link{
+  display:inline-block; margin-top:10px; font-family:'IBM Plex Mono',monospace; font-size:11px;
+  color:var(--hgr-a-blue-bright); text-decoration:none; border:1px solid var(--hgr-a-hairline);
+  border-radius:2px; padding:5px 10px; white-space:nowrap;
+}
+.hgr-a-dash-bernoulli-link:hover{ border-color:var(--hgr-a-blue-bright); color:var(--hgr-a-paper); }
 .hgr-a-dash-section{ padding:24px 28px; border-bottom:1px solid var(--hgr-a-hairline); }
 .hgr-a-dash-section:last-of-type{ border-bottom:none; }
 .hgr-a-dash-section h4{ font-family:'Space Grotesk',sans-serif; font-size:14.5px; font-weight:600; margin-bottom:16px; }

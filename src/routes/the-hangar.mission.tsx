@@ -1113,19 +1113,34 @@ function TheHangarMission() {
 
             {missionsListStatus === "error" && <ListFetchError onRetry={fetchMissionsList} />}
 
-            {missionsListStatus !== "error" &&
-              missionsList &&
-              missionsList.length > 0 &&
-              !selectedMission && (
-                <MissionsListPanel
-                  missions={missionsList}
-                  expanded={missionsExpanded}
-                  onToggleExpanded={() => setMissionsExpanded((v) => !v)}
-                  onSelect={(m) =>
-                    m.status === "finalized" ? setSelectedMission(m) : resumeMission(m)
-                  }
-                />
-              )}
+            {/* "Your missions" and "+ Plan a new mission" are navigation
+                aids for whatever's currently showing below -- the blank
+                intake form, a resumed live dashboard, or a read-only past
+                mission -- so both stay up here across all three, rather
+                than disappearing the moment a finalized mission's detail
+                view takes over the content area. */}
+            {missionsListStatus !== "error" && missionsList && missionsList.length > 0 && (
+              <MissionsListPanel
+                missions={missionsList}
+                expanded={missionsExpanded}
+                onToggleExpanded={() => setMissionsExpanded((v) => !v)}
+                onSelect={(m) => {
+                  // Collapse the row list once something's picked -- the
+                  // spec shows directly below -- but the panel itself (and
+                  // its toggle) stays put so switching to a different past
+                  // mission is still one click away.
+                  setMissionsExpanded(false);
+                  if (m.status === "finalized") setSelectedMission(m);
+                  else resumeMission(m);
+                }}
+              />
+            )}
+
+            {(!isIdle || selectedMission) && (
+              <button type="button" className="hgr-m-plan-new-link" onClick={resetFlow}>
+                + Plan a new mission
+              </button>
+            )}
 
             {selectedMission ? (
               <PastMissionDetail
@@ -1133,12 +1148,16 @@ function TheHangarMission() {
                 onBack={() => setSelectedMission(null)}
               />
             ) : (
-              // The "Plan a new mission" collapsible only applies before
-              // anything has started — once a mission is running, resumed
-              // from history, or showing its finished dashboard, that label
-              // would be actively wrong (you're not planning a NEW one), so
-              // it's shown open and unlabeled instead.
-              <div className={isIdle ? "hgr-m-missions-panel" : undefined}>
+              // The "Plan a new mission" collapsible header below only
+              // applies before anything has started -- once a mission is
+              // running or resumed, that label would be actively wrong
+              // (you're not planning a NEW one), so it's shown open and
+              // unlabeled instead. The reset link above takes its place
+              // once a mission is active, so starting fresh doesn't
+              // require scrolling all the way down to the dashboard's own
+              // "Start a new mission" action.
+              <>
+                <div className={isIdle ? "hgr-m-missions-panel" : undefined}>
                 {isIdle && (
                   <button
                     type="button"
@@ -1390,7 +1409,8 @@ function TheHangarMission() {
                     )}
                   </div>
                 )}
-              </div>
+                </div>
+              </>
             )}
           </div>
         </section>
@@ -1653,6 +1673,26 @@ function PastMissionDetail({ mission, onBack }: { mission: MissionListEntry; onB
               {Math.round(mission.confidenceScore * 100)}%
             </div>
             <div className="hgr-m-dash-confidence-label">Confidence</div>
+            {hasSpec && (
+              <Link
+                to="/the-hangar/bernoulli"
+                search={{ source: "mission", missionId: mission.missionId, sourceId: "" }}
+                className="hgr-m-dash-bernoulli-link"
+                style={
+                  mission.status === "finalized"
+                    ? { pointerEvents: "none", opacity: 0.4 }
+                    : undefined
+                }
+                aria-disabled={mission.status === "finalized"}
+                title={
+                  mission.status === "finalized"
+                    ? "This mission is finalized — a physics check on a locked spec isn't useful groundwork anymore."
+                    : "Sanity-check this spec's numbers against conservation laws and aerospace empiricals."
+                }
+              >
+                Ask Bernoulli →
+              </Link>
+            )}
           </div>
         )}
       </div>
@@ -2005,6 +2045,22 @@ function MissionDashboard({
               </span>
             </span>
           </div>
+          <Link
+            to="/the-hangar/bernoulli"
+            search={{ source: "mission", missionId: result.missionId, sourceId: "" }}
+            className="hgr-m-dash-bernoulli-link"
+            style={
+              finalizeState.status === "saved" ? { pointerEvents: "none", opacity: 0.4 } : undefined
+            }
+            aria-disabled={finalizeState.status === "saved"}
+            title={
+              finalizeState.status === "saved"
+                ? "This mission is finalized — a physics check on a locked spec isn't useful groundwork anymore."
+                : "Sanity-check this spec's numbers against conservation laws and aerospace empiricals."
+            }
+          >
+            Ask Bernoulli →
+          </Link>
         </div>
       </div>
 
@@ -2405,6 +2461,13 @@ const HGR_MISSION_CSS = `
 .hgr-m-btn:disabled:hover{ color:var(--hgr-m-paper-dim); border-color:var(--hgr-m-hairline); }
 
 /* ── Your missions ── */
+.hgr-m-plan-new-link{
+  display:inline-flex; align-items:center; gap:6px; margin-bottom:20px;
+  font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.04em;
+  color:var(--hgr-m-blue-bright); background:none; border:1px solid var(--hgr-m-hairline);
+  border-radius:2px; padding:9px 16px; cursor:pointer;
+}
+.hgr-m-plan-new-link:hover{ color:var(--hgr-m-paper); border-color:var(--hgr-m-blue-bright); }
 .hgr-m-missions-panel{ border:1px solid var(--hgr-m-hairline); background:var(--hgr-m-navy-panel); border-radius:2px; margin-bottom:32px; }
 .hgr-m-missions-panel-title{
   display:flex; align-items:center; justify-content:space-between; width:100%;
@@ -2567,6 +2630,12 @@ const HGR_MISSION_CSS = `
 .hgr-m-dash-confidence-num{ font-family:'Space Grotesk',sans-serif; font-size:32px; font-weight:700; color:var(--hgr-m-amber-bright); line-height:1; }
 .hgr-m-dash-confidence-label{ font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--hgr-m-paper-dim); }
 .hgr-m-dash-confidence-label-row{ display:flex; align-items:center; justify-content:center; gap:6px; margin-top:6px; }
+.hgr-m-dash-bernoulli-link{
+  display:inline-block; margin-top:10px; font-family:'IBM Plex Mono',monospace; font-size:11px;
+  color:var(--hgr-m-blue-bright); text-decoration:none; border:1px solid var(--hgr-m-hairline);
+  border-radius:2px; padding:5px 10px; white-space:nowrap;
+}
+.hgr-m-dash-bernoulli-link:hover{ border-color:var(--hgr-m-blue-bright); color:var(--hgr-m-paper); }
 
 /* ── Confidence boost wizard ── */
 .hgr-m-boost-arrow{

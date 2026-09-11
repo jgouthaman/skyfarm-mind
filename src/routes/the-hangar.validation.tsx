@@ -625,6 +625,14 @@ function ValidationResultView({
             {Math.round(result.confidenceScore * 100)}%
           </div>
           <div className="hgr-v-dash-confidence-label">Confidence</div>
+          <Link
+            to="/the-hangar/bernoulli"
+            search={{ source: "validation", missionId: "", sourceId: result.validationId }}
+            className="hgr-v-dash-bernoulli-link"
+            title="Sanity-check this result's origin mission spec against conservation laws and aerospace empiricals."
+          >
+            Ask Bernoulli →
+          </Link>
         </div>
       </div>
 
@@ -699,6 +707,16 @@ function PastValidationDetail({
               {Math.round(validation.confidenceScore * 100)}%
             </div>
             <div className="hgr-v-dash-confidence-label">Confidence</div>
+            {hasSpec && (
+              <Link
+                to="/the-hangar/bernoulli"
+                search={{ source: "validation", missionId: "", sourceId: validation.validationId }}
+                className="hgr-v-dash-bernoulli-link"
+                title="Sanity-check this result's origin mission spec against conservation laws and aerospace empiricals."
+              >
+                Ask Bernoulli →
+              </Link>
+            )}
           </div>
         )}
       </div>
@@ -881,6 +899,12 @@ const HGR_VALIDATION_CSS = `
 .hgr-v-dash-confidence{ text-align:center; flex-shrink:0; }
 .hgr-v-dash-confidence-num{ font-family:'Space Grotesk',sans-serif; font-size:32px; font-weight:700; color:var(--hgr-v-amber-bright); line-height:1; }
 .hgr-v-dash-confidence-label{ font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--hgr-v-paper-dim); }
+.hgr-v-dash-bernoulli-link{
+  display:inline-block; margin-top:10px; font-family:'IBM Plex Mono',monospace; font-size:11px;
+  color:var(--hgr-v-blue-bright); text-decoration:none; border:1px solid var(--hgr-v-hairline);
+  border-radius:2px; padding:5px 10px; white-space:nowrap;
+}
+.hgr-v-dash-bernoulli-link:hover{ border-color:var(--hgr-v-blue-bright); color:var(--hgr-v-paper); }
 .hgr-v-dash-section{ padding:24px 28px; border-bottom:1px solid var(--hgr-v-hairline); }
 .hgr-v-dash-section:last-of-type{ border-bottom:none; }
 .hgr-v-dash-section h4{ font-family:'Space Grotesk',sans-serif; font-size:14.5px; font-weight:600; margin-bottom:16px; }
