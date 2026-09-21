@@ -20,6 +20,7 @@ import {
   getLatestStageRun,
   getUsageForMissions,
   logMissionAudit,
+  publishMissionEvent,
   updateMissionStatus,
   persistMissionSpec,
   logStageRun,
@@ -30,12 +31,8 @@ import {
   type HangarMissionRow,
   type MissionStatus,
 } from "./missionPersistence.ts";
-import {
-  stubExport,
-  stubEventPublish,
-  type StubResult,
-  type EventStubResult,
-} from "./exportAndEventStubs.ts";
+import { stubExport, type StubResult } from "./exportAndEventStubs.ts";
+import { buildSpecReadyEvent, type EventPublishResult } from "./missionEvents.ts";
 import type {
   DerivedKpi,
   MissionSourceInput,
@@ -417,7 +414,7 @@ export interface Stage4Result {
   validationFlags: string[];
   specVersion: number;
   export: StubResult;
-  eventPublish: EventStubResult;
+  eventPublish: EventPublishResult;
 }
 
 export async function runOutputInterfaceStage(request: Stage4Request): Promise<Stage4Result> {
@@ -453,7 +450,12 @@ export async function runOutputInterfaceStage(request: Stage4Request): Promise<S
       confidenceScore,
     });
     const exportResult = stubExport();
-    const eventResult = stubEventPublish();
+    // Publishes mission.spec_ready (Section 4.4.3). Never throws; the outcome
+    // (published / duplicate / failed) is recorded in this stage's run row below.
+    const eventResult = await publishMissionEvent(
+      missionId,
+      buildSpecReadyEvent(missionId, specRow.version),
+    );
     await logStageRun(
       missionId,
       "output_interface",
