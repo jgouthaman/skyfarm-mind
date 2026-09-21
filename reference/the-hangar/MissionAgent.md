@@ -1529,7 +1529,8 @@ Status below reflects the code as of 2026-09-21 (read from the source, not from 
 | Item | Phase | Status |
 |---|---|---|
 | Input intake UI | Phase 1 | Built and wired for Natural Language, plus Requirements-form answers via the confidence-boost wizard. Document, Existing Projects, Regulations and Market Data sources have backend parsing/resolution (`missionSourceParsing.ts`, `directReferenceResolver.ts`) but **no intake UI yet** |
-| `Hangar_*` Supabase tables | Phase 1 | `Hangar_missions`, `Hangar_mission_specs`, `Hangar_agent_runs` and the regulations / market-data catalogs exist live in Supabase (there is no migration file for them in the repo). `Hangar_events` is **not** created |
+| `Hangar_*` Supabase tables | Phase 1 | `Hangar_missions`, `Hangar_mission_specs`, `Hangar_agent_runs` and the regulations / market-data catalogs exist live. Their migration was missing; `20260801000000_hangar_mission_agent_baseline.sql` now reconstructs them from the live schema (idempotent — a no-op on the live project, builds them on a fresh one). `Hangar_mission_audit` and `Hangar_events` came later, each with its own migration, both applied |
+| Core-table access hardening | Phase 1 | Migration written, **not yet applied** — `20260922000000_hangar_mission_agent_hardening.sql`. The live schema let a signed-in user write their own `Hangar_missions` rows directly (`owner_all_hangar_missions` is `FOR ALL`), skipping every server check, e.g. setting `status = 'finalized'` with no spec; and `get_next_mission_spec_version` (SECURITY DEFINER) was executable by any API key, revealing whether a mission has specs. The migration makes missions select-only for users, restricts that function to the service role, and indexes `Hangar_agent_runs (mission_id, stage)`. The server uses the service role and is unaffected |
 | Stage 2.1 — LLM extraction (intent + entities) | Phase 1 | Built — one combined Claude call (`intentExtraction.ts`), falls back to a mock when the API key is missing or the call fails |
 | Stage 2.1 — Rules engine (validation & normalization) | Phase 1 | Built (`rulesEngine.ts`, `missionInputValidation.ts`) — deterministic, no LLM |
 | Stage 2.1 — RAG context retrieval | Stub | Stubbed (always-empty) and **not called by the pipeline** — full implementation planned for Phase 2, once `Hangar_mission_specs` has enough real missions to be worth searching |
@@ -1545,7 +1546,7 @@ Status below reflects the code as of 2026-09-21 (read from the source, not from 
 
 **Known drift from this spec** (the code is the source of truth where they differ):
 - `Hangar_agent_runs.stage` holds `input_processing`, `reasoning_planning`, `output_generation` and `output_interface` in the live table (confirmed against its check constraint), not the `2.1_…` / `2.2_…` names used in Section 10 and Section 12.1.
-- The `Hangar_missions`, `Hangar_mission_specs` and `Hangar_agent_runs` tables exist live in Supabase but have no migration file in the repo, so a fresh environment can't recreate them yet.
+- The core tables were created by hand in the Supabase SQL editor; the baseline migration (`20260801000000_…`) was reconstructed from a dump of the live schema, not from Section 10, and Section 10's DDL differs from it (stage names as above; `Hangar_missions.mission_code` is nullable and filled by a trigger; `Hangar_mission_specs.version` defaults to 1; the catalogs are `Hangar_regulations_catalog` / `Hangar_market_data_catalog`).
 - Section 12.1's single `runMissionAgent` is split into four stage functions plus `finalizeMission`; the request/response contract is Section 11.1.
 
 ## 15. Scope of This Document
