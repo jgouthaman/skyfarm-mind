@@ -28,14 +28,12 @@ export interface EventStubResult extends StubResult {
   eventType: string;
 }
 
-// Section 4.4.3 — Event Publish. No queue, no bus, no consumer exists yet
-// (Concept Agent / Bay 02 isn't built). The doc's own words: "'Event
-// Publish' today is nothing more than the Hangar_agent_runs log row every
-// stage already writes" — this stub's entire job is to be visible in that
-// row, not to actually publish anywhere.
-// TODO(when Concept Agent exists): create the Hangar_events table (schema
-// documented in Section 4.4.3, deliberately not part of this migration)
-// and wire Supabase Realtime as the bus.
+// Section 4.4.3 — Event Publish. Mission Agent no longer uses this: it
+// publishes for real (missionEvents.ts + missionPersistence.ts's
+// publishMissionEvent, into Hangar_events). Concept Agent's pipeline still
+// calls this stub, so it stays until that bay gets its own publisher — its
+// job is to be visible in the stage's Hangar_agent_runs row, not to publish
+// anywhere.
 export function stubEventPublish(): EventStubResult {
   return {
     status: "stubbed",

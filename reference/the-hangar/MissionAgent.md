@@ -1,6 +1,6 @@
 # Mission Agent — Bay 01
 
-**Status:** Stages 2.1–2.4 built for the natural-language path; RAG and the event bus are deferred stubs — see [Build Status](#14-build-status)
+**Status:** Stages 2.1–2.4 built for the natural-language path; RAG is a deferred stub; the event publish side is built (nothing consumes it yet) — see [Build Status](#14-build-status)
 **Agent ID:** `MISSION_AGENT`
 **Type:** Base Agent (Upstream)
 **Stage:** 1 of 15 — The Hangar
@@ -574,7 +574,7 @@ This stage is shaped differently from 2.1–2.3. Those three were dependency cha
 | 1 | Structured Data API | The persisted `MissionSpec` (#0) | **Synchronous.** The caller (the intake UI's "Process Mission" action) is directly waiting on this — it's the critical path. | `MissionSpec` serialized as JSON | Nowhere new — it's the HTTP response body, ephemeral, gone once the request completes |
 | 2 | Dashboard View | **The API response from #1** — not a separate fetch of `MissionSpec` | Client-side, strictly after #1 returns. This is the one component that isn't parallel to the others — it's downstream of #1 specifically. | Rendered UI — full content spec in [Section 13.1](#131-dashboard-view--content-spec) | Browser only — no new stored artifact, it's a display of data already in `Hangar_mission_specs` |
 | 3 | Export | The persisted `MissionSpec` (#0) | Async, on-demand — a user action taken later, not automatic on every mission. **Deferred (v2)**, same treatment as RAG — documented here, not built in this pass. | A generated file (PDF/DOCX/Excel) | Would live in Supabase Storage, tracked by a future `Hangar_mission_exports` table (not part of the current schema — add when this is actually built) |
-| 4 | Event Publish | The persisted `MissionSpec` (#0) + `missionId` | Async, fire-and-forget — does **not** block #1's response to the caller | `mission.spec_ready` event — minimal payload, full spec fetched separately by the consumer. Full detail in [Section 4.4.3](#443-event-publish--type-bus-consumer--lifecycle) | No queryable store today (stub — logged via `logStageRun` only). Future: `Hangar_events` table |
+| 4 | Event Publish | The persisted `MissionSpec` (#0) + `missionId` | Async, fire-and-forget — does **not** block #1's response to the caller | `mission.spec_ready` event — minimal payload, full spec fetched separately by the consumer. Full detail in [Section 4.4.3](#443-event-publish--type-bus-consumer--lifecycle) | `Hangar_events` (Section 4.4.3) — built; also recorded in the stage's `Hangar_agent_runs` row |
 
 **Execution diagram:**
 
@@ -640,13 +640,15 @@ This stage is shaped differently from 2.1–2.3. Those three were dependency cha
 
 ### 4.4.3 Event Publish — Type, Bus, Consumer & Lifecycle
 
-**Today, honestly:** there is no queue, no bus, no consumer. Bay 02 (Concept Agent) doesn't exist yet. "Event Publish" today is nothing more than the `Hangar_agent_runs` log row every stage already writes. The detail below is what this becomes once there's a real subscriber — same "specified now, built when needed" treatment as RAG (4.1.1) and Export (4.4.2), not something to build in this pass.
+**Status: publish side built; no consumer yet.** Stage 4 inserts one `mission.spec_ready` row into `Hangar_events` each time it persists a spec version (`missionEvents.ts`, `publishMissionEvent`), and records the outcome — `published`, `duplicate` or `failed` — in its `Hangar_agent_runs` row. The insert is best-effort and never fails the stage, so the app works before the migration (`supabase/migrations/20260921010000_hangar_events.sql`, applied by hand) is run; events simply aren't recorded until it is. A unique index on `(event_type, mission_id, payload->>'version')` makes republishing the same spec version a no-op. Nothing reads the table yet: Concept Agent still checks `Hangar_missions.status = 'finalized'` directly (Section 17). Note that `spec_ready` means "a draft spec exists", not "a human confirmed it" — a consumer that must act only on confirmed specs still checks `status = 'finalized'`.
+
+**Original note, written before this was built:** there was no queue, no bus, no consumer, and "Event Publish" was nothing more than the `Hangar_agent_runs` log row every stage already writes. The detail below was specified ahead of the build — same "specified now, built when needed" treatment as RAG (4.1.1).
 
 **Event type:** one named event, `mission.spec_ready` — dot-namespaced (`<domain>.<action>`), the standard convention. Only one type exists for now; future agents add their own (`concept.options_ready`, etc.) to the same mechanism rather than inventing a new one each time.
 
 **Bus:** not RabbitMQ or a separate message broker — that's new infrastructure with no justification yet, same logic as not standing up pgvector before there's content worth searching. Use a `Hangar_events` table backed by **Supabase Realtime** (Postgres `LISTEN`/`NOTIFY` under the hood) — nothing new to run, it's the database already in use.
 
-**Consumer:** today, nobody. Once built: Concept Agent subscribes to `mission.spec_ready`. The actual value of a real event mechanism over Mission Agent directly calling Concept Agent is that Mission Agent never needs to know who's listening — Knowledge Agent (Bay 15) could subscribe to the same event later with zero changes to Mission Agent's code.
+**Consumer:** today, nobody reads the table. Once built: Concept Agent subscribes to `mission.spec_ready`. The actual value of a real event mechanism over Mission Agent directly calling Concept Agent is that Mission Agent never needs to know who's listening — Knowledge Agent (Bay 15) could subscribe to the same event later with zero changes to Mission Agent's code.
 
 **Lifecycle:** backed by a table row specifically so a momentarily-offline consumer doesn't lose the event — a pure broadcast with no consumer listening at that exact instant is gone forever; a row can be picked up whenever the consumer next checks. States: `pending` (published, unconsumed) → `consumed` (a subscriber processed it, timestamped, tagged with which agent) → kept indefinitely for audit trail, same retention posture as `Hangar_agent_runs`.
 
@@ -723,7 +725,7 @@ Auth Service · File Storage (Supabase Storage) · Event Bus · Workflow Engine 
 **Event Bus**
 - **What it is:** Supabase Realtime, backed by the `Hangar_events` table — fully specified in Section 4.4.3. Not RabbitMQ or a separate broker, deliberately (no new infrastructure with no consumer to justify it).
 - **Role in Mission Agent:** publishes `mission.spec_ready` once a spec is persisted, so Concept Agent (once it exists) can pick up new work without Mission Agent needing to know who's listening.
-- **Status:** fully specified, not built (stub only — logged via `Hangar_agent_runs`, no real event today, per 4.4.3).
+- **Status:** publish side built (Section 4.4.3); no consumer yet. Realtime is not enabled: the app runs on Vercel serverless functions, which can't hold a subscription open, so a consumer would poll pending rows or be triggered by a webhook instead.
 
 **Workflow Engine**
 - **What it is — and importantly, what it is NOT:** within Mission Agent itself, this is just the plain TypeScript orchestrator function (`runMissionAgent`, Section 12) chaining Stages 2.1→2.2→2.3→2.4 in sequence. It does **not** require LangGraph or any graph-based framework — that's overkill for one agent's own internal 4-step sequence.
@@ -1533,12 +1535,13 @@ Status below reflects the code as of 2026-09-21 (read from the source, not from 
 | Stage 2.1 — RAG context retrieval | Stub | Stubbed (always-empty) and **not called by the pipeline** — full implementation planned for Phase 2, once `Hangar_mission_specs` has enough real missions to be worth searching |
 | Stage 2.2 — Reasoning & Planning | Phase 1 | Built — two Claude calls (decomposition; constraints + KPIs) plus deterministic trade-off prioritization |
 | Stage 2.3 — Output Generation | Phase 1 | Built — deterministic assembly and dedup, one Claude call for the summary, formula-computed confidence score |
-| Stage 2.4 — Output Interface | Phase 1 | Built — persistence, versioning, Save as final. The pipeline's own export and event-publish steps are **stubs** (`exportAndEventStubs.ts`) — on-demand export is a separate, built feature (see the Export row below); the event publish is still a stub |
+| Stage 2.4 — Output Interface | Phase 1 | Built — persistence, versioning, Save as final. The pipeline's own export step is a **stub** (`exportAndEventStubs.ts`) — on-demand export is a separate, built feature (see the Export row below). Event publish is real (next row) |
 | Stage hand-off integrity | Phase 1 | Built — Stages 2–4 take only `missionId` (plus the gap-wizard's whitelisted answers for Stage 2) and read the previous stage's result from that stage's stored `Hangar_agent_runs` row; the browser never supplies spec content, KPIs or a confidence score |
 | Per-run telemetry and cost | Phase 1 | Built — per-stage requests and tokens table, run totals, and estimated cost, shown in INR (list price converted at a fixed rate — `USD_TO_INR` in `missionUsage.ts`, ₹96 as of 2026-09-21; update it when it drifts; hover shows the USD figure). Usage is also rebuilt from `Hangar_agent_runs`, so a reopened mission and the "Your missions" rows show it too (time taken is only known for a run made this session; usage from before Stage 2 logged its own is a floor, marked "≥") |
 | Export (PDF / Word / Excel) | Phase 1 | Built — client-side, on demand (Section 4.4.2) |
 | User-action audit log | Phase 2 | Built in code, **migration not yet applied** — `Hangar_mission_audit` (`supabase/migrations/20260921000000_hangar_mission_audit_log.sql`) records mission created / spec generated / finalized. Writes are best-effort, so nothing breaks before the migration is run, but no rows are recorded until it is |
-| Handoff to Concept Agent | Phase 1 | Working through `Hangar_missions.status = 'finalized'` (Concept Agent checks it directly); the `mission.spec_ready` event bus is not built |
+| Event publish (`mission.spec_ready`) | Phase 1 | Publish side built — Stage 4 inserts into `Hangar_events`. **Migration not yet applied** (`supabase/migrations/20260921010000_hangar_events.sql`); publishing is best-effort, so nothing breaks before it is, but no events are recorded until it is. No consumer yet |
+| Handoff to Concept Agent | Phase 1 | Working through `Hangar_missions.status = 'finalized'` (Concept Agent checks it directly); it does not consume the `mission.spec_ready` events yet |
 
 **Known drift from this spec** (the code is the source of truth where they differ):
 - `Hangar_agent_runs.stage` holds `input_processing`, `reasoning_planning`, `output_generation` and `output_interface` in the live table (confirmed against its check constraint), not the `2.1_…` / `2.2_…` names used in Section 10 and Section 12.1.
@@ -1569,7 +1572,7 @@ This section exists for whoever writes `ConceptAgent.md` next — everything Con
 
 **What Concept Agent receives:** a `MissionSpec` object, exact abstract shape in [Section 11](#11-interface-contract-io), realistic filled example in the same section. Fetched from `Hangar_mission_specs` by `mission_id` — Concept Agent does not receive the spec embedded in whatever triggers it (see below).
 
-**How Concept Agent knows a mission is ready:** the `mission.spec_ready` event, [Section 4.4.3](#443-event-publish--type-bus-consumer--lifecycle). Not built yet — until `Hangar_events` exists, Concept Agent's own build will need its own interim trigger (e.g. polling `Hangar_missions` where `status = 'spec_ready'` or `'finalized'`). Whichever is chosen, don't have Concept Agent poll `Hangar_mission_specs` directly for new rows — go through `Hangar_missions.status`, which is the field that actually reflects lifecycle state (Section 13.2).
+**How Concept Agent knows a mission is ready:** the `mission.spec_ready` event, [Section 4.4.3](#443-event-publish--type-bus-consumer--lifecycle). The publish side is built (Section 4.4.3) but Concept Agent doesn't consume it yet — today it uses its own interim trigger, checking `Hangar_missions.status`. Whichever is chosen, don't have Concept Agent poll `Hangar_mission_specs` directly for new rows — go through `Hangar_missions.status`, which is the field that actually reflects lifecycle state (Section 13.2).
 
 **What's guaranteed on every `MissionSpec`:**
 - `confidence_score` is always present and always computed via the Section 4.3 formula — never absent, never an LLM self-report.

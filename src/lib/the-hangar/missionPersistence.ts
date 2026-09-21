@@ -1,6 +1,11 @@
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import type { SourceType } from "./types/hangar-mission";
 import { aggregateMissionUsage, type MissionUsage, type UsageRunRow } from "./missionUsage.ts";
+import {
+  classifyPublishError,
+  type EventPublishResult,
+  type MissionEventDraft,
+} from "./missionEvents.ts";
 
 // Stage 2.4 (MissionAgent.md Section 4.4.1) — persistence against
 // Hangar_missions / Hangar_mission_specs / Hangar_agent_runs. Server-only:
@@ -358,6 +363,47 @@ export async function logMissionAudit(
   });
   if (error) {
     console.error(`logMissionAudit: failed to record ${action} for mission ${missionId}: ${error.message}`);
+  }
+}
+
+// ── Event publish (Section 4.4.3) ────────────────────────────────────────
+//
+// Inserts one row into Hangar_events. Best-effort and never throws, like the
+// audit log: a failed publish (including the table not existing yet — its
+// migration is applied by hand) must not fail the Stage 4 that already
+// persisted the spec. The outcome is returned so Stage 4 records it in its
+// Hangar_agent_runs row — a durable trace of whether the event went out.
+//
+// Awaited by the caller rather than fired and forgotten: on a serverless
+// function the runtime can freeze once the response is sent, silently
+// dropping an un-awaited insert, and the one insert is a few milliseconds.
+export async function publishMissionEvent(
+  missionId: string,
+  draft: MissionEventDraft,
+): Promise<EventPublishResult> {
+  const failed = (reason: string): EventPublishResult => {
+    console.error(
+      `publishMissionEvent: failed to publish ${draft.event_type} for mission ${missionId}: ${reason}`,
+    );
+    return { status: "failed", eventType: draft.event_type, reason };
+  };
+  try {
+    const { data, error } = await db
+      .from("Hangar_events")
+      .insert({ event_type: draft.event_type, mission_id: missionId, payload: draft.payload })
+      .select("id")
+      .single();
+    if (error) {
+      const failure = error as { message: string; code?: string };
+      if (classifyPublishError(failure) === "duplicate") {
+        return { status: "duplicate", eventType: draft.event_type };
+      }
+      return failed(failure.message);
+    }
+    return { status: "published", eventType: draft.event_type, eventId: String(data.id) };
+  } catch (err) {
+    // A thrown error (e.g. the network) is the same non-event as a returned one.
+    return failed(err instanceof Error ? err.message : String(err));
   }
 }
 
