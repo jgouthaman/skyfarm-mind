@@ -33,6 +33,8 @@ export interface FinalMissionResponse {
   summary: string;
   confidence_score: number;
   validation_flags: string[];
+  /** Persisted spec version. null when a caller can't know it (e.g. a reopened past mission). */
+  spec_version: number | null;
 }
 
 // validationFlags comes from the caller's already-held Stage 1 result —
@@ -52,5 +54,6 @@ export function toFinalMissionResponse(
     summary: stage4.summary,
     confidence_score: stage4.confidenceScore,
     validation_flags: validationFlags,
+    spec_version: stage4.specVersion,
   };
 }

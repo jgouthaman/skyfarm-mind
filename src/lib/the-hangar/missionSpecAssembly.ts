@@ -1,6 +1,7 @@
 import { formatKpiItem, isGateTierConstraint } from "./tradeoffPrioritization.ts";
 import type { TracedConstraint } from "./constraintIdentification.ts";
 import type { DerivedKpi, PrioritizedTradeoff } from "./types/hangar-mission";
+import { verticalForIntentCategory } from "./missionIntentCategories.ts";
 
 // Stage 2.3, Steps 1-3 (MissionAgent.md Section 4.3.1) — deterministic
 // assembly, no LLM. Step 4 (summary, LLM) lives in missionSummary.ts, and
@@ -70,6 +71,8 @@ function capitalize(text: string): string {
 
 export interface AssembleMissionSpecsInput {
   detectedIntent: string;
+  /** Stage 2.1's validated intent category — only used to fill `vertical` when the keyword rules find none. */
+  intentCategory?: string | null;
   decomposedElements: string[];
   operatingEnvironment?: string | null;
 }
@@ -79,7 +82,12 @@ export function assembleMissionSpecs(input: AssembleMissionSpecsInput): MissionS
     // "UAV" is TorqWings' platform throughout the doc — no other domain
     // signal exists anywhere in the pipeline to derive this from per-mission.
     domain: "UAV",
-    vertical: detectFromElements(input.decomposedElements, VERTICAL_KEYWORDS, (e) => e.vertical),
+    // Keyword rules first (DOM-001–004, unchanged); the category only fills
+    // the gap they leave — e.g. a mission the keywords miss but the extraction
+    // classified as agriculture. Categories with no defined vertical stay null.
+    vertical:
+      detectFromElements(input.decomposedElements, VERTICAL_KEYWORDS, (e) => e.vertical) ??
+      verticalForIntentCategory(input.intentCategory),
     vehicleClass: detectFromElements(
       input.decomposedElements,
       VEHICLE_CLASS_KEYWORDS,

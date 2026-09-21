@@ -1,5 +1,11 @@
 import { createServerFn } from "@tanstack/react-start";
 import { callLlmGateway, stripJsonFences, type LlmUsage } from "./llmGateway.ts";
+import {
+  FALLBACK_INTENT_CATEGORY,
+  intentCategoryPromptList,
+  normalizeIntentCategory,
+  type IntentCategoryId,
+} from "./missionIntentCategories.ts";
 
 // Stage 2.1, Step 2 (MissionAgent.md Section 4.1.1) — combined intent
 // understanding + entity extraction, one LLM call covering both, not two
@@ -13,7 +19,9 @@ import { callLlmGateway, stripJsonFences, type LlmUsage } from "./llmGateway.ts"
 // this specific step. The prompt below is written to match that described
 // contract and mirrors the structure/tone of the doc's other explicit
 // templates, since there was no verbatim block to adapt here.
-const SYSTEM = `You are Mission Agent's intent-understanding and entity-extraction step for TorqWings' aerospace design platform. Given a mission's raw text and any already-structured requirement fields, identify the mission's intent and extract payload, range, and endurance hints plus any additional constraint hints. Explicit structured field values always win — if a field is already stated explicitly, do not re-guess it; only fill in what's genuinely missing. Return JSON only.`;
+const SYSTEM = `You are Mission Agent's intent-understanding and entity-extraction step for TorqWings' aerospace design platform. Given a mission's raw text and any already-structured requirement fields, identify the mission's intent (a short free-text description of what the mission is for) and classify it into exactly one intent_category from the fixed list below, then extract payload, range, and endurance hints plus any additional constraint hints. intent_category must be one of these ids exactly — if none clearly fits, use "other", never invent a new category:
+${intentCategoryPromptList()}
+ Explicit structured field values always win — if a field is already stated explicitly, do not re-guess it; only fill in what's genuinely missing. Return JSON only.`;
 
 export interface IntentExtractionInput {
   rawTextCombined: string;
@@ -23,6 +31,8 @@ export interface IntentExtractionInput {
 
 export interface IntentExtractionResult {
   intent: string;
+  /** One of the fixed ids in missionIntentCategories.ts; "other" when nothing fit or the model went off-list. */
+  intentCategory: IntentCategoryId;
   payloadHint: string | null;
   rangeHint: string | null;
   enduranceHint: string | null;
@@ -39,7 +49,7 @@ Structured fields already provided (do not re-derive these): ${JSON.stringify(da
 Grounding context (from imported project / selected regulations / market data, if any): ${JSON.stringify(data.groundingContext ?? {}, null, 2)}
 
 Return:
-{ "intent": "string", "payload_hint": "string | null", "range_hint": "string | null", "endurance_hint": "string | null", "constraint_hints": ["string"] }`;
+{ "intent": "string", "intent_category": "one id from the list", "payload_hint": "string | null", "range_hint": "string | null", "endurance_hint": "string | null", "constraint_hints": ["string"] }`;
 
     const { content, usage } = await callLlmGateway(SYSTEM, userContent, { jsonMode: true });
     if (!content) return { ...mockExtraction(data), mock: true, usage: null };
@@ -57,6 +67,7 @@ function parseExtractionResponse(
     if (typeof obj.intent !== "string") return null;
     return {
       intent: obj.intent,
+      intentCategory: normalizeIntentCategory(obj.intent_category),
       payloadHint: typeof obj.payload_hint === "string" ? obj.payload_hint : null,
       rangeHint: typeof obj.range_hint === "string" ? obj.range_hint : null,
       enduranceHint: typeof obj.endurance_hint === "string" ? obj.endurance_hint : null,
@@ -74,6 +85,7 @@ function mockExtraction(
 ): Omit<IntentExtractionResult, "mock" | "usage"> {
   return {
     intent: `Mock intent derived from: "${data.rawTextCombined.slice(0, 80)}"`,
+    intentCategory: FALLBACK_INTENT_CATEGORY,
     payloadHint: null,
     rangeHint: null,
     enduranceHint: null,

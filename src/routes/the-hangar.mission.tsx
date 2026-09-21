@@ -10,6 +10,17 @@ import type {
 import type { Stage3Output } from "@/lib/the-hangar/stage3Orchestrator";
 import type { FinalMissionResponse } from "@/lib/the-hangar/types/mission-pipeline-api";
 import { DOMAIN_RULES } from "@/lib/the-hangar/domainRules";
+import { intentCategoryLabel } from "@/lib/the-hangar/missionIntentCategories";
+import { estimateCostUsd, formatCostUsd, type MissionUsage } from "@/lib/the-hangar/missionUsage";
+import {
+  EXPORT_FORMAT_META,
+  buildMissionExportModel,
+  downloadBlob,
+  exportMission,
+  formatKpiDisplay,
+  type MissionExportFormat,
+  type MissionExportInput,
+} from "@/lib/the-hangar/missionExport";
 import type { SourceType } from "@/lib/the-hangar/types/hangar-mission";
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -62,6 +73,7 @@ interface MissionResult {
   summary: string;
   confidenceScore: number;
   validationFlags: string[];
+  specVersion: number | null;
 }
 
 function toMissionResult(r: FinalMissionResponse): MissionResult {
@@ -74,6 +86,7 @@ function toMissionResult(r: FinalMissionResponse): MissionResult {
     summary: r.summary,
     confidenceScore: r.confidence_score,
     validationFlags: r.validation_flags,
+    specVersion: r.spec_version,
   };
 }
 
@@ -89,17 +102,21 @@ function formatGeneratedAt(iso: string): string {
   });
 }
 
-// Per-run LLM usage/timing, for the telemetry bar at the top of the live
-// spec dashboard — meant for optimization, not user-facing status, so it's
-// only ever computed for a mission that was actually run THIS session
-// (computeTelemetry below returns null otherwise): a resumed/past mission
-// has no real Stage1-3 results to total, only what MissionsListPanel
-// already knew, same limitation generatedAt's resume path already accepted.
+// Per-mission LLM usage for the dashboard's telemetry bar. Live numbers come
+// from this session's own stage results; a mission reopened from "Your
+// missions" has none of those, so it falls back to the usage the server
+// rebuilds from Hangar_agent_runs (flow.persistedUsage) — same requests and
+// tokens, but no processing time, since that isn't stored. Cost is always an
+// estimate at list price (missionUsage.ts), never a bill.
 interface MissionTelemetry {
   requests: number;
   inputTokens: number;
   outputTokens: number;
-  durationMs: number;
+  estimatedCostUsd: number;
+  /** null when unknown — time is only measured for a run made this session. */
+  durationMs: number | null;
+  /** True when some stage's usage was never recorded, so the totals are a floor. */
+  partial: boolean;
 }
 
 // Sums each stage's own request count/token usage/processing time (already
@@ -113,15 +130,31 @@ function computeTelemetry(flow: MissionFlowState): MissionTelemetry | null {
   const s1 = flow.stage1.result;
   const s2 = flow.stage2.result;
   const s3 = flow.stage3.result;
-  if (!s1 || !s2 || !s3) return null;
-  const s1Usage = s1.extraction.usage;
-  const s3Usage = s3.usage;
+  if (s1 && s2 && s3) {
+    const s1Usage = s1.extraction.usage;
+    const s3Usage = s3.usage;
+    const inputTokens =
+      (s1Usage?.inputTokens ?? 0) + s2.usage.inputTokens + (s3Usage?.inputTokens ?? 0);
+    const outputTokens =
+      (s1Usage?.outputTokens ?? 0) + s2.usage.outputTokens + (s3Usage?.outputTokens ?? 0);
+    return {
+      requests: (s1Usage ? 1 : 0) + s2.requestCount + (s3Usage ? 1 : 0),
+      inputTokens,
+      outputTokens,
+      estimatedCostUsd: estimateCostUsd(inputTokens, outputTokens),
+      durationMs: s1.durationMs + s2.durationMs + s3.durationMs,
+      partial: false,
+    };
+  }
+  const persisted = flow.persistedUsage;
+  if (!persisted) return null;
   return {
-    requests: (s1Usage ? 1 : 0) + s2.requestCount + (s3Usage ? 1 : 0),
-    inputTokens: (s1Usage?.inputTokens ?? 0) + s2.usage.inputTokens + (s3Usage?.inputTokens ?? 0),
-    outputTokens:
-      (s1Usage?.outputTokens ?? 0) + s2.usage.outputTokens + (s3Usage?.outputTokens ?? 0),
-    durationMs: s1.durationMs + s2.durationMs + s3.durationMs,
+    requests: persisted.requests,
+    inputTokens: persisted.inputTokens,
+    outputTokens: persisted.outputTokens,
+    estimatedCostUsd: persisted.estimatedCostUsd,
+    durationMs: null,
+    partial: !persisted.complete,
   };
 }
 
@@ -133,9 +166,15 @@ function formatDuration(ms: number): string {
 function TelemetryBar({ telemetry }: { telemetry: MissionTelemetry | null }) {
   if (!telemetry) return null;
   return (
-    <div className="hgr-m-telemetry" title="LLM usage for this run — not available for resumed/past missions">
+    <div
+      className="hgr-m-telemetry"
+      title="LLM usage for this mission. Cost is an estimate at list price, not a bill. Time is only known for a run made in this session."
+    >
       <div className="hgr-m-telemetry-item">
-        <span className="hgr-m-telemetry-num">{telemetry.requests}</span>
+        <span className="hgr-m-telemetry-num">
+          {telemetry.partial ? "≥ " : ""}
+          {telemetry.requests}
+        </span>
         <span className="hgr-m-telemetry-label">Requests</span>
       </div>
       <div className="hgr-m-telemetry-item">
@@ -147,22 +186,175 @@ function TelemetryBar({ telemetry }: { telemetry: MissionTelemetry | null }) {
         <span className="hgr-m-telemetry-label">Output tokens</span>
       </div>
       <div className="hgr-m-telemetry-item">
-        <span className="hgr-m-telemetry-num">{formatDuration(telemetry.durationMs)}</span>
-        <span className="hgr-m-telemetry-label">Time taken</span>
+        <span className="hgr-m-telemetry-num">
+          {telemetry.partial ? "≥ " : "~"}
+          {formatCostUsd(telemetry.estimatedCostUsd)}
+        </span>
+        <span className="hgr-m-telemetry-label">Est. cost</span>
       </div>
+      {telemetry.durationMs !== null && (
+        <div className="hgr-m-telemetry-item">
+          <span className="hgr-m-telemetry-num">{formatDuration(telemetry.durationMs)}</span>
+          <span className="hgr-m-telemetry-label">Time taken</span>
+        </div>
+      )}
     </div>
   );
 }
 
-// TorqWings' missions are all India-based (Tamil Nadu, DGCA, etc.) — any
-// cost/budget-named KPI should read in ₹/INR regardless of what unit the
-// LLM happened to pick, so this overrides the display rather than trusting
-// the model's own unit choice.
-function formatKpiDisplay(name: string, target: string, unit: string): string {
-  if (/cost|budget|price/i.test(name) && !/₹|inr/i.test(unit)) {
-    return `₹${target}`;
-  }
-  return `${target} ${unit}`;
+// Per-stage checkpoint: requests on the left, tokens on the right, one row per
+// pipeline stage. A row is null until that stage's usage is known — live, as
+// each "Proceed" lands, or (for a mission reopened from "Your missions") from
+// the persisted usage. Stage 4 makes no LLM call (persist + stubs only), so
+// once complete it's a real 0/0, not "unknown".
+interface StageUsageRow {
+  key: StageKey;
+  /** True when the stage fell back to mock output (no live Claude reply). */
+  mock: boolean;
+  requests: number;
+  inputTokens: number;
+  outputTokens: number;
+}
+
+function computeStageUsage(flow: MissionFlowState): (StageUsageRow | null)[] {
+  const s1 = flow.stage1.result;
+  const s2 = flow.stage2.result;
+  const s3 = flow.stage3.result;
+  const u1 = s1?.extraction.usage;
+  const persisted = flow.persistedUsage?.stages;
+  const fromPersisted = (key: StageKey): StageUsageRow | null => {
+    const p = persisted?.[key as keyof typeof persisted];
+    return p ? { key, ...p } : null;
+  };
+  return [
+    s1
+      ? {
+          key: "input_processing",
+          mock: s1.extraction.mock,
+          requests: u1 ? 1 : 0,
+          inputTokens: u1?.inputTokens ?? 0,
+          outputTokens: u1?.outputTokens ?? 0,
+        }
+      : fromPersisted("input_processing"),
+    s2
+      ? {
+          key: "reasoning_planning",
+          mock: s2.mock,
+          requests: s2.requestCount,
+          inputTokens: s2.usage.inputTokens,
+          outputTokens: s2.usage.outputTokens,
+        }
+      : fromPersisted("reasoning_planning"),
+    s3
+      ? {
+          key: "output_generation",
+          mock: s3.mock,
+          requests: s3.usage ? 1 : 0,
+          inputTokens: s3.usage?.inputTokens ?? 0,
+          outputTokens: s3.usage?.outputTokens ?? 0,
+        }
+      : fromPersisted("output_generation"),
+    flow.stage4.status === "complete" && (s1 || flow.persistedUsage)
+      ? { key: "output_interface", mock: false, requests: 0, inputTokens: 0, outputTokens: 0 }
+      : null,
+  ];
+}
+
+function StageUsageTable({ flow }: { flow: MissionFlowState }) {
+  const rows = computeStageUsage(flow);
+  const done = rows.filter((r): r is StageUsageRow => r !== null);
+  const totalRequests = done.reduce((n, r) => n + r.requests, 0);
+  const totalInput = done.reduce((n, r) => n + r.inputTokens, 0);
+  const totalOutput = done.reduce((n, r) => n + r.outputTokens, 0);
+  const partial = !!flow.persistedUsage && !flow.persistedUsage.complete;
+  return (
+    <table
+      className="hgr-m-usage-table"
+      title="LLM requests and tokens per stage. Cost is an estimate at list price, not a bill."
+    >
+      <thead>
+        <tr>
+          <th>Stage</th>
+          <th className="hgr-m-usage-num">Requests</th>
+          <th className="hgr-m-usage-num">Tokens</th>
+        </tr>
+      </thead>
+      <tbody>
+        {STAGE_ORDER.map((key, i) => {
+          const row = rows[i];
+          return (
+            <tr key={key}>
+              <td>
+                {STAGE_TITLES[key]}
+                {row?.mock && (
+                  <span
+                    className="hgr-m-usage-mock"
+                    title="No live Claude reply — this stage's content is placeholder output"
+                  >
+                    simulated
+                  </span>
+                )}
+              </td>
+              <td className="hgr-m-usage-num">{row ? row.requests : "—"}</td>
+              <td className="hgr-m-usage-num">
+                {row ? (row.inputTokens + row.outputTokens).toLocaleString() : "—"}
+                {row && row.requests > 0 && (
+                  <span className="hgr-m-usage-split">
+                    {" "}
+                    in {row.inputTokens.toLocaleString()} · out {row.outputTokens.toLocaleString()}
+                  </span>
+                )}
+              </td>
+            </tr>
+          );
+        })}
+      </tbody>
+      <tfoot>
+        <tr>
+          <td>Total</td>
+          <td className="hgr-m-usage-num">
+            {partial ? "≥ " : ""}
+            {totalRequests}
+          </td>
+          <td className="hgr-m-usage-num">{(totalInput + totalOutput).toLocaleString()}</td>
+        </tr>
+        <tr>
+          <td colSpan={2}>Estimated cost (list price)</td>
+          <td className="hgr-m-usage-num">
+            {partial ? "≥ " : "~"}
+            {formatCostUsd(estimateCostUsd(totalInput, totalOutput))}
+          </td>
+        </tr>
+      </tfoot>
+    </table>
+  );
+}
+
+// Which of the LLM stages fell back to mock output this run. The per-stage
+// findings cards already carry a Live/Simulated badge, but once a mission is
+// done those cards are only reachable by hovering the phase tabs — so
+// without this, a finished dashboard with a confident-looking spec and score
+// gives no sign that some of it is placeholder text. Only known for a
+// mission run this session (a resumed one has no stage results).
+function simulatedStageTitles(flow: MissionFlowState): string[] {
+  const titles: string[] = [];
+  if (flow.stage1.result?.extraction.mock) titles.push(STAGE_TITLES.input_processing);
+  if (flow.stage2.result?.mock) titles.push(STAGE_TITLES.reasoning_planning);
+  if (flow.stage3.result?.mock) titles.push(STAGE_TITLES.output_generation);
+  return titles;
+}
+
+function SimulatedOutputNotice({ flow }: { flow: MissionFlowState }) {
+  const titles = simulatedStageTitles(flow);
+  if (titles.length === 0) return null;
+  return (
+    <div className="hgr-m-simulated-notice" role="alert">
+      <strong>Simulated output.</strong> {titles.join(", ")} did not get a full live Claude
+      response, so part of this spec is placeholder text rather than real analysis, and the
+      confidence score may not reflect real extraction. Check the AI status indicator and
+      regenerate before relying on it.
+    </div>
+  );
 }
 
 // Mirrors confidenceScore.ts's exact formula so the tooltip can show this
@@ -383,6 +575,11 @@ interface MissionFlowState {
   stage2: StageSlot<Stage2Result>;
   stage3: StageSlot<Stage3Output>;
   stage4: StageSlot<FinalMissionResponse>;
+  // LLM usage the server rebuilt from Hangar_agent_runs, for a mission
+  // reopened from "Your missions" (which has no live stage results to read
+  // usage from). null for a mission run this session — its stage results
+  // carry the usage directly.
+  persistedUsage: MissionUsage | null;
 }
 
 const EMPTY_SLOT = { status: "pending" as const, result: null, errorMessage: null };
@@ -395,6 +592,7 @@ const INITIAL_FLOW_STATE: MissionFlowState = {
   stage2: EMPTY_SLOT,
   stage3: EMPTY_SLOT,
   stage4: EMPTY_SLOT,
+  persistedUsage: null,
 };
 
 // Stages run strictly in order, so the active one is simply the first that
@@ -427,12 +625,21 @@ const STAGE_TITLES: Record<StageKey, string> = {
 // not real per-step telemetry — scoped to Stage 1 only, since that's the
 // one stage whose internals have actually been audited down to this level
 // of detail. Stages 2-4 each show a single "Processing…" line instead.
+//
+// Lists only what Stage 1 really does: parse sources, ONE Claude call that
+// covers intent + entity extraction together, then the rules-engine
+// validation. Context retrieval (RAG) is deliberately absent — it's a
+// stub that isn't called (contextRetrieval.ts), so showing it as a step
+// claimed work that never happens. The timer stops at the Claude step
+// (LLM_PROGRESS_STEP): validation is instant once the response arrives, so
+// letting the timer reach it would show "validating" while Claude is still
+// thinking.
 const PROGRESS_STEPS = [
-  "Intent understanding",
-  "Entity extraction",
-  "Context retrieval",
-  "Validation & normalization",
+  "Parsing your brief",
+  "Extracting intent & entities (Claude)",
+  "Validating against KPI bounds",
 ];
+const LLM_PROGRESS_STEP = 1;
 
 // Shared fetch helper for all 4 stage calls — resolves the auth token,
 // posts JSON, and normalizes both HTTP-error and network-error cases into
@@ -648,6 +855,7 @@ function TheHangarMission() {
       stage1: { status: "complete", result: null, errorMessage: null },
       stage2: { status: "complete", result: null, errorMessage: null },
       stage3: { status: "complete", result: null, errorMessage: null },
+      persistedUsage: m.usage,
       stage4: {
         status: "complete",
         result: {
@@ -663,6 +871,7 @@ function TheHangarMission() {
           // tooltip just won't list validation flags; the persisted score
           // itself is still exact.
           validation_flags: [],
+          spec_version: m.specVersion,
         },
         errorMessage: null,
       },
@@ -736,7 +945,7 @@ function TheHangarMission() {
     let stepIdx = 0;
     setProgressStepIdx(0);
     progressTimer.current = setInterval(() => {
-      stepIdx = Math.min(stepIdx + 1, PROGRESS_STEPS.length - 1);
+      stepIdx = Math.min(stepIdx + 1, LLM_PROGRESS_STEP);
       setProgressStepIdx(stepIdx);
     }, 2500);
 
@@ -778,25 +987,21 @@ function TheHangarMission() {
   async function proceedToStage2() {
     const { missionId, stage1 } = flow;
     if (!missionId || !stage1.result) return;
-    // Fold any gap-wizard answers in as overrides on top of Stage 1's
-    // structuredFields — constraintIdentification.ts's STRUCTURED_KPI_OVERRIDES
-    // then applies these deterministically, the same override path that
-    // already guarantees an explicitly-provided value can't drift, so a
-    // field the user just answered here can't drift either.
-    const structuredFields = { ...stage1.result.structuredFields };
+    // The gap-wizard answers are the only thing sent besides the mission id —
+    // the server reads Stage 1's extraction/fields from its own stored record
+    // (not from this request) and applies these as overrides on top, via
+    // constraintIdentification.ts's STRUCTURED_KPI_OVERRIDES, the same
+    // deterministic path that already guarantees an explicitly-provided
+    // value can't drift.
+    const gapOverrides: Record<string, number> = {};
     for (const [field, answerText] of Object.entries(gapWizard.answers)) {
       const num = parseLeadingNumberClient(answerText as string);
-      if (num !== null) structuredFields[BOOST_QUESTIONS[field as CoreField].structuredKey] = num;
+      if (num !== null) gapOverrides[BOOST_QUESTIONS[field as CoreField].structuredKey] = num;
     }
     setFlow((f) => ({ ...f, stage2: { status: "running", result: null, errorMessage: null } }));
     const outcome = await callStageApi<Stage2Result>(
       "/api/hangar/process-mission/reasoning-planning",
-      {
-        missionId,
-        extraction: stage1.result.extraction,
-        structuredFields,
-        attachedRegulations: stage1.result.attachedRegulations,
-      },
+      { missionId, gapOverrides },
     );
     if (!outcome.ok) {
       setFlow((f) => ({
@@ -838,17 +1043,6 @@ function TheHangarMission() {
       "/api/hangar/process-mission/output-generation",
       {
         missionId,
-        detectedIntent: stage1.result.extraction.intent,
-        sourceTypesUsedCount: stage1.result.sourceTypesUsed.length,
-        validationFlagCount: stage1.result.validationFlags.length,
-        operatingEnvironment:
-          typeof stage1.result.structuredFields.operating_environment === "string"
-            ? stage1.result.structuredFields.operating_environment
-            : null,
-        decomposedElements: stage2.result.decomposedElements,
-        identifiedConstraints: stage2.result.identifiedConstraints,
-        derivedKpis: stage2.result.derivedKpis,
-        prioritizedTradeoffs: stage2.result.prioritizedTradeoffs,
       },
     );
     if (!outcome.ok) {
@@ -872,12 +1066,6 @@ function TheHangarMission() {
       "/api/hangar/process-mission/output-interface",
       {
         missionId,
-        missionSpecs: stage3.result.missionSpecs,
-        constraints: stage3.result.constraints,
-        kpis: stage3.result.kpis,
-        summary: stage3.result.summary,
-        confidenceScore: stage3.result.confidenceScore,
-        validation_flags: stage1.result.validationFlags,
       },
     );
     if (!outcome.ok) {
@@ -933,9 +1121,6 @@ function TheHangarMission() {
       "/api/hangar/process-mission/reasoning-planning",
       {
         missionId: stage1.data.missionId,
-        extraction: stage1.data.extraction,
-        structuredFields: stage1.data.structuredFields,
-        attachedRegulations: stage1.data.attachedRegulations,
       },
     );
     if (!stage2.ok) {
@@ -955,17 +1140,6 @@ function TheHangarMission() {
       "/api/hangar/process-mission/output-generation",
       {
         missionId: stage1.data.missionId,
-        detectedIntent: stage1.data.extraction.intent,
-        sourceTypesUsedCount: stage1.data.sourceTypesUsed.length,
-        validationFlagCount: stage1.data.validationFlags.length,
-        operatingEnvironment:
-          typeof stage1.data.structuredFields.operating_environment === "string"
-            ? stage1.data.structuredFields.operating_environment
-            : null,
-        decomposedElements: stage2.data.decomposedElements,
-        identifiedConstraints: stage2.data.identifiedConstraints,
-        derivedKpis: stage2.data.derivedKpis,
-        prioritizedTradeoffs: stage2.data.prioritizedTradeoffs,
       },
     );
     if (!stage3.ok) {
@@ -985,12 +1159,6 @@ function TheHangarMission() {
       "/api/hangar/process-mission/output-interface",
       {
         missionId: stage1.data.missionId,
-        missionSpecs: stage3.data.missionSpecs,
-        constraints: stage3.data.constraints,
-        kpis: stage3.data.kpis,
-        summary: stage3.data.summary,
-        confidenceScore: stage3.data.confidenceScore,
-        validation_flags: stage1.data.validationFlags,
       },
     );
     if (!stage4.ok) {
@@ -1264,6 +1432,8 @@ function TheHangarMission() {
                       })}
                     </div>
 
+                    {(flow.stage1.result || flow.persistedUsage) && <StageUsageTable flow={flow} />}
+
                     {activeStage !== "done" && (
                       <>
                         <div className="hgr-m-process-grid">
@@ -1454,6 +1624,7 @@ function TheHangarMission() {
 
                     {activeStage === "done" && flow.stage4.result && (
                       <>
+                        <SimulatedOutputNotice flow={flow} />
                         <PhasePreviewStrip flow={flow} />
                         <MissionDashboard
                           result={toMissionResult(flow.stage4.result)}
@@ -1653,11 +1824,60 @@ function MissionsListPanel({
               <span className="hgr-m-mission-row-date">
                 {new Date(m.createdAt).toLocaleDateString()}
               </span>
+              <span
+                className="hgr-m-mission-row-usage"
+                title="LLM requests · tokens · estimated cost at list price"
+              >
+                {m.usage
+                  ? `${m.usage.complete ? "" : "≥ "}${m.usage.requests} req · ${(m.usage.inputTokens + m.usage.outputTokens).toLocaleString()} tok · ~${formatCostUsd(m.usage.estimatedCostUsd)}`
+                  : "—"}
+              </span>
             </button>
           ))}
         </div>
       )}
     </div>
+  );
+}
+
+// Export the spec as PDF / Word / Excel (MissionAgent.md Section 4.4.2).
+// Generated in the browser from the spec already on screen; the export
+// libraries load on click, not with the page.
+function ExportButtons({ input }: { input: MissionExportInput }) {
+  const [busy, setBusy] = useState<MissionExportFormat | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  async function run(format: MissionExportFormat) {
+    if (busy) return;
+    setBusy(format);
+    setError(null);
+    try {
+      const { blob, fileName } = await exportMission(format, buildMissionExportModel(input));
+      downloadBlob(fileName, blob);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Export failed");
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  return (
+    <span className="hgr-m-export">
+      <span className="hgr-m-export-label">Export</span>
+      {(Object.keys(EXPORT_FORMAT_META) as MissionExportFormat[]).map((format) => (
+        <button
+          key={format}
+          type="button"
+          className="hgr-m-btn hgr-m-btn-ghost"
+          disabled={busy !== null}
+          onClick={() => run(format)}
+          title={`Download this spec as ${EXPORT_FORMAT_META[format].label}`}
+        >
+          {busy === format ? "Preparing…" : EXPORT_FORMAT_META[format].label}
+        </button>
+      ))}
+      {error && <span className="hgr-m-export-error">Couldn't export: {error}</span>}
+    </span>
   );
 }
 
@@ -1751,6 +1971,23 @@ function PastMissionDetail({ mission, onBack }: { mission: MissionListEntry; onB
       )}
 
       <div className="hgr-m-dash-actions">
+        {hasSpec && (
+          <ExportButtons
+            input={{
+              missionCode: mission.missionCode,
+              generatedAt: mission.createdAt,
+              confidenceScore: mission.confidenceScore ?? 0,
+              version: mission.specVersion,
+              missionSpecs: mission.missionSpecs as unknown as MissionSpecsView,
+              summary: mission.summary ?? "",
+              constraints: mission.constraints as unknown as ConstraintView[],
+              kpis: mission.kpis as unknown as KpiView[],
+              // Not retained per mission (see resumeMission) — a past mission's
+              // export simply has no Validation Notes section.
+              validationFlags: [],
+            }}
+          />
+        )}
         <button type="button" className="hgr-m-btn hgr-m-btn-amber" onClick={onBack}>
           ← Back to your missions
         </button>
@@ -1807,6 +2044,10 @@ function Stage1Findings({ result }: { result: Stage1Result }) {
         <div className="hgr-m-findings-row">
           <b>Intent</b>
           <span>{result.extraction.intent}</span>
+        </div>
+        <div className="hgr-m-findings-row">
+          <b>Category</b>
+          <span>{intentCategoryLabel(result.extraction.intentCategory)}</span>
         </div>
         <div className="hgr-m-findings-row">
           <b>Payload hint</b>
@@ -2293,6 +2534,19 @@ function MissionDashboard({
         >
           Continue to Concept Agent →
         </Link>
+        <ExportButtons
+          input={{
+            missionCode: result.missionCode,
+            generatedAt,
+            confidenceScore: result.confidenceScore,
+            version: result.specVersion,
+            missionSpecs: result.missionSpecs,
+            summary: result.summary,
+            constraints: result.constraints,
+            kpis: result.kpis,
+            validationFlags: result.validationFlags,
+          }}
+        />
         <button type="button" className="hgr-m-btn hgr-m-btn-amber" onClick={onStartNew}>
           Start a new mission
         </button>
@@ -2676,13 +2930,14 @@ const HGR_MISSION_CSS = `
 .hgr-m-missions-arrow-open{ transform:rotate(90deg); }
 .hgr-m-missions-list{ max-height:260px; overflow-y:auto; border-top:1px solid var(--hgr-m-hairline); }
 .hgr-m-mission-row{
-  display:grid; grid-template-columns:1.2fr 2fr 1fr 0.7fr 1fr; align-items:center; gap:12px; width:100%;
+  display:grid; grid-template-columns:1.2fr 2fr 1fr 0.7fr 1fr 1.6fr; align-items:center; gap:12px; width:100%;
   padding:12px 18px; border:none; border-bottom:1px dashed var(--hgr-m-hairline); background:none; cursor:pointer;
   text-align:left; font-family:'IBM Plex Sans',sans-serif; transition:background .15s;
 }
 .hgr-m-mission-row:last-child{ border-bottom:none; }
 .hgr-m-mission-row:hover{ background:rgba(111,180,224,.07); }
 @media(max-width:700px){ .hgr-m-mission-row{ grid-template-columns:1fr 1fr; row-gap:4px; } }
+.hgr-m-mission-row-usage{ font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--hgr-m-paper-dim); white-space:nowrap; }
 .hgr-m-mission-row-code{ font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--hgr-m-blue-bright); }
 .hgr-m-mission-row-type{ font-size:13px; color:var(--hgr-m-paper); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .hgr-m-mission-row-status{
@@ -2830,6 +3085,30 @@ const HGR_MISSION_CSS = `
   font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.06em; text-transform:uppercase;
   color:var(--hgr-m-paper-dim);
 }
+.hgr-m-usage-table{
+  width:100%; border-collapse:collapse; margin:0 0 20px; background:var(--hgr-m-navy-deep);
+  border:1px solid var(--hgr-m-hairline); font-size:13px;
+}
+.hgr-m-usage-table th, .hgr-m-usage-table td{ padding:9px 16px; text-align:left; border-bottom:1px solid var(--hgr-m-hairline); }
+.hgr-m-usage-table th{
+  font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.06em; text-transform:uppercase;
+  color:var(--hgr-m-paper-dim); font-weight:400;
+}
+.hgr-m-usage-table tfoot td{ border-bottom:0; font-weight:600; }
+.hgr-m-usage-table .hgr-m-usage-num{ text-align:right; font-variant-numeric:tabular-nums; }
+.hgr-m-export{ display:inline-flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.hgr-m-export-label{ font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--hgr-m-paper-dim); }
+.hgr-m-export-error{ font-size:12.5px; color:#ffb4b4; }
+.hgr-m-usage-mock{
+  margin-left:10px; font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.05em; text-transform:uppercase;
+  color:var(--hgr-m-amber); border:1px solid rgba(232,163,61,.4); padding:2px 6px; border-radius:2px;
+}
+.hgr-m-simulated-notice{
+  margin:0 0 16px; padding:12px 16px; font-size:13px; line-height:1.5; color:var(--hgr-m-paper);
+  border:1px solid rgba(232,163,61,.5); background:rgba(232,163,61,.08);
+}
+.hgr-m-simulated-notice strong{ color:var(--hgr-m-amber-bright); }
+.hgr-m-usage-split{ font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--hgr-m-paper-dim); }
 .hgr-m-dash-header{ display:flex; align-items:flex-start; justify-content:space-between; gap:24px; padding:26px 28px; border-bottom:1px solid var(--hgr-m-hairline); flex-wrap:wrap; }
 .hgr-m-dash-badge{
   display:inline-block; font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase;

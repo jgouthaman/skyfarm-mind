@@ -1,5 +1,6 @@
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import type { SourceType } from "./types/hangar-mission";
+import { aggregateMissionUsage, type MissionUsage, type UsageRunRow } from "./missionUsage.ts";
 
 // Stage 2.4 (MissionAgent.md Section 4.4.1) — persistence against
 // Hangar_missions / Hangar_mission_specs / Hangar_agent_runs. Server-only:
@@ -116,6 +117,7 @@ const listDb = supabaseAdmin as unknown as {
 
 export interface HangarMissionSpecSummary {
   mission_id: string;
+  version: number;
   mission_specs: Record<string, unknown>;
   constraints: unknown[];
   kpis: unknown[];
@@ -171,7 +173,7 @@ export async function getSpecsForMissions(
   if (missionIds.length === 0) return [];
   const { data, error } = await orderedListDb
     .from("Hangar_mission_specs")
-    .select("mission_id,mission_specs,constraints,kpis,summary,confidence_score")
+    .select("mission_id,version,mission_specs,constraints,kpis,summary,confidence_score")
     .in("mission_id", missionIds)
     .order("mission_id", { ascending: true })
     .order("version", { ascending: false });
@@ -280,6 +282,10 @@ export type AgentRunStage =
 // silent failures." Deliberately swallows its OWN failure (logs to
 // console, doesn't throw): a logging write failing is not a reason to turn
 // an otherwise-successful mission into an error response to the caller.
+// Returns whether the row was written — a SUCCESS row is also the server's
+// record of that stage's result, which the next stage reads back instead of
+// trusting the browser (see getLatestStageRun), so the success paths in
+// missionAgentPipeline.ts treat `false` as a failure.
 export async function logStageRun(
   missionId: string,
   stage: AgentRunStage,
@@ -288,7 +294,7 @@ export async function logStageRun(
   status: "success" | "error",
   durationMs: number,
   errorMessage?: string,
-): Promise<void> {
+): Promise<boolean> {
   const { error } = await db.from("Hangar_agent_runs").insert({
     mission_id: missionId,
     agent_id: "MISSION_AGENT",
@@ -303,5 +309,90 @@ export async function logStageRun(
     console.error(
       `logStageRun: failed to log stage ${stage} for mission ${missionId}: ${error.message}`,
     );
+    return false;
   }
+  return true;
+}
+
+// Per-mission LLM usage/cost for a batch of missions, rebuilt from the
+// usage each stage already logs into its Hangar_agent_runs row. Selects only
+// the three JSON fields it needs (PostgREST `col->key` paths, aliased) rather
+// than whole snapshots — those hold the full spec/extraction and this runs
+// for every mission in the list. Missions with no LLM runs are absent from
+// the map. Callers should treat a failure here as "no usage to show", not as
+// a reason to fail the list it decorates.
+export async function getUsageForMissions(
+  missionIds: string[],
+): Promise<Map<string, MissionUsage>> {
+  if (missionIds.length === 0) return new Map();
+  const { data, error } = await listDb
+    .from("Hangar_agent_runs")
+    .select(
+      "mission_id,stage,status,usage:output_snapshot->usage,request_count:output_snapshot->requestCount,mock:output_snapshot->mock",
+    )
+    .in("mission_id", missionIds);
+  if (error) throw new Error(`getUsageForMissions: ${error.message}`);
+  return aggregateMissionUsage((data ?? []) as unknown as UsageRunRow[]);
+}
+
+// ── Audit trail (Section 9.1's "user-level" gap) ─────────────────────────
+//
+// Hangar_agent_runs records what the AGENT did; this records what the USER
+// did to a mission, one row per lifecycle action. Best-effort by design, like
+// logStageRun: an audit write failing (including the table not existing yet
+// — its migration is applied by hand, see 20260921000000_hangar_mission_
+// audit_log.sql) must never fail the action being audited.
+export type MissionAuditAction = "mission_created" | "spec_generated" | "mission_finalized";
+
+export async function logMissionAudit(
+  missionId: string,
+  userId: string,
+  action: MissionAuditAction,
+  details?: Record<string, unknown>,
+): Promise<void> {
+  const { error } = await db.from("Hangar_mission_audit").insert({
+    mission_id: missionId,
+    user_id: userId,
+    action,
+    details: details ?? {},
+  });
+  if (error) {
+    console.error(`logMissionAudit: failed to record ${action} for mission ${missionId}: ${error.message}`);
+  }
+}
+
+export interface StageRunRecord {
+  input: unknown;
+  output: unknown;
+}
+
+// The server-side record of a stage's most recent SUCCESSFUL run for this
+// mission — what Stage 2/3/4 read their inputs from instead of taking them
+// from the request body. Everything in a request body is attacker-controlled
+// (the browser can send any extraction, KPI list, source count or
+// confidence score it likes); the log row was written by this server from
+// this server's own computation. Newest row wins when a stage ran more than
+// once (retry after an error, or the user re-clicking Proceed).
+//
+// Sorted client-side rather than `.order("created_at")` at the DB: the
+// existing readers of this table never order it, and the live table has
+// already drifted from Section 10 once (stage names) — this stays correct
+// whether or not created_at is selectable, falling back to insertion order.
+export async function getLatestStageRun(
+  missionId: string,
+  stage: AgentRunStage,
+): Promise<StageRunRecord | null> {
+  const { data, error } = await listDb
+    .from("Hangar_agent_runs")
+    .select("*")
+    .eq("mission_id", missionId)
+    .eq("stage", stage)
+    .in("status", ["success"]);
+  if (error) throw new Error(`getLatestStageRun: ${error.message}`);
+  const rows = data ?? [];
+  if (rows.length === 0) return null;
+  const newest = rows.reduce((best, row) =>
+    String(row.created_at ?? "") >= String(best.created_at ?? "") ? row : best,
+  );
+  return { input: newest.input_snapshot, output: newest.output_snapshot };
 }
