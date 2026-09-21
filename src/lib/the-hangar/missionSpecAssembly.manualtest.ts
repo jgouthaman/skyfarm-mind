@@ -50,6 +50,52 @@ check(
   },
 );
 
+check(
+  "intent category fills vertical when the keyword rules find none",
+  assembleMissionSpecs({
+    detectedIntent: "x",
+    decomposedElements: ["carry water payload"],
+    intentCategory: "agriculture",
+  }).vertical,
+  "AgriSky",
+);
+
+check(
+  "keyword rules still win over the intent category",
+  assembleMissionSpecs({
+    detectedIntent: "x",
+    decomposedElements: ["perimeter security patrol"],
+    intentCategory: "agriculture",
+  }).vertical,
+  "GuardSky",
+);
+
+check(
+  "a category with no defined vertical leaves it null (nothing invented)",
+  assembleMissionSpecs({
+    detectedIntent: "x",
+    decomposedElements: ["carry water payload"],
+    intentCategory: "emergency_response",
+  }).vertical,
+  null,
+);
+
+check(
+  "no category and no keyword match -> null, same as before categories existed",
+  assembleMissionSpecs({ detectedIntent: "x", decomposedElements: ["carry water payload"] }).vertical,
+  null,
+);
+
+check(
+  "an unknown / off-list category id can't set a vertical",
+  assembleMissionSpecs({
+    detectedIntent: "x",
+    decomposedElements: ["carry water payload"],
+    intentCategory: "made_up",
+  }).vertical,
+  null,
+);
+
 console.log("\n--- finalizeConstraints (Step 2) ---");
 
 check(
