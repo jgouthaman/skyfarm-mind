@@ -4,6 +4,7 @@ import { identifyConstraintsAndKpis, type TracedConstraint } from "./constraintI
 import { prioritizeTradeoffs } from "./tradeoffPrioritization.ts";
 import { sumUsage, type LlmUsage } from "./llmGateway.ts";
 import { runOutputGeneration, type Stage3Output } from "./stage3Orchestrator.ts";
+import type { MissionUsage } from "./missionUsage.ts";
 import type {
   FinalizedConstraint,
   FinalizedKpi,
@@ -15,6 +16,9 @@ import { hasUsableContent, computeValidationFlags } from "./missionInputValidati
 import {
   createMission,
   getMission,
+  getLatestStageRun,
+  getUsageForMissions,
+  logMissionAudit,
   updateMissionStatus,
   persistMissionSpec,
   logStageRun,
@@ -106,6 +110,54 @@ async function recordStageFailure(
   return new MissionAgentError(message, missionId, stage);
 }
 
+// Stages 1-3 write a success row that is ALSO the input to the next stage:
+// Stage 2 reads Stage 1's row, Stage 3 reads Stages 1+2's, Stage 4 reads
+// Stage 3's. None of them take their inputs from the request body, since
+// anything in a request body can be forged by the caller (see
+// getLatestStageRun). That makes a failed log write a real failure — the
+// user would otherwise get a result that the next click can't build on —
+// so unlike logStageRun's own best-effort contract, these throw.
+async function logStageSuccess(
+  missionId: string,
+  stage: AgentRunStage,
+  input: unknown,
+  output: unknown,
+  durationMs: number,
+): Promise<void> {
+  const written = await logStageRun(missionId, stage, input, output, "success", durationMs);
+  if (!written) {
+    throw new Error(`Could not record the ${stage} result — the next stage reads it from there`);
+  }
+}
+
+// The latest successful run of an earlier stage, or a 400 telling the caller
+// to run the earlier stage first. Thrown BEFORE the calling stage flips the
+// mission to 'processing', so an out-of-order call can't disturb a mission
+// that's already sitting at spec_ready/finalized.
+async function requireStageRun(
+  missionId: string,
+  stage: AgentRunStage,
+): Promise<{ input: Record<string, unknown>; output: Record<string, unknown> }> {
+  const run = await getLatestStageRun(missionId, stage);
+  if (!run || typeof run.output !== "object" || run.output === null) {
+    throw new InvalidMissionInputError(
+      `The ${stage} stage has not completed for this mission — run the earlier stages first.`,
+    );
+  }
+  return {
+    input: (run.input ?? {}) as Record<string, unknown>,
+    output: run.output as Record<string, unknown>,
+  };
+}
+
+function storedField<T>(record: Record<string, unknown>, key: string, stage: AgentRunStage): T {
+  const value = record[key];
+  if (value === undefined || value === null) {
+    throw new Error(`Stored ${stage} record is missing "${key}"`);
+  }
+  return value as T;
+}
+
 // ── Stage 01 — Input Processing ──────────────────────────────────────────
 
 export interface Stage1Request {
@@ -137,11 +189,12 @@ export async function runInputProcessingStage(request: Stage1Request): Promise<S
 
   const mission = await createMission(userId, sourceTypesUsed);
   const missionId = mission.id;
+  await logMissionAudit(missionId, userId, "mission_created", { sourceTypesUsed });
   await updateMissionStatus(missionId, "processing");
 
   const start = Date.now();
   try {
-    const directRefs = await resolveDirectReferences(sources);
+    const directRefs = await resolveDirectReferences(sources, userId);
     const extraction = await extractIntentAndEntities({
       data: {
         rawTextCombined,
@@ -157,12 +210,11 @@ export async function runInputProcessingStage(request: Stage1Request): Promise<S
     const validationFlags = computeValidationFlags(extraction, structuredFields);
     const durationMs = Date.now() - start;
 
-    await logStageRun(
+    await logStageSuccess(
       missionId,
       "input_processing",
       { rawTextCombined, structuredFields, attachedRegulations: directRefs.attachedRegulations },
       { ...extraction, validationFlags },
-      "success",
       durationMs,
     );
 
@@ -183,12 +235,28 @@ export async function runInputProcessingStage(request: Stage1Request): Promise<S
 
 // ── Stage 02 — Reasoning & Planning ──────────────────────────────────────
 
+// The ONE thing the browser still contributes here: the gap-fill wizard's
+// answers (Stage 1 flagged payload/range/endurance as missing and the user
+// supplied them). Those are genuine user input, but they're accepted only for
+// these three known keys and only as positive finite numbers — everything
+// else Stage 2 needs (extraction, structured fields, regulations) comes from
+// Stage 1's stored record, not from the request.
+const GAP_OVERRIDE_KEYS = ["payload_kg", "range_km", "endurance_min"] as const;
+
+function sanitizeGapOverrides(raw: unknown): Record<string, number> {
+  const out: Record<string, number> = {};
+  if (typeof raw !== "object" || raw === null) return out;
+  for (const key of GAP_OVERRIDE_KEYS) {
+    const value = (raw as Record<string, unknown>)[key];
+    if (typeof value === "number" && Number.isFinite(value) && value > 0) out[key] = value;
+  }
+  return out;
+}
+
 export interface Stage2Request {
   userId: string;
   missionId: string;
-  extraction: IntentExtractionResult;
-  structuredFields: Record<string, unknown>;
-  attachedRegulations: string[];
+  gapOverrides?: Record<string, unknown>;
 }
 
 export interface Stage2Result {
@@ -208,8 +276,21 @@ export interface Stage2Result {
 }
 
 export async function runReasoningPlanningStage(request: Stage2Request): Promise<Stage2Result> {
-  const { userId, missionId, extraction, structuredFields, attachedRegulations } = request;
+  const { userId, missionId } = request;
   await assertMissionOwnership(missionId, userId);
+  const stage1 = await requireStageRun(missionId, "input_processing");
+  const { validationFlags: _flags, ...extractionRecord } = stage1.output;
+  const extraction = extractionRecord as unknown as IntentExtractionResult;
+  const gapOverrides = sanitizeGapOverrides(request.gapOverrides);
+  const structuredFields = {
+    ...storedField<Record<string, unknown>>(stage1.input, "structuredFields", "input_processing"),
+    ...gapOverrides,
+  };
+  const attachedRegulations = storedField<string[]>(
+    stage1.input,
+    "attachedRegulations",
+    "input_processing",
+  );
   await updateMissionStatus(missionId, "processing");
 
   const start = Date.now();
@@ -233,16 +314,20 @@ export async function runReasoningPlanningStage(request: Stage2Request): Promise
 
     const durationMs = Date.now() - start;
 
-    await logStageRun(
+    await logStageSuccess(
       missionId,
       "reasoning_planning",
-      { decomposedElements: decomposition.decomposedElements },
+      { decomposedElements: decomposition.decomposedElements, gapOverrides },
       {
         identifiedConstraints: constraintsAndKpis.identifiedConstraints,
         derivedKpis: constraintsAndKpis.derivedKpis,
         prioritizedTradeoffs,
+        // Logged so per-mission cost can be rebuilt from Hangar_agent_runs
+        // later (missionUsage.ts) — Stages 1 and 3 already carry theirs.
+        usage: sumUsage(decomposition.usage, constraintsAndKpis.usage),
+        requestCount: (decomposition.mock ? 0 : 1) + (constraintsAndKpis.mock ? 0 : 1),
+        mock: decomposition.mock || constraintsAndKpis.mock,
       },
-      "success",
       durationMs,
     );
 
@@ -264,29 +349,59 @@ export async function runReasoningPlanningStage(request: Stage2Request): Promise
 
 // ── Stage 03 — Output Generation ─────────────────────────────────────────
 
+// The request carries only the mission id. Everything the confidence score
+// is computed from — source count, derived KPIs, validation flag count — is
+// read server-side: the source count off the Hangar_missions row, the flags
+// from Stage 1's record, the KPIs/constraints from Stage 2's. Taking any of
+// those from the browser would let a caller dictate their own score.
 export interface Stage3Request {
   userId: string;
   missionId: string;
-  detectedIntent: string;
-  sourceTypesUsedCount: number;
-  validationFlagCount: number;
-  operatingEnvironment?: string | null;
-  decomposedElements: string[];
-  identifiedConstraints: TracedConstraint[];
-  derivedKpis: DerivedKpi[];
-  prioritizedTradeoffs: PrioritizedTradeoff[];
 }
 
 export async function runOutputGenerationStage(request: Stage3Request): Promise<Stage3Output> {
-  const { userId, missionId, ...stage3Input } = request;
-  await assertMissionOwnership(missionId, userId);
+  const { userId, missionId } = request;
+  const mission = await assertMissionOwnership(missionId, userId);
+  const stage1 = await requireStageRun(missionId, "input_processing");
+  const stage2 = await requireStageRun(missionId, "reasoning_planning");
+  const structuredFields = storedField<Record<string, unknown>>(
+    stage1.input,
+    "structuredFields",
+    "input_processing",
+  );
+  const stage3Input = {
+    detectedIntent: storedField<string>(stage1.output, "intent", "input_processing"),
+    // Optional: a mission whose Stage 1 ran before intent categories existed
+    // has no stored category — it just gets no category-based vertical.
+    intentCategory:
+      typeof stage1.output.intentCategory === "string" ? stage1.output.intentCategory : null,
+    sourceTypesUsedCount: mission.source_types_used.length,
+    validationFlagCount: storedField<string[]>(stage1.output, "validationFlags", "input_processing")
+      .length,
+    operatingEnvironment:
+      typeof structuredFields.operating_environment === "string"
+        ? structuredFields.operating_environment
+        : null,
+    decomposedElements: storedField<string[]>(stage2.input, "decomposedElements", "reasoning_planning"),
+    identifiedConstraints: storedField<TracedConstraint[]>(
+      stage2.output,
+      "identifiedConstraints",
+      "reasoning_planning",
+    ),
+    derivedKpis: storedField<DerivedKpi[]>(stage2.output, "derivedKpis", "reasoning_planning"),
+    prioritizedTradeoffs: storedField<PrioritizedTradeoff[]>(
+      stage2.output,
+      "prioritizedTradeoffs",
+      "reasoning_planning",
+    ),
+  };
   await updateMissionStatus(missionId, "processing");
 
   const start = Date.now();
   try {
     const stage3 = await runOutputGeneration({ data: { missionId, ...stage3Input } });
     const durationMs = Date.now() - start;
-    await logStageRun(missionId, "output_generation", { missionId }, stage3, "success", durationMs);
+    await logStageSuccess(missionId, "output_generation", { missionId }, stage3, durationMs);
     return { ...stage3, durationMs };
   } catch (err) {
     throw await recordStageFailure(missionId, "output_generation", err);
@@ -295,14 +410,15 @@ export async function runOutputGenerationStage(request: Stage3Request): Promise<
 
 // ── Stage 04 — Output Interface ──────────────────────────────────────────
 
+// The request carries only the mission id: the spec that gets persisted is
+// Stage 3's own stored output, never a copy the browser echoes back. What
+// lands in Hangar_mission_specs (and what Concept/Bernoulli/every later bay
+// then trusts) is therefore always something this server generated — in
+// particular the confidence score is always the Section 4.3.1 formula's
+// result, not a number the caller chose.
 export interface Stage4Request {
   userId: string;
   missionId: string;
-  missionSpecs: MissionSpecsFields;
-  constraints: FinalizedConstraint[];
-  kpis: FinalizedKpi[];
-  summary: string;
-  confidenceScore: number;
 }
 
 export interface Stage4Result {
@@ -313,14 +429,23 @@ export interface Stage4Result {
   kpis: FinalizedKpi[];
   summary: string;
   confidenceScore: number;
+  validationFlags: string[];
   specVersion: number;
   export: StubResult;
   eventPublish: EventStubResult;
 }
 
 export async function runOutputInterfaceStage(request: Stage4Request): Promise<Stage4Result> {
-  const { userId, missionId, missionSpecs, constraints, kpis, summary, confidenceScore } = request;
+  const { userId, missionId } = request;
   const mission = await assertMissionOwnership(missionId, userId);
+  const stage1 = await requireStageRun(missionId, "input_processing");
+  const stage3 = await requireStageRun(missionId, "output_generation");
+  const validationFlags = storedField<string[]>(stage1.output, "validationFlags", "input_processing");
+  const missionSpecs = storedField<MissionSpecsFields>(stage3.output, "missionSpecs", "output_generation");
+  const constraints = storedField<FinalizedConstraint[]>(stage3.output, "constraints", "output_generation");
+  const kpis = storedField<FinalizedKpi[]>(stage3.output, "kpis", "output_generation");
+  const summary = storedField<string>(stage3.output, "summary", "output_generation");
+  const confidenceScore = storedField<number>(stage3.output, "confidenceScore", "output_generation");
   await updateMissionStatus(missionId, "processing");
 
   const start = Date.now();
@@ -338,6 +463,10 @@ export async function runOutputInterfaceStage(request: Stage4Request): Promise<S
       confidenceScore,
     });
     await updateMissionStatus(missionId, "spec_ready", confidenceScore);
+    await logMissionAudit(missionId, userId, "spec_generated", {
+      version: specRow.version,
+      confidenceScore,
+    });
     const exportResult = stubExport();
     const eventResult = stubEventPublish();
     await logStageRun(
@@ -362,6 +491,7 @@ export async function runOutputInterfaceStage(request: Stage4Request): Promise<S
       kpis,
       summary,
       confidenceScore,
+      validationFlags,
       specVersion: specRow.version,
       export: exportResult,
       eventPublish: eventResult,
@@ -393,8 +523,23 @@ export async function finalizeMission(
   request: FinalizeMissionRequest,
 ): Promise<FinalizeMissionResult> {
   const { userId, missionId } = request;
-  await assertMissionOwnership(missionId, userId);
+  const mission = await assertMissionOwnership(missionId, userId);
+  // Only a mission that actually has a persisted spec can be confirmed —
+  // otherwise a draft/processing/error mission could be flipped to
+  // 'finalized' via a direct API call and then be picked up by Concept Agent
+  // (which trusts status = 'finalized'). Already-finalized stays a no-op.
+  if (mission.status !== "spec_ready" && mission.status !== "finalized") {
+    throw new InvalidMissionInputError(
+      `Mission has no generated spec to finalize (status: ${mission.status})`,
+    );
+  }
   await updateMissionStatus(missionId, "finalized");
+  // Only record a real transition — finalizing an already-final mission is a no-op.
+  if (mission.status !== "finalized") {
+    await logMissionAudit(missionId, userId, "mission_finalized", {
+      confidenceScore: mission.confidence_score,
+    });
+  }
   return { missionId, status: "finalized" };
 }
 
@@ -418,6 +563,10 @@ export interface MissionListEntry {
   kpis: FinalizedKpi[] | null;
   summary: string | null;
   confidenceScore: number | null;
+  /** Latest persisted spec version — null until a spec exists. */
+  specVersion: number | null;
+  /** LLM requests/tokens/estimated cost, rebuilt from the run log. null when unavailable. */
+  usage: MissionUsage | null;
 }
 
 export async function listMissionsForUser(
@@ -426,9 +575,15 @@ export async function listMissionsForUser(
 ): Promise<MissionListEntry[]> {
   const missions = await listUserMissions(userId, statusFilter);
   const missionIds = missions.map((m) => m.id);
-  const [specs, briefs] = await Promise.all([
+  const [specs, briefs, usageByMission] = await Promise.all([
     getSpecsForMissions(missionIds),
     getOriginalBriefsForMissions(missionIds),
+    // Decoration only — if the usage query fails (e.g. a PostgREST/JSON-path
+    // problem), the list must still load, just without usage numbers.
+    getUsageForMissions(missionIds).catch((err) => {
+      console.error("listMissionsForUser: usage unavailable:", err);
+      return new Map<string, MissionUsage>();
+    }),
   ]);
   const specsByMission = new Map(specs.map((s) => [s.mission_id, s]));
 
@@ -446,6 +601,8 @@ export async function listMissionsForUser(
       kpis: spec ? (spec.kpis as unknown as FinalizedKpi[]) : null,
       summary: spec?.summary ?? null,
       confidenceScore: spec?.confidence_score ?? null,
+      specVersion: spec?.version ?? null,
+      usage: usageByMission.get(m.id) ?? null,
     };
   });
 }

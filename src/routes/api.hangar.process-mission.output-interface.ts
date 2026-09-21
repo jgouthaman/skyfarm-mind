@@ -4,25 +4,20 @@ import { toFinalMissionResponse } from "@/lib/the-hangar/types/mission-pipeline-
 import { resolveUserId, jsonResponse, errorResponse } from "@/lib/the-hangar/apiAuth";
 
 // Stage 04 of the gated Mission Agent flow (MissionAgent.md Section 4.4.1)
-// — the terminal stage. Request is Stage3Output's fields echoed back verbatim
-// plus missionId (internal hand-off, camelCase); the response is the public
-// boundary again (Section 11's documented schema), matching what the old
-// single-shot endpoint returned. validation_flags comes from the client's
-// own request body since Stage 4 never touches them server-side (see
-// mission-pipeline-api.ts's toFinalMissionResponse).
-interface OutputInterfaceRequestBody extends Omit<Stage4Request, "userId"> {
-  validation_flags: string[];
-}
-
+// — the terminal stage. The request is just { missionId }: the spec that gets
+// persisted is Stage 3's stored output and the validation flags come from
+// Stage 1's stored record, both read server-side (see Stage4Request) — the
+// browser never supplies spec content or a confidence score. The response is
+// the public boundary again (Section 11's documented schema).
 export const Route = createFileRoute("/api/hangar/process-mission/output-interface")({
   server: {
     handlers: {
       POST: async ({ request }) => {
         try {
           const userId = await resolveUserId(request);
-          const { validation_flags, ...stage4Body }: OutputInterfaceRequestBody = await request.json();
-          const result = await runOutputInterfaceStage({ ...stage4Body, userId });
-          return jsonResponse(toFinalMissionResponse(result, validation_flags));
+          const body: Omit<Stage4Request, "userId"> = await request.json();
+          const result = await runOutputInterfaceStage({ missionId: body.missionId, userId });
+          return jsonResponse(toFinalMissionResponse(result, result.validationFlags));
         } catch (err) {
           return errorResponse(err);
         }

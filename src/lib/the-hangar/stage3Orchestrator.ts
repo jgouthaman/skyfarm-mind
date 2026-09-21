@@ -30,6 +30,7 @@ export interface Stage3Input {
   missionId: string;
   // From Stage 2.1 (ParsedMissionInput)
   detectedIntent: string;
+  intentCategory?: string | null;
   sourceTypesUsedCount: number;
   validationFlagCount: number;
   operatingEnvironment?: string | null;
@@ -68,6 +69,7 @@ export const runOutputGeneration = createServerFn({ method: "POST" })
     // Steps 1-3 — deterministic assembly, computed before Step 4 is even called.
     const missionSpecs = assembleMissionSpecs({
       detectedIntent: data.detectedIntent,
+      intentCategory: data.intentCategory,
       decomposedElements: data.decomposedElements,
       operatingEnvironment: data.operatingEnvironment,
     });

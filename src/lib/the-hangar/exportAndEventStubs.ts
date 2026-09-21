@@ -20,7 +20,7 @@ export interface StubResult {
 export function stubExport(): StubResult {
   return {
     status: "stubbed",
-    reason: "Export (PDF/DOCX/Excel) is v2 per Section 4.4.2 — not implemented",
+    reason: "Server-side export is not part of the pipeline — PDF/Word/Excel are generated in the browser on demand from the dashboard (missionExport.ts, Section 4.4.2)",
   };
 }
 

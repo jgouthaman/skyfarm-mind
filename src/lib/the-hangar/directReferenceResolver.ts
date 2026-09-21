@@ -1,5 +1,6 @@
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import type { MissionSourceInput, MissionSpec } from "./types/hangar-mission";
+import { getMission } from "./missionPersistence.ts";
 
 // Stage 2.1, Step 0 (MissionAgent.md Section 4.1.1) — deterministic DB
 // fetches for sources 4/5/6 (Existing Projects, Regulations & Standards,
@@ -90,6 +91,7 @@ function toMissionSpec(row: HangarMissionSpecRow): MissionSpec {
 // sources 1/2/3 are ignored here, they belong to Step 2 (intentExtraction.ts).
 export async function resolveDirectReferences(
   sources: MissionSourceInput[],
+  userId: string,
 ): Promise<DirectReferenceResolution> {
   const existingProjectSource = sources.find((s) => s.sourceType === "existing_project");
   const regulationsSource = sources.find((s) => s.sourceType === "regulations");
@@ -109,7 +111,7 @@ export async function resolveDirectReferences(
     : [];
 
   const [importedMissionSpec, regulationDetails, marketDataDetails] = await Promise.all([
-    fetchImportedMissionSpec(importedMissionRef),
+    fetchImportedMissionSpec(importedMissionRef, userId),
     fetchRegulationDetails(attachedRegulations),
     fetchMarketDataDetails(marketDataRefs),
   ]);
@@ -126,10 +128,23 @@ export async function resolveDirectReferences(
 
 // Source 4 — fetch the imported mission's stored Hangar_mission_specs row,
 // most recent version, by imported_mission_id (Section 4.1.1, Section 10).
+//
+// supabaseAdmin bypasses RLS, and importedMissionId is client-supplied — so
+// without this check any signed-in user could pull another user's spec into
+// their own LLM grounding context by guessing/knowing a mission id. "Existing
+// Projects" means the caller's own past missions (Section 16), so anything
+// else is rejected. Missing and not-owned share one message so this can't be
+// used to probe which mission ids exist.
 async function fetchImportedMissionSpec(
   importedMissionId: string | null,
+  userId: string,
 ): Promise<MissionSpec | null> {
   if (!importedMissionId) return null;
+
+  const mission = await getMission(importedMissionId);
+  if (!mission || mission.user_id !== userId) {
+    throw new Error("Imported mission not found");
+  }
 
   const { data, error } = await db
     .from("Hangar_mission_specs")

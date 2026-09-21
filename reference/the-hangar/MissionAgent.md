@@ -1,6 +1,6 @@
 # Mission Agent — Bay 01
 
-**Status:** In development (build started — see [Build Status](#14-build-status))
+**Status:** Stages 2.1–2.4 built for the natural-language path; RAG and the event bus are deferred stubs — see [Build Status](#14-build-status)
 **Agent ID:** `MISSION_AGENT`
 **Type:** Base Agent (Upstream)
 **Stage:** 1 of 15 — The Hangar
@@ -189,12 +189,15 @@ validation_flags    ┘
 
 **Build order recommendation:** LLM extraction and the rules engine can be built today — no blockers. RAG has no payoff until there's real content worth retrieving (an empty knowledge base just returns nothing), so stub context retrieval as an always-empty call until `Hangar_mission_specs` has enough real missions in it to be worth searching — same logic already applied to `design_outcomes` being a moat only once it holds data.
 
+**Intent category (added after the original spec):** `detected_intent` stays free text — it's what Stage 2.2's decomposition reads, and it carries detail a label would lose — but the same extraction call also returns `intent_category`, one id from a fixed list (`missionIntentCategories.ts`, the single place to edit it). The value is validated server-side: anything off-list, or missing, becomes `other`. Stage 2.3 uses it only to fill `mission_specs.vertical` when the DOM-001–004 keyword rules find none; categories with no defined vertical (e.g. emergency response) leave it null. The category list is a starting set pending a product decision, not an approved taxonomy.
+
 **Output — `ParsedMissionInput`:**
 ```json
 {
   "raw_text_combined": "string",
   "source_types_used": ["natural_language", "regulations"],
   "detected_intent": "string",
+  "intent_category": "agriculture | security_surveillance | infrastructure_inspection | mapping_survey | emergency_response | delivery_logistics | aerial_media | environmental_monitoring | other",
   "extracted_entities": {
     "payload_hint": "string | null",
     "range_hint": "string | null",
@@ -612,9 +615,9 @@ This stage is shaped differently from 2.1–2.3. Those three were dependency cha
 
 **What this means for implementation:** `publishOutput` (Section 12) should persist first, then either `await` the API response path directly while firing Export-stub and Event-publish-stub without blocking on their completion (e.g. not awaited, or awaited but wrapped so a failure there doesn't fail the whole request) — a slow or failed event-bus stub should never be the reason a user sees an error after their mission spec was actually saved successfully.
 
-### 4.4.2 Export Template (Documented, Not Built — v2)
+### 4.4.2 Export Template (Built — client-side, on demand)
 
-Same treatment as RAG (Section 4.1.1): specified now so the shape is settled, not built in this pass. When Export is implemented, it should reuse the *exact* content structure already defined for Dashboard View (Section 13.1) — same 7 sections, same source data, just formatted for a static document instead of an interactive screen. Two format families, not one universal template:
+**Status:** built. PDF, Word (.docx) and Excel (.xlsx) are generated in the browser from the spec on screen (`missionExport.ts`), via Export buttons on the dashboard and on a reopened past mission — not by the pipeline, so the export never drifts from what the dashboard shows and needs no server-side file generation. PDF uses built-in Helvetica, so ₹ prints as "INR " there (Word and Excel keep ₹). A past mission's export has no Validation Notes section, because those flags aren't retained per mission. Original spec: same treatment as RAG (Section 4.1.1) — the shape was settled first. Export reuses the *exact* content structure already defined for Dashboard View (Section 13.1) — same 7 sections, same source data, just formatted for a static document instead of an interactive screen. Two format families, not one universal template:
 
 **PDF / DOCX (narrative document):**
 
@@ -1497,17 +1500,23 @@ Two things could look like they conflict: Section 4.4.1 has persistence happen *
 
 ## 14. Build Status
 
+Status below reflects the code as of 2026-09-21 (read from the source, not from a live run). The four stages are built and wired end to end for the natural-language path; what's deferred is deferred deliberately and is stubbed, not missing.
+
 | Item | Phase | Status |
 |---|---|---|
-| Input intake UI (all six sources) | Phase 1 | UI mockup complete — not wired to backend |
-| `Hangar_*` Supabase tables | Phase 1 | Not created |
-| Stage 2.1 — LLM extraction (intent + entities) | Phase 1 | Not started |
-| Stage 2.1 — Rules engine (validation & normalization) | Phase 1 | Not started |
-| Stage 2.1 — RAG context retrieval | Stub | Stubbed (always-empty) for now — full implementation planned for Phase 2, once `Hangar_mission_specs` has enough real missions to be worth searching |
-| Stage 2.2 — Reasoning & Planning | Phase 1 | Not started |
-| Stage 2.3 — Output Generation | Phase 1 | Not started |
-| Stage 2.4 — Output Interface | Phase 1 | Not started |
-| Handoff to Concept Agent | Phase 1 | Not started |
+| Input intake UI | Phase 1 | Built and wired for Natural Language, plus Requirements-form answers via the confidence-boost wizard. Document, Existing Projects, Regulations and Market Data sources have backend parsing/resolution (`missionSourceParsing.ts`, `directReferenceResolver.ts`) but **no intake UI yet** |
+| `Hangar_*` Supabase tables | Phase 1 | `Hangar_missions`, `Hangar_mission_specs`, `Hangar_agent_runs` and the regulations / market-data catalogs exist live in Supabase (there is no migration file for them in the repo). `Hangar_events` is **not** created |
+| Stage 2.1 — LLM extraction (intent + entities) | Phase 1 | Built — one combined Claude call (`intentExtraction.ts`), falls back to a mock when the API key is missing or the call fails |
+| Stage 2.1 — Rules engine (validation & normalization) | Phase 1 | Built (`rulesEngine.ts`, `missionInputValidation.ts`) — deterministic, no LLM |
+| Stage 2.1 — RAG context retrieval | Stub | Stubbed (always-empty) and **not called by the pipeline** — full implementation planned for Phase 2, once `Hangar_mission_specs` has enough real missions to be worth searching |
+| Stage 2.2 — Reasoning & Planning | Phase 1 | Built — two Claude calls (decomposition; constraints + KPIs) plus deterministic trade-off prioritization |
+| Stage 2.3 — Output Generation | Phase 1 | Built — deterministic assembly and dedup, one Claude call for the summary, formula-computed confidence score |
+| Stage 2.4 — Output Interface | Phase 1 | Built — persistence, versioning, Save as final. The pipeline's own export and event-publish steps are **stubs** (`exportAndEventStubs.ts`) — on-demand export is a separate, built feature (see the Export row below); the event publish is still a stub |
+| Stage hand-off integrity | Phase 1 | Built — Stages 2–4 take only `missionId` (plus the gap-wizard's whitelisted answers for Stage 2) and read the previous stage's result from that stage's stored `Hangar_agent_runs` row; the browser never supplies spec content, KPIs or a confidence score |
+| Per-run telemetry and cost | Phase 1 | Built — per-stage requests and tokens table, run totals, and estimated cost, shown in INR (list price converted at a fixed rate — `USD_TO_INR` in `missionUsage.ts`, ₹96 as of 2026-09-21; update it when it drifts; hover shows the USD figure). Usage is also rebuilt from `Hangar_agent_runs`, so a reopened mission and the "Your missions" rows show it too (time taken is only known for a run made this session; usage from before Stage 2 logged its own is a floor, marked "≥") |
+| Export (PDF / Word / Excel) | Phase 1 | Built — client-side, on demand (Section 4.4.2) |
+| User-action audit log | Phase 2 | Built in code, **migration not yet applied** — `Hangar_mission_audit` (`supabase/migrations/20260921000000_hangar_mission_audit_log.sql`) records mission created / spec generated / finalized. Writes are best-effort, so nothing breaks before the migration is run, but no rows are recorded until it is |
+| Handoff to Concept Agent | Phase 1 | Working through `Hangar_missions.status = 'finalized'` (Concept Agent checks it directly); the `mission.spec_ready` event bus is not built |
 
 ## 15. Scope of This Document
 
