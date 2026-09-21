@@ -11,7 +11,12 @@ import type { Stage3Output } from "@/lib/the-hangar/stage3Orchestrator";
 import type { FinalMissionResponse } from "@/lib/the-hangar/types/mission-pipeline-api";
 import { DOMAIN_RULES } from "@/lib/the-hangar/domainRules";
 import { intentCategoryLabel } from "@/lib/the-hangar/missionIntentCategories";
-import { estimateCostUsd, formatCostUsd, type MissionUsage } from "@/lib/the-hangar/missionUsage";
+import {
+  describeInrCost,
+  estimateCostUsd,
+  formatCostInr,
+  type MissionUsage,
+} from "@/lib/the-hangar/missionUsage";
 import {
   EXPORT_FORMAT_META,
   buildMissionExportModel,
@@ -168,7 +173,7 @@ function TelemetryBar({ telemetry }: { telemetry: MissionTelemetry | null }) {
   return (
     <div
       className="hgr-m-telemetry"
-      title="LLM usage for this mission. Cost is an estimate at list price, not a bill. Time is only known for a run made in this session."
+      title="LLM usage for this mission. Cost is an estimate in INR at a fixed USD rate, not a bill. Time is only known for a run made in this session."
     >
       <div className="hgr-m-telemetry-item">
         <span className="hgr-m-telemetry-num">
@@ -185,10 +190,10 @@ function TelemetryBar({ telemetry }: { telemetry: MissionTelemetry | null }) {
         <span className="hgr-m-telemetry-num">{telemetry.outputTokens.toLocaleString()}</span>
         <span className="hgr-m-telemetry-label">Output tokens</span>
       </div>
-      <div className="hgr-m-telemetry-item">
+      <div className="hgr-m-telemetry-item" title={describeInrCost(telemetry.estimatedCostUsd)}>
         <span className="hgr-m-telemetry-num">
           {telemetry.partial ? "≥ " : "~"}
-          {formatCostUsd(telemetry.estimatedCostUsd)}
+          {formatCostInr(telemetry.estimatedCostUsd)}
         </span>
         <span className="hgr-m-telemetry-label">Est. cost</span>
       </div>
@@ -270,7 +275,7 @@ function StageUsageTable({ flow }: { flow: MissionFlowState }) {
   return (
     <table
       className="hgr-m-usage-table"
-      title="LLM requests and tokens per stage. Cost is an estimate at list price, not a bill."
+      title="LLM requests and tokens per stage. Cost is an estimate in INR at a fixed USD rate, not a bill."
     >
       <thead>
         <tr>
@@ -319,10 +324,13 @@ function StageUsageTable({ flow }: { flow: MissionFlowState }) {
           <td className="hgr-m-usage-num">{(totalInput + totalOutput).toLocaleString()}</td>
         </tr>
         <tr>
-          <td colSpan={2}>Estimated cost (list price)</td>
-          <td className="hgr-m-usage-num">
+          <td colSpan={2}>Estimated cost</td>
+          <td
+            className="hgr-m-usage-num"
+            title={describeInrCost(estimateCostUsd(totalInput, totalOutput))}
+          >
             {partial ? "≥ " : "~"}
-            {formatCostUsd(estimateCostUsd(totalInput, totalOutput))}
+            {formatCostInr(estimateCostUsd(totalInput, totalOutput))}
           </td>
         </tr>
       </tfoot>
@@ -1826,10 +1834,10 @@ function MissionsListPanel({
               </span>
               <span
                 className="hgr-m-mission-row-usage"
-                title="LLM requests · tokens · estimated cost at list price"
+                title={m.usage ? describeInrCost(m.usage.estimatedCostUsd) : "LLM usage not available"}
               >
                 {m.usage
-                  ? `${m.usage.complete ? "" : "≥ "}${m.usage.requests} req · ${(m.usage.inputTokens + m.usage.outputTokens).toLocaleString()} tok · ~${formatCostUsd(m.usage.estimatedCostUsd)}`
+                  ? `${m.usage.complete ? "" : "≥ "}${m.usage.requests} req · ${(m.usage.inputTokens + m.usage.outputTokens).toLocaleString()} tok · ~${formatCostInr(m.usage.estimatedCostUsd)}`
                   : "—"}
               </span>
             </button>
@@ -1890,9 +1898,24 @@ function ExportButtons({ input }: { input: MissionExportInput }) {
 function PastMissionDetail({ mission, onBack }: { mission: MissionListEntry; onBack: () => void }) {
   const hasSpec =
     mission.missionSpecs && mission.constraints && mission.kpis && mission.summary !== null;
+  // A finalized mission has no live stage results, only the usage the server
+  // rebuilt from Hangar_agent_runs — so borrow the live dashboard's own
+  // telemetry/table code by handing it a flow that carries just that (time
+  // taken isn't stored, so the bar omits it). A spec exists only once Stage 4
+  // ran, hence "complete" for the Output Interface row.
+  const usageFlow: MissionFlowState = {
+    ...INITIAL_FLOW_STATE,
+    persistedUsage: mission.usage,
+    stage4: {
+      status: mission.specVersion !== null ? "complete" : "pending",
+      result: null,
+      errorMessage: null,
+    },
+  };
 
   return (
     <div className="hgr-m-dash">
+      <TelemetryBar telemetry={computeTelemetry(usageFlow)} />
       <div className="hgr-m-dash-header">
         <div>
           <div className="hgr-m-dash-badge">
@@ -1967,6 +1990,13 @@ function PastMissionDetail({ mission, onBack }: { mission: MissionListEntry; onB
             {MISSION_STATUS_LABEL[mission.status] ?? mission.status}
             ".
           </p>
+        </div>
+      )}
+
+      {mission.usage && (
+        <div className="hgr-m-dash-section">
+          <h4>LLM Usage</h4>
+          <StageUsageTable flow={usageFlow} />
         </div>
       )}
 

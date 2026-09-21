@@ -145,3 +145,33 @@ export function formatCostUsd(usd: number): string {
   if (usd === 0) return "$0";
   return usd < 0.01 ? `$${usd.toFixed(4)}` : `$${usd.toFixed(2)}`;
 }
+
+// ── INR display ──────────────────────────────────────────────────────────
+//
+// Usage and cost stay in USD everywhere they're computed or stored (that's
+// what Anthropic bills in); INR is applied only when shown. The rate is a
+// fixed constant, NOT a live feed — a client fetch would be blocked by the
+// site's CSP, and a per-mission estimate doesn't need tick-level accuracy.
+// Approximate as of 2026-09-21 (Frankfurter 95.88 on 09-18, open.er-api 96.04
+// on 09-21). It drifts: update it here when it has moved enough to matter, and
+// the UI's tooltips will quote whatever this says.
+export const USD_TO_INR = 96;
+
+export function usdToInr(usd: number): number {
+  return usd * USD_TO_INR;
+}
+
+// Indian digit grouping (1,23,456.00). LLM costs per mission are a few rupees,
+// so two decimals; anything under a paisa reads as "<₹0.01" rather than ₹0.00.
+export function formatCostInr(usd: number): string {
+  const inr = usdToInr(usd);
+  if (inr === 0) return "₹0";
+  if (inr < 0.01) return "<₹0.01";
+  return `₹${inr.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
+// The exact USD figure and the rate used, for a hover tooltip — so the rupee
+// number is never a black box.
+export function describeInrCost(usd: number): string {
+  return `≈ ${formatCostUsd(usd)} at ₹${USD_TO_INR}/USD (list price, fixed rate — not a bill)`;
+}
