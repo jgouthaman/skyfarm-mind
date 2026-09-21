@@ -1308,13 +1308,35 @@ Hangar does **not** read, write, or depend on `Destud_user` in any way — no sh
 ```
 
 Two things worth reading off this example: the "Max payload weight" constraint carries two source tags (`REG-003` and `FORM-001`) — this is Section 4.3's dedup logic in action, where two different rules independently produced the same constraint and got merged rather than duplicated. And `Payload`'s `priority` is `"critical"` (string) while `Range`'s is `2` (number) — the two valid states of that field per the `'critical' | number` type in Section 12.
-```
+
+### 11.1 As built: the gated stage API
+
+The schemas above describe the original single call, `runMissionAgent(mission_id, sources)`. The app doesn't call it that way: the pipeline is exposed as four HTTP calls the UI makes in order, pausing between them so the user can review each stage's findings, plus a finalize call and a list call. This subsection is the contract as built. Every route needs `Authorization: Bearer <Supabase access token>`; the user id comes from the verified token, never from the request body.
+
+| Call | Request body | Success response |
+|---|---|---|
+| `POST /api/hangar/process-mission/input-processing` | `{ sources: [{ source_type, raw_input }] }` — the Section 11 input without `mission_id` (this call creates the mission) | `{ missionId, missionCode, structuredFields, sourceTypesUsed[], attachedRegulations[], extraction, validationFlags[], durationMs }`, where `extraction` is `{ intent, intentCategory, payloadHint, rangeHint, enduranceHint, constraintHints[], mock, usage }` |
+| `POST .../reasoning-planning` | `{ missionId, gapOverrides? }` | `{ missionId, decomposedElements[], identifiedConstraints[], derivedKpis[], prioritizedTradeoffs[], mock, requestCount, usage, durationMs }` |
+| `POST .../output-generation` | `{ missionId }` | `{ missionId, missionSpecs, constraints[], kpis[], summary, confidenceScore, mock, usage, durationMs }` |
+| `POST .../output-interface` | `{ missionId }` | `{ mission_id, mission_code, mission_specs, constraints[], kpis[], summary, confidence_score, validation_flags[], spec_version }` — the public boundary, snake_case |
+| `POST .../finalize` | `{ missionId }` | `{ missionId, status: "finalized" }` |
+| `GET /api/hangar/missions[?status=]` | — | the caller's missions, newest first, each with its brief, latest spec, `specVersion` and `usage` |
+
+**Trust model.** Only Stage 1 accepts mission content from the client. Stages 2–4 take just `missionId` and read the previous stage's result from that stage's stored `Hangar_agent_runs` row (the latest successful run), never from the request. The single exception is Stage 2's `gapOverrides` — the gap-fill wizard's answers — which are accepted only for `payload_kg`, `range_km` and `endurance_min`, and only as positive finite numbers (`gapOverrides.ts`); everything else is dropped. So the confidence score, source count and KPIs that feed the score can't be supplied by a caller. A stage called before the one it depends on returns 400 and leaves the mission's status alone. Ownership is checked on every call after Stage 1, and Stage 1 refuses an imported mission (an `existing_project` source) that isn't the caller's.
+
+**Status rules.** `finalize` requires status `spec_ready`; finalizing an already-final mission is a no-op, and anything else is a 400.
+
+**Errors.** `401 { error }` for a missing or invalid token. `400 { error, mission_id: null }` when there's nothing usable in the brief, an earlier stage hasn't completed, finalize is called before a spec exists, or the `missionId` doesn't exist or isn't the caller's (the same `Mission not found` for both, so a caller can't tell which ids exist). `500 { error, mission_id, stage }` when a stage fails (already logged to `Hangar_agent_runs`, mission set to `error`). Any other unexpected failure comes back as `500 { error, mission_id: null }`.
+
+**Differences from the Section 11 examples.** The final response adds `mission_code`, `validation_flags` and `spec_version`, and omits `prioritized_tradeoffs` (Stage 2 returns them; they aren't persisted with the spec). The `mission_specs` keys are camelCase (`vehicleClass`, `missionType`, …), not snake_case as in the example. `detected_intent` gains a sibling `intent_category` (Section 4.1.1).
 
 ## 12. Sample Source Files
 
 Skeletons only — types and function signatures, not full implementations. These are the shapes Claude Code should build against.
 
 ### 12.1 Execution Architecture — Server-Side Only
+
+> **As built:** the single `runMissionAgent` shown below is split into four stage functions plus `finalizeMission` — see Section 11.1 for the request/response contract.
 
 Every function in `pipeline/mission-agent.pipeline.ts` runs **server-side** — never in the browser. This is not a style preference, it's a hard requirement, for two independent reasons:
 
@@ -1517,6 +1539,11 @@ Status below reflects the code as of 2026-09-21 (read from the source, not from 
 | Export (PDF / Word / Excel) | Phase 1 | Built — client-side, on demand (Section 4.4.2) |
 | User-action audit log | Phase 2 | Built in code, **migration not yet applied** — `Hangar_mission_audit` (`supabase/migrations/20260921000000_hangar_mission_audit_log.sql`) records mission created / spec generated / finalized. Writes are best-effort, so nothing breaks before the migration is run, but no rows are recorded until it is |
 | Handoff to Concept Agent | Phase 1 | Working through `Hangar_missions.status = 'finalized'` (Concept Agent checks it directly); the `mission.spec_ready` event bus is not built |
+
+**Known drift from this spec** (the code is the source of truth where they differ):
+- `Hangar_agent_runs.stage` holds `input_processing`, `reasoning_planning`, `output_generation` and `output_interface` in the live table (confirmed against its check constraint), not the `2.1_…` / `2.2_…` names used in Section 10 and Section 12.1.
+- The `Hangar_missions`, `Hangar_mission_specs` and `Hangar_agent_runs` tables exist live in Supabase but have no migration file in the repo, so a fresh environment can't recreate them yet.
+- Section 12.1's single `runMissionAgent` is split into four stage functions plus `finalizeMission`; the request/response contract is Section 11.1.
 
 ## 15. Scope of This Document
 

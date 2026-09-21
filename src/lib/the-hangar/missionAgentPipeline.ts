@@ -4,6 +4,7 @@ import { identifyConstraintsAndKpis, type TracedConstraint } from "./constraintI
 import { prioritizeTradeoffs } from "./tradeoffPrioritization.ts";
 import { sumUsage, type LlmUsage } from "./llmGateway.ts";
 import { runOutputGeneration, type Stage3Output } from "./stage3Orchestrator.ts";
+import { sanitizeGapOverrides } from "./gapOverrides.ts";
 import type { MissionUsage } from "./missionUsage.ts";
 import type {
   FinalizedConstraint,
@@ -78,16 +79,18 @@ export class InvalidMissionInputError extends Error {
 // of them, not just optionally. Without this, any authenticated user who
 // learns/guesses a missionId could advance or corrupt someone else's
 // in-flight mission.
+//
+// A missing mission and someone else's mission fail with the SAME error (a
+// 400, not a 500 — nothing broke, the id just isn't usable by this caller).
+// Two different messages would tell a caller which ids exist, which is
+// exactly what ownership checks are there to keep private.
 async function assertMissionOwnership(
   missionId: string,
   userId: string,
 ): Promise<HangarMissionRow> {
   const mission = await getMission(missionId);
-  if (!mission) {
-    throw new Error(`No Hangar_missions row found for missionId "${missionId}"`);
-  }
-  if (mission.user_id !== userId) {
-    throw new Error(`Mission "${mission.id}" does not belong to user "${userId}"`);
+  if (!mission || mission.user_id !== userId) {
+    throw new InvalidMissionInputError("Mission not found");
   }
   return mission;
 }
@@ -234,24 +237,6 @@ export async function runInputProcessingStage(request: Stage1Request): Promise<S
 }
 
 // ── Stage 02 — Reasoning & Planning ──────────────────────────────────────
-
-// The ONE thing the browser still contributes here: the gap-fill wizard's
-// answers (Stage 1 flagged payload/range/endurance as missing and the user
-// supplied them). Those are genuine user input, but they're accepted only for
-// these three known keys and only as positive finite numbers — everything
-// else Stage 2 needs (extraction, structured fields, regulations) comes from
-// Stage 1's stored record, not from the request.
-const GAP_OVERRIDE_KEYS = ["payload_kg", "range_km", "endurance_min"] as const;
-
-function sanitizeGapOverrides(raw: unknown): Record<string, number> {
-  const out: Record<string, number> = {};
-  if (typeof raw !== "object" || raw === null) return out;
-  for (const key of GAP_OVERRIDE_KEYS) {
-    const value = (raw as Record<string, unknown>)[key];
-    if (typeof value === "number" && Number.isFinite(value) && value > 0) out[key] = value;
-  }
-  return out;
-}
 
 export interface Stage2Request {
   userId: string;
