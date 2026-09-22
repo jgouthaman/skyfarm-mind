@@ -701,7 +701,9 @@ async function callStageApi<TResult>(
 //
 // Regulations is deliberately minimal — plain checkboxes over the catalog and
 // nothing else; how regulations should shape a mission needs a proper study.
-// Document upload is not built yet and is shown as such.
+// Document text is extracted server-side (documentExtraction.ts) on upload and
+// carried in state as plain text, exactly like the brief textarea — the file
+// itself is never re-sent or stored beyond that one extraction call.
 
 interface SourceCatalogsState {
   status: "loading" | "ready" | "error";
@@ -710,6 +712,21 @@ interface SourceCatalogsState {
 }
 
 type WireSource = { source_type: string; raw_input: Record<string, unknown> };
+
+interface DocumentAttachment {
+  status: "idle" | "extracting" | "ready" | "error";
+  fileName: string | null;
+  text: string | null;
+  truncated: boolean;
+  errorMessage: string | null;
+}
+const IDLE_DOCUMENT: DocumentAttachment = {
+  status: "idle",
+  fileName: null,
+  text: null,
+  truncated: false,
+  errorMessage: null,
+};
 
 function toggleInList(list: string[], value: string): string[] {
   return list.includes(value) ? list.filter((v) => v !== value) : [...list, value];
@@ -731,6 +748,9 @@ function IntakeSources({
   onImportedMission,
   marketIds,
   onToggleMarket,
+  document,
+  onDocumentFile,
+  onClearDocument,
 }: {
   catalogs: SourceCatalogsState;
   missions: MissionListEntry[] | null;
@@ -740,9 +760,13 @@ function IntakeSources({
   onImportedMission: (id: string) => void;
   marketIds: string[];
   onToggleMarket: (id: string) => void;
+  document: DocumentAttachment;
+  onDocumentFile: (file: File) => void;
+  onClearDocument: () => void;
 }) {
   const eligible = importableMissions(missions);
-  const count = regCodes.length + (importedMissionId ? 1 : 0) + marketIds.length;
+  const count =
+    regCodes.length + (importedMissionId ? 1 : 0) + marketIds.length + (document.status === "ready" ? 1 : 0);
   const listNote = (rows: number, what: string) =>
     catalogs.status === "loading" ? (
       <p className="hgr-m-source-empty">Loading…</p>
@@ -828,14 +852,41 @@ function IntakeSources({
         )}
       </div>
 
-      <div className="hgr-m-source-card hgr-m-source-card-wip" aria-disabled="true">
+      <div className="hgr-m-source-card">
         <div className="hgr-m-source-card-head">
           <b>Document</b>
-          <span className="hgr-m-wip">Work in progress</span>
         </div>
-        <p className="hgr-m-source-empty">
-          Upload a brief (PDF or Word) to add it as context. Not available yet.
-        </p>
+        {document.status === "ready" && document.fileName ? (
+          <div className="hgr-m-doc-attached">
+            <span className="hgr-m-doc-name">{document.fileName}</span>
+            <span className="hgr-m-source-meta">
+              {document.text?.length.toLocaleString()} characters{document.truncated ? " · truncated" : ""}
+            </span>
+            <button type="button" className="hgr-m-doc-remove" onClick={onClearDocument}>
+              Remove
+            </button>
+          </div>
+        ) : (
+          <>
+            <label className="hgr-m-doc-upload">
+              <input
+                type="file"
+                accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
+                disabled={document.status === "extracting"}
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) onDocumentFile(file);
+                  e.target.value = "";
+                }}
+              />
+              {document.status === "extracting" ? "Extracting…" : "Choose a PDF, Word or text file"}
+            </label>
+            <p className="hgr-m-source-hint">Up to 4 MB, PDF / Word / plain text. Its text is added as context, same as typed text.</p>
+            {document.status === "error" && (
+              <p className="hgr-m-doc-error">Couldn't read that file: {document.errorMessage}</p>
+            )}
+          </>
+        )}
       </div>
     </details>
   );
@@ -848,12 +899,14 @@ function AttachedSummary({
   regCodes,
   importedMissionId,
   marketIds,
+  document,
 }: {
   catalogs: SourceCatalogsState;
   missions: MissionListEntry[] | null;
   regCodes: string[];
   importedMissionId: string;
   marketIds: string[];
+  document: DocumentAttachment;
 }) {
   const chips: string[] = [
     ...regCodes.map((c) => catalogs.regulations.find((r) => r.code === c)?.name ?? c),
@@ -865,6 +918,7 @@ function AttachedSummary({
         ]
       : []),
     ...marketIds.map((id) => catalogs.marketData.find((d) => d.id === id)?.name ?? id),
+    ...(document.status === "ready" && document.fileName ? [document.fileName] : []),
   ];
   if (chips.length === 0) return null;
   return (
@@ -906,6 +960,7 @@ function TheHangarMission() {
   const [attachedRegCodes, setAttachedRegCodes] = useState<string[]>([]);
   const [attachedMarketIds, setAttachedMarketIds] = useState<string[]>([]);
   const [importedMissionId, setImportedMissionId] = useState("");
+  const [document, setDocument] = useState<DocumentAttachment>(IDLE_DOCUMENT);
   const [missionsListStatus, setMissionsListStatus] = useState<"idle" | "loading" | "error">(
     "idle",
   );
@@ -1052,6 +1107,54 @@ function TheHangarMission() {
     };
   }, [currentUserEmail]);
 
+  // The file is uploaded once, on selection — text extraction happens
+  // server-side (documentExtraction.ts) and the result is held in state, not
+  // re-uploaded on every keystroke or on submit.
+  async function handleDocumentFile(file: File) {
+    setDocument({ ...IDLE_DOCUMENT, status: "extracting", fileName: file.name });
+    const { data: sessionData } = await supabase.auth.getSession();
+    const token = sessionData.session?.access_token;
+    if (!token) {
+      setDocument({ ...IDLE_DOCUMENT, status: "error", fileName: file.name, errorMessage: "not signed in" });
+      return;
+    }
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      const res = await fetch("/api/hangar/extract-document", {
+        method: "POST",
+        headers: { Authorization: "Bearer " + token },
+        body: form,
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setDocument({
+          status: "error",
+          fileName: file.name,
+          text: null,
+          truncated: false,
+          errorMessage: json.error ?? "HTTP " + res.status,
+        });
+        return;
+      }
+      setDocument({
+        status: "ready",
+        fileName: json.fileName ?? file.name,
+        text: json.text,
+        truncated: !!json.truncated,
+        errorMessage: null,
+      });
+    } catch (err) {
+      setDocument({
+        status: "error",
+        fileName: file.name,
+        text: null,
+        truncated: false,
+        errorMessage: err instanceof Error ? err.message : "upload failed",
+      });
+    }
+  }
+
   // Only what's actually selected is sent: an empty source would otherwise
   // read as an input the user never gave.
   function buildAttachedSources(): WireSource[] {
@@ -1065,6 +1168,12 @@ function TheHangarMission() {
     if (attachedMarketIds.length > 0) {
       out.push({ source_type: "market_data", raw_input: { marketDataIds: attachedMarketIds } });
     }
+    if (document.status === "ready" && document.text) {
+      out.push({
+        source_type: "document",
+        raw_input: { extractedText: document.text, fileName: document.fileName },
+      });
+    }
     return out;
   }
 
@@ -1072,6 +1181,7 @@ function TheHangarMission() {
     setAttachedRegCodes([]);
     setAttachedMarketIds([]);
     setImportedMissionId("");
+    setDocument(IDLE_DOCUMENT);
     setFlow(INITIAL_FLOW_STATE);
     setBriefText("");
     setFinalizeState({ status: "idle", errorMessage: null });
@@ -1724,6 +1834,9 @@ function TheHangarMission() {
                                   onToggleMarket={(id) =>
                                     setAttachedMarketIds((l) => toggleInList(l, id))
                                   }
+                                  document={document}
+                                  onDocumentFile={handleDocumentFile}
+                                  onClearDocument={() => setDocument(IDLE_DOCUMENT)}
                                 />
                                 <button
                                   type="submit"
@@ -1748,6 +1861,7 @@ function TheHangarMission() {
                                 regCodes={attachedRegCodes}
                                 importedMissionId={importedMissionId}
                                 marketIds={attachedMarketIds}
+                                document={document}
                               />
                             )}
 
@@ -3308,11 +3422,20 @@ const HGR_MISSION_CSS = `
   width:100%; background:var(--hgr-m-navy-deep); border:1px solid var(--hgr-m-hairline); color:var(--hgr-m-paper);
   font-family:'IBM Plex Sans',sans-serif; font-size:13.5px; padding:9px 10px; border-radius:2px;
 }
-.hgr-m-source-card-wip{ opacity:.6; }
-.hgr-m-wip{
-  font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.05em; text-transform:uppercase;
-  color:var(--hgr-m-amber); border:1px solid rgba(232,163,61,.4); padding:2px 6px; border-radius:2px;
+.hgr-m-doc-upload{
+  display:inline-flex; align-items:center; gap:8px; cursor:pointer; font-size:13px; color:var(--hgr-m-paper);
+  border:1px dashed var(--hgr-m-hairline); border-radius:2px; padding:9px 14px;
 }
+.hgr-m-doc-upload:has(input:disabled){ opacity:.6; cursor:default; }
+.hgr-m-doc-upload input{ display:none; }
+.hgr-m-doc-attached{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; font-size:13px; }
+.hgr-m-doc-name{ color:var(--hgr-m-paper); }
+.hgr-m-doc-remove{
+  background:none; border:1px solid var(--hgr-m-hairline); color:var(--hgr-m-paper-dim);
+  font-size:11.5px; padding:3px 9px; border-radius:2px; cursor:pointer; margin-left:auto;
+}
+.hgr-m-doc-remove:hover{ color:var(--hgr-m-paper); border-color:var(--hgr-m-blue-bright); }
+.hgr-m-doc-error{ margin:8px 0 0; font-size:12.5px; color:#ffb4b4; }
 .hgr-m-attached{ max-width:640px; margin:-8px 0 20px; }
 .hgr-m-attached .hgr-m-intake-summary-label{ margin-bottom:6px; }
 .hgr-m-attached-chips{ display:flex; flex-wrap:wrap; gap:6px; }

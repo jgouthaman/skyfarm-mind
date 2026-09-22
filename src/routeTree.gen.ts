@@ -107,6 +107,7 @@ import { Route as ApiHangarMissionsRouteImport } from './routes/api.hangar.missi
 import { Route as ApiHangarMaterialsRouteImport } from './routes/api.hangar.materials'
 import { Route as ApiHangarManufacturingsRouteImport } from './routes/api.hangar.manufacturings'
 import { Route as ApiHangarLlmStatusRouteImport } from './routes/api.hangar.llm-status'
+import { Route as ApiHangarExtractDocumentRouteImport } from './routes/api.hangar.extract-document'
 import { Route as ApiHangarDocumentationsRouteImport } from './routes/api.hangar.documentations'
 import { Route as ApiHangarConceptsRouteImport } from './routes/api.hangar.concepts'
 import { Route as ApiHangarCfdAnalysesRouteImport } from './routes/api.hangar.cfd-analyses'
@@ -656,6 +657,12 @@ const ApiHangarLlmStatusRoute = ApiHangarLlmStatusRouteImport.update({
   path: '/api/hangar/llm-status',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiHangarExtractDocumentRoute =
+  ApiHangarExtractDocumentRouteImport.update({
+    id: '/api/hangar/extract-document',
+    path: '/api/hangar/extract-document',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiHangarDocumentationsRoute = ApiHangarDocumentationsRouteImport.update({
   id: '/api/hangar/documentations',
   path: '/api/hangar/documentations',
@@ -939,6 +946,7 @@ export interface FileRoutesByFullPath {
   '/api/hangar/cfd-analyses': typeof ApiHangarCfdAnalysesRoute
   '/api/hangar/concepts': typeof ApiHangarConceptsRoute
   '/api/hangar/documentations': typeof ApiHangarDocumentationsRoute
+  '/api/hangar/extract-document': typeof ApiHangarExtractDocumentRoute
   '/api/hangar/llm-status': typeof ApiHangarLlmStatusRoute
   '/api/hangar/manufacturings': typeof ApiHangarManufacturingsRoute
   '/api/hangar/materials': typeof ApiHangarMaterialsRoute
@@ -1066,6 +1074,7 @@ export interface FileRoutesByTo {
   '/api/hangar/cfd-analyses': typeof ApiHangarCfdAnalysesRoute
   '/api/hangar/concepts': typeof ApiHangarConceptsRoute
   '/api/hangar/documentations': typeof ApiHangarDocumentationsRoute
+  '/api/hangar/extract-document': typeof ApiHangarExtractDocumentRoute
   '/api/hangar/llm-status': typeof ApiHangarLlmStatusRoute
   '/api/hangar/manufacturings': typeof ApiHangarManufacturingsRoute
   '/api/hangar/materials': typeof ApiHangarMaterialsRoute
@@ -1202,6 +1211,7 @@ export interface FileRoutesById {
   '/api/hangar/cfd-analyses': typeof ApiHangarCfdAnalysesRoute
   '/api/hangar/concepts': typeof ApiHangarConceptsRoute
   '/api/hangar/documentations': typeof ApiHangarDocumentationsRoute
+  '/api/hangar/extract-document': typeof ApiHangarExtractDocumentRoute
   '/api/hangar/llm-status': typeof ApiHangarLlmStatusRoute
   '/api/hangar/manufacturings': typeof ApiHangarManufacturingsRoute
   '/api/hangar/materials': typeof ApiHangarMaterialsRoute
@@ -1338,6 +1348,7 @@ export interface FileRouteTypes {
     | '/api/hangar/cfd-analyses'
     | '/api/hangar/concepts'
     | '/api/hangar/documentations'
+    | '/api/hangar/extract-document'
     | '/api/hangar/llm-status'
     | '/api/hangar/manufacturings'
     | '/api/hangar/materials'
@@ -1465,6 +1476,7 @@ export interface FileRouteTypes {
     | '/api/hangar/cfd-analyses'
     | '/api/hangar/concepts'
     | '/api/hangar/documentations'
+    | '/api/hangar/extract-document'
     | '/api/hangar/llm-status'
     | '/api/hangar/manufacturings'
     | '/api/hangar/materials'
@@ -1600,6 +1612,7 @@ export interface FileRouteTypes {
     | '/api/hangar/cfd-analyses'
     | '/api/hangar/concepts'
     | '/api/hangar/documentations'
+    | '/api/hangar/extract-document'
     | '/api/hangar/llm-status'
     | '/api/hangar/manufacturings'
     | '/api/hangar/materials'
@@ -1673,6 +1686,7 @@ export interface RootRouteChildren {
   ApiHangarCfdAnalysesRoute: typeof ApiHangarCfdAnalysesRoute
   ApiHangarConceptsRoute: typeof ApiHangarConceptsRoute
   ApiHangarDocumentationsRoute: typeof ApiHangarDocumentationsRoute
+  ApiHangarExtractDocumentRoute: typeof ApiHangarExtractDocumentRoute
   ApiHangarLlmStatusRoute: typeof ApiHangarLlmStatusRoute
   ApiHangarManufacturingsRoute: typeof ApiHangarManufacturingsRoute
   ApiHangarMaterialsRoute: typeof ApiHangarMaterialsRoute
@@ -2395,6 +2409,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiHangarLlmStatusRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/hangar/extract-document': {
+      id: '/api/hangar/extract-document'
+      path: '/api/hangar/extract-document'
+      fullPath: '/api/hangar/extract-document'
+      preLoaderRoute: typeof ApiHangarExtractDocumentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/hangar/documentations': {
       id: '/api/hangar/documentations'
       path: '/api/hangar/documentations'
@@ -2925,6 +2946,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiHangarCfdAnalysesRoute: ApiHangarCfdAnalysesRoute,
   ApiHangarConceptsRoute: ApiHangarConceptsRoute,
   ApiHangarDocumentationsRoute: ApiHangarDocumentationsRoute,
+  ApiHangarExtractDocumentRoute: ApiHangarExtractDocumentRoute,
   ApiHangarLlmStatusRoute: ApiHangarLlmStatusRoute,
   ApiHangarManufacturingsRoute: ApiHangarManufacturingsRoute,
   ApiHangarMaterialsRoute: ApiHangarMaterialsRoute,
