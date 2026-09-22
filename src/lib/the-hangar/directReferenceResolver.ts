@@ -1,6 +1,8 @@
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import type { MissionSourceInput, MissionSpec } from "./types/hangar-mission";
 import { getMission } from "./missionPersistence.ts";
+import { readString, readStringList } from "./missionSourceParsing.ts";
+import { fetchMarketDataText } from "./marketDataFetch.ts";
 
 // Stage 2.1, Step 0 (MissionAgent.md Section 4.1.1) — deterministic DB
 // fetches for sources 4/5/6 (Existing Projects, Regulations & Standards,
@@ -64,8 +66,28 @@ interface HangarMarketDataCatalogRow {
   name: string;
   description: string | null;
   data_source: string | null;
+  /**
+   * Set by whoever curates the catalog (never by a user). Optional because the
+   * column is added by 20260922010000_hangar_market_data_source_url.sql.
+   */
+  source_url?: string | null;
   active: boolean;
 }
+
+// What reading a selected row's link produced. Only a summary of this is kept in
+// the run log; the text itself goes to the model and is not stored.
+export interface MarketDataContent {
+  id: string;
+  url: string | null;
+  status: "ok" | "failed" | "no_link";
+  reason?: string;
+  text: string;
+  truncated: boolean;
+}
+
+// Across all selected rows, so a mission can't send the model an unbounded
+// amount of fetched text (each page is also capped on its own).
+const MARKET_TOTAL_CHARS = 12_000;
 
 export interface DirectReferenceResolution {
   importedMissionRef: string | null;
@@ -74,6 +96,7 @@ export interface DirectReferenceResolution {
   regulationDetails: HangarRegulationCatalogRow[];
   marketDataRefs: string[];
   marketDataDetails: HangarMarketDataCatalogRow[];
+  marketDataContent: MarketDataContent[];
 }
 
 function toMissionSpec(row: HangarMissionSpecRow): MissionSpec {
@@ -97,17 +120,18 @@ export async function resolveDirectReferences(
   const regulationsSource = sources.find((s) => s.sourceType === "regulations");
   const marketDataSource = sources.find((s) => s.sourceType === "market_data");
 
-  const importedMissionRef =
-    typeof existingProjectSource?.rawInput.importedMissionId === "string"
-      ? (existingProjectSource.rawInput.importedMissionId as string)
-      : null;
+  // Both camelCase (this repo's convention) and snake_case (Section 11's
+  // example) spellings are read — see missionSourceParsing.ts's readRawKey.
+  const importedMissionRef = existingProjectSource
+    ? readString(existingProjectSource.rawInput, "importedMissionId", "imported_mission_id")
+    : null;
 
-  const attachedRegulations = Array.isArray(regulationsSource?.rawInput.regulationCodes)
-    ? regulationsSource.rawInput.regulationCodes.filter((c): c is string => typeof c === "string")
+  const attachedRegulations = regulationsSource
+    ? readStringList(regulationsSource.rawInput, "regulationCodes", "regulation_codes")
     : [];
 
-  const marketDataRefs = Array.isArray(marketDataSource?.rawInput.marketDataIds)
-    ? marketDataSource.rawInput.marketDataIds.filter((c): c is string => typeof c === "string")
+  const marketDataRefs = marketDataSource
+    ? readStringList(marketDataSource.rawInput, "marketDataIds", "market_data_ids")
     : [];
 
   const [importedMissionSpec, regulationDetails, marketDataDetails] = await Promise.all([
@@ -116,6 +140,8 @@ export async function resolveDirectReferences(
     fetchMarketDataDetails(marketDataRefs),
   ]);
 
+  const marketDataContent = await readMarketDataLinks(marketDataDetails);
+
   return {
     importedMissionRef,
     importedMissionSpec,
@@ -123,7 +149,32 @@ export async function resolveDirectReferences(
     regulationDetails,
     marketDataRefs,
     marketDataDetails,
+    marketDataContent,
   };
+}
+
+// Reads each selected row's link (in parallel), then applies the total budget in
+// row order. A link that can't be read never fails the mission — the row just
+// contributes its name and description, as it did before links existed.
+async function readMarketDataLinks(rows: HangarMarketDataCatalogRow[]): Promise<MarketDataContent[]> {
+  const fetched = await Promise.all(
+    rows.map(async (row): Promise<MarketDataContent> => {
+      const url = row.source_url ?? null;
+      if (!url) return { id: row.id, url: null, status: "no_link", text: "", truncated: false };
+      const r = await fetchMarketDataText(url);
+      return { id: row.id, url, status: r.status, reason: r.reason, text: r.text, truncated: r.truncated };
+    }),
+  );
+  let remaining = MARKET_TOTAL_CHARS;
+  return fetched.map((c) => {
+    if (c.status !== "ok") return c;
+    if (remaining <= 0) {
+      return { ...c, status: "failed", reason: "skipped: total size limit reached", text: "", truncated: false };
+    }
+    const text = c.text.slice(0, remaining);
+    remaining -= text.length;
+    return { ...c, text, truncated: c.truncated || text.length < c.text.length };
+  });
 }
 
 // Source 4 — fetch the imported mission's stored Hangar_mission_specs row,

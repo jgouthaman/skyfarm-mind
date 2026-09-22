@@ -46,6 +46,39 @@ interface FlowState {
 
 const INITIAL_FLOW_STATE: FlowState = { status: "idle", result: null, errorMessage: null };
 
+// "Trigger Sagush" — a standalone prototype next to the real Generate Design
+// flow above, LOCAL DEV ONLY (see pythonRunner.ts). Two Python scripts, run
+// as real local child processes: hello.py proves the Node -> Python bridge
+// works and echoes back the concept; a confirm popup then asks whether to
+// proceed, and only on "Yes" does aircraftdesign.py run and its (placeholder)
+// design spec for "Aircraft Sagush" render below. Deliberately separate state
+// from FlowState — this never touches the real geometry-generation pipeline.
+interface SagushDesignSpec {
+  aircraftName: string;
+  vehicleClass: string;
+  wingspanM: number;
+  lengthM: number;
+  grossWeightKg: number;
+  wingAreaM2: number;
+  cruiseSpeedKmh: number;
+  propulsion: string;
+  notes: string;
+}
+interface SagushState {
+  status: "idle" | "hello-running" | "confirm" | "design-running" | "done" | "error";
+  conceptCode: string | null;
+  helloMessage: string | null;
+  designSpec: SagushDesignSpec | null;
+  errorMessage: string | null;
+}
+const IDLE_SAGUSH: SagushState = {
+  status: "idle",
+  conceptCode: null,
+  helloMessage: null,
+  designSpec: null,
+  errorMessage: null,
+};
+
 const AIRCRAFT_DESIGN_STATUS_LABEL: Record<string, string> = {
   draft: "Draft",
   processing: "Processing",
@@ -108,6 +141,7 @@ function TheHangarAircraftDesign() {
   const [selectedConcept, setSelectedConcept] = useState<ConceptListEntry | null>(null);
   const [selectedDesign, setSelectedDesign] = useState<AircraftDesignListEntry | null>(null);
   const [planExpanded, setPlanExpanded] = useState(false);
+  const [sagush, setSagush] = useState<SagushState>(IDLE_SAGUSH);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -184,6 +218,44 @@ function TheHangarAircraftDesign() {
     setFlow(INITIAL_FLOW_STATE);
     setSelectedConcept(null);
     setSelectedDesign(null);
+    setSagush(IDLE_SAGUSH);
+  }
+
+  async function triggerSagushHello() {
+    if (!selectedConcept) return;
+    setSagush({ ...IDLE_SAGUSH, status: "hello-running" });
+    const outcome = await callStageApi<{ message: string; conceptId: string | null; conceptCode: string | null }>(
+      "/api/hangar/sagush-hello",
+      { conceptId: selectedConcept.conceptId },
+    );
+    if (!outcome.ok) {
+      setSagush({ ...IDLE_SAGUSH, status: "error", errorMessage: outcome.error });
+      return;
+    }
+    setSagush({
+      status: "confirm",
+      conceptCode: outcome.data.conceptCode ?? selectedConcept.conceptCode,
+      helloMessage: outcome.data.message,
+      designSpec: null,
+      errorMessage: null,
+    });
+  }
+
+  async function confirmSagushDesign() {
+    if (!selectedConcept) return;
+    setSagush((v) => ({ ...v, status: "design-running" }));
+    const outcome = await callStageApi<{ designSpec: SagushDesignSpec }>("/api/hangar/sagush-design", {
+      conceptId: selectedConcept.conceptId,
+    });
+    if (!outcome.ok) {
+      setSagush((v) => ({ ...v, status: "error", errorMessage: outcome.error }));
+      return;
+    }
+    setSagush((v) => ({ ...v, status: "done", designSpec: outcome.data.designSpec }));
+  }
+
+  function cancelSagush() {
+    setSagush(IDLE_SAGUSH);
   }
 
   function selectFinalizedConcept(c: ConceptListEntry) {
@@ -387,13 +459,100 @@ function TheHangarAircraftDesign() {
                                 {selectedConcept.rankedConcepts?.[0]?.conceptName ?? "—"}
                               </p>
                               {flow.status !== "running" && (
-                                <button
-                                  type="button"
-                                  className="hgr-a-btn hgr-a-btn-amber"
-                                  onClick={generateDesign}
-                                >
-                                  Generate Design →
-                                </button>
+                                <div className="hgr-a-btn-row">
+                                  <button
+                                    type="button"
+                                    className="hgr-a-btn hgr-a-btn-amber"
+                                    onClick={generateDesign}
+                                  >
+                                    Generate Design →
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className="hgr-a-btn hgr-a-btn-ghost"
+                                    disabled={sagush.status === "hello-running" || sagush.status === "design-running"}
+                                    onClick={triggerSagushHello}
+                                    title="Prototype: runs local Python scripts (hello.py, then aircraftdesign.py). Local dev only — not available once deployed."
+                                  >
+                                    {sagush.status === "hello-running" ? "Running…" : "Trigger Sagush"}
+                                  </button>
+                                </div>
+                              )}
+                              {sagush.status === "error" && (
+                                <p className="hgr-a-sagush-error">Sagush prototype failed: {sagush.errorMessage}</p>
+                              )}
+                              {sagush.status === "confirm" && (
+                                <div className="hgr-a-sagush-overlay">
+                                  <div className="hgr-a-sagush-popup">
+                                    <p className="hgr-a-sagush-popup-message">{sagush.helloMessage}</p>
+                                    <p className="hgr-a-sagush-popup-question">
+                                      Concept <b>{sagush.conceptCode}</b> — do you want to proceed with Sagush?
+                                    </p>
+                                    <div className="hgr-a-sagush-popup-actions">
+                                      <button
+                                        type="button"
+                                        className="hgr-a-btn hgr-a-btn-amber"
+                                        onClick={confirmSagushDesign}
+                                      >
+                                        Yes, proceed
+                                      </button>
+                                      <button
+                                        type="button"
+                                        className="hgr-a-btn hgr-a-btn-ghost"
+                                        onClick={cancelSagush}
+                                      >
+                                        Cancel
+                                      </button>
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+                              {sagush.status === "design-running" && (
+                                <p className="hgr-a-sagush-status">Running aircraftdesign.py…</p>
+                              )}
+                              {sagush.status === "done" && sagush.designSpec && (
+                                <div className="hgr-a-sagush-result">
+                                  <div className="hgr-a-sagush-result-head">
+                                    <span>Design spec for Aircraft {sagush.designSpec.aircraftName}</span>
+                                    <button type="button" className="hgr-a-btn hgr-a-btn-ghost" onClick={cancelSagush}>
+                                      Dismiss
+                                    </button>
+                                  </div>
+                                  <p className="hgr-a-sagush-result-note">
+                                    Prototype output from aircraftdesign.py — a placeholder, not a real computed
+                                    design.
+                                  </p>
+                                  <div className="hgr-a-dash-fields">
+                                    <div>
+                                      <div className="hgr-a-dash-field-label">Vehicle class</div>
+                                      <div className="hgr-a-dash-field-value">{sagush.designSpec.vehicleClass}</div>
+                                    </div>
+                                    <div>
+                                      <div className="hgr-a-dash-field-label">Wingspan</div>
+                                      <div className="hgr-a-dash-field-value">{sagush.designSpec.wingspanM} m</div>
+                                    </div>
+                                    <div>
+                                      <div className="hgr-a-dash-field-label">Length</div>
+                                      <div className="hgr-a-dash-field-value">{sagush.designSpec.lengthM} m</div>
+                                    </div>
+                                    <div>
+                                      <div className="hgr-a-dash-field-label">Gross weight</div>
+                                      <div className="hgr-a-dash-field-value">{sagush.designSpec.grossWeightKg} kg</div>
+                                    </div>
+                                    <div>
+                                      <div className="hgr-a-dash-field-label">Wing area</div>
+                                      <div className="hgr-a-dash-field-value">{sagush.designSpec.wingAreaM2} m²</div>
+                                    </div>
+                                    <div>
+                                      <div className="hgr-a-dash-field-label">Cruise speed</div>
+                                      <div className="hgr-a-dash-field-value">{sagush.designSpec.cruiseSpeedKmh} km/h</div>
+                                    </div>
+                                    <div>
+                                      <div className="hgr-a-dash-field-label">Propulsion</div>
+                                      <div className="hgr-a-dash-field-value">{sagush.designSpec.propulsion}</div>
+                                    </div>
+                                  </div>
+                                </div>
                               )}
                             </div>
                           ) : (
@@ -863,4 +1022,29 @@ const HGR_AIRCRAFT_DESIGN_CSS = `
 .hgr-a-component-category{ font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--hgr-a-amber); margin-bottom:6px; }
 .hgr-a-component-selection{ font-size:14px; font-weight:600; margin-bottom:6px; }
 .hgr-a-component-rationale{ color:var(--hgr-a-paper-dim); font-size:12.5px; line-height:1.6; margin:0; }
+
+/* ── "Trigger Sagush" prototype (local dev only) ── */
+.hgr-a-btn-row{ display:flex; gap:12px; flex-wrap:wrap; }
+.hgr-a-sagush-error{ margin-top:12px; font-size:13px; color:var(--hgr-a-red); }
+.hgr-a-sagush-status{ margin-top:12px; font-size:13px; color:var(--hgr-a-paper-dim); }
+.hgr-a-sagush-overlay{
+  position:fixed; inset:0; background:rgba(8,19,31,0.75); display:flex; align-items:center;
+  justify-content:center; z-index:50; padding:20px;
+}
+.hgr-a-sagush-popup{
+  max-width:420px; width:100%; background:var(--hgr-a-navy-panel); border:1px solid var(--hgr-a-hairline);
+  border-radius:4px; padding:24px; box-shadow:0 20px 60px rgba(0,0,0,0.5);
+}
+.hgr-a-sagush-popup-message{ font-size:13px; color:var(--hgr-a-paper-dim); margin:0 0 14px; }
+.hgr-a-sagush-popup-question{ font-size:15px; margin:0 0 20px; line-height:1.5; }
+.hgr-a-sagush-popup-actions{ display:flex; gap:12px; }
+.hgr-a-sagush-result{
+  margin-top:16px; padding:20px 22px; background:var(--hgr-a-navy-panel); border:1px solid var(--hgr-a-hairline);
+  border-radius:2px;
+}
+.hgr-a-sagush-result-head{
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  font-family:'Space Grotesk',sans-serif; font-size:15px; font-weight:600; margin-bottom:6px;
+}
+.hgr-a-sagush-result-note{ font-size:12.5px; color:var(--hgr-a-paper-dim); margin:0 0 18px; }
 `;

@@ -12,7 +12,7 @@ import type {
   MissionSpecsFields,
 } from "./missionSpecAssembly.ts";
 import { resolveDirectReferences } from "./directReferenceResolver.ts";
-import { parseNaturalLanguageAndFormSources } from "./missionSourceParsing.ts";
+import { finalizeSourceTypes, parseNaturalLanguageAndFormSources } from "./missionSourceParsing.ts";
 import { hasUsableContent, computeValidationFlags } from "./missionInputValidation.ts";
 import {
   createMission,
@@ -20,6 +20,7 @@ import {
   getLatestStageRun,
   getUsageForMissions,
   logMissionAudit,
+  updateMissionSourceTypes,
   publishMissionEvent,
   updateMissionStatus,
   persistMissionSpec,
@@ -178,7 +179,7 @@ export interface Stage1Result {
 
 export async function runInputProcessingStage(request: Stage1Request): Promise<Stage1Result> {
   const { userId, sources } = request;
-  const { rawTextCombined, structuredFields, sourceTypesUsed } =
+  const { rawTextCombined, structuredFields, sourceTypesUsed: structuralTypes } =
     parseNaturalLanguageAndFormSources(sources);
 
   if (!hasUsableContent(rawTextCombined, structuredFields)) {
@@ -187,14 +188,24 @@ export async function runInputProcessingStage(request: Stage1Request): Promise<S
     );
   }
 
-  const mission = await createMission(userId, sourceTypesUsed);
+  const mission = await createMission(userId, structuralTypes);
   const missionId = mission.id;
-  await logMissionAudit(missionId, userId, "mission_created", { sourceTypesUsed });
+  await logMissionAudit(missionId, userId, "mission_created", { sourceTypesUsed: structuralTypes });
   await updateMissionStatus(missionId, "processing");
 
   const start = Date.now();
   try {
     const directRefs = await resolveDirectReferences(sources, userId);
+    // Narrow the source types to the ones that actually contributed: a reference
+    // only counts if it resolved (see finalizeSourceTypes).
+    const sourceTypesUsed = finalizeSourceTypes(structuralTypes, {
+      importedMissionResolved: directRefs.importedMissionSpec !== null,
+      regulationRowsFound: directRefs.regulationDetails.length,
+      marketRowsFound: directRefs.marketDataDetails.length,
+    });
+    if (sourceTypesUsed.length !== structuralTypes.length) {
+      await updateMissionSourceTypes(missionId, sourceTypesUsed);
+    }
     const extraction = await extractIntentAndEntities({
       data: {
         rawTextCombined,
@@ -202,7 +213,19 @@ export async function runInputProcessingStage(request: Stage1Request): Promise<S
         groundingContext: {
           importedMissionSpec: directRefs.importedMissionSpec,
           regulationDetails: directRefs.regulationDetails,
-          marketDataDetails: directRefs.marketDataDetails,
+          // Each row's name/description, plus the text of its link when there is one
+          // and it could be read. linkedContent is untrusted web text — the extraction
+          // prompt says so (intentExtraction.ts).
+          marketDataDetails: directRefs.marketDataDetails.map((row) => {
+            const content = directRefs.marketDataContent.find((c) => c.id === row.id);
+            return {
+              id: row.id,
+              name: row.name,
+              description: row.description,
+              data_source: row.data_source,
+              linkedContent: content?.status === "ok" ? content.text : null,
+            };
+          }),
         },
       },
     });
@@ -213,7 +236,27 @@ export async function runInputProcessingStage(request: Stage1Request): Promise<S
     await logStageSuccess(
       missionId,
       "input_processing",
-      { rawTextCombined, structuredFields, attachedRegulations: directRefs.attachedRegulations },
+      {
+        rawTextCombined,
+        structuredFields,
+        attachedRegulations: directRefs.attachedRegulations,
+        // What was attached beyond the text (previously not recorded at all): the
+        // imported mission and market-data picks were used for grounding and then lost.
+        attachedSources: {
+          importedMissionId: directRefs.importedMissionRef,
+          marketDataIds: directRefs.marketDataRefs,
+          // What reading each link produced — never the fetched text itself.
+          marketDataLinks: directRefs.marketDataContent.map((c) => ({
+            id: c.id,
+            url: c.url,
+            status: c.status,
+            reason: c.reason ?? null,
+            chars: c.text.length,
+            truncated: c.truncated,
+          })),
+          sourceTypesUsed,
+        },
+      },
       { ...extraction, validationFlags },
       durationMs,
     );
