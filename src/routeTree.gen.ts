@@ -102,6 +102,8 @@ import { Route as ApiHangarStructuralsRouteImport } from './routes/api.hangar.st
 import { Route as ApiHangarStoreDocumentRouteImport } from './routes/api.hangar.store-document'
 import { Route as ApiHangarSourceCatalogsRouteImport } from './routes/api.hangar.source-catalogs'
 import { Route as ApiHangarSimulationsRouteImport } from './routes/api.hangar.simulations'
+import { Route as ApiHangarSagushHelloRouteImport } from './routes/api.hangar.sagush-hello'
+import { Route as ApiHangarSagushDesignRouteImport } from './routes/api.hangar.sagush-design'
 import { Route as ApiHangarResolveMissionRouteImport } from './routes/api.hangar.resolve-mission'
 import { Route as ApiHangarOptimizationsRouteImport } from './routes/api.hangar.optimizations'
 import { Route as ApiHangarMissionsRouteImport } from './routes/api.hangar.missions'
@@ -633,6 +635,16 @@ const ApiHangarSimulationsRoute = ApiHangarSimulationsRouteImport.update({
   path: '/api/hangar/simulations',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiHangarSagushHelloRoute = ApiHangarSagushHelloRouteImport.update({
+  id: '/api/hangar/sagush-hello',
+  path: '/api/hangar/sagush-hello',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiHangarSagushDesignRoute = ApiHangarSagushDesignRouteImport.update({
+  id: '/api/hangar/sagush-design',
+  path: '/api/hangar/sagush-design',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiHangarResolveMissionRoute = ApiHangarResolveMissionRouteImport.update({
   id: '/api/hangar/resolve-mission',
   path: '/api/hangar/resolve-mission',
@@ -959,6 +971,8 @@ export interface FileRoutesByFullPath {
   '/api/hangar/missions': typeof ApiHangarMissionsRoute
   '/api/hangar/optimizations': typeof ApiHangarOptimizationsRoute
   '/api/hangar/resolve-mission': typeof ApiHangarResolveMissionRoute
+  '/api/hangar/sagush-design': typeof ApiHangarSagushDesignRoute
+  '/api/hangar/sagush-hello': typeof ApiHangarSagushHelloRoute
   '/api/hangar/simulations': typeof ApiHangarSimulationsRoute
   '/api/hangar/source-catalogs': typeof ApiHangarSourceCatalogsRoute
   '/api/hangar/store-document': typeof ApiHangarStoreDocumentRoute
@@ -1088,6 +1102,8 @@ export interface FileRoutesByTo {
   '/api/hangar/missions': typeof ApiHangarMissionsRoute
   '/api/hangar/optimizations': typeof ApiHangarOptimizationsRoute
   '/api/hangar/resolve-mission': typeof ApiHangarResolveMissionRoute
+  '/api/hangar/sagush-design': typeof ApiHangarSagushDesignRoute
+  '/api/hangar/sagush-hello': typeof ApiHangarSagushHelloRoute
   '/api/hangar/simulations': typeof ApiHangarSimulationsRoute
   '/api/hangar/source-catalogs': typeof ApiHangarSourceCatalogsRoute
   '/api/hangar/store-document': typeof ApiHangarStoreDocumentRoute
@@ -1226,6 +1242,8 @@ export interface FileRoutesById {
   '/api/hangar/missions': typeof ApiHangarMissionsRoute
   '/api/hangar/optimizations': typeof ApiHangarOptimizationsRoute
   '/api/hangar/resolve-mission': typeof ApiHangarResolveMissionRoute
+  '/api/hangar/sagush-design': typeof ApiHangarSagushDesignRoute
+  '/api/hangar/sagush-hello': typeof ApiHangarSagushHelloRoute
   '/api/hangar/simulations': typeof ApiHangarSimulationsRoute
   '/api/hangar/source-catalogs': typeof ApiHangarSourceCatalogsRoute
   '/api/hangar/store-document': typeof ApiHangarStoreDocumentRoute
@@ -1364,6 +1382,8 @@ export interface FileRouteTypes {
     | '/api/hangar/missions'
     | '/api/hangar/optimizations'
     | '/api/hangar/resolve-mission'
+    | '/api/hangar/sagush-design'
+    | '/api/hangar/sagush-hello'
     | '/api/hangar/simulations'
     | '/api/hangar/source-catalogs'
     | '/api/hangar/store-document'
@@ -1493,6 +1513,8 @@ export interface FileRouteTypes {
     | '/api/hangar/missions'
     | '/api/hangar/optimizations'
     | '/api/hangar/resolve-mission'
+    | '/api/hangar/sagush-design'
+    | '/api/hangar/sagush-hello'
     | '/api/hangar/simulations'
     | '/api/hangar/source-catalogs'
     | '/api/hangar/store-document'
@@ -1630,6 +1652,8 @@ export interface FileRouteTypes {
     | '/api/hangar/missions'
     | '/api/hangar/optimizations'
     | '/api/hangar/resolve-mission'
+    | '/api/hangar/sagush-design'
+    | '/api/hangar/sagush-hello'
     | '/api/hangar/simulations'
     | '/api/hangar/source-catalogs'
     | '/api/hangar/store-document'
@@ -1705,6 +1729,8 @@ export interface RootRouteChildren {
   ApiHangarMissionsRoute: typeof ApiHangarMissionsRoute
   ApiHangarOptimizationsRoute: typeof ApiHangarOptimizationsRoute
   ApiHangarResolveMissionRoute: typeof ApiHangarResolveMissionRoute
+  ApiHangarSagushDesignRoute: typeof ApiHangarSagushDesignRoute
+  ApiHangarSagushHelloRoute: typeof ApiHangarSagushHelloRoute
   ApiHangarSimulationsRoute: typeof ApiHangarSimulationsRoute
   ApiHangarSourceCatalogsRoute: typeof ApiHangarSourceCatalogsRoute
   ApiHangarStoreDocumentRoute: typeof ApiHangarStoreDocumentRoute
@@ -2387,6 +2413,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiHangarSimulationsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/hangar/sagush-hello': {
+      id: '/api/hangar/sagush-hello'
+      path: '/api/hangar/sagush-hello'
+      fullPath: '/api/hangar/sagush-hello'
+      preLoaderRoute: typeof ApiHangarSagushHelloRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/hangar/sagush-design': {
+      id: '/api/hangar/sagush-design'
+      path: '/api/hangar/sagush-design'
+      fullPath: '/api/hangar/sagush-design'
+      preLoaderRoute: typeof ApiHangarSagushDesignRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/hangar/resolve-mission': {
       id: '/api/hangar/resolve-mission'
       path: '/api/hangar/resolve-mission'
@@ -2973,6 +3013,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiHangarMissionsRoute: ApiHangarMissionsRoute,
   ApiHangarOptimizationsRoute: ApiHangarOptimizationsRoute,
   ApiHangarResolveMissionRoute: ApiHangarResolveMissionRoute,
+  ApiHangarSagushDesignRoute: ApiHangarSagushDesignRoute,
+  ApiHangarSagushHelloRoute: ApiHangarSagushHelloRoute,
   ApiHangarSimulationsRoute: ApiHangarSimulationsRoute,
   ApiHangarSourceCatalogsRoute: ApiHangarSourceCatalogsRoute,
   ApiHangarStoreDocumentRoute: ApiHangarStoreDocumentRoute,
