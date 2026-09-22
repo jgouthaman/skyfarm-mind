@@ -27,6 +27,7 @@ import {
   type MissionExportInput,
 } from "@/lib/the-hangar/missionExport";
 import type { SourceType } from "@/lib/the-hangar/types/hangar-mission";
+import type { MarketDataOption, RegulationOption } from "@/lib/the-hangar/sourceCatalogs";
 
 // ─────────────────────────────────────────────────────────────────────────
 // The Hangar — Bay 01 (Mission Agent) detail page. Faithful port of
@@ -690,6 +691,196 @@ async function callStageApi<TResult>(
   }
 }
 
+// ── Intake: extra context sources (MissionAgent.md Section 3, sources 4-6) ──
+//
+// Optional add-ons under the brief. Everything ticked is sent as extra entries
+// in the SAME `sources` list Stage 1 already receives, so an attached source
+// goes through the same four stages, Save as final, export and Concept Agent
+// as a plain brief. A source is only added to the request when something is
+// selected (an empty one would otherwise look like an input it isn't).
+//
+// Regulations is deliberately minimal — plain checkboxes over the catalog and
+// nothing else; how regulations should shape a mission needs a proper study.
+// Document upload is not built yet and is shown as such.
+
+interface SourceCatalogsState {
+  status: "loading" | "ready" | "error";
+  regulations: RegulationOption[];
+  marketData: MarketDataOption[];
+}
+
+type WireSource = { source_type: string; raw_input: Record<string, unknown> };
+
+function toggleInList(list: string[], value: string): string[] {
+  return list.includes(value) ? list.filter((v) => v !== value) : [...list, value];
+}
+
+// Past missions that can be used as context: only ones that have a spec.
+function importableMissions(missions: MissionListEntry[] | null): MissionListEntry[] {
+  return (missions ?? []).filter(
+    (m) => m.missionSpecs && (m.status === "spec_ready" || m.status === "finalized"),
+  );
+}
+
+function IntakeSources({
+  catalogs,
+  missions,
+  regCodes,
+  onToggleReg,
+  importedMissionId,
+  onImportedMission,
+  marketIds,
+  onToggleMarket,
+}: {
+  catalogs: SourceCatalogsState;
+  missions: MissionListEntry[] | null;
+  regCodes: string[];
+  onToggleReg: (code: string) => void;
+  importedMissionId: string;
+  onImportedMission: (id: string) => void;
+  marketIds: string[];
+  onToggleMarket: (id: string) => void;
+}) {
+  const eligible = importableMissions(missions);
+  const count = regCodes.length + (importedMissionId ? 1 : 0) + marketIds.length;
+  const listNote = (rows: number, what: string) =>
+    catalogs.status === "loading" ? (
+      <p className="hgr-m-source-empty">Loading…</p>
+    ) : catalogs.status === "error" ? (
+      <p className="hgr-m-source-empty">Couldn't load this list. Reload the page to retry.</p>
+    ) : rows === 0 ? (
+      <p className="hgr-m-source-empty">No {what} are available yet.</p>
+    ) : null;
+
+  return (
+    <details className="hgr-m-sources">
+      <summary>
+        Add more context <span className="hgr-m-sources-opt">(optional)</span>
+        {count > 0 && <span className="hgr-m-sources-count">{count} attached</span>}
+      </summary>
+
+      <div className="hgr-m-source-card">
+        <div className="hgr-m-source-card-head">
+          <b>Regulations &amp; standards</b>
+        </div>
+        {listNote(catalogs.regulations.length, "regulations")}
+        {catalogs.regulations.map((r) => (
+          <label key={r.code} className="hgr-m-source-opt">
+            <input
+              type="checkbox"
+              checked={regCodes.includes(r.code)}
+              onChange={() => onToggleReg(r.code)}
+            />
+            <span>{r.name}</span>
+            <span className="hgr-m-source-meta">{r.region}</span>
+          </label>
+        ))}
+      </div>
+
+      <div className="hgr-m-source-card">
+        <div className="hgr-m-source-card-head">
+          <b>Existing project</b>
+        </div>
+        {eligible.length === 0 ? (
+          <p className="hgr-m-source-empty">You have no saved specs to build on yet.</p>
+        ) : (
+          <>
+            <select
+              className="hgr-m-source-select"
+              value={importedMissionId}
+              onChange={(e) => onImportedMission(e.target.value)}
+              aria-label="Existing project"
+            >
+              <option value="">None</option>
+              {eligible.map((m) => (
+                <option key={m.missionId} value={m.missionId}>
+                  {m.missionCode} · {m.missionSpecs?.missionType ?? "—"}
+                </option>
+              ))}
+            </select>
+            <p className="hgr-m-source-hint">
+              That mission's spec is given to the model as context for this one.
+            </p>
+          </>
+        )}
+      </div>
+
+      <div className="hgr-m-source-card">
+        <div className="hgr-m-source-card-head">
+          <b>Market &amp; domain data</b>
+        </div>
+        {listNote(catalogs.marketData.length, "market-data sources")}
+        {catalogs.marketData.map((d) => (
+          <label key={d.id} className="hgr-m-source-opt">
+            <input
+              type="checkbox"
+              checked={marketIds.includes(d.id)}
+              onChange={() => onToggleMarket(d.id)}
+            />
+            <span>{d.name}</span>
+            {d.dataSource && <span className="hgr-m-source-meta">{d.dataSource}</span>}
+          </label>
+        ))}
+        {catalogs.marketData.length > 0 && (
+          <p className="hgr-m-source-hint">
+            If a source has a link, that page is read when the mission runs and used as context.
+          </p>
+        )}
+      </div>
+
+      <div className="hgr-m-source-card hgr-m-source-card-wip" aria-disabled="true">
+        <div className="hgr-m-source-card-head">
+          <b>Document</b>
+          <span className="hgr-m-wip">Work in progress</span>
+        </div>
+        <p className="hgr-m-source-empty">
+          Upload a brief (PDF or Word) to add it as context. Not available yet.
+        </p>
+      </div>
+    </details>
+  );
+}
+
+// What was attached, shown back once the brief has been submitted.
+function AttachedSummary({
+  catalogs,
+  missions,
+  regCodes,
+  importedMissionId,
+  marketIds,
+}: {
+  catalogs: SourceCatalogsState;
+  missions: MissionListEntry[] | null;
+  regCodes: string[];
+  importedMissionId: string;
+  marketIds: string[];
+}) {
+  const chips: string[] = [
+    ...regCodes.map((c) => catalogs.regulations.find((r) => r.code === c)?.name ?? c),
+    ...(importedMissionId
+      ? [
+          "Project " +
+            (importableMissions(missions).find((m) => m.missionId === importedMissionId)
+              ?.missionCode ?? "selected"),
+        ]
+      : []),
+    ...marketIds.map((id) => catalogs.marketData.find((d) => d.id === id)?.name ?? id),
+  ];
+  if (chips.length === 0) return null;
+  return (
+    <div className="hgr-m-attached">
+      <span className="hgr-m-intake-summary-label">Attached context</span>
+      <div className="hgr-m-attached-chips">
+        {chips.map((c, i) => (
+          <span key={i} className="hgr-m-attached-chip">
+            {c}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function TheHangarMission() {
   const ready = useHangarSession();
 
@@ -706,6 +897,15 @@ function TheHangarMission() {
   const [currentUserEmail, setCurrentUserEmail] = useState<string | null>(null);
   const [llmStatus, setLlmStatus] = useState<"checking" | "live" | "offline">("checking");
   const [missionsList, setMissionsList] = useState<MissionListEntry[] | null>(null);
+  // Optional extra context attached to the brief (Section 3, sources 4-6).
+  const [catalogs, setCatalogs] = useState<SourceCatalogsState>({
+    status: "loading",
+    regulations: [],
+    marketData: [],
+  });
+  const [attachedRegCodes, setAttachedRegCodes] = useState<string[]>([]);
+  const [attachedMarketIds, setAttachedMarketIds] = useState<string[]>([]);
+  const [importedMissionId, setImportedMissionId] = useState("");
   const [missionsListStatus, setMissionsListStatus] = useState<"idle" | "loading" | "error">(
     "idle",
   );
@@ -821,7 +1021,57 @@ function TheHangarMission() {
     [],
   );
 
+  // The Regulations / Market-data checkbox options come from the catalog
+  // tables (via the server), not a hardcoded list.
+  useEffect(() => {
+    if (!currentUserEmail) return;
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase.auth.getSession();
+      const token = data.session?.access_token;
+      if (!token) return;
+      try {
+        const res = await fetch("/api/hangar/source-catalogs", {
+          headers: { Authorization: "Bearer " + token },
+        });
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        const json = await res.json();
+        if (!cancelled) {
+          setCatalogs({
+            status: "ready",
+            regulations: json.regulations ?? [],
+            marketData: json.marketData ?? [],
+          });
+        }
+      } catch {
+        if (!cancelled) setCatalogs((c) => ({ ...c, status: "error" }));
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [currentUserEmail]);
+
+  // Only what's actually selected is sent: an empty source would otherwise
+  // read as an input the user never gave.
+  function buildAttachedSources(): WireSource[] {
+    const out: WireSource[] = [];
+    if (attachedRegCodes.length > 0) {
+      out.push({ source_type: "regulations", raw_input: { regulationCodes: attachedRegCodes } });
+    }
+    if (importedMissionId) {
+      out.push({ source_type: "existing_project", raw_input: { importedMissionId } });
+    }
+    if (attachedMarketIds.length > 0) {
+      out.push({ source_type: "market_data", raw_input: { marketDataIds: attachedMarketIds } });
+    }
+    return out;
+  }
+
   function resetFlow() {
+    setAttachedRegCodes([]);
+    setAttachedMarketIds([]);
+    setImportedMissionId("");
     setFlow(INITIAL_FLOW_STATE);
     setBriefText("");
     setFinalizeState({ status: "idle", errorMessage: null });
@@ -957,7 +1207,10 @@ function TheHangarMission() {
       setProgressStepIdx(stepIdx);
     }, 2500);
 
-    const sources = [{ source_type: "natural_language", raw_input: { text: briefText.trim() } }];
+    const sources = [
+      { source_type: "natural_language", raw_input: { text: briefText.trim() } },
+      ...buildAttachedSources(),
+    ];
     const outcome = await callStageApi<Stage1Result>(
       "/api/hangar/process-mission/input-processing",
       {
@@ -1219,6 +1472,7 @@ function TheHangarMission() {
 
     const sources = [
       { source_type: "natural_language", raw_input: { text: briefText.trim() } },
+      ...buildAttachedSources(),
       ...(Object.keys(structuredAnswers).length > 0
         ? [{ source_type: "requirements_form", raw_input: structuredAnswers }]
         : []),
@@ -1459,6 +1713,18 @@ function TheHangarMission() {
                                     onChange={(e) => setBriefText(e.target.value)}
                                   />
                                 </div>
+                                <IntakeSources
+                                  catalogs={catalogs}
+                                  missions={missionsList}
+                                  regCodes={attachedRegCodes}
+                                  onToggleReg={(c) => setAttachedRegCodes((l) => toggleInList(l, c))}
+                                  importedMissionId={importedMissionId}
+                                  onImportedMission={setImportedMissionId}
+                                  marketIds={attachedMarketIds}
+                                  onToggleMarket={(id) =>
+                                    setAttachedMarketIds((l) => toggleInList(l, id))
+                                  }
+                                />
                                 <button
                                   type="submit"
                                   className="hgr-m-btn hgr-m-btn-amber"
@@ -1474,6 +1740,15 @@ function TheHangarMission() {
                                 <span className="hgr-m-intake-summary-label">Mission brief</span>
                                 <p>{briefText}</p>
                               </div>
+                            )}
+                            {flow.stage1.status !== "pending" && flow.stage1.status !== "error" && (
+                              <AttachedSummary
+                                catalogs={catalogs}
+                                missions={missionsList}
+                                regCodes={attachedRegCodes}
+                                importedMissionId={importedMissionId}
+                                marketIds={attachedMarketIds}
+                              />
                             )}
 
                             {flow.stage1.status === "error" && (
@@ -3012,6 +3287,39 @@ const HGR_MISSION_CSS = `
   padding:14px 16px; border-radius:2px; outline:none; resize:vertical; transition:border-color .15s;
 }
 .hgr-m-field textarea:focus{ border-color:var(--hgr-m-blue-bright); }
+.hgr-m-sources{ margin:-6px 0 22px; border:1px solid var(--hgr-m-hairline); background:var(--hgr-m-navy-panel); border-radius:2px; }
+.hgr-m-sources > summary{
+  cursor:pointer; padding:12px 16px; font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.08em;
+  text-transform:uppercase; color:var(--hgr-m-paper-dim); list-style:none;
+}
+.hgr-m-sources > summary::-webkit-details-marker{ display:none; }
+.hgr-m-sources > summary::before{ content:"▸ "; }
+.hgr-m-sources[open] > summary::before{ content:"▾ "; }
+.hgr-m-sources-opt{ opacity:.7; text-transform:none; letter-spacing:0; }
+.hgr-m-sources-count{ margin-left:10px; color:var(--hgr-m-amber-bright); }
+.hgr-m-source-card{ padding:12px 16px 14px; border-top:1px dashed var(--hgr-m-hairline); }
+.hgr-m-source-card-head{ display:flex; align-items:center; gap:10px; margin-bottom:8px; font-size:13px; color:var(--hgr-m-paper); }
+.hgr-m-source-opt{ display:flex; align-items:baseline; gap:10px; padding:5px 0; font-size:13.5px; color:var(--hgr-m-paper); cursor:pointer; }
+.hgr-m-source-opt input{ accent-color:var(--hgr-m-amber); }
+.hgr-m-source-meta{ margin-left:auto; font-size:11.5px; color:var(--hgr-m-paper-dim); }
+.hgr-m-source-empty, .hgr-m-source-hint{ margin:0; font-size:12.5px; color:var(--hgr-m-paper-dim); line-height:1.5; }
+.hgr-m-source-hint{ margin-top:6px; }
+.hgr-m-source-select{
+  width:100%; background:var(--hgr-m-navy-deep); border:1px solid var(--hgr-m-hairline); color:var(--hgr-m-paper);
+  font-family:'IBM Plex Sans',sans-serif; font-size:13.5px; padding:9px 10px; border-radius:2px;
+}
+.hgr-m-source-card-wip{ opacity:.6; }
+.hgr-m-wip{
+  font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.05em; text-transform:uppercase;
+  color:var(--hgr-m-amber); border:1px solid rgba(232,163,61,.4); padding:2px 6px; border-radius:2px;
+}
+.hgr-m-attached{ max-width:640px; margin:-8px 0 20px; }
+.hgr-m-attached .hgr-m-intake-summary-label{ margin-bottom:6px; }
+.hgr-m-attached-chips{ display:flex; flex-wrap:wrap; gap:6px; }
+.hgr-m-attached-chip{
+  font-size:12.5px; color:var(--hgr-m-paper); border:1px solid rgba(111,180,224,.35);
+  background:rgba(111,180,224,.08); padding:3px 9px; border-radius:2px;
+}
 .hgr-m-intake-summary{
   max-width:640px; padding:14px 16px; border:1px solid rgba(111,180,224,.3);
   border-left:3px solid var(--hgr-m-blue-bright); background:rgba(111,180,224,.09);
