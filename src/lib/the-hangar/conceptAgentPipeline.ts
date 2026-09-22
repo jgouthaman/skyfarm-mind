@@ -1,6 +1,8 @@
 import { generateConceptIdeas, type CandidateConcept } from "./conceptIdeation.ts";
 import { analyzeConceptTradeoffs, type ConceptTradeoffNote } from "./tradeoffReasoning.ts";
 import { rankConcepts, type RankedConcept } from "./conceptRanking.ts";
+import type { LlmUsage } from "./llmGateway.ts";
+import type { ConceptUsage } from "./conceptUsage.ts";
 import type {
   FinalizedConstraint,
   FinalizedKpi,
@@ -15,6 +17,7 @@ import {
   logConceptStageRun,
   listUserConcepts,
   getSpecsForConcepts,
+  getUsageForConcepts,
   type ConceptRunStage,
   type HangarConceptRow,
   type ConceptStatus,
@@ -120,6 +123,8 @@ export interface Stage1Result {
   conceptCode: string;
   candidates: CandidateConcept[];
   mock: boolean;
+  usage: LlmUsage | null;
+  durationMs: number;
 }
 
 export async function runConceptIdeationStage(request: Stage1Request): Promise<Stage1Result> {
@@ -138,19 +143,22 @@ export async function runConceptIdeationStage(request: Stage1Request): Promise<S
     const ideation = await generateConceptIdeas({
       data: { missionSpecs, constraints, kpis, summary },
     });
+    const durationMs = Date.now() - start;
     await logConceptStageRun(
       conceptId,
       "concept_ideation",
       { sourceMissionId },
       ideation,
       "success",
-      Date.now() - start,
+      durationMs,
     );
     return {
       conceptId,
       conceptCode: concept.concept_code,
       candidates: ideation.candidates,
       mock: ideation.mock,
+      usage: ideation.usage,
+      durationMs,
     };
   } catch (err) {
     throw await recordStageFailure(conceptId, "concept_ideation", err);
@@ -171,6 +179,8 @@ export interface Stage2Result {
   conceptId: string;
   notes: ConceptTradeoffNote[];
   mock: boolean;
+  usage: LlmUsage | null;
+  durationMs: number;
 }
 
 export async function runTradeOffReasoningStage(request: Stage2Request): Promise<Stage2Result> {
@@ -181,15 +191,15 @@ export async function runTradeOffReasoningStage(request: Stage2Request): Promise
   const start = Date.now();
   try {
     const reasoning = await analyzeConceptTradeoffs({ data: { candidates, constraints, kpis } });
-    await logConceptStageRun(
+    const durationMs = Date.now() - start;
+    await logConceptStageRun(conceptId, "trade_off_reasoning", { candidates }, reasoning, "success", durationMs);
+    return {
       conceptId,
-      "trade_off_reasoning",
-      { candidates },
-      reasoning,
-      "success",
-      Date.now() - start,
-    );
-    return { conceptId, notes: reasoning.notes, mock: reasoning.mock };
+      notes: reasoning.notes,
+      mock: reasoning.mock,
+      usage: reasoning.usage,
+      durationMs,
+    };
   } catch (err) {
     throw await recordStageFailure(conceptId, "trade_off_reasoning", err);
   }
@@ -207,6 +217,7 @@ export interface Stage3Request {
 export interface Stage3Result {
   conceptId: string;
   rankedConcepts: RankedConcept[];
+  durationMs: number;
 }
 
 export async function runRankingScoringStage(request: Stage3Request): Promise<Stage3Result> {
@@ -217,15 +228,16 @@ export async function runRankingScoringStage(request: Stage3Request): Promise<St
   const start = Date.now();
   try {
     const rankedConcepts = rankConcepts(candidates, tradeoffNotes);
+    const durationMs = Date.now() - start;
     await logConceptStageRun(
       conceptId,
       "ranking_scoring",
       { candidates, tradeoffNotes },
       { rankedConcepts },
       "success",
-      Date.now() - start,
+      durationMs,
     );
-    return { conceptId, rankedConcepts };
+    return { conceptId, rankedConcepts, durationMs };
   } catch (err) {
     throw await recordStageFailure(conceptId, "ranking_scoring", err);
   }
@@ -343,12 +355,24 @@ export interface ConceptListEntry {
   tradeOffNotes: ConceptTradeoffNote[] | null;
   rankedConcepts: RankedConcept[] | null;
   confidenceScore: number | null;
+  /** Latest persisted spec version — null until a spec exists. */
+  specVersion: number | null;
+  /** LLM requests/tokens/estimated cost, rebuilt from the run log. null when unavailable. */
+  usage: ConceptUsage | null;
 }
 
 export async function listConceptsForUser(userId: string): Promise<ConceptListEntry[]> {
   const concepts = await listUserConcepts(userId);
   const conceptIds = concepts.map((c) => c.id);
-  const specs = await getSpecsForConcepts(conceptIds);
+  const [specs, usageByConcept] = await Promise.all([
+    getSpecsForConcepts(conceptIds),
+    // Decoration only — if the usage query fails, the list must still load,
+    // just without usage numbers (same contract as Mission Agent's own list).
+    getUsageForConcepts(conceptIds).catch((err) => {
+      console.error("listConceptsForUser: usage unavailable:", err);
+      return new Map<string, ConceptUsage>();
+    }),
+  ]);
   const specsByConcept = new Map(specs.map((s) => [s.concept_id, s]));
 
   return concepts.map((c): ConceptListEntry => {
@@ -363,6 +387,8 @@ export async function listConceptsForUser(userId: string): Promise<ConceptListEn
       tradeOffNotes: spec ? (spec.trade_off_notes as unknown as ConceptTradeoffNote[]) : null,
       rankedConcepts: spec ? (spec.ranked_concepts as unknown as RankedConcept[]) : null,
       confidenceScore: spec?.confidence_score ?? null,
+      specVersion: spec?.version ?? null,
+      usage: usageByConcept.get(c.id) ?? null,
     };
   });
 }

@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { callLlmGateway, stripJsonFences } from "./llmGateway.ts";
+import { callLlmGateway, stripJsonFences, type LlmUsage } from "./llmGateway.ts";
 import type {
   FinalizedConstraint,
   FinalizedKpi,
@@ -32,6 +32,7 @@ export interface CandidateConcept {
 export interface ConceptIdeationResult {
   candidates: CandidateConcept[];
   mock: boolean;
+  usage: LlmUsage | null;
 }
 
 export const generateConceptIdeas = createServerFn({ method: "POST" })
@@ -44,12 +45,14 @@ Mission summary: ${data.summary}
 
 Return: { "candidates": [{ "concept_name": "string", "description": "string", "vehicle_class": "string", "rationale": "string" }] } — exactly 3 entries in "candidates".`;
 
-    const { content } = await callLlmGateway(SYSTEM, userContent, { jsonMode: true });
-    if (!content) return { candidates: mockCandidates(data), mock: true };
+    const { content, usage } = await callLlmGateway(SYSTEM, userContent, { jsonMode: true });
+    if (!content) return { candidates: mockCandidates(data), mock: true, usage: null };
 
     const parsed = parseIdeationResponse(content);
-    if (!parsed || parsed.length === 0) return { candidates: mockCandidates(data), mock: true };
-    return { candidates: parsed, mock: false };
+    if (!parsed || parsed.length === 0) {
+      return { candidates: mockCandidates(data), mock: true, usage: null };
+    }
+    return { candidates: parsed, mock: false, usage };
   });
 
 function parseIdeationResponse(raw: string): CandidateConcept[] | null {
