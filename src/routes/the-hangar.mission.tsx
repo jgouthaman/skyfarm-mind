@@ -719,6 +719,10 @@ interface DocumentAttachment {
   text: string | null;
   truncated: boolean;
   errorMessage: string | null;
+  // Kept only long enough to upload to Storage once a missionId exists to
+  // name it after (Stage 1 hasn't run yet when the file is first picked) —
+  // see storeAttachedDocument below. Never re-sent to extract-document.
+  file: File | null;
 }
 const IDLE_DOCUMENT: DocumentAttachment = {
   status: "idle",
@@ -726,6 +730,7 @@ const IDLE_DOCUMENT: DocumentAttachment = {
   text: null,
   truncated: false,
   errorMessage: null,
+  file: null,
 };
 
 function toggleInList(list: string[], value: string): string[] {
@@ -1111,7 +1116,7 @@ function TheHangarMission() {
   // server-side (documentExtraction.ts) and the result is held in state, not
   // re-uploaded on every keystroke or on submit.
   async function handleDocumentFile(file: File) {
-    setDocument({ ...IDLE_DOCUMENT, status: "extracting", fileName: file.name });
+    setDocument({ ...IDLE_DOCUMENT, status: "extracting", fileName: file.name, file });
     const { data: sessionData } = await supabase.auth.getSession();
     const token = sessionData.session?.access_token;
     if (!token) {
@@ -1134,6 +1139,7 @@ function TheHangarMission() {
           text: null,
           truncated: false,
           errorMessage: json.error ?? "HTTP " + res.status,
+          file: null,
         });
         return;
       }
@@ -1143,6 +1149,7 @@ function TheHangarMission() {
         text: json.text,
         truncated: !!json.truncated,
         errorMessage: null,
+        file,
       });
     } catch (err) {
       setDocument({
@@ -1151,7 +1158,37 @@ function TheHangarMission() {
         text: null,
         truncated: false,
         errorMessage: err instanceof Error ? err.message : "upload failed",
+        file: null,
       });
+    }
+  }
+
+  // Persists the ORIGINAL file to Storage (bucket BK_HangarMission, key
+  // `<missionId>.<ext>`), once Stage 1 has actually created the mission —
+  // there's nothing to name the file after before that. Fire-and-forget from
+  // the caller's perspective: it never blocks the pipeline and its failure is
+  // only logged, never shown as a mission error — the mission already has the
+  // document's extracted text either way (extract-document ran separately).
+  async function storeAttachedDocument(missionId: string) {
+    if (!document.file) return;
+    const { data: sessionData } = await supabase.auth.getSession();
+    const token = sessionData.session?.access_token;
+    if (!token) return;
+    try {
+      const form = new FormData();
+      form.append("missionId", missionId);
+      form.append("file", document.file);
+      const res = await fetch("/api/hangar/store-document", {
+        method: "POST",
+        headers: { Authorization: "Bearer " + token },
+        body: form,
+      });
+      if (!res.ok) {
+        const json = await res.json().catch(() => ({}));
+        console.error("storeAttachedDocument: " + (json.error ?? "HTTP " + res.status));
+      }
+    } catch (err) {
+      console.error("storeAttachedDocument:", err);
     }
   }
 
@@ -1342,6 +1379,7 @@ function TheHangarMission() {
       sourceTypesUsedCount: outcome.data.sourceTypesUsed.length,
       stage1: { status: "complete", result: outcome.data, errorMessage: null },
     }));
+    void storeAttachedDocument(outcome.data.missionId);
     // Auto-open the gap-fill gate the moment Stage 1 lands, if any of
     // payload/range/endurance came back unresolved — before the user ever
     // gets a "Proceed" button to click, so there's no path from here into
@@ -1486,6 +1524,7 @@ function TheHangarMission() {
       sourceTypesUsedCount: stage1.data.sourceTypesUsed.length,
       stage1: { status: "complete", result: stage1.data, errorMessage: null },
     }));
+    void storeAttachedDocument(stage1.data.missionId);
 
     setFlow((f) => ({ ...f, stage2: { status: "running", result: null, errorMessage: null } }));
     const stage2 = await callStageApi<Stage2Result>(

@@ -99,6 +99,7 @@ import { Route as DestudDashboardExplorerRouteImport } from './routes/destud.das
 import { Route as DestudDashboardEngineerRouteImport } from './routes/destud.dashboard.engineer'
 import { Route as ApiHangarValidationsRouteImport } from './routes/api.hangar.validations'
 import { Route as ApiHangarStructuralsRouteImport } from './routes/api.hangar.structurals'
+import { Route as ApiHangarStoreDocumentRouteImport } from './routes/api.hangar.store-document'
 import { Route as ApiHangarSourceCatalogsRouteImport } from './routes/api.hangar.source-catalogs'
 import { Route as ApiHangarSimulationsRouteImport } from './routes/api.hangar.simulations'
 import { Route as ApiHangarResolveMissionRouteImport } from './routes/api.hangar.resolve-mission'
@@ -617,6 +618,11 @@ const ApiHangarStructuralsRoute = ApiHangarStructuralsRouteImport.update({
   path: '/api/hangar/structurals',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiHangarStoreDocumentRoute = ApiHangarStoreDocumentRouteImport.update({
+  id: '/api/hangar/store-document',
+  path: '/api/hangar/store-document',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiHangarSourceCatalogsRoute = ApiHangarSourceCatalogsRouteImport.update({
   id: '/api/hangar/source-catalogs',
   path: '/api/hangar/source-catalogs',
@@ -955,6 +961,7 @@ export interface FileRoutesByFullPath {
   '/api/hangar/resolve-mission': typeof ApiHangarResolveMissionRoute
   '/api/hangar/simulations': typeof ApiHangarSimulationsRoute
   '/api/hangar/source-catalogs': typeof ApiHangarSourceCatalogsRoute
+  '/api/hangar/store-document': typeof ApiHangarStoreDocumentRoute
   '/api/hangar/structurals': typeof ApiHangarStructuralsRoute
   '/api/hangar/validations': typeof ApiHangarValidationsRoute
   '/destud/dashboard/engineer': typeof DestudDashboardEngineerRoute
@@ -1083,6 +1090,7 @@ export interface FileRoutesByTo {
   '/api/hangar/resolve-mission': typeof ApiHangarResolveMissionRoute
   '/api/hangar/simulations': typeof ApiHangarSimulationsRoute
   '/api/hangar/source-catalogs': typeof ApiHangarSourceCatalogsRoute
+  '/api/hangar/store-document': typeof ApiHangarStoreDocumentRoute
   '/api/hangar/structurals': typeof ApiHangarStructuralsRoute
   '/api/hangar/validations': typeof ApiHangarValidationsRoute
   '/destud/dashboard/engineer': typeof DestudDashboardEngineerRoute
@@ -1220,6 +1228,7 @@ export interface FileRoutesById {
   '/api/hangar/resolve-mission': typeof ApiHangarResolveMissionRoute
   '/api/hangar/simulations': typeof ApiHangarSimulationsRoute
   '/api/hangar/source-catalogs': typeof ApiHangarSourceCatalogsRoute
+  '/api/hangar/store-document': typeof ApiHangarStoreDocumentRoute
   '/api/hangar/structurals': typeof ApiHangarStructuralsRoute
   '/api/hangar/validations': typeof ApiHangarValidationsRoute
   '/destud/dashboard/engineer': typeof DestudDashboardEngineerRoute
@@ -1357,6 +1366,7 @@ export interface FileRouteTypes {
     | '/api/hangar/resolve-mission'
     | '/api/hangar/simulations'
     | '/api/hangar/source-catalogs'
+    | '/api/hangar/store-document'
     | '/api/hangar/structurals'
     | '/api/hangar/validations'
     | '/destud/dashboard/engineer'
@@ -1485,6 +1495,7 @@ export interface FileRouteTypes {
     | '/api/hangar/resolve-mission'
     | '/api/hangar/simulations'
     | '/api/hangar/source-catalogs'
+    | '/api/hangar/store-document'
     | '/api/hangar/structurals'
     | '/api/hangar/validations'
     | '/destud/dashboard/engineer'
@@ -1621,6 +1632,7 @@ export interface FileRouteTypes {
     | '/api/hangar/resolve-mission'
     | '/api/hangar/simulations'
     | '/api/hangar/source-catalogs'
+    | '/api/hangar/store-document'
     | '/api/hangar/structurals'
     | '/api/hangar/validations'
     | '/destud/dashboard/engineer'
@@ -1695,6 +1707,7 @@ export interface RootRouteChildren {
   ApiHangarResolveMissionRoute: typeof ApiHangarResolveMissionRoute
   ApiHangarSimulationsRoute: typeof ApiHangarSimulationsRoute
   ApiHangarSourceCatalogsRoute: typeof ApiHangarSourceCatalogsRoute
+  ApiHangarStoreDocumentRoute: typeof ApiHangarStoreDocumentRoute
   ApiHangarStructuralsRoute: typeof ApiHangarStructuralsRoute
   ApiHangarValidationsRoute: typeof ApiHangarValidationsRoute
   ApiHangarProcessAircraftDesignGeometryGenerationRoute: typeof ApiHangarProcessAircraftDesignGeometryGenerationRoute
@@ -2353,6 +2366,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiHangarStructuralsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/hangar/store-document': {
+      id: '/api/hangar/store-document'
+      path: '/api/hangar/store-document'
+      fullPath: '/api/hangar/store-document'
+      preLoaderRoute: typeof ApiHangarStoreDocumentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/hangar/source-catalogs': {
       id: '/api/hangar/source-catalogs'
       path: '/api/hangar/source-catalogs'
@@ -2955,6 +2975,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiHangarResolveMissionRoute: ApiHangarResolveMissionRoute,
   ApiHangarSimulationsRoute: ApiHangarSimulationsRoute,
   ApiHangarSourceCatalogsRoute: ApiHangarSourceCatalogsRoute,
+  ApiHangarStoreDocumentRoute: ApiHangarStoreDocumentRoute,
   ApiHangarStructuralsRoute: ApiHangarStructuralsRoute,
   ApiHangarValidationsRoute: ApiHangarValidationsRoute,
   ApiHangarProcessAircraftDesignGeometryGenerationRoute:
