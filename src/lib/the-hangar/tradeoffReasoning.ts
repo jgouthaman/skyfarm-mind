@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { callLlmGateway, stripJsonFences } from "./llmGateway.ts";
+import { callLlmGateway, stripJsonFences, type LlmUsage } from "./llmGateway.ts";
 import type { FinalizedConstraint, FinalizedKpi } from "./missionSpecAssembly.ts";
 import type { CandidateConcept } from "./conceptIdeation.ts";
 
@@ -30,6 +30,7 @@ export interface ConceptTradeoffNote {
 export interface TradeoffReasoningResult {
   notes: ConceptTradeoffNote[];
   mock: boolean;
+  usage: LlmUsage | null;
 }
 
 export const analyzeConceptTradeoffs = createServerFn({ method: "POST" })
@@ -41,12 +42,12 @@ KPIs: ${JSON.stringify(data.kpis, null, 2)}
 
 Return: { "notes": [{ "concept_name": "string", "pros_cons": ["string"], "constraint_fit": "pass | partial | fail", "fit_score": 1-10, "rationale": "string" }] } — one entry per candidate concept, using the same concept_name values given above.`;
 
-    const { content } = await callLlmGateway(SYSTEM, userContent, { jsonMode: true });
-    if (!content) return { notes: mockNotes(data), mock: true };
+    const { content, usage } = await callLlmGateway(SYSTEM, userContent, { jsonMode: true });
+    if (!content) return { notes: mockNotes(data), mock: true, usage: null };
 
     const parsed = parseTradeoffResponse(content);
-    if (!parsed || parsed.length === 0) return { notes: mockNotes(data), mock: true };
-    return { notes: parsed, mock: false };
+    if (!parsed || parsed.length === 0) return { notes: mockNotes(data), mock: true, usage: null };
+    return { notes: parsed, mock: false, usage };
   });
 
 function isConstraintFit(value: unknown): value is ConstraintFit {

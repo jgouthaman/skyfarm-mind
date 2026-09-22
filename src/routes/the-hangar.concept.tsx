@@ -13,6 +13,16 @@ import type {
 import type { CandidateConcept } from "@/lib/the-hangar/conceptIdeation";
 import type { ConceptTradeoffNote, ConstraintFit } from "@/lib/the-hangar/tradeoffReasoning";
 import type { RankedConcept } from "@/lib/the-hangar/conceptRanking";
+import type { ConceptUsage } from "@/lib/the-hangar/conceptUsage";
+import { describeInrCost, estimateCostUsd, formatCostInr } from "@/lib/the-hangar/missionUsage";
+import {
+  EXPORT_FORMAT_META,
+  buildConceptExportModel,
+  downloadBlob,
+  exportConcept,
+  type ConceptExportFormat,
+  type ConceptExportInput,
+} from "@/lib/the-hangar/conceptExport";
 
 // ─────────────────────────────────────────────────────────────────────────
 // The Hangar — Bay 02 (Concept Agent) detail page. New, self-contained page
@@ -44,6 +54,16 @@ const EMPTY_SLOT: StageSlot<never> = { status: "pending", result: null, errorMes
 interface ConceptFlowState {
   conceptId: string | null;
   conceptCode: string | null;
+  // Usage the server rebuilt from Hangar_concept_runs, for a concept reopened
+  // from "Your concepts" (which has no live stage results to read usage
+  // from). null for a concept run this session — its stage results carry
+  // the usage directly. Mirrors Mission Agent's flow.persistedUsage.
+  persistedUsage: ConceptUsage | null;
+  // Client-side timestamp for a concept generated this session (Stage4Result
+  // carries no timestamp of its own), or the concept's real createdAt when
+  // reopened via resumeConcept — same pattern as Mission Agent's
+  // flow.generatedAt.
+  generatedAt: string | null;
   stage1: StageSlot<Stage1Result>;
   stage2: StageSlot<Stage2Result>;
   stage3: StageSlot<Stage3Result>;
@@ -53,6 +73,8 @@ interface ConceptFlowState {
 const INITIAL_FLOW_STATE: ConceptFlowState = {
   conceptId: null,
   conceptCode: null,
+  generatedAt: null,
+  persistedUsage: null,
   stage1: EMPTY_SLOT,
   stage2: EMPTY_SLOT,
   stage3: EMPTY_SLOT,
@@ -88,6 +110,224 @@ const CONCEPT_STATUS_LABEL: Record<string, string> = {
   finalized: "Finalized",
   error: "Error",
 };
+
+// Beside the Concept ID on the live dashboard — same date+time convention
+// as Mission Agent's formatGeneratedAt.
+function formatGeneratedAt(iso: string): string {
+  return new Date(iso).toLocaleString(undefined, {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
+}
+
+// Per-run LLM usage/timing, mirroring Mission Agent's MissionTelemetry —
+// only available for a concept run THIS session (a resumed/past concept
+// has no real Stage1-3 results to total). Stage 3 (ranking) has no LLM
+// component at all, unlike Mission Agent's Stage 3 (which does) — its
+// contribution here is duration-only, requests/tokens stay at whatever
+// Stage 1-2 alone produced.
+interface ConceptTelemetry {
+  requests: number;
+  inputTokens: number;
+  outputTokens: number;
+  estimatedCostUsd: number;
+  /** null when unknown — time is only measured for a run made this session. */
+  durationMs: number | null;
+  /** True when some stage's usage was never recorded, so the totals are a floor. */
+  partial: boolean;
+}
+
+function computeTelemetry(flow: ConceptFlowState): ConceptTelemetry | null {
+  const s1 = flow.stage1.result;
+  const s2 = flow.stage2.result;
+  const s3 = flow.stage3.result;
+  if (s1 && s2 && s3) {
+    const inputTokens = (s1.usage?.inputTokens ?? 0) + (s2.usage?.inputTokens ?? 0);
+    const outputTokens = (s1.usage?.outputTokens ?? 0) + (s2.usage?.outputTokens ?? 0);
+    return {
+      requests: (s1.usage ? 1 : 0) + (s2.usage ? 1 : 0),
+      inputTokens,
+      outputTokens,
+      estimatedCostUsd: estimateCostUsd(inputTokens, outputTokens),
+      durationMs: s1.durationMs + s2.durationMs + s3.durationMs,
+      partial: false,
+    };
+  }
+  const persisted = flow.persistedUsage;
+  if (!persisted) return null;
+  return {
+    requests: persisted.requests,
+    inputTokens: persisted.inputTokens,
+    outputTokens: persisted.outputTokens,
+    estimatedCostUsd: persisted.estimatedCostUsd,
+    durationMs: null,
+    partial: !persisted.complete,
+  };
+}
+
+// Per-stage checkpoint: requests on the left, tokens on the right, one row
+// per pipeline stage. A row is null until that stage's usage is known —
+// live, as each "Proceed" lands, or (for a reopened concept) from the
+// persisted usage. Stages 3/4 have no LLM call, so once complete they're a
+// real 0/0, not "unknown" — direct port of Mission Agent's StageUsageTable.
+interface ConceptStageUsageRow {
+  key: StageKey;
+  mock: boolean;
+  requests: number;
+  inputTokens: number;
+  outputTokens: number;
+}
+
+function computeStageUsage(flow: ConceptFlowState): (ConceptStageUsageRow | null)[] {
+  const s1 = flow.stage1.result;
+  const s2 = flow.stage2.result;
+  const s3 = flow.stage3.result;
+  const persisted = flow.persistedUsage?.stages;
+  const fromPersisted = (key: StageKey): ConceptStageUsageRow | null => {
+    const p = persisted?.[key as "concept_ideation" | "trade_off_reasoning"];
+    return p ? { key, ...p } : null;
+  };
+  return [
+    s1
+      ? {
+          key: "concept_ideation",
+          mock: s1.mock,
+          requests: s1.usage ? 1 : 0,
+          inputTokens: s1.usage?.inputTokens ?? 0,
+          outputTokens: s1.usage?.outputTokens ?? 0,
+        }
+      : fromPersisted("concept_ideation"),
+    s2
+      ? {
+          key: "trade_off_reasoning",
+          mock: s2.mock,
+          requests: s2.usage ? 1 : 0,
+          inputTokens: s2.usage?.inputTokens ?? 0,
+          outputTokens: s2.usage?.outputTokens ?? 0,
+        }
+      : fromPersisted("trade_off_reasoning"),
+    s3 || (flow.persistedUsage && flow.stage3.status === "complete")
+      ? { key: "ranking_scoring", mock: false, requests: 0, inputTokens: 0, outputTokens: 0 }
+      : null,
+    flow.stage4.status === "complete" && (s1 || flow.persistedUsage)
+      ? { key: "output_interface", mock: false, requests: 0, inputTokens: 0, outputTokens: 0 }
+      : null,
+  ];
+}
+
+function StageUsageTable({ flow }: { flow: ConceptFlowState }) {
+  const rows = computeStageUsage(flow);
+  const done = rows.filter((r): r is ConceptStageUsageRow => r !== null);
+  const totalRequests = done.reduce((n, r) => n + r.requests, 0);
+  const totalInput = done.reduce((n, r) => n + r.inputTokens, 0);
+  const totalOutput = done.reduce((n, r) => n + r.outputTokens, 0);
+  const partial = !!flow.persistedUsage && !flow.persistedUsage.complete;
+  return (
+    <table
+      className="hgr-c-usage-table"
+      title="LLM requests and tokens per stage. Cost is an estimate in INR at a fixed USD rate, not a bill."
+    >
+      <thead>
+        <tr>
+          <th>Stage</th>
+          <th className="hgr-c-usage-num">Requests</th>
+          <th className="hgr-c-usage-num">Tokens</th>
+        </tr>
+      </thead>
+      <tbody>
+        {STAGE_ORDER.map((key, i) => {
+          const row = rows[i];
+          return (
+            <tr key={key}>
+              <td>
+                {STAGE_TITLES[key]}
+                {row?.mock && (
+                  <span
+                    className="hgr-c-usage-mock"
+                    title="No live Claude reply — this stage's content is placeholder output"
+                  >
+                    simulated
+                  </span>
+                )}
+              </td>
+              <td className="hgr-c-usage-num">{row ? row.requests : "—"}</td>
+              <td className="hgr-c-usage-num">
+                {row ? (row.inputTokens + row.outputTokens).toLocaleString() : "—"}
+                {row && row.requests > 0 && (
+                  <span className="hgr-c-usage-split">
+                    {" "}
+                    in {row.inputTokens.toLocaleString()} · out {row.outputTokens.toLocaleString()}
+                  </span>
+                )}
+              </td>
+            </tr>
+          );
+        })}
+      </tbody>
+      <tfoot>
+        <tr>
+          <td>Total</td>
+          <td className="hgr-c-usage-num">
+            {partial ? "≥ " : ""}
+            {totalRequests}
+          </td>
+          <td className="hgr-c-usage-num">{(totalInput + totalOutput).toLocaleString()}</td>
+        </tr>
+        <tr>
+          <td colSpan={2}>Estimated cost</td>
+          <td className="hgr-c-usage-num" title={describeInrCost(estimateCostUsd(totalInput, totalOutput))}>
+            {partial ? "≥ " : "~"}
+            {formatCostInr(estimateCostUsd(totalInput, totalOutput))}
+          </td>
+        </tr>
+      </tfoot>
+    </table>
+  );
+}
+
+function formatDuration(ms: number): string {
+  if (ms < 1000) return `${ms}ms`;
+  return `${(ms / 1000).toFixed(1)}s`;
+}
+
+function TelemetryBar({ telemetry }: { telemetry: ConceptTelemetry | null }) {
+  if (!telemetry) return null;
+  return (
+    <div
+      className="hgr-c-telemetry"
+      title="LLM usage for this concept. Cost is an estimate in INR at a fixed USD rate, not a bill. Time is only known for a run made in this session."
+    >
+      <div className="hgr-c-telemetry-item">
+        <span className="hgr-c-telemetry-num">
+          {telemetry.partial ? "≥ " : ""}
+          {telemetry.requests}
+        </span>
+        <span className="hgr-c-telemetry-label">Requests</span>
+      </div>
+      <div className="hgr-c-telemetry-item">
+        <span className="hgr-c-telemetry-num">{telemetry.inputTokens.toLocaleString()}</span>
+        <span className="hgr-c-telemetry-label">Input tokens</span>
+      </div>
+      <div className="hgr-c-telemetry-item">
+        <span className="hgr-c-telemetry-num">{telemetry.outputTokens.toLocaleString()}</span>
+        <span className="hgr-c-telemetry-label">Output tokens</span>
+      </div>
+      <div className="hgr-c-telemetry-item" title={describeInrCost(telemetry.estimatedCostUsd)}>
+        <span className="hgr-c-telemetry-num">
+          {telemetry.partial ? "≥ " : "~"}
+          {formatCostInr(telemetry.estimatedCostUsd)}
+        </span>
+        <span className="hgr-c-telemetry-label">Est. cost</span>
+      </div>
+      {telemetry.durationMs !== null && (
+        <div className="hgr-c-telemetry-item">
+          <span className="hgr-c-telemetry-num">{formatDuration(telemetry.durationMs)}</span>
+          <span className="hgr-c-telemetry-label">Time taken</span>
+        </div>
+      )}
+    </div>
+  );
+}
 
 const FIT_LABEL: Record<ConstraintFit, string> = {
   pass: "Fits",
@@ -142,6 +382,7 @@ function TheHangarConcept() {
     errorMessage: string | null;
   }>({ status: "idle", errorMessage: null });
   const [currentUserEmail, setCurrentUserEmail] = useState<string | null>(null);
+  const [llmStatus, setLlmStatus] = useState<"checking" | "live" | "offline">("checking");
   const [savedSpecs, setSavedSpecs] = useState<MissionListEntry[] | null>(null);
   const [savedSpecsStatus, setSavedSpecsStatus] = useState<"idle" | "loading" | "error">("idle");
   const [savedSpecsExpanded, setSavedSpecsExpanded] = useState(false);
@@ -162,6 +403,34 @@ function TheHangarConcept() {
       setCurrentUserEmail(session?.user.email ?? null);
     });
     return () => subscription.unsubscribe();
+  }, []);
+
+  // "AI" indicator — same live check Mission Agent's Bay 01 header uses
+  // (checkLlmLiveStatus in llmGateway.ts is generic, not Mission-Agent-
+  // specific, so this reuses the exact same /api/hangar/llm-status
+  // endpoint rather than standing up a Concept-Agent-scoped copy).
+  useEffect(() => {
+    let cancelled = false;
+    async function checkLlmStatus() {
+      const { data } = await supabase.auth.getSession();
+      const token = data.session?.access_token;
+      if (!token) return;
+      try {
+        const res = await fetch("/api/hangar/llm-status", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const json = await res.json();
+        if (!cancelled) setLlmStatus(res.ok && json.live ? "live" : "offline");
+      } catch {
+        if (!cancelled) setLlmStatus("offline");
+      }
+    }
+    checkLlmStatus();
+    const interval = setInterval(checkLlmStatus, 60000);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
   }, []);
 
   // "Your saved specs" — finalized mission specs only, reusing
@@ -256,6 +525,8 @@ function TheHangarConcept() {
     setFlow({
       conceptId: c.conceptId,
       conceptCode: c.conceptCode,
+      generatedAt: c.createdAt,
+      persistedUsage: c.usage,
       stage1: { status: "complete", result: null, errorMessage: null },
       stage2: { status: "complete", result: null, errorMessage: null },
       stage3: { status: "complete", result: null, errorMessage: null },
@@ -268,7 +539,7 @@ function TheHangarConcept() {
           tradeoffNotes: c.tradeOffNotes,
           rankedConcepts: c.rankedConcepts,
           confidenceScore: c.confidenceScore,
-          specVersion: 1,
+          specVersion: c.specVersion ?? 1,
           export: { status: "stubbed", reason: "Export (PDF/DOCX/Excel) is v2 — not implemented" },
           eventPublish: {
             status: "stubbed",
@@ -405,6 +676,7 @@ function TheHangarConcept() {
     }
     setFlow((f) => ({
       ...f,
+      generatedAt: new Date().toISOString(),
       stage4: { status: "complete", result: outcome.data, errorMessage: null },
     }));
   }
@@ -471,6 +743,19 @@ function TheHangarConcept() {
           <div className="hgr-c-wrap">
             <div className="hgr-c-status-row">
               <span className="hgr-c-badge hgr-c-badge-bay">BAY 02 OF 15</span>
+              <span
+                className={`hgr-c-badge hgr-c-badge-ai hgr-c-badge-ai-${llmStatus}`}
+                title={
+                  llmStatus === "checking"
+                    ? "Checking connection to Anthropic…"
+                    : llmStatus === "live"
+                      ? "Live — connected to Anthropic (Claude Sonnet 5)"
+                      : "Offline — not connected to Anthropic. Stage LLM calls will fall back to mock output."
+                }
+              >
+                <span className="hgr-c-badge-ai-dot" />
+                AI
+              </span>
             </div>
             <div className="hgr-c-hero-row">
               <h1>Concept Agent</h1>
@@ -613,6 +898,8 @@ function TheHangarConcept() {
                       })}
                     </div>
 
+                    {(flow.stage1.result || flow.persistedUsage) && <StageUsageTable flow={flow} />}
+
                     {activeStage !== "done" && (
                       <>
                         <div className="hgr-c-process-grid">
@@ -731,6 +1018,8 @@ function TheHangarConcept() {
                       <ConceptDashboard
                         result={flow.stage4.result}
                         sourceMissionId={selectedSpec?.missionId ?? null}
+                        generatedAt={flow.generatedAt}
+                        telemetry={computeTelemetry(flow)}
                         onStartNew={resetFlow}
                         onEditAndRegenerate={editAndRegenerate}
                         finalizeState={finalizeState}
@@ -866,12 +1155,70 @@ function FitBadge({ fit }: { fit: ConstraintFit }) {
   return <span className={`hgr-c-fit-badge hgr-c-fit-badge-${fit}`}>{FIT_LABEL[fit]}</span>;
 }
 
+// Green = this stage's finding came back from a real Claude call; amber =
+// it fell back to that call's mock — same at-a-glance color-coding as the
+// "AI" live-status badge above, per-stage instead of per-page. Only
+// Stage 1/2 (the LLM stages) use this; Stage 3 (deterministic ranking) has
+// no mock/live state to show, so it keeps the plain neutral badge.
+function StageStatusBadge({ num, mock }: { num: number; mock: boolean }) {
+  return (
+    <span
+      className={`hgr-c-findings-badge ${mock ? "hgr-c-findings-badge-mock" : "hgr-c-findings-badge-live"}`}
+      title={mock ? "Simulated — no ANTHROPIC_API_KEY reply" : "Live — real Claude response"}
+    >
+      {num}
+    </span>
+  );
+}
+
+// Export the spec as PDF / Word / Excel. Generated in the browser from the
+// spec already on screen; the export libraries load on click, not with the
+// page — direct port of Mission Agent's ExportButtons.
+function ExportButtons({ input }: { input: ConceptExportInput }) {
+  const [busy, setBusy] = useState<ConceptExportFormat | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  async function run(format: ConceptExportFormat) {
+    if (busy) return;
+    setBusy(format);
+    setError(null);
+    try {
+      const { blob, fileName } = await exportConcept(format, buildConceptExportModel(input));
+      downloadBlob(fileName, blob);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Export failed");
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  return (
+    <span className="hgr-c-export">
+      <span className="hgr-c-export-label">Export</span>
+      {(Object.keys(EXPORT_FORMAT_META) as ConceptExportFormat[]).map((format) => (
+        <button
+          key={format}
+          type="button"
+          className="hgr-c-btn hgr-c-btn-ghost"
+          disabled={busy !== null}
+          onClick={() => run(format)}
+          title={`Download this spec as ${EXPORT_FORMAT_META[format].label}`}
+        >
+          {busy === format ? "Preparing…" : EXPORT_FORMAT_META[format].label}
+        </button>
+      ))}
+      {error && <span className="hgr-c-export-error">Couldn't export: {error}</span>}
+    </span>
+  );
+}
+
 function Stage1Findings({ result }: { result: Stage1Result }) {
   return (
     <div className="hgr-c-findings-card">
       <div className="hgr-c-findings-card-head">
         <span className="hgr-c-findings-title">
-          <span className="hgr-c-findings-badge">1</span>Concept Ideation
+          <StageStatusBadge num={1} mock={result.mock} />
+          Concept Ideation
         </span>
         <MockBadge show={result.mock} />
       </div>
@@ -894,7 +1241,8 @@ function Stage2Findings({ result }: { result: Stage2Result }) {
     <div className="hgr-c-findings-card">
       <div className="hgr-c-findings-card-head">
         <span className="hgr-c-findings-title">
-          <span className="hgr-c-findings-badge">2</span>Trade-off Reasoning
+          <StageStatusBadge num={2} mock={result.mock} />
+          Trade-off Reasoning
         </span>
         <MockBadge show={result.mock} />
       </div>
@@ -968,6 +1316,8 @@ function RankedConceptsSection({ rankedConcepts }: { rankedConcepts: RankedConce
 function ConceptDashboard({
   result,
   sourceMissionId,
+  generatedAt,
+  telemetry,
   onStartNew,
   onEditAndRegenerate,
   finalizeState,
@@ -975,6 +1325,8 @@ function ConceptDashboard({
 }: {
   result: Stage4Result;
   sourceMissionId: string | null;
+  generatedAt: string | null;
+  telemetry: ConceptTelemetry | null;
   onStartNew: () => void;
   onEditAndRegenerate: () => void;
   finalizeState: { status: "idle" | "saving" | "saved" | "error"; errorMessage: string | null };
@@ -983,11 +1335,18 @@ function ConceptDashboard({
   const top = result.rankedConcepts[0];
   return (
     <div className="hgr-c-dash">
+      <TelemetryBar telemetry={telemetry} />
+
       <div className="hgr-c-dash-header">
         <div>
           <div className="hgr-c-dash-badge">Spec Ready</div>
           <h3>{top?.conceptName ?? result.conceptCode}</h3>
-          <div className="hgr-c-dash-id">{result.conceptCode}</div>
+          <div className="hgr-c-dash-id">
+            {result.conceptCode}
+            {generatedAt && (
+              <span className="hgr-c-dash-generated-at"> · Generated {formatGeneratedAt(generatedAt)}</span>
+            )}
+          </div>
         </div>
         <div className="hgr-c-dash-confidence">
           <div className="hgr-c-dash-confidence-num">
@@ -999,7 +1358,15 @@ function ConceptDashboard({
               to="/the-hangar/bernoulli"
               search={{ source: "concept", missionId: sourceMissionId, sourceId: "" }}
               className="hgr-c-dash-bernoulli-link"
-              title="Sanity-check this concept's source mission spec against conservation laws and aerospace empiricals."
+              style={
+                finalizeState.status === "saved" ? { pointerEvents: "none", opacity: 0.4 } : undefined
+              }
+              aria-disabled={finalizeState.status === "saved"}
+              title={
+                finalizeState.status === "saved"
+                  ? "This concept is finalized — a physics check on a locked spec isn't useful groundwork anymore."
+                  : "Sanity-check this concept's source mission spec against conservation laws and aerospace empiricals."
+              }
             >
               Ask Bernoulli →
             </Link>
@@ -1040,6 +1407,35 @@ function ConceptDashboard({
         <button type="button" className="hgr-c-btn hgr-c-btn-amber" onClick={onStartNew}>
           Start a new concept
         </button>
+        <ExportButtons
+          input={{
+            conceptCode: result.conceptCode,
+            generatedAt,
+            confidenceScore: result.confidenceScore,
+            version: result.specVersion,
+            candidates: result.candidates,
+            tradeoffNotes: result.tradeoffNotes,
+            rankedConcepts: result.rankedConcepts,
+          }}
+        />
+        {sourceMissionId && (
+          <Link
+            to="/the-hangar/bernoulli"
+            search={{ source: "concept", missionId: sourceMissionId, sourceId: "" }}
+            className="hgr-c-btn hgr-c-dash-bernoulli-link"
+            style={
+              finalizeState.status === "saved" ? { pointerEvents: "none", opacity: 0.4 } : undefined
+            }
+            aria-disabled={finalizeState.status === "saved"}
+            title={
+              finalizeState.status === "saved"
+                ? "This concept is finalized — a physics check on a locked spec isn't useful groundwork anymore."
+                : "Sanity-check this concept's source mission spec against conservation laws and aerospace empiricals."
+            }
+          >
+            Ask Bernoulli →
+          </Link>
+        )}
       </div>
       {finalizeState.status === "error" && (
         <p className="hgr-c-dash-finalize-error">
@@ -1064,7 +1460,10 @@ function PastConceptDetail({ concept, onBack }: { concept: ConceptListEntry; onB
             {CONCEPT_STATUS_LABEL[concept.status] ?? concept.status}
           </div>
           <h3>{concept.rankedConcepts?.[0]?.conceptName ?? concept.conceptCode}</h3>
-          <div className="hgr-c-dash-id">{concept.conceptCode}</div>
+          <div className="hgr-c-dash-id">
+            {concept.conceptCode}
+            <span className="hgr-c-dash-generated-at"> · Generated {formatGeneratedAt(concept.createdAt)}</span>
+          </div>
         </div>
         {concept.confidenceScore !== null && (
           <div className="hgr-c-dash-confidence">
@@ -1077,7 +1476,17 @@ function PastConceptDetail({ concept, onBack }: { concept: ConceptListEntry; onB
                 to="/the-hangar/bernoulli"
                 search={{ source: "concept", missionId: concept.sourceMissionId, sourceId: "" }}
                 className="hgr-c-dash-bernoulli-link"
-                title="Sanity-check this concept's source mission spec against conservation laws and aerospace empiricals."
+                style={
+                  concept.status === "finalized"
+                    ? { pointerEvents: "none", opacity: 0.4 }
+                    : undefined
+                }
+                aria-disabled={concept.status === "finalized"}
+                title={
+                  concept.status === "finalized"
+                    ? "This concept is finalized — a physics check on a locked spec isn't useful groundwork anymore."
+                    : "Sanity-check this concept's source mission spec against conservation laws and aerospace empiricals."
+                }
               >
                 Ask Bernoulli →
               </Link>
@@ -1102,6 +1511,19 @@ function PastConceptDetail({ concept, onBack }: { concept: ConceptListEntry; onB
         <button type="button" className="hgr-c-btn hgr-c-btn-ghost" onClick={onBack}>
           ← Back to Your concepts
         </button>
+        {hasSpec && (
+          <ExportButtons
+            input={{
+              conceptCode: concept.conceptCode,
+              generatedAt: concept.createdAt,
+              confidenceScore: concept.confidenceScore ?? 0,
+              version: concept.specVersion,
+              candidates: concept.candidateConcepts ?? [],
+              tradeoffNotes: concept.tradeOffNotes ?? [],
+              rankedConcepts: concept.rankedConcepts ?? [],
+            }}
+          />
+        )}
       </div>
     </div>
   );
@@ -1114,6 +1536,7 @@ const HGR_CONCEPT_CSS = `
   --hgr-c-amber:#E8A33D; --hgr-c-amber-bright:#F6C374;
   --hgr-c-paper:#ECEFF3; --hgr-c-paper-dim:#8FA5BB;
   --hgr-c-green:#5FBF8F; --hgr-c-red:#E0715A;
+  --hgr-c-bernoulli:#9B7FE8; --hgr-c-bernoulli-bright:#B6A2F2;
   --hgr-c-grid:rgba(111,180,224,0.08); --hgr-c-hairline:rgba(111,180,224,0.20);
 
   background:var(--hgr-c-navy-deep); color:var(--hgr-c-paper); font-family:'IBM Plex Sans', sans-serif;
@@ -1152,6 +1575,15 @@ const HGR_CONCEPT_CSS = `
 .hgr-c-status-row{ display:flex; align-items:center; gap:12px; margin-bottom:22px; flex-wrap:wrap; }
 .hgr-c-badge{ font-family:'IBM Plex Mono',monospace; font-size:11.5px; letter-spacing:.1em; text-transform:uppercase; padding:6px 13px; border-radius:2px; display:inline-flex; align-items:center; gap:8px; }
 .hgr-c-badge-bay{ color:var(--hgr-c-paper-dim); border:1px solid var(--hgr-c-hairline); }
+.hgr-c-badge-ai{ font-weight:700; }
+.hgr-c-badge-ai-dot{ width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+.hgr-c-badge-ai-checking{ color:var(--hgr-c-paper-dim); border:1px solid var(--hgr-c-hairline); }
+.hgr-c-badge-ai-checking .hgr-c-badge-ai-dot{ background:var(--hgr-c-paper-dim); }
+.hgr-c-badge-ai-live{ color:#4ADE80; border:1px solid rgba(74,222,128,.4); background:rgba(74,222,128,.08); }
+.hgr-c-badge-ai-live .hgr-c-badge-ai-dot{ background:#4ADE80; box-shadow:0 0 6px rgba(74,222,128,.8); animation:hgr-c-ai-pulse 2s ease-in-out infinite; }
+.hgr-c-badge-ai-offline{ color:var(--hgr-c-amber); border:1px solid rgba(232,163,61,.4); background:rgba(232,163,61,.08); }
+.hgr-c-badge-ai-offline .hgr-c-badge-ai-dot{ background:var(--hgr-c-amber); box-shadow:0 0 6px rgba(232,163,61,.6); }
+@keyframes hgr-c-ai-pulse{ 0%,100%{ opacity:1; } 50%{ opacity:.4; } }
 .hgr-c-hero-row{ display:flex; align-items:center; gap:48px; flex-wrap:wrap; }
 @media(max-width:760px){ .hgr-c-hero-row{ flex-direction:column; align-items:flex-start; gap:16px; } }
 .hgr-c-hero h1{ font-size:clamp(34px,5vw,58px); margin:0; flex-shrink:0; }
@@ -1207,6 +1639,27 @@ const HGR_CONCEPT_CSS = `
 .hgr-c-stage-tracker-item-active .hgr-c-stage-tracker-label{ color:var(--hgr-c-paper); }
 .hgr-c-stage-tracker-item-active .hgr-c-stage-tracker-num{ border-color:var(--hgr-c-amber); }
 
+/* ── Per-stage usage table + export buttons ── */
+.hgr-c-usage-table{
+  width:100%; border-collapse:collapse; margin:0 0 20px; background:var(--hgr-c-navy-deep);
+  border:1px solid var(--hgr-c-hairline); font-size:13px;
+}
+.hgr-c-usage-table th, .hgr-c-usage-table td{ padding:9px 16px; text-align:left; border-bottom:1px solid var(--hgr-c-hairline); }
+.hgr-c-usage-table th{
+  font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.06em; text-transform:uppercase;
+  color:var(--hgr-c-paper-dim); font-weight:400;
+}
+.hgr-c-usage-table tfoot td{ border-bottom:0; font-weight:600; }
+.hgr-c-usage-table .hgr-c-usage-num{ text-align:right; font-variant-numeric:tabular-nums; }
+.hgr-c-usage-mock{
+  margin-left:10px; font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.05em; text-transform:uppercase;
+  color:var(--hgr-c-amber); border:1px solid rgba(232,163,61,.4); padding:2px 6px; border-radius:2px;
+}
+.hgr-c-usage-split{ font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--hgr-c-paper-dim); }
+.hgr-c-export{ display:inline-flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.hgr-c-export-label{ font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--hgr-c-paper-dim); }
+.hgr-c-export-error{ font-size:12.5px; color:#ffb4b4; }
+
 /* ── Process grid + selected-spec / status panel ── */
 .hgr-c-process-grid{ display:grid; grid-template-columns:1fr 320px; gap:32px; align-items:start; }
 @media(max-width:820px){ .hgr-c-process-grid{ grid-template-columns:1fr; } }
@@ -1234,6 +1687,8 @@ const HGR_CONCEPT_CSS = `
 .hgr-c-findings-card-head{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:14px; flex-wrap:wrap; }
 .hgr-c-findings-title{ font-family:'Space Grotesk',sans-serif; font-size:15px; font-weight:600; display:flex; align-items:center; gap:10px; }
 .hgr-c-findings-badge{ width:22px; height:22px; border-radius:50%; background:var(--hgr-c-blue-bright); color:var(--hgr-c-navy-deep); display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; flex-shrink:0; box-shadow:0 0 8px rgba(111,180,224,0.5); }
+.hgr-c-findings-badge-live{ background:#4ADE80; box-shadow:0 0 8px rgba(74,222,128,.5); }
+.hgr-c-findings-badge-mock{ background:var(--hgr-c-amber); box-shadow:0 0 8px rgba(232,163,61,.5); }
 .hgr-c-findings-mock{ font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.05em; text-transform:uppercase; color:var(--hgr-c-amber); border:1px solid rgba(232,163,61,.4); padding:3px 8px; border-radius:2px; }
 .hgr-c-findings-body{ font-size:13px; color:var(--hgr-c-paper-dim); }
 .hgr-c-findings-row{ padding:8px 0; border-top:1px dashed var(--hgr-c-hairline); }
@@ -1259,19 +1714,45 @@ const HGR_CONCEPT_CSS = `
 
 /* ── Dashboard ── */
 .hgr-c-dash{ border:1px solid var(--hgr-c-hairline); background:var(--hgr-c-navy-panel); }
+.hgr-c-telemetry{
+  display:flex; flex-wrap:wrap; gap:1px; background:var(--hgr-c-hairline);
+  border-bottom:1px solid var(--hgr-c-hairline);
+}
+.hgr-c-telemetry-item{
+  flex:1; min-width:110px; background:var(--hgr-c-navy-deep); padding:12px 16px;
+  display:flex; flex-direction:column; gap:2px;
+}
+.hgr-c-telemetry-num{ font-family:'Space Grotesk',sans-serif; font-size:17px; font-weight:600; }
+.hgr-c-telemetry-label{
+  font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.06em; text-transform:uppercase;
+  color:var(--hgr-c-paper-dim);
+}
 .hgr-c-dash-header{ display:flex; align-items:flex-start; justify-content:space-between; gap:24px; padding:26px 28px; border-bottom:1px solid var(--hgr-c-hairline); flex-wrap:wrap; }
 .hgr-c-dash-badge{ display:inline-block; font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--hgr-c-blue-bright); border:1px solid rgba(111,180,224,.4); padding:4px 10px; border-radius:2px; margin-bottom:10px; }
 .hgr-c-dash-header h3{ font-size:20px; margin-bottom:6px; }
 .hgr-c-dash-id{ font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--hgr-c-paper-dim); }
+.hgr-c-dash-generated-at{ opacity:.75; }
 .hgr-c-dash-confidence{ text-align:center; flex-shrink:0; }
 .hgr-c-dash-confidence-num{ font-family:'Space Grotesk',sans-serif; font-size:32px; font-weight:700; color:var(--hgr-c-amber-bright); line-height:1; }
 .hgr-c-dash-confidence-label{ font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--hgr-c-paper-dim); }
 .hgr-c-dash-bernoulli-link{
-  display:inline-block; margin-top:10px; font-family:'IBM Plex Mono',monospace; font-size:11px;
-  color:var(--hgr-c-blue-bright); text-decoration:none; border:1px solid var(--hgr-c-hairline);
-  border-radius:2px; padding:5px 10px; white-space:nowrap;
+  display:inline-flex; align-items:center; gap:6px; margin-top:10px; font-family:'IBM Plex Mono',monospace;
+  font-size:12.5px; font-weight:700; color:#160F2E; text-decoration:none;
+  background:var(--hgr-c-bernoulli); border:1px solid var(--hgr-c-bernoulli); border-radius:2px;
+  padding:9px 16px; white-space:nowrap; box-shadow:0 0 14px rgba(155,127,232,.45);
+  transition:background .2s, box-shadow .2s;
 }
-.hgr-c-dash-bernoulli-link:hover{ border-color:var(--hgr-c-blue-bright); color:var(--hgr-c-paper); }
+.hgr-c-dash-bernoulli-link:hover{
+  background:var(--hgr-c-bernoulli-bright); border-color:var(--hgr-c-bernoulli-bright);
+  box-shadow:0 0 18px rgba(155,127,232,.65);
+}
+/* In the bottom actions row (alongside Save as final / Edit and
+   regenerate / etc.) it needs to match those .hgr-c-btn siblings' exact
+   size, not the smaller/offset version used under the confidence score —
+   same fix already applied to Mission Agent's equivalent. */
+.hgr-c-dash-actions .hgr-c-dash-bernoulli-link{
+  margin-top:0; padding:12px 22px; font-size:13px;
+}
 .hgr-c-dash-section{ padding:24px 28px; border-bottom:1px solid var(--hgr-c-hairline); }
 .hgr-c-dash-section:last-of-type{ border-bottom:none; }
 .hgr-c-dash-section h4{ font-family:'Space Grotesk',sans-serif; font-size:14.5px; font-weight:600; margin-bottom:16px; }
