@@ -1,4 +1,9 @@
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import {
+  aggregateConceptUsage,
+  type ConceptUsage,
+  type ConceptUsageRunRow,
+} from "./conceptUsage.ts";
 
 // Concept Agent (Bay 02) persistence against Hangar_concepts /
 // Hangar_concept_specs / Hangar_concept_runs — mirrors missionPersistence.ts
@@ -95,15 +100,20 @@ type ListQueryResult = Promise<{
   error: { message: string } | null;
 }>;
 
+// EqChain lets `.eq()` chain onto itself and also mixes in `.in()` at the top
+// level — same shape missionPersistence.ts's own listDb cast uses, widened
+// here (originally only supported `.select().eq().order()`) so
+// getUsageForConcepts can call `.select().in()` directly.
+type EqChain = {
+  eq: (column: string, value: string) => EqChain;
+  order: (column: string, opts: { ascending: boolean }) => ListQueryResult;
+  in: (column: string, values: string[]) => ListQueryResult;
+};
+
 const listDb = supabaseAdmin as unknown as {
   from: (table: string) => {
-    select: (columns: string) => {
-      eq: (
-        column: string,
-        value: string,
-      ) => {
-        order: (column: string, opts: { ascending: boolean }) => ListQueryResult;
-      };
+    select: (columns: string) => EqChain & {
+      in: (column: string, values: string[]) => ListQueryResult;
     };
   };
 };
@@ -131,6 +141,7 @@ const orderedListDb = supabaseAdmin as unknown as {
 
 export interface HangarConceptSpecSummary {
   concept_id: string;
+  version: number;
   candidate_concepts: unknown[];
   trade_off_notes: unknown[];
   ranked_concepts: unknown[];
@@ -153,7 +164,7 @@ export async function getSpecsForConcepts(
   if (conceptIds.length === 0) return [];
   const { data, error } = await orderedListDb
     .from("Hangar_concept_specs")
-    .select("concept_id,candidate_concepts,trade_off_notes,ranked_concepts,confidence_score")
+    .select("concept_id,version,candidate_concepts,trade_off_notes,ranked_concepts,confidence_score")
     .in("concept_id", conceptIds)
     .order("concept_id", { ascending: true })
     .order("version", { ascending: false });
@@ -200,6 +211,23 @@ export async function getConceptStageMockFlags(conceptId: string): Promise<boole
     const snapshot = row.output_snapshot as { mock?: unknown } | null;
     return snapshot?.mock === true;
   });
+}
+
+// Per-concept LLM usage/cost, rebuilt from the run log — direct port of
+// missionPersistence.ts's getUsageForMissions. Selects only the two JSON
+// fields it needs (PostgREST col->key paths) rather than whole snapshots.
+// Callers should treat a failure here as "no usage to show", never as a
+// reason to fail the list it decorates.
+export async function getUsageForConcepts(
+  conceptIds: string[],
+): Promise<Map<string, ConceptUsage>> {
+  if (conceptIds.length === 0) return new Map();
+  const { data, error } = await listDb
+    .from("Hangar_concept_runs")
+    .select("concept_id,stage,status,usage:output_snapshot->usage,mock:output_snapshot->mock")
+    .in("concept_id", conceptIds);
+  if (error) throw new Error(`getUsageForConcepts: ${error.message}`);
+  return aggregateConceptUsage((data ?? []) as unknown as ConceptUsageRunRow[]);
 }
 
 // Mirrors missionPersistence.ts's getNextMissionSpecVersion — same reason:
