@@ -9,7 +9,7 @@
 // this machine. Run directly:
 //
 //   node src/lib/the-hangar/pythonRunner.manualtest.ts
-import { runHangarPythonScript } from "./pythonRunner.ts";
+import { runHangarPythonScript, runSagushStep } from "./pythonRunner.ts";
 
 let passCount = 0;
 let failCount = 0;
@@ -59,6 +59,45 @@ console.log("\n--- error handling ---");
   const r = await runHangarPythonScript("does-not-exist.py", ["x"]);
   check("a missing script file fails cleanly, not with a thrown exception", r.status, "failed");
   check("a reason is given", typeof r.reason === "string" && r.reason.length > 0, true);
+}
+
+console.log("\n--- runSagushStep: local mode (SAGUSH_SERVICE_URL unset) ---");
+{
+  delete process.env.SAGUSH_SERVICE_URL;
+  delete process.env.SAGUSH_SERVICE_KEY;
+  const r = await runSagushStep("hello", { conceptId: "c-1", conceptCode: "CN-1" });
+  check("dispatches to the local script when no remote is configured", r.status, "ok");
+  const data = r.data as Record<string, unknown>;
+  check("no 'source' field — this came from the local script, not the remote service", data?.source, undefined);
+}
+
+// The deployed Vercel Python service (python-service/), created for exactly
+// this feature and returning only non-sensitive placeholder data — safe to
+// call for real from this test. If these fail, either the deployment or its
+// SAGUSH_SERVICE_KEY has changed; re-check both before assuming the code is wrong.
+console.log("\n--- runSagushStep: remote mode (real deployed python-service) ---");
+{
+  process.env.SAGUSH_SERVICE_URL = "https://sagush-python-service.vercel.app";
+  process.env.SAGUSH_SERVICE_KEY = "2f4189ca96d33fd3e241d60b818334bb1c852bff335f23fd3f6277c9a64b0c33";
+
+  const hello = await runSagushStep("hello", { conceptId: "c-9", conceptCode: "CN-9" });
+  check("hello step reaches the real Vercel Python function", hello.status, "ok");
+  const helloData = hello.data as Record<string, unknown>;
+  check("response is genuinely from the remote service", helloData?.source, "vercel-python");
+  check("the concept is echoed back correctly", [helloData?.conceptId, helloData?.conceptCode], ["c-9", "CN-9"]);
+
+  const design = await runSagushStep("design", { conceptId: "c-9", conceptCode: "CN-9" });
+  check("design step reaches the real Vercel Python function", design.status, "ok");
+  const designData = design.data as { source: string; designSpec: { aircraftName: string } };
+  check("response is genuinely from the remote service", designData.source, "vercel-python");
+  check("the design is for Sagush", designData.designSpec?.aircraftName, "Sagush");
+
+  process.env.SAGUSH_SERVICE_KEY = "the-wrong-key";
+  const wrongKey = await runSagushStep("hello", { conceptId: "c-9", conceptCode: "CN-9" });
+  check("a wrong shared secret is refused, not silently accepted", wrongKey.status, "failed");
+
+  delete process.env.SAGUSH_SERVICE_URL;
+  delete process.env.SAGUSH_SERVICE_KEY;
 }
 
 console.log(`\n${passCount} passed, ${failCount} failed`);

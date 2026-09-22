@@ -1,16 +1,13 @@
 import { spawn } from "node:child_process";
 import path from "node:path";
 
-// LOCAL DEV ONLY. Runs a Hangar prototype Python script (scripts/hangar-python/)
-// from Node as a real child process. Works only where a Python interpreter is
-// actually installed and reachable — i.e. today, only on a developer's own
-// machine running `vite dev`. This will NOT work once deployed to Vercel: a
-// Vercel Node serverless function has no Python interpreter available and
-// can't reliably spawn external processes. Moving this to production needs
-// either a real Python Vercel Function (a `.py` file under Vercel's own
-// Python runtime) or an external service this code calls over HTTP instead —
-// this file is deliberately neither of those; it's the local-only first step,
-// by design (see the "Trigger Sagush" feature this backs).
+// LOCAL DEV ONLY (this function specifically — see runSagushStep below for
+// the dispatcher that also covers production). Runs a Hangar prototype
+// Python script (scripts/hangar-python/) from Node as a real child process.
+// Works only where a Python interpreter is actually installed and reachable
+// — i.e. a developer's own machine running `vite dev`. This will NOT work on
+// Vercel: a Vercel Node serverless function has no Python interpreter
+// available and can't reliably spawn external processes.
 //
 // On Windows, plain `python`/`python3` are often just Microsoft Store alias
 // stubs that print a redirect message instead of running anything real — `py`
@@ -110,4 +107,66 @@ export async function runHangarPythonScript(
     }
   }
   return lastFailure;
+}
+
+// ── Sagush step dispatch: local subprocess in dev, real Vercel Python ──────
+// service in production/preview ─────────────────────────────────────────
+//
+// The main app's own build can't host Python functions directly (see
+// python-service/README.md for why — its Nitro build already emits a
+// self-contained Vercel deployment that bypasses Vercel's normal /api/*.py
+// auto-detection). The real Python code lives in a SEPARATE Vercel project
+// (python-service/), called over HTTPS once SAGUSH_SERVICE_URL and
+// SAGUSH_SERVICE_KEY are set (Production/Preview on the main app's Vercel
+// project). Unset locally on purpose, so local dev keeps using the real
+// local subprocess path above — exactly the "local first, then move to
+// Vercel" sequence this was built in.
+
+export interface SagushInvocation {
+  conceptId: string;
+  conceptCode: string;
+}
+
+const SAGUSH_STEPS = {
+  hello: { localScript: "hello.py", remotePath: "/api/sagush_hello" },
+  design: { localScript: "aircraftdesign.py", remotePath: "/api/sagush_design" },
+} as const;
+
+export type SagushStep = keyof typeof SAGUSH_STEPS;
+
+export async function runSagushStep(
+  step: SagushStep,
+  invocation: SagushInvocation,
+): Promise<PythonRunResult> {
+  const remoteUrl = process.env.SAGUSH_SERVICE_URL;
+  const remoteKey = process.env.SAGUSH_SERVICE_KEY;
+  const { localScript, remotePath } = SAGUSH_STEPS[step];
+  if (remoteUrl && remoteKey) {
+    return runSagushStepRemote(remoteUrl, remoteKey, remotePath, invocation);
+  }
+  return runHangarPythonScript(localScript, [invocation.conceptId, invocation.conceptCode]);
+}
+
+async function runSagushStepRemote(
+  baseUrl: string,
+  key: string,
+  path: string,
+  invocation: SagushInvocation,
+): Promise<PythonRunResult> {
+  try {
+    const res = await fetch(baseUrl.replace(/\/$/, "") + path, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-Sagush-Key": key },
+      body: JSON.stringify(invocation),
+      signal: AbortSignal.timeout(TIMEOUT_MS),
+    });
+    const json = await res.json().catch(() => null);
+    if (!res.ok) {
+      const reason = (json && typeof json === "object" && "error" in json && json.error) || `remote HTTP ${res.status}`;
+      return { status: "failed", reason: String(reason), data: null };
+    }
+    return { status: "ok", data: json };
+  } catch (err) {
+    return { status: "failed", reason: err instanceof Error ? err.message : String(err), data: null };
+  }
 }
