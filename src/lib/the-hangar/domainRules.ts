@@ -65,7 +65,12 @@ export const DOMAIN_RULES: DomainRule[] = [
   {
     id: "REG-003",
     trigger: "Regulation = DGCA CAR Section 3 selected",
-    matches: (ctx) => ctx.attachedRegulations.includes("DGCA_CAR_SECTION_3"),
+    // The live Hangar_regulations_catalog code is DGCA_CAR_S3 (what the intake
+    // form sends); DGCA_CAR_SECTION_3 is the spelling this rule was first written
+    // with. Both are accepted so neither silently matches nothing.
+    matches: (ctx) =>
+      ctx.attachedRegulations.includes("DGCA_CAR_S3") ||
+      ctx.attachedRegulations.includes("DGCA_CAR_SECTION_3"),
     constraints: [
       { name: "Weight category", value: "Nano <250g / Micro <2kg / Small <25kg / Medium <150kg" },
       { name: "Registration", value: "required" },

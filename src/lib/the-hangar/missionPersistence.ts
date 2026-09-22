@@ -228,6 +228,22 @@ export async function updateMissionStatus(
   if (error) throw new Error(`updateMissionStatus: ${error.message}`);
 }
 
+// Stage 1 creates the row with the sources' structural types, then narrows it
+// once the selections have been looked up (missionSourceParsing.ts's
+// finalizeSourceTypes) — a regulation code the catalog doesn't know, or an
+// imported mission with no spec, shouldn't count toward the confidence score.
+// Stage 3 reads this column, so it has to be the final answer.
+export async function updateMissionSourceTypes(
+  missionId: string,
+  sourceTypes: SourceType[],
+): Promise<void> {
+  const { error } = await db
+    .from("Hangar_missions")
+    .update({ source_types_used: sourceTypes })
+    .eq("id", missionId);
+  if (error) throw new Error(`updateMissionSourceTypes: ${error.message}`);
+}
+
 // version was previously hardcoded to 1 — wrong as soon as a mission is
 // persisted more than once (e.g. Section 13.2's "Edit and regenerate"
 // resubmits the same mission_id). get_next_mission_spec_version(p_mission_id)
