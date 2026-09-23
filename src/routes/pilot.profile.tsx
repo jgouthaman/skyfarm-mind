@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { LogOut, MapPin, Camera, HardDrive, CircleCheck, CircleX } from "lucide-react";
 
 export const Route = createFileRoute("/pilot/profile")({
-  head: () => ({ meta: [{ title: "AgriSky Pilot — Profile" }] }),
+  head: () => ({ meta: [{ title: "AgriSky Pilot — Profile" }, { name: "robots", content: "noindex" }] }),
   component: Profile,
 });
 

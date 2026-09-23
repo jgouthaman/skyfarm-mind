@@ -173,7 +173,7 @@ export function HangarFooter() {
           <span className="hgr-torq">TORQWINGS</span><span className="hgr-sep">/</span><span className="hgr-hangar-word">The Hangar</span>
         </div>
         <div className="hgr-f-links">
-          <a href="https://torqwings.com">torqwings.com</a>
+          <a href="https://www.torqwings.com">torqwings.com</a>
           <a href="https://linkedin.com/company/torqwings">LinkedIn</a>
           <a href="https://instagram.com/torqwings.official">Instagram</a>
         </div>
@@ -594,7 +594,7 @@ export const HGR_LANDING_CSS = `
   color:var(--hgr-paper-dim); opacity:.75; margin:-12px 0 20px;
 }
 
-.hgr-section-head h2{ font-size:clamp(28px,3.4vw,42px); line-height:1.15; margin-bottom:16px; }
+.hgr-section-head h1, .hgr-section-head h2{ font-size:clamp(28px,3.4vw,42px); line-height:1.15; margin-bottom:16px; }
 .hgr-section-head p{ color:var(--hgr-paper-dim); font-size:16.5px; }
 
 

@@ -7,7 +7,30 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/Card";
 import { IconBubble } from "@/components/IconBubble";
 
+import { OG_IMAGE_URL, absoluteUrl } from "@/lib/siteConfig";
+
+// Found while auditing every public route for the SEO fix — see the same
+// note in _layout.agrisky.tsx.
+const TITLE = "GuardSky | Aerial Surveillance & Fire Response | TorqWings";
+const DESCRIPTION = "GuardSky is a prototype drone-based surveillance and emergency-support solution: real-time aerial visibility, fire/smoke detection, alerting, and rapid first-response payload deployment.";
+
 export const Route = createFileRoute("/_layout/guardsky")({
+  head: () => ({
+    meta: [
+      { title: TITLE },
+      { name: "description", content: DESCRIPTION },
+      { property: "og:title", content: TITLE },
+      { property: "og:description", content: DESCRIPTION },
+      { property: "og:image", content: OG_IMAGE_URL },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: absoluteUrl("/guardsky") },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: TITLE },
+      { name: "twitter:description", content: DESCRIPTION },
+      { name: "twitter:image", content: OG_IMAGE_URL },
+    ],
+    links: [{ rel: "canonical", href: absoluteUrl("/guardsky") }],
+  }),
   component: GuardSkyPage,
 });
 
@@ -41,7 +64,7 @@ function GuardSkyPage() {
             <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-primary-foreground bg-primary border border-primary px-3 py-1.5 rounded-full shadow-glow">
               <Flame className="h-3.5 w-3.5" aria-hidden="true" /> Prototype vertical
             </span>
-            <h2 className="mt-5 text-3xl sm:text-4xl font-semibold">GuardSky</h2>
+            <h1 className="mt-5 text-3xl sm:text-4xl font-semibold">GuardSky</h1>
             <p className="mt-2 text-lg text-muted-foreground">
               Aerial surveillance and early fire response by TorqWings
             </p>
@@ -69,7 +92,7 @@ function GuardSkyPage() {
         </div>
 
         <div className="mt-16">
-          <h3 className="text-xl font-semibold mb-6">Use cases</h3>
+          <h2 className="text-xl font-semibold mb-6">Use cases</h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {GUARDSKY_USE_CASES.map((c) => (
               <Card key={c.text} className="text-center items-center flex flex-col">

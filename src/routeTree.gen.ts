@@ -10,7 +10,6 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TheHangarRouteImport } from './routes/the-hangar'
-import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as PilotRouteImport } from './routes/pilot'
 import { Route as MissionHubRouteImport } from './routes/mission-hub'
 import { Route as HangarStage3ManualtestRouteImport } from './routes/hangar-stage3-manualtest'
@@ -147,11 +146,6 @@ import { Route as AcademyCoursesSlugModulesModuleIdRouteImport } from './routes/
 const TheHangarRoute = TheHangarRouteImport.update({
   id: '/the-hangar',
   path: '/the-hangar',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
-  id: '/sitemap.xml',
-  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PilotRoute = PilotRouteImport.update({
@@ -874,7 +868,6 @@ export interface FileRoutesByFullPath {
   '/hangar-stage3-manualtest': typeof HangarStage3ManualtestRoute
   '/mission-hub': typeof MissionHubRouteWithChildren
   '/pilot': typeof PilotRouteWithChildren
-  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/the-hangar': typeof TheHangarRouteWithChildren
   '/about': typeof LayoutAboutRoute
   '/agrisky': typeof LayoutAgriskyRoute
@@ -1004,7 +997,6 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/field': typeof FieldRoute
   '/hangar-stage3-manualtest': typeof HangarStage3ManualtestRoute
-  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/about': typeof LayoutAboutRoute
   '/agrisky': typeof LayoutAgriskyRoute
   '/contact': typeof LayoutContactRoute
@@ -1139,7 +1131,6 @@ export interface FileRoutesById {
   '/hangar-stage3-manualtest': typeof HangarStage3ManualtestRoute
   '/mission-hub': typeof MissionHubRouteWithChildren
   '/pilot': typeof PilotRouteWithChildren
-  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/the-hangar': typeof TheHangarRouteWithChildren
   '/_layout/about': typeof LayoutAboutRoute
   '/_layout/agrisky': typeof LayoutAgriskyRoute
@@ -1277,7 +1268,6 @@ export interface FileRouteTypes {
     | '/hangar-stage3-manualtest'
     | '/mission-hub'
     | '/pilot'
-    | '/sitemap.xml'
     | '/the-hangar'
     | '/about'
     | '/agrisky'
@@ -1407,7 +1397,6 @@ export interface FileRouteTypes {
   to:
     | '/field'
     | '/hangar-stage3-manualtest'
-    | '/sitemap.xml'
     | '/about'
     | '/agrisky'
     | '/contact'
@@ -1541,7 +1530,6 @@ export interface FileRouteTypes {
     | '/hangar-stage3-manualtest'
     | '/mission-hub'
     | '/pilot'
-    | '/sitemap.xml'
     | '/the-hangar'
     | '/_layout/about'
     | '/_layout/agrisky'
@@ -1678,7 +1666,6 @@ export interface RootRouteChildren {
   HangarStage3ManualtestRoute: typeof HangarStage3ManualtestRoute
   MissionHubRoute: typeof MissionHubRouteWithChildren
   PilotRoute: typeof PilotRouteWithChildren
-  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TheHangarRoute: typeof TheHangarRouteWithChildren
   ApiHangarAircraftDesignsRoute: typeof ApiHangarAircraftDesignsRoute
   ApiHangarBernoulliReviewRoute: typeof ApiHangarBernoulliReviewRoute
@@ -1732,13 +1719,6 @@ declare module '@tanstack/react-router' {
       path: '/the-hangar'
       fullPath: '/the-hangar'
       preLoaderRoute: typeof TheHangarRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sitemap.xml': {
-      id: '/sitemap.xml'
-      path: '/sitemap.xml'
-      fullPath: '/sitemap.xml'
-      preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pilot': {
@@ -2924,7 +2904,6 @@ const rootRouteChildren: RootRouteChildren = {
   HangarStage3ManualtestRoute: HangarStage3ManualtestRoute,
   MissionHubRoute: MissionHubRouteWithChildren,
   PilotRoute: PilotRouteWithChildren,
-  SitemapDotxmlRoute: SitemapDotxmlRoute,
   TheHangarRoute: TheHangarRouteWithChildren,
   ApiHangarAircraftDesignsRoute: ApiHangarAircraftDesignsRoute,
   ApiHangarBernoulliReviewRoute: ApiHangarBernoulliReviewRoute,

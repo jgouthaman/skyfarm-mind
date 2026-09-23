@@ -3,10 +3,30 @@ import {
   HGR_LANDING_CSS, HangarFooter, HangarNav, FlightDeckModal, useFlightDeck,
   EarlyAccessModal, useEarlyAccess,
 } from "@/components/hangar-landing/HangarChrome";
+import { OG_IMAGE_URL, absoluteUrl } from "@/lib/siteConfig";
+
+const TITLE = "The Hangar's Open-Source Engineering Stack | TorqWings";
+const DESCRIPTION = "Built on the same open-source tools aerospace engineers already trust — OpenVSP, OpenFOAM, CalculiX and more — mapped to the agent designed to run each one.";
 
 // Split out of the-hangar.index.tsx's old #stack scroll-anchor section into
 // its own page, linked from the nav bar.
 export const Route = createFileRoute("/the-hangar/stack")({
+  head: () => ({
+    meta: [
+      { title: TITLE },
+      { name: "description", content: DESCRIPTION },
+      { property: "og:title", content: TITLE },
+      { property: "og:description", content: DESCRIPTION },
+      { property: "og:image", content: OG_IMAGE_URL },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: absoluteUrl("/the-hangar/stack") },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: TITLE },
+      { name: "twitter:description", content: DESCRIPTION },
+      { name: "twitter:image", content: OG_IMAGE_URL },
+    ],
+    links: [{ rel: "canonical", href: absoluteUrl("/the-hangar/stack") }],
+  }),
   component: HangarStackPage,
 });
 
@@ -47,7 +67,7 @@ function HangarStackPage() {
           <div className="hgr-wrap">
             <div className="hgr-section-head">
               <div className="hgr-kicker hgr-kicker-badge">Open, not proprietary</div>
-              <h2>Built on tools your engineers already trust.</h2>
+              <h1>Built on tools your engineers already trust.</h1>
               <p>No agent replaces a solver — each one is designed around the same open-source tools an aerospace engineer would run by hand, so the reasoning stays grounded in real engineering practice, not a black box.</p>
             </div>
 

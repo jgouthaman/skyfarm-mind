@@ -4,7 +4,7 @@ import { usePilotStore } from "@/lib/pilot-store";
 import { MapPin, Clock, ArrowRight, Search } from "lucide-react";
 
 export const Route = createFileRoute("/pilot/missions/")({
-  head: () => ({ meta: [{ title: "AgriSky Pilot — Missions" }] }),
+  head: () => ({ meta: [{ title: "AgriSky Pilot — Missions" }, { name: "robots", content: "noindex" }] }),
   component: MissionsList,
 });
 

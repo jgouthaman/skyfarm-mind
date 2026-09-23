@@ -5,7 +5,7 @@ import { LayoutDashboard, ListChecks, Radar, RefreshCw, User2, Plane, Wifi, Wifi
 import { pilotStore, usePilotStore } from "@/lib/pilot-store";
 
 export const Route = createFileRoute("/pilot")({
-  head: () => ({ meta: [{ title: "AgriSky Pilot" }] }),
+  head: () => ({ meta: [{ title: "AgriSky Pilot" }, { name: "robots", content: "noindex" }] }),
   component: PilotLayout,
 });
 

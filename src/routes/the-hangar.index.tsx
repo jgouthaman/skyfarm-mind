@@ -3,6 +3,10 @@ import {
   HGR_LANDING_CSS, HangarFooter, HangarNav, FlightDeckModal, useFlightDeck,
   EarlyAccessModal, useEarlyAccess,
 } from "@/components/hangar-landing/HangarChrome";
+import { OG_IMAGE_URL, absoluteUrl } from "@/lib/siteConfig";
+
+const TITLE = "The Hangar | AI Aerospace Design Platform | TorqWings";
+const DESCRIPTION = "Fifteen specialist AI agents, one design pipeline. Turn a mission brief into a simulation-validated, flyable aircraft design — fixed-wing, VTOL, multirotor or stealth.";
 
 // ─────────────────────────────────────────────────────────────────────────
 // The Hangar — public landing/home page. Was previously one long scrolling
@@ -15,6 +19,22 @@ import {
 // ─────────────────────────────────────────────────────────────────────────
 
 export const Route = createFileRoute("/the-hangar/")({
+  head: () => ({
+    meta: [
+      { title: TITLE },
+      { name: "description", content: DESCRIPTION },
+      { property: "og:title", content: TITLE },
+      { property: "og:description", content: DESCRIPTION },
+      { property: "og:image", content: OG_IMAGE_URL },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: absoluteUrl("/the-hangar") },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: TITLE },
+      { name: "twitter:description", content: DESCRIPTION },
+      { name: "twitter:image", content: OG_IMAGE_URL },
+    ],
+    links: [{ rel: "canonical", href: absoluteUrl("/the-hangar") }],
+  }),
   component: TheHangarLanding,
 });
 

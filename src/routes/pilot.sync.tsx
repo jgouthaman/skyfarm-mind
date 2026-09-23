@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { RefreshCw, Image as ImageIcon, Activity, FlaskConical, Radar, CheckCircle2, Wifi, WifiOff } from "lucide-react";
 
 export const Route = createFileRoute("/pilot/sync")({
-  head: () => ({ meta: [{ title: "AgriSky Pilot — Sync Center" }] }),
+  head: () => ({ meta: [{ title: "AgriSky Pilot — Sync Center" }, { name: "robots", content: "noindex" }] }),
   component: SyncCenter,
 });
 

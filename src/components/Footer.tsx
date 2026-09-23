@@ -8,7 +8,7 @@ export function Footer() {
           TORQWINGS <span style={{ color: "var(--hp-blue-line)" }}>/</span> The Hangar
         </div>
         <div className="hgr-pub-footer-links">
-          <a href="https://torqwings.com">torqwings.com</a>
+          <a href="https://www.torqwings.com">torqwings.com</a>
           <a href="https://www.linkedin.com/company/torqwings" target="_blank" rel="noopener noreferrer">LinkedIn</a>
           <a href="https://instagram.com/torqwings.official" target="_blank" rel="noopener noreferrer">Instagram</a>
         </div>

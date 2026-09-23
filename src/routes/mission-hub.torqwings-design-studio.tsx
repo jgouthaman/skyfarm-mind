@@ -6,7 +6,7 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/mission-hub/torqwings-design-studio")({
   ssr: false,
-  head: () => ({ meta: [{ title: "TorqWings Design Studio" }] }),
+  head: () => ({ meta: [{ title: "TorqWings Design Studio" }, { name: "robots", content: "noindex" }] }),
   component: StudioRoot,
 });
 

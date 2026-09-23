@@ -4,10 +4,30 @@ import {
   HGR_LANDING_CSS, HangarFooter, HangarNav, FlightDeckModal, useFlightDeck,
   EarlyAccessModal, useEarlyAccess,
 } from "@/components/hangar-landing/HangarChrome";
+import { OG_IMAGE_URL, absoluteUrl } from "@/lib/siteConfig";
+
+const TITLE = "The Hangar Agents | 15 AI Aerospace Design Specialists | TorqWings";
+const DESCRIPTION = "Fifteen specialist agents, one design pipeline: mission, concept, CAD, CFD, structures, optimisation, validation, materials, manufacturing, certification and more.";
 
 // The Hangar's fleet — split out of the-hangar.index.tsx's old #agents
 // scroll-anchor section into its own page, linked from the nav bar.
 export const Route = createFileRoute("/the-hangar/agents")({
+  head: () => ({
+    meta: [
+      { title: TITLE },
+      { name: "description", content: DESCRIPTION },
+      { property: "og:title", content: TITLE },
+      { property: "og:description", content: DESCRIPTION },
+      { property: "og:image", content: OG_IMAGE_URL },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: absoluteUrl("/the-hangar/agents") },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: TITLE },
+      { name: "twitter:description", content: DESCRIPTION },
+      { name: "twitter:image", content: OG_IMAGE_URL },
+    ],
+    links: [{ rel: "canonical", href: absoluteUrl("/the-hangar/agents") }],
+  }),
   component: HangarAgentsPage,
 });
 
@@ -97,7 +117,7 @@ function HangarAgentsPage() {
         <section style={{ paddingTop: 24 }}>
           <div className="hgr-wrap">
             <div className="hgr-section-head">
-              <h2>Fifteen bays. Fifteen specialist agents.</h2>
+              <h1>Fifteen bays. Fifteen specialist agents.</h1>
               <p>Each agent owns exactly one stage of the design lifecycle, reads from a shared memory layer, and writes its output where the next agent — human or machine — can pick it up.</p>
             </div>
 

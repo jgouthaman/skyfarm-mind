@@ -15,6 +15,7 @@ export const Route = createFileRoute("/pilot/login")({
       { property: "og:title", content: "AgriSky Pilot — Login" },
       { property: "og:description", content: "AgriSky pilot login. Verify your mobile to access farm missions, aerial surveys, and field operations." },
       { property: "og:url", content: "/pilot/login" },
+      { name: "robots", content: "noindex" },
     ],
     links: [
       { rel: "canonical", href: "/pilot/login" },

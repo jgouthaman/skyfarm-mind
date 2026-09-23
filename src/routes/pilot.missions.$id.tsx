@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 
 export const Route = createFileRoute("/pilot/missions/$id")({
-  head: () => ({ meta: [{ title: "AgriSky Pilot — Mission" }] }),
+  head: () => ({ meta: [{ title: "AgriSky Pilot — Mission" }, { name: "robots", content: "noindex" }] }),
   component: MissionDetail,
 });
 

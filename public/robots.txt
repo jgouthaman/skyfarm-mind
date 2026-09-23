@@ -1,4 +1,28 @@
 User-agent: *
 Allow: /
 
+# Gated / login / admin — nothing here is meant to be indexed
+Disallow: /academy
+Disallow: /pilot
+Disallow: /pilot/
+Disallow: /mission-hub
+Disallow: /field
+Disallow: /the-hangar/welcome
+Disallow: /the-hangar/mission
+Disallow: /the-hangar/concept
+Disallow: /the-hangar/aircraft-design
+Disallow: /the-hangar/cad-design
+Disallow: /the-hangar/simulation
+Disallow: /the-hangar/cfd-analysis
+Disallow: /the-hangar/structural
+Disallow: /the-hangar/optimization
+Disallow: /the-hangar/validation
+Disallow: /the-hangar/materials
+Disallow: /the-hangar/manufacturing
+Disallow: /the-hangar/certification
+Disallow: /the-hangar/documentation
+Disallow: /the-hangar/bernoulli
+Disallow: /control-center
+Disallow: /destud
+
 Sitemap: https://www.torqwings.com/sitemap.xml

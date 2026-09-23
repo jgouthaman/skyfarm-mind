@@ -3,8 +3,32 @@ import { Leaf, Camera, Activity, Map as MapIcon, Droplets, FileText, Sparkles, A
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/Card";
 import { IconBubble } from "@/components/IconBubble";
+import { OG_IMAGE_URL, absoluteUrl } from "@/lib/siteConfig";
+
+// Found while auditing every public route for the SEO fix (not in the
+// original request's explicit page list, but a real 200 page with zero
+// meta of its own otherwise) — added so it doesn't share the home page's
+// title/description verbatim.
+const TITLE = "AgriSky | Agriculture Drone Intelligence | TorqWings";
+const DESCRIPTION = "AgriSky helps farmers and agri-organisations monitor crop health, detect stress early, plan irrigation, and enable precision farming using drone imagery and AI-based farm advisory.";
 
 export const Route = createFileRoute("/_layout/agrisky")({
+  head: () => ({
+    meta: [
+      { title: TITLE },
+      { name: "description", content: DESCRIPTION },
+      { property: "og:title", content: TITLE },
+      { property: "og:description", content: DESCRIPTION },
+      { property: "og:image", content: OG_IMAGE_URL },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: absoluteUrl("/agrisky") },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: TITLE },
+      { name: "twitter:description", content: DESCRIPTION },
+      { name: "twitter:image", content: OG_IMAGE_URL },
+    ],
+    links: [{ rel: "canonical", href: absoluteUrl("/agrisky") }],
+  }),
   component: AgriSkyPage,
 });
 
@@ -28,10 +52,10 @@ function AgriSkyPage() {
             <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-accent-foreground bg-accent border border-accent px-3 py-1.5 rounded-full shadow-glow">
               <Leaf className="h-3.5 w-3.5" aria-hidden="true" /> Flagship vertical
             </span>
-            <h2 className="mt-5 text-3xl sm:text-4xl font-semibold">
+            <h1 className="mt-5 text-3xl sm:text-4xl font-semibold">
               Flagship vertical:{" "}
               <span className="bg-gradient-agri bg-clip-text text-transparent">AgriSky</span>
-            </h2>
+            </h1>
             <p className="mt-2 text-lg text-muted-foreground">Agriculture drone intelligence by TorqWings</p>
             <p className="mt-5 text-muted-foreground">
               AgriSky helps farmers and agri-organizations monitor crop health, detect stress early, plan

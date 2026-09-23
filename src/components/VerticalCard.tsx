@@ -26,7 +26,7 @@ export function VerticalCard({ tag, icon, title, subtitle, desc, accent, to }: P
         <IconBubble tone={isAgri ? "agri" : "primary"}>{icon}</IconBubble>
         <span className="text-[10px] uppercase tracking-widest text-muted-foreground">{tag}</span>
       </div>
-      <h3 className="mt-5 text-xl font-display font-semibold">{title}</h3>
+      <h2 className="mt-5 text-xl font-display font-semibold">{title}</h2>
       <p className={`mt-1 text-sm font-medium ${isAgri ? "text-accent" : "text-primary"}`}>{subtitle}</p>
       <p className="mt-3 text-sm text-muted-foreground">{desc}</p>
       {to && (

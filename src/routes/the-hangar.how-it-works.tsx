@@ -3,6 +3,10 @@ import {
   HGR_LANDING_CSS, HangarFooter, HangarNav, FlightDeckModal, useFlightDeck,
   EarlyAccessModal, useEarlyAccess,
 } from "@/components/hangar-landing/HangarChrome";
+import { OG_IMAGE_URL, absoluteUrl } from "@/lib/siteConfig";
+
+const TITLE = "How The Hangar Works | Mission to Validated Design | TorqWings";
+const DESCRIPTION = "From a mission sentence to a validated aircraft design: see how The Hangar's agents move through concept, CFD, structures, optimisation and validation in one connected workflow.";
 
 // Split out of the-hangar.index.tsx's old #how scroll-anchor section into
 // its own page, linked from the nav bar. Bay names, numbers and grouping
@@ -12,6 +16,22 @@ import {
 // Optimization — neither is "parallel"), 10-13 sequential, 14/15
 // cross-cutting.
 export const Route = createFileRoute("/the-hangar/how-it-works")({
+  head: () => ({
+    meta: [
+      { title: TITLE },
+      { name: "description", content: DESCRIPTION },
+      { property: "og:title", content: TITLE },
+      { property: "og:description", content: DESCRIPTION },
+      { property: "og:image", content: OG_IMAGE_URL },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: absoluteUrl("/the-hangar/how-it-works") },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: TITLE },
+      { name: "twitter:description", content: DESCRIPTION },
+      { name: "twitter:image", content: OG_IMAGE_URL },
+    ],
+    links: [{ rel: "canonical", href: absoluteUrl("/the-hangar/how-it-works") }],
+  }),
   component: HangarHowItWorksPage,
 });
 
@@ -43,7 +63,7 @@ function HangarHowItWorksPage() {
           <div className="hgr-wrap">
             <div className="hgr-section-head">
               <div className="hgr-kicker hgr-kicker-badge">How it flows</div>
-              <h2>From a sentence to a validated design.</h2>
+              <h1>From a sentence to a validated design.</h1>
               <p>Agents 1 through 5 run in sequence to prepare geometry and a simulation plan. CFD and Structural run in parallel, Optimization combines their results, and Validation checks the outcome. If it doesn't pass, the loop goes back to Optimization, not back to square one. Once validated, the design moves downstream to materials, manufacturing, certification and documentation.</p>
             </div>
 

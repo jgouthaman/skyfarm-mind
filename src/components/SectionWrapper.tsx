@@ -15,7 +15,7 @@ export function SectionWrapper({ id, eyebrow, title, children, muted = false }: 
             {eyebrow}
           </span>
         )}
-        <h2 className="mt-3 text-3xl sm:text-4xl font-semibold max-w-3xl">{title}</h2>
+        <h1 className="mt-3 text-3xl sm:text-4xl font-semibold max-w-3xl">{title}</h1>
         {children}
       </div>
     </section>

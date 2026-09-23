@@ -1,18 +1,27 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
 import { HANGAR_PUBLIC_HEAD_LINKS } from "@/styles/hangarPublicTheme";
+import { OG_IMAGE_URL, absoluteUrl } from "@/lib/siteConfig";
+
+const TITLE = "About TorqWings | The Team Behind The Hangar";
+const DESCRIPTION = "A Chennai team building an aerospace design engine: specialist AI agents that turn a mission brief into a simulation-validated, flyable design.";
 
 export const Route = createFileRoute("/_layout/about")({
   head: () => ({
     meta: [
-      { title: "About TorqWings — Built by engineers. Flown for India." },
-      { name: "description", content: "TorqWings builds The Hangar — fifteen specialist AI agents that turn a mission brief into a simulation-validated, flyable aerial platform. Gate-then-score, not guesswork." },
-      { property: "og:title", content: "About TorqWings — Built by engineers. Flown for India." },
-      { property: "og:description", content: "TorqWings builds The Hangar — fifteen specialist AI agents that turn a mission brief into a simulation-validated, flyable aerial platform." },
+      { title: TITLE },
+      { name: "description", content: DESCRIPTION },
+      { property: "og:title", content: TITLE },
+      { property: "og:description", content: DESCRIPTION },
+      { property: "og:image", content: OG_IMAGE_URL },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "/about" },
+      { property: "og:url", content: absoluteUrl("/about") },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: TITLE },
+      { name: "twitter:description", content: DESCRIPTION },
+      { name: "twitter:image", content: OG_IMAGE_URL },
     ],
-    links: [{ rel: "canonical", href: "/about" }, ...HANGAR_PUBLIC_HEAD_LINKS],
+    links: [{ rel: "canonical", href: absoluteUrl("/about") }, ...HANGAR_PUBLIC_HEAD_LINKS],
   }),
   component: AboutPage,
 });

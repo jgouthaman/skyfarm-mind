@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Battery, MapPin, Radar, Send, Wifi, WifiOff, Gauge, ArrowUp } from "lucide-react";
 
 export const Route = createFileRoute("/pilot/tracking")({
-  head: () => ({ meta: [{ title: "AgriSky Pilot — Live Tracking" }] }),
+  head: () => ({ meta: [{ title: "AgriSky Pilot — Live Tracking" }, { name: "robots", content: "noindex" }] }),
   component: Tracking,
 });
 
