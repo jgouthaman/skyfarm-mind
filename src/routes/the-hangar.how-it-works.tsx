@@ -49,39 +49,43 @@ function HangarHowItWorksPage() {
 
             <div className="hgr-flow-wrap">
               <div className="hgr-flow-diagram">
-                <div className="hgr-flow-row">
-                  <FlowNode n="01" label="Mission" />
-                  <FlowArrow />
-                  <FlowNode n="02" label="Concept" />
-                  <FlowArrow />
-                  <FlowNode n="03" label="Aircraft Design" />
-                  <FlowArrow />
-                  <FlowNode n="04" label="CAD" />
-                  <FlowArrow />
-                  <FlowNode n="05" label="Simulation" />
-                </div>
+                <div className="hgr-flow-chain">
+                  <div className="hgr-flow-row">
+                    <FlowNode n="01" label="Mission" />
+                    <FlowArrow />
+                    <FlowNode n="02" label="Concept" />
+                    <FlowArrow />
+                    <FlowNode n="03" label="Aircraft Design" />
+                    <FlowArrow />
+                    <FlowNode n="04" label="CAD" />
+                    <FlowArrow />
+                    <FlowNode n="05" label="Simulation" />
+                  </div>
 
-                <div className="hgr-flow-down" aria-hidden="true">↓</div>
+                  <div className="hgr-flow-chain-tail">
+                    <div className="hgr-flow-down" aria-hidden="true">↓</div>
 
-                <div className="hgr-flow-parallel-wrap">
-                  <div className="hgr-flow-parallel-pair">
-                    <FlowNode n="06" label="CFD" />
-                    <FlowNode n="07" label="Structural" />
+                    <div className="hgr-flow-parallel-wrap">
+                      <div className="hgr-flow-parallel-pair">
+                        <FlowNode n="06" label="CFD" />
+                        <FlowNode n="07" label="Structural" />
+                      </div>
+                    </div>
+
+                    <div className="hgr-flow-down" aria-hidden="true">↓</div>
+
+                    <FlowNode n="08" label="Optimization" />
+
+                    <div className="hgr-flow-return">
+                      <ReturnArrow />
+                      Fail → re-optimise
+                    </div>
+
+                    <div className="hgr-flow-down" aria-hidden="true">↓</div>
+
+                    <FlowNode n="09" label="Validation" />
                   </div>
                 </div>
-
-                <div className="hgr-flow-down" aria-hidden="true">↓</div>
-
-                <FlowNode n="08" label="Optimization" />
-
-                <div className="hgr-flow-return">
-                  <ReturnArrow />
-                  Fail → re-optimise
-                </div>
-
-                <div className="hgr-flow-down" aria-hidden="true">↓</div>
-
-                <FlowNode n="09" label="Validation" />
 
                 <div className="hgr-flow-down" aria-hidden="true">↓</div>
 

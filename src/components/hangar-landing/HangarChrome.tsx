@@ -9,7 +9,6 @@
 // copies of the same nav/footer/modal.
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, Link } from "@tanstack/react-router";
-import { Plane } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 export type HangarNavKey = "home" | "agents" | "how" | "stack";
@@ -123,8 +122,8 @@ export function HangarNav({
             utilities, not scoped to .hgr-pub, so they work here too) so
             this header matches instead of being text-only. */}
         <Link to="/the-hangar" className="hgr-brand" style={{ textDecoration: "none" }}>
-          <span className="grid place-items-center h-8 w-8 rounded-lg bg-gradient-primary shadow-glow">
-            <Plane className="h-4 w-4 text-primary-foreground" aria-hidden="true" />
+          <span className="grid place-items-center h-8 w-8 rounded-lg bg-white overflow-hidden shadow-glow">
+            <img src="/torqwings-mark.png" alt="" className="h-full w-full object-contain" aria-hidden="true" />
           </span>
           <span className="hgr-torq">TORQWINGS</span><span className="hgr-sep">/</span><span className="hgr-hangar-word">The Hangar</span>
         </Link>
@@ -237,8 +236,6 @@ export function FlightDeckModal({
                 {status === "submitting" ? "Signing in…" : "Enter The Hangar →"}
               </button>
             </form>
-
-            <div className="hgr-fd-foot">New here? <a href="#access" onClick={closeFlightDeck}>Request early access</a></div>
           </div>
         ) : (
           <div className="hgr-fd-success" style={{ display: "block" }}>
@@ -650,6 +647,13 @@ export const HGR_LANDING_CSS = `
 /* ── How it works: full flow diagram (rows + parallel pair + return loop + rail) ── */
 .hgr-flow-diagram{ display:flex; flex-direction:column; align-items:center; }
 .hgr-flow-row{ display:flex; align-items:center; justify-content:center; gap:0; flex-wrap:wrap; }
+/* Row 1 ends at node 05, and everything from the down-arrow through
+   Validation continues that same thread — so it must hang off node 05's
+   position, not the row's horizontal center. hgr-flow-chain shrinks to
+   Row 1's own width (its widest child), and hgr-flow-chain-tail right-aligns
+   within that width, landing under node 05 instead of the row's midpoint. */
+.hgr-flow-chain{ display:inline-block; }
+.hgr-flow-chain-tail{ display:flex; flex-direction:column; align-items:flex-end; }
 .hgr-flow-down{ color:var(--hgr-blue-line); font-size:16px; padding:4px 0; }
 .hgr-flow-parallel-wrap{ display:flex; align-items:center; gap:0; }
 .hgr-flow-parallel-pair{ display:flex; flex-direction:column; gap:8px; }
@@ -671,6 +675,8 @@ export const HGR_LANDING_CSS = `
   .hgr-flow-row{ flex-direction:column; }
   .hgr-flow-row .hgr-flow-arrow{ transform:rotate(90deg); }
   .hgr-flow-parallel-wrap{ flex-direction:column; }
+  .hgr-flow-chain{ display:block; width:100%; }
+  .hgr-flow-chain-tail{ align-items:center; }
 }
 
 /* Worked example (How it works) */
