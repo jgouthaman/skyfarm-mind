@@ -26,7 +26,7 @@ function AboutPage() {
   return (
     <section id="about" className="hgr-pub-section" style={{ paddingTop: 128, borderBottom: "none" }}>
       <div className="hgr-pub-wrap">
-        <div className="grid lg:grid-cols-12 gap-10">
+        <div className="grid lg:grid-cols-12 gap-10 items-start">
 
           <div className="lg:col-span-5">
             <span className="hgr-pub-badge hgr-pub-badge-dark">Our Story</span>
@@ -42,9 +42,6 @@ function AboutPage() {
             <div className="hgr-pub-cta">
               <Link to="/the-hangar" className="hgr-pub-btn hgr-pub-btn-amber">
                 Enter The Hangar <ArrowRight className="h-4 w-4" aria-hidden="true" />
-              </Link>
-              <Link to="/contact" className="hgr-pub-btn hgr-pub-btn-ghost">
-                Partner with us
               </Link>
             </div>
           </div>
