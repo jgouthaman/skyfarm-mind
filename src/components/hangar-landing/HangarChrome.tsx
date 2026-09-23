@@ -399,21 +399,6 @@ export const HGR_LANDING_CSS = `
 .hgr-section-head h2{ font-size:clamp(28px,3.4vw,42px); line-height:1.15; margin-bottom:16px; }
 .hgr-section-head p{ color:var(--hgr-paper-dim); font-size:16.5px; }
 
-.hgr-gate{ background:var(--hgr-navy-panel); border-top:1px solid var(--hgr-hairline); border-bottom:1px solid var(--hgr-hairline); }
-.hgr-gate-grid{ display:grid; grid-template-columns:1fr 1fr; gap:64px; align-items:center; }
-@media(max-width:860px){ .hgr-gate-grid{ grid-template-columns:1fr; } }
-.hgr-gate-diagram{ border:1px solid var(--hgr-hairline); border-radius:2px; padding:32px; background:var(--hgr-navy-deep); }
-.hgr-gate-step{ display:flex; align-items:center; gap:16px; padding:14px 0; border-bottom:1px dashed var(--hgr-hairline); }
-.hgr-gate-step:last-child{ border-bottom:none; }
-.hgr-gate-step .hgr-idx{ font-family:'IBM Plex Mono',monospace; color:var(--hgr-amber); font-size:13px; width:28px; flex-shrink:0; }
-.hgr-gate-step .hgr-label{ font-size:14.5px; }
-.hgr-gate-step .hgr-tag{ margin-left:auto; font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.06em; padding:3px 8px; border:1px solid var(--hgr-hairline); border-radius:2px; color:var(--hgr-paper-dim); white-space:nowrap; }
-.hgr-gate-step.hgr-pass .hgr-tag{ color:var(--hgr-blue-bright); border-color:rgba(111,180,224,.4); }
-.hgr-gate-body h3{ font-size:22px; margin-bottom:14px; }
-.hgr-gate-body p{ color:var(--hgr-paper-dim); margin-bottom:16px; font-size:15.5px; }
-.hgr-gate-body ul{ list-style:none; padding:0; margin:0; }
-.hgr-gate-body li{ display:flex; gap:10px; margin-bottom:10px; font-size:14.5px; color:var(--hgr-paper); }
-.hgr-gate-body li::before{ content:"›"; color:var(--hgr-blue-line); flex-shrink:0; }
 
 .hgr-bay-group-label{
   font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.1em; text-transform:uppercase;

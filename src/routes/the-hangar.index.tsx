@@ -55,29 +55,6 @@ function TheHangarLanding() {
             <div className="hgr-stat"><div className="hgr-n">1</div><div className="hgr-l">Shared Memory Layer</div></div>
           </div>
         </div>
-
-        <section className="hgr-gate">
-          <div className="hgr-wrap hgr-gate-grid">
-            <div className="hgr-gate-body">
-              <div className="hgr-kicker">Why gate-then-score</div>
-              <h2>Every design earns its ranking. None are assumed.</h2>
-              <p>Aerospace and defense teams don't trust a model that hands them a number with no explanation. So The Hangar never scores anything until it's already survived the hard constraints — payload, endurance, range, weight, cost. What comes out the other side is ranked, not guessed.</p>
-              <ul>
-                <li>Hard constraints eliminate infeasible designs first</li>
-                <li>Survivors are scored across a multi-criteria model</li>
-                <li>Every recommendation carries a confidence signal</li>
-                <li>Every step is traceable back to the rule or reference that produced it</li>
-              </ul>
-            </div>
-            <div className="hgr-gate-diagram">
-              <div className="hgr-gate-step"><span className="hgr-idx hgr-mono">01</span><span className="hgr-label">Mission constraints applied</span><span className="hgr-tag">GATE</span></div>
-              <div className="hgr-gate-step"><span className="hgr-idx hgr-mono">02</span><span className="hgr-label">Infeasible configurations removed</span><span className="hgr-tag">GATE</span></div>
-              <div className="hgr-gate-step hgr-pass"><span className="hgr-idx hgr-mono">03</span><span className="hgr-label">Survivors scored, six factors</span><span className="hgr-tag">SCORE</span></div>
-              <div className="hgr-gate-step hgr-pass"><span className="hgr-idx hgr-mono">04</span><span className="hgr-label">Confidence signal attached</span><span className="hgr-tag">SCORE</span></div>
-              <div className="hgr-gate-step hgr-pass"><span className="hgr-idx hgr-mono">05</span><span className="hgr-label">Ranked output to next agent</span><span className="hgr-tag">PASS →</span></div>
-            </div>
-          </div>
-        </section>
       </main>
 
       <HangarFooter />
