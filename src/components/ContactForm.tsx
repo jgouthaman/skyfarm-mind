@@ -70,14 +70,13 @@ export function ContactForm() {
             <SelectValue placeholder="Select an option" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="agrisky">AgriSky — agriculture solution</SelectItem>
-            <SelectItem value="infrasky">InfraSky — infrastructure inspection</SelectItem>
-            <SelectItem value="geosky">GeoSky — mapping &amp; survey</SelectItem>
-            <SelectItem value="guardsky">GuardSky — aerial surveillance &amp; early fire response</SelectItem>
-            <SelectItem value="labs">Custom UAV R&amp;D / Labs</SelectItem>
-            <SelectItem value="academy">TorqWings Academy — drone training</SelectItem>
-            <SelectItem value="design-studio">Design Studio</SelectItem>
-            <SelectItem value="partner">Partnership / Investment</SelectItem>
+            <SelectItem value="hangar-early-access">Early access to The Hangar</SelectItem>
+            <SelectItem value="custom-platform-design">Custom platform design (fixed-wing, VTOL, multirotor, stealth)</SelectItem>
+            <SelectItem value="defence-government">Defence / government programme</SelectItem>
+            <SelectItem value="oem-partnership">OEM or industry partnership</SelectItem>
+            <SelectItem value="academy-training">Academy / institutional training</SelectItem>
+            <SelectItem value="investment">Investment</SelectItem>
+            <SelectItem value="other">Other</SelectItem>
           </SelectContent>
         </Select>
       </Field>
@@ -96,7 +95,10 @@ export function ContactForm() {
           {submitting ? "Submitting…" : "Submit Interest"}
           <ArrowRight className="ml-1 h-4 w-4" aria-hidden="true" />
         </Button>
-        <p className="mt-3 text-xs text-muted-foreground flex items-center gap-1.5">
+        <p className="mt-3 text-xs text-muted-foreground">
+          We'll only use your details to reply to this enquiry.
+        </p>
+        <p className="mt-1.5 text-xs text-muted-foreground flex items-center gap-1.5">
           <CheckCircle2 className="h-3.5 w-3.5 text-accent" aria-hidden="true" />
           We typically respond within 1–2 business days.
         </p>
