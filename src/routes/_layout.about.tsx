@@ -50,7 +50,7 @@ function AboutPage() {
             <div className="hgr-pub-grid hgr-pub-grid-2">
               {[
                 { k: "15", v: "Specialist Agents"      },
-                { k: "9",  v: "Open-Source Solvers"     },
+                { k: "9",  v: "Open-Source Tools"       },
                 { k: "0",  v: "Black Boxes"             },
                 { k: "1",  v: "Shared Memory Layer"     },
               ].map((s) => (

@@ -617,6 +617,7 @@ export const HGR_LANDING_CSS = `
 @media(min-width:600px){ .hgr-bays{ grid-template-columns:repeat(2,1fr); } }
 @media(min-width:900px){
   .hgr-bays-2{ grid-template-columns:repeat(2,1fr); }
+  .hgr-bays-3{ grid-template-columns:repeat(3,1fr); }
   .hgr-bays-4{ grid-template-columns:repeat(4,1fr); }
   .hgr-bays-5{ grid-template-columns:repeat(5,1fr); }
 }
@@ -645,6 +646,61 @@ export const HGR_LANDING_CSS = `
   font-family:'IBM Plex Mono',monospace; font-size:12.5px; color:var(--hgr-paper-dim);
   border:1px solid var(--hgr-hairline); padding:8px 14px; border-radius:2px;
 }
+
+/* ── How it works: full flow diagram (rows + parallel pair + return loop + rail) ── */
+.hgr-flow-diagram{ display:flex; flex-direction:column; align-items:center; }
+.hgr-flow-row{ display:flex; align-items:center; justify-content:center; gap:0; flex-wrap:wrap; }
+.hgr-flow-down{ color:var(--hgr-blue-line); font-size:16px; padding:4px 0; }
+.hgr-flow-parallel-wrap{ display:flex; align-items:center; gap:0; }
+.hgr-flow-parallel-pair{ display:flex; flex-direction:column; gap:8px; }
+.hgr-flow-parallel-pair .hgr-flow-node{ width:150px; }
+.hgr-flow-return{
+  display:flex; align-items:center; gap:6px; margin:8px 0;
+  font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.05em; text-transform:uppercase;
+  color:var(--hgr-amber);
+}
+.hgr-flow-return svg{ flex-shrink:0; }
+.hgr-flow-rail{ margin-top:40px; padding-top:22px; border-top:1px dashed var(--hgr-hairline); width:100%; max-width:600px; text-align:center; }
+.hgr-flow-rail-label{
+  font-family:'IBM Plex Mono',monospace; font-size:11.5px; letter-spacing:.06em; text-transform:uppercase;
+  color:var(--hgr-paper-dim); margin-top:10px;
+}
+.hgr-flow-rail-label:first-child{ margin-top:0; }
+.hgr-flow-rail-label b{ color:var(--hgr-amber); font-weight:600; }
+@media(max-width:760px){
+  .hgr-flow-row{ flex-direction:column; }
+  .hgr-flow-row .hgr-flow-arrow{ transform:rotate(90deg); }
+  .hgr-flow-parallel-wrap{ flex-direction:column; }
+}
+
+/* Worked example (How it works) */
+.hgr-worked-quote{
+  margin:0 auto 32px; max-width:640px; padding:20px 24px; border-left:3px solid var(--hgr-amber);
+  background:rgba(232,163,61,.06); border-radius:2px; text-align:left;
+}
+.hgr-worked-quote p{ font-family:'Space Grotesk',sans-serif; font-size:17px; font-style:italic; line-height:1.45; color:var(--hgr-paper); margin:0; }
+.hgr-worked-list{ max-width:640px; margin:0 auto; border:1px solid var(--hgr-hairline); border-radius:2px; }
+.hgr-worked-row{ display:flex; gap:16px; padding:14px 18px; border-bottom:1px solid var(--hgr-hairline); text-align:left; }
+.hgr-worked-row:last-child{ border-bottom:none; }
+.hgr-worked-row-stage{
+  flex:0 0 160px; font-family:'IBM Plex Mono',monospace; font-size:11.5px; letter-spacing:.04em;
+  text-transform:uppercase; color:var(--hgr-amber);
+}
+.hgr-worked-row-output{ font-size:13.5px; color:var(--hgr-paper-dim); line-height:1.5; }
+.hgr-illustrative-note{
+  text-align:center; margin-top:16px; font-family:'IBM Plex Mono',monospace; font-size:10.5px;
+  letter-spacing:.05em; text-transform:uppercase; color:var(--hgr-paper-dim); opacity:.7;
+}
+
+/* Stack page: tool cards (replaces the plain chip list) */
+.hgr-tool-card{ background:var(--hgr-navy-panel); border:1px solid var(--hgr-hairline); border-radius:2px; padding:22px; position:relative; }
+.hgr-tool-name{ font-size:16px; margin-bottom:6px; }
+.hgr-tool-role{ color:var(--hgr-paper-dim); font-size:13.5px; line-height:1.55; margin-bottom:14px; }
+.hgr-tool-agent{
+  display:inline-block; font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.05em;
+  text-transform:uppercase; color:var(--hgr-blue-bright); border:1px solid var(--hgr-hairline); padding:4px 9px; border-radius:2px;
+}
+.hgr-stack-note{ margin-top:24px; text-align:center; color:var(--hgr-paper-dim); font-size:13.5px; }
 
 .hgr-cta{ text-align:center; border-top:1px solid var(--hgr-hairline); }
 .hgr-cta h2{ font-size:clamp(28px,4vw,44px); max-width:680px; margin:0 auto 16px; }

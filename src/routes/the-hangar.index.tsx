@@ -52,7 +52,7 @@ function TheHangarLanding() {
         <div className="hgr-stats">
           <div className="hgr-wrap">
             <div className="hgr-stat"><div className="hgr-n">15</div><div className="hgr-l">Specialist Agents</div></div>
-            <div className="hgr-stat"><div className="hgr-n">9</div><div className="hgr-l">Open-Source Solvers</div></div>
+            <div className="hgr-stat"><div className="hgr-n">9</div><div className="hgr-l">Open-Source Tools</div></div>
             <div className="hgr-stat"><div className="hgr-n">0</div><div className="hgr-l">Black Boxes</div></div>
             <div className="hgr-stat"><div className="hgr-n">1</div><div className="hgr-l">Shared Memory Layer</div></div>
           </div>
