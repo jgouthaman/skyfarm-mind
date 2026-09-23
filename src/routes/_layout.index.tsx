@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
 import heroImg from "@/assets/torqwings-hero-hangar.png";
 import { HANGAR_PUBLIC_HEAD_LINKS } from "@/styles/hangarPublicTheme";
+import PlatformSection from "@/components/PlatformSection";
 
 export const Route = createFileRoute("/_layout/")({
   head: () => ({
@@ -40,6 +41,7 @@ const HERO_STATS = [
 // site — Navbar, Footer, and every page nested here).
 function HeroPage() {
   return (
+    <>
     <section id="home" className="hgr-pub-section" style={{ paddingTop: 128 }}>
       <div className="hgr-pub-wrap">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
@@ -52,7 +54,7 @@ function HeroPage() {
             </h1>
             <p className="hgr-pub-lead">
               TorqWings turns a mission brief into a validated aircraft design. Fixed‑wing, VTOL,
-              multirotor or bio-inspired, it moves through concept, CFD, structures, optimisation and
+              multirotor or stealth, it moves through concept, CFD, structures, optimisation and
               certification in one connected workflow, built for the world's fast-growing drone and
               defence ecosystem.
             </p>
@@ -88,5 +90,7 @@ function HeroPage() {
         </div>
       </div>
     </section>
+    <PlatformSection />
+    </>
   );
 }
