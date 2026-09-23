@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import {
   HGR_LANDING_CSS, HangarFooter, HangarNav, FlightDeckModal, useFlightDeck,
+  EarlyAccessModal, useEarlyAccess,
 } from "@/components/hangar-landing/HangarChrome";
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -19,6 +20,7 @@ export const Route = createFileRoute("/the-hangar/")({
 
 function TheHangarLanding() {
   const flightDeck = useFlightDeck();
+  const earlyAccess = useEarlyAccess();
 
   return (
     <div className="hgr-landing">
@@ -41,7 +43,7 @@ function TheHangarLanding() {
             <h1>Fifteen specialist agents.<br />One <span className="hgr-accent">aerospace design engine.</span></h1>
             <p className="hgr-sub">The Hangar houses every AI agent TorqWings has built for autonomous aerial platform design — from mission definition through CFD, structural validation, and certification. Each one does a single job, gates before it scores, and hands off clean data to the next.</p>
             <div className="hgr-ctas">
-              <a href="#access" className="hgr-btn hgr-btn-amber">Request Early Access</a>
+              <button type="button" className="hgr-btn hgr-btn-amber" onClick={earlyAccess.openEarlyAccess}>Request Early Access</button>
               <a href="/the-hangar/agents" className="hgr-btn hgr-btn-ghost">See all 15 agents →</a>
             </div>
           </div>
@@ -59,6 +61,7 @@ function TheHangarLanding() {
 
       <HangarFooter />
       <FlightDeckModal {...flightDeck} />
+      <EarlyAccessModal {...earlyAccess} />
     </div>
   );
 }

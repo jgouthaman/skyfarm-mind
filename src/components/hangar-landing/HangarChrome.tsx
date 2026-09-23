@@ -244,6 +244,161 @@ export function FlightDeckModal({
   );
 }
 
+// "Request Early Access" lead-capture modal (Hero CTA on the-hangar.index.tsx).
+// Hangar_early_access isn't in the generated Supabase types (no Hangar_*
+// table is — see conceptPersistence.ts/missionPersistence.ts, which cast
+// around the same gap), so the insert shape is typed locally and the
+// client cast narrowly to just the method this needs, same convention.
+interface EarlyAccessInsert {
+  name: string;
+  email: string;
+  mobile_number: string;
+  profession: string | null;
+  company: string | null;
+  country: string | null;
+}
+const earlyAccessDb = supabase as unknown as {
+  from: (table: "Hangar_early_access") => {
+    insert: (row: EarlyAccessInsert) => Promise<{ error: { message: string } | null }>;
+  };
+};
+
+type EarlyAccessStatus = "form" | "submitting" | "error" | "success";
+
+export function useEarlyAccess() {
+  const [modalOpen, setModalOpen] = useState(false);
+  const [status, setStatus] = useState<EarlyAccessStatus>("form");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const nameRef = useRef<HTMLInputElement>(null);
+
+  function openEarlyAccess() {
+    setModalOpen(true);
+    setStatus("form");
+    setErrorMessage(null);
+    setTimeout(() => nameRef.current?.focus(), 150);
+  }
+
+  function closeEarlyAccess() {
+    setModalOpen(false);
+    setStatus("form");
+  }
+
+  async function submitEarlyAccess(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (status === "submitting") return;
+    setStatus("submitting");
+    setErrorMessage(null);
+
+    const fd = new FormData(e.currentTarget);
+    // status is never collected from the form — the column's own DB
+    // default ('Requested') is the only value this insert can produce.
+    const payload: EarlyAccessInsert = {
+      name: String(fd.get("name") ?? "").trim(),
+      email: String(fd.get("email") ?? "").trim(),
+      mobile_number: String(fd.get("mobile") ?? "").trim(),
+      profession: String(fd.get("profession") ?? "").trim() || null,
+      company: String(fd.get("company") ?? "").trim() || null,
+      country: String(fd.get("country") ?? "").trim() || null,
+    };
+
+    // try/catch: the client can reject outright (a 404 — e.g. this
+    // migration not yet applied — a network failure) rather than resolve
+    // with {error}, and without this the status would stay stuck on
+    // "submitting" forever with no way to recover.
+    try {
+      const { error } = await earlyAccessDb.from("Hangar_early_access").insert(payload);
+      if (error) throw error;
+      setStatus("success");
+    } catch (err) {
+      setStatus("error");
+      setErrorMessage(err instanceof Error ? err.message : "please try again.");
+    }
+  }
+
+  useEffect(() => {
+    if (!modalOpen) return;
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") closeEarlyAccess();
+    }
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [modalOpen]);
+
+  return { modalOpen, status, errorMessage, nameRef, openEarlyAccess, closeEarlyAccess, submitEarlyAccess };
+}
+
+// Same floating glassy panel as the Flight Deck modal (.hgr-fd-overlay's
+// backdrop-blur + bordered navy panel) — reused directly rather than a
+// second copy of the same chrome, just with this form's own fields.
+export function EarlyAccessModal({
+  modalOpen, status, errorMessage, nameRef, closeEarlyAccess, submitEarlyAccess,
+}: ReturnType<typeof useEarlyAccess>) {
+  return (
+    <div
+      className={`hgr-fd-overlay${modalOpen ? " open" : ""}`}
+      aria-hidden={!modalOpen}
+      onClick={(e) => { if (e.target === e.currentTarget) closeEarlyAccess(); }}
+    >
+      <div className="hgr-fd-panel hgr-ea-panel" role="dialog" aria-modal="true" aria-labelledby="eaTitle">
+        <span className="hgr-corner hgr-corner-tl" /><span className="hgr-corner hgr-corner-tr" />
+        <span className="hgr-corner hgr-corner-bl" /><span className="hgr-corner hgr-corner-br" />
+        <button type="button" className="hgr-fd-close" onClick={closeEarlyAccess} aria-label="Close">✕ CLOSE</button>
+
+        {status !== "success" ? (
+          <div>
+            <div className="hgr-fd-eyebrow">Early Access</div>
+            <h3 id="eaTitle">Request access to The Hangar</h3>
+            <p className="hgr-fd-sub">Tell us a bit about you — we'll reach out as spots open up.</p>
+
+            <form onSubmit={submitEarlyAccess}>
+              <div className="hgr-ea-grid">
+                <div className="hgr-fd-field">
+                  <label htmlFor="eaName">Name</label>
+                  <input ref={nameRef} type="text" id="eaName" name="name" required placeholder="Your full name" disabled={status === "submitting"} />
+                </div>
+                <div className="hgr-fd-field">
+                  <label htmlFor="eaEmail">Email</label>
+                  <input type="email" id="eaEmail" name="email" required placeholder="you@company.com" disabled={status === "submitting"} />
+                </div>
+                <div className="hgr-fd-field">
+                  <label htmlFor="eaMobile">Mobile number</label>
+                  <input type="tel" id="eaMobile" name="mobile" required placeholder="+91 ..." disabled={status === "submitting"} />
+                </div>
+                <div className="hgr-fd-field">
+                  <label htmlFor="eaProfession">Profession</label>
+                  <input type="text" id="eaProfession" name="profession" placeholder="e.g. Aerospace Engineer" disabled={status === "submitting"} />
+                </div>
+                <div className="hgr-fd-field">
+                  <label htmlFor="eaCompany">Company</label>
+                  <input type="text" id="eaCompany" name="company" placeholder="Company / Institution" disabled={status === "submitting"} />
+                </div>
+                <div className="hgr-fd-field">
+                  <label htmlFor="eaCountry">Country</label>
+                  <input type="text" id="eaCountry" name="country" placeholder="Country" disabled={status === "submitting"} />
+                </div>
+              </div>
+              {status === "error" && (
+                <div style={{ color: "var(--hgr-amber)", fontSize: 12.5, fontFamily: "'IBM Plex Mono',monospace", marginBottom: 14 }}>
+                  COULDN'T SUBMIT — {errorMessage ?? "please try again."}
+                </div>
+              )}
+              <button type="submit" className="hgr-btn hgr-btn-amber hgr-fd-submit" disabled={status === "submitting"}>
+                {status === "submitting" ? "Submitting…" : "Request Access →"}
+              </button>
+            </form>
+          </div>
+        ) : (
+          <div className="hgr-fd-success" style={{ display: "block" }}>
+            <div className="hgr-fd-success-badge">✓</div>
+            <h3>Request received</h3>
+            <p>We'll be in touch as early access opens up.</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export const HGR_LANDING_CSS = `
 .hgr-landing{
   /* Light theme: white page background, blue grid/hairlines. --hgr-navy-deep
@@ -472,6 +627,9 @@ export const HGR_LANDING_CSS = `
   transition:transform .2s ease;
 }
 .hgr-fd-overlay.open .hgr-fd-panel{ transform:translateY(0) scale(1); }
+.hgr-ea-panel{ max-width:520px; }
+.hgr-ea-grid{ display:grid; grid-template-columns:1fr; gap:0 16px; }
+@media(min-width:520px){ .hgr-ea-grid{ grid-template-columns:1fr 1fr; } }
 .hgr-fd-panel .hgr-corner{ width:14px; height:14px; }
 .hgr-fd-panel .hgr-corner-tl{ top:-1px; left:-1px; }
 .hgr-fd-panel .hgr-corner-tr{ top:-1px; right:-1px; border-left:none; border-right:1px solid var(--hgr-blue-line); border-bottom:none; }
