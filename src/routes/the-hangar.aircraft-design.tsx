@@ -469,7 +469,7 @@ function TheHangarAircraftDesign() {
                                   </button>
                                   <button
                                     type="button"
-                                    className="hgr-a-btn hgr-a-btn-ghost"
+                                    className="hgr-a-btn hgr-a-btn-sagush"
                                     disabled={sagush.status === "hello-running" || sagush.status === "design-running"}
                                     onClick={triggerSagushHello}
                                     title="Prototype: runs local Python scripts (hello.py, then aircraftdesign.py). Local dev only — not available once deployed."
@@ -936,6 +936,12 @@ const HGR_AIRCRAFT_DESIGN_CSS = `
 .hgr-a-btn{ font-family:'IBM Plex Mono',monospace; font-size:13px; padding:12px 22px; border-radius:2px; display:inline-flex; align-items:center; gap:8px; text-decoration:none; border:1px solid transparent; cursor:pointer; background:none; }
 .hgr-a-btn-ghost{ border:1px solid var(--hgr-a-hairline); color:var(--hgr-a-paper-dim); }
 .hgr-a-btn-ghost:hover{ color:var(--hgr-a-paper); border-color:var(--hgr-a-blue-bright); }
+/* "Trigger Sagush" only — a dedicated green fill so it stands out from the
+   many other .hgr-a-btn-ghost buttons on this page (retry/back/cancel),
+   which stay untouched. */
+.hgr-a-btn-sagush{ background:#22c55e; color:#08131F; border-color:#22c55e; font-weight:600; }
+.hgr-a-btn-sagush:hover{ background:#16a34a; border-color:#16a34a; }
+.hgr-a-btn-sagush:disabled{ background:#22c55e; opacity:.5; }
 .hgr-a-btn-amber{ background:var(--hgr-a-amber); color:var(--hgr-a-navy-deep); font-weight:600; }
 .hgr-a-btn-amber:hover{ background:var(--hgr-a-amber-bright); }
 .hgr-a-btn:disabled{ opacity:.4; cursor:not-allowed; }
