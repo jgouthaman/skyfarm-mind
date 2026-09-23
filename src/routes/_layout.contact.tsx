@@ -20,12 +20,13 @@ function ContactPage() {
             <span className="hgr-pub-badge hgr-pub-badge-dark">Get In Touch</span>
             <h2 className="hgr-pub-h2">Partner with TorqWings</h2>
             <p className="hgr-pub-sub">
-              Whether you are a farmer, infrastructure company, autonomous aerial platform operator, investor, institution, or
-              industry partner — TorqWings is open to pilots, partnerships, and custom aerial intelligence
-              projects.
+              Whether you're building aircraft, flying them, or funding the next generation — OEMs,
+              operators, defence and research programmes, institutions and investors — we'd like to hear
+              what you're working on. Early access to The Hangar, custom platform design, Academy
+              partnerships or pilots: start here.
             </p>
             <div className="hgr-pub-info-row">
-              <Phone className="h-4 w-4" aria-hidden="true" /> Hello : +919940263589
+              <Phone className="h-4 w-4" aria-hidden="true" /> +919940263589
             </div>
             <div className="hgr-pub-info-row">
               <Mail className="h-4 w-4" aria-hidden="true" /> support@torqwings.com
