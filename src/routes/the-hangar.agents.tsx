@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import {
   HGR_LANDING_CSS, HangarFooter, HangarNav, FlightDeckModal, useFlightDeck,
@@ -8,6 +9,65 @@ import {
 export const Route = createFileRoute("/the-hangar/agents")({
   component: HangarAgentsPage,
 });
+
+type BayDatum = { num: string; title: string; desc: string };
+type BayGroup = { label: string; bays: BayDatum[] };
+
+// Column count for each group's grid is derived from bays.length (see
+// render below, className={`hgr-bays hgr-bays-${g.bays.length}`}) rather
+// than hard-coded per section — a group's card count and its layout can
+// never drift apart.
+const BAY_GROUPS: BayGroup[] = [
+  {
+    label: "Primary workflow — sequential",
+    bays: [
+      { num: "BAY 01", title: "Mission Agent", desc: "Turns a mission brief into structured specs, constraints, and KPIs." },
+      { num: "BAY 02", title: "Concept Agent", desc: "Generates and ranks concept options against benchmarks and trends." },
+      { num: "BAY 03", title: "Aircraft Design Agent", desc: "Selects configuration and design parameters from rules and reference designs." },
+      { num: "BAY 04", title: "CAD Agent", desc: "Builds CAD geometry and assemblies from validated design parameters." },
+      { num: "BAY 05", title: "Simulation Orchestrator", desc: "Prepares the simulation plan and dispatches jobs to the solver agents." },
+    ],
+  },
+  {
+    // Only CFD and Structural actually run in parallel — Optimization
+    // consumes both of their outputs, and Validation follows Optimization,
+    // so those two are their own sequential group below, not lumped in
+    // with the parallel pair.
+    label: "Parallel analysis — CFD ‖ Structures",
+    bays: [
+      { num: "BAY 06", title: "CFD Agent", desc: "Runs fluid dynamics simulations — forces, coefficients, fields." },
+      { num: "BAY 07", title: "Structural Agent", desc: "Runs FEA for stress, deformation, and safety factor." },
+    ],
+  },
+  {
+    label: "Refine & verify — sequential",
+    bays: [
+      { num: "BAY 08", title: "Optimization Agent", desc: "Searches the design space for Pareto-optimal candidates." },
+      { num: "BAY 09", title: "Validation Agent", desc: "Checks results against the mission spec and issues pass or fail." },
+    ],
+  },
+  {
+    label: "Downstream — build, comply, ship",
+    bays: [
+      { num: "BAY 10", title: "Materials Agent", desc: "Recommends materials against requirements, environment, and constraints." },
+      { num: "BAY 11", title: "Manufacturing Agent", desc: "Checks manufacturability and produces a build plan and BOM." },
+      { num: "BAY 12", title: "Certification Agent", desc: "Maps the design against regulations and standards, flags gaps." },
+      { num: "BAY 13", title: "Documentation Agent", desc: "Compiles final reports, drawings, and summary documentation." },
+    ],
+  },
+  {
+    label: "Cross-cutting — physics validation service",
+    bays: [
+      { num: "BAY 14", title: "Bernoulli Agent", desc: "Called by every design and analysis bay to sanity-check its output against conservation laws, dimensional consistency, and aerospace empiricals before it moves downstream." },
+    ],
+  },
+  {
+    label: "Knowledge layer",
+    bays: [
+      { num: "BAY 15", title: "Knowledge Agent", desc: "Answers questions and surfaces insight from every past project, rule, and outcome — the memory every other bay reads from and writes to." },
+    ],
+  },
+];
 
 function HangarAgentsPage() {
   const flightDeck = useFlightDeck();
@@ -29,40 +89,20 @@ function HangarAgentsPage() {
               <p>Each agent owns exactly one stage of the design lifecycle, reads from a shared memory layer, and writes its output where the next agent — human or machine — can pick it up.</p>
             </div>
 
-            <div className="hgr-bay-group-label">Primary workflow — sequential</div>
-            <div className="hgr-bays">
-              <Bay num="BAY 01" title="Mission Agent" desc="Turns a mission brief into structured specs, constraints, and KPIs." />
-              <Bay num="BAY 02" title="Concept Agent" desc="Generates and ranks concept options against benchmarks and trends." />
-              <Bay num="BAY 03" title="Aircraft Design Agent" desc="Selects configuration and design parameters from rules and reference designs." />
-              <Bay num="BAY 04" title="CAD Agent" desc="Builds CAD geometry and assemblies from validated design parameters." />
-              <Bay num="BAY 05" title="Simulation Orchestrator" desc="Prepares the simulation plan and dispatches jobs to the solver agents." />
-            </div>
-
-            <div className="hgr-bay-group-label">Parallel stage — physics &amp; validation</div>
-            <div className="hgr-bays">
-              <Bay num="BAY 06" title="CFD Agent" desc="Runs fluid dynamics simulations — forces, coefficients, fields." />
-              <Bay num="BAY 07" title="Structural Agent" desc="Runs FEA for stress, deformation, and safety factor." />
-              <Bay num="BAY 08" title="Optimization Agent" desc="Searches the design space for Pareto-optimal candidates." />
-              <Bay num="BAY 09" title="Validation Agent" desc="Checks results against the mission spec and issues pass or fail." />
-            </div>
-
-            <div className="hgr-bay-group-label">Downstream — build, comply, ship</div>
-            <div className="hgr-bays">
-              <Bay num="BAY 10" title="Materials Agent" desc="Recommends materials against requirements, environment, and constraints." />
-              <Bay num="BAY 11" title="Manufacturing Agent" desc="Checks manufacturability and produces a build plan and BOM." />
-              <Bay num="BAY 12" title="Certification Agent" desc="Maps the design against regulations and standards, flags gaps." />
-              <Bay num="BAY 13" title="Documentation Agent" desc="Compiles final reports, drawings, and summary documentation." />
-            </div>
-
-            <div className="hgr-bay-group-label">Cross-cutting — physics validation service</div>
-            <div className="hgr-bays" style={{ gridTemplateColumns: "1fr" }}>
-              <Bay num="BAY 14" title="Bernoulli Agent" desc="Called by every design and analysis bay to sanity-check its output against conservation laws, dimensional consistency, and aerospace empiricals before it moves downstream." />
-            </div>
-
-            <div className="hgr-bay-group-label">Knowledge layer</div>
-            <div className="hgr-bays" style={{ gridTemplateColumns: "1fr" }}>
-              <Bay num="BAY 15" title="Knowledge Agent" desc="Answers questions and surfaces insight from every past project, rule, and outcome — the memory every other bay reads from and writes to." />
-            </div>
+            {/* Fragment (not a wrapping div) keeps each label and its grid
+                as direct siblings of every other group's, same as before —
+                .hgr-bay-group-label:first-of-type only clears the top
+                margin on the very first one if they all share one parent. */}
+            {BAY_GROUPS.map((g) => (
+              <Fragment key={g.label}>
+                <div className="hgr-bay-group-label">{g.label}</div>
+                <div className={`hgr-bays hgr-bays-${g.bays.length}`}>
+                  {g.bays.map((b) => (
+                    <Bay key={b.num} num={b.num} title={b.title} desc={b.desc} />
+                  ))}
+                </div>
+              </Fragment>
+            ))}
           </div>
         </section>
       </main>

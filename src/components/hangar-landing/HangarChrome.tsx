@@ -561,10 +561,24 @@ export const HGR_LANDING_CSS = `
 }
 .hgr-bay-group-label:first-of-type{ margin-top:0; }
 .hgr-bay-group-label::after{ content:""; flex:1; height:1px; background:var(--hgr-hairline); }
-.hgr-bays{ display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--hgr-hairline); border:1px solid var(--hgr-hairline); }
-@media(max-width:900px){ .hgr-bays{ grid-template-columns:repeat(2,1fr);} }
-@media(max-width:600px){ .hgr-bays{ grid-template-columns:1fr;} }
-.hgr-bay{ background:var(--hgr-navy-panel); padding:26px 24px; position:relative; transition:background .15s; }
+/* Column count comes from a per-group modifier class (.hgr-bays-N, N = that
+   group's card count — see the-hangar.agents.tsx) instead of one fixed
+   3-column grid for every group. A fixed grid left genuinely empty cells
+   in any group whose count wasn't a multiple of 3 (5 cards, 4 cards, …),
+   and since the grid container itself carried the fill colour (visible
+   through the 1px gaps), an empty cell showed as a plain coloured block
+   with nothing in it. The container no longer has a background or border
+   at all — colour comes only from each .hgr-bay card, so a cell that has
+   no card simply doesn't exist, empty or otherwise. */
+.hgr-bays{ display:grid; grid-template-columns:1fr; gap:12px; }
+@media(min-width:600px){ .hgr-bays{ grid-template-columns:repeat(2,1fr); } }
+@media(min-width:900px){
+  .hgr-bays-2{ grid-template-columns:repeat(2,1fr); }
+  .hgr-bays-4{ grid-template-columns:repeat(4,1fr); }
+  .hgr-bays-5{ grid-template-columns:repeat(5,1fr); }
+}
+.hgr-bays-1{ grid-template-columns:1fr !important; }
+.hgr-bay{ background:var(--hgr-navy-panel); border:1px solid var(--hgr-hairline); padding:26px 24px; position:relative; transition:background .15s, border-color .15s; }
 .hgr-bay:hover{ background:var(--hgr-navy-panel-2); }
 .hgr-bay-num{ font-family:'IBM Plex Mono',monospace; color:var(--hgr-amber); font-size:12px; letter-spacing:.06em; margin-bottom:10px; }
 .hgr-bay h3{ font-size:17px; margin-bottom:10px; }
