@@ -1,42 +1,42 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Phone, Mail, MapPin } from "lucide-react";
-import { Card } from "@/components/Card";
+import { Phone, Mail } from "lucide-react";
 import { ContactForm } from "@/components/ContactForm";
-import { SectionBadge } from "@/components/SectionBadge";
+import { HANGAR_PUBLIC_HEAD_LINKS } from "@/styles/hangarPublicTheme";
 
 export const Route = createFileRoute("/_layout/contact")({
+  head: () => ({
+    links: [...HANGAR_PUBLIC_HEAD_LINKS],
+  }),
   component: ContactPage,
 });
 
 function ContactPage() {
   return (
-    <section id="contact" className="relative py-20 sm:py-28 bg-gradient-hero">
-      <div className="absolute inset-0 grid-bg opacity-30 pointer-events-none" />
-      <div className="mx-auto max-w-7xl px-5 lg:px-8 relative grid lg:grid-cols-12 gap-10">
+    <section id="contact" className="hgr-pub-section" style={{ paddingTop: 128, borderBottom: "none" }}>
+      <div className="hgr-pub-wrap">
+        <div className="grid lg:grid-cols-12 gap-10">
 
-        <div className="lg:col-span-5">
-          <SectionBadge label="Get In Touch" />
-          <h2 className="text-3xl sm:text-4xl font-bold">Partner with TorqWings</h2>
-          <p className="mt-4 text-muted-foreground">
-            Whether you are a farmer, infrastructure company, autonomous aerial platform operator, investor, institution, or
-            industry partner — TorqWings is open to pilots, partnerships, and custom aerial intelligence
-            projects.
-          </p>
-          <ul className="mt-8 space-y-4 text-sm">
-            <li className="flex items-center gap-3">
-              <Phone className="h-4 w-4 text-primary" aria-hidden="true" /> Hello : +919940263589
-            </li>
-            <li className="flex items-center gap-3">
-              <Mail className="h-4 w-4 text-primary" aria-hidden="true" /> support@torqwings.com
-            </li>
+          <div className="lg:col-span-5">
+            <span className="hgr-pub-badge hgr-pub-badge-dark">Get In Touch</span>
+            <h2 className="hgr-pub-h2">Partner with TorqWings</h2>
+            <p className="hgr-pub-sub">
+              Whether you are a farmer, infrastructure company, autonomous aerial platform operator, investor, institution, or
+              industry partner — TorqWings is open to pilots, partnerships, and custom aerial intelligence
+              projects.
+            </p>
+            <div className="hgr-pub-info-row">
+              <Phone className="h-4 w-4" aria-hidden="true" /> Hello : +919940263589
+            </div>
+            <div className="hgr-pub-info-row">
+              <Mail className="h-4 w-4" aria-hidden="true" /> support@torqwings.com
+            </div>
+          </div>
 
-          </ul>
+          <div className="lg:col-span-7 hgr-pub-form-panel">
+            <ContactForm />
+          </div>
+
         </div>
-
-        <Card className="lg:col-span-7">
-          <ContactForm />
-        </Card>
-
       </div>
     </section>
   );

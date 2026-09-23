@@ -33,10 +33,10 @@ function IndustriesPage() {
           </div>
         </div>
         <Link
-          to="/technology"
+          to="/the-hangar"
           className="inline-flex items-center gap-1.5 text-sm font-medium hover:gap-2.5 transition-all shrink-0"
         >
-          See the stack <ArrowRight className="h-4 w-4" aria-hidden="true" />
+          See the stack in The Hangar <ArrowRight className="h-4 w-4" aria-hidden="true" />
         </Link>
       </div>
 

@@ -76,7 +76,7 @@ export function ContactForm() {
             <SelectItem value="guardsky">GuardSky — aerial surveillance &amp; early fire response</SelectItem>
             <SelectItem value="labs">Custom UAV R&amp;D / Labs</SelectItem>
             <SelectItem value="academy">TorqWings Academy — drone training</SelectItem>
-            <SelectItem value="design-studio">Design Studio</SelectItem>
+            <SelectItem value="design-studio">The Hangar</SelectItem>
             <SelectItem value="partner">Partnership / Investment</SelectItem>
           </SelectContent>
         </Select>
