@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Plane, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { NAV_LINKS } from "@/constants/nav.constants";
 
 export function Navbar() {
@@ -10,8 +10,8 @@ export function Navbar() {
     <header className="hgr-pub-navbar fixed top-0 inset-x-0 z-50">
       <div className="mx-auto max-w-7xl px-5 lg:px-8 h-16 flex items-center justify-between">
         <Link to="/" className="hgr-pub-navbar-brand">
-          <span className="grid place-items-center h-8 w-8 rounded-lg bg-gradient-primary shadow-glow">
-            <Plane className="h-4 w-4 text-primary-foreground" aria-hidden="true" />
+          <span className="grid place-items-center h-8 w-8 rounded-lg bg-white overflow-hidden shadow-glow">
+            <img src="/torqwings-mark.png" alt="" className="h-full w-full object-contain" aria-hidden="true" />
           </span>
           <span>TorqWings</span>
         </Link>
