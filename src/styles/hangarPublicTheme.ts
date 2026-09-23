@@ -104,6 +104,34 @@ export const HANGAR_PUBLIC_CSS = `
 .hgr-pub-card h3{ font-size:16px; }
 .hgr-pub-card p{ margin-top:8px; color:var(--hp-paper-dim); font-size:13.5px; line-height:1.6; }
 
+/* Platform cards (PlatformSection) — a separate hover treatment from the
+   base .hgr-pub-card above (amber border + amber icon, not blue-bright),
+   so it doesn't change that card's hover on About/Contact. */
+.hgr-pub-platform-card{
+  border:1px solid var(--hp-hairline); background:var(--hp-navy-deep); border-radius:2px; padding:24px;
+  display:flex; flex-direction:column;
+  transition:border-color .15s, transform .15s, box-shadow .15s;
+}
+.hgr-pub-platform-card:hover{
+  border-color:var(--hp-amber); transform:translateY(-4px); box-shadow:0 16px 30px -18px rgba(18,34,47,.35);
+}
+.hgr-pub-platform-icon{ color:var(--hp-paper); transition:color .15s; }
+.hgr-pub-platform-card:hover .hgr-pub-platform-icon{ color:var(--hp-amber); }
+.hgr-pub-platform-code{ font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.1em; color:var(--hp-paper-dim); }
+.hgr-pub-platform-name{ margin-top:20px; font-size:19px; }
+.hgr-pub-platform-tagline{
+  margin-top:4px; font-family:'IBM Plex Mono',monospace; font-size:11px; text-transform:uppercase;
+  letter-spacing:.1em; color:var(--hp-amber);
+}
+.hgr-pub-platform-body{ margin-top:14px; font-size:13.5px; line-height:1.6; color:var(--hp-paper-dim); }
+.hgr-pub-platform-uses{ margin-top:18px; padding-top:14px; border-top:1px solid var(--hp-hairline); list-style:none; }
+.hgr-pub-platform-uses li{
+  display:flex; align-items:center; gap:8px; font-family:'IBM Plex Mono',monospace; font-size:11.5px;
+  color:var(--hp-paper-dim); margin-top:8px;
+}
+.hgr-pub-platform-uses li:first-child{ margin-top:0; }
+.hgr-pub-platform-dot{ width:4px; height:4px; background:var(--hp-amber); flex-shrink:0; }
+
 .hgr-pub-pill{
   display:inline-block; font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.08em; text-transform:uppercase;
   padding:4px 10px; border-radius:99px; border:1px solid var(--hp-hairline); color:var(--hp-blue-bright);
