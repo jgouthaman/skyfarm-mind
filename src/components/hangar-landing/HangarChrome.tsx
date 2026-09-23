@@ -9,6 +9,7 @@
 // copies of the same nav/footer/modal.
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, Link } from "@tanstack/react-router";
+import { Plane } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 export type HangarNavKey = "home" | "agents" | "how" | "stack";
@@ -117,7 +118,14 @@ export function HangarNav({
   return (
     <nav>
       <div className="hgr-wrap">
+        {/* Same round logo icon as the main site's Navbar.tsx brand, reused
+            verbatim (bg-gradient-primary/shadow-glow are global Tailwind
+            utilities, not scoped to .hgr-pub, so they work here too) so
+            this header matches instead of being text-only. */}
         <Link to="/the-hangar" className="hgr-brand" style={{ textDecoration: "none" }}>
+          <span className="grid place-items-center h-8 w-8 rounded-lg bg-gradient-primary shadow-glow">
+            <Plane className="h-4 w-4 text-primary-foreground" aria-hidden="true" />
+          </span>
           <span className="hgr-torq">TORQWINGS</span><span className="hgr-sep">/</span><span className="hgr-hangar-word">The Hangar</span>
         </Link>
         <div className="hgr-nav-right">
@@ -551,6 +559,41 @@ export const HGR_LANDING_CSS = `
   display:inline-flex; align-items:center; padding:6px 13px; border-radius:2px;
   background:var(--hgr-ink); color:#ECEFF3; border:1px solid rgba(111,180,224,0.35);
 }
+/* Live badge (Agents page, above the "THE FLEET" tag) — same font/size as
+   the section labels (.hgr-bay-group-label): 12px IBM Plex Mono, uppercase,
+   .1em tracking. */
+.hgr-live-badge{
+  display:flex; align-items:center; gap:8px; margin-bottom:14px;
+  font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--hgr-paper-dim);
+}
+.hgr-live-dot{
+  width:7px; height:7px; border-radius:50%; background:#22c55e; flex-shrink:0;
+  box-shadow:0 0 0 0 rgba(34,197,94,.6); animation:hgr-live-pulse 2s ease-in-out infinite;
+}
+@keyframes hgr-live-pulse{
+  0%{ box-shadow:0 0 0 0 rgba(34,197,94,.5); }
+  70%{ box-shadow:0 0 0 6px rgba(34,197,94,0); }
+  100%{ box-shadow:0 0 0 0 rgba(34,197,94,0); }
+}
+@media (prefers-reduced-motion: reduce){ .hgr-live-dot{ animation:none; } }
+
+/* Flow connector — a short vertical rule ending in a chevron, between two
+   consecutive workflow groups on the Agents page. */
+.hgr-flow-connector{ display:flex; justify-content:center; padding:6px 0; }
+.hgr-flow-connector-line{ width:1px; height:32px; background:var(--hgr-hairline); }
+.hgr-flow-connector-chevron{
+  width:9px; height:9px; margin-top:-5px; border-right:1px solid var(--hgr-hairline); border-bottom:1px solid var(--hgr-hairline);
+  transform:rotate(45deg);
+}
+.hgr-flow-connector-wrap{ display:flex; flex-direction:column; align-items:center; }
+
+/* Muted mono note under a group label (Agents page, Cross-cutting group). */
+.hgr-group-note{
+  font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.06em; text-transform:uppercase;
+  color:var(--hgr-paper-dim); opacity:.75; margin:-12px 0 20px;
+}
+
 .hgr-section-head h2{ font-size:clamp(28px,3.4vw,42px); line-height:1.15; margin-bottom:16px; }
 .hgr-section-head p{ color:var(--hgr-paper-dim); font-size:16.5px; }
 

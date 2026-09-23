@@ -2,6 +2,7 @@ import { Fragment } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import {
   HGR_LANDING_CSS, HangarFooter, HangarNav, FlightDeckModal, useFlightDeck,
+  EarlyAccessModal, useEarlyAccess,
 } from "@/components/hangar-landing/HangarChrome";
 
 // The Hangar's fleet — split out of the-hangar.index.tsx's old #agents
@@ -11,7 +12,7 @@ export const Route = createFileRoute("/the-hangar/agents")({
 });
 
 type BayDatum = { num: string; title: string; desc: string };
-type BayGroup = { label: string; bays: BayDatum[] };
+type BayGroup = { label: string; note?: string; bays: BayDatum[] };
 
 // Column count for each group's grid is derived from bays.length (see
 // render below, className={`hgr-bays hgr-bays-${g.bays.length}`}) rather
@@ -57,8 +58,9 @@ const BAY_GROUPS: BayGroup[] = [
   },
   {
     label: "Cross-cutting — physics validation service",
+    note: "Validates output across every stage above",
     bays: [
-      { num: "BAY 14", title: "Bernoulli Agent", desc: "Called by every design and analysis bay to sanity-check its output against conservation laws, dimensional consistency, and aerospace empiricals before it moves downstream." },
+      { num: "BAY 14", title: "Bernoulli Agent", desc: "Validates output from across the pipeline against conservation laws, dimensional consistency, and aerospace empiricals before it moves downstream." },
     ],
   },
   {
@@ -69,8 +71,14 @@ const BAY_GROUPS: BayGroup[] = [
   },
 ];
 
+// A connector renders directly after the group at this index (0-based) --
+// Primary→Parallel, Parallel→Refine, Refine→Downstream. None before
+// Cross-cutting or Knowledge layer.
+const CONNECTOR_AFTER_INDEX = new Set([0, 1, 2]);
+
 function HangarAgentsPage() {
   const flightDeck = useFlightDeck();
+  const earlyAccess = useEarlyAccess();
 
   return (
     <div className="hgr-landing">
@@ -80,12 +88,16 @@ function HangarAgentsPage() {
 
       <main>
         <div className="hgr-wrap hgr-page-header">
+          <div className="hgr-live-badge">
+            <span className="hgr-live-dot" aria-hidden="true" />
+            All 15 bays live
+          </div>
           <div className="hgr-kicker hgr-kicker-badge">The fleet</div>
         </div>
         <section style={{ paddingTop: 24 }}>
           <div className="hgr-wrap">
             <div className="hgr-section-head">
-              <h2>Fifteen bays. Fifteen specialist Agents.</h2>
+              <h2>Fifteen bays. Fifteen specialist agents.</h2>
               <p>Each agent owns exactly one stage of the design lifecycle, reads from a shared memory layer, and writes its output where the next agent — human or machine — can pick it up.</p>
             </div>
 
@@ -93,22 +105,35 @@ function HangarAgentsPage() {
                 as direct siblings of every other group's, same as before —
                 .hgr-bay-group-label:first-of-type only clears the top
                 margin on the very first one if they all share one parent. */}
-            {BAY_GROUPS.map((g) => (
+            {BAY_GROUPS.map((g, i) => (
               <Fragment key={g.label}>
                 <div className="hgr-bay-group-label">{g.label}</div>
+                {g.note && <div className="hgr-group-note">{g.note}</div>}
                 <div className={`hgr-bays hgr-bays-${g.bays.length}`}>
                   {g.bays.map((b) => (
                     <Bay key={b.num} num={b.num} title={b.title} desc={b.desc} />
                   ))}
                 </div>
+                {CONNECTOR_AFTER_INDEX.has(i) && <FlowConnector />}
               </Fragment>
             ))}
+          </div>
+        </section>
+
+        <section className="hgr-cta">
+          <div className="hgr-wrap">
+            <h2>Want to put these agents to work?</h2>
+            <p>The Hangar is in early access. Request access and we'll get you set up.</p>
+            <button type="button" className="hgr-btn hgr-btn-amber" onClick={earlyAccess.openEarlyAccess}>
+              Request access →
+            </button>
           </div>
         </section>
       </main>
 
       <HangarFooter />
       <FlightDeckModal {...flightDeck} />
+      <EarlyAccessModal {...earlyAccess} />
     </div>
   );
 }
@@ -120,6 +145,17 @@ function Bay({ num, title, desc }: { num: string; title: string; desc: string })
       <div className="hgr-bay-num">{num}</div>
       <h3>{title}</h3>
       <p>{desc}</p>
+    </div>
+  );
+}
+
+function FlowConnector() {
+  return (
+    <div className="hgr-flow-connector" aria-hidden="true">
+      <div className="hgr-flow-connector-wrap">
+        <div className="hgr-flow-connector-line" />
+        <div className="hgr-flow-connector-chevron" />
+      </div>
     </div>
   );
 }
