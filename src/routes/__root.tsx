@@ -95,8 +95,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" },
       { rel: "stylesheet", href: appCss },
       { rel: "manifest", href: "/manifest.json" },
-      { rel: "apple-touch-icon", href: "/app-icon.png" },
-      { rel: "icon", href: "/app-icon.png", type: "image/png" },
+      // Browser tab icon — "TW" monogram, not the Control Center PWA's own
+      // app-icon.png (still used by manifest.json and the Organization
+      // JSON-LD logo, both separate concerns left untouched).
+      { rel: "apple-touch-icon", href: "/apple-touch-icon-tw.png" },
+      { rel: "icon", href: "/favicon-tw.svg", type: "image/svg+xml" },
+      { rel: "icon", href: "/apple-touch-icon-tw.png", type: "image/png" },
     ],
   }),
   shellComponent: RootShell,
