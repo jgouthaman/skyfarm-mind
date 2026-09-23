@@ -25,7 +25,7 @@ function HangarAgentsPage() {
         <section style={{ paddingTop: 24 }}>
           <div className="hgr-wrap">
             <div className="hgr-section-head">
-              <h2>Fifteen bays. Fifteen specialists Agents.</h2>
+              <h2>Fifteen bays. Fifteen specialist Agents.</h2>
               <p>Each agent owns exactly one stage of the design lifecycle, reads from a shared memory layer, and writes its output where the next agent — human or machine — can pick it up.</p>
             </div>
 
