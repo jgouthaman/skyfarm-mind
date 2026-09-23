@@ -55,6 +55,5 @@ export const VERTICALS: VerticalDatum[] = [
     title: "TorqWings Academy",
     subtitle: "Autonomous Aerial Platform Design & Intelligence",
     desc: "Hands-on training in autonomous aerial platform design, engineering, AI-powered flight intelligence, mission planning, agri-platform operations, mapping workflows, and certification support for students, farmers, operators, SHGs, FPOs, and professionals.",
-    to: "/learn",
   },
 ];

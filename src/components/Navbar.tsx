@@ -7,25 +7,30 @@ export function Navbar() {
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="fixed top-0 inset-x-0 z-50 backdrop-blur-xl bg-background/70 border-b border-border/60">
+    <header className="hgr-pub-navbar fixed top-0 inset-x-0 z-50">
       <div className="mx-auto max-w-7xl px-5 lg:px-8 h-16 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-2 font-display font-semibold text-lg">
+        {/* Same "TORQWINGS / The Hangar" lockup as the Footer (and as
+            the-hangar's own nav) — a plain "TorqWings" here read as a
+            mismatched font next to the Footer's brand, even though the
+            underlying font-family was actually identical; it was the
+            content/casing that differed, not the type. */}
+        <Link to="/" className="hgr-pub-navbar-brand">
           <span className="grid place-items-center h-8 w-8 rounded-lg bg-gradient-primary shadow-glow">
             <Plane className="h-4 w-4 text-primary-foreground" aria-hidden="true" />
           </span>
-          <span>TorqWings</span>
+          <span>TORQWINGS <span style={{ color: "var(--hp-blue-line)" }}>/</span> The Hangar</span>
         </Link>
 
-        <nav className="hidden md:flex items-center gap-7 text-sm text-muted-foreground">
+        <nav className="hgr-pub-navbar-links hidden md:flex">
           {NAV_LINKS.map((n) => (
-            <Link key={n.to} to={n.to} className="hover:text-foreground transition-colors">
+            <Link key={n.to} to={n.to}>
               {n.label}
             </Link>
           ))}
         </nav>
 
         <button
-          className="md:hidden p-2 rounded-md hover:bg-muted"
+          className="hgr-pub-navbar-toggle md:hidden p-2 rounded-md hover:bg-white/5"
           onClick={() => setOpen(!open)}
           aria-label="Toggle menu"
         >
@@ -36,14 +41,13 @@ export function Navbar() {
       </div>
 
       {open && (
-        <div className="md:hidden border-t border-border bg-background/95 backdrop-blur">
+        <div className="hgr-pub-navbar-mobile md:hidden">
           <div className="px-5 py-4 flex flex-col gap-3">
             {NAV_LINKS.map((n) => (
               <Link
                 key={n.to}
                 to={n.to}
                 onClick={() => setOpen(false)}
-                className="text-sm text-muted-foreground hover:text-foreground"
               >
                 {n.label}
               </Link>

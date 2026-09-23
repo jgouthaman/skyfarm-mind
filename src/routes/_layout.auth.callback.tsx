@@ -11,14 +11,14 @@ function AuthCallback() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "SIGNED_IN" && session) {
         subscription.unsubscribe();
-        window.location.href = "/learn/drone-design-fundamentals";
+        window.location.href = "/";
       }
     });
 
-    // Fallback: if no SIGNED_IN event within 10s, go to academy
+    // Fallback: if no SIGNED_IN event within 10s, go home
     const timeout = setTimeout(() => {
       subscription.unsubscribe();
-      window.location.href = "/learn";
+      window.location.href = "/";
     }, 10000);
 
     return () => {
