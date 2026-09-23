@@ -11,6 +11,20 @@
 -- Not auto-applied to the live project -- run manually in the Supabase SQL
 -- editor, same as every other Hangar_* migration in this repo.
 
+-- The select policy below depends on public.is_mh_admin(), which is
+-- defined in an earlier migration (20260617091417_...sql) that turned out
+-- to not actually be applied to the live project. Redefined here,
+-- idempotently (CREATE OR REPLACE, safe even if it does already exist
+-- elsewhere with this same definition), so this migration doesn't silently
+-- depend on that one having been run first.
+create or replace function public.is_mh_admin()
+returns boolean language sql stable security definer set search_path = public as $$
+  select exists (
+    select 1 from public.profiles
+    where user_id = auth.uid() and role in ('super_admin','admin') and is_active = true
+  );
+$$;
+
 create table public."Hangar_early_access" (
   id uuid primary key default gen_random_uuid(),
   created_at timestamptz not null default now(),
