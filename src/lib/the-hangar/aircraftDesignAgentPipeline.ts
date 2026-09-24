@@ -261,13 +261,11 @@ export async function runGeometryGenerationStage(request: Stage1Request): Promis
     // same gateway Bay 01/Bay 02 use), reasoning about the already-gated
     // survivor only.
     const generation = await generateAircraftDesignGeometry({
-      data: {
-        conceptName: topConcept.conceptName,
-        description: topConcept.description,
-        vehicleClass: topCandidate.vehicleClass,
-        rationale: topConcept.rationale,
-        constraintFit: topConcept.constraintFit,
-      },
+      conceptName: topConcept.conceptName,
+      description: topConcept.description,
+      vehicleClass: topCandidate.vehicleClass,
+      rationale: topConcept.rationale,
+      constraintFit: topConcept.constraintFit,
     });
 
     const finalSourceWasMock = sourceWasMock || generation.mock;
