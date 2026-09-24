@@ -140,9 +140,7 @@ export async function runConceptIdeationStage(request: Stage1Request): Promise<S
 
   const start = Date.now();
   try {
-    const ideation = await generateConceptIdeas({
-      data: { missionSpecs, constraints, kpis, summary },
-    });
+    const ideation = await generateConceptIdeas({ missionSpecs, constraints, kpis, summary });
     const durationMs = Date.now() - start;
     await logConceptStageRun(
       conceptId,
@@ -190,7 +188,7 @@ export async function runTradeOffReasoningStage(request: Stage2Request): Promise
 
   const start = Date.now();
   try {
-    const reasoning = await analyzeConceptTradeoffs({ data: { candidates, constraints, kpis } });
+    const reasoning = await analyzeConceptTradeoffs({ candidates, constraints, kpis });
     const durationMs = Date.now() - start;
     await logConceptStageRun(conceptId, "trade_off_reasoning", { candidates }, reasoning, "success", durationMs);
     return {

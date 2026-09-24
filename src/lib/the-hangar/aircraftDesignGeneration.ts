@@ -1,14 +1,20 @@
-import { createServerFn } from "@tanstack/react-start";
 import { callLlmGateway, stripJsonFences } from "./llmGateway.ts";
 
 // Bay 03 Stage 1's SCORE + GENERATE step (AircraftDesignAgent.md Section
-// 4.1/4.2) — same createServerFn + callLlmGateway + mock-fallback pattern
-// as Concept Agent's conceptIdeation.ts (real Claude Sonnet 5 calls via
-// the Anthropic SDK, ./llmGateway.ts — this codebase has not used a
-// "Lovable AI gateway" or GPT-4o/Llama anywhere since that gateway was
-// replaced project-wide; see llmGateway.ts's own header comment). Runs
-// only after aircraftDesignRules.ts's gate has already passed — this step
-// reasons about an already-feasible concept, it never decides pass/fail.
+// 4.1/4.2) — callLlmGateway + mock-fallback pattern, same as Concept
+// Agent's conceptIdeation.ts (real Claude Sonnet 5 calls via the Anthropic
+// SDK, ./llmGateway.ts — this codebase has not used a "Lovable AI gateway"
+// or GPT-4o/Llama anywhere since that gateway was replaced project-wide;
+// see llmGateway.ts's own header comment). Runs only after
+// aircraftDesignRules.ts's gate has already passed — this step reasons
+// about an already-feasible concept, it never decides pass/fail.
+//
+// PRODUCTION FIX: generateAircraftDesignGeometry was a createServerFn until
+// this change — same "Server function info not found" manifest bug as
+// generateConceptIdeas (see conceptIdeation.ts's header comment), and same
+// fix: its only caller anywhere in the codebase is
+// aircraftDesignAgentPipeline.ts, server-only, so the createServerFn
+// RPC/hash dispatch mechanism was never actually needed.
 
 const SYSTEM = `You are Aircraft Design Agent's geometry generation step for TorqWings' aerospace design platform. Given one gated, feasible vehicle concept (name, description, vehicle class, rationale), propose plausible aircraft geometry parameters and a component selection consistent with that concept. Every claim must be grounded in the given concept — do not invent mission requirements not present in the input. State your reasoning in design_rationale. Return JSON only.`;
 
@@ -41,20 +47,18 @@ export interface GeometryGenerationResult {
   mock: boolean;
 }
 
-export const generateAircraftDesignGeometry = createServerFn({ method: "POST" })
-  .validator((d: GeometryGenerationInput) => d)
-  .handler(async ({ data }): Promise<GeometryGenerationResult> => {
-    const userContent = `Concept: ${JSON.stringify(data, null, 2)}
+export async function generateAircraftDesignGeometry(data: GeometryGenerationInput): Promise<GeometryGenerationResult> {
+  const userContent = `Concept: ${JSON.stringify(data, null, 2)}
 
 Return: { "geometry_parameters": { "wingspan_m": number, "fuselage_length_m": number, "wing_area_m2": number, "aspect_ratio": number }, "component_selections": [{ "category": "string", "selection": "string", "rationale": "string" }], "design_rationale": "string" }`;
 
-    const { content } = await callLlmGateway(SYSTEM, userContent, { jsonMode: true });
-    if (!content) return mockGeometry(data);
+  const { content } = await callLlmGateway(SYSTEM, userContent, { jsonMode: true });
+  if (!content) return mockGeometry(data);
 
-    const parsed = parseGeometryResponse(content, data.vehicleClass);
-    if (!parsed) return mockGeometry(data);
-    return { ...parsed, mock: false };
-  });
+  const parsed = parseGeometryResponse(content, data.vehicleClass);
+  if (!parsed) return mockGeometry(data);
+  return { ...parsed, mock: false };
+}
 
 function isFiniteNumber(v: unknown): v is number {
   return typeof v === "number" && Number.isFinite(v);
