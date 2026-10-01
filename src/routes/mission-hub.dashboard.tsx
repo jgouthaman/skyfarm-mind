@@ -85,12 +85,12 @@ function UserDashboard({ name, verticals }: { name: string; verticals: Vertical[
   const otherVerticals = verticals.filter((v) => v !== ("design-studio" as Vertical));
   return (
     <div>
-      <h2 className="text-white text-2xl" style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 500 }}>
+      <h2 className="text-2xl" style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 500, color: "var(--mh-ink)" }}>
         Welcome back, {name}
       </h2>
-      <p className="mt-2 text-sm text-white/55">Your workspace</p>
+      <p className="mt-2 text-sm" style={{ color: "var(--mh-dim)" }}>Your workspace</p>
       {verticals.length === 0 ? (
-        <div className="mt-10 text-center text-white/40">
+        <div className="mt-10 text-center" style={{ color: "var(--mh-dim)" }}>
           <Inbox className="h-8 w-8 mx-auto mb-3" />
           No access assigned yet. Contact your administrator.
         </div>
@@ -98,21 +98,21 @@ function UserDashboard({ name, verticals }: { name: string; verticals: Vertical[
         <div className="mt-6 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {hasDesignStudio && (
             <Link to="/mission-hub/design-studio">
-              <MhCard className="p-5 hover:border-[#EF9F27]/50 transition-colors">
-                <div className="text-white" style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 500 }}>
+              <MhCard className="p-5 hover:border-[var(--mh-amber)] transition-colors">
+                <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 500, color: "var(--mh-ink)" }}>
                   Design Studio
                 </div>
-                <div className="mt-1 text-[12px] text-[#EF9F27]">Open Studio →</div>
+                <div className="mt-1 text-[12px]" style={{ color: "var(--mh-amber)" }}>Open Studio →</div>
               </MhCard>
             </Link>
           )}
           {otherVerticals.map((v) => (
             <Link key={v} to="/mission-hub/verticals/$vertical" params={{ vertical: v }}>
-              <MhCard className="p-5 hover:border-[#378ADD]/40 transition-colors">
-                <div className="text-white" style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 500 }}>
+              <MhCard className="p-5 hover:border-[var(--mh-blue)] transition-colors">
+                <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 500, color: "var(--mh-ink)" }}>
                   {VERTICAL_LABELS[v]}
                 </div>
-                <div className="mt-1 text-[12px] text-[#378ADD]">Open →</div>
+                <div className="mt-1 text-[12px]" style={{ color: "var(--mh-blue)" }}>Open →</div>
               </MhCard>
             </Link>
           ))}
@@ -125,8 +125,8 @@ function UserDashboard({ name, verticals }: { name: string; verticals: Vertical[
 function Stat({ label, value }: { label: string; value: number }) {
   return (
     <MhCard className="p-5">
-      <div className="text-3xl text-white" style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 500 }}>{value}</div>
-      <div className="mt-1 text-[12px] text-white/50">{label}</div>
+      <div className="text-3xl" style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 500, color: "var(--mh-ink)" }}>{value}</div>
+      <div className="mt-1 text-[12px]" style={{ color: "var(--mh-dim)" }}>{label}</div>
     </MhCard>
   );
 }
@@ -135,8 +135,8 @@ function Panel({ title, linkTo, children }: { title: string; linkTo: string; chi
   return (
     <MhCard className="p-5">
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-white text-base" style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 500 }}>{title}</h3>
-        <Link to={linkTo} className="text-[12px] text-[#378ADD]">View all →</Link>
+        <h3 className="text-base" style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 500, color: "var(--mh-ink)" }}>{title}</h3>
+        <Link to={linkTo} className="text-[12px]" style={{ color: "var(--mh-blue)" }}>View all →</Link>
       </div>
       {children}
     </MhCard>
@@ -146,14 +146,14 @@ function Panel({ title, linkTo, children }: { title: string; linkTo: string; chi
 function SimpleTable({ headers, rows }: { headers: string[]; rows: React.ReactNode[][] }) {
   return (
     <table className="w-full text-sm">
-      <thead><tr className="text-left text-[10px] uppercase text-white/40">
+      <thead><tr className="text-left text-[10px] uppercase" style={{ color: "var(--mh-dim)" }}>
         {headers.map((h) => <th key={h} className="py-2 font-normal">{h}</th>)}
       </tr></thead>
       <tbody>
-        {!rows.length && <tr><td colSpan={headers.length} className="py-6 text-center text-white/30 text-[12px]">No records</td></tr>}
+        {!rows.length && <tr><td colSpan={headers.length} className="py-6 text-center text-[12px]" style={{ color: "var(--mh-dim)" }}>No records</td></tr>}
         {rows.map((r, i) => (
-          <tr key={i} className="border-t border-white/[0.05]">
-            {r.map((c, j) => <td key={j} className="py-2.5 text-white/85">{c}</td>)}
+          <tr key={i} className="border-t" style={{ borderColor: "var(--mh-hairline)" }}>
+            {r.map((c, j) => <td key={j} className="py-2.5" style={{ color: "var(--mh-paper)" }}>{c}</td>)}
           </tr>
         ))}
       </tbody>
@@ -162,11 +162,11 @@ function SimpleTable({ headers, rows }: { headers: string[]; rows: React.ReactNo
 }
 
 const PLAN_COLORS: Record<string, { bg: string; color: string }> = {
-  Explorer: { bg: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.6)" },
-  Engineer: { bg: "rgba(55,138,221,0.15)", color: "#378ADD" },
-  Squadron: { bg: "rgba(239,159,39,0.15)", color: "#EF9F27" },
-  Campus: { bg: "rgba(29,158,117,0.15)", color: "#1D9E75" },
-  Waitlist: { bg: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.6)" },
+  Explorer: { bg: "var(--mh-panel)", color: "var(--mh-dim)" },
+  Engineer: { bg: "rgba(28,116,184,0.12)", color: "#1C74B8" },
+  Squadron: { bg: "rgba(232,163,61,0.15)", color: "#B8791F" },
+  Campus: { bg: "rgba(29,158,117,0.12)", color: "#1D9E75" },
+  Waitlist: { bg: "var(--mh-panel)", color: "var(--mh-dim)" },
 };
 
 function planPill(plan: string) {
@@ -175,5 +175,5 @@ function planPill(plan: string) {
 }
 
 function date(iso: string) {
-  return <span className="text-[12px] text-white/60">{new Date(iso).toLocaleDateString()}</span>;
+  return <span className="text-[12px]" style={{ color: "var(--mh-dim)" }}>{new Date(iso).toLocaleDateString()}</span>;
 }

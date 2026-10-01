@@ -1,10 +1,10 @@
 export function RoleBadge({ role }: { role: string }) {
   const s =
     role === "super_admin"
-      ? { bg: "rgba(163,45,45,0.2)", color: "#F09595", label: "Super Admin" }
+      ? { bg: "rgba(188,54,54,0.12)", color: "#B23A3A", label: "Super Admin" }
       : role === "admin"
-        ? { bg: "rgba(239,159,39,0.15)", color: "#EF9F27", label: "Admin" }
-        : { bg: "rgba(24,95,165,0.2)", color: "#378ADD", label: "User" };
+        ? { bg: "rgba(232,163,61,0.15)", color: "#B8791F", label: "Admin" }
+        : { bg: "rgba(28,116,184,0.12)", color: "#1C74B8", label: "User" };
   return (
     <span
       className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full"

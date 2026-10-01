@@ -31,22 +31,22 @@ function ResetPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 bg-[#0a0f1c]" style={{ fontFamily: "Inter, sans-serif" }}>
+    <div className="min-h-screen flex items-center justify-center px-4 bg-[var(--mh-panel)]" style={{ fontFamily: "Inter, sans-serif" }}>
       <form
         onSubmit={submit}
-        className="w-full max-w-[420px] rounded-2xl px-10 py-11 bg-[#141928] space-y-4"
-        style={{ border: "0.5px solid rgba(255,255,255,0.08)" }}
+        className="w-full max-w-[420px] rounded-2xl px-10 py-11 bg-[var(--mh-bg)] space-y-4"
+        style={{ border: "0.5px solid var(--mh-panel)" }}
       >
-        <h2 className="text-white text-[22px]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Set a new password</h2>
+        <h2 className="text-[var(--mh-ink)] text-[22px]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Set a new password</h2>
         <div>
-          <label className="block text-[11px] uppercase tracking-wider text-white/50 mb-1.5">New password</label>
+          <label className="block text-[11px] uppercase tracking-wider text-[var(--mh-dim)] mb-1.5">New password</label>
           <input type="password" value={pwd} onChange={(e) => setPwd(e.target.value)} required minLength={8}
-            className="w-full bg-[#1a2035] rounded-lg px-3.5 py-2.5 text-sm text-white" style={{ border: "0.5px solid rgba(255,255,255,0.1)" }} />
+            className="w-full bg-[var(--mh-bg)] rounded-lg px-3.5 py-2.5 text-sm text-[var(--mh-ink)]" style={{ border: "0.5px solid var(--mh-hairline)" }} />
         </div>
         <div>
-          <label className="block text-[11px] uppercase tracking-wider text-white/50 mb-1.5">Confirm password</label>
+          <label className="block text-[11px] uppercase tracking-wider text-[var(--mh-dim)] mb-1.5">Confirm password</label>
           <input type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} required
-            className="w-full bg-[#1a2035] rounded-lg px-3.5 py-2.5 text-sm text-white" style={{ border: "0.5px solid rgba(255,255,255,0.1)" }} />
+            className="w-full bg-[var(--mh-bg)] rounded-lg px-3.5 py-2.5 text-sm text-[var(--mh-ink)]" style={{ border: "0.5px solid var(--mh-hairline)" }} />
         </div>
         {err && (
           <div className="rounded-lg px-3.5 py-2.5 text-[13px] text-[#F09595]"
@@ -55,7 +55,7 @@ function ResetPasswordPage() {
           </div>
         )}
         <button type="submit" disabled={submitting}
-          className="w-full rounded-lg bg-[#185FA5] hover:bg-[#378ADD] text-white py-3">
+          className="w-full rounded-lg bg-[#185FA5] hover:bg-[#378ADD] text-[var(--mh-ink)] py-3">
           {submitting ? "Updating…" : "Update password"}
         </button>
       </form>

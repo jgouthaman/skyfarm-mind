@@ -57,7 +57,7 @@ function Dashboard() {
       </div>
 
       <div className="flex flex-wrap gap-2">
-        <Button onClick={() => nav({ to: "/mission-hub/torqwings-design-studio/new" })} className="bg-sky-500 hover:bg-sky-600 text-white">
+        <Button onClick={() => nav({ to: "/mission-hub/torqwings-design-studio/new" })} className="bg-sky-500 hover:bg-sky-600 text-[var(--mh-ink)]">
           <FilePlus className="h-4 w-4 mr-1" /> Create New Drone Design
         </Button>
         <Button variant="outline" onClick={() => nav({ to: "/mission-hub/torqwings-design-studio/simulation" })}>

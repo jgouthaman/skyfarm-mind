@@ -9,10 +9,10 @@ function ApprovalPage() {
   return (
     <MissionHubShell title="Approval">
       <MhCard className="p-8 text-center">
-        <div className="text-white text-lg mb-2" style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 500 }}>
+        <div className="text-[var(--mh-ink)] text-lg mb-2" style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 500 }}>
           Approval
         </div>
-        <p className="text-[13px] text-white/50">Design review and approval workflow management. Coming soon.</p>
+        <p className="text-[13px] text-[var(--mh-dim)]">Design review and approval workflow management. Coming soon.</p>
       </MhCard>
     </MissionHubShell>
   );

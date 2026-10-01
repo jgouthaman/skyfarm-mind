@@ -27,8 +27,8 @@ function DesignRulePage() {
     return (
       <MissionHubShell title="Design Rule">
         <div className="flex flex-col items-center justify-center py-24 text-center">
-          <Brain className="h-10 w-10 text-white/20 mb-4" aria-hidden="true" />
-          <p className="text-white/40 text-sm">
+          <Brain className="h-10 w-10 text-[var(--mh-ink)]/20 mb-4" aria-hidden="true" />
+          <p className="text-[var(--mh-dim)] text-sm">
             Access restricted to the engineering team.
           </p>
         </div>
@@ -140,11 +140,11 @@ function DesignRuleContent({ engineerName, userId, isAdmin }: { engineerName: st
       <div>
         <div className="flex items-center gap-2">
           <Brain className="h-5 w-5 text-[#378ADD]" aria-hidden="true" />
-          <h1 className="text-2xl font-semibold text-white">
+          <h1 className="text-2xl font-semibold text-[var(--mh-ink)]">
             Design Rule — Design Knowledge Capture
           </h1>
         </div>
-        <p className="text-sm text-white/50 mt-1 max-w-2xl">
+        <p className="text-sm text-[var(--mh-dim)] mt-1 max-w-2xl">
           Feed your engineering knowledge here. Each rule teaches the design
           engine how to recommend drone configurations for specific mission
           conditions.
@@ -153,15 +153,15 @@ function DesignRuleContent({ engineerName, userId, isAdmin }: { engineerName: st
 
       {/* Form divider */}
       <div className="flex items-center gap-3">
-        <span className="text-[11px] uppercase tracking-widest text-white/30">
+        <span className="text-[11px] uppercase tracking-widest text-[var(--mh-dim)]">
           {editingRule ? "EDITING RULE" : "NEW KNOWLEDGE ENTRY"}
         </span>
-        <div className="flex-1 h-px bg-white/[0.08]" />
+        <div className="flex-1 h-px bg-[var(--mh-panel)]" />
         {editingRule && (
           <button
             type="button"
             onClick={() => setEditingRule(null)}
-            className="text-[12px] text-white/40 hover:text-white/70"
+            className="text-[12px] text-[var(--mh-dim)] hover:text-[var(--mh-ink)]/70"
           >
             Cancel edit
           </button>
@@ -180,22 +180,22 @@ function DesignRuleContent({ engineerName, userId, isAdmin }: { engineerName: st
 
       {/* Knowledge base divider */}
       <div className="flex items-center gap-3 pt-4">
-        <span className="text-[11px] uppercase tracking-widest text-white/30">
+        <span className="text-[11px] uppercase tracking-widest text-[var(--mh-dim)]">
           KNOWLEDGE BASE — {rules.length} rule{rules.length !== 1 ? "s" : ""} stored
         </span>
-        <div className="flex-1 h-px bg-white/[0.08]" />
+        <div className="flex-1 h-px bg-[var(--mh-panel)]" />
       </div>
 
       {isAdmin && !loadingRules && rules.length > 0 && (
-        <p className="text-xs text-white/40 mb-3">
+        <p className="text-xs text-[var(--mh-dim)] mb-3">
           {totalMatches} total matches · {neverMatched} rule{neverMatched !== 1 ? 's' : ''} never matched · {fallbackRate}% fallback rate
         </p>
       )}
 
       {/* Rules list */}
-      <div className="bg-[#0d1b2e]/60 border border-white/[0.08] rounded-xl overflow-hidden">
+      <div className="bg-[#0d1b2e]/60 border border-[var(--mh-hairline)] rounded-xl overflow-hidden">
         {/* Table header */}
-        <div className={`grid ${gridCols} bg-[#0a0f1c] text-[11px] uppercase text-white/40 px-4 py-3 gap-3`}>
+        <div className={`grid ${gridCols} bg-[var(--mh-panel)] text-[11px] uppercase text-[var(--mh-dim)] px-4 py-3 gap-3`}>
           <span>Purpose</span>
           <span>Vertical</span>
           <span>Drone type</span>
@@ -214,13 +214,13 @@ function DesignRuleContent({ engineerName, userId, isAdmin }: { engineerName: st
           [0, 1, 2].map((i) => (
             <div
               key={i}
-              className="h-12 mx-4 my-2 rounded bg-white/5 animate-pulse"
+              className="h-12 mx-4 my-2 rounded bg-[var(--mh-panel)] animate-pulse"
             />
           ))}
 
         {/* Empty state */}
         {!loadingRules && rules.length === 0 && (
-          <div className="py-16 text-center text-white/30">
+          <div className="py-16 text-center text-[var(--mh-dim)]">
             <Brain
               className="h-8 w-8 mx-auto mb-3 opacity-40"
               aria-hidden="true"
@@ -236,40 +236,40 @@ function DesignRuleContent({ engineerName, userId, isAdmin }: { engineerName: st
             <div
               key={rule.id}
               onDoubleClick={() => setSelected(rule)}
-              className={`grid ${gridCols} border-t border-white/[0.05] px-4 py-3 gap-3 items-center cursor-pointer hover:bg-white/[0.04] transition-colors`}
+              className={`grid ${gridCols} border-t border-[var(--mh-hairline)] px-4 py-3 gap-3 items-center cursor-pointer hover:bg-[var(--mh-panel)] transition-colors`}
             >
-              <span className="text-white/85 text-sm truncate">{rule.purpose}</span>
-              <span className="text-white/60 text-[12px] truncate">{rule.vertical}</span>
-              <span className="text-white/60 text-[12px]">{rule.drone_type ?? "—"}</span>
-              <span className="text-white/60 text-[12px]">
+              <span className="text-[var(--mh-paper)] text-sm truncate">{rule.purpose}</span>
+              <span className="text-[var(--mh-dim)] text-[12px] truncate">{rule.vertical}</span>
+              <span className="text-[var(--mh-dim)] text-[12px]">{rule.drone_type ?? "—"}</span>
+              <span className="text-[var(--mh-dim)] text-[12px]">
                 {rule.payload_min_kg !== null || rule.payload_max_kg !== null
                   ? `${rule.payload_min_kg ?? "?"} – ${rule.payload_max_kg ?? "?"} kg`
                   : "Any"}
               </span>
-              <span className="text-white/70 text-[12px] truncate">{rule.engineer_name}</span>
+              <span className="text-[var(--mh-dim)] text-[12px] truncate">{rule.engineer_name}</span>
               <span className={`text-[12px] font-mono ${starColor(rule.confidence_level)}`}>
                 {stars(rule.confidence_level)}
               </span>
-              <span className="text-white/40 text-[12px]">
+              <span className="text-[var(--mh-dim)] text-[12px]">
                 {new Date(rule.created_at).toLocaleDateString("en-IN")}
               </span>
               <span className="flex items-center">
                 <span
-                  className={`w-2 h-2 rounded-full ${rule.is_active ? "bg-emerald-400" : "bg-white/20"}`}
+                  className={`w-2 h-2 rounded-full ${rule.is_active ? "bg-emerald-400" : "bg-[var(--mh-panel)]"}`}
                 />
               </span>
               {isAdmin && (
-                <span className={`text-[12px] ${(rule.match_count ?? 0) > 0 ? 'text-white' : 'text-white/25'}`}>
+                <span className={`text-[12px] ${(rule.match_count ?? 0) > 0 ? 'text-[var(--mh-ink)]' : 'text-[var(--mh-ink)]/25'}`}>
                   {(rule.match_count ?? 0) > 0 ? rule.match_count : '—'}
                 </span>
               )}
               {isAdmin && (
-                <span className={`text-[12px] ${(rule.fallback_count ?? 0) > 0 ? 'text-amber-400' : 'text-white/25'}`}>
+                <span className={`text-[12px] ${(rule.fallback_count ?? 0) > 0 ? 'text-amber-400' : 'text-[var(--mh-ink)]/25'}`}>
                   {(rule.fallback_count ?? 0) > 0 ? rule.fallback_count : '—'}
                 </span>
               )}
               {isAdmin && (
-                <span className={`text-[12px] ${rule.last_matched_at ? 'text-white/60' : 'text-white/25'}`}>
+                <span className={`text-[12px] ${rule.last_matched_at ? 'text-[var(--mh-dim)]' : 'text-[var(--mh-ink)]/25'}`}>
                   {rule.last_matched_at ? relativeTime(rule.last_matched_at) : 'Never'}
                 </span>
               )}
@@ -278,7 +278,7 @@ function DesignRuleContent({ engineerName, userId, isAdmin }: { engineerName: st
 
         {/* Double-click hint */}
         {!loadingRules && rules.length > 0 && (
-          <div className="text-center py-2 text-[11px] text-white/20 border-t border-white/[0.05]">
+          <div className="text-center py-2 text-[11px] text-[var(--mh-ink)]/20 border-t border-[var(--mh-hairline)]">
             Double-click any row to view full details
           </div>
         )}

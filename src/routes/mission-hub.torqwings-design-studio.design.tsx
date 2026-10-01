@@ -25,20 +25,14 @@ const CONF_STYLE = {
 } as const;
 
 function twrColor(twr: number | null) {
-  if (twr === null) return 'text-white/50';
+  if (twr === null) return 'text-[var(--mh-dim)]';
   if (twr >= 2.0)  return 'text-emerald-400';
   if (twr >= 1.5)  return 'text-amber-400';
   return 'text-red-400';
 }
 
-const STUDIO_DARK_VARS = {
-  '--foreground':       'oklch(0.95 0.01 250)',
-  '--muted-foreground': 'oklch(0.58 0.04 250)',
-  '--border':           'oklch(0.95 0.01 250 / 15%)',
-  '--primary':          'oklch(0.65 0.15 235)',
-  '--card':             'oklch(0.14 0.04 250)',
-  '--muted':            'oklch(0.18 0.03 250)',
-} as React.CSSProperties;
+// Was STUDIO_DARK_VARS, forcing shadcn vars dark to match this page's old
+// dark theme. The site's :root defaults are already light-theme-appropriate.
 
 function DesignResult() {
   const project = useCurrentProject();
@@ -59,7 +53,7 @@ function DesignResult() {
 
   if (hasNewRec) {
     return (
-      <div className="space-y-6" style={STUDIO_DARK_VARS}>
+      <div className="space-y-6">
         <StudioTabNav />
         <header>
           <h1 className="text-2xl font-semibold">Drone Design Result</h1>
@@ -89,7 +83,7 @@ function DesignResult() {
     ["Risk Level", d.riskLevel],
   ];
   return (
-    <div className="space-y-6" style={STUDIO_DARK_VARS}>
+    <div className="space-y-6">
       <StudioTabNav />
       <header>
         <h1 className="text-2xl font-semibold">Drone Design Result</h1>
@@ -143,7 +137,7 @@ function NewDesignView({ rec }: { rec: IntelligenceResult }) {
               }`}>{rule.risk_level}</span>
             )}
             {ref && (
-              <span className="text-xs px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-white/50">
+              <span className="text-xs px-2.5 py-1 rounded-full bg-[var(--mh-panel)] border border-[var(--mh-hairline)] text-[var(--mh-dim)]">
                 Based on: {ref.name}
               </span>
             )}
@@ -171,7 +165,7 @@ function NewDesignView({ rec }: { rec: IntelligenceResult }) {
         {(rule?.cost_min_inr != null || rule?.cost_max_inr != null) && (
           <p className="text-sm text-muted-foreground">
             Estimated cost:{' '}
-            <span className="font-medium text-white">
+            <span className="font-medium text-[var(--mh-ink)]">
               ₹{(rule!.cost_min_inr ?? 0).toLocaleString('en-IN')} – ₹{(rule!.cost_max_inr ?? 0).toLocaleString('en-IN')}
             </span>
           </p>
@@ -263,10 +257,10 @@ function NewDesignView({ rec }: { rec: IntelligenceResult }) {
             {conf.label}
           </span>
           <span className="text-xs text-muted-foreground">
-            Rule score: <span className="text-white font-medium">{rec.rule_confidence_score}/100</span>
+            Rule score: <span className="text-[var(--mh-ink)] font-medium">{rec.rule_confidence_score}/100</span>
           </span>
           <span className="text-xs text-muted-foreground">
-            Reference score: <span className="text-white font-medium">{rec.reference_score}/100</span>
+            Reference score: <span className="text-[var(--mh-ink)] font-medium">{rec.reference_score}/100</span>
           </span>
         </div>
 

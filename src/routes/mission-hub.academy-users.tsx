@@ -79,7 +79,7 @@ function AcademyUsersPage() {
   if (authLoading || loading) {
     return (
       <MissionHubShell title="Academy Users">
-        <p className="text-sm text-white/40">Loading…</p>
+        <p className="text-sm text-[var(--mh-dim)]">Loading…</p>
       </MissionHubShell>
     );
   }
@@ -88,7 +88,7 @@ function AcademyUsersPage() {
     <MissionHubShell title="Academy Users">
       <MhCard className="overflow-hidden">
         {rows.length === 0 ? (
-          <div className="text-center py-12 text-white/40">
+          <div className="text-center py-12 text-[var(--mh-dim)]">
             <Inbox className="h-8 w-8 mx-auto mb-3" />
             <p className="text-sm">No pending academy waitlist entries.</p>
           </div>
@@ -96,7 +96,7 @@ function AcademyUsersPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-[#0a0f1c] text-[11px] uppercase text-white/40 text-left">
+                <tr className="bg-[var(--mh-panel)] text-[11px] uppercase text-[var(--mh-dim)] text-left">
                   {["Email", "Name", "Course", "Date", "Status"].map((h) => (
                     <th key={h} className="px-4 py-3 font-normal">{h}</th>
                   ))}
@@ -109,15 +109,15 @@ function AcademyUsersPage() {
                   return (
                     <tr
                       key={r.id}
-                      className="border-t border-white/[0.05]"
+                      className="border-t border-[var(--mh-hairline)]"
                       style={{ opacity: isProcessing ? 0.5 : 1 }}
                     >
-                      <td className="px-4 py-3 text-white/85">{r.email}</td>
-                      <td className="px-4 py-3 text-white/70 text-[12px]">{r.name ?? "—"}</td>
-                      <td className="px-4 py-3 text-white/70 text-[12px]">
+                      <td className="px-4 py-3 text-[var(--mh-paper)]">{r.email}</td>
+                      <td className="px-4 py-3 text-[var(--mh-dim)] text-[12px]">{r.name ?? "—"}</td>
+                      <td className="px-4 py-3 text-[var(--mh-dim)] text-[12px]">
                         {r.course_id ? (courseById.get(r.course_id)?.title ?? "—") : "Full bundle"}
                       </td>
-                      <td className="px-4 py-3 text-[12px] text-white/60">
+                      <td className="px-4 py-3 text-[12px] text-[var(--mh-dim)]">
                         {new Date(r.created_at).toLocaleDateString()}
                       </td>
                       <td className="px-4 py-3">
@@ -125,10 +125,10 @@ function AcademyUsersPage() {
                           value="pending"
                           disabled={isLocked}
                           onChange={(e) => { if (e.target.value === "enrolled") handleEnroll(r); }}
-                          className="bg-transparent border border-white/[0.1] rounded px-2 py-1 text-[11px] text-white"
+                          className="bg-transparent border border-[var(--mh-hairline)] rounded px-2 py-1 text-[11px] text-[var(--mh-ink)]"
                         >
-                          <option value="pending" style={{ color: "#fff", background: "#1a2035" }}>Pending</option>
-                          <option value="enrolled" style={{ color: "#fff", background: "#1a2035" }}>Enrolled</option>
+                          <option value="pending" style={{ color: "#fff", background: "var(--mh-bg)" }}>Pending</option>
+                          <option value="enrolled" style={{ color: "#fff", background: "var(--mh-bg)" }}>Enrolled</option>
                         </select>
                       </td>
                     </tr>

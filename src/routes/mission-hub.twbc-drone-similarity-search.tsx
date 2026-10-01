@@ -9,10 +9,10 @@ function SimilaritySearchPage() {
   return (
     <MissionHubShell title="Similarity Search">
       <MhCard className="p-8 text-center">
-        <div className="text-white text-lg mb-2" style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 500 }}>
+        <div className="text-[var(--mh-ink)] text-lg mb-2" style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 500 }}>
           Similarity Search
         </div>
-        <p className="text-[13px] text-white/50">Find similar drone designs using vector-based semantic search. Coming soon.</p>
+        <p className="text-[13px] text-[var(--mh-dim)]">Find similar drone designs using vector-based semantic search. Coming soon.</p>
       </MhCard>
     </MissionHubShell>
   );
