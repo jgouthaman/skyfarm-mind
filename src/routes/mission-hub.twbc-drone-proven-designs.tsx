@@ -87,14 +87,14 @@ function ProvenDesignsContent() {
     <div style={{ fontFamily: "Inter, system-ui, sans-serif" }}>
       {/* ── Header ── */}
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-8">
-        <p className="text-[13px] text-white/50 max-w-lg self-center">
+        <p className="text-[13px] text-[var(--mh-dim)] max-w-lg self-center">
           Validated drone configurations approved by the engineering team. Use
           these as starting points or reference baselines for new projects.
         </p>
         {isAdmin && (
           <button
             onClick={() => setModalOpen(true)}
-            className="inline-flex items-center gap-2 shrink-0 rounded-lg px-4 py-2.5 text-[13px] text-white transition-colors hover:opacity-90"
+            className="inline-flex items-center gap-2 shrink-0 rounded-lg px-4 py-2.5 text-[13px] text-[var(--mh-ink)] transition-colors hover:opacity-90"
             style={{ background: "#185FA5", fontFamily: "'Space Grotesk', sans-serif", fontWeight: 500 }}
           >
             <Plus className="h-4 w-4" />
@@ -116,19 +116,19 @@ function ProvenDesignsContent() {
       {/* ── Search + Filters ── */}
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
         <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30 pointer-events-none" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--mh-dim)] pointer-events-none" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search designs, purpose, drone type…"
-            className="w-full h-9 bg-[#141928] border rounded-lg pl-9 pr-3 text-sm text-white/80 placeholder-white/30 outline-none focus:border-[#378ADD]/50"
-            style={{ borderColor: "rgba(255,255,255,0.1)" }}
+            className="w-full h-9 bg-[var(--mh-bg)] border rounded-lg pl-9 pr-3 text-sm text-[var(--mh-paper)] placeholder-white/30 outline-none focus:border-[#378ADD]/50"
+            style={{ borderColor: "var(--mh-hairline)" }}
           />
           {search && (
             <button
               onClick={() => setSearch("")}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--mh-dim)] hover:text-[var(--mh-ink)]/60"
             >
               <X className="h-3.5 w-3.5" />
             </button>
@@ -147,7 +147,7 @@ function ProvenDesignsContent() {
                 style={
                   active
                     ? { background: c.bg, color: c.text, borderColor: c.text + "55" }
-                    : { background: "transparent", color: "rgba(255,255,255,0.4)", borderColor: "rgba(255,255,255,0.12)" }
+                    : { background: "transparent", color: "var(--mh-dim)", borderColor: "var(--mh-hairline)" }
                 }
               >
                 {v}
@@ -157,8 +157,8 @@ function ProvenDesignsContent() {
           {activeVerticals.length > 0 && (
             <button
               onClick={() => setActiveVerticals([])}
-              className="rounded-full px-3 py-1 text-[12px] text-white/30 hover:text-white/60 border transition-colors"
-              style={{ borderColor: "rgba(255,255,255,0.08)" }}
+              className="rounded-full px-3 py-1 text-[12px] text-[var(--mh-dim)] hover:text-[var(--mh-ink)]/60 border transition-colors"
+              style={{ borderColor: "rgba(62,124,166,0.08)" }}
             >
               Clear
             </button>
@@ -170,7 +170,7 @@ function ProvenDesignsContent() {
               style={
                 pendingOnly
                   ? { background: "rgba(245,158,11,0.12)", color: "#fbbf24", borderColor: "#fbbf2455" }
-                  : { background: "transparent", color: "rgba(255,255,255,0.4)", borderColor: "rgba(255,255,255,0.12)" }
+                  : { background: "transparent", color: "var(--mh-dim)", borderColor: "var(--mh-hairline)" }
               }
             >
               <Clock className="h-3 w-3" />
@@ -187,7 +187,7 @@ function ProvenDesignsContent() {
             <div
               key={i}
               className="rounded-[14px] h-64 animate-pulse"
-              style={{ background: "#141928", border: "0.5px solid rgba(255,255,255,0.08)" }}
+              style={{ background: "var(--mh-bg)", border: "0.5px solid rgba(62,124,166,0.08)" }}
             />
           ))}
         </div>
@@ -196,7 +196,7 @@ function ProvenDesignsContent() {
           <p className="text-[13px] text-[#f87171]">{error}</p>
         </div>
       ) : displayedDesigns.length === 0 ? (
-        <div className="text-center py-20 text-white/30">
+        <div className="text-center py-20 text-[var(--mh-dim)]">
           <p className="text-sm">No designs match your filters.</p>
         </div>
       ) : (
@@ -251,7 +251,7 @@ function StatCard({ label, value, accent }: { label: string; value: number; acce
   return (
     <div
       className="rounded-[14px] p-5"
-      style={{ background: "#141928", border: "0.5px solid rgba(255,255,255,0.08)" }}
+      style={{ background: "var(--mh-bg)", border: "0.5px solid rgba(62,124,166,0.08)" }}
     >
       <div
         className="text-3xl"
@@ -259,7 +259,7 @@ function StatCard({ label, value, accent }: { label: string; value: number; acce
       >
         {value}
       </div>
-      <div className="mt-1 text-[12px] text-white/50">{label}</div>
+      <div className="mt-1 text-[12px] text-[var(--mh-dim)]">{label}</div>
     </div>
   );
 }
@@ -289,19 +289,19 @@ function DesignCard({
 
   return (
     <div
-      className="rounded-[14px] flex flex-col gap-4 p-5 transition-colors hover:border-white/[0.14]"
-      style={{ background: "#141928", border: "0.5px solid rgba(255,255,255,0.08)" }}
+      className="rounded-[14px] flex flex-col gap-4 p-5 transition-colors hover:border-[var(--mh-hairline)]"
+      style={{ background: "var(--mh-bg)", border: "0.5px solid rgba(62,124,166,0.08)" }}
     >
       {/* Header */}
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
           <h3
-            className="text-white text-[15px] truncate"
+            className="text-[var(--mh-ink)] text-[15px] truncate"
             style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 500 }}
           >
             {design.name}
           </h3>
-          <p className="mt-0.5 text-[12px] text-white/50 line-clamp-2">{design.description}</p>
+          <p className="mt-0.5 text-[12px] text-[var(--mh-dim)] line-clamp-2">{design.description}</p>
         </div>
         <ApprovalBadge status={design.approval_status} />
       </div>
@@ -322,12 +322,12 @@ function DesignCard({
       {/* Confidence bar */}
       <div>
         <div className="flex items-center justify-between mb-1.5">
-          <span className="text-[11px] uppercase tracking-wider text-white/30">Confidence</span>
+          <span className="text-[11px] uppercase tracking-wider text-[var(--mh-dim)]">Confidence</span>
           <span className="text-[12px] font-medium" style={{ color: scoreColor }}>
             {design.confidence_score}%
           </span>
         </div>
-        <div className="h-1.5 rounded-full bg-white/[0.08] overflow-hidden">
+        <div className="h-1.5 rounded-full bg-[var(--mh-panel)] overflow-hidden">
           <div
             className="h-full rounded-full transition-all"
             style={{ width: `${design.confidence_score}%`, background: scoreColor }}
@@ -339,8 +339,8 @@ function DesignCard({
       <div className="flex gap-2 pt-1">
         <button
           onClick={onView}
-          className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-lg border py-2 text-[12px] text-white/70 hover:text-white hover:border-white/25 transition-colors"
-          style={{ borderColor: "rgba(255,255,255,0.12)" }}
+          className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-lg border py-2 text-[12px] text-[var(--mh-dim)] hover:text-[var(--mh-ink)] hover:border-[var(--mh-hairline)] transition-colors"
+          style={{ borderColor: "var(--mh-hairline)" }}
         >
           <Eye className="h-3.5 w-3.5" /> View
         </button>
@@ -417,25 +417,25 @@ function ViewDesignModal({
     >
       <div
         className="relative w-full max-w-2xl rounded-2xl p-8"
-        style={{ background: "#141928", border: "0.5px solid rgba(255,255,255,0.12)" }}
+        style={{ background: "var(--mh-bg)", border: "0.5px solid var(--mh-hairline)" }}
         onClick={(e) => e.stopPropagation()}
       >
-        <button onClick={onClose} className="absolute top-4 right-4 text-white/40 hover:text-white text-xl leading-none">×</button>
+        <button onClick={onClose} className="absolute top-4 right-4 text-[var(--mh-dim)] hover:text-[var(--mh-ink)] text-xl leading-none">×</button>
 
         <div className="flex items-start gap-3 flex-wrap mb-2">
-          <h2 className="text-white text-xl flex-1" style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600 }}>
+          <h2 className="text-[var(--mh-ink)] text-xl flex-1" style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600 }}>
             {design.name}
           </h2>
           <ApprovalBadge status={design.approval_status} />
         </div>
-        <p className="text-[13px] text-white/55 mb-4">{design.description}</p>
+        <p className="text-[13px] text-[var(--mh-dim)] mb-4">{design.description}</p>
 
         <div className="flex flex-wrap gap-1.5 mb-6">
           {design.vertical && <VerticalBadge vertical={design.vertical} />}
         </div>
 
         <SectionLabel>Purpose</SectionLabel>
-        <p className="text-sm text-white/70 mb-5">{design.purpose}</p>
+        <p className="text-sm text-[var(--mh-dim)] mb-5">{design.purpose}</p>
 
         <SectionLabel>Drone Specifications</SectionLabel>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mb-5">
@@ -449,7 +449,7 @@ function ViewDesignModal({
 
         <SectionLabel>Confidence Score</SectionLabel>
         <div className="flex items-center gap-3 mb-5">
-          <div className="flex-1 h-2 rounded-full bg-white/[0.08] overflow-hidden">
+          <div className="flex-1 h-2 rounded-full bg-[var(--mh-panel)] overflow-hidden">
             <div className="h-full rounded-full" style={{ width: `${design.confidence_score}%`, background: scoreColor }} />
           </div>
           <span className="text-sm font-medium shrink-0" style={{ color: scoreColor }}>{design.confidence_score}%</span>
@@ -458,7 +458,7 @@ function ViewDesignModal({
         {design.engineer_notes && (
           <>
             <SectionLabel>Engineer Notes</SectionLabel>
-            <p className="text-sm text-white/60 rounded-xl p-4 mb-6" style={{ background: "rgba(255,255,255,0.04)" }}>
+            <p className="text-sm text-[var(--mh-dim)] rounded-xl p-4 mb-6" style={{ background: "rgba(62,124,166,0.08)" }}>
               {design.engineer_notes}
             </p>
           </>
@@ -487,11 +487,11 @@ function ViewDesignModal({
           </div>
         )}
 
-        <div className="flex justify-between items-center pt-4 border-t" style={{ borderColor: "rgba(255,255,255,0.08)" }}>
-          <span className="text-[12px] text-white/30">Added {design.created_at?.split("T")[0] ?? ""}</span>
+        <div className="flex justify-between items-center pt-4 border-t" style={{ borderColor: "rgba(62,124,166,0.08)" }}>
+          <span className="text-[12px] text-[var(--mh-dim)]">Added {design.created_at?.split("T")[0] ?? ""}</span>
           <button
             onClick={onUseAsBase}
-            className="inline-flex items-center gap-2 rounded-lg px-5 py-2 text-[13px] text-white hover:opacity-90 transition-opacity"
+            className="inline-flex items-center gap-2 rounded-lg px-5 py-2 text-[13px] text-[var(--mh-ink)] hover:opacity-90 transition-opacity"
             style={{ background: "#185FA5" }}
           >
             <Copy className="h-4 w-4" /> Use as base
@@ -568,15 +568,15 @@ function AddDesignModal({
     >
       <div
         className="relative w-full max-w-2xl rounded-2xl p-8 my-auto"
-        style={{ background: "#141928", border: "0.5px solid rgba(255,255,255,0.12)" }}
+        style={{ background: "var(--mh-bg)", border: "0.5px solid var(--mh-hairline)" }}
         onClick={(e) => e.stopPropagation()}
       >
-        <button onClick={onClose} className="absolute top-4 right-4 text-white/40 hover:text-white text-xl leading-none">×</button>
+        <button onClick={onClose} className="absolute top-4 right-4 text-[var(--mh-dim)] hover:text-[var(--mh-ink)] text-xl leading-none">×</button>
 
-        <h2 className="text-white text-xl mb-1" style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600 }}>
+        <h2 className="text-[var(--mh-ink)] text-xl mb-1" style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600 }}>
           Add Proven Design
         </h2>
-        <p className="text-[13px] text-white/45 mb-6">Submit a validated configuration to the proven designs library.</p>
+        <p className="text-[13px] text-[var(--mh-ink)]/45 mb-6">Submit a validated configuration to the proven designs library.</p>
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <Field label="Design Name" required>
@@ -604,7 +604,7 @@ function AddDesignModal({
                     className="rounded-full px-3 py-1 text-[12px] border transition-all"
                     style={active
                       ? { background: c.bg, color: c.text, borderColor: c.text + "55" }
-                      : { background: "transparent", color: "rgba(255,255,255,0.4)", borderColor: "rgba(255,255,255,0.12)" }}>
+                      : { background: "transparent", color: "var(--mh-dim)", borderColor: "var(--mh-hairline)" }}>
                     {v}
                   </button>
                 );
@@ -619,7 +619,7 @@ function AddDesignModal({
                   <option value="">Select…</option>
                   {DRONE_TYPES.map((t) => <option key={t}>{t}</option>)}
                 </select>
-                <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-white/30" />
+                <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[var(--mh-dim)]" />
               </div>
             </Field>
             <Field label="Frame Size">
@@ -646,7 +646,7 @@ function AddDesignModal({
                   <option value="">Select…</option>
                   {MOTOR_CLASSES.map((m) => <option key={m}>{m}</option>)}
                 </select>
-                <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-white/30" />
+                <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[var(--mh-dim)]" />
               </div>
             </Field>
             <Field label="Battery">
@@ -664,7 +664,7 @@ function AddDesignModal({
                 {form.confidence_score}
               </span>
             </div>
-            <div className="mt-2 h-1.5 rounded-full bg-white/[0.08] overflow-hidden">
+            <div className="mt-2 h-1.5 rounded-full bg-[var(--mh-panel)] overflow-hidden">
               <div className="h-full rounded-full transition-all" style={{ width: `${form.confidence_score}%`, background: scoreColor }} />
             </div>
           </Field>
@@ -681,18 +681,18 @@ function AddDesignModal({
                 <option value="approved">Approved</option>
                 <option value="rejected">Rejected</option>
               </select>
-              <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-white/30" />
+              <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[var(--mh-dim)]" />
             </div>
           </Field>
 
-          <div className="flex justify-end gap-3 pt-4 border-t" style={{ borderColor: "rgba(255,255,255,0.08)" }}>
+          <div className="flex justify-end gap-3 pt-4 border-t" style={{ borderColor: "rgba(62,124,166,0.08)" }}>
             <button type="button" onClick={onClose} disabled={saving}
-              className="rounded-lg border px-5 py-2 text-[13px] text-white/60 hover:text-white transition-colors disabled:opacity-50"
-              style={{ borderColor: "rgba(255,255,255,0.12)" }}>
+              className="rounded-lg border px-5 py-2 text-[13px] text-[var(--mh-dim)] hover:text-[var(--mh-ink)] transition-colors disabled:opacity-50"
+              style={{ borderColor: "var(--mh-hairline)" }}>
               Cancel
             </button>
             <button type="submit" disabled={saving}
-              className="rounded-lg px-6 py-2 text-[13px] text-white hover:opacity-90 transition-opacity disabled:opacity-70 inline-flex items-center gap-2"
+              className="rounded-lg px-6 py-2 text-[13px] text-[var(--mh-ink)] hover:opacity-90 transition-opacity disabled:opacity-70 inline-flex items-center gap-2"
               style={{ background: "#185FA5", fontFamily: "'Space Grotesk', sans-serif", fontWeight: 500 }}>
               {saving && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
               Save design
@@ -704,18 +704,18 @@ function AddDesignModal({
       <style>{`
         .mh-input {
           width: 100%;
-          background: rgba(255,255,255,0.04);
-          border: 0.5px solid rgba(255,255,255,0.10);
+          background: rgba(62,124,166,0.08);
+          border: 0.5px solid var(--mh-hairline);
           border-radius: 8px;
           padding: 8px 12px;
           font-size: 13px;
-          color: rgba(255,255,255,0.85);
+          color: var(--mh-paper);
           outline: none;
           transition: border-color 0.15s;
         }
-        .mh-input::placeholder { color: rgba(255,255,255,0.25); }
+        .mh-input::placeholder { color: var(--mh-dim); }
         .mh-input:focus { border-color: rgba(55,138,221,0.50); }
-        .mh-input option { background: #141928; }
+        .mh-input option { background: var(--mh-bg); }
       `}</style>
     </div>
   );
@@ -729,7 +729,7 @@ function ApprovalBadge({ status }: { status: string }) {
     pending:  { icon: Clock,         bg: "rgba(245,158,11,0.12)", text: "#fbbf24", label: "Pending"  },
     rejected: { icon: XCircle,       bg: "rgba(239,68,68,0.12)",  text: "#f87171", label: "Rejected" },
   } as Record<string, { icon: React.ElementType; bg: string; text: string; label: string }>)[status]
-    ?? { icon: Clock, bg: "rgba(255,255,255,0.08)", text: "rgba(255,255,255,0.4)", label: status };
+    ?? { icon: Clock, bg: "rgba(62,124,166,0.08)", text: "var(--mh-dim)", label: status };
   const Icon = cfg.icon;
   return (
     <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] shrink-0"
@@ -741,7 +741,7 @@ function ApprovalBadge({ status }: { status: string }) {
 }
 
 function VerticalBadge({ vertical }: { vertical: string }) {
-  const c = VERTICAL_COLOR[vertical] ?? { bg: "rgba(255,255,255,0.08)", text: "rgba(255,255,255,0.5)" };
+  const c = VERTICAL_COLOR[vertical] ?? { bg: "rgba(62,124,166,0.08)", text: "var(--mh-dim)" };
   return (
     <span className="rounded-full px-2.5 py-0.5 text-[11px]" style={{ background: c.bg, color: c.text }}>
       {vertical}
@@ -751,32 +751,32 @@ function VerticalBadge({ vertical }: { vertical: string }) {
 
 function SpecPill({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg px-3 py-2" style={{ background: "rgba(255,255,255,0.04)" }}>
-      <div className="text-[10px] uppercase tracking-wide text-white/30">{label}</div>
-      <div className="text-[12px] text-white/75 mt-0.5 truncate">{value}</div>
+    <div className="rounded-lg px-3 py-2" style={{ background: "rgba(62,124,166,0.08)" }}>
+      <div className="text-[10px] uppercase tracking-wide text-[var(--mh-dim)]">{label}</div>
+      <div className="text-[12px] text-[var(--mh-paper)] mt-0.5 truncate">{value}</div>
     </div>
   );
 }
 
 function SpecCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg px-3 py-2" style={{ background: "rgba(255,255,255,0.04)" }}>
-      <div className="text-[10px] uppercase tracking-wide text-white/30">{label}</div>
-      <div className="text-sm text-white/80 mt-0.5">{value}</div>
+    <div className="rounded-lg px-3 py-2" style={{ background: "rgba(62,124,166,0.08)" }}>
+      <div className="text-[10px] uppercase tracking-wide text-[var(--mh-dim)]">{label}</div>
+      <div className="text-sm text-[var(--mh-paper)] mt-0.5">{value}</div>
     </div>
   );
 }
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <p className="text-[11px] uppercase tracking-widest text-white/30 font-medium mb-3">{children}</p>
+    <p className="text-[11px] uppercase tracking-widest text-[var(--mh-dim)] font-medium mb-3">{children}</p>
   );
 }
 
 function Field({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
   return (
     <div>
-      <label className="block text-[11px] uppercase tracking-wider text-white/40 mb-1.5">
+      <label className="block text-[11px] uppercase tracking-wider text-[var(--mh-dim)] mb-1.5">
         {label}{required && <span className="text-[#378ADD] ml-0.5">*</span>}
       </label>
       {children}

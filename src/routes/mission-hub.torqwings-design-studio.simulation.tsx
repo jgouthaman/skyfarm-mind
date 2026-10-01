@@ -73,7 +73,7 @@ function SimulationLab() {
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => setParams(initial)}>Reset</Button>
           <Button variant="outline" onClick={() => nav({ to: "/mission-hub/torqwings-design-studio/advisor" })}>Ask AI Advisor</Button>
-          <Button onClick={save} className="bg-sky-500 hover:bg-sky-600 text-white">Save Simulation</Button>
+          <Button onClick={save} className="bg-sky-500 hover:bg-sky-600 text-[var(--mh-ink)]">Save Simulation</Button>
         </div>
       </header>
 
@@ -195,7 +195,7 @@ function FormulaPopover() {
     <div className="fixed bottom-6 right-6 z-50">
       <Popover>
         <PopoverTrigger asChild>
-          <Button size="sm" className="rounded-full shadow-lg bg-sky-500 hover:bg-sky-600 text-white gap-2">
+          <Button size="sm" className="rounded-full shadow-lg bg-sky-500 hover:bg-sky-600 text-[var(--mh-ink)] gap-2">
             <Info className="h-4 w-4" /> How it's calculated
           </Button>
         </PopoverTrigger>

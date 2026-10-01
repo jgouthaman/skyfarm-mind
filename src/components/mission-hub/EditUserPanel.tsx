@@ -59,7 +59,7 @@ export function EditUserPanel({
       open={!!editing}
       onClose={onClose}
       title={
-        <h3 className="text-white text-lg" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+        <h3 className="text-lg" style={{ fontFamily: "'Space Grotesk', sans-serif", color: "var(--mh-ink)" }}>
           {canEdit ? "Edit user" : "User details"}
         </h3>
       }
@@ -70,12 +70,12 @@ export function EditUserPanel({
             <Inp label="Full name" value={name} setValue={setName} />
             <Field label="Email" value={editing.email} />
             <div>
-              <label className="block text-[11px] uppercase tracking-wider text-white/50 mb-1.5">Role</label>
+              <label className="block text-[11px] uppercase tracking-wider mb-1.5" style={{ color: "var(--mh-dim)" }}>Role</label>
               <select
                 value={role}
                 onChange={(e) => setRole(e.target.value as Role)}
-                className="w-full bg-[#1a2035] rounded-lg px-3.5 py-2.5 text-sm text-white"
-                style={{ border: "0.5px solid rgba(255,255,255,0.1)" }}
+                className="w-full rounded-lg px-3.5 py-2.5 text-sm"
+                style={{ background: "var(--mh-panel)", border: "1px solid var(--mh-hairline)", color: "var(--mh-ink)" }}
               >
                 <option value="user">User</option>
                 <option value="admin">Admin</option>
@@ -83,13 +83,13 @@ export function EditUserPanel({
               </select>
             </div>
             <div>
-              <label className="block text-[11px] uppercase tracking-wider text-white/50 mb-1.5">Industries</label>
+              <label className="block text-[11px] uppercase tracking-wider mb-1.5" style={{ color: "var(--mh-dim)" }}>Industries</label>
               <div className="grid grid-cols-2 gap-2">
                 {industries.map((ind) => (
                   <label
                     key={ind.id}
-                    className="flex items-center gap-2 text-[13px] text-white/80 bg-[#1a2035] rounded-lg px-3 py-2 cursor-pointer"
-                    style={{ border: "0.5px solid rgba(255,255,255,0.08)" }}
+                    className="flex items-center gap-2 text-[13px] rounded-lg px-3 py-2 cursor-pointer"
+                    style={{ background: "var(--mh-panel)", border: "1px solid var(--mh-hairline)", color: "var(--mh-paper)" }}
                   >
                     <input
                       type="checkbox"
@@ -110,18 +110,20 @@ export function EditUserPanel({
             <button
               onClick={handleSave}
               disabled={submitting}
-              className="w-full rounded-lg bg-[#185FA5] hover:bg-[#378ADD] text-white py-2.5 text-sm"
+              className="w-full rounded-lg text-white py-2.5 text-sm transition-colors"
+              style={{ background: "var(--mh-blue)" }}
             >
               Save changes
             </button>
             <button
               onClick={handleToggleStatus}
               disabled={submitting}
-              className={`w-full rounded-lg py-2.5 text-sm ${
+              className="w-full rounded-lg py-2.5 text-sm border"
+              style={
                 isActive
-                  ? "bg-[rgba(163,45,45,0.2)] text-[#F09595] border border-[rgba(163,45,45,0.4)]"
-                  : "bg-[rgba(29,158,117,0.15)] text-[#1D9E75] border border-[rgba(29,158,117,0.4)]"
-              }`}
+                  ? { background: "rgba(188,54,54,0.1)", color: "#B23A3A", borderColor: "rgba(188,54,54,0.35)" }
+                  : { background: "rgba(29,158,117,0.1)", color: "#1D9E75", borderColor: "rgba(29,158,117,0.35)" }
+              }
             >
               {isActive ? "Deactivate account" : "Reactivate"}
             </button>
@@ -158,14 +160,14 @@ function Inp({
 }) {
   return (
     <div>
-      <label className="block text-[11px] uppercase tracking-wider text-white/50 mb-1.5">{label}</label>
+      <label className="block text-[11px] uppercase tracking-wider mb-1.5" style={{ color: "var(--mh-dim)" }}>{label}</label>
       <input
         type={type}
         value={value}
         required={required}
         onChange={(e) => setValue(e.target.value)}
-        className="w-full bg-[#1a2035] rounded-lg px-3.5 py-2.5 text-sm text-white outline-none focus:border-[#378ADD]/60"
-        style={{ border: "0.5px solid rgba(255,255,255,0.1)" }}
+        className="w-full rounded-lg px-3.5 py-2.5 text-sm outline-none"
+        style={{ background: "var(--mh-panel)", border: "1px solid var(--mh-hairline)", color: "var(--mh-ink)" }}
       />
     </div>
   );

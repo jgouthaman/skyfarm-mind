@@ -92,7 +92,7 @@ function Advisor() {
         </div>
         <div className="mt-4 flex gap-2 border-t border-border/60 pt-4">
           <Input value={input} onChange={(e) => setInput(e.target.value)} placeholder="Ask the advisor…" onKeyDown={(e) => e.key === "Enter" && send()} />
-          <Button onClick={() => send()} disabled={m.isPending} className="bg-sky-500 hover:bg-sky-600 text-white"><Send className="h-4 w-4" /></Button>
+          <Button onClick={() => send()} disabled={m.isPending} className="bg-sky-500 hover:bg-sky-600 text-[var(--mh-ink)]"><Send className="h-4 w-4" /></Button>
         </div>
       </div>
 

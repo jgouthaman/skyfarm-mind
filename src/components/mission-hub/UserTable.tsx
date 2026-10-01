@@ -4,8 +4,8 @@ import type { Industry, MhUser, UserStatus } from "@/lib/mission-hub/types";
 
 const STATUS_STYLE: Record<UserStatus, { dot: string; text: string; label: string }> = {
   active: { dot: "bg-[#1D9E75]", text: "text-[#1D9E75]", label: "Active" },
-  inactive: { dot: "bg-white/30", text: "text-white/40", label: "Inactive" },
-  pending: { dot: "bg-[#EF9F27]", text: "text-[#EF9F27]", label: "Pending" },
+  inactive: { dot: "bg-[var(--mh-dim)]", text: "text-[var(--mh-dim)]", label: "Inactive" },
+  pending: { dot: "bg-[#B8791F]", text: "text-[#B8791F]", label: "Pending" },
 };
 
 export function UserTable({
@@ -26,7 +26,7 @@ export function UserTable({
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="bg-[#0a0f1c] text-[11px] uppercase tracking-wider text-white/40 text-left">
+            <tr className="text-[11px] uppercase tracking-wider text-left" style={{ background: "var(--mh-panel)", color: "var(--mh-dim)" }}>
               <th className="px-4 py-3 font-normal">Name</th>
               <th className="px-4 py-3 font-normal">Email</th>
               <th className="px-4 py-3 font-normal">Role</th>
@@ -41,9 +41,9 @@ export function UserTable({
               const ids = u.industries ?? [];
               const status = STATUS_STYLE[u.status] ?? STATUS_STYLE.inactive;
               return (
-                <tr key={u.id} className="border-t border-white/[0.05] hover:bg-white/[0.03]">
-                  <td className="px-4 py-3 text-white/90">{u.full_name}</td>
-                  <td className="px-4 py-3 text-white/70 text-[12px]">{u.email}</td>
+                <tr key={u.id} className="border-t transition-colors hover:bg-[var(--mh-panel)]" style={{ borderColor: "var(--mh-hairline)" }}>
+                  <td className="px-4 py-3" style={{ color: "var(--mh-ink)" }}>{u.full_name}</td>
+                  <td className="px-4 py-3 text-[12px]" style={{ color: "var(--mh-dim)" }}>{u.email}</td>
                   <td className="px-4 py-3">
                     <RoleBadge role={u.role} />
                   </td>
@@ -53,12 +53,12 @@ export function UserTable({
                         <span
                           key={id}
                           className="text-[11px] px-1.5 py-0.5 rounded"
-                          style={{ background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.6)" }}
+                          style={{ background: "var(--mh-panel)", color: "var(--mh-dim)" }}
                         >
                           {industryName(id)}
                         </span>
                       ))}
-                      {ids.length > 3 && <span className="text-[11px] text-white/40">+{ids.length - 3}</span>}
+                      {ids.length > 3 && <span className="text-[11px]" style={{ color: "var(--mh-dim)" }}>+{ids.length - 3}</span>}
                     </div>
                   </td>
                   <td className="px-4 py-3 text-[12px]">
@@ -67,11 +67,12 @@ export function UserTable({
                       {status.label}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-[12px] text-white/60">{new Date(u.created_at).toLocaleDateString()}</td>
+                  <td className="px-4 py-3 text-[12px]" style={{ color: "var(--mh-dim)" }}>{new Date(u.created_at).toLocaleDateString()}</td>
                   <td className="px-4 py-3 text-right">
                     <button
                       onClick={() => onSelect(u)}
-                      className="text-[12px] border border-white/[0.1] rounded px-2.5 py-1 text-white/70 hover:text-white"
+                      className="text-[12px] border rounded px-2.5 py-1 transition-colors"
+                      style={{ borderColor: "var(--mh-hairline)", color: "var(--mh-dim)" }}
                     >
                       {isSuper ? "Edit" : "View"}
                     </button>

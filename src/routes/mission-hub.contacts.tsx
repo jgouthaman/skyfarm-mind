@@ -14,7 +14,7 @@ const STATUS = [
   { value: "new", label: "New", color: "#378ADD", bg: "rgba(55,138,221,0.15)" },
   { value: "replied", label: "Replied", color: "#EF9F27", bg: "rgba(239,159,39,0.15)" },
   { value: "in_progress", label: "In progress", color: "#EF9F27", bg: "rgba(239,159,39,0.1)" },
-  { value: "closed", label: "Closed", color: "rgba(255,255,255,0.6)", bg: "rgba(255,255,255,0.06)" },
+  { value: "closed", label: "Closed", color: "var(--mh-dim)", bg: "var(--mh-panel)" },
 ];
 
 function ContactsPage() {

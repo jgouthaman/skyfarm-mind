@@ -9,10 +9,10 @@ function RuleEnginePage() {
   return (
     <MissionHubShell title="Rule Engine">
       <MhCard className="p-8 text-center">
-        <div className="text-white text-lg mb-2" style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 500 }}>
+        <div className="text-[var(--mh-ink)] text-lg mb-2" style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 500 }}>
           Rule Engine
         </div>
-        <p className="text-[13px] text-white/50">Automated design rule evaluation and constraint checking. Coming soon.</p>
+        <p className="text-[13px] text-[var(--mh-dim)]">Automated design rule evaluation and constraint checking. Coming soon.</p>
       </MhCard>
     </MissionHubShell>
   );

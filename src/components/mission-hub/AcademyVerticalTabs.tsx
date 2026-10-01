@@ -151,8 +151,8 @@ export function AcademyVerticalTabs() {
             className="rounded-full px-4 py-1.5 text-sm transition-colors"
             style={
               tab === t.id
-                ? { background: "#2BB3B0", color: "#0a0f1c", fontWeight: 500 }
-                : { background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.6)" }
+                ? { background: "var(--mh-blue)", color: "#fff", fontWeight: 500 }
+                : { background: "var(--mh-panel)", color: "var(--mh-dim)" }
             }
           >
             {t.label}
@@ -161,7 +161,7 @@ export function AcademyVerticalTabs() {
       </div>
 
       {loading ? (
-        <p className="text-sm text-white/40">Loading…</p>
+        <p className="text-sm" style={{ color: "var(--mh-dim)" }}>Loading…</p>
       ) : (
         <>
           {tab === "courses" && (
@@ -179,7 +179,7 @@ export function AcademyVerticalTabs() {
 
 function EmptyState({ message }: { message: string }) {
   return (
-    <div className="text-center py-12 text-white/40">
+    <div className="text-center py-12" style={{ color: "var(--mh-dim)" }}>
       <Inbox className="h-8 w-8 mx-auto mb-3" />
       <p className="text-sm">{message}</p>
     </div>
@@ -191,7 +191,7 @@ function TableShell({ headers, children }: { headers: string[]; children: React.
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
-          <tr className="bg-[#0a0f1c] text-[11px] uppercase text-white/40 text-left">
+          <tr className="text-[11px] uppercase text-left" style={{ background: "var(--mh-panel)", color: "var(--mh-dim)" }}>
             {headers.map((h) => (
               <th key={h} className="px-4 py-3 font-normal">{h}</th>
             ))}
@@ -242,56 +242,59 @@ function AddCourseForm({
     if (ok) onDone();
   }
 
+  const inputCls = "border rounded px-2 py-1.5 text-sm";
+  const inputStyle = { background: "var(--mh-bg)", borderColor: "var(--mh-hairline)", color: "var(--mh-ink)" } as const;
+
   return (
-    <form onSubmit={handleSubmit} className="px-5 py-4 border-b border-white/[0.08] grid grid-cols-2 gap-3">
-      <label className="flex flex-col gap-1 text-[11px] text-white/50">
+    <form onSubmit={handleSubmit} className="px-5 py-4 border-b grid grid-cols-2 gap-3" style={{ borderColor: "var(--mh-hairline)" }}>
+      <label className="flex flex-col gap-1 text-[11px]" style={{ color: "var(--mh-dim)" }}>
         Title
         <input
           value={form.title}
           onChange={(e) => setTitle(e.target.value)}
-          className="bg-transparent border border-white/[0.1] rounded px-2 py-1.5 text-sm text-white"
+          className={inputCls} style={inputStyle}
           required
         />
       </label>
-      <label className="flex flex-col gap-1 text-[11px] text-white/50">
+      <label className="flex flex-col gap-1 text-[11px]" style={{ color: "var(--mh-dim)" }}>
         Slug
         <input
           value={form.slug}
           onChange={(e) => { setSlugTouched(true); setForm((f) => ({ ...f, slug: e.target.value })); }}
-          className="bg-transparent border border-white/[0.1] rounded px-2 py-1.5 text-sm text-white"
+          className={inputCls} style={inputStyle}
           required
         />
       </label>
-      <label className="flex flex-col gap-1 text-[11px] text-white/50">
+      <label className="flex flex-col gap-1 text-[11px]" style={{ color: "var(--mh-dim)" }}>
         Level
         <input
           value={form.level}
           onChange={(e) => setForm((f) => ({ ...f, level: e.target.value }))}
-          className="bg-transparent border border-white/[0.1] rounded px-2 py-1.5 text-sm text-white"
+          className={inputCls} style={inputStyle}
         />
       </label>
-      <label className="flex flex-col gap-1 text-[11px] text-white/50">
+      <label className="flex flex-col gap-1 text-[11px]" style={{ color: "var(--mh-dim)" }}>
         Price (₹)
         <input
           type="number" min={0} value={form.price}
           onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))}
-          className="bg-transparent border border-white/[0.1] rounded px-2 py-1.5 text-sm text-white"
+          className={inputCls} style={inputStyle}
         />
       </label>
-      <label className="flex flex-col gap-1 text-[11px] text-white/50">
+      <label className="flex flex-col gap-1 text-[11px]" style={{ color: "var(--mh-dim)" }}>
         Hours
         <input
           type="number" min={0} value={form.hours}
           onChange={(e) => setForm((f) => ({ ...f, hours: e.target.value }))}
-          className="bg-transparent border border-white/[0.1] rounded px-2 py-1.5 text-sm text-white"
+          className={inputCls} style={inputStyle}
         />
       </label>
-      <label className="flex flex-col gap-1 text-[11px] text-white/50">
+      <label className="flex flex-col gap-1 text-[11px]" style={{ color: "var(--mh-dim)" }}>
         Projects
         <input
           type="number" min={0} value={form.project_count}
           onChange={(e) => setForm((f) => ({ ...f, project_count: e.target.value }))}
-          className="bg-transparent border border-white/[0.1] rounded px-2 py-1.5 text-sm text-white"
+          className={inputCls} style={inputStyle}
         />
       </label>
       <div className="col-span-2 flex items-center gap-2 mt-1">
@@ -299,14 +302,15 @@ function AddCourseForm({
           type="submit"
           disabled={saving}
           className="rounded-lg px-4 py-1.5 text-sm"
-          style={{ background: "#2BB3B0", color: "#0a0f1c", fontWeight: 500, opacity: saving ? 0.6 : 1 }}
+          style={{ background: "var(--mh-blue)", color: "#fff", fontWeight: 500, opacity: saving ? 0.6 : 1 }}
         >
           {saving ? "Adding…" : "Add course"}
         </button>
         <button
           type="button"
           onClick={onDone}
-          className="rounded-lg px-4 py-1.5 text-sm text-white/60 hover:text-white"
+          className="rounded-lg px-4 py-1.5 text-sm transition-colors"
+          style={{ color: "var(--mh-dim)" }}
         >
           Cancel
         </button>
@@ -331,7 +335,7 @@ function CoursesTab({
           <button
             onClick={() => setShowAdd(true)}
             className="rounded-lg px-4 py-1.5 text-sm"
-            style={{ background: "#2BB3B0", color: "#0a0f1c", fontWeight: 500 }}
+            style={{ background: "var(--mh-blue)", color: "#fff", fontWeight: 500 }}
           >
             + Add course
           </button>
@@ -344,20 +348,21 @@ function CoursesTab({
         ) : (
           <TableShell headers={["Title", "Level", "Price", "Hours", "Projects", "Status"]}>
             {rows.map((r) => (
-              <tr key={r.id} className="border-t border-white/[0.05]">
-                <td className="px-4 py-3 text-white/85">{r.title}</td>
-                <td className="px-4 py-3 text-white/70 text-[12px]">{r.level}</td>
-                <td className="px-4 py-3 text-white/70 text-[12px]">₹{Number(r.price).toLocaleString("en-IN")}</td>
-                <td className="px-4 py-3 text-white/70 text-[12px]">{r.hours}</td>
-                <td className="px-4 py-3 text-white/70 text-[12px]">{r.project_count}</td>
+              <tr key={r.id} className="border-t" style={{ borderColor: "var(--mh-hairline)" }}>
+                <td className="px-4 py-3" style={{ color: "var(--mh-paper)" }}>{r.title}</td>
+                <td className="px-4 py-3 text-[12px]" style={{ color: "var(--mh-dim)" }}>{r.level}</td>
+                <td className="px-4 py-3 text-[12px]" style={{ color: "var(--mh-dim)" }}>₹{Number(r.price).toLocaleString("en-IN")}</td>
+                <td className="px-4 py-3 text-[12px]" style={{ color: "var(--mh-dim)" }}>{r.hours}</td>
+                <td className="px-4 py-3 text-[12px]" style={{ color: "var(--mh-dim)" }}>{r.project_count}</td>
                 <td className="px-4 py-3">
                   <select
                     value={r.status}
                     onChange={(e) => onStatusChange(r.id, e.target.value)}
-                    className="bg-transparent border border-white/[0.1] rounded px-2 py-1 text-[11px] text-white"
+                    className="border rounded px-2 py-1 text-[11px]"
+                    style={{ background: "var(--mh-bg)", borderColor: "var(--mh-hairline)", color: "var(--mh-ink)" }}
                   >
                     {Object.entries(STATUS_DISPLAY_LABEL).map(([value, label]) => (
-                      <option key={value} value={value} style={{ color: "#fff", background: "#1a2035" }}>
+                      <option key={value} value={value}>
                         {label}
                       </option>
                     ))}
@@ -398,34 +403,38 @@ function AddModuleForm({
 
   if (sortedCourses.length === 0) {
     return (
-      <div className="px-5 py-4 border-b border-white/[0.08] text-sm text-white/50">
+      <div className="px-5 py-4 border-b text-sm" style={{ borderColor: "var(--mh-hairline)", color: "var(--mh-dim)" }}>
         Add a course first — modules need a course to belong to.
       </div>
     );
   }
 
+  const inputStyle = { background: "var(--mh-bg)", borderColor: "var(--mh-hairline)", color: "var(--mh-ink)" } as const;
+
   return (
-    <form onSubmit={handleSubmit} className="px-5 py-4 border-b border-white/[0.08] grid grid-cols-2 gap-3">
-      <label className="flex flex-col gap-1 text-[11px] text-white/50">
+    <form onSubmit={handleSubmit} className="px-5 py-4 border-b grid grid-cols-2 gap-3" style={{ borderColor: "var(--mh-hairline)" }}>
+      <label className="flex flex-col gap-1 text-[11px]" style={{ color: "var(--mh-dim)" }}>
         Course
         <select
           value={courseId}
           onChange={(e) => setCourseId(e.target.value)}
-          className="bg-transparent border border-white/[0.1] rounded px-2 py-1.5 text-sm text-white"
+          className="border rounded px-2 py-1.5 text-sm"
+          style={inputStyle}
         >
           {sortedCourses.map((c) => (
-            <option key={c.id} value={c.id} style={{ color: "#fff", background: "#1a2035" }}>
+            <option key={c.id} value={c.id}>
               {c.title}
             </option>
           ))}
         </select>
       </label>
-      <label className="flex flex-col gap-1 text-[11px] text-white/50">
+      <label className="flex flex-col gap-1 text-[11px]" style={{ color: "var(--mh-dim)" }}>
         Module title
         <input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          className="bg-transparent border border-white/[0.1] rounded px-2 py-1.5 text-sm text-white"
+          className="border rounded px-2 py-1.5 text-sm"
+          style={inputStyle}
           required
         />
       </label>
@@ -434,14 +443,15 @@ function AddModuleForm({
           type="submit"
           disabled={saving}
           className="rounded-lg px-4 py-1.5 text-sm"
-          style={{ background: "#2BB3B0", color: "#0a0f1c", fontWeight: 500, opacity: saving ? 0.6 : 1 }}
+          style={{ background: "var(--mh-blue)", color: "#fff", fontWeight: 500, opacity: saving ? 0.6 : 1 }}
         >
           {saving ? "Adding…" : "Add module"}
         </button>
         <button
           type="button"
           onClick={onDone}
-          className="rounded-lg px-4 py-1.5 text-sm text-white/60 hover:text-white"
+          className="rounded-lg px-4 py-1.5 text-sm transition-colors"
+          style={{ color: "var(--mh-dim)" }}
         >
           Cancel
         </button>
@@ -467,7 +477,7 @@ function ModulesTab({
           <button
             onClick={() => setShowAdd(true)}
             className="rounded-lg px-4 py-1.5 text-sm"
-            style={{ background: "#2BB3B0", color: "#0a0f1c", fontWeight: 500 }}
+            style={{ background: "var(--mh-blue)", color: "#fff", fontWeight: 500 }}
           >
             + Add module
           </button>
@@ -493,16 +503,16 @@ function ModulesTab({
             if (courseModules.length === 0) return null;
             return (
               <MhCard key={course.id} className="overflow-hidden">
-                <div className="px-5 py-3 border-b border-white/[0.08]">
-                  <h3 className="text-white text-sm" style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 500 }}>
+                <div className="px-5 py-3 border-b" style={{ borderColor: "var(--mh-hairline)" }}>
+                  <h3 className="text-sm" style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 500, color: "var(--mh-ink)" }}>
                     {course.title}
                   </h3>
                 </div>
                 <TableShell headers={["#", "Module"]}>
                   {courseModules.map((m) => (
-                    <tr key={m.id} className="border-t border-white/[0.05]">
-                      <td className="px-4 py-3 text-white/50 text-[12px]">{m.order_index}</td>
-                      <td className="px-4 py-3 text-white/85">{m.title}</td>
+                    <tr key={m.id} className="border-t" style={{ borderColor: "var(--mh-hairline)" }}>
+                      <td className="px-4 py-3 text-[12px]" style={{ color: "var(--mh-dim)" }}>{m.order_index}</td>
+                      <td className="px-4 py-3" style={{ color: "var(--mh-paper)" }}>{m.title}</td>
                     </tr>
                   ))}
                 </TableShell>
@@ -528,14 +538,14 @@ function UsersTab({
       ) : (
         <TableShell headers={["User", "Email", "Course", "Status", "Activated"]}>
           {rows.map((r) => (
-            <tr key={r.id} className="border-t border-white/[0.05]">
-              <td className="px-4 py-3 text-white/70 text-[12px]">{r.full_name}</td>
-              <td className="px-4 py-3 text-white/70 text-[12px]">{r.email}</td>
-              <td className="px-4 py-3 text-white/70 text-[12px]">
+            <tr key={r.id} className="border-t" style={{ borderColor: "var(--mh-hairline)" }}>
+              <td className="px-4 py-3 text-[12px]" style={{ color: "var(--mh-dim)" }}>{r.full_name}</td>
+              <td className="px-4 py-3 text-[12px]" style={{ color: "var(--mh-dim)" }}>{r.email}</td>
+              <td className="px-4 py-3 text-[12px]" style={{ color: "var(--mh-dim)" }}>
                 {r.course_id ? (courseById.get(r.course_id)?.title ?? "—") : "—"}
               </td>
-              <td className="px-4 py-3 text-[12px] text-white/70">{r.status}</td>
-              <td className="px-4 py-3 text-[12px] text-white/60">{new Date(r.activated_at).toLocaleDateString()}</td>
+              <td className="px-4 py-3 text-[12px]" style={{ color: "var(--mh-dim)" }}>{r.status}</td>
+              <td className="px-4 py-3 text-[12px]" style={{ color: "var(--mh-dim)" }}>{new Date(r.activated_at).toLocaleDateString()}</td>
             </tr>
           ))}
         </TableShell>

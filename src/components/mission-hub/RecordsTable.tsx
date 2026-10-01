@@ -12,7 +12,7 @@ export type ColumnDef = {
 };
 
 type Props = {
-  table: "destud_waitlist" | "destud_users" | "contacts";
+  table: "destud_waitlist" | "destud_users" | "contacts" | "Hangar_early_access";
   title?: string;
   searchFields: string[];
   columns: ColumnDef[];
@@ -25,6 +25,7 @@ type Props = {
 };
 
 const PAGE_SIZE = 20;
+const inputStyle = { background: "var(--mh-bg)", borderColor: "var(--mh-hairline)", color: "var(--mh-ink)" } as const;
 
 export function RecordsTable({
   table, title, searchFields, columns, filters = [], statusOptions = [], showStatus = true, detailFields, csvFilename, initialFilters = {},
@@ -126,19 +127,24 @@ export function RecordsTable({
     <div>
       <div className="flex items-center justify-between gap-3 mb-5">
         <div className="flex items-center gap-2.5">
-          <h2 className="text-[22px] text-white" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-            {title ?? (table === "destud_waitlist" ? "DeStud Users" : "Contacts")}
-          </h2>
-          <span
-            className="text-[12px] px-2.5 py-0.5 rounded-full"
-            style={{ background: "rgba(55,138,221,0.12)", color: "#378ADD" }}
-          >
-            {count}
-          </span>
+          {title !== "" && (
+            <>
+              <h2 className="text-[22px]" style={{ fontFamily: "'Space Grotesk', sans-serif", color: "var(--mh-ink)" }}>
+                {title ?? (table === "destud_waitlist" ? "DeStud Users" : "Contacts")}
+              </h2>
+              <span
+                className="text-[12px] px-2.5 py-0.5 rounded-full"
+                style={{ background: "rgba(28,116,184,0.12)", color: "var(--mh-blue)" }}
+              >
+                {count}
+              </span>
+            </>
+          )}
         </div>
         <button
           onClick={exportCsv}
-          className="flex items-center gap-1.5 text-[13px] text-white/70 hover:text-white border border-white/[0.1] rounded-lg px-3 py-1.5"
+          className="flex items-center gap-1.5 text-[13px] border rounded-lg px-3 py-1.5 transition-colors"
+          style={{ color: "var(--mh-dim)", borderColor: "var(--mh-hairline)" }}
         >
           <Download className="h-3.5 w-3.5" /> Export CSV
         </button>
@@ -148,12 +154,13 @@ export function RecordsTable({
       <MhCard className="p-4 mb-5">
         <div className="flex flex-wrap gap-3 items-center">
           <div className="relative flex-1 min-w-[180px]">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-white/40" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5" style={{ color: "var(--mh-dim)" }} />
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search name or email…"
-              className="w-full bg-[#0a0f1c] border border-white/[0.1] rounded-lg pl-9 pr-3 py-2 text-sm text-white placeholder:text-white/30 focus:border-[#378ADD]/60 outline-none"
+              className="w-full border rounded-lg pl-9 pr-3 py-2 text-sm outline-none"
+              style={inputStyle}
             />
           </div>
           {filters.map((f) => (
@@ -161,7 +168,8 @@ export function RecordsTable({
               key={f.key}
               value={filterValues[f.key] ?? ""}
               onChange={(e) => setFilterValues({ ...filterValues, [f.key]: e.target.value })}
-              className="bg-[#0a0f1c] border border-white/[0.1] rounded-lg px-3 py-2 text-sm text-white"
+              className="border rounded-lg px-3 py-2 text-sm"
+              style={inputStyle}
             >
               <option value="">All {f.label.toLowerCase()}</option>
               {f.options.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
@@ -171,7 +179,8 @@ export function RecordsTable({
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="bg-[#0a0f1c] border border-white/[0.1] rounded-lg px-3 py-2 text-sm text-white"
+              className="border rounded-lg px-3 py-2 text-sm"
+              style={inputStyle}
             >
               <option value="">All statuses</option>
               {statusOptions.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
@@ -179,15 +188,18 @@ export function RecordsTable({
           )}
           <input
             type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)}
-            className="bg-[#0a0f1c] border border-white/[0.1] rounded-lg px-3 py-2 text-sm text-white"
+            className="border rounded-lg px-3 py-2 text-sm"
+            style={inputStyle}
           />
           <input
             type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)}
-            className="bg-[#0a0f1c] border border-white/[0.1] rounded-lg px-3 py-2 text-sm text-white"
+            className="border rounded-lg px-3 py-2 text-sm"
+            style={inputStyle}
           />
           <button
             onClick={() => { setSearch(""); setFilterValues({}); setStatusFilter(""); setDateFrom(""); setDateTo(""); }}
-            className="text-[12px] text-white/60 hover:text-white"
+            className="text-[12px] transition-colors"
+            style={{ color: "var(--mh-dim)" }}
           >
             Clear filters
           </button>
@@ -198,7 +210,7 @@ export function RecordsTable({
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-[#0a0f1c] text-[11px] uppercase tracking-wider text-white/40 text-left">
+              <tr className="text-[11px] uppercase tracking-wider text-left" style={{ background: "var(--mh-panel)", color: "var(--mh-dim)" }}>
                 {columns.map((c) => <th key={c.key} className="px-4 py-3 font-normal">{c.label}</th>)}
                 {showStatus && <th className="px-4 py-3 font-normal">Status</th>}
                 <th className="px-4 py-3 font-normal">Submitted</th>
@@ -207,37 +219,38 @@ export function RecordsTable({
             </thead>
             <tbody>
               {loading && (
-                <tr><td colSpan={columns.length + (showStatus ? 3 : 2)} className="px-4 py-10 text-center text-white/40">Loading…</td></tr>
+                <tr><td colSpan={columns.length + (showStatus ? 3 : 2)} className="px-4 py-10 text-center" style={{ color: "var(--mh-dim)" }}>Loading…</td></tr>
               )}
               {!loading && !rows.length && (
-                <tr><td colSpan={columns.length + (showStatus ? 3 : 2)} className="px-4 py-10 text-center text-white/40">No records</td></tr>
+                <tr><td colSpan={columns.length + (showStatus ? 3 : 2)} className="px-4 py-10 text-center" style={{ color: "var(--mh-dim)" }}>No records</td></tr>
               )}
               {!loading && rows.map((row) => {
                 const ss = statusStyle(row.status);
                 return (
-                  <tr key={row.id} className="border-t border-white/[0.05] hover:bg-white/[0.03]">
+                  <tr key={row.id} className="border-t transition-colors hover:bg-[var(--mh-panel)]" style={{ borderColor: "var(--mh-hairline)" }}>
                     {columns.map((c) => (
-                      <td key={c.key} className="px-4 py-3 text-white/85">{c.render ? c.render(row) : row[c.key]}</td>
+                      <td key={c.key} className="px-4 py-3" style={{ color: "var(--mh-paper)" }}>{c.render ? c.render(row) : row[c.key]}</td>
                     ))}
                     {showStatus && (
                       <td className="px-4 py-3">
                         <select
                           value={row.status}
                           onChange={(e) => updateStatus(row.id, e.target.value)}
-                          className="bg-transparent border border-white/[0.1] rounded px-2 py-1 text-[11px]"
-                          style={ss ? { color: ss.color, background: ss.bg } : undefined}
+                          className="border rounded px-2 py-1 text-[11px]"
+                          style={ss ? { color: ss.color, background: ss.bg, borderColor: "var(--mh-hairline)" } : { borderColor: "var(--mh-hairline)" }}
                         >
-                          {statusOptions.map((o) => <option key={o.value} value={o.value} style={{ color: "#fff", background: "#1a2035" }}>{o.label}</option>)}
+                          {statusOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
                         </select>
                       </td>
                     )}
-                    <td className="px-4 py-3 text-white/60 text-[12px] whitespace-nowrap">
+                    <td className="px-4 py-3 text-[12px] whitespace-nowrap" style={{ color: "var(--mh-dim)" }}>
                       {new Date(row.created_at).toLocaleDateString()}
                     </td>
                     <td className="px-4 py-3 text-right">
                       <button
                         onClick={() => setSelected(row)}
-                        className="text-[12px] text-white/70 hover:text-white border border-white/[0.1] rounded px-2.5 py-1"
+                        className="text-[12px] border rounded px-2.5 py-1 transition-colors"
+                        style={{ color: "var(--mh-dim)", borderColor: "var(--mh-hairline)" }}
                       >
                         View
                       </button>
@@ -250,17 +263,19 @@ export function RecordsTable({
         </div>
       </MhCard>
 
-      <div className="flex items-center justify-end gap-3 mt-4 text-[12px] text-white/60">
+      <div className="flex items-center justify-end gap-3 mt-4 text-[12px]" style={{ color: "var(--mh-dim)" }}>
         <span>Page {page + 1} of {totalPages}</span>
         <button
           disabled={page === 0}
           onClick={() => setPage((p) => Math.max(0, p - 1))}
-          className="px-3 py-1 rounded border border-white/[0.1] disabled:opacity-30"
+          className="px-3 py-1 rounded border disabled:opacity-30"
+          style={{ borderColor: "var(--mh-hairline)" }}
         >Prev</button>
         <button
           disabled={page >= totalPages - 1}
           onClick={() => setPage((p) => p + 1)}
-          className="px-3 py-1 rounded border border-white/[0.1] disabled:opacity-30"
+          className="px-3 py-1 rounded border disabled:opacity-30"
+          style={{ borderColor: "var(--mh-hairline)" }}
         >Next</button>
       </div>
 
@@ -270,11 +285,11 @@ export function RecordsTable({
         title={
           selected && (
             <div>
-              <h3 className="text-white text-lg" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+              <h3 className="text-lg" style={{ fontFamily: "'Space Grotesk', sans-serif", color: "var(--mh-ink)" }}>
                 {selected.full_name || selected.name}
               </h3>
               {selected.plan && (
-                <span className="text-[11px] text-white/60 mt-1 inline-block">{selected.plan}</span>
+                <span className="text-[11px] mt-1 inline-block" style={{ color: "var(--mh-dim)" }}>{selected.plan}</span>
               )}
             </div>
           )
@@ -289,11 +304,12 @@ export function RecordsTable({
             />
             {showStatus && (
               <div className="mt-4">
-                <label className="block text-[10px] uppercase tracking-wider text-white/40 mb-1.5">Status</label>
+                <label className="block text-[10px] uppercase tracking-wider mb-1.5" style={{ color: "var(--mh-dim)" }}>Status</label>
                 <select
                   value={selected.status}
                   onChange={(e) => updateStatus(selected.id, e.target.value)}
-                  className="w-full bg-[#0a0f1c] border border-white/[0.1] rounded-lg px-3 py-2 text-sm text-white"
+                  className="w-full border rounded-lg px-3 py-2 text-sm"
+                  style={inputStyle}
                 >
                   {statusOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
                 </select>
@@ -302,8 +318,8 @@ export function RecordsTable({
             {table === "destud_waitlist" && selected.status !== "contacted" && (
               <button
                 onClick={() => updateStatus(selected.id, "contacted")}
-                className="mt-4 w-full rounded-lg py-2.5 text-sm font-medium text-[#0a0f1c]"
-                style={{ background: "#EF9F27" }}
+                className="mt-4 w-full rounded-lg py-2.5 text-sm font-medium"
+                style={{ background: "var(--mh-amber)", color: "var(--mh-ink)" }}
               >
                 Mark as contacted
               </button>
@@ -311,7 +327,7 @@ export function RecordsTable({
             {table === "destud_waitlist" && (
               <button
                 onClick={() => updateStatus(selected.id, "converted")}
-                className="mt-2.5 w-full rounded-lg py-2.5 text-sm font-medium text-[#0a0f1c]"
+                className="mt-2.5 w-full rounded-lg py-2.5 text-sm font-medium text-white"
                 style={{ background: "#1D9E75" }}
               >
                 Convert to DeStud user

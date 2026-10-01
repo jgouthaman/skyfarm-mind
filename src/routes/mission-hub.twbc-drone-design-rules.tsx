@@ -9,10 +9,10 @@ function DesignRulesPage() {
   return (
     <MissionHubShell title="Design Rules">
       <MhCard className="p-8 text-center">
-        <div className="text-white text-lg mb-2" style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 500 }}>
+        <div className="text-[var(--mh-ink)] text-lg mb-2" style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 500 }}>
           Design Rules
         </div>
-        <p className="text-[13px] text-white/50">Engineering constraints and design rule sets. Coming soon.</p>
+        <p className="text-[13px] text-[var(--mh-dim)]">Engineering constraints and design rule sets. Coming soon.</p>
       </MhCard>
     </MissionHubShell>
   );

@@ -10,10 +10,10 @@ export const Route = createFileRoute("/mission-hub/waitlist")({
 });
 
 const STATUS = [
-  { value: "new", label: "New", color: "#378ADD", bg: "rgba(55,138,221,0.15)" },
-  { value: "contacted", label: "Contacted", color: "#EF9F27", bg: "rgba(239,159,39,0.15)" },
-  { value: "converted", label: "Converted", color: "#1D9E75", bg: "rgba(29,158,117,0.15)" },
-  { value: "not_interested", label: "Not interested", color: "rgba(255,255,255,0.6)", bg: "rgba(255,255,255,0.06)" },
+  { value: "Requested", label: "Requested", color: "#378ADD", bg: "rgba(55,138,221,0.15)" },
+  { value: "Contacted", label: "Contacted", color: "#EF9F27", bg: "rgba(239,159,39,0.15)" },
+  { value: "Approved", label: "Approved", color: "#1D9E75", bg: "rgba(29,158,117,0.15)" },
+  { value: "Declined", label: "Declined", color: "var(--mh-dim)", bg: "var(--mh-panel)" },
 ];
 
 function WaitlistPage() {
@@ -27,42 +27,28 @@ function WaitlistPage() {
   }, [loading, profile, navigate]);
 
   return (
-    <MissionHubShell title="DeStud Users">
+    <MissionHubShell title="Early Access Request">
       <RecordsTable
-        table="destud_waitlist"
-        searchFields={["full_name", "email"]}
-        csvFilename="waitlist.csv"
+        table="Hangar_early_access"
+        title=""
+        searchFields={["name", "email"]}
+        csvFilename="hangar-early-access.csv"
         columns={[
-          { key: "full_name", label: "Name" },
+          { key: "name", label: "Name" },
           { key: "email", label: "Email" },
-          { key: "phone", label: "Phone" },
-          { key: "organisation", label: "Organisation" },
-          { key: "role", label: "Role" },
-          { key: "plan", label: "Plan" },
-          { key: "location", label: "Location" },
-        ]}
-        filters={[
-          {
-            key: "plan", label: "Plans",
-            options: [
-              { value: "Explorer", label: "Explorer" },
-              { value: "Engineer", label: "Engineer" },
-              { value: "Squadron", label: "Squadron" },
-              { value: "Campus", label: "Campus" },
-              { value: "Waitlist", label: "Waitlist" },
-            ],
-          },
+          { key: "mobile_number", label: "Mobile Number" },
+          { key: "profession", label: "Profession" },
+          { key: "company", label: "Company" },
+          { key: "country", label: "Country" },
         ]}
         statusOptions={STATUS}
         detailFields={[
-          { key: "full_name", label: "Full name" },
+          { key: "name", label: "Name" },
           { key: "email", label: "Email" },
-          { key: "phone", label: "Phone" },
-          { key: "organisation", label: "Organisation" },
-          { key: "role", label: "Role" },
-          { key: "location", label: "Location" },
-          { key: "plan", label: "Plan" },
-          { key: "message", label: "Message" },
+          { key: "mobile_number", label: "Mobile Number" },
+          { key: "profession", label: "Profession" },
+          { key: "company", label: "Company" },
+          { key: "country", label: "Country" },
         ]}
       />
     </MissionHubShell>

@@ -66,11 +66,11 @@ function VerticalPage() {
 
       <MhCard className="overflow-hidden">
         <div className="flex items-center justify-between px-5 py-4">
-          <h3 className="text-white text-base" style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 500 }}>Contacts</h3>
+          <h3 className="text-[var(--mh-ink)] text-base" style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 500 }}>Contacts</h3>
           <Link to="/mission-hub/contacts" search={{ vertical: v }} className="text-[12px] text-[#378ADD]">View all in Contacts →</Link>
         </div>
         {rows.length === 0 ? (
-          <div className="text-center py-12 text-white/40">
+          <div className="text-center py-12 text-[var(--mh-dim)]">
             <Inbox className="h-8 w-8 mx-auto mb-3" />
             <p className="text-sm">No activity yet for {VERTICAL_LABELS[v]}</p>
             <p className="text-[12px] mt-1">Contacts and leads mapped to this vertical will appear here.</p>
@@ -78,7 +78,7 @@ function VerticalPage() {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead><tr className="bg-[#0a0f1c] text-[11px] uppercase text-white/40 text-left">
+              <thead><tr className="bg-[var(--mh-panel)] text-[11px] uppercase text-[var(--mh-dim)] text-left">
                 <th className="px-4 py-3 font-normal">Name</th>
                 <th className="px-4 py-3 font-normal">Email</th>
                 <th className="px-4 py-3 font-normal">Phone</th>
@@ -88,13 +88,13 @@ function VerticalPage() {
               </tr></thead>
               <tbody>
                 {rows.map((r) => (
-                  <tr key={r.id} className="border-t border-white/[0.05]">
-                    <td className="px-4 py-3 text-white/85">{r.name}</td>
-                    <td className="px-4 py-3 text-white/70 text-[12px]">{r.email}</td>
-                    <td className="px-4 py-3 text-white/70 text-[12px]">{r.phone}</td>
-                    <td className="px-4 py-3 text-white/70 text-[12px]">{r.location}</td>
-                    <td className="px-4 py-3 text-[12px] text-white/70">{r.status}</td>
-                    <td className="px-4 py-3 text-[12px] text-white/60">{new Date(r.created_at).toLocaleDateString()}</td>
+                  <tr key={r.id} className="border-t border-[var(--mh-hairline)]">
+                    <td className="px-4 py-3 text-[var(--mh-paper)]">{r.name}</td>
+                    <td className="px-4 py-3 text-[var(--mh-dim)] text-[12px]">{r.email}</td>
+                    <td className="px-4 py-3 text-[var(--mh-dim)] text-[12px]">{r.phone}</td>
+                    <td className="px-4 py-3 text-[var(--mh-dim)] text-[12px]">{r.location}</td>
+                    <td className="px-4 py-3 text-[12px] text-[var(--mh-dim)]">{r.status}</td>
+                    <td className="px-4 py-3 text-[12px] text-[var(--mh-dim)]">{new Date(r.created_at).toLocaleDateString()}</td>
                   </tr>
                 ))}
               </tbody>
@@ -109,8 +109,8 @@ function VerticalPage() {
 function Stat({ label, value }: { label: string; value: number }) {
   return (
     <MhCard className="p-5">
-      <div className="text-3xl text-white" style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 500 }}>{value}</div>
-      <div className="mt-1 text-[12px] text-white/50">{label}</div>
+      <div className="text-3xl text-[var(--mh-ink)]" style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 500 }}>{value}</div>
+      <div className="mt-1 text-[12px] text-[var(--mh-dim)]">{label}</div>
     </MhCard>
   );
 }
