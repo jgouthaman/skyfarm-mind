@@ -37,7 +37,7 @@ function UsersPage() {
         <span className="text-[12px] px-2.5 py-0.5 rounded-full" style={{ background: "rgba(55,138,221,0.12)", color: "#378ADD" }}>{users.length} users</span>
         <button
           onClick={() => setShowCreate(true)}
-          className="flex items-center gap-1.5 bg-[#185FA5] hover:bg-[#378ADD] text-white text-[13px] rounded-lg px-3.5 py-2 transition-colors"
+          className="flex items-center gap-1.5 bg-[#185FA5] hover:bg-[#378ADD] text-[var(--mh-ink)] text-[13px] rounded-lg px-3.5 py-2 transition-colors"
         >
           <UserPlus className="h-3.5 w-3.5" /> Create user
         </button>

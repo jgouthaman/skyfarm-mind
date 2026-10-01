@@ -14,12 +14,8 @@ export const Route = createFileRoute("/mission-hub/torqwings-design-studio/compo
 const SAFETY = new Set(["Safety buzzer", "Voltage monitor", "Obstacle sensor", "Parachute", "Landing gear"]);
 const PAYLOAD = new Set(["Payload module", "Camera module", "Spray system", "Pump", "Nozzles", "Tank"]);
 
-const DARK_VARS = {
-  '--foreground':       'oklch(0.95 0.01 250)',
-  '--muted-foreground': 'oklch(0.58 0.04 250)',
-  '--border':           'oklch(0.95 0.01 250 / 15%)',
-  '--card':             'oklch(0.14 0.04 250)',
-} as React.CSSProperties;
+// Was DARK_VARS, forcing shadcn vars dark to match this page's old dark
+// theme. The site's :root defaults are already light-theme-appropriate.
 
 const COMP_KEYS = ['frame', 'motors', 'esc', 'battery', 'flight_controller', 'gps', 'payload', 'propellers'];
 
@@ -94,7 +90,7 @@ function Components() {
 
   if (refNotFound && !hasOldList) {
     return (
-      <div className="py-12 text-center text-white/40 text-sm">
+      <div className="py-12 text-center text-[var(--mh-dim)] text-sm">
         Reference design no longer available.
         <a href="/mission-hub/torqwings-design-studio/new" className="text-[#378ADD] ml-1 hover:underline">
           Regenerate this design →
@@ -116,14 +112,14 @@ function Components() {
     const compList = (liveComponentList ?? rec!.matched_reference!.component_list) as Record<string, Record<string, unknown>>;
     const rows = COMP_KEYS.filter(k => compList[k]);
     return (
-      <div className="space-y-5" style={DARK_VARS}>
+      <div className="space-y-5">
         <StudioTabNav />
         <header className="flex items-end justify-between flex-wrap gap-4">
           <div>
-            <h1 className="text-2xl font-semibold text-white">Bill of Materials</h1>
-            <p className="text-sm text-white/50 mt-1">
+            <h1 className="text-2xl font-semibold text-[var(--mh-ink)]">Bill of Materials</h1>
+            <p className="text-sm text-[var(--mh-dim)] mt-1">
               {project!.projectName} · Based on:{' '}
-              <span className="text-white/70">{rec!.matched_reference!.name}</span>
+              <span className="text-[var(--mh-dim)]">{rec!.matched_reference!.name}</span>
             </p>
           </div>
           <span className={`text-[11px] px-2.5 py-1 rounded-full border font-medium capitalize ${CONFIDENCE_BADGE[rec!.confidence] ?? CONFIDENCE_BADGE.low}`}>
@@ -131,8 +127,8 @@ function Components() {
           </span>
         </header>
 
-        <div className="rounded-xl border border-white/[0.08] bg-[#0a0f1c] overflow-hidden">
-          <div className="grid grid-cols-[140px_1fr_1fr_110px] gap-4 bg-[#0d1117] text-[11px] uppercase tracking-wider text-white/40 px-4 py-3">
+        <div className="rounded-xl border border-[var(--mh-hairline)] bg-[var(--mh-panel)] overflow-hidden">
+          <div className="grid grid-cols-[140px_1fr_1fr_110px] gap-4 bg-[#0d1117] text-[11px] uppercase tracking-wider text-[var(--mh-dim)] px-4 py-3">
             <span>Category</span>
             <span>Model</span>
             <span>Specs</span>
@@ -145,14 +141,14 @@ function Components() {
               .filter(([k]) => k !== 'model')
               .map(([k, v]) => `${k.replace(/_/g, ' ')}: ${v}`)
               .join(' · ');
-            const badgeCls = COMP_BADGE[key] ?? 'bg-white/10 text-white/50 border-white/10';
+            const badgeCls = COMP_BADGE[key] ?? 'bg-[var(--mh-panel)] text-[var(--mh-dim)] border-[var(--mh-hairline)]';
             return (
-              <div key={key} className="grid grid-cols-[140px_1fr_1fr_110px] gap-4 border-t border-white/[0.05] px-4 py-3.5 items-center">
+              <div key={key} className="grid grid-cols-[140px_1fr_1fr_110px] gap-4 border-t border-[var(--mh-hairline)] px-4 py-3.5 items-center">
                 <span className={`inline-flex text-[11px] font-medium px-2 py-0.5 rounded-full border w-fit ${badgeCls}`}>
                   {key.replace(/_/g, ' ').replace(/^\w/, c => c.toUpperCase())}
                 </span>
-                <span className="text-white font-medium text-sm">{model}</span>
-                <span className="text-white/45 text-[12px]">{extras || '—'}</span>
+                <span className="text-[var(--mh-ink)] font-medium text-sm">{model}</span>
+                <span className="text-[var(--mh-ink)]/45 text-[12px]">{extras || '—'}</span>
                 <Link
                   to="/mission-hub/twbc-drone-components-library"
                   className="text-[12px] text-[#378ADD] hover:underline whitespace-nowrap"
@@ -193,7 +189,7 @@ function Components() {
         <div className="flex flex-wrap gap-2">
           <Button variant="outline" size="sm" onClick={exportCSV}>Export CSV</Button>
           <Button variant="outline" size="sm" onClick={() => window.print()}>Download PDF</Button>
-          <Button size="sm" className="bg-sky-500 hover:bg-sky-600 text-white" onClick={() => toast.success("Sent for engineering review")}>Send for Review</Button>
+          <Button size="sm" className="bg-sky-500 hover:bg-sky-600 text-[var(--mh-ink)]" onClick={() => toast.success("Sent for engineering review")}>Send for Review</Button>
         </div>
       </header>
 

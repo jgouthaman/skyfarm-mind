@@ -15,6 +15,28 @@ const verticalIcon: Record<Vertical, any> = {
   "design-studio": Cpu,
 };
 
+// Full mission-hub chrome + content restyled to match the main public
+// site's look (localhost:8080) — same palette/fonts as HANGAR_PUBLIC_CSS
+// (src/styles/hangarPublicTheme.ts): white/light-panel backgrounds, Space
+// Grotesk/IBM Plex Sans/Mono, blue (#1C74B8) + amber (#E8A33D) accents.
+// --mh-* vars are declared on .mh-shell (this wrapper) and cascade down
+// through <main>{children}</main> to every page, so individual page/
+// component files reference them directly (e.g. style={{ color:
+// "var(--mh-dim)" }}) rather than redeclaring their own tokens.
+const MH_SHELL_CSS = `
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;700&display=swap');
+.mh-shell{
+  --mh-bg:#FFFFFF; --mh-panel:#F2F7FB;
+  --mh-ink:#08131F; --mh-paper:#12222F; --mh-dim:#4F6B80;
+  --mh-blue:#1C74B8; --mh-blue-line:#3E7CA6;
+  --mh-amber:#E8A33D; --mh-amber-bright:#F6C374;
+  --mh-hairline:rgba(62,124,166,0.28);
+  font-family:'IBM Plex Sans', sans-serif;
+}
+.mh-shell h1, .mh-shell h2 { font-family:'Space Grotesk', sans-serif; }
+.mh-mono{ font-family:'IBM Plex Mono', monospace; }
+`;
+
 export function MissionHubShell({ title, children }: { title: string; children: ReactNode }) {
   const { profile, verticals, loading, signOut } = useMissionHubAuth();
   const navigate = useNavigate();
@@ -33,14 +55,15 @@ export function MissionHubShell({ title, children }: { title: string; children: 
   // Tearing down `{children}` there would unmount open modals/forms mid-entry.
   if (!profile) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0a0f1c] text-white/60 text-sm">
+      <div className="min-h-screen flex items-center justify-center text-sm" style={{ background: "#F2F7FB", color: "#4F6B80" }}>
         Loading…
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0f1c] text-white" style={{ fontFamily: "Inter, system-ui, sans-serif" }}>
+    <div className="mh-shell min-h-screen" style={{ background: "var(--mh-panel)", color: "var(--mh-paper)" }}>
+      <style>{MH_SHELL_CSS}</style>
       {/* Mobile backdrop */}
       {open && (
         <div className="lg:hidden fixed inset-0 z-40 bg-black/60" onClick={() => setOpen(false)} />
@@ -49,24 +72,24 @@ export function MissionHubShell({ title, children }: { title: string; children: 
       <Sidebar profile={profile} verticals={verticals} open={open} onClose={() => setOpen(false)} onSignOut={signOut} />
 
       <div className="lg:ml-[224px]">
-        {/* Top bar */}
-        <header className="h-14 flex items-center justify-between px-5 lg:px-7 border-b border-white/[0.08] bg-[#0a0f1c]">
+        {/* Top bar — white, matching the main site's nav; page content below stays on the dark canvas */}
+        <header className="h-14 flex items-center justify-between px-5 lg:px-7 border-b" style={{ background: "var(--mh-bg)", borderColor: "var(--mh-hairline)" }}>
           <div className="flex items-center gap-3">
-            <button className="lg:hidden text-white/70" onClick={() => setOpen(true)} aria-label="Open menu">
+            <button className="lg:hidden" style={{ color: "var(--mh-dim)" }} onClick={() => setOpen(true)} aria-label="Open menu">
               <Menu className="h-5 w-5" />
             </button>
-            <h1 className="text-white text-base font-medium" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            <h1 className="text-base font-medium" style={{ color: "var(--mh-ink)" }}>
               {title}
             </h1>
           </div>
           <div className="flex items-center gap-4">
-            <Bell className="h-4 w-4 text-white/50" />
-            <span className="hidden sm:block text-sm text-white/60">{profile.full_name}</span>
+            <Bell className="h-4 w-4" style={{ color: "var(--mh-dim)" }} />
+            <span className="hidden sm:block text-sm" style={{ color: "var(--mh-dim)" }}>{profile.full_name}</span>
             <Avatar name={profile.full_name} />
           </div>
         </header>
 
-        <main className="p-6 lg:p-9 min-h-[calc(100vh-56px)]">{children}</main>
+        <main className="p-6 lg:p-9 min-h-[calc(100vh-56px)]" style={{ background: "var(--mh-panel)", color: "var(--mh-paper)" }}>{children}</main>
       </div>
     </div>
   );
@@ -82,6 +105,18 @@ function getSectionFromPath(path: string, role?: string): Section | null {
   if (path.startsWith("/mission-hub/twbc-") || path === "/mission-hub/knowledge-uav") return "twbc";
   if (path === "/mission-hub/users" || path.startsWith("/mission-hub/settings")) return "config";
   return null;
+}
+
+// Temporary grouping node — bundles Design Studio, Academy, and Design
+// Intelligence under one collapsible "Temp" section in the sidebar. Expand
+// by default when the current path is inside any of the three.
+function getTemOpenFromPath(path: string) {
+  return (
+    path === "/mission-hub/design-studio" ||
+    path === "/mission-hub/verticals/academy" ||
+    path.startsWith("/mission-hub/twbc-") ||
+    path === "/mission-hub/knowledge-uav"
+  );
 }
 
 function getTwbcOpenFromPath(path: string) {
@@ -131,46 +166,60 @@ function Sidebar({
   const [twbcOpen, setTwbcOpen] = useState(() => getTwbcOpenFromPath(path));
   const toggleTwbc = (k: keyof typeof twbcOpen) => setTwbcOpen(s => ({ ...s, [k]: !s[k] }));
 
+  const [temOpen, setTemOpen] = useState(() => getTemOpenFromPath(path));
+  useEffect(() => {
+    if (getTemOpenFromPath(path)) setTemOpen(true);
+  }, [path]);
+
   const hasVertical = (v: Vertical) => isAdmin || verticals.includes(v);
   const hasDesignStudio = hasVertical("design-studio");
+
+  const sectionLabelStyle = { color: "var(--mh-dim)" };
 
   return (
     <aside
       className={[
-        "fixed top-0 left-0 z-50 h-full w-[224px] bg-[#141928] border-r border-white/[0.08]",
+        "mh-shell fixed top-0 left-0 z-50 h-full w-[224px] border-r",
         "flex flex-col transition-transform duration-200",
         open ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
       ].join(" ")}
+      style={{ background: "var(--mh-bg)", borderColor: "var(--mh-hairline)" }}
     >
+      <style>{MH_SHELL_CSS}</style>
       <div className="px-5 pt-5 pb-4">
         <div className="flex items-center justify-between">
-          <span className="text-white text-base" style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700 }}>
-            Torq<span className="text-[#378ADD]">Wings</span>
+          <span className="flex items-center gap-2">
+            <span className="grid place-items-center h-7 w-7 rounded-lg overflow-hidden flex-shrink-0" style={{ background: "var(--mh-bg)", border: "1px solid var(--mh-hairline)" }}>
+              <img src="/torqwings-mark.png" alt="" className="h-full w-full object-contain" aria-hidden="true" />
+            </span>
+            <span className="text-base" style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, color: "var(--mh-ink)" }}>
+              Torq<span style={{ color: "var(--mh-blue)" }}>Wings</span>
+            </span>
           </span>
-          <button className="lg:hidden text-white/50" onClick={onClose} aria-label="Close menu">
+          <button className="lg:hidden" style={{ color: "var(--mh-dim)" }} onClick={onClose} aria-label="Close menu">
             <X className="h-4 w-4" />
           </button>
         </div>
         <span
-          className="mt-2 inline-block uppercase tracking-[0.08em] text-[10px] rounded-full px-2.5 py-0.5"
-          style={{ background: "rgba(55,138,221,0.12)", color: "#378ADD" }}
+          className="mh-mono mt-2 inline-block uppercase tracking-[0.08em] text-[10px] rounded-full px-2.5 py-0.5"
+          style={{ background: "rgba(28,116,184,0.12)", color: "var(--mh-blue)" }}
         >
           Mission Hub
         </span>
       </div>
-      <div className="border-t border-white/[0.06]" />
+      <div className="border-t" style={{ borderColor: "var(--mh-hairline)" }} />
 
       <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-0.5 text-[13px]">
         {isAdmin && (
           <>
             <button type="button" onClick={() => toggle("business")}
-              className="mb-2 flex w-full items-center px-3 text-[10px] uppercase tracking-wider text-white/70 hover:text-white/90 transition-colors">
+              className="mh-mono mb-2 flex w-full items-center px-3 text-[10px] uppercase tracking-wider transition-colors" style={sectionLabelStyle}>
               <span className="flex-1 text-left">Business</span>
               {openSection === "business" ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
             </button>
             {openSection === "business" && (
               <>
-                <NavLink to="/mission-hub/waitlist" icon={Clock}    active={path === "/mission-hub/waitlist"} onClick={onClose}>DeStud Users</NavLink>
+                <NavLink to="/mission-hub/waitlist" icon={Clock}    active={path === "/mission-hub/waitlist"} onClick={onClose}>The Hangar</NavLink>
                 <NavLink to="/mission-hub/academy-users" icon={GraduationCap} active={path === "/mission-hub/academy-users"} onClick={onClose}>Academy Users</NavLink>
                 <NavLink to="/mission-hub/contacts" icon={BookUser} active={path === "/mission-hub/contacts"} onClick={onClose}>Contacts</NavLink>
               </>
@@ -178,10 +227,21 @@ function Sidebar({
           </>
         )}
 
-        {/* ── Top-level: Design Studio (primary product surface), then the
-            secondary Labs / Academy surfaces — not nested in any section. ── */}
+        {/* ── Temporary grouping node — Design Studio, Academy, and Design
+            Intelligence bundled under one collapsible "Temp" section. Remove
+            this wrapper (and restore the three blocks below it to top-level)
+            once it's no longer needed. ── */}
+        <div className="mt-5">
+          <button type="button" onClick={() => setTemOpen(o => !o)}
+            className="mh-mono mb-2 flex w-full items-center px-3 text-[10px] uppercase tracking-wider transition-colors" style={sectionLabelStyle}>
+            <span className="flex-1 text-left">Temp</span>
+            {temOpen ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
+          </button>
+        </div>
+
+        {temOpen && <>
         {hasDesignStudio && (
-          <div className="mt-5">
+          <div>
             <NavLink
               to="/mission-hub/design-studio"
               icon={verticalIcon["design-studio"]}
@@ -204,9 +264,9 @@ function Sidebar({
         )}
 
         {isAdmin && (
-          <div className="mt-5 space-y-0.5">
+          <div className="mt-2 space-y-0.5">
             <button type="button" onClick={() => toggle("twbc")}
-              className="mb-2 flex w-full items-center px-3 text-[10px] uppercase tracking-wider text-white/70 hover:text-white/90 transition-colors">
+              className="mh-mono mb-2 flex w-full items-center px-3 text-[10px] uppercase tracking-wider transition-colors" style={sectionLabelStyle}>
               <span className="flex-1 text-left">Design Intelligence</span>
               {openSection === "twbc" ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
             </button>
@@ -214,23 +274,23 @@ function Sidebar({
             {openSection === "twbc" && <>
             {/* ── Drone (collapsible) ── */}
             <button type="button" onClick={() => toggleTwbc("drone")}
-              className="flex w-full items-center gap-2.5 px-4 py-2.5 rounded-lg text-[13px] text-white/65 hover:bg-white/[0.04] hover:text-white transition-colors">
+              className="flex w-full items-center gap-2.5 px-4 py-2.5 rounded-lg text-[13px] transition-colors hover:bg-[rgba(62,124,166,0.08)]" style={{ color: "var(--mh-paper)" }}>
               <Cpu className="h-4 w-4 shrink-0" />
               <span className="flex-1 truncate text-left">Drone</span>
               {twbcOpen.drone ? <ChevronDown className="h-3.5 w-3.5 opacity-50" /> : <ChevronRight className="h-3.5 w-3.5 opacity-50" />}
             </button>
 
             {twbcOpen.drone && (
-              <div className="ml-3 border-l border-white/[0.06] pl-1.5 space-y-0.5">
+              <div className="ml-3 border-l pl-1.5 space-y-0.5" style={{ borderColor: "var(--mh-hairline)" }}>
 
                 {/* Knowledge Base */}
                 <button type="button" onClick={() => toggleTwbc("kb")}
-                  className="flex w-full items-center gap-2 px-3 py-1.5 rounded-md text-[12px] text-white/55 hover:bg-white/[0.04] hover:text-white transition-colors">
+                  className="flex w-full items-center gap-2 px-3 py-1.5 rounded-md text-[12px] transition-colors hover:bg-[rgba(62,124,166,0.08)]" style={{ color: "var(--mh-dim)" }}>
                   <span className="flex-1 truncate text-left">Knowledge Base</span>
                   {twbcOpen.kb ? <ChevronDown className="h-3 w-3 opacity-40" /> : <ChevronRight className="h-3 w-3 opacity-40" />}
                 </button>
                 {twbcOpen.kb && (
-                  <div className="ml-3 border-l border-white/[0.06] pl-1.5 space-y-0.5">
+                  <div className="ml-3 border-l pl-1.5 space-y-0.5" style={{ borderColor: "var(--mh-hairline)" }}>
                     <TwbcLeaf to="/mission-hub/twbc-drone-design-rule" active={path === "/mission-hub/twbc-drone-design-rule"} onClick={onClose}>Design Rules</TwbcLeaf>
                     <TwbcLeaf to="/mission-hub/twbc-drone-proven-designs" active={path === "/mission-hub/twbc-drone-proven-designs"} onClick={onClose}>Proven Designs</TwbcLeaf>
                     <TwbcLeaf to="/mission-hub/twbc-drone-components-library" active={path === "/mission-hub/twbc-drone-components-library"} onClick={onClose}>Components</TwbcLeaf>
@@ -239,24 +299,24 @@ function Sidebar({
 
                 {/* Intelligence Engine */}
                 <button type="button" onClick={() => toggleTwbc("ie")}
-                  className="flex w-full items-center gap-2 px-3 py-1.5 rounded-md text-[12px] text-white/55 hover:bg-white/[0.04] hover:text-white transition-colors">
+                  className="flex w-full items-center gap-2 px-3 py-1.5 rounded-md text-[12px] transition-colors hover:bg-[rgba(62,124,166,0.08)]" style={{ color: "var(--mh-dim)" }}>
                   <span className="flex-1 truncate text-left">Intelligence Engine</span>
                   {twbcOpen.ie ? <ChevronDown className="h-3 w-3 opacity-40" /> : <ChevronRight className="h-3 w-3 opacity-40" />}
                 </button>
                 {twbcOpen.ie && (
-                  <div className="ml-3 border-l border-white/[0.06] pl-1.5 space-y-0.5">
+                  <div className="ml-3 border-l pl-1.5 space-y-0.5" style={{ borderColor: "var(--mh-hairline)" }}>
                     <TwbcLeaf to="/mission-hub/twbc-drone-rule-engine" active={path === "/mission-hub/twbc-drone-rule-engine"} onClick={onClose}>Rule Engine</TwbcLeaf>
                   </div>
                 )}
 
                 {/* Engineer Review */}
                 <button type="button" onClick={() => toggleTwbc("er")}
-                  className="flex w-full items-center gap-2 px-3 py-1.5 rounded-md text-[12px] text-white/55 hover:bg-white/[0.04] hover:text-white transition-colors">
+                  className="flex w-full items-center gap-2 px-3 py-1.5 rounded-md text-[12px] transition-colors hover:bg-[rgba(62,124,166,0.08)]" style={{ color: "var(--mh-dim)" }}>
                   <span className="flex-1 truncate text-left">Engineer Review</span>
                   {twbcOpen.er ? <ChevronDown className="h-3 w-3 opacity-40" /> : <ChevronRight className="h-3 w-3 opacity-40" />}
                 </button>
                 {twbcOpen.er && (
-                  <div className="ml-3 border-l border-white/[0.06] pl-1.5 space-y-0.5">
+                  <div className="ml-3 border-l pl-1.5 space-y-0.5" style={{ borderColor: "var(--mh-hairline)" }}>
                     <TwbcLeaf to="/mission-hub/twbc-drone-design-score" active={path === "/mission-hub/twbc-drone-design-score"} onClick={onClose}>Design Score</TwbcLeaf>
                     <TwbcLeaf to="/mission-hub/twbc-drone-approval" active={path === "/mission-hub/twbc-drone-approval"} onClick={onClose}>Approval</TwbcLeaf>
                     <TwbcLeaf to="/mission-hub/twbc-drone-feedback" active={path === "/mission-hub/twbc-drone-feedback"} onClick={onClose}>Feedback</TwbcLeaf>
@@ -272,11 +332,12 @@ function Sidebar({
             </>}
           </div>
         )}
+        </>}
 
         {hasDesignStudio && role !== "super_admin" && (
           <div className="mt-5 space-y-0.5">
             <button type="button" onClick={() => toggle("knowledge")}
-              className="mb-2 flex w-full items-center px-3 text-[10px] uppercase tracking-wider text-white/70 hover:text-white/90 transition-colors">
+              className="mh-mono mb-2 flex w-full items-center px-3 text-[10px] uppercase tracking-wider transition-colors" style={sectionLabelStyle}>
               <span className="flex-1 text-left">Knowledge Base</span>
               {openSection === "knowledge" ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
             </button>
@@ -290,7 +351,7 @@ function Sidebar({
 
         <div className="mt-5 space-y-0.5">
           <button type="button" onClick={() => toggle("config")}
-            className="mb-2 flex w-full items-center px-3 text-[10px] uppercase tracking-wider text-white/70 hover:text-white/90 transition-colors">
+            className="mh-mono mb-2 flex w-full items-center px-3 text-[10px] uppercase tracking-wider transition-colors" style={sectionLabelStyle}>
             <span className="flex-1 text-left">Configurations</span>
             {openSection === "config" ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
           </button>
@@ -309,17 +370,18 @@ function Sidebar({
         </div>
       </nav>
 
-      <div className="border-t border-white/[0.06] p-4">
+      <div className="border-t p-4" style={{ borderColor: "var(--mh-hairline)" }}>
         <div className="flex items-center gap-3">
           <Avatar name={profile.full_name} />
           <div className="min-w-0 flex-1">
-            <div className="text-[13px] font-medium text-white truncate">{profile.full_name}</div>
+            <div className="text-[13px] font-medium truncate" style={{ color: "var(--mh-ink)" }}>{profile.full_name}</div>
             <RolePill role={role} />
           </div>
         </div>
         <button
           onClick={() => { onSignOut(); toast.success("Signed out"); }}
-          className="mt-3 flex items-center gap-1.5 text-[12px] text-white/50 hover:text-white"
+          className="mt-3 flex items-center gap-1.5 text-[12px] transition-colors hover:text-[var(--mh-ink)]"
+          style={{ color: "var(--mh-dim)" }}
         >
           <LogOut className="h-3.5 w-3.5" /> Sign out
         </button>
@@ -335,12 +397,14 @@ function NavLink({
     <Link
       to={to}
       onClick={onClick}
-      className={[
-        "flex items-center gap-2.5 px-4 py-2.5 rounded-lg border-l-[3px] transition-colors",
+      className="flex items-center gap-2.5 px-4 py-2.5 rounded-lg border-l-[3px] transition-colors"
+      style={
         active
-          ? "bg-[rgba(55,138,221,0.12)] border-[#378ADD] text-white"
-          : "border-transparent text-white/65 hover:bg-white/[0.04] hover:text-white",
-      ].join(" ")}
+          ? { background: "rgba(28,116,184,0.10)", borderColor: "var(--mh-blue)", color: "var(--mh-ink)" }
+          : { borderColor: "transparent", color: "var(--mh-dim)" }
+      }
+      onMouseEnter={(e) => { if (!active) { e.currentTarget.style.background = "rgba(62,124,166,0.06)"; e.currentTarget.style.color = "var(--mh-ink)"; } }}
+      onMouseLeave={(e) => { if (!active) { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--mh-dim)"; } }}
     >
       <Icon className="h-4 w-4 flex-shrink-0" />
       <span className="truncate">{children}</span>
@@ -353,12 +417,14 @@ function TwbcLeaf({ to, active, onClick, children }: { to: string; active: boole
     <Link
       to={to as never}
       onClick={onClick}
-      className={[
-        "flex items-center px-3 py-1.5 rounded-md text-[12px] border-l-2 transition-colors",
+      className="flex items-center px-3 py-1.5 rounded-md text-[12px] border-l-2 transition-colors"
+      style={
         active
-          ? "bg-[rgba(55,138,221,0.10)] border-[#378ADD] text-white"
-          : "border-transparent text-white/50 hover:bg-white/[0.04] hover:text-white",
-      ].join(" ")}
+          ? { background: "rgba(28,116,184,0.08)", borderColor: "var(--mh-blue)", color: "var(--mh-ink)" }
+          : { borderColor: "transparent", color: "var(--mh-dim)" }
+      }
+      onMouseEnter={(e) => { if (!active) { e.currentTarget.style.background = "rgba(62,124,166,0.06)"; e.currentTarget.style.color = "var(--mh-ink)"; } }}
+      onMouseLeave={(e) => { if (!active) { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--mh-dim)"; } }}
     >
       {children}
     </Link>
@@ -371,7 +437,7 @@ function Avatar({ name }: { name: string }) {
   return (
     <div
       className="grid place-items-center rounded-full text-[12px] font-semibold flex-shrink-0"
-      style={{ background: "rgba(55,138,221,0.2)", color: "#378ADD", width: 34, height: 34 }}
+      style={{ background: "rgba(28,116,184,0.14)", color: "var(--mh-blue)", width: 34, height: 34 }}
     >
       {initials || "?"}
     </div>
@@ -381,10 +447,10 @@ function Avatar({ name }: { name: string }) {
 function RolePill({ role }: { role: "super_admin" | "admin" | "user" }) {
   const styles =
     role === "super_admin"
-      ? { bg: "rgba(163,45,45,0.2)", color: "#F09595", label: "Super Admin" }
+      ? { bg: "rgba(188,54,54,0.12)", color: "#B23A3A", label: "Super Admin" }
       : role === "admin"
-        ? { bg: "rgba(239,159,39,0.15)", color: "#EF9F27", label: "Admin" }
-        : { bg: "rgba(24,95,165,0.2)", color: "#378ADD", label: "User" };
+        ? { bg: "rgba(232,163,61,0.15)", color: "#B8791F", label: "Admin" }
+        : { bg: "rgba(28,116,184,0.12)", color: "#1C74B8", label: "User" };
   return (
     <span
       className="inline-block text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full"
@@ -397,7 +463,12 @@ function RolePill({ role }: { role: "super_admin" | "admin" | "user" }) {
 
 export function MhCard({ children, className = "" }: { children: ReactNode; className?: string }) {
   return (
-    <div className={`rounded-[14px] bg-[#1a2035] border border-white/[0.08] ${className}`}>{children}</div>
+    <div
+      className={`rounded-[14px] ${className}`}
+      style={{ background: "var(--mh-bg)", border: "1px solid var(--mh-hairline)" }}
+    >
+      {children}
+    </div>
   );
 }
 

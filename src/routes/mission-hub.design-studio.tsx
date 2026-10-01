@@ -127,7 +127,7 @@ function MyProjects({ isAdmin, userId }: { isAdmin: boolean; userId: string }) {
 
       <MhCard className="overflow-hidden">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 py-4">
-          <h3 className="text-white text-base shrink-0" style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 500 }}>
+          <h3 className="text-[var(--mh-ink)] text-base shrink-0" style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 500 }}>
             {isAdmin ? "All Design Studio projects" : "Your Design Studio projects"}
           </h3>
           <div className="flex items-center gap-1">
@@ -136,14 +136,14 @@ function MyProjects({ isAdmin, userId }: { isAdmin: boolean; userId: string }) {
               value={search}
               onChange={(e) => { setSearch(e.target.value); setPage(0); }}
               placeholder="Search projects…"
-              className="h-8 w-52 rounded-lg bg-white/8 border border-white/10
-                text-sm text-white/80 placeholder-white/30 px-3
-                focus:outline-none focus:border-white/25"
+              className="h-8 w-52 rounded-lg bg-[var(--mh-panel)] border border-[var(--mh-hairline)]
+                text-sm text-[var(--mh-paper)] placeholder-white/30 px-3
+                focus:outline-none focus:border-[var(--mh-hairline)]"
             />
             {search && (
               <button
                 onClick={() => { setSearch(""); setPage(0); }}
-                className="text-white/40 hover:text-white/70 text-xs ml-1"
+                className="text-[var(--mh-dim)] hover:text-[var(--mh-ink)]/70 text-xs ml-1"
               >
                 Clear
               </button>
@@ -154,21 +154,21 @@ function MyProjects({ isAdmin, userId }: { isAdmin: boolean; userId: string }) {
         {loadingRows ? (
           <div className="py-2">
             {[0, 1, 2].map((i) => (
-              <div key={i} className="h-10 rounded bg-white/5 animate-pulse mx-4 my-2" />
+              <div key={i} className="h-10 rounded bg-[var(--mh-panel)] animate-pulse mx-4 my-2" />
             ))}
           </div>
         ) : fetchError ? (
-          <div className="text-white/50 text-sm text-center py-8">
+          <div className="text-[var(--mh-dim)] text-sm text-center py-8">
             Failed to load projects.
             <button
               onClick={() => setRetryTick((t) => t + 1)}
-              className="underline ml-2 hover:text-white/70"
+              className="underline ml-2 hover:text-[var(--mh-ink)]/70"
             >
               Retry
             </button>
           </div>
         ) : rows.length === 0 ? (
-          <div className="text-center py-12 text-white/40">
+          <div className="text-center py-12 text-[var(--mh-dim)]">
             <Inbox className="h-8 w-8 mx-auto mb-3" />
             <p className="text-sm">No projects yet</p>
             <p className="text-[12px] mt-1">No drone designs have been started yet.</p>
@@ -178,7 +178,7 @@ function MyProjects({ isAdmin, userId }: { isAdmin: boolean; userId: string }) {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="bg-[#0a0f1c] text-[11px] uppercase text-white/40 text-left">
+                  <tr className="bg-[var(--mh-panel)] text-[11px] uppercase text-[var(--mh-dim)] text-left">
                     <th className="px-4 py-3 font-normal">Project</th>
                     <th className="px-4 py-3 font-normal">Vertical</th>
                     <th className="px-4 py-3 font-normal">Purpose</th>
@@ -190,13 +190,13 @@ function MyProjects({ isAdmin, userId }: { isAdmin: boolean; userId: string }) {
                 </thead>
                 <tbody>
                   {rows.map((r) => (
-                    <tr key={r.id} className="border-t border-white/[0.05]">
-                      <td className="px-4 py-3 text-white/85">{r.project_name}</td>
-                      <td className="px-4 py-3 text-white/70 text-[12px]">{r.vertical}</td>
-                      <td className="px-4 py-3 text-white/70 text-[12px]">{r.purpose ?? "—"}</td>
-                      <td className="px-4 py-3 text-[12px] text-white/70">{r.status}</td>
-                      <td className={`px-4 py-3 text-[12px] ${RISK_TONE[r.risk_level]?.text ?? "text-white/60"}`}>{r.risk_level ?? "—"}</td>
-                      <td className="px-4 py-3 text-[12px] text-white/60">{new Date(r.updated_at).toLocaleDateString()}</td>
+                    <tr key={r.id} className="border-t border-[var(--mh-hairline)]">
+                      <td className="px-4 py-3 text-[var(--mh-paper)]">{r.project_name}</td>
+                      <td className="px-4 py-3 text-[var(--mh-dim)] text-[12px]">{r.vertical}</td>
+                      <td className="px-4 py-3 text-[var(--mh-dim)] text-[12px]">{r.purpose ?? "—"}</td>
+                      <td className="px-4 py-3 text-[12px] text-[var(--mh-dim)]">{r.status}</td>
+                      <td className={`px-4 py-3 text-[12px] ${RISK_TONE[r.risk_level]?.text ?? "text-[var(--mh-dim)]"}`}>{r.risk_level ?? "—"}</td>
+                      <td className="px-4 py-3 text-[12px] text-[var(--mh-dim)]">{new Date(r.updated_at).toLocaleDateString()}</td>
                       <td className="px-4 py-3 text-right">
                         <Link
                           to="/mission-hub/torqwings-design-studio"
@@ -218,7 +218,7 @@ function MyProjects({ isAdmin, userId }: { isAdmin: boolean; userId: string }) {
 
             {totalRows > PAGE_SIZE && (
               <div className="flex items-center justify-between px-5 py-3
-                border-t border-white/[0.05] text-[12px] text-white/40">
+                border-t border-[var(--mh-hairline)] text-[12px] text-[var(--mh-dim)]">
                 <span>
                   Showing {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, totalRows)} of {totalRows}
                 </span>
@@ -226,16 +226,16 @@ function MyProjects({ isAdmin, userId }: { isAdmin: boolean; userId: string }) {
                   <button
                     disabled={page === 0}
                     onClick={() => setPage((p) => p - 1)}
-                    className="px-3 py-1 rounded border border-white/10 text-white/60
-                      hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed"
+                    className="px-3 py-1 rounded border border-[var(--mh-hairline)] text-[var(--mh-dim)]
+                      hover:bg-[var(--mh-panel)] disabled:opacity-30 disabled:cursor-not-allowed"
                   >
                     Prev
                   </button>
                   <button
                     disabled={(page + 1) * PAGE_SIZE >= totalRows}
                     onClick={() => setPage((p) => p + 1)}
-                    className="px-3 py-1 rounded border border-white/10 text-white/60
-                      hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed"
+                    className="px-3 py-1 rounded border border-[var(--mh-hairline)] text-[var(--mh-dim)]
+                      hover:bg-[var(--mh-panel)] disabled:opacity-30 disabled:cursor-not-allowed"
                   >
                     Next
                   </button>
@@ -254,8 +254,8 @@ function MyProjects({ isAdmin, userId }: { isAdmin: boolean; userId: string }) {
 function Stat({ label, value }: { label: string; value: number }) {
   return (
     <MhCard className="p-5">
-      <div className="text-3xl text-white" style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 500 }}>{value}</div>
-      <div className="mt-1 text-[12px] text-white/50">{label}</div>
+      <div className="text-3xl text-[var(--mh-ink)]" style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 500 }}>{value}</div>
+      <div className="mt-1 text-[12px] text-[var(--mh-dim)]">{label}</div>
     </MhCard>
   );
 }

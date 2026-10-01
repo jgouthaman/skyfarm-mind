@@ -35,7 +35,7 @@ function Report() {
           <Button variant="outline" onClick={() => window.print()}>Download PDF</Button>
           <Button variant="outline" onClick={exportJSON}>Export JSON</Button>
           <Button variant="outline" onClick={() => { navigator.clipboard.writeText(window.location.href); toast.success("Link copied"); }}>Share</Button>
-          <Button className="bg-sky-500 hover:bg-sky-600 text-white" onClick={() => toast.success("Saved to project history")}>Save</Button>
+          <Button className="bg-sky-500 hover:bg-sky-600 text-[var(--mh-ink)]" onClick={() => toast.success("Saved to project history")}>Save</Button>
         </div>
       </header>
 

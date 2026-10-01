@@ -229,8 +229,8 @@ function RequirementsWizard() {
         <div className="flex justify-between pt-2 border-t border-border/60">
           <Button variant="outline" disabled={step === 1} onClick={() => setStep(step - 1)}>Back</Button>
           {step < 4
-            ? <Button onClick={() => setStep(step + 1)} className="bg-sky-500 hover:bg-sky-600 text-white">Next</Button>
-            : <Button onClick={generate} className="bg-emerald-500 hover:bg-emerald-600 text-white">Generate Drone Design</Button>}
+            ? <Button onClick={() => setStep(step + 1)} className="bg-sky-500 hover:bg-sky-600 text-[var(--mh-ink)]">Next</Button>
+            : <Button onClick={generate} className="bg-emerald-500 hover:bg-emerald-600 text-[var(--mh-ink)]">Generate Drone Design</Button>}
         </div>
       </div>
     </div>
