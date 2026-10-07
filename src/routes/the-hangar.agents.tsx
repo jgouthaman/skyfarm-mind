@@ -26,16 +26,16 @@ const BAY_GROUPS: BayGroup[] = [
       { num: "BAY 02", title: "Concept Agent", desc: "Generates and ranks concept options against benchmarks and trends." },
       { num: "BAY 03", title: "Aircraft Design Agent", desc: "Selects configuration and design parameters from rules and reference designs." },
       { num: "BAY 04", title: "CAD Agent", desc: "Builds CAD geometry and assemblies from validated design parameters." },
-      { num: "BAY 05", title: "Simulation Orchestrator", desc: "Prepares the simulation plan and dispatches jobs to the solver agents." },
     ],
   },
   {
-    // Only CFD and Structural actually run in parallel — Optimization
-    // consumes both of their outputs, and Validation follows Optimization,
-    // so those two are their own sequential group below, not lumped in
-    // with the parallel pair.
-    label: "Parallel analysis — CFD ‖ Structures",
+    // Flight Dynamics (Simulation Orchestrator), CFD, and Structural all run in parallel off
+    // Bay 04's CAD geometry — Optimization (Bay 08) consumes all three
+    // outputs, and Validation follows Optimization, so those two are their
+    // own sequential group below, not lumped in with the parallel triple.
+    label: "Parallel analysis — Flight Dynamics ‖ CFD ‖ Structures",
     bays: [
+      { num: "BAY 05", title: "Flight Dynamics", desc: "Prepares the simulation plan and dispatches jobs to the solver agents." },
       { num: "BAY 06", title: "CFD Agent", desc: "Runs fluid dynamics simulations — forces, coefficients, fields." },
       { num: "BAY 07", title: "Structural Agent", desc: "Runs FEA for stress, deformation, and safety factor." },
     ],

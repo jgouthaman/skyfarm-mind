@@ -103,11 +103,11 @@ const NODES: NodeData[] = [
   },
   {
     id: 5,
-    x: 935,
-    y: 140,
+    x: 625,
+    y: 300,
     bay: "05",
-    name: "Sim Orchestrator",
-    title: "Simulation Orchestrator",
+    name: "Flight Dynamics",
+    title: "Flight Dynamics",
     status: "online",
     href: "/the-hangar/simulation",
     desc: "Assesses flight envelope, stability, and performance risk from the CAD design -- LLM reasoning bounded by vertical design rules.",
@@ -145,21 +145,21 @@ const NODES: NodeData[] = [
   },
   {
     id: 8,
-    x: 895,
+    x: 805,
     y: 420,
     bay: "08",
     name: "Optimization",
     title: "Optimization Agent",
     status: "online",
     href: "/the-hangar/optimization",
-    desc: "Reasons about the weight/drag/cost/safety trade-off position from CFD and structural results -- LLM reasoning only, no real multi-objective search (Optuna/PyGMO) runs yet.",
-    inp: "CFD + structural results",
+    desc: "Reasons about the weight/drag/cost/safety trade-off position from flight dynamics, CFD, and structural results -- LLM reasoning only, no real multi-objective search (Optuna/PyGMO) runs yet.",
+    inp: "Flight dynamics + CFD + structural results",
     tools: "Claude Sonnet 5, rule engine",
     out: "Trade-off assessment: objective scores, recommended adjustments (Phase 1 -- reasoning only, not a real Pareto search)",
   },
   {
     id: 9,
-    x: 895,
+    x: 805,
     y: 540,
     bay: "09",
     name: "Validation",
@@ -173,7 +173,7 @@ const NODES: NodeData[] = [
   },
   {
     id: 10,
-    x: 235,
+    x: 565,
     y: 640,
     bay: "10",
     name: "Materials",
@@ -187,7 +187,7 @@ const NODES: NodeData[] = [
   },
   {
     id: 11,
-    x: 450,
+    x: 725,
     y: 640,
     bay: "11",
     name: "Manufacturing",
@@ -201,7 +201,7 @@ const NODES: NodeData[] = [
   },
   {
     id: 12,
-    x: 665,
+    x: 885,
     y: 640,
     bay: "12",
     name: "Certification",
@@ -215,7 +215,7 @@ const NODES: NodeData[] = [
   },
   {
     id: 13,
-    x: 880,
+    x: 1045,
     y: 640,
     bay: "13",
     name: "Documentation",
@@ -229,7 +229,7 @@ const NODES: NodeData[] = [
   },
   {
     id: 14,
-    x: 685,
+    x: 500,
     y: 390,
     bay: "14",
     name: "Bernoulli",
@@ -263,26 +263,25 @@ const NODES: NodeData[] = [
   },
 ];
 
-// Bay 14 (Bernoulli) sits at the centroid of the bays that call it, roughly
-// equidistant between the Bay 01 row (y=140) and the Bay 10-13 row
-// (y=640) -- a real hub position, not off to one side, so its 10 fan-out
-// lines to every calling bay read as short, clear spokes instead of long
-// diagonals crossing the whole canvas. Its x (685) is NOT the canvas'
-// own center (600) -- it's the horizontal centroid of the shifted
-// sequential-node cluster below, so Bernoulli stays visually centered
-// relative to the bays around it rather than relative to the two
-// Knowledge bars (which are centered on the canvas independently).
+// Bay 14 (Bernoulli) sits roughly equidistant between the Bay 01 row
+// (y=140) and the Bay 10-13 row (y=640) -- a real hub position, not off to
+// one side, so its 10 fan-out lines to every calling bay read as short,
+// clear spokes instead of long diagonals crossing the whole canvas. Its x
+// (500) is shifted left of the old centroid value (685) specifically to
+// clear Bay 05 (Flight Dynamics, x=625) -- at 685 the "Bernoulli" label
+// overlapped Flight Dynamics' circle once Bay 05 moved down next to
+// CFD/Structural.
 const PHYSICS_HUB_LINES = [
-  "M685,390 L215,140", // Bay 01 Mission
-  "M685,390 L395,140", // Bay 02 Concept
-  "M685,390 L575,140", // Bay 03 Aircraft Design
-  "M685,390 L755,140", // Bay 04 CAD
-  "M685,390 L935,140", // Bay 05 Sim Orchestrator
-  "M685,390 L805,300", // Bay 06 CFD
-  "M685,390 L985,300", // Bay 07 Structural
-  "M685,390 L895,420", // Bay 08 Optimization
-  "M685,390 L895,540", // Bay 09 Validation
-  "M685,390 L665,640", // Bay 12 Certification
+  "M500,390 L215,140", // Bay 01 Mission
+  "M500,390 L395,140", // Bay 02 Concept
+  "M500,390 L575,140", // Bay 03 Aircraft Design
+  "M500,390 L755,140", // Bay 04 CAD
+  "M500,390 L625,300", // Bay 05 Flight Dynamics
+  "M500,390 L805,300", // Bay 06 CFD
+  "M500,390 L985,300", // Bay 07 Structural
+  "M500,390 L805,420", // Bay 08 Optimization
+  "M500,390 L805,540", // Bay 09 Validation
+  "M500,390 L885,640", // Bay 12 Certification
 ];
 
 // Bay 15 (Knowledge) renders as two vertical bars flanking the diagram --
@@ -307,38 +306,37 @@ const KNOWLEDGE_BAR_LINES = [
   `M395,140 H${KNOWLEDGE_BAR_LEFT_CENTER_X}`, // Bay 02
   `M575,140 H${KNOWLEDGE_BAR_LEFT_CENTER_X}`, // Bay 03
   `M755,140 H${KNOWLEDGE_BAR_RIGHT_CENTER_X}`, // Bay 04
-  `M935,140 H${KNOWLEDGE_BAR_RIGHT_CENTER_X}`, // Bay 05
+  `M625,300 H${KNOWLEDGE_BAR_RIGHT_CENTER_X}`, // Bay 05
   `M805,300 H${KNOWLEDGE_BAR_RIGHT_CENTER_X}`, // Bay 06
   `M985,300 H${KNOWLEDGE_BAR_RIGHT_CENTER_X}`, // Bay 07
-  `M895,420 H${KNOWLEDGE_BAR_RIGHT_CENTER_X}`, // Bay 08
-  `M895,540 H${KNOWLEDGE_BAR_RIGHT_CENTER_X}`, // Bay 09
-  `M235,640 H${KNOWLEDGE_BAR_LEFT_CENTER_X}`, // Bay 10
-  `M450,640 H${KNOWLEDGE_BAR_LEFT_CENTER_X}`, // Bay 11
-  `M665,640 H${KNOWLEDGE_BAR_RIGHT_CENTER_X}`, // Bay 12
-  `M880,640 H${KNOWLEDGE_BAR_RIGHT_CENTER_X}`, // Bay 13
+  `M805,420 H${KNOWLEDGE_BAR_RIGHT_CENTER_X}`, // Bay 08
+  `M805,540 H${KNOWLEDGE_BAR_RIGHT_CENTER_X}`, // Bay 09
+  `M565,640 H${KNOWLEDGE_BAR_LEFT_CENTER_X}`, // Bay 10
+  `M725,640 H${KNOWLEDGE_BAR_RIGHT_CENTER_X}`, // Bay 11 -- crossed to the right bar now that it sits right of canvas-center (x=725 >= 600)
+  `M885,640 H${KNOWLEDGE_BAR_RIGHT_CENTER_X}`, // Bay 12
+  `M1045,640 H${KNOWLEDGE_BAR_RIGHT_CENTER_X}`, // Bay 13
 ];
 
 const LEAD_LINES: { id: string; d: string }[] = [
   { id: "ln-1-2", d: "M249,140 H361" },
   { id: "ln-2-3", d: "M429,140 H541" },
   { id: "ln-3-4", d: "M609,140 H721" },
-  { id: "ln-4-5", d: "M789,140 H901" },
-  // Bay 06 (CFD) and Bay 07 (Structural) both source primary input directly
-  // from Bay 04 (CAD Agent), not from Bay 05 -- rewired from the stale
-  // Bay05->06/07 edges. Single shared exit point off Bay 04's bottom edge
+  // Bay 05 (Flight Dynamics), Bay 06 (CFD), and Bay 07 (Structural) all
+  // source primary input directly from Bay 04 (CAD Agent) and run in
+  // parallel -- same single shared exit point off Bay 04's bottom edge
   // (755,174) fanning out at y=220, mirroring ln-9-10..ln-9-14's own
-  // single-origin fan-out pattern below, rather than reusing Bay05's old
-  // two-point diagonal-exit shape (which existed because Bay05's two
-  // targets straddled it symmetrically -- Bay04's targets don't).
+  // single-origin fan-out pattern below.
+  { id: "ln-4-5", d: "M755,174 V220 H625 V266" },
   { id: "ln-4-6", d: "M755,174 V220 H805 V266" },
   { id: "ln-4-7", d: "M755,174 V220 H985 V266" },
-  { id: "ln-6-8", d: "M805,334 V376 H895 V386" },
-  { id: "ln-7-8", d: "M985,334 V376 H895 V386" },
-  { id: "ln-8-9", d: "M895,454 V506" },
-  { id: "ln-9-10", d: "M895,574 V596 H235 V606" },
-  { id: "ln-9-11", d: "M895,574 V596 H450 V606" },
-  { id: "ln-9-12", d: "M895,574 V596 H665 V606" },
-  { id: "ln-9-13", d: "M895,574 V596 H880 V606" },
+  { id: "ln-5-8", d: "M625,334 V376 H805 V386" },
+  { id: "ln-6-8", d: "M805,334 V386" },
+  { id: "ln-7-8", d: "M985,334 V376 H805 V386" },
+  { id: "ln-8-9", d: "M805,454 V506" },
+  { id: "ln-9-10", d: "M805,574 V596 H565 V606" },
+  { id: "ln-9-11", d: "M805,574 V596 H725 V606" },
+  { id: "ln-9-12", d: "M805,574 V596 H885 V606" },
+  { id: "ln-9-13", d: "M805,574 V596 H1045 V606" },
 ];
 
 interface Stage {
@@ -357,17 +355,12 @@ const STAGES: Stage[] = [
   },
   { lines: ["ln-3-4"], nodes: [4], text: "BAY 04 -- CAD Agent -- building geometry & assembly..." },
   {
-    lines: ["ln-4-5"],
-    nodes: [5],
-    text: "BAY 05 -- Simulation Orchestrator -- preparing simulation plan...",
+    lines: ["ln-4-5", "ln-4-6", "ln-4-7"],
+    nodes: [5, 6, 7],
+    text: "BAY 05 / 06 / 07 -- Flight Dynamics + CFD + Structural -- running in parallel...",
   },
   {
-    lines: ["ln-4-6", "ln-4-7"],
-    nodes: [6, 7],
-    text: "BAY 06 / 07 -- CFD + Structural -- running in parallel...",
-  },
-  {
-    lines: ["ln-6-8", "ln-7-8"],
+    lines: ["ln-5-8", "ln-6-8", "ln-7-8"],
     nodes: [8],
     text: "BAY 08 -- Optimization Agent -- searching for Pareto-optimal designs...",
   },
@@ -605,6 +598,15 @@ function TheHangarWelcome() {
                     d={line.d}
                   />
                 ))}
+                {/* Bays 10-13 grouped in one dashed bounding box, same visual
+                    language as the public how-it-works page's downstream
+                    group -- encloses the four node circles (r=30, centered
+                    y=640) plus their below-node labels, not just the
+                    circles themselves. */}
+                <rect
+                  x={515} y={598} width={580} height={118} rx={6}
+                  className="hgr-w-downstream-box"
+                />
                 <g>
                   {NODES.filter((n) => n.id !== 15).map((n) => {
                     const r = n.r || 30;
@@ -626,33 +628,24 @@ function TheHangarWelcome() {
                         }}
                       >
                         <circle cx={n.x} cy={n.y} r={r} className={nodeCircleClassName(n)} />
-                        <rect
-                          x={n.x - 25}
-                          y={n.y - 8}
-                          width={50}
-                          height={17}
-                          rx={8.5}
-                          className={n.status === "online" ? "hgr-w-live-pill" : "hgr-w-wip-pill"}
-                        />
-                        <text
-                          x={n.x}
-                          y={n.y + 2}
-                          className={`hgr-w-status-badge ${n.status === "online" ? "hgr-w-online-badge" : "hgr-w-design-badge"}`}
-                        >
-                          {n.status === "online" ? "LIVE" + (n.href ? " ↗" : "") : "WIP"}
-                        </text>
-                        <text
-                          x={n.x}
-                          // Bays 10-13 sit on the bottom row, where the
-                          // ln-9-10..13 fan-out lines route horizontally
-                          // right above them (y=596) -- a label placed
-                          // above the node there sits on top of that line,
-                          // so this row keeps its label below instead.
-                          // Every other row has clear space above.
-                          y={[10, 11, 12, 13].includes(n.id) ? n.y + r + 20 : n.y - r - 14}
-                          className="hgr-w-node-label"
-                        >
-                          {n.name}
+                        {/* Name rendered inside the circle instead of the old
+                            LIVE/WIP pill + external label -- status is still
+                            conveyed by the circle's own fill/stroke color
+                            (nodeCircleClassName), just not spelled out in
+                            text anymore. Two-word names wrap onto two lines
+                            (one word per tspan); one-word names stay on one
+                            line, centered via dominant-baseline rather than
+                            a hand-picked y offset. */}
+                        <text x={n.x} y={n.y} className="hgr-w-node-label">
+                          {n.name.includes(" ") ? (
+                            n.name.split(" ").map((word, i, arr) => (
+                              <tspan key={word} x={n.x} dy={i === 0 ? -(arr.length - 1) * 5.5 : 11}>
+                                {word}
+                              </tspan>
+                            ))
+                          ) : (
+                            n.name
+                          )}
                         </text>
                       </g>
                     );
@@ -921,7 +914,20 @@ const HGR_WELCOME_CSS = `
 .hgr-w-node-circle.hgr-w-seen{ fill:#16324E; stroke:var(--hgr-w-blue-bright); }
 .hgr-w-node-g{ outline:none; }
 .hgr-w-node-g:focus .hgr-w-node-circle{ stroke:var(--hgr-w-amber-bright); stroke-width:2.5; }
-.hgr-w-node-label{ font-family:'IBM Plex Sans',sans-serif; font-weight:600; fill:var(--hgr-w-paper-dim); font-size:14.5px; text-anchor:middle; pointer-events:none; }
+/* Now rendered INSIDE each node circle (replacing the old LIVE/WIP pill),
+   not as an external label above/below -- dominant-baseline:middle centers
+   it on the node's own y regardless of 1-line vs 2-line (tspan) content.
+   paint-order+stroke still gives it a halo in the page's own background
+   color: several mid-chain nodes (05-08) have connector lines routed
+   directly through their center at the same x, and long one-word names
+   (Manufacturing, Certification, Documentation) overflow past the circle
+   edge onto the lines/canvas behind them -- the halo keeps both cases
+   legible without hand-tuning position per node. */
+.hgr-w-node-label{
+  font-family:'IBM Plex Sans',sans-serif; font-weight:600; fill:var(--hgr-w-paper); font-size:9.5px;
+  text-anchor:middle; dominant-baseline:middle; pointer-events:none;
+  paint-order:stroke; stroke:var(--hgr-w-navy-deep); stroke-width:3px; stroke-linejoin:round;
+}
 .hgr-w-node-g:hover .hgr-w-node-circle:not(.hgr-w-hub){ stroke:var(--hgr-w-blue-bright); }
 .hgr-w-node-g:hover .hgr-w-node-label{ fill:var(--hgr-w-paper); }
 
@@ -938,15 +944,13 @@ const HGR_WELCOME_CSS = `
 .hgr-w-bar.hgr-w-bar-active{ stroke:var(--hgr-w-amber); filter:drop-shadow(0 0 10px rgba(232,163,61,0.65)); }
 .hgr-w-bar.hgr-w-bar-seen{ stroke:var(--hgr-w-blue-bright); }
 .hgr-w-bar-label{ font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:12.5px; letter-spacing:.12em; fill:var(--hgr-w-paper-dim); text-anchor:middle; pointer-events:none; transition:fill .3s; }
+.hgr-w-downstream-box{ fill:none; stroke:var(--hgr-w-blue-line); stroke-width:1.5; stroke-dasharray:3 3; pointer-events:none; }
 .hgr-w-bar-g:hover .hgr-w-bar-label{ fill:var(--hgr-w-paper); }
 
+/* Still used by the Bay 15 Knowledge bars' own WIP indicator -- the main
+   node loop no longer renders a LIVE/WIP pill (see hgr-w-node-label). */
 .hgr-w-status-badge{ font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:10.5px; text-anchor:middle; letter-spacing:.05em; }
-.hgr-w-online-badge{ fill:var(--hgr-w-green-bright); font-size:11.5px; font-weight:700; }
 .hgr-w-design-badge{ fill:var(--hgr-w-amber-bright); font-size:11.5px; font-weight:700; }
-.hgr-w-live-pill{
-  fill:rgba(18,59,46,0.92); stroke:var(--hgr-w-green); stroke-width:1.2;
-  filter:drop-shadow(0 0 6px rgba(95,191,143,0.75)); pointer-events:none;
-}
 .hgr-w-wip-pill{
   fill:rgba(59,40,10,0.92); stroke:var(--hgr-w-amber); stroke-width:1.2;
   filter:drop-shadow(0 0 6px rgba(232,163,61,0.75)); pointer-events:none;
