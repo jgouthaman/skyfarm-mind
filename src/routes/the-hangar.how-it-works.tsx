@@ -44,7 +44,7 @@ function HangarHowItWorksPage() {
             <div className="hgr-section-head">
               <div className="hgr-kicker hgr-kicker-badge">How it flows</div>
               <h2>From a sentence to a validated design.</h2>
-              <p>Agents 1 through 5 run in sequence to prepare geometry and a simulation plan. CFD and Structural run in parallel, Optimization combines their results, and Validation checks the outcome. If it doesn't pass, the loop goes back to Optimization, not back to square one. Once validated, the design moves downstream to materials, manufacturing, certification and documentation.</p>
+              <p>Agents 1 through 4 run in sequence to prepare validated CAD geometry. Flight Dynamics, CFD, and Structural then run in parallel off that geometry, Optimization combines their results, and Validation checks the outcome. If it doesn't pass, the loop goes back to Optimization, not back to square one. Once validated, the design moves downstream to materials, manufacturing, certification and documentation.</p>
             </div>
 
             <div className="hgr-flow-wrap">
@@ -58,15 +58,14 @@ function HangarHowItWorksPage() {
                     <FlowNode n="03" label="Aircraft Design" />
                     <FlowArrow />
                     <FlowNode n="04" label="CAD" />
-                    <FlowArrow />
-                    <FlowNode n="05" label="Simulation" />
                   </div>
 
                   <div className="hgr-flow-chain-tail">
                     <div className="hgr-flow-down" aria-hidden="true">↓</div>
 
                     <div className="hgr-flow-parallel-wrap">
-                      <div className="hgr-flow-parallel-pair">
+                      <div className="hgr-flow-parallel-group">
+                        <FlowNode n="05" label="Flight Dynamics" />
                         <FlowNode n="06" label="CFD" />
                         <FlowNode n="07" label="Structural" />
                       </div>
@@ -74,34 +73,48 @@ function HangarHowItWorksPage() {
 
                     <div className="hgr-flow-down" aria-hidden="true">↓</div>
 
-                    <FlowNode n="08" label="Optimization" />
+                    {/* Bernoulli/Knowledge are cross-cutting services, not
+                        sequential steps — anchored left/right and vertically
+                        centered on the whole Optimization-through-Validation
+                        block (position:relative on this wrapper,
+                        position:absolute + identical left/right offset and
+                        top:50% centering on both boxes), landing them
+                        centered between bays 08 and 09 specifically, not
+                        level with either one alone. */}
+                    <div className="hgr-flow-opt-anchor">
+                      <FlowNode n="08" label="Optimization" />
 
-                    <div className="hgr-flow-return">
-                      <ReturnArrow />
-                      Fail → re-optimise
+                      <div className="hgr-flow-return">
+                        <ReturnArrow />
+                        Fail → re-optimise
+                      </div>
+
+                      <div className="hgr-flow-down" aria-hidden="true">↓</div>
+
+                      <FlowNode n="09" label="Validation" />
+
+                      <div className="hgr-flow-side-box hgr-flow-side-box-left">
+                        <FlowNode n="14" label="Bernoulli" />
+                        <div className="hgr-flow-side-box-caption">Physics checks at every stage</div>
+                      </div>
+                      <div className="hgr-flow-side-box hgr-flow-side-box-right">
+                        <FlowNode n="15" label="Knowledge" />
+                        <div className="hgr-flow-side-box-caption">Shared memory across all bays</div>
+                      </div>
                     </div>
 
                     <div className="hgr-flow-down" aria-hidden="true">↓</div>
 
-                    <FlowNode n="09" label="Validation" />
+                    <div className="hgr-flow-downstream-group">
+                      <FlowNode n="10" label="Materials" />
+                      <FlowArrow />
+                      <FlowNode n="11" label="Manufacturing" />
+                      <FlowArrow />
+                      <FlowNode n="12" label="Certification" />
+                      <FlowArrow />
+                      <FlowNode n="13" label="Documentation" />
+                    </div>
                   </div>
-                </div>
-
-                <div className="hgr-flow-down" aria-hidden="true">↓</div>
-
-                <div className="hgr-flow-row">
-                  <FlowNode n="10" label="Materials" />
-                  <FlowArrow />
-                  <FlowNode n="11" label="Manufacturing" />
-                  <FlowArrow />
-                  <FlowNode n="12" label="Certification" />
-                  <FlowArrow />
-                  <FlowNode n="13" label="Documentation" />
-                </div>
-
-                <div className="hgr-flow-rail">
-                  <div className="hgr-flow-rail-label"><b>14 Bernoulli</b> — physics checks at every stage</div>
-                  <div className="hgr-flow-rail-label"><b>15 Knowledge</b> — shared memory across all bays</div>
                 </div>
               </div>
             </div>

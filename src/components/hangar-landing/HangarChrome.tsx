@@ -647,36 +647,75 @@ export const HGR_LANDING_CSS = `
 /* ── How it works: full flow diagram (rows + parallel pair + return loop + rail) ── */
 .hgr-flow-diagram{ display:flex; flex-direction:column; align-items:center; }
 .hgr-flow-row{ display:flex; align-items:center; justify-content:center; gap:0; flex-wrap:wrap; }
-/* Row 1 ends at node 05, and everything from the down-arrow through
-   Validation continues that same thread — so it must hang off node 05's
-   position, not the row's horizontal center. hgr-flow-chain shrinks to
-   Row 1's own width (its widest child), and hgr-flow-chain-tail right-aligns
-   within that width, landing under node 05 instead of the row's midpoint. */
-.hgr-flow-chain{ display:inline-block; }
-.hgr-flow-chain-tail{ display:flex; flex-direction:column; align-items:flex-end; }
+/* Row 1 ends at node 04, and everything from the down-arrow through
+   Validation continues that same thread — so it must hang off node 04's
+   own horizontal center, not the row's. hgr-flow-chain is a 7-column grid
+   matching Row 1's 4 nodes + 3 arrows exactly; .hgr-flow-row is rendered
+   with display:contents here so its children (the nodes/arrows) become
+   direct grid items filling those 7 columns in order, and
+   hgr-flow-chain-tail is explicitly placed in the last column (node 04's
+   column) with justify-self:center, so it's centered on node 04 even
+   though the tail content is wider than that one column. */
+.hgr-flow-chain{ display:grid; grid-template-columns:130px 28px 130px 28px 130px 28px 130px; align-items:center; }
+.hgr-flow-chain > .hgr-flow-row{ display:contents; }
+.hgr-flow-chain-tail{
+  grid-column:7; grid-row:2; justify-self:center;
+  display:flex; flex-direction:column; align-items:center;
+}
 .hgr-flow-down{ color:var(--hgr-blue-line); font-size:16px; padding:4px 0; }
 .hgr-flow-parallel-wrap{ display:flex; align-items:center; gap:0; }
-.hgr-flow-parallel-pair{ display:flex; flex-direction:column; gap:8px; }
-.hgr-flow-parallel-pair .hgr-flow-node{ width:150px; }
+/* 05/06/07 sit side by side inside one visible bounding box (not stacked),
+   showing they're a single parallel group fed from one connector off 04. */
+.hgr-flow-parallel-group{
+  display:flex; flex-direction:row; gap:12px;
+  border:1px dashed var(--hgr-blue-line); border-radius:4px; padding:14px;
+}
+.hgr-flow-parallel-group .hgr-flow-node{ width:130px; }
+/* 10/11/12/13 grouped in one bounding box, same visual language as the
+   05/06/07 parallel box — centered on Bay 09 since it's just another
+   child of hgr-flow-chain-tail (which is already centered on Bay 04's
+   grid column), not a layout of its own. */
+.hgr-flow-downstream-group{
+  display:flex; align-items:center; gap:0;
+  border:1px dashed var(--hgr-blue-line); border-radius:4px; padding:14px;
+}
 .hgr-flow-return{
   display:flex; align-items:center; gap:6px; margin:8px 0;
   font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.05em; text-transform:uppercase;
   color:var(--hgr-amber);
 }
 .hgr-flow-return svg{ flex-shrink:0; }
-.hgr-flow-rail{ margin-top:40px; padding-top:22px; border-top:1px dashed var(--hgr-hairline); width:100%; max-width:600px; text-align:center; }
-.hgr-flow-rail-label{
-  font-family:'IBM Plex Mono',monospace; font-size:11.5px; letter-spacing:.06em; text-transform:uppercase;
-  color:var(--hgr-paper-dim); margin-top:10px;
+/* 14 Bernoulli / 15 Knowledge anchor left/right of Optimization specifically
+   (not the chain as a whole) — this wrapper is the positioning context, and
+   both side boxes use the same top:50%/translateY(-50%) centering and the
+   same left/right offset, so they land at identical height and identical
+   spacing from Optimization on both sides, symmetric by construction rather
+   than by matching numbers. FlowNode is reused for 14/15 (not a custom box)
+   so their font/number styling is identical to every other bay, not a
+   separate style that could drift from it. */
+.hgr-flow-opt-anchor{ position:relative; display:flex; flex-direction:column; align-items:center; }
+.hgr-flow-side-box{ position:absolute; top:50%; transform:translateY(-50%); text-align:center; }
+.hgr-flow-side-box-left{ right:calc(100% + 36px); }
+.hgr-flow-side-box-right{ left:calc(100% + 36px); }
+.hgr-flow-side-box-caption{
+  margin-top:8px; font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.05em;
+  text-transform:uppercase; color:var(--hgr-paper-dim); max-width:140px;
 }
-.hgr-flow-rail-label:first-child{ margin-top:0; }
-.hgr-flow-rail-label b{ color:var(--hgr-amber); font-weight:600; }
 @media(max-width:760px){
+  /* Absolute left/right anchoring doesn't fit a narrow viewport — stack
+     Bernoulli/Knowledge below Optimization instead, still reusing the same
+     FlowNode styling. */
+  .hgr-flow-opt-anchor{ display:flex; flex-direction:column; align-items:center; gap:10px; }
+  .hgr-flow-side-box{ position:static; transform:none; }
   .hgr-flow-row{ flex-direction:column; }
   .hgr-flow-row .hgr-flow-arrow{ transform:rotate(90deg); }
   .hgr-flow-parallel-wrap{ flex-direction:column; }
+  .hgr-flow-parallel-group{ flex-direction:column; }
+  .hgr-flow-downstream-group{ flex-direction:column; }
+  .hgr-flow-downstream-group .hgr-flow-arrow{ transform:rotate(90deg); }
   .hgr-flow-chain{ display:block; width:100%; }
-  .hgr-flow-chain-tail{ align-items:center; }
+  .hgr-flow-chain > .hgr-flow-row{ display:flex; }
+  .hgr-flow-chain-tail{ grid-column:auto; grid-row:auto; justify-self:auto; align-items:center; }
 }
 
 /* Worked example (How it works) */
