@@ -1,5 +1,6 @@
 User-agent: *
 Allow: /
 Disallow: /t-h
+Disallow: /t-h/
 
 Sitemap: https://www.torqwings.com/sitemap.xml
