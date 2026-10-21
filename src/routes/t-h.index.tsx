@@ -40,10 +40,12 @@ function TestHarnessMain() {
     setSubmitting(true);
     setResponse(null);
     try {
-      // Same-origin call -- this app's own /api/t-h/$agent route proxies
-      // server-to-server to th-vercel-functions, so the browser never
-      // makes a cross-origin request and CORS doesn't enter into it.
-      const res = await fetch(`/api/t-h/${agent.slug}`, {
+      // Same-origin call -- this app's own /api/harness/call/$bay route
+      // proxies server-to-server to th-vercel-functions, so the browser
+      // never makes a cross-origin request and CORS doesn't enter into it.
+      // (Not under /api/t-h/* -- a dynamic route there collides with the
+      // /t-h page route group; see api.harness.call.$bay.ts.)
+      const res = await fetch(`/api/harness/call/${agent.slug}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ function_name: functionId, payload }),
