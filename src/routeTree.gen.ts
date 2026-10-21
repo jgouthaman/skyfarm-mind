@@ -9,174 +9,146 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as TheHangarRouteImport } from './routes/the-hangar'
-import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
-import { Route as PilotRouteImport } from './routes/pilot'
-import { Route as MissionHubRouteImport } from './routes/mission-hub'
-import { Route as HangarStage3ManualtestRouteImport } from './routes/hangar-stage3-manualtest'
-import { Route as FieldRouteImport } from './routes/field'
-import { Route as DestudRouteImport } from './routes/destud'
-import { Route as AcademyRouteImport } from './routes/academy'
 import { Route as LayoutRouteImport } from './routes/_layout'
-import { Route as TheHangarIndexRouteImport } from './routes/the-hangar.index'
-import { Route as PilotIndexRouteImport } from './routes/pilot.index'
-import { Route as MissionHubIndexRouteImport } from './routes/mission-hub.index'
-import { Route as DestudIndexRouteImport } from './routes/destud.index'
-import { Route as AcademyIndexRouteImport } from './routes/academy.index'
+import { Route as AcademyRouteImport } from './routes/academy'
+import { Route as DestudRouteImport } from './routes/destud'
+import { Route as FieldRouteImport } from './routes/field'
+import { Route as HangarStage3ManualtestRouteImport } from './routes/hangar-stage3-manualtest'
+import { Route as MissionHubRouteImport } from './routes/mission-hub'
+import { Route as PilotRouteImport } from './routes/pilot'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as TheHangarRouteImport } from './routes/the-hangar'
 import { Route as LayoutIndexRouteImport } from './routes/_layout.index'
-import { Route as TheHangarWelcomeRouteImport } from './routes/the-hangar.welcome'
-import { Route as TheHangarValidationRouteImport } from './routes/the-hangar.validation'
-import { Route as TheHangarStructuralRouteImport } from './routes/the-hangar.structural'
-import { Route as TheHangarStackRouteImport } from './routes/the-hangar.stack'
-import { Route as TheHangarSimulationRouteImport } from './routes/the-hangar.simulation'
-import { Route as TheHangarOptimizationRouteImport } from './routes/the-hangar.optimization'
-import { Route as TheHangarMissionRouteImport } from './routes/the-hangar.mission'
-import { Route as TheHangarMaterialsRouteImport } from './routes/the-hangar.materials'
-import { Route as TheHangarManufacturingRouteImport } from './routes/the-hangar.manufacturing'
-import { Route as TheHangarHowItWorksRouteImport } from './routes/the-hangar.how-it-works'
-import { Route as TheHangarDocumentationRouteImport } from './routes/the-hangar.documentation'
-import { Route as TheHangarConceptRouteImport } from './routes/the-hangar.concept'
-import { Route as TheHangarCfdAnalysisRouteImport } from './routes/the-hangar.cfd-analysis'
-import { Route as TheHangarCertificationRouteImport } from './routes/the-hangar.certification'
-import { Route as TheHangarCadDesignRouteImport } from './routes/the-hangar.cad-design'
-import { Route as TheHangarBernoulliRouteImport } from './routes/the-hangar.bernoulli'
-import { Route as TheHangarAircraftDesignRouteImport } from './routes/the-hangar.aircraft-design'
-import { Route as TheHangarAgentsRouteImport } from './routes/the-hangar.agents'
-import { Route as PilotTrackingRouteImport } from './routes/pilot.tracking'
-import { Route as PilotSyncRouteImport } from './routes/pilot.sync'
-import { Route as PilotProfileRouteImport } from './routes/pilot.profile'
-import { Route as PilotLoginRouteImport } from './routes/pilot.login'
-import { Route as MissionHubWaitlistRouteImport } from './routes/mission-hub.waitlist'
-import { Route as MissionHubUsersRouteImport } from './routes/mission-hub.users'
-import { Route as MissionHubTwbcDroneSimilaritySearchRouteImport } from './routes/mission-hub.twbc-drone-similarity-search'
-import { Route as MissionHubTwbcDroneRuleEngineRouteImport } from './routes/mission-hub.twbc-drone-rule-engine'
-import { Route as MissionHubTwbcDroneReferenceDesignsRouteImport } from './routes/mission-hub.twbc-drone-reference-designs'
-import { Route as MissionHubTwbcDroneReasoningApiRouteImport } from './routes/mission-hub.twbc-drone-reasoning-api'
-import { Route as MissionHubTwbcDroneProvenDesignsRouteImport } from './routes/mission-hub.twbc-drone-proven-designs'
-import { Route as MissionHubTwbcDroneFeedbackRouteImport } from './routes/mission-hub.twbc-drone-feedback'
-import { Route as MissionHubTwbcDroneDesignScoreRouteImport } from './routes/mission-hub.twbc-drone-design-score'
-import { Route as MissionHubTwbcDroneDesignRulesRouteImport } from './routes/mission-hub.twbc-drone-design-rules'
-import { Route as MissionHubTwbcDroneDesignRuleRouteImport } from './routes/mission-hub.twbc-drone-design-rule'
-import { Route as MissionHubTwbcDroneComponentsLibraryRouteImport } from './routes/mission-hub.twbc-drone-components-library'
-import { Route as MissionHubTwbcDroneApprovalRouteImport } from './routes/mission-hub.twbc-drone-approval'
-import { Route as MissionHubTorqwingsDesignStudioRouteImport } from './routes/mission-hub.torqwings-design-studio'
-import { Route as MissionHubSettingsRouteImport } from './routes/mission-hub.settings'
-import { Route as MissionHubResetPasswordRouteImport } from './routes/mission-hub.reset-password'
-import { Route as MissionHubLoginRouteImport } from './routes/mission-hub.login'
-import { Route as MissionHubKnowledgeUavRouteImport } from './routes/mission-hub.knowledge-uav'
-import { Route as MissionHubDesignStudioRouteImport } from './routes/mission-hub.design-studio'
-import { Route as MissionHubDashboardRouteImport } from './routes/mission-hub.dashboard'
-import { Route as MissionHubContactsRouteImport } from './routes/mission-hub.contacts'
-import { Route as MissionHubAcademyUsersRouteImport } from './routes/mission-hub.academy-users'
-import { Route as DestudNewMissionRouteImport } from './routes/destud.new-mission'
-import { Route as AcademyQuizDemoRouteImport } from './routes/academy.quiz-demo'
-import { Route as AcademyLessonDemoRouteImport } from './routes/academy.lesson-demo'
-import { Route as AcademyDashboardRouteImport } from './routes/academy.dashboard'
-import { Route as LayoutPilotsRouteImport } from './routes/_layout.pilots'
-import { Route as LayoutIndustriesRouteImport } from './routes/_layout.industries'
-import { Route as LayoutGuardskyRouteImport } from './routes/_layout.guardsky'
-import { Route as LayoutContactRouteImport } from './routes/_layout.contact'
-import { Route as LayoutAgriskyRouteImport } from './routes/_layout.agrisky'
 import { Route as LayoutAboutRouteImport } from './routes/_layout.about'
-import { Route as PilotMissionsIndexRouteImport } from './routes/pilot.missions.index'
-import { Route as MissionHubTorqwingsDesignStudioIndexRouteImport } from './routes/mission-hub.torqwings-design-studio.index'
-import { Route as PilotMissionsIdRouteImport } from './routes/pilot.missions.$id'
-import { Route as MissionHubVerticalsVerticalRouteImport } from './routes/mission-hub.verticals.$vertical'
-import { Route as MissionHubTorqwingsDesignStudioSimulationRouteImport } from './routes/mission-hub.torqwings-design-studio.simulation'
-import { Route as MissionHubTorqwingsDesignStudioRequirementsRouteImport } from './routes/mission-hub.torqwings-design-studio.requirements'
-import { Route as MissionHubTorqwingsDesignStudioReportRouteImport } from './routes/mission-hub.torqwings-design-studio.report'
-import { Route as MissionHubTorqwingsDesignStudioNewRouteImport } from './routes/mission-hub.torqwings-design-studio.new'
-import { Route as MissionHubTorqwingsDesignStudioHistoryRouteImport } from './routes/mission-hub.torqwings-design-studio.history'
-import { Route as MissionHubTorqwingsDesignStudioDesignRuleRouteImport } from './routes/mission-hub.torqwings-design-studio.design-rule'
-import { Route as MissionHubTorqwingsDesignStudioDesignRouteImport } from './routes/mission-hub.torqwings-design-studio.design'
-import { Route as MissionHubTorqwingsDesignStudioComponentsRouteImport } from './routes/mission-hub.torqwings-design-studio.components'
-import { Route as MissionHubTorqwingsDesignStudioComplianceRouteImport } from './routes/mission-hub.torqwings-design-studio.compliance'
-import { Route as MissionHubTorqwingsDesignStudioAdvisorRouteImport } from './routes/mission-hub.torqwings-design-studio.advisor'
-import { Route as DestudProjectsProjectIdRouteImport } from './routes/destud.projects.$projectId'
-import { Route as DestudDashboardExplorerRouteImport } from './routes/destud.dashboard.explorer'
-import { Route as DestudDashboardEngineerRouteImport } from './routes/destud.dashboard.engineer'
-import { Route as ApiHangarValidationsRouteImport } from './routes/api.hangar.validations'
-import { Route as ApiHangarStructuralsRouteImport } from './routes/api.hangar.structurals'
-import { Route as ApiHangarStoreDocumentRouteImport } from './routes/api.hangar.store-document'
-import { Route as ApiHangarSourceCatalogsRouteImport } from './routes/api.hangar.source-catalogs'
-import { Route as ApiHangarSimulationsRouteImport } from './routes/api.hangar.simulations'
-import { Route as ApiHangarSagushHelloRouteImport } from './routes/api.hangar.sagush-hello'
-import { Route as ApiHangarSagushDesignRouteImport } from './routes/api.hangar.sagush-design'
-import { Route as ApiHangarResolveMissionRouteImport } from './routes/api.hangar.resolve-mission'
-import { Route as ApiHangarOptimizationsRouteImport } from './routes/api.hangar.optimizations'
-import { Route as ApiHangarMissionsRouteImport } from './routes/api.hangar.missions'
-import { Route as ApiHangarMaterialsRouteImport } from './routes/api.hangar.materials'
-import { Route as ApiHangarManufacturingsRouteImport } from './routes/api.hangar.manufacturings'
-import { Route as ApiHangarLlmStatusRouteImport } from './routes/api.hangar.llm-status'
-import { Route as ApiHangarExtractDocumentRouteImport } from './routes/api.hangar.extract-document'
-import { Route as ApiHangarDocumentationsRouteImport } from './routes/api.hangar.documentations'
-import { Route as ApiHangarConceptsRouteImport } from './routes/api.hangar.concepts'
-import { Route as ApiHangarCfdAnalysesRouteImport } from './routes/api.hangar.cfd-analyses'
-import { Route as ApiHangarCertificationsRouteImport } from './routes/api.hangar.certifications'
-import { Route as ApiHangarCadDesignsRouteImport } from './routes/api.hangar.cad-designs'
-import { Route as ApiHangarBernoulliReviewRouteImport } from './routes/api.hangar.bernoulli-review'
-import { Route as ApiHangarAircraftDesignsRouteImport } from './routes/api.hangar.aircraft-designs'
+import { Route as LayoutAgriskyRouteImport } from './routes/_layout.agrisky'
+import { Route as LayoutContactRouteImport } from './routes/_layout.contact'
+import { Route as LayoutGuardskyRouteImport } from './routes/_layout.guardsky'
+import { Route as LayoutIndustriesRouteImport } from './routes/_layout.industries'
+import { Route as LayoutPilotsRouteImport } from './routes/_layout.pilots'
+import { Route as AcademyIndexRouteImport } from './routes/academy.index'
+import { Route as AcademyDashboardRouteImport } from './routes/academy.dashboard'
+import { Route as AcademyLessonDemoRouteImport } from './routes/academy.lesson-demo'
+import { Route as AcademyQuizDemoRouteImport } from './routes/academy.quiz-demo'
+import { Route as DestudIndexRouteImport } from './routes/destud.index'
+import { Route as DestudNewMissionRouteImport } from './routes/destud.new-mission'
+import { Route as MissionHubIndexRouteImport } from './routes/mission-hub.index'
+import { Route as MissionHubAcademyUsersRouteImport } from './routes/mission-hub.academy-users'
+import { Route as MissionHubContactsRouteImport } from './routes/mission-hub.contacts'
+import { Route as MissionHubDashboardRouteImport } from './routes/mission-hub.dashboard'
+import { Route as MissionHubDesignStudioRouteImport } from './routes/mission-hub.design-studio'
+import { Route as MissionHubKnowledgeUavRouteImport } from './routes/mission-hub.knowledge-uav'
+import { Route as MissionHubLoginRouteImport } from './routes/mission-hub.login'
+import { Route as MissionHubResetPasswordRouteImport } from './routes/mission-hub.reset-password'
+import { Route as MissionHubSettingsRouteImport } from './routes/mission-hub.settings'
+import { Route as MissionHubTorqwingsDesignStudioRouteImport } from './routes/mission-hub.torqwings-design-studio'
+import { Route as MissionHubTwbcDroneApprovalRouteImport } from './routes/mission-hub.twbc-drone-approval'
+import { Route as MissionHubTwbcDroneComponentsLibraryRouteImport } from './routes/mission-hub.twbc-drone-components-library'
+import { Route as MissionHubTwbcDroneDesignRuleRouteImport } from './routes/mission-hub.twbc-drone-design-rule'
+import { Route as MissionHubTwbcDroneDesignRulesRouteImport } from './routes/mission-hub.twbc-drone-design-rules'
+import { Route as MissionHubTwbcDroneDesignScoreRouteImport } from './routes/mission-hub.twbc-drone-design-score'
+import { Route as MissionHubTwbcDroneFeedbackRouteImport } from './routes/mission-hub.twbc-drone-feedback'
+import { Route as MissionHubTwbcDroneProvenDesignsRouteImport } from './routes/mission-hub.twbc-drone-proven-designs'
+import { Route as MissionHubTwbcDroneReasoningApiRouteImport } from './routes/mission-hub.twbc-drone-reasoning-api'
+import { Route as MissionHubTwbcDroneReferenceDesignsRouteImport } from './routes/mission-hub.twbc-drone-reference-designs'
+import { Route as MissionHubTwbcDroneRuleEngineRouteImport } from './routes/mission-hub.twbc-drone-rule-engine'
+import { Route as MissionHubTwbcDroneSimilaritySearchRouteImport } from './routes/mission-hub.twbc-drone-similarity-search'
+import { Route as MissionHubUsersRouteImport } from './routes/mission-hub.users'
+import { Route as MissionHubWaitlistRouteImport } from './routes/mission-hub.waitlist'
+import { Route as PilotIndexRouteImport } from './routes/pilot.index'
+import { Route as PilotLoginRouteImport } from './routes/pilot.login'
+import { Route as PilotProfileRouteImport } from './routes/pilot.profile'
+import { Route as PilotSyncRouteImport } from './routes/pilot.sync'
+import { Route as PilotTrackingRouteImport } from './routes/pilot.tracking'
+import { Route as THIndexRouteImport } from './routes/t-h.index'
+import { Route as THLoginRouteImport } from './routes/t-h.login'
+import { Route as TheHangarIndexRouteImport } from './routes/the-hangar.index'
+import { Route as TheHangarAgentsRouteImport } from './routes/the-hangar.agents'
+import { Route as TheHangarAircraftDesignRouteImport } from './routes/the-hangar.aircraft-design'
+import { Route as TheHangarBernoulliRouteImport } from './routes/the-hangar.bernoulli'
+import { Route as TheHangarCadDesignRouteImport } from './routes/the-hangar.cad-design'
+import { Route as TheHangarCertificationRouteImport } from './routes/the-hangar.certification'
+import { Route as TheHangarCfdAnalysisRouteImport } from './routes/the-hangar.cfd-analysis'
+import { Route as TheHangarConceptRouteImport } from './routes/the-hangar.concept'
+import { Route as TheHangarDocumentationRouteImport } from './routes/the-hangar.documentation'
+import { Route as TheHangarHowItWorksRouteImport } from './routes/the-hangar.how-it-works'
+import { Route as TheHangarManufacturingRouteImport } from './routes/the-hangar.manufacturing'
+import { Route as TheHangarMaterialsRouteImport } from './routes/the-hangar.materials'
+import { Route as TheHangarMissionRouteImport } from './routes/the-hangar.mission'
+import { Route as TheHangarOptimizationRouteImport } from './routes/the-hangar.optimization'
+import { Route as TheHangarSimulationRouteImport } from './routes/the-hangar.simulation'
+import { Route as TheHangarStackRouteImport } from './routes/the-hangar.stack'
+import { Route as TheHangarStructuralRouteImport } from './routes/the-hangar.structural'
+import { Route as TheHangarValidationRouteImport } from './routes/the-hangar.validation'
+import { Route as TheHangarWelcomeRouteImport } from './routes/the-hangar.welcome'
 import { Route as LayoutAuthCallbackRouteImport } from './routes/_layout.auth.callback'
-import { Route as ApiHangarProcessValidationComplianceValidationRouteImport } from './routes/api.hangar.process-validation.compliance-validation'
-import { Route as ApiHangarProcessStructuralStructuralAssessmentRouteImport } from './routes/api.hangar.process-structural.structural-assessment'
-import { Route as ApiHangarProcessSimulationFlightDynamicsAssessmentRouteImport } from './routes/api.hangar.process-simulation.flight-dynamics-assessment'
-import { Route as ApiHangarProcessOptimizationTradeOffOptimizationRouteImport } from './routes/api.hangar.process-optimization.trade-off-optimization'
-import { Route as ApiHangarProcessMissionReasoningPlanningRouteImport } from './routes/api.hangar.process-mission.reasoning-planning'
-import { Route as ApiHangarProcessMissionOutputInterfaceRouteImport } from './routes/api.hangar.process-mission.output-interface'
-import { Route as ApiHangarProcessMissionOutputGenerationRouteImport } from './routes/api.hangar.process-mission.output-generation'
-import { Route as ApiHangarProcessMissionInputProcessingRouteImport } from './routes/api.hangar.process-mission.input-processing'
-import { Route as ApiHangarProcessMissionFinalizeRouteImport } from './routes/api.hangar.process-mission.finalize'
-import { Route as ApiHangarProcessMaterialsMaterialSelectionRouteImport } from './routes/api.hangar.process-materials.material-selection'
-import { Route as ApiHangarProcessManufacturingManufacturabilityReviewRouteImport } from './routes/api.hangar.process-manufacturing.manufacturability-review'
-import { Route as ApiHangarProcessDocumentationContentCompilationRouteImport } from './routes/api.hangar.process-documentation.content-compilation'
-import { Route as ApiHangarProcessConceptTradeOffReasoningRouteImport } from './routes/api.hangar.process-concept.trade-off-reasoning'
-import { Route as ApiHangarProcessConceptRankingScoringRouteImport } from './routes/api.hangar.process-concept.ranking-scoring'
-import { Route as ApiHangarProcessConceptOutputInterfaceRouteImport } from './routes/api.hangar.process-concept.output-interface'
-import { Route as ApiHangarProcessConceptFinalizeRouteImport } from './routes/api.hangar.process-concept.finalize'
-import { Route as ApiHangarProcessConceptConceptIdeationRouteImport } from './routes/api.hangar.process-concept.concept-ideation'
-import { Route as ApiHangarProcessCfdAnalysisOutputGenerationRouteImport } from './routes/api.hangar.process-cfd-analysis.output-generation'
-import { Route as ApiHangarProcessCertificationRegulatoryMappingRouteImport } from './routes/api.hangar.process-certification.regulatory-mapping'
-import { Route as ApiHangarProcessCadDesignModelGenerationRouteImport } from './routes/api.hangar.process-cad-design.model-generation'
-import { Route as ApiHangarProcessBernoulliReviewRouteImport } from './routes/api.hangar.process-bernoulli.review'
-import { Route as ApiHangarProcessAircraftDesignGeometryGenerationRouteImport } from './routes/api.hangar.process-aircraft-design.geometry-generation'
+import { Route as ApiHangarAircraftDesignsRouteImport } from './routes/api.hangar.aircraft-designs'
+import { Route as ApiHangarBernoulliReviewRouteImport } from './routes/api.hangar.bernoulli-review'
+import { Route as ApiHangarCadDesignsRouteImport } from './routes/api.hangar.cad-designs'
+import { Route as ApiHangarCertificationsRouteImport } from './routes/api.hangar.certifications'
+import { Route as ApiHangarCfdAnalysesRouteImport } from './routes/api.hangar.cfd-analyses'
+import { Route as ApiHangarConceptsRouteImport } from './routes/api.hangar.concepts'
+import { Route as ApiHangarDocumentationsRouteImport } from './routes/api.hangar.documentations'
+import { Route as ApiHangarExtractDocumentRouteImport } from './routes/api.hangar.extract-document'
+import { Route as ApiHangarLlmStatusRouteImport } from './routes/api.hangar.llm-status'
+import { Route as ApiHangarManufacturingsRouteImport } from './routes/api.hangar.manufacturings'
+import { Route as ApiHangarMaterialsRouteImport } from './routes/api.hangar.materials'
+import { Route as ApiHangarMissionsRouteImport } from './routes/api.hangar.missions'
+import { Route as ApiHangarOptimizationsRouteImport } from './routes/api.hangar.optimizations'
+import { Route as ApiHangarResolveMissionRouteImport } from './routes/api.hangar.resolve-mission'
+import { Route as ApiHangarSagushDesignRouteImport } from './routes/api.hangar.sagush-design'
+import { Route as ApiHangarSagushHelloRouteImport } from './routes/api.hangar.sagush-hello'
+import { Route as ApiHangarSimulationsRouteImport } from './routes/api.hangar.simulations'
+import { Route as ApiHangarSourceCatalogsRouteImport } from './routes/api.hangar.source-catalogs'
+import { Route as ApiHangarStoreDocumentRouteImport } from './routes/api.hangar.store-document'
+import { Route as ApiHangarStructuralsRouteImport } from './routes/api.hangar.structurals'
+import { Route as ApiHangarValidationsRouteImport } from './routes/api.hangar.validations'
+import { Route as ApiTHAgentRouteImport } from './routes/api.t-h.$agent'
+import { Route as DestudDashboardEngineerRouteImport } from './routes/destud.dashboard.engineer'
+import { Route as DestudDashboardExplorerRouteImport } from './routes/destud.dashboard.explorer'
+import { Route as DestudProjectsProjectIdRouteImport } from './routes/destud.projects.$projectId'
+import { Route as MissionHubTorqwingsDesignStudioIndexRouteImport } from './routes/mission-hub.torqwings-design-studio.index'
+import { Route as MissionHubTorqwingsDesignStudioAdvisorRouteImport } from './routes/mission-hub.torqwings-design-studio.advisor'
+import { Route as MissionHubTorqwingsDesignStudioComplianceRouteImport } from './routes/mission-hub.torqwings-design-studio.compliance'
+import { Route as MissionHubTorqwingsDesignStudioComponentsRouteImport } from './routes/mission-hub.torqwings-design-studio.components'
+import { Route as MissionHubTorqwingsDesignStudioDesignRouteImport } from './routes/mission-hub.torqwings-design-studio.design'
+import { Route as MissionHubTorqwingsDesignStudioDesignRuleRouteImport } from './routes/mission-hub.torqwings-design-studio.design-rule'
+import { Route as MissionHubTorqwingsDesignStudioHistoryRouteImport } from './routes/mission-hub.torqwings-design-studio.history'
+import { Route as MissionHubTorqwingsDesignStudioNewRouteImport } from './routes/mission-hub.torqwings-design-studio.new'
+import { Route as MissionHubTorqwingsDesignStudioReportRouteImport } from './routes/mission-hub.torqwings-design-studio.report'
+import { Route as MissionHubTorqwingsDesignStudioRequirementsRouteImport } from './routes/mission-hub.torqwings-design-studio.requirements'
+import { Route as MissionHubTorqwingsDesignStudioSimulationRouteImport } from './routes/mission-hub.torqwings-design-studio.simulation'
+import { Route as MissionHubVerticalsVerticalRouteImport } from './routes/mission-hub.verticals.$vertical'
+import { Route as PilotMissionsIndexRouteImport } from './routes/pilot.missions.index'
+import { Route as PilotMissionsIdRouteImport } from './routes/pilot.missions.$id'
 import { Route as AcademyCoursesSlugLearnRouteImport } from './routes/academy.courses.$slug.learn'
-import { Route as AcademyModuleModuleIdQuizQuizIdRouteImport } from './routes/academy.module.$moduleId.quiz.$quizId'
-import { Route as AcademyModuleModuleIdLessonLessonIdRouteImport } from './routes/academy.module.$moduleId.lesson.$lessonId'
+import { Route as ApiHangarProcessAircraftDesignGeometryGenerationRouteImport } from './routes/api.hangar.process-aircraft-design.geometry-generation'
+import { Route as ApiHangarProcessBernoulliReviewRouteImport } from './routes/api.hangar.process-bernoulli.review'
+import { Route as ApiHangarProcessCadDesignModelGenerationRouteImport } from './routes/api.hangar.process-cad-design.model-generation'
+import { Route as ApiHangarProcessCertificationRegulatoryMappingRouteImport } from './routes/api.hangar.process-certification.regulatory-mapping'
+import { Route as ApiHangarProcessCfdAnalysisOutputGenerationRouteImport } from './routes/api.hangar.process-cfd-analysis.output-generation'
+import { Route as ApiHangarProcessConceptConceptIdeationRouteImport } from './routes/api.hangar.process-concept.concept-ideation'
+import { Route as ApiHangarProcessConceptFinalizeRouteImport } from './routes/api.hangar.process-concept.finalize'
+import { Route as ApiHangarProcessConceptOutputInterfaceRouteImport } from './routes/api.hangar.process-concept.output-interface'
+import { Route as ApiHangarProcessConceptRankingScoringRouteImport } from './routes/api.hangar.process-concept.ranking-scoring'
+import { Route as ApiHangarProcessConceptTradeOffReasoningRouteImport } from './routes/api.hangar.process-concept.trade-off-reasoning'
+import { Route as ApiHangarProcessDocumentationContentCompilationRouteImport } from './routes/api.hangar.process-documentation.content-compilation'
+import { Route as ApiHangarProcessManufacturingManufacturabilityReviewRouteImport } from './routes/api.hangar.process-manufacturing.manufacturability-review'
+import { Route as ApiHangarProcessMaterialsMaterialSelectionRouteImport } from './routes/api.hangar.process-materials.material-selection'
+import { Route as ApiHangarProcessMissionFinalizeRouteImport } from './routes/api.hangar.process-mission.finalize'
+import { Route as ApiHangarProcessMissionInputProcessingRouteImport } from './routes/api.hangar.process-mission.input-processing'
+import { Route as ApiHangarProcessMissionOutputGenerationRouteImport } from './routes/api.hangar.process-mission.output-generation'
+import { Route as ApiHangarProcessMissionOutputInterfaceRouteImport } from './routes/api.hangar.process-mission.output-interface'
+import { Route as ApiHangarProcessMissionReasoningPlanningRouteImport } from './routes/api.hangar.process-mission.reasoning-planning'
+import { Route as ApiHangarProcessOptimizationTradeOffOptimizationRouteImport } from './routes/api.hangar.process-optimization.trade-off-optimization'
+import { Route as ApiHangarProcessSimulationFlightDynamicsAssessmentRouteImport } from './routes/api.hangar.process-simulation.flight-dynamics-assessment'
+import { Route as ApiHangarProcessStructuralStructuralAssessmentRouteImport } from './routes/api.hangar.process-structural.structural-assessment'
+import { Route as ApiHangarProcessValidationComplianceValidationRouteImport } from './routes/api.hangar.process-validation.compliance-validation'
 import { Route as AcademyCoursesSlugModulesModuleIdRouteImport } from './routes/academy.courses.$slug.modules.$moduleId'
+import { Route as AcademyModuleModuleIdLessonLessonIdRouteImport } from './routes/academy.module.$moduleId.lesson.$lessonId'
+import { Route as AcademyModuleModuleIdQuizQuizIdRouteImport } from './routes/academy.module.$moduleId.quiz.$quizId'
 
-const TheHangarRoute = TheHangarRouteImport.update({
-  id: '/the-hangar',
-  path: '/the-hangar',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
-  id: '/sitemap.xml',
-  path: '/sitemap.xml',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PilotRoute = PilotRouteImport.update({
-  id: '/pilot',
-  path: '/pilot',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MissionHubRoute = MissionHubRouteImport.update({
-  id: '/mission-hub',
-  path: '/mission-hub',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const HangarStage3ManualtestRoute = HangarStage3ManualtestRouteImport.update({
-  id: '/hangar-stage3-manualtest',
-  path: '/hangar-stage3-manualtest',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FieldRoute = FieldRouteImport.update({
-  id: '/field',
-  path: '/field',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DestudRoute = DestudRouteImport.update({
-  id: '/destud',
-  path: '/destud',
+const LayoutRoute = LayoutRouteImport.update({
+  id: '/_layout',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AcademyRoute = AcademyRouteImport.update({
@@ -184,218 +156,155 @@ const AcademyRoute = AcademyRouteImport.update({
   path: '/academy',
   getParentRoute: () => rootRouteImport,
 } as any)
-const LayoutRoute = LayoutRouteImport.update({
-  id: '/_layout',
+const DestudRoute = DestudRouteImport.update({
+  id: '/destud',
+  path: '/destud',
   getParentRoute: () => rootRouteImport,
 } as any)
-const TheHangarIndexRoute = TheHangarIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => TheHangarRoute,
+const FieldRoute = FieldRouteImport.update({
+  id: '/field',
+  path: '/field',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const PilotIndexRoute = PilotIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => PilotRoute,
+const HangarStage3ManualtestRoute = HangarStage3ManualtestRouteImport.update({
+  id: '/hangar-stage3-manualtest',
+  path: '/hangar-stage3-manualtest',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const MissionHubIndexRoute = MissionHubIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => MissionHubRoute,
+const MissionHubRoute = MissionHubRouteImport.update({
+  id: '/mission-hub',
+  path: '/mission-hub',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const DestudIndexRoute = DestudIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => DestudRoute,
+const PilotRoute = PilotRouteImport.update({
+  id: '/pilot',
+  path: '/pilot',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const AcademyIndexRoute = AcademyIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AcademyRoute,
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TheHangarRoute = TheHangarRouteImport.update({
+  id: '/the-hangar',
+  path: '/the-hangar',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const LayoutIndexRoute = LayoutIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => LayoutRoute,
 } as any)
-const TheHangarWelcomeRoute = TheHangarWelcomeRouteImport.update({
-  id: '/welcome',
-  path: '/welcome',
-  getParentRoute: () => TheHangarRoute,
+const LayoutAboutRoute = LayoutAboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => LayoutRoute,
 } as any)
-const TheHangarValidationRoute = TheHangarValidationRouteImport.update({
-  id: '/validation',
-  path: '/validation',
-  getParentRoute: () => TheHangarRoute,
+const LayoutAgriskyRoute = LayoutAgriskyRouteImport.update({
+  id: '/agrisky',
+  path: '/agrisky',
+  getParentRoute: () => LayoutRoute,
 } as any)
-const TheHangarStructuralRoute = TheHangarStructuralRouteImport.update({
-  id: '/structural',
-  path: '/structural',
-  getParentRoute: () => TheHangarRoute,
+const LayoutContactRoute = LayoutContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => LayoutRoute,
 } as any)
-const TheHangarStackRoute = TheHangarStackRouteImport.update({
-  id: '/stack',
-  path: '/stack',
-  getParentRoute: () => TheHangarRoute,
+const LayoutGuardskyRoute = LayoutGuardskyRouteImport.update({
+  id: '/guardsky',
+  path: '/guardsky',
+  getParentRoute: () => LayoutRoute,
 } as any)
-const TheHangarSimulationRoute = TheHangarSimulationRouteImport.update({
-  id: '/simulation',
-  path: '/simulation',
-  getParentRoute: () => TheHangarRoute,
+const LayoutIndustriesRoute = LayoutIndustriesRouteImport.update({
+  id: '/industries',
+  path: '/industries',
+  getParentRoute: () => LayoutRoute,
 } as any)
-const TheHangarOptimizationRoute = TheHangarOptimizationRouteImport.update({
-  id: '/optimization',
-  path: '/optimization',
-  getParentRoute: () => TheHangarRoute,
+const LayoutPilotsRoute = LayoutPilotsRouteImport.update({
+  id: '/pilots',
+  path: '/pilots',
+  getParentRoute: () => LayoutRoute,
 } as any)
-const TheHangarMissionRoute = TheHangarMissionRouteImport.update({
-  id: '/mission',
-  path: '/mission',
-  getParentRoute: () => TheHangarRoute,
+const AcademyIndexRoute = AcademyIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AcademyRoute,
 } as any)
-const TheHangarMaterialsRoute = TheHangarMaterialsRouteImport.update({
-  id: '/materials',
-  path: '/materials',
-  getParentRoute: () => TheHangarRoute,
+const AcademyDashboardRoute = AcademyDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AcademyRoute,
 } as any)
-const TheHangarManufacturingRoute = TheHangarManufacturingRouteImport.update({
-  id: '/manufacturing',
-  path: '/manufacturing',
-  getParentRoute: () => TheHangarRoute,
+const AcademyLessonDemoRoute = AcademyLessonDemoRouteImport.update({
+  id: '/lesson-demo',
+  path: '/lesson-demo',
+  getParentRoute: () => AcademyRoute,
 } as any)
-const TheHangarHowItWorksRoute = TheHangarHowItWorksRouteImport.update({
-  id: '/how-it-works',
-  path: '/how-it-works',
-  getParentRoute: () => TheHangarRoute,
+const AcademyQuizDemoRoute = AcademyQuizDemoRouteImport.update({
+  id: '/quiz-demo',
+  path: '/quiz-demo',
+  getParentRoute: () => AcademyRoute,
 } as any)
-const TheHangarDocumentationRoute = TheHangarDocumentationRouteImport.update({
-  id: '/documentation',
-  path: '/documentation',
-  getParentRoute: () => TheHangarRoute,
+const DestudIndexRoute = DestudIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => DestudRoute,
 } as any)
-const TheHangarConceptRoute = TheHangarConceptRouteImport.update({
-  id: '/concept',
-  path: '/concept',
-  getParentRoute: () => TheHangarRoute,
+const DestudNewMissionRoute = DestudNewMissionRouteImport.update({
+  id: '/new-mission',
+  path: '/new-mission',
+  getParentRoute: () => DestudRoute,
 } as any)
-const TheHangarCfdAnalysisRoute = TheHangarCfdAnalysisRouteImport.update({
-  id: '/cfd-analysis',
-  path: '/cfd-analysis',
-  getParentRoute: () => TheHangarRoute,
+const MissionHubIndexRoute = MissionHubIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => MissionHubRoute,
 } as any)
-const TheHangarCertificationRoute = TheHangarCertificationRouteImport.update({
-  id: '/certification',
-  path: '/certification',
-  getParentRoute: () => TheHangarRoute,
+const MissionHubAcademyUsersRoute = MissionHubAcademyUsersRouteImport.update({
+  id: '/academy-users',
+  path: '/academy-users',
+  getParentRoute: () => MissionHubRoute,
 } as any)
-const TheHangarCadDesignRoute = TheHangarCadDesignRouteImport.update({
-  id: '/cad-design',
-  path: '/cad-design',
-  getParentRoute: () => TheHangarRoute,
+const MissionHubContactsRoute = MissionHubContactsRouteImport.update({
+  id: '/contacts',
+  path: '/contacts',
+  getParentRoute: () => MissionHubRoute,
 } as any)
-const TheHangarBernoulliRoute = TheHangarBernoulliRouteImport.update({
-  id: '/bernoulli',
-  path: '/bernoulli',
-  getParentRoute: () => TheHangarRoute,
+const MissionHubDashboardRoute = MissionHubDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => MissionHubRoute,
 } as any)
-const TheHangarAircraftDesignRoute = TheHangarAircraftDesignRouteImport.update({
-  id: '/aircraft-design',
-  path: '/aircraft-design',
-  getParentRoute: () => TheHangarRoute,
+const MissionHubDesignStudioRoute = MissionHubDesignStudioRouteImport.update({
+  id: '/design-studio',
+  path: '/design-studio',
+  getParentRoute: () => MissionHubRoute,
 } as any)
-const TheHangarAgentsRoute = TheHangarAgentsRouteImport.update({
-  id: '/agents',
-  path: '/agents',
-  getParentRoute: () => TheHangarRoute,
+const MissionHubKnowledgeUavRoute = MissionHubKnowledgeUavRouteImport.update({
+  id: '/knowledge-uav',
+  path: '/knowledge-uav',
+  getParentRoute: () => MissionHubRoute,
 } as any)
-const PilotTrackingRoute = PilotTrackingRouteImport.update({
-  id: '/tracking',
-  path: '/tracking',
-  getParentRoute: () => PilotRoute,
-} as any)
-const PilotSyncRoute = PilotSyncRouteImport.update({
-  id: '/sync',
-  path: '/sync',
-  getParentRoute: () => PilotRoute,
-} as any)
-const PilotProfileRoute = PilotProfileRouteImport.update({
-  id: '/profile',
-  path: '/profile',
-  getParentRoute: () => PilotRoute,
-} as any)
-const PilotLoginRoute = PilotLoginRouteImport.update({
+const MissionHubLoginRoute = MissionHubLoginRouteImport.update({
   id: '/login',
   path: '/login',
-  getParentRoute: () => PilotRoute,
-} as any)
-const MissionHubWaitlistRoute = MissionHubWaitlistRouteImport.update({
-  id: '/waitlist',
-  path: '/waitlist',
   getParentRoute: () => MissionHubRoute,
 } as any)
-const MissionHubUsersRoute = MissionHubUsersRouteImport.update({
-  id: '/users',
-  path: '/users',
+const MissionHubResetPasswordRoute = MissionHubResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
   getParentRoute: () => MissionHubRoute,
 } as any)
-const MissionHubTwbcDroneSimilaritySearchRoute =
-  MissionHubTwbcDroneSimilaritySearchRouteImport.update({
-    id: '/twbc-drone-similarity-search',
-    path: '/twbc-drone-similarity-search',
-    getParentRoute: () => MissionHubRoute,
-  } as any)
-const MissionHubTwbcDroneRuleEngineRoute =
-  MissionHubTwbcDroneRuleEngineRouteImport.update({
-    id: '/twbc-drone-rule-engine',
-    path: '/twbc-drone-rule-engine',
-    getParentRoute: () => MissionHubRoute,
-  } as any)
-const MissionHubTwbcDroneReferenceDesignsRoute =
-  MissionHubTwbcDroneReferenceDesignsRouteImport.update({
-    id: '/twbc-drone-reference-designs',
-    path: '/twbc-drone-reference-designs',
-    getParentRoute: () => MissionHubRoute,
-  } as any)
-const MissionHubTwbcDroneReasoningApiRoute =
-  MissionHubTwbcDroneReasoningApiRouteImport.update({
-    id: '/twbc-drone-reasoning-api',
-    path: '/twbc-drone-reasoning-api',
-    getParentRoute: () => MissionHubRoute,
-  } as any)
-const MissionHubTwbcDroneProvenDesignsRoute =
-  MissionHubTwbcDroneProvenDesignsRouteImport.update({
-    id: '/twbc-drone-proven-designs',
-    path: '/twbc-drone-proven-designs',
-    getParentRoute: () => MissionHubRoute,
-  } as any)
-const MissionHubTwbcDroneFeedbackRoute =
-  MissionHubTwbcDroneFeedbackRouteImport.update({
-    id: '/twbc-drone-feedback',
-    path: '/twbc-drone-feedback',
-    getParentRoute: () => MissionHubRoute,
-  } as any)
-const MissionHubTwbcDroneDesignScoreRoute =
-  MissionHubTwbcDroneDesignScoreRouteImport.update({
-    id: '/twbc-drone-design-score',
-    path: '/twbc-drone-design-score',
-    getParentRoute: () => MissionHubRoute,
-  } as any)
-const MissionHubTwbcDroneDesignRulesRoute =
-  MissionHubTwbcDroneDesignRulesRouteImport.update({
-    id: '/twbc-drone-design-rules',
-    path: '/twbc-drone-design-rules',
-    getParentRoute: () => MissionHubRoute,
-  } as any)
-const MissionHubTwbcDroneDesignRuleRoute =
-  MissionHubTwbcDroneDesignRuleRouteImport.update({
-    id: '/twbc-drone-design-rule',
-    path: '/twbc-drone-design-rule',
-    getParentRoute: () => MissionHubRoute,
-  } as any)
-const MissionHubTwbcDroneComponentsLibraryRoute =
-  MissionHubTwbcDroneComponentsLibraryRouteImport.update({
-    id: '/twbc-drone-components-library',
-    path: '/twbc-drone-components-library',
+const MissionHubSettingsRoute = MissionHubSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => MissionHubRoute,
+} as any)
+const MissionHubTorqwingsDesignStudioRoute =
+  MissionHubTorqwingsDesignStudioRouteImport.update({
+    id: '/torqwings-design-studio',
+    path: '/torqwings-design-studio',
     getParentRoute: () => MissionHubRoute,
   } as any)
 const MissionHubTwbcDroneApprovalRoute =
@@ -404,262 +313,246 @@ const MissionHubTwbcDroneApprovalRoute =
     path: '/twbc-drone-approval',
     getParentRoute: () => MissionHubRoute,
   } as any)
-const MissionHubTorqwingsDesignStudioRoute =
-  MissionHubTorqwingsDesignStudioRouteImport.update({
-    id: '/torqwings-design-studio',
-    path: '/torqwings-design-studio',
+const MissionHubTwbcDroneComponentsLibraryRoute =
+  MissionHubTwbcDroneComponentsLibraryRouteImport.update({
+    id: '/twbc-drone-components-library',
+    path: '/twbc-drone-components-library',
     getParentRoute: () => MissionHubRoute,
   } as any)
-const MissionHubSettingsRoute = MissionHubSettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
+const MissionHubTwbcDroneDesignRuleRoute =
+  MissionHubTwbcDroneDesignRuleRouteImport.update({
+    id: '/twbc-drone-design-rule',
+    path: '/twbc-drone-design-rule',
+    getParentRoute: () => MissionHubRoute,
+  } as any)
+const MissionHubTwbcDroneDesignRulesRoute =
+  MissionHubTwbcDroneDesignRulesRouteImport.update({
+    id: '/twbc-drone-design-rules',
+    path: '/twbc-drone-design-rules',
+    getParentRoute: () => MissionHubRoute,
+  } as any)
+const MissionHubTwbcDroneDesignScoreRoute =
+  MissionHubTwbcDroneDesignScoreRouteImport.update({
+    id: '/twbc-drone-design-score',
+    path: '/twbc-drone-design-score',
+    getParentRoute: () => MissionHubRoute,
+  } as any)
+const MissionHubTwbcDroneFeedbackRoute =
+  MissionHubTwbcDroneFeedbackRouteImport.update({
+    id: '/twbc-drone-feedback',
+    path: '/twbc-drone-feedback',
+    getParentRoute: () => MissionHubRoute,
+  } as any)
+const MissionHubTwbcDroneProvenDesignsRoute =
+  MissionHubTwbcDroneProvenDesignsRouteImport.update({
+    id: '/twbc-drone-proven-designs',
+    path: '/twbc-drone-proven-designs',
+    getParentRoute: () => MissionHubRoute,
+  } as any)
+const MissionHubTwbcDroneReasoningApiRoute =
+  MissionHubTwbcDroneReasoningApiRouteImport.update({
+    id: '/twbc-drone-reasoning-api',
+    path: '/twbc-drone-reasoning-api',
+    getParentRoute: () => MissionHubRoute,
+  } as any)
+const MissionHubTwbcDroneReferenceDesignsRoute =
+  MissionHubTwbcDroneReferenceDesignsRouteImport.update({
+    id: '/twbc-drone-reference-designs',
+    path: '/twbc-drone-reference-designs',
+    getParentRoute: () => MissionHubRoute,
+  } as any)
+const MissionHubTwbcDroneRuleEngineRoute =
+  MissionHubTwbcDroneRuleEngineRouteImport.update({
+    id: '/twbc-drone-rule-engine',
+    path: '/twbc-drone-rule-engine',
+    getParentRoute: () => MissionHubRoute,
+  } as any)
+const MissionHubTwbcDroneSimilaritySearchRoute =
+  MissionHubTwbcDroneSimilaritySearchRouteImport.update({
+    id: '/twbc-drone-similarity-search',
+    path: '/twbc-drone-similarity-search',
+    getParentRoute: () => MissionHubRoute,
+  } as any)
+const MissionHubUsersRoute = MissionHubUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
   getParentRoute: () => MissionHubRoute,
 } as any)
-const MissionHubResetPasswordRoute = MissionHubResetPasswordRouteImport.update({
-  id: '/reset-password',
-  path: '/reset-password',
+const MissionHubWaitlistRoute = MissionHubWaitlistRouteImport.update({
+  id: '/waitlist',
+  path: '/waitlist',
   getParentRoute: () => MissionHubRoute,
 } as any)
-const MissionHubLoginRoute = MissionHubLoginRouteImport.update({
+const PilotIndexRoute = PilotIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => PilotRoute,
+} as any)
+const PilotLoginRoute = PilotLoginRouteImport.update({
   id: '/login',
   path: '/login',
-  getParentRoute: () => MissionHubRoute,
-} as any)
-const MissionHubKnowledgeUavRoute = MissionHubKnowledgeUavRouteImport.update({
-  id: '/knowledge-uav',
-  path: '/knowledge-uav',
-  getParentRoute: () => MissionHubRoute,
-} as any)
-const MissionHubDesignStudioRoute = MissionHubDesignStudioRouteImport.update({
-  id: '/design-studio',
-  path: '/design-studio',
-  getParentRoute: () => MissionHubRoute,
-} as any)
-const MissionHubDashboardRoute = MissionHubDashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
-  getParentRoute: () => MissionHubRoute,
-} as any)
-const MissionHubContactsRoute = MissionHubContactsRouteImport.update({
-  id: '/contacts',
-  path: '/contacts',
-  getParentRoute: () => MissionHubRoute,
-} as any)
-const MissionHubAcademyUsersRoute = MissionHubAcademyUsersRouteImport.update({
-  id: '/academy-users',
-  path: '/academy-users',
-  getParentRoute: () => MissionHubRoute,
-} as any)
-const DestudNewMissionRoute = DestudNewMissionRouteImport.update({
-  id: '/new-mission',
-  path: '/new-mission',
-  getParentRoute: () => DestudRoute,
-} as any)
-const AcademyQuizDemoRoute = AcademyQuizDemoRouteImport.update({
-  id: '/quiz-demo',
-  path: '/quiz-demo',
-  getParentRoute: () => AcademyRoute,
-} as any)
-const AcademyLessonDemoRoute = AcademyLessonDemoRouteImport.update({
-  id: '/lesson-demo',
-  path: '/lesson-demo',
-  getParentRoute: () => AcademyRoute,
-} as any)
-const AcademyDashboardRoute = AcademyDashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
-  getParentRoute: () => AcademyRoute,
-} as any)
-const LayoutPilotsRoute = LayoutPilotsRouteImport.update({
-  id: '/pilots',
-  path: '/pilots',
-  getParentRoute: () => LayoutRoute,
-} as any)
-const LayoutIndustriesRoute = LayoutIndustriesRouteImport.update({
-  id: '/industries',
-  path: '/industries',
-  getParentRoute: () => LayoutRoute,
-} as any)
-const LayoutGuardskyRoute = LayoutGuardskyRouteImport.update({
-  id: '/guardsky',
-  path: '/guardsky',
-  getParentRoute: () => LayoutRoute,
-} as any)
-const LayoutContactRoute = LayoutContactRouteImport.update({
-  id: '/contact',
-  path: '/contact',
-  getParentRoute: () => LayoutRoute,
-} as any)
-const LayoutAgriskyRoute = LayoutAgriskyRouteImport.update({
-  id: '/agrisky',
-  path: '/agrisky',
-  getParentRoute: () => LayoutRoute,
-} as any)
-const LayoutAboutRoute = LayoutAboutRouteImport.update({
-  id: '/about',
-  path: '/about',
-  getParentRoute: () => LayoutRoute,
-} as any)
-const PilotMissionsIndexRoute = PilotMissionsIndexRouteImport.update({
-  id: '/missions/',
-  path: '/missions/',
   getParentRoute: () => PilotRoute,
 } as any)
-const MissionHubTorqwingsDesignStudioIndexRoute =
-  MissionHubTorqwingsDesignStudioIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () => MissionHubTorqwingsDesignStudioRoute,
-  } as any)
-const PilotMissionsIdRoute = PilotMissionsIdRouteImport.update({
-  id: '/missions/$id',
-  path: '/missions/$id',
+const PilotProfileRoute = PilotProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
   getParentRoute: () => PilotRoute,
 } as any)
-const MissionHubVerticalsVerticalRoute =
-  MissionHubVerticalsVerticalRouteImport.update({
-    id: '/verticals/$vertical',
-    path: '/verticals/$vertical',
-    getParentRoute: () => MissionHubRoute,
+const PilotSyncRoute = PilotSyncRouteImport.update({
+  id: '/sync',
+  path: '/sync',
+  getParentRoute: () => PilotRoute,
+} as any)
+const PilotTrackingRoute = PilotTrackingRouteImport.update({
+  id: '/tracking',
+  path: '/tracking',
+  getParentRoute: () => PilotRoute,
+} as any)
+const THIndexRoute = THIndexRouteImport.update({
+  id: '/t-h/',
+  path: '/t-h/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const THLoginRoute = THLoginRouteImport.update({
+  id: '/t-h/login',
+  path: '/t-h/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TheHangarIndexRoute = TheHangarIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => TheHangarRoute,
+} as any)
+const TheHangarAgentsRoute = TheHangarAgentsRouteImport.update({
+  id: '/agents',
+  path: '/agents',
+  getParentRoute: () => TheHangarRoute,
+} as any)
+const TheHangarAircraftDesignRoute = TheHangarAircraftDesignRouteImport.update({
+  id: '/aircraft-design',
+  path: '/aircraft-design',
+  getParentRoute: () => TheHangarRoute,
+} as any)
+const TheHangarBernoulliRoute = TheHangarBernoulliRouteImport.update({
+  id: '/bernoulli',
+  path: '/bernoulli',
+  getParentRoute: () => TheHangarRoute,
+} as any)
+const TheHangarCadDesignRoute = TheHangarCadDesignRouteImport.update({
+  id: '/cad-design',
+  path: '/cad-design',
+  getParentRoute: () => TheHangarRoute,
+} as any)
+const TheHangarCertificationRoute = TheHangarCertificationRouteImport.update({
+  id: '/certification',
+  path: '/certification',
+  getParentRoute: () => TheHangarRoute,
+} as any)
+const TheHangarCfdAnalysisRoute = TheHangarCfdAnalysisRouteImport.update({
+  id: '/cfd-analysis',
+  path: '/cfd-analysis',
+  getParentRoute: () => TheHangarRoute,
+} as any)
+const TheHangarConceptRoute = TheHangarConceptRouteImport.update({
+  id: '/concept',
+  path: '/concept',
+  getParentRoute: () => TheHangarRoute,
+} as any)
+const TheHangarDocumentationRoute = TheHangarDocumentationRouteImport.update({
+  id: '/documentation',
+  path: '/documentation',
+  getParentRoute: () => TheHangarRoute,
+} as any)
+const TheHangarHowItWorksRoute = TheHangarHowItWorksRouteImport.update({
+  id: '/how-it-works',
+  path: '/how-it-works',
+  getParentRoute: () => TheHangarRoute,
+} as any)
+const TheHangarManufacturingRoute = TheHangarManufacturingRouteImport.update({
+  id: '/manufacturing',
+  path: '/manufacturing',
+  getParentRoute: () => TheHangarRoute,
+} as any)
+const TheHangarMaterialsRoute = TheHangarMaterialsRouteImport.update({
+  id: '/materials',
+  path: '/materials',
+  getParentRoute: () => TheHangarRoute,
+} as any)
+const TheHangarMissionRoute = TheHangarMissionRouteImport.update({
+  id: '/mission',
+  path: '/mission',
+  getParentRoute: () => TheHangarRoute,
+} as any)
+const TheHangarOptimizationRoute = TheHangarOptimizationRouteImport.update({
+  id: '/optimization',
+  path: '/optimization',
+  getParentRoute: () => TheHangarRoute,
+} as any)
+const TheHangarSimulationRoute = TheHangarSimulationRouteImport.update({
+  id: '/simulation',
+  path: '/simulation',
+  getParentRoute: () => TheHangarRoute,
+} as any)
+const TheHangarStackRoute = TheHangarStackRouteImport.update({
+  id: '/stack',
+  path: '/stack',
+  getParentRoute: () => TheHangarRoute,
+} as any)
+const TheHangarStructuralRoute = TheHangarStructuralRouteImport.update({
+  id: '/structural',
+  path: '/structural',
+  getParentRoute: () => TheHangarRoute,
+} as any)
+const TheHangarValidationRoute = TheHangarValidationRouteImport.update({
+  id: '/validation',
+  path: '/validation',
+  getParentRoute: () => TheHangarRoute,
+} as any)
+const TheHangarWelcomeRoute = TheHangarWelcomeRouteImport.update({
+  id: '/welcome',
+  path: '/welcome',
+  getParentRoute: () => TheHangarRoute,
+} as any)
+const LayoutAuthCallbackRoute = LayoutAuthCallbackRouteImport.update({
+  id: '/auth/callback',
+  path: '/auth/callback',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const ApiHangarAircraftDesignsRoute =
+  ApiHangarAircraftDesignsRouteImport.update({
+    id: '/api/hangar/aircraft-designs',
+    path: '/api/hangar/aircraft-designs',
+    getParentRoute: () => rootRouteImport,
   } as any)
-const MissionHubTorqwingsDesignStudioSimulationRoute =
-  MissionHubTorqwingsDesignStudioSimulationRouteImport.update({
-    id: '/simulation',
-    path: '/simulation',
-    getParentRoute: () => MissionHubTorqwingsDesignStudioRoute,
+const ApiHangarBernoulliReviewRoute =
+  ApiHangarBernoulliReviewRouteImport.update({
+    id: '/api/hangar/bernoulli-review',
+    path: '/api/hangar/bernoulli-review',
+    getParentRoute: () => rootRouteImport,
   } as any)
-const MissionHubTorqwingsDesignStudioRequirementsRoute =
-  MissionHubTorqwingsDesignStudioRequirementsRouteImport.update({
-    id: '/requirements',
-    path: '/requirements',
-    getParentRoute: () => MissionHubTorqwingsDesignStudioRoute,
-  } as any)
-const MissionHubTorqwingsDesignStudioReportRoute =
-  MissionHubTorqwingsDesignStudioReportRouteImport.update({
-    id: '/report',
-    path: '/report',
-    getParentRoute: () => MissionHubTorqwingsDesignStudioRoute,
-  } as any)
-const MissionHubTorqwingsDesignStudioNewRoute =
-  MissionHubTorqwingsDesignStudioNewRouteImport.update({
-    id: '/new',
-    path: '/new',
-    getParentRoute: () => MissionHubTorqwingsDesignStudioRoute,
-  } as any)
-const MissionHubTorqwingsDesignStudioHistoryRoute =
-  MissionHubTorqwingsDesignStudioHistoryRouteImport.update({
-    id: '/history',
-    path: '/history',
-    getParentRoute: () => MissionHubTorqwingsDesignStudioRoute,
-  } as any)
-const MissionHubTorqwingsDesignStudioDesignRuleRoute =
-  MissionHubTorqwingsDesignStudioDesignRuleRouteImport.update({
-    id: '/design-rule',
-    path: '/design-rule',
-    getParentRoute: () => MissionHubTorqwingsDesignStudioRoute,
-  } as any)
-const MissionHubTorqwingsDesignStudioDesignRoute =
-  MissionHubTorqwingsDesignStudioDesignRouteImport.update({
-    id: '/design',
-    path: '/design',
-    getParentRoute: () => MissionHubTorqwingsDesignStudioRoute,
-  } as any)
-const MissionHubTorqwingsDesignStudioComponentsRoute =
-  MissionHubTorqwingsDesignStudioComponentsRouteImport.update({
-    id: '/components',
-    path: '/components',
-    getParentRoute: () => MissionHubTorqwingsDesignStudioRoute,
-  } as any)
-const MissionHubTorqwingsDesignStudioComplianceRoute =
-  MissionHubTorqwingsDesignStudioComplianceRouteImport.update({
-    id: '/compliance',
-    path: '/compliance',
-    getParentRoute: () => MissionHubTorqwingsDesignStudioRoute,
-  } as any)
-const MissionHubTorqwingsDesignStudioAdvisorRoute =
-  MissionHubTorqwingsDesignStudioAdvisorRouteImport.update({
-    id: '/advisor',
-    path: '/advisor',
-    getParentRoute: () => MissionHubTorqwingsDesignStudioRoute,
-  } as any)
-const DestudProjectsProjectIdRoute = DestudProjectsProjectIdRouteImport.update({
-  id: '/projects/$projectId',
-  path: '/projects/$projectId',
-  getParentRoute: () => DestudRoute,
-} as any)
-const DestudDashboardExplorerRoute = DestudDashboardExplorerRouteImport.update({
-  id: '/dashboard/explorer',
-  path: '/dashboard/explorer',
-  getParentRoute: () => DestudRoute,
-} as any)
-const DestudDashboardEngineerRoute = DestudDashboardEngineerRouteImport.update({
-  id: '/dashboard/engineer',
-  path: '/dashboard/engineer',
-  getParentRoute: () => DestudRoute,
-} as any)
-const ApiHangarValidationsRoute = ApiHangarValidationsRouteImport.update({
-  id: '/api/hangar/validations',
-  path: '/api/hangar/validations',
+const ApiHangarCadDesignsRoute = ApiHangarCadDesignsRouteImport.update({
+  id: '/api/hangar/cad-designs',
+  path: '/api/hangar/cad-designs',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiHangarStructuralsRoute = ApiHangarStructuralsRouteImport.update({
-  id: '/api/hangar/structurals',
-  path: '/api/hangar/structurals',
+const ApiHangarCertificationsRoute = ApiHangarCertificationsRouteImport.update({
+  id: '/api/hangar/certifications',
+  path: '/api/hangar/certifications',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiHangarStoreDocumentRoute = ApiHangarStoreDocumentRouteImport.update({
-  id: '/api/hangar/store-document',
-  path: '/api/hangar/store-document',
+const ApiHangarCfdAnalysesRoute = ApiHangarCfdAnalysesRouteImport.update({
+  id: '/api/hangar/cfd-analyses',
+  path: '/api/hangar/cfd-analyses',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiHangarSourceCatalogsRoute = ApiHangarSourceCatalogsRouteImport.update({
-  id: '/api/hangar/source-catalogs',
-  path: '/api/hangar/source-catalogs',
+const ApiHangarConceptsRoute = ApiHangarConceptsRouteImport.update({
+  id: '/api/hangar/concepts',
+  path: '/api/hangar/concepts',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiHangarSimulationsRoute = ApiHangarSimulationsRouteImport.update({
-  id: '/api/hangar/simulations',
-  path: '/api/hangar/simulations',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiHangarSagushHelloRoute = ApiHangarSagushHelloRouteImport.update({
-  id: '/api/hangar/sagush-hello',
-  path: '/api/hangar/sagush-hello',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiHangarSagushDesignRoute = ApiHangarSagushDesignRouteImport.update({
-  id: '/api/hangar/sagush-design',
-  path: '/api/hangar/sagush-design',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiHangarResolveMissionRoute = ApiHangarResolveMissionRouteImport.update({
-  id: '/api/hangar/resolve-mission',
-  path: '/api/hangar/resolve-mission',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiHangarOptimizationsRoute = ApiHangarOptimizationsRouteImport.update({
-  id: '/api/hangar/optimizations',
-  path: '/api/hangar/optimizations',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiHangarMissionsRoute = ApiHangarMissionsRouteImport.update({
-  id: '/api/hangar/missions',
-  path: '/api/hangar/missions',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiHangarMaterialsRoute = ApiHangarMaterialsRouteImport.update({
-  id: '/api/hangar/materials',
-  path: '/api/hangar/materials',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiHangarManufacturingsRoute = ApiHangarManufacturingsRouteImport.update({
-  id: '/api/hangar/manufacturings',
-  path: '/api/hangar/manufacturings',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiHangarLlmStatusRoute = ApiHangarLlmStatusRouteImport.update({
-  id: '/api/hangar/llm-status',
-  path: '/api/hangar/llm-status',
+const ApiHangarDocumentationsRoute = ApiHangarDocumentationsRouteImport.update({
+  id: '/api/hangar/documentations',
+  path: '/api/hangar/documentations',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiHangarExtractDocumentRoute =
@@ -668,166 +561,182 @@ const ApiHangarExtractDocumentRoute =
     path: '/api/hangar/extract-document',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ApiHangarDocumentationsRoute = ApiHangarDocumentationsRouteImport.update({
-  id: '/api/hangar/documentations',
-  path: '/api/hangar/documentations',
+const ApiHangarLlmStatusRoute = ApiHangarLlmStatusRouteImport.update({
+  id: '/api/hangar/llm-status',
+  path: '/api/hangar/llm-status',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiHangarConceptsRoute = ApiHangarConceptsRouteImport.update({
-  id: '/api/hangar/concepts',
-  path: '/api/hangar/concepts',
+const ApiHangarManufacturingsRoute = ApiHangarManufacturingsRouteImport.update({
+  id: '/api/hangar/manufacturings',
+  path: '/api/hangar/manufacturings',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiHangarCfdAnalysesRoute = ApiHangarCfdAnalysesRouteImport.update({
-  id: '/api/hangar/cfd-analyses',
-  path: '/api/hangar/cfd-analyses',
+const ApiHangarMaterialsRoute = ApiHangarMaterialsRouteImport.update({
+  id: '/api/hangar/materials',
+  path: '/api/hangar/materials',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiHangarCertificationsRoute = ApiHangarCertificationsRouteImport.update({
-  id: '/api/hangar/certifications',
-  path: '/api/hangar/certifications',
+const ApiHangarMissionsRoute = ApiHangarMissionsRouteImport.update({
+  id: '/api/hangar/missions',
+  path: '/api/hangar/missions',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiHangarCadDesignsRoute = ApiHangarCadDesignsRouteImport.update({
-  id: '/api/hangar/cad-designs',
-  path: '/api/hangar/cad-designs',
+const ApiHangarOptimizationsRoute = ApiHangarOptimizationsRouteImport.update({
+  id: '/api/hangar/optimizations',
+  path: '/api/hangar/optimizations',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiHangarBernoulliReviewRoute =
-  ApiHangarBernoulliReviewRouteImport.update({
-    id: '/api/hangar/bernoulli-review',
-    path: '/api/hangar/bernoulli-review',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiHangarAircraftDesignsRoute =
-  ApiHangarAircraftDesignsRouteImport.update({
-    id: '/api/hangar/aircraft-designs',
-    path: '/api/hangar/aircraft-designs',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const LayoutAuthCallbackRoute = LayoutAuthCallbackRouteImport.update({
-  id: '/auth/callback',
-  path: '/auth/callback',
-  getParentRoute: () => LayoutRoute,
+const ApiHangarResolveMissionRoute = ApiHangarResolveMissionRouteImport.update({
+  id: '/api/hangar/resolve-mission',
+  path: '/api/hangar/resolve-mission',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const ApiHangarProcessValidationComplianceValidationRoute =
-  ApiHangarProcessValidationComplianceValidationRouteImport.update({
-    id: '/api/hangar/process-validation/compliance-validation',
-    path: '/api/hangar/process-validation/compliance-validation',
-    getParentRoute: () => rootRouteImport,
+const ApiHangarSagushDesignRoute = ApiHangarSagushDesignRouteImport.update({
+  id: '/api/hangar/sagush-design',
+  path: '/api/hangar/sagush-design',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiHangarSagushHelloRoute = ApiHangarSagushHelloRouteImport.update({
+  id: '/api/hangar/sagush-hello',
+  path: '/api/hangar/sagush-hello',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiHangarSimulationsRoute = ApiHangarSimulationsRouteImport.update({
+  id: '/api/hangar/simulations',
+  path: '/api/hangar/simulations',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiHangarSourceCatalogsRoute = ApiHangarSourceCatalogsRouteImport.update({
+  id: '/api/hangar/source-catalogs',
+  path: '/api/hangar/source-catalogs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiHangarStoreDocumentRoute = ApiHangarStoreDocumentRouteImport.update({
+  id: '/api/hangar/store-document',
+  path: '/api/hangar/store-document',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiHangarStructuralsRoute = ApiHangarStructuralsRouteImport.update({
+  id: '/api/hangar/structurals',
+  path: '/api/hangar/structurals',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiHangarValidationsRoute = ApiHangarValidationsRouteImport.update({
+  id: '/api/hangar/validations',
+  path: '/api/hangar/validations',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiTHAgentRoute = ApiTHAgentRouteImport.update({
+  id: '/api/t-h/$agent',
+  path: '/api/t-h/$agent',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DestudDashboardEngineerRoute = DestudDashboardEngineerRouteImport.update({
+  id: '/dashboard/engineer',
+  path: '/dashboard/engineer',
+  getParentRoute: () => DestudRoute,
+} as any)
+const DestudDashboardExplorerRoute = DestudDashboardExplorerRouteImport.update({
+  id: '/dashboard/explorer',
+  path: '/dashboard/explorer',
+  getParentRoute: () => DestudRoute,
+} as any)
+const DestudProjectsProjectIdRoute = DestudProjectsProjectIdRouteImport.update({
+  id: '/projects/$projectId',
+  path: '/projects/$projectId',
+  getParentRoute: () => DestudRoute,
+} as any)
+const MissionHubTorqwingsDesignStudioIndexRoute =
+  MissionHubTorqwingsDesignStudioIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => MissionHubTorqwingsDesignStudioRoute,
   } as any)
-const ApiHangarProcessStructuralStructuralAssessmentRoute =
-  ApiHangarProcessStructuralStructuralAssessmentRouteImport.update({
-    id: '/api/hangar/process-structural/structural-assessment',
-    path: '/api/hangar/process-structural/structural-assessment',
-    getParentRoute: () => rootRouteImport,
+const MissionHubTorqwingsDesignStudioAdvisorRoute =
+  MissionHubTorqwingsDesignStudioAdvisorRouteImport.update({
+    id: '/advisor',
+    path: '/advisor',
+    getParentRoute: () => MissionHubTorqwingsDesignStudioRoute,
   } as any)
-const ApiHangarProcessSimulationFlightDynamicsAssessmentRoute =
-  ApiHangarProcessSimulationFlightDynamicsAssessmentRouteImport.update({
-    id: '/api/hangar/process-simulation/flight-dynamics-assessment',
-    path: '/api/hangar/process-simulation/flight-dynamics-assessment',
-    getParentRoute: () => rootRouteImport,
+const MissionHubTorqwingsDesignStudioComplianceRoute =
+  MissionHubTorqwingsDesignStudioComplianceRouteImport.update({
+    id: '/compliance',
+    path: '/compliance',
+    getParentRoute: () => MissionHubTorqwingsDesignStudioRoute,
   } as any)
-const ApiHangarProcessOptimizationTradeOffOptimizationRoute =
-  ApiHangarProcessOptimizationTradeOffOptimizationRouteImport.update({
-    id: '/api/hangar/process-optimization/trade-off-optimization',
-    path: '/api/hangar/process-optimization/trade-off-optimization',
-    getParentRoute: () => rootRouteImport,
+const MissionHubTorqwingsDesignStudioComponentsRoute =
+  MissionHubTorqwingsDesignStudioComponentsRouteImport.update({
+    id: '/components',
+    path: '/components',
+    getParentRoute: () => MissionHubTorqwingsDesignStudioRoute,
   } as any)
-const ApiHangarProcessMissionReasoningPlanningRoute =
-  ApiHangarProcessMissionReasoningPlanningRouteImport.update({
-    id: '/api/hangar/process-mission/reasoning-planning',
-    path: '/api/hangar/process-mission/reasoning-planning',
-    getParentRoute: () => rootRouteImport,
+const MissionHubTorqwingsDesignStudioDesignRoute =
+  MissionHubTorqwingsDesignStudioDesignRouteImport.update({
+    id: '/design',
+    path: '/design',
+    getParentRoute: () => MissionHubTorqwingsDesignStudioRoute,
   } as any)
-const ApiHangarProcessMissionOutputInterfaceRoute =
-  ApiHangarProcessMissionOutputInterfaceRouteImport.update({
-    id: '/api/hangar/process-mission/output-interface',
-    path: '/api/hangar/process-mission/output-interface',
-    getParentRoute: () => rootRouteImport,
+const MissionHubTorqwingsDesignStudioDesignRuleRoute =
+  MissionHubTorqwingsDesignStudioDesignRuleRouteImport.update({
+    id: '/design-rule',
+    path: '/design-rule',
+    getParentRoute: () => MissionHubTorqwingsDesignStudioRoute,
   } as any)
-const ApiHangarProcessMissionOutputGenerationRoute =
-  ApiHangarProcessMissionOutputGenerationRouteImport.update({
-    id: '/api/hangar/process-mission/output-generation',
-    path: '/api/hangar/process-mission/output-generation',
-    getParentRoute: () => rootRouteImport,
+const MissionHubTorqwingsDesignStudioHistoryRoute =
+  MissionHubTorqwingsDesignStudioHistoryRouteImport.update({
+    id: '/history',
+    path: '/history',
+    getParentRoute: () => MissionHubTorqwingsDesignStudioRoute,
   } as any)
-const ApiHangarProcessMissionInputProcessingRoute =
-  ApiHangarProcessMissionInputProcessingRouteImport.update({
-    id: '/api/hangar/process-mission/input-processing',
-    path: '/api/hangar/process-mission/input-processing',
-    getParentRoute: () => rootRouteImport,
+const MissionHubTorqwingsDesignStudioNewRoute =
+  MissionHubTorqwingsDesignStudioNewRouteImport.update({
+    id: '/new',
+    path: '/new',
+    getParentRoute: () => MissionHubTorqwingsDesignStudioRoute,
   } as any)
-const ApiHangarProcessMissionFinalizeRoute =
-  ApiHangarProcessMissionFinalizeRouteImport.update({
-    id: '/api/hangar/process-mission/finalize',
-    path: '/api/hangar/process-mission/finalize',
-    getParentRoute: () => rootRouteImport,
+const MissionHubTorqwingsDesignStudioReportRoute =
+  MissionHubTorqwingsDesignStudioReportRouteImport.update({
+    id: '/report',
+    path: '/report',
+    getParentRoute: () => MissionHubTorqwingsDesignStudioRoute,
   } as any)
-const ApiHangarProcessMaterialsMaterialSelectionRoute =
-  ApiHangarProcessMaterialsMaterialSelectionRouteImport.update({
-    id: '/api/hangar/process-materials/material-selection',
-    path: '/api/hangar/process-materials/material-selection',
-    getParentRoute: () => rootRouteImport,
+const MissionHubTorqwingsDesignStudioRequirementsRoute =
+  MissionHubTorqwingsDesignStudioRequirementsRouteImport.update({
+    id: '/requirements',
+    path: '/requirements',
+    getParentRoute: () => MissionHubTorqwingsDesignStudioRoute,
   } as any)
-const ApiHangarProcessManufacturingManufacturabilityReviewRoute =
-  ApiHangarProcessManufacturingManufacturabilityReviewRouteImport.update({
-    id: '/api/hangar/process-manufacturing/manufacturability-review',
-    path: '/api/hangar/process-manufacturing/manufacturability-review',
-    getParentRoute: () => rootRouteImport,
+const MissionHubTorqwingsDesignStudioSimulationRoute =
+  MissionHubTorqwingsDesignStudioSimulationRouteImport.update({
+    id: '/simulation',
+    path: '/simulation',
+    getParentRoute: () => MissionHubTorqwingsDesignStudioRoute,
   } as any)
-const ApiHangarProcessDocumentationContentCompilationRoute =
-  ApiHangarProcessDocumentationContentCompilationRouteImport.update({
-    id: '/api/hangar/process-documentation/content-compilation',
-    path: '/api/hangar/process-documentation/content-compilation',
-    getParentRoute: () => rootRouteImport,
+const MissionHubVerticalsVerticalRoute =
+  MissionHubVerticalsVerticalRouteImport.update({
+    id: '/verticals/$vertical',
+    path: '/verticals/$vertical',
+    getParentRoute: () => MissionHubRoute,
   } as any)
-const ApiHangarProcessConceptTradeOffReasoningRoute =
-  ApiHangarProcessConceptTradeOffReasoningRouteImport.update({
-    id: '/api/hangar/process-concept/trade-off-reasoning',
-    path: '/api/hangar/process-concept/trade-off-reasoning',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiHangarProcessConceptRankingScoringRoute =
-  ApiHangarProcessConceptRankingScoringRouteImport.update({
-    id: '/api/hangar/process-concept/ranking-scoring',
-    path: '/api/hangar/process-concept/ranking-scoring',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiHangarProcessConceptOutputInterfaceRoute =
-  ApiHangarProcessConceptOutputInterfaceRouteImport.update({
-    id: '/api/hangar/process-concept/output-interface',
-    path: '/api/hangar/process-concept/output-interface',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiHangarProcessConceptFinalizeRoute =
-  ApiHangarProcessConceptFinalizeRouteImport.update({
-    id: '/api/hangar/process-concept/finalize',
-    path: '/api/hangar/process-concept/finalize',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiHangarProcessConceptConceptIdeationRoute =
-  ApiHangarProcessConceptConceptIdeationRouteImport.update({
-    id: '/api/hangar/process-concept/concept-ideation',
-    path: '/api/hangar/process-concept/concept-ideation',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiHangarProcessCfdAnalysisOutputGenerationRoute =
-  ApiHangarProcessCfdAnalysisOutputGenerationRouteImport.update({
-    id: '/api/hangar/process-cfd-analysis/output-generation',
-    path: '/api/hangar/process-cfd-analysis/output-generation',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiHangarProcessCertificationRegulatoryMappingRoute =
-  ApiHangarProcessCertificationRegulatoryMappingRouteImport.update({
-    id: '/api/hangar/process-certification/regulatory-mapping',
-    path: '/api/hangar/process-certification/regulatory-mapping',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiHangarProcessCadDesignModelGenerationRoute =
-  ApiHangarProcessCadDesignModelGenerationRouteImport.update({
-    id: '/api/hangar/process-cad-design/model-generation',
-    path: '/api/hangar/process-cad-design/model-generation',
+const PilotMissionsIndexRoute = PilotMissionsIndexRouteImport.update({
+  id: '/missions/',
+  path: '/missions/',
+  getParentRoute: () => PilotRoute,
+} as any)
+const PilotMissionsIdRoute = PilotMissionsIdRouteImport.update({
+  id: '/missions/$id',
+  path: '/missions/$id',
+  getParentRoute: () => PilotRoute,
+} as any)
+const AcademyCoursesSlugLearnRoute = AcademyCoursesSlugLearnRouteImport.update({
+  id: '/courses/$slug/learn',
+  path: '/courses/$slug/learn',
+  getParentRoute: () => AcademyRoute,
+} as any)
+const ApiHangarProcessAircraftDesignGeometryGenerationRoute =
+  ApiHangarProcessAircraftDesignGeometryGenerationRouteImport.update({
+    id: '/api/hangar/process-aircraft-design/geometry-generation',
+    path: '/api/hangar/process-aircraft-design/geometry-generation',
     getParentRoute: () => rootRouteImport,
   } as any)
 const ApiHangarProcessBernoulliReviewRoute =
@@ -836,21 +745,130 @@ const ApiHangarProcessBernoulliReviewRoute =
     path: '/api/hangar/process-bernoulli/review',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ApiHangarProcessAircraftDesignGeometryGenerationRoute =
-  ApiHangarProcessAircraftDesignGeometryGenerationRouteImport.update({
-    id: '/api/hangar/process-aircraft-design/geometry-generation',
-    path: '/api/hangar/process-aircraft-design/geometry-generation',
+const ApiHangarProcessCadDesignModelGenerationRoute =
+  ApiHangarProcessCadDesignModelGenerationRouteImport.update({
+    id: '/api/hangar/process-cad-design/model-generation',
+    path: '/api/hangar/process-cad-design/model-generation',
     getParentRoute: () => rootRouteImport,
   } as any)
-const AcademyCoursesSlugLearnRoute = AcademyCoursesSlugLearnRouteImport.update({
-  id: '/courses/$slug/learn',
-  path: '/courses/$slug/learn',
-  getParentRoute: () => AcademyRoute,
-} as any)
-const AcademyModuleModuleIdQuizQuizIdRoute =
-  AcademyModuleModuleIdQuizQuizIdRouteImport.update({
-    id: '/module/$moduleId/quiz/$quizId',
-    path: '/module/$moduleId/quiz/$quizId',
+const ApiHangarProcessCertificationRegulatoryMappingRoute =
+  ApiHangarProcessCertificationRegulatoryMappingRouteImport.update({
+    id: '/api/hangar/process-certification/regulatory-mapping',
+    path: '/api/hangar/process-certification/regulatory-mapping',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiHangarProcessCfdAnalysisOutputGenerationRoute =
+  ApiHangarProcessCfdAnalysisOutputGenerationRouteImport.update({
+    id: '/api/hangar/process-cfd-analysis/output-generation',
+    path: '/api/hangar/process-cfd-analysis/output-generation',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiHangarProcessConceptConceptIdeationRoute =
+  ApiHangarProcessConceptConceptIdeationRouteImport.update({
+    id: '/api/hangar/process-concept/concept-ideation',
+    path: '/api/hangar/process-concept/concept-ideation',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiHangarProcessConceptFinalizeRoute =
+  ApiHangarProcessConceptFinalizeRouteImport.update({
+    id: '/api/hangar/process-concept/finalize',
+    path: '/api/hangar/process-concept/finalize',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiHangarProcessConceptOutputInterfaceRoute =
+  ApiHangarProcessConceptOutputInterfaceRouteImport.update({
+    id: '/api/hangar/process-concept/output-interface',
+    path: '/api/hangar/process-concept/output-interface',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiHangarProcessConceptRankingScoringRoute =
+  ApiHangarProcessConceptRankingScoringRouteImport.update({
+    id: '/api/hangar/process-concept/ranking-scoring',
+    path: '/api/hangar/process-concept/ranking-scoring',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiHangarProcessConceptTradeOffReasoningRoute =
+  ApiHangarProcessConceptTradeOffReasoningRouteImport.update({
+    id: '/api/hangar/process-concept/trade-off-reasoning',
+    path: '/api/hangar/process-concept/trade-off-reasoning',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiHangarProcessDocumentationContentCompilationRoute =
+  ApiHangarProcessDocumentationContentCompilationRouteImport.update({
+    id: '/api/hangar/process-documentation/content-compilation',
+    path: '/api/hangar/process-documentation/content-compilation',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiHangarProcessManufacturingManufacturabilityReviewRoute =
+  ApiHangarProcessManufacturingManufacturabilityReviewRouteImport.update({
+    id: '/api/hangar/process-manufacturing/manufacturability-review',
+    path: '/api/hangar/process-manufacturing/manufacturability-review',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiHangarProcessMaterialsMaterialSelectionRoute =
+  ApiHangarProcessMaterialsMaterialSelectionRouteImport.update({
+    id: '/api/hangar/process-materials/material-selection',
+    path: '/api/hangar/process-materials/material-selection',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiHangarProcessMissionFinalizeRoute =
+  ApiHangarProcessMissionFinalizeRouteImport.update({
+    id: '/api/hangar/process-mission/finalize',
+    path: '/api/hangar/process-mission/finalize',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiHangarProcessMissionInputProcessingRoute =
+  ApiHangarProcessMissionInputProcessingRouteImport.update({
+    id: '/api/hangar/process-mission/input-processing',
+    path: '/api/hangar/process-mission/input-processing',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiHangarProcessMissionOutputGenerationRoute =
+  ApiHangarProcessMissionOutputGenerationRouteImport.update({
+    id: '/api/hangar/process-mission/output-generation',
+    path: '/api/hangar/process-mission/output-generation',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiHangarProcessMissionOutputInterfaceRoute =
+  ApiHangarProcessMissionOutputInterfaceRouteImport.update({
+    id: '/api/hangar/process-mission/output-interface',
+    path: '/api/hangar/process-mission/output-interface',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiHangarProcessMissionReasoningPlanningRoute =
+  ApiHangarProcessMissionReasoningPlanningRouteImport.update({
+    id: '/api/hangar/process-mission/reasoning-planning',
+    path: '/api/hangar/process-mission/reasoning-planning',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiHangarProcessOptimizationTradeOffOptimizationRoute =
+  ApiHangarProcessOptimizationTradeOffOptimizationRouteImport.update({
+    id: '/api/hangar/process-optimization/trade-off-optimization',
+    path: '/api/hangar/process-optimization/trade-off-optimization',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiHangarProcessSimulationFlightDynamicsAssessmentRoute =
+  ApiHangarProcessSimulationFlightDynamicsAssessmentRouteImport.update({
+    id: '/api/hangar/process-simulation/flight-dynamics-assessment',
+    path: '/api/hangar/process-simulation/flight-dynamics-assessment',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiHangarProcessStructuralStructuralAssessmentRoute =
+  ApiHangarProcessStructuralStructuralAssessmentRouteImport.update({
+    id: '/api/hangar/process-structural/structural-assessment',
+    path: '/api/hangar/process-structural/structural-assessment',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiHangarProcessValidationComplianceValidationRoute =
+  ApiHangarProcessValidationComplianceValidationRouteImport.update({
+    id: '/api/hangar/process-validation/compliance-validation',
+    path: '/api/hangar/process-validation/compliance-validation',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const AcademyCoursesSlugModulesModuleIdRoute =
+  AcademyCoursesSlugModulesModuleIdRouteImport.update({
+    id: '/courses/$slug/modules/$moduleId',
+    path: '/courses/$slug/modules/$moduleId',
     getParentRoute: () => AcademyRoute,
   } as any)
 const AcademyModuleModuleIdLessonLessonIdRoute =
@@ -859,10 +877,10 @@ const AcademyModuleModuleIdLessonLessonIdRoute =
     path: '/module/$moduleId/lesson/$lessonId',
     getParentRoute: () => AcademyRoute,
   } as any)
-const AcademyCoursesSlugModulesModuleIdRoute =
-  AcademyCoursesSlugModulesModuleIdRouteImport.update({
-    id: '/courses/$slug/modules/$moduleId',
-    path: '/courses/$slug/modules/$moduleId',
+const AcademyModuleModuleIdQuizQuizIdRoute =
+  AcademyModuleModuleIdQuizQuizIdRouteImport.update({
+    id: '/module/$moduleId/quiz/$quizId',
+    path: '/module/$moduleId/quiz/$quizId',
     getParentRoute: () => AcademyRoute,
   } as any)
 
@@ -912,6 +930,7 @@ export interface FileRoutesByFullPath {
   '/pilot/profile': typeof PilotProfileRoute
   '/pilot/sync': typeof PilotSyncRoute
   '/pilot/tracking': typeof PilotTrackingRoute
+  '/t-h/login': typeof THLoginRoute
   '/the-hangar/agents': typeof TheHangarAgentsRoute
   '/the-hangar/aircraft-design': typeof TheHangarAircraftDesignRoute
   '/the-hangar/bernoulli': typeof TheHangarBernoulliRoute
@@ -934,6 +953,7 @@ export interface FileRoutesByFullPath {
   '/destud/': typeof DestudIndexRoute
   '/mission-hub/': typeof MissionHubIndexRoute
   '/pilot/': typeof PilotIndexRoute
+  '/t-h/': typeof THIndexRoute
   '/the-hangar/': typeof TheHangarIndexRoute
   '/auth/callback': typeof LayoutAuthCallbackRoute
   '/api/hangar/aircraft-designs': typeof ApiHangarAircraftDesignsRoute
@@ -957,6 +977,7 @@ export interface FileRoutesByFullPath {
   '/api/hangar/store-document': typeof ApiHangarStoreDocumentRoute
   '/api/hangar/structurals': typeof ApiHangarStructuralsRoute
   '/api/hangar/validations': typeof ApiHangarValidationsRoute
+  '/api/t-h/$agent': typeof ApiTHAgentRoute
   '/destud/dashboard/engineer': typeof DestudDashboardEngineerRoute
   '/destud/dashboard/explorer': typeof DestudDashboardExplorerRoute
   '/destud/projects/$projectId': typeof DestudProjectsProjectIdRoute
@@ -1040,6 +1061,7 @@ export interface FileRoutesByTo {
   '/pilot/profile': typeof PilotProfileRoute
   '/pilot/sync': typeof PilotSyncRoute
   '/pilot/tracking': typeof PilotTrackingRoute
+  '/t-h/login': typeof THLoginRoute
   '/the-hangar/agents': typeof TheHangarAgentsRoute
   '/the-hangar/aircraft-design': typeof TheHangarAircraftDesignRoute
   '/the-hangar/bernoulli': typeof TheHangarBernoulliRoute
@@ -1063,6 +1085,7 @@ export interface FileRoutesByTo {
   '/destud': typeof DestudIndexRoute
   '/mission-hub': typeof MissionHubIndexRoute
   '/pilot': typeof PilotIndexRoute
+  '/t-h': typeof THIndexRoute
   '/the-hangar': typeof TheHangarIndexRoute
   '/auth/callback': typeof LayoutAuthCallbackRoute
   '/api/hangar/aircraft-designs': typeof ApiHangarAircraftDesignsRoute
@@ -1086,6 +1109,7 @@ export interface FileRoutesByTo {
   '/api/hangar/store-document': typeof ApiHangarStoreDocumentRoute
   '/api/hangar/structurals': typeof ApiHangarStructuralsRoute
   '/api/hangar/validations': typeof ApiHangarValidationsRoute
+  '/api/t-h/$agent': typeof ApiTHAgentRoute
   '/destud/dashboard/engineer': typeof DestudDashboardEngineerRoute
   '/destud/dashboard/explorer': typeof DestudDashboardExplorerRoute
   '/destud/projects/$projectId': typeof DestudProjectsProjectIdRoute
@@ -1177,6 +1201,7 @@ export interface FileRoutesById {
   '/pilot/profile': typeof PilotProfileRoute
   '/pilot/sync': typeof PilotSyncRoute
   '/pilot/tracking': typeof PilotTrackingRoute
+  '/t-h/login': typeof THLoginRoute
   '/the-hangar/agents': typeof TheHangarAgentsRoute
   '/the-hangar/aircraft-design': typeof TheHangarAircraftDesignRoute
   '/the-hangar/bernoulli': typeof TheHangarBernoulliRoute
@@ -1200,6 +1225,7 @@ export interface FileRoutesById {
   '/destud/': typeof DestudIndexRoute
   '/mission-hub/': typeof MissionHubIndexRoute
   '/pilot/': typeof PilotIndexRoute
+  '/t-h/': typeof THIndexRoute
   '/the-hangar/': typeof TheHangarIndexRoute
   '/_layout/auth/callback': typeof LayoutAuthCallbackRoute
   '/api/hangar/aircraft-designs': typeof ApiHangarAircraftDesignsRoute
@@ -1223,6 +1249,7 @@ export interface FileRoutesById {
   '/api/hangar/store-document': typeof ApiHangarStoreDocumentRoute
   '/api/hangar/structurals': typeof ApiHangarStructuralsRoute
   '/api/hangar/validations': typeof ApiHangarValidationsRoute
+  '/api/t-h/$agent': typeof ApiTHAgentRoute
   '/destud/dashboard/engineer': typeof DestudDashboardEngineerRoute
   '/destud/dashboard/explorer': typeof DestudDashboardExplorerRoute
   '/destud/projects/$projectId': typeof DestudProjectsProjectIdRoute
@@ -1315,6 +1342,7 @@ export interface FileRouteTypes {
     | '/pilot/profile'
     | '/pilot/sync'
     | '/pilot/tracking'
+    | '/t-h/login'
     | '/the-hangar/agents'
     | '/the-hangar/aircraft-design'
     | '/the-hangar/bernoulli'
@@ -1337,6 +1365,7 @@ export interface FileRouteTypes {
     | '/destud/'
     | '/mission-hub/'
     | '/pilot/'
+    | '/t-h/'
     | '/the-hangar/'
     | '/auth/callback'
     | '/api/hangar/aircraft-designs'
@@ -1360,6 +1389,7 @@ export interface FileRouteTypes {
     | '/api/hangar/store-document'
     | '/api/hangar/structurals'
     | '/api/hangar/validations'
+    | '/api/t-h/$agent'
     | '/destud/dashboard/engineer'
     | '/destud/dashboard/explorer'
     | '/destud/projects/$projectId'
@@ -1443,6 +1473,7 @@ export interface FileRouteTypes {
     | '/pilot/profile'
     | '/pilot/sync'
     | '/pilot/tracking'
+    | '/t-h/login'
     | '/the-hangar/agents'
     | '/the-hangar/aircraft-design'
     | '/the-hangar/bernoulli'
@@ -1466,6 +1497,7 @@ export interface FileRouteTypes {
     | '/destud'
     | '/mission-hub'
     | '/pilot'
+    | '/t-h'
     | '/the-hangar'
     | '/auth/callback'
     | '/api/hangar/aircraft-designs'
@@ -1489,6 +1521,7 @@ export interface FileRouteTypes {
     | '/api/hangar/store-document'
     | '/api/hangar/structurals'
     | '/api/hangar/validations'
+    | '/api/t-h/$agent'
     | '/destud/dashboard/engineer'
     | '/destud/dashboard/explorer'
     | '/destud/projects/$projectId'
@@ -1579,6 +1612,7 @@ export interface FileRouteTypes {
     | '/pilot/profile'
     | '/pilot/sync'
     | '/pilot/tracking'
+    | '/t-h/login'
     | '/the-hangar/agents'
     | '/the-hangar/aircraft-design'
     | '/the-hangar/bernoulli'
@@ -1602,6 +1636,7 @@ export interface FileRouteTypes {
     | '/destud/'
     | '/mission-hub/'
     | '/pilot/'
+    | '/t-h/'
     | '/the-hangar/'
     | '/_layout/auth/callback'
     | '/api/hangar/aircraft-designs'
@@ -1625,6 +1660,7 @@ export interface FileRouteTypes {
     | '/api/hangar/store-document'
     | '/api/hangar/structurals'
     | '/api/hangar/validations'
+    | '/api/t-h/$agent'
     | '/destud/dashboard/engineer'
     | '/destud/dashboard/explorer'
     | '/destud/projects/$projectId'
@@ -1680,6 +1716,8 @@ export interface RootRouteChildren {
   PilotRoute: typeof PilotRouteWithChildren
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TheHangarRoute: typeof TheHangarRouteWithChildren
+  THLoginRoute: typeof THLoginRoute
+  THIndexRoute: typeof THIndexRoute
   ApiHangarAircraftDesignsRoute: typeof ApiHangarAircraftDesignsRoute
   ApiHangarBernoulliReviewRoute: typeof ApiHangarBernoulliReviewRoute
   ApiHangarCadDesignsRoute: typeof ApiHangarCadDesignsRoute
@@ -1701,6 +1739,7 @@ export interface RootRouteChildren {
   ApiHangarStoreDocumentRoute: typeof ApiHangarStoreDocumentRoute
   ApiHangarStructuralsRoute: typeof ApiHangarStructuralsRoute
   ApiHangarValidationsRoute: typeof ApiHangarValidationsRoute
+  ApiTHAgentRoute: typeof ApiTHAgentRoute
   ApiHangarProcessAircraftDesignGeometryGenerationRoute: typeof ApiHangarProcessAircraftDesignGeometryGenerationRoute
   ApiHangarProcessBernoulliReviewRoute: typeof ApiHangarProcessBernoulliReviewRoute
   ApiHangarProcessCadDesignModelGenerationRoute: typeof ApiHangarProcessCadDesignModelGenerationRoute
@@ -1727,53 +1766,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/the-hangar': {
-      id: '/the-hangar'
-      path: '/the-hangar'
-      fullPath: '/the-hangar'
-      preLoaderRoute: typeof TheHangarRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sitemap.xml': {
-      id: '/sitemap.xml'
-      path: '/sitemap.xml'
-      fullPath: '/sitemap.xml'
-      preLoaderRoute: typeof SitemapDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/pilot': {
-      id: '/pilot'
-      path: '/pilot'
-      fullPath: '/pilot'
-      preLoaderRoute: typeof PilotRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/mission-hub': {
-      id: '/mission-hub'
-      path: '/mission-hub'
-      fullPath: '/mission-hub'
-      preLoaderRoute: typeof MissionHubRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/hangar-stage3-manualtest': {
-      id: '/hangar-stage3-manualtest'
-      path: '/hangar-stage3-manualtest'
-      fullPath: '/hangar-stage3-manualtest'
-      preLoaderRoute: typeof HangarStage3ManualtestRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/field': {
-      id: '/field'
-      path: '/field'
-      fullPath: '/field'
-      preLoaderRoute: typeof FieldRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/destud': {
-      id: '/destud'
-      path: '/destud'
-      fullPath: '/destud'
-      preLoaderRoute: typeof DestudRouteImport
+    '/_layout': {
+      id: '/_layout'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof LayoutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/academy': {
@@ -1783,424 +1780,60 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AcademyRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_layout': {
-      id: '/_layout'
-      path: ''
-      fullPath: '/'
-      preLoaderRoute: typeof LayoutRouteImport
+    '/destud': {
+      id: '/destud'
+      path: '/destud'
+      fullPath: '/destud'
+      preLoaderRoute: typeof DestudRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/the-hangar/': {
-      id: '/the-hangar/'
-      path: '/'
-      fullPath: '/the-hangar/'
-      preLoaderRoute: typeof TheHangarIndexRouteImport
-      parentRoute: typeof TheHangarRoute
+    '/field': {
+      id: '/field'
+      path: '/field'
+      fullPath: '/field'
+      preLoaderRoute: typeof FieldRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/pilot/': {
-      id: '/pilot/'
-      path: '/'
-      fullPath: '/pilot/'
-      preLoaderRoute: typeof PilotIndexRouteImport
-      parentRoute: typeof PilotRoute
+    '/hangar-stage3-manualtest': {
+      id: '/hangar-stage3-manualtest'
+      path: '/hangar-stage3-manualtest'
+      fullPath: '/hangar-stage3-manualtest'
+      preLoaderRoute: typeof HangarStage3ManualtestRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/mission-hub/': {
-      id: '/mission-hub/'
-      path: '/'
-      fullPath: '/mission-hub/'
-      preLoaderRoute: typeof MissionHubIndexRouteImport
-      parentRoute: typeof MissionHubRoute
+    '/mission-hub': {
+      id: '/mission-hub'
+      path: '/mission-hub'
+      fullPath: '/mission-hub'
+      preLoaderRoute: typeof MissionHubRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/destud/': {
-      id: '/destud/'
-      path: '/'
-      fullPath: '/destud/'
-      preLoaderRoute: typeof DestudIndexRouteImport
-      parentRoute: typeof DestudRoute
+    '/pilot': {
+      id: '/pilot'
+      path: '/pilot'
+      fullPath: '/pilot'
+      preLoaderRoute: typeof PilotRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/academy/': {
-      id: '/academy/'
-      path: '/'
-      fullPath: '/academy/'
-      preLoaderRoute: typeof AcademyIndexRouteImport
-      parentRoute: typeof AcademyRoute
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/the-hangar': {
+      id: '/the-hangar'
+      path: '/the-hangar'
+      fullPath: '/the-hangar'
+      preLoaderRoute: typeof TheHangarRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_layout/': {
       id: '/_layout/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof LayoutIndexRouteImport
-      parentRoute: typeof LayoutRoute
-    }
-    '/the-hangar/welcome': {
-      id: '/the-hangar/welcome'
-      path: '/welcome'
-      fullPath: '/the-hangar/welcome'
-      preLoaderRoute: typeof TheHangarWelcomeRouteImport
-      parentRoute: typeof TheHangarRoute
-    }
-    '/the-hangar/validation': {
-      id: '/the-hangar/validation'
-      path: '/validation'
-      fullPath: '/the-hangar/validation'
-      preLoaderRoute: typeof TheHangarValidationRouteImport
-      parentRoute: typeof TheHangarRoute
-    }
-    '/the-hangar/structural': {
-      id: '/the-hangar/structural'
-      path: '/structural'
-      fullPath: '/the-hangar/structural'
-      preLoaderRoute: typeof TheHangarStructuralRouteImport
-      parentRoute: typeof TheHangarRoute
-    }
-    '/the-hangar/stack': {
-      id: '/the-hangar/stack'
-      path: '/stack'
-      fullPath: '/the-hangar/stack'
-      preLoaderRoute: typeof TheHangarStackRouteImport
-      parentRoute: typeof TheHangarRoute
-    }
-    '/the-hangar/simulation': {
-      id: '/the-hangar/simulation'
-      path: '/simulation'
-      fullPath: '/the-hangar/simulation'
-      preLoaderRoute: typeof TheHangarSimulationRouteImport
-      parentRoute: typeof TheHangarRoute
-    }
-    '/the-hangar/optimization': {
-      id: '/the-hangar/optimization'
-      path: '/optimization'
-      fullPath: '/the-hangar/optimization'
-      preLoaderRoute: typeof TheHangarOptimizationRouteImport
-      parentRoute: typeof TheHangarRoute
-    }
-    '/the-hangar/mission': {
-      id: '/the-hangar/mission'
-      path: '/mission'
-      fullPath: '/the-hangar/mission'
-      preLoaderRoute: typeof TheHangarMissionRouteImport
-      parentRoute: typeof TheHangarRoute
-    }
-    '/the-hangar/materials': {
-      id: '/the-hangar/materials'
-      path: '/materials'
-      fullPath: '/the-hangar/materials'
-      preLoaderRoute: typeof TheHangarMaterialsRouteImport
-      parentRoute: typeof TheHangarRoute
-    }
-    '/the-hangar/manufacturing': {
-      id: '/the-hangar/manufacturing'
-      path: '/manufacturing'
-      fullPath: '/the-hangar/manufacturing'
-      preLoaderRoute: typeof TheHangarManufacturingRouteImport
-      parentRoute: typeof TheHangarRoute
-    }
-    '/the-hangar/how-it-works': {
-      id: '/the-hangar/how-it-works'
-      path: '/how-it-works'
-      fullPath: '/the-hangar/how-it-works'
-      preLoaderRoute: typeof TheHangarHowItWorksRouteImport
-      parentRoute: typeof TheHangarRoute
-    }
-    '/the-hangar/documentation': {
-      id: '/the-hangar/documentation'
-      path: '/documentation'
-      fullPath: '/the-hangar/documentation'
-      preLoaderRoute: typeof TheHangarDocumentationRouteImport
-      parentRoute: typeof TheHangarRoute
-    }
-    '/the-hangar/concept': {
-      id: '/the-hangar/concept'
-      path: '/concept'
-      fullPath: '/the-hangar/concept'
-      preLoaderRoute: typeof TheHangarConceptRouteImport
-      parentRoute: typeof TheHangarRoute
-    }
-    '/the-hangar/cfd-analysis': {
-      id: '/the-hangar/cfd-analysis'
-      path: '/cfd-analysis'
-      fullPath: '/the-hangar/cfd-analysis'
-      preLoaderRoute: typeof TheHangarCfdAnalysisRouteImport
-      parentRoute: typeof TheHangarRoute
-    }
-    '/the-hangar/certification': {
-      id: '/the-hangar/certification'
-      path: '/certification'
-      fullPath: '/the-hangar/certification'
-      preLoaderRoute: typeof TheHangarCertificationRouteImport
-      parentRoute: typeof TheHangarRoute
-    }
-    '/the-hangar/cad-design': {
-      id: '/the-hangar/cad-design'
-      path: '/cad-design'
-      fullPath: '/the-hangar/cad-design'
-      preLoaderRoute: typeof TheHangarCadDesignRouteImport
-      parentRoute: typeof TheHangarRoute
-    }
-    '/the-hangar/bernoulli': {
-      id: '/the-hangar/bernoulli'
-      path: '/bernoulli'
-      fullPath: '/the-hangar/bernoulli'
-      preLoaderRoute: typeof TheHangarBernoulliRouteImport
-      parentRoute: typeof TheHangarRoute
-    }
-    '/the-hangar/aircraft-design': {
-      id: '/the-hangar/aircraft-design'
-      path: '/aircraft-design'
-      fullPath: '/the-hangar/aircraft-design'
-      preLoaderRoute: typeof TheHangarAircraftDesignRouteImport
-      parentRoute: typeof TheHangarRoute
-    }
-    '/the-hangar/agents': {
-      id: '/the-hangar/agents'
-      path: '/agents'
-      fullPath: '/the-hangar/agents'
-      preLoaderRoute: typeof TheHangarAgentsRouteImport
-      parentRoute: typeof TheHangarRoute
-    }
-    '/pilot/tracking': {
-      id: '/pilot/tracking'
-      path: '/tracking'
-      fullPath: '/pilot/tracking'
-      preLoaderRoute: typeof PilotTrackingRouteImport
-      parentRoute: typeof PilotRoute
-    }
-    '/pilot/sync': {
-      id: '/pilot/sync'
-      path: '/sync'
-      fullPath: '/pilot/sync'
-      preLoaderRoute: typeof PilotSyncRouteImport
-      parentRoute: typeof PilotRoute
-    }
-    '/pilot/profile': {
-      id: '/pilot/profile'
-      path: '/profile'
-      fullPath: '/pilot/profile'
-      preLoaderRoute: typeof PilotProfileRouteImport
-      parentRoute: typeof PilotRoute
-    }
-    '/pilot/login': {
-      id: '/pilot/login'
-      path: '/login'
-      fullPath: '/pilot/login'
-      preLoaderRoute: typeof PilotLoginRouteImport
-      parentRoute: typeof PilotRoute
-    }
-    '/mission-hub/waitlist': {
-      id: '/mission-hub/waitlist'
-      path: '/waitlist'
-      fullPath: '/mission-hub/waitlist'
-      preLoaderRoute: typeof MissionHubWaitlistRouteImport
-      parentRoute: typeof MissionHubRoute
-    }
-    '/mission-hub/users': {
-      id: '/mission-hub/users'
-      path: '/users'
-      fullPath: '/mission-hub/users'
-      preLoaderRoute: typeof MissionHubUsersRouteImport
-      parentRoute: typeof MissionHubRoute
-    }
-    '/mission-hub/twbc-drone-similarity-search': {
-      id: '/mission-hub/twbc-drone-similarity-search'
-      path: '/twbc-drone-similarity-search'
-      fullPath: '/mission-hub/twbc-drone-similarity-search'
-      preLoaderRoute: typeof MissionHubTwbcDroneSimilaritySearchRouteImport
-      parentRoute: typeof MissionHubRoute
-    }
-    '/mission-hub/twbc-drone-rule-engine': {
-      id: '/mission-hub/twbc-drone-rule-engine'
-      path: '/twbc-drone-rule-engine'
-      fullPath: '/mission-hub/twbc-drone-rule-engine'
-      preLoaderRoute: typeof MissionHubTwbcDroneRuleEngineRouteImport
-      parentRoute: typeof MissionHubRoute
-    }
-    '/mission-hub/twbc-drone-reference-designs': {
-      id: '/mission-hub/twbc-drone-reference-designs'
-      path: '/twbc-drone-reference-designs'
-      fullPath: '/mission-hub/twbc-drone-reference-designs'
-      preLoaderRoute: typeof MissionHubTwbcDroneReferenceDesignsRouteImport
-      parentRoute: typeof MissionHubRoute
-    }
-    '/mission-hub/twbc-drone-reasoning-api': {
-      id: '/mission-hub/twbc-drone-reasoning-api'
-      path: '/twbc-drone-reasoning-api'
-      fullPath: '/mission-hub/twbc-drone-reasoning-api'
-      preLoaderRoute: typeof MissionHubTwbcDroneReasoningApiRouteImport
-      parentRoute: typeof MissionHubRoute
-    }
-    '/mission-hub/twbc-drone-proven-designs': {
-      id: '/mission-hub/twbc-drone-proven-designs'
-      path: '/twbc-drone-proven-designs'
-      fullPath: '/mission-hub/twbc-drone-proven-designs'
-      preLoaderRoute: typeof MissionHubTwbcDroneProvenDesignsRouteImport
-      parentRoute: typeof MissionHubRoute
-    }
-    '/mission-hub/twbc-drone-feedback': {
-      id: '/mission-hub/twbc-drone-feedback'
-      path: '/twbc-drone-feedback'
-      fullPath: '/mission-hub/twbc-drone-feedback'
-      preLoaderRoute: typeof MissionHubTwbcDroneFeedbackRouteImport
-      parentRoute: typeof MissionHubRoute
-    }
-    '/mission-hub/twbc-drone-design-score': {
-      id: '/mission-hub/twbc-drone-design-score'
-      path: '/twbc-drone-design-score'
-      fullPath: '/mission-hub/twbc-drone-design-score'
-      preLoaderRoute: typeof MissionHubTwbcDroneDesignScoreRouteImport
-      parentRoute: typeof MissionHubRoute
-    }
-    '/mission-hub/twbc-drone-design-rules': {
-      id: '/mission-hub/twbc-drone-design-rules'
-      path: '/twbc-drone-design-rules'
-      fullPath: '/mission-hub/twbc-drone-design-rules'
-      preLoaderRoute: typeof MissionHubTwbcDroneDesignRulesRouteImport
-      parentRoute: typeof MissionHubRoute
-    }
-    '/mission-hub/twbc-drone-design-rule': {
-      id: '/mission-hub/twbc-drone-design-rule'
-      path: '/twbc-drone-design-rule'
-      fullPath: '/mission-hub/twbc-drone-design-rule'
-      preLoaderRoute: typeof MissionHubTwbcDroneDesignRuleRouteImport
-      parentRoute: typeof MissionHubRoute
-    }
-    '/mission-hub/twbc-drone-components-library': {
-      id: '/mission-hub/twbc-drone-components-library'
-      path: '/twbc-drone-components-library'
-      fullPath: '/mission-hub/twbc-drone-components-library'
-      preLoaderRoute: typeof MissionHubTwbcDroneComponentsLibraryRouteImport
-      parentRoute: typeof MissionHubRoute
-    }
-    '/mission-hub/twbc-drone-approval': {
-      id: '/mission-hub/twbc-drone-approval'
-      path: '/twbc-drone-approval'
-      fullPath: '/mission-hub/twbc-drone-approval'
-      preLoaderRoute: typeof MissionHubTwbcDroneApprovalRouteImport
-      parentRoute: typeof MissionHubRoute
-    }
-    '/mission-hub/torqwings-design-studio': {
-      id: '/mission-hub/torqwings-design-studio'
-      path: '/torqwings-design-studio'
-      fullPath: '/mission-hub/torqwings-design-studio'
-      preLoaderRoute: typeof MissionHubTorqwingsDesignStudioRouteImport
-      parentRoute: typeof MissionHubRoute
-    }
-    '/mission-hub/settings': {
-      id: '/mission-hub/settings'
-      path: '/settings'
-      fullPath: '/mission-hub/settings'
-      preLoaderRoute: typeof MissionHubSettingsRouteImport
-      parentRoute: typeof MissionHubRoute
-    }
-    '/mission-hub/reset-password': {
-      id: '/mission-hub/reset-password'
-      path: '/reset-password'
-      fullPath: '/mission-hub/reset-password'
-      preLoaderRoute: typeof MissionHubResetPasswordRouteImport
-      parentRoute: typeof MissionHubRoute
-    }
-    '/mission-hub/login': {
-      id: '/mission-hub/login'
-      path: '/login'
-      fullPath: '/mission-hub/login'
-      preLoaderRoute: typeof MissionHubLoginRouteImport
-      parentRoute: typeof MissionHubRoute
-    }
-    '/mission-hub/knowledge-uav': {
-      id: '/mission-hub/knowledge-uav'
-      path: '/knowledge-uav'
-      fullPath: '/mission-hub/knowledge-uav'
-      preLoaderRoute: typeof MissionHubKnowledgeUavRouteImport
-      parentRoute: typeof MissionHubRoute
-    }
-    '/mission-hub/design-studio': {
-      id: '/mission-hub/design-studio'
-      path: '/design-studio'
-      fullPath: '/mission-hub/design-studio'
-      preLoaderRoute: typeof MissionHubDesignStudioRouteImport
-      parentRoute: typeof MissionHubRoute
-    }
-    '/mission-hub/dashboard': {
-      id: '/mission-hub/dashboard'
-      path: '/dashboard'
-      fullPath: '/mission-hub/dashboard'
-      preLoaderRoute: typeof MissionHubDashboardRouteImport
-      parentRoute: typeof MissionHubRoute
-    }
-    '/mission-hub/contacts': {
-      id: '/mission-hub/contacts'
-      path: '/contacts'
-      fullPath: '/mission-hub/contacts'
-      preLoaderRoute: typeof MissionHubContactsRouteImport
-      parentRoute: typeof MissionHubRoute
-    }
-    '/mission-hub/academy-users': {
-      id: '/mission-hub/academy-users'
-      path: '/academy-users'
-      fullPath: '/mission-hub/academy-users'
-      preLoaderRoute: typeof MissionHubAcademyUsersRouteImport
-      parentRoute: typeof MissionHubRoute
-    }
-    '/destud/new-mission': {
-      id: '/destud/new-mission'
-      path: '/new-mission'
-      fullPath: '/destud/new-mission'
-      preLoaderRoute: typeof DestudNewMissionRouteImport
-      parentRoute: typeof DestudRoute
-    }
-    '/academy/quiz-demo': {
-      id: '/academy/quiz-demo'
-      path: '/quiz-demo'
-      fullPath: '/academy/quiz-demo'
-      preLoaderRoute: typeof AcademyQuizDemoRouteImport
-      parentRoute: typeof AcademyRoute
-    }
-    '/academy/lesson-demo': {
-      id: '/academy/lesson-demo'
-      path: '/lesson-demo'
-      fullPath: '/academy/lesson-demo'
-      preLoaderRoute: typeof AcademyLessonDemoRouteImport
-      parentRoute: typeof AcademyRoute
-    }
-    '/academy/dashboard': {
-      id: '/academy/dashboard'
-      path: '/dashboard'
-      fullPath: '/academy/dashboard'
-      preLoaderRoute: typeof AcademyDashboardRouteImport
-      parentRoute: typeof AcademyRoute
-    }
-    '/_layout/pilots': {
-      id: '/_layout/pilots'
-      path: '/pilots'
-      fullPath: '/pilots'
-      preLoaderRoute: typeof LayoutPilotsRouteImport
-      parentRoute: typeof LayoutRoute
-    }
-    '/_layout/industries': {
-      id: '/_layout/industries'
-      path: '/industries'
-      fullPath: '/industries'
-      preLoaderRoute: typeof LayoutIndustriesRouteImport
-      parentRoute: typeof LayoutRoute
-    }
-    '/_layout/guardsky': {
-      id: '/_layout/guardsky'
-      path: '/guardsky'
-      fullPath: '/guardsky'
-      preLoaderRoute: typeof LayoutGuardskyRouteImport
-      parentRoute: typeof LayoutRoute
-    }
-    '/_layout/contact': {
-      id: '/_layout/contact'
-      path: '/contact'
-      fullPath: '/contact'
-      preLoaderRoute: typeof LayoutContactRouteImport
-      parentRoute: typeof LayoutRoute
-    }
-    '/_layout/agrisky': {
-      id: '/_layout/agrisky'
-      path: '/agrisky'
-      fullPath: '/agrisky'
-      preLoaderRoute: typeof LayoutAgriskyRouteImport
       parentRoute: typeof LayoutRoute
     }
     '/_layout/about': {
@@ -2210,256 +1843,438 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutAboutRouteImport
       parentRoute: typeof LayoutRoute
     }
-    '/pilot/missions/': {
-      id: '/pilot/missions/'
-      path: '/missions'
-      fullPath: '/pilot/missions/'
-      preLoaderRoute: typeof PilotMissionsIndexRouteImport
-      parentRoute: typeof PilotRoute
+    '/_layout/agrisky': {
+      id: '/_layout/agrisky'
+      path: '/agrisky'
+      fullPath: '/agrisky'
+      preLoaderRoute: typeof LayoutAgriskyRouteImport
+      parentRoute: typeof LayoutRoute
     }
-    '/mission-hub/torqwings-design-studio/': {
-      id: '/mission-hub/torqwings-design-studio/'
+    '/_layout/contact': {
+      id: '/_layout/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof LayoutContactRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/guardsky': {
+      id: '/_layout/guardsky'
+      path: '/guardsky'
+      fullPath: '/guardsky'
+      preLoaderRoute: typeof LayoutGuardskyRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/industries': {
+      id: '/_layout/industries'
+      path: '/industries'
+      fullPath: '/industries'
+      preLoaderRoute: typeof LayoutIndustriesRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/pilots': {
+      id: '/_layout/pilots'
+      path: '/pilots'
+      fullPath: '/pilots'
+      preLoaderRoute: typeof LayoutPilotsRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/academy/': {
+      id: '/academy/'
       path: '/'
-      fullPath: '/mission-hub/torqwings-design-studio/'
-      preLoaderRoute: typeof MissionHubTorqwingsDesignStudioIndexRouteImport
-      parentRoute: typeof MissionHubTorqwingsDesignStudioRoute
+      fullPath: '/academy/'
+      preLoaderRoute: typeof AcademyIndexRouteImport
+      parentRoute: typeof AcademyRoute
     }
-    '/pilot/missions/$id': {
-      id: '/pilot/missions/$id'
-      path: '/missions/$id'
-      fullPath: '/pilot/missions/$id'
-      preLoaderRoute: typeof PilotMissionsIdRouteImport
-      parentRoute: typeof PilotRoute
+    '/academy/dashboard': {
+      id: '/academy/dashboard'
+      path: '/dashboard'
+      fullPath: '/academy/dashboard'
+      preLoaderRoute: typeof AcademyDashboardRouteImport
+      parentRoute: typeof AcademyRoute
     }
-    '/mission-hub/verticals/$vertical': {
-      id: '/mission-hub/verticals/$vertical'
-      path: '/verticals/$vertical'
-      fullPath: '/mission-hub/verticals/$vertical'
-      preLoaderRoute: typeof MissionHubVerticalsVerticalRouteImport
+    '/academy/lesson-demo': {
+      id: '/academy/lesson-demo'
+      path: '/lesson-demo'
+      fullPath: '/academy/lesson-demo'
+      preLoaderRoute: typeof AcademyLessonDemoRouteImport
+      parentRoute: typeof AcademyRoute
+    }
+    '/academy/quiz-demo': {
+      id: '/academy/quiz-demo'
+      path: '/quiz-demo'
+      fullPath: '/academy/quiz-demo'
+      preLoaderRoute: typeof AcademyQuizDemoRouteImport
+      parentRoute: typeof AcademyRoute
+    }
+    '/destud/': {
+      id: '/destud/'
+      path: '/'
+      fullPath: '/destud/'
+      preLoaderRoute: typeof DestudIndexRouteImport
+      parentRoute: typeof DestudRoute
+    }
+    '/destud/new-mission': {
+      id: '/destud/new-mission'
+      path: '/new-mission'
+      fullPath: '/destud/new-mission'
+      preLoaderRoute: typeof DestudNewMissionRouteImport
+      parentRoute: typeof DestudRoute
+    }
+    '/mission-hub/': {
+      id: '/mission-hub/'
+      path: '/'
+      fullPath: '/mission-hub/'
+      preLoaderRoute: typeof MissionHubIndexRouteImport
       parentRoute: typeof MissionHubRoute
     }
-    '/mission-hub/torqwings-design-studio/simulation': {
-      id: '/mission-hub/torqwings-design-studio/simulation'
+    '/mission-hub/academy-users': {
+      id: '/mission-hub/academy-users'
+      path: '/academy-users'
+      fullPath: '/mission-hub/academy-users'
+      preLoaderRoute: typeof MissionHubAcademyUsersRouteImport
+      parentRoute: typeof MissionHubRoute
+    }
+    '/mission-hub/contacts': {
+      id: '/mission-hub/contacts'
+      path: '/contacts'
+      fullPath: '/mission-hub/contacts'
+      preLoaderRoute: typeof MissionHubContactsRouteImport
+      parentRoute: typeof MissionHubRoute
+    }
+    '/mission-hub/dashboard': {
+      id: '/mission-hub/dashboard'
+      path: '/dashboard'
+      fullPath: '/mission-hub/dashboard'
+      preLoaderRoute: typeof MissionHubDashboardRouteImport
+      parentRoute: typeof MissionHubRoute
+    }
+    '/mission-hub/design-studio': {
+      id: '/mission-hub/design-studio'
+      path: '/design-studio'
+      fullPath: '/mission-hub/design-studio'
+      preLoaderRoute: typeof MissionHubDesignStudioRouteImport
+      parentRoute: typeof MissionHubRoute
+    }
+    '/mission-hub/knowledge-uav': {
+      id: '/mission-hub/knowledge-uav'
+      path: '/knowledge-uav'
+      fullPath: '/mission-hub/knowledge-uav'
+      preLoaderRoute: typeof MissionHubKnowledgeUavRouteImport
+      parentRoute: typeof MissionHubRoute
+    }
+    '/mission-hub/login': {
+      id: '/mission-hub/login'
+      path: '/login'
+      fullPath: '/mission-hub/login'
+      preLoaderRoute: typeof MissionHubLoginRouteImport
+      parentRoute: typeof MissionHubRoute
+    }
+    '/mission-hub/reset-password': {
+      id: '/mission-hub/reset-password'
+      path: '/reset-password'
+      fullPath: '/mission-hub/reset-password'
+      preLoaderRoute: typeof MissionHubResetPasswordRouteImport
+      parentRoute: typeof MissionHubRoute
+    }
+    '/mission-hub/settings': {
+      id: '/mission-hub/settings'
+      path: '/settings'
+      fullPath: '/mission-hub/settings'
+      preLoaderRoute: typeof MissionHubSettingsRouteImport
+      parentRoute: typeof MissionHubRoute
+    }
+    '/mission-hub/torqwings-design-studio': {
+      id: '/mission-hub/torqwings-design-studio'
+      path: '/torqwings-design-studio'
+      fullPath: '/mission-hub/torqwings-design-studio'
+      preLoaderRoute: typeof MissionHubTorqwingsDesignStudioRouteImport
+      parentRoute: typeof MissionHubRoute
+    }
+    '/mission-hub/twbc-drone-approval': {
+      id: '/mission-hub/twbc-drone-approval'
+      path: '/twbc-drone-approval'
+      fullPath: '/mission-hub/twbc-drone-approval'
+      preLoaderRoute: typeof MissionHubTwbcDroneApprovalRouteImport
+      parentRoute: typeof MissionHubRoute
+    }
+    '/mission-hub/twbc-drone-components-library': {
+      id: '/mission-hub/twbc-drone-components-library'
+      path: '/twbc-drone-components-library'
+      fullPath: '/mission-hub/twbc-drone-components-library'
+      preLoaderRoute: typeof MissionHubTwbcDroneComponentsLibraryRouteImport
+      parentRoute: typeof MissionHubRoute
+    }
+    '/mission-hub/twbc-drone-design-rule': {
+      id: '/mission-hub/twbc-drone-design-rule'
+      path: '/twbc-drone-design-rule'
+      fullPath: '/mission-hub/twbc-drone-design-rule'
+      preLoaderRoute: typeof MissionHubTwbcDroneDesignRuleRouteImport
+      parentRoute: typeof MissionHubRoute
+    }
+    '/mission-hub/twbc-drone-design-rules': {
+      id: '/mission-hub/twbc-drone-design-rules'
+      path: '/twbc-drone-design-rules'
+      fullPath: '/mission-hub/twbc-drone-design-rules'
+      preLoaderRoute: typeof MissionHubTwbcDroneDesignRulesRouteImport
+      parentRoute: typeof MissionHubRoute
+    }
+    '/mission-hub/twbc-drone-design-score': {
+      id: '/mission-hub/twbc-drone-design-score'
+      path: '/twbc-drone-design-score'
+      fullPath: '/mission-hub/twbc-drone-design-score'
+      preLoaderRoute: typeof MissionHubTwbcDroneDesignScoreRouteImport
+      parentRoute: typeof MissionHubRoute
+    }
+    '/mission-hub/twbc-drone-feedback': {
+      id: '/mission-hub/twbc-drone-feedback'
+      path: '/twbc-drone-feedback'
+      fullPath: '/mission-hub/twbc-drone-feedback'
+      preLoaderRoute: typeof MissionHubTwbcDroneFeedbackRouteImport
+      parentRoute: typeof MissionHubRoute
+    }
+    '/mission-hub/twbc-drone-proven-designs': {
+      id: '/mission-hub/twbc-drone-proven-designs'
+      path: '/twbc-drone-proven-designs'
+      fullPath: '/mission-hub/twbc-drone-proven-designs'
+      preLoaderRoute: typeof MissionHubTwbcDroneProvenDesignsRouteImport
+      parentRoute: typeof MissionHubRoute
+    }
+    '/mission-hub/twbc-drone-reasoning-api': {
+      id: '/mission-hub/twbc-drone-reasoning-api'
+      path: '/twbc-drone-reasoning-api'
+      fullPath: '/mission-hub/twbc-drone-reasoning-api'
+      preLoaderRoute: typeof MissionHubTwbcDroneReasoningApiRouteImport
+      parentRoute: typeof MissionHubRoute
+    }
+    '/mission-hub/twbc-drone-reference-designs': {
+      id: '/mission-hub/twbc-drone-reference-designs'
+      path: '/twbc-drone-reference-designs'
+      fullPath: '/mission-hub/twbc-drone-reference-designs'
+      preLoaderRoute: typeof MissionHubTwbcDroneReferenceDesignsRouteImport
+      parentRoute: typeof MissionHubRoute
+    }
+    '/mission-hub/twbc-drone-rule-engine': {
+      id: '/mission-hub/twbc-drone-rule-engine'
+      path: '/twbc-drone-rule-engine'
+      fullPath: '/mission-hub/twbc-drone-rule-engine'
+      preLoaderRoute: typeof MissionHubTwbcDroneRuleEngineRouteImport
+      parentRoute: typeof MissionHubRoute
+    }
+    '/mission-hub/twbc-drone-similarity-search': {
+      id: '/mission-hub/twbc-drone-similarity-search'
+      path: '/twbc-drone-similarity-search'
+      fullPath: '/mission-hub/twbc-drone-similarity-search'
+      preLoaderRoute: typeof MissionHubTwbcDroneSimilaritySearchRouteImport
+      parentRoute: typeof MissionHubRoute
+    }
+    '/mission-hub/users': {
+      id: '/mission-hub/users'
+      path: '/users'
+      fullPath: '/mission-hub/users'
+      preLoaderRoute: typeof MissionHubUsersRouteImport
+      parentRoute: typeof MissionHubRoute
+    }
+    '/mission-hub/waitlist': {
+      id: '/mission-hub/waitlist'
+      path: '/waitlist'
+      fullPath: '/mission-hub/waitlist'
+      preLoaderRoute: typeof MissionHubWaitlistRouteImport
+      parentRoute: typeof MissionHubRoute
+    }
+    '/pilot/': {
+      id: '/pilot/'
+      path: '/'
+      fullPath: '/pilot/'
+      preLoaderRoute: typeof PilotIndexRouteImport
+      parentRoute: typeof PilotRoute
+    }
+    '/pilot/login': {
+      id: '/pilot/login'
+      path: '/login'
+      fullPath: '/pilot/login'
+      preLoaderRoute: typeof PilotLoginRouteImport
+      parentRoute: typeof PilotRoute
+    }
+    '/pilot/profile': {
+      id: '/pilot/profile'
+      path: '/profile'
+      fullPath: '/pilot/profile'
+      preLoaderRoute: typeof PilotProfileRouteImport
+      parentRoute: typeof PilotRoute
+    }
+    '/pilot/sync': {
+      id: '/pilot/sync'
+      path: '/sync'
+      fullPath: '/pilot/sync'
+      preLoaderRoute: typeof PilotSyncRouteImport
+      parentRoute: typeof PilotRoute
+    }
+    '/pilot/tracking': {
+      id: '/pilot/tracking'
+      path: '/tracking'
+      fullPath: '/pilot/tracking'
+      preLoaderRoute: typeof PilotTrackingRouteImport
+      parentRoute: typeof PilotRoute
+    }
+    '/t-h/': {
+      id: '/t-h/'
+      path: '/t-h'
+      fullPath: '/t-h/'
+      preLoaderRoute: typeof THIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/t-h/login': {
+      id: '/t-h/login'
+      path: '/t-h/login'
+      fullPath: '/t-h/login'
+      preLoaderRoute: typeof THLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/the-hangar/': {
+      id: '/the-hangar/'
+      path: '/'
+      fullPath: '/the-hangar/'
+      preLoaderRoute: typeof TheHangarIndexRouteImport
+      parentRoute: typeof TheHangarRoute
+    }
+    '/the-hangar/agents': {
+      id: '/the-hangar/agents'
+      path: '/agents'
+      fullPath: '/the-hangar/agents'
+      preLoaderRoute: typeof TheHangarAgentsRouteImport
+      parentRoute: typeof TheHangarRoute
+    }
+    '/the-hangar/aircraft-design': {
+      id: '/the-hangar/aircraft-design'
+      path: '/aircraft-design'
+      fullPath: '/the-hangar/aircraft-design'
+      preLoaderRoute: typeof TheHangarAircraftDesignRouteImport
+      parentRoute: typeof TheHangarRoute
+    }
+    '/the-hangar/bernoulli': {
+      id: '/the-hangar/bernoulli'
+      path: '/bernoulli'
+      fullPath: '/the-hangar/bernoulli'
+      preLoaderRoute: typeof TheHangarBernoulliRouteImport
+      parentRoute: typeof TheHangarRoute
+    }
+    '/the-hangar/cad-design': {
+      id: '/the-hangar/cad-design'
+      path: '/cad-design'
+      fullPath: '/the-hangar/cad-design'
+      preLoaderRoute: typeof TheHangarCadDesignRouteImport
+      parentRoute: typeof TheHangarRoute
+    }
+    '/the-hangar/certification': {
+      id: '/the-hangar/certification'
+      path: '/certification'
+      fullPath: '/the-hangar/certification'
+      preLoaderRoute: typeof TheHangarCertificationRouteImport
+      parentRoute: typeof TheHangarRoute
+    }
+    '/the-hangar/cfd-analysis': {
+      id: '/the-hangar/cfd-analysis'
+      path: '/cfd-analysis'
+      fullPath: '/the-hangar/cfd-analysis'
+      preLoaderRoute: typeof TheHangarCfdAnalysisRouteImport
+      parentRoute: typeof TheHangarRoute
+    }
+    '/the-hangar/concept': {
+      id: '/the-hangar/concept'
+      path: '/concept'
+      fullPath: '/the-hangar/concept'
+      preLoaderRoute: typeof TheHangarConceptRouteImport
+      parentRoute: typeof TheHangarRoute
+    }
+    '/the-hangar/documentation': {
+      id: '/the-hangar/documentation'
+      path: '/documentation'
+      fullPath: '/the-hangar/documentation'
+      preLoaderRoute: typeof TheHangarDocumentationRouteImport
+      parentRoute: typeof TheHangarRoute
+    }
+    '/the-hangar/how-it-works': {
+      id: '/the-hangar/how-it-works'
+      path: '/how-it-works'
+      fullPath: '/the-hangar/how-it-works'
+      preLoaderRoute: typeof TheHangarHowItWorksRouteImport
+      parentRoute: typeof TheHangarRoute
+    }
+    '/the-hangar/manufacturing': {
+      id: '/the-hangar/manufacturing'
+      path: '/manufacturing'
+      fullPath: '/the-hangar/manufacturing'
+      preLoaderRoute: typeof TheHangarManufacturingRouteImport
+      parentRoute: typeof TheHangarRoute
+    }
+    '/the-hangar/materials': {
+      id: '/the-hangar/materials'
+      path: '/materials'
+      fullPath: '/the-hangar/materials'
+      preLoaderRoute: typeof TheHangarMaterialsRouteImport
+      parentRoute: typeof TheHangarRoute
+    }
+    '/the-hangar/mission': {
+      id: '/the-hangar/mission'
+      path: '/mission'
+      fullPath: '/the-hangar/mission'
+      preLoaderRoute: typeof TheHangarMissionRouteImport
+      parentRoute: typeof TheHangarRoute
+    }
+    '/the-hangar/optimization': {
+      id: '/the-hangar/optimization'
+      path: '/optimization'
+      fullPath: '/the-hangar/optimization'
+      preLoaderRoute: typeof TheHangarOptimizationRouteImport
+      parentRoute: typeof TheHangarRoute
+    }
+    '/the-hangar/simulation': {
+      id: '/the-hangar/simulation'
       path: '/simulation'
-      fullPath: '/mission-hub/torqwings-design-studio/simulation'
-      preLoaderRoute: typeof MissionHubTorqwingsDesignStudioSimulationRouteImport
-      parentRoute: typeof MissionHubTorqwingsDesignStudioRoute
+      fullPath: '/the-hangar/simulation'
+      preLoaderRoute: typeof TheHangarSimulationRouteImport
+      parentRoute: typeof TheHangarRoute
     }
-    '/mission-hub/torqwings-design-studio/requirements': {
-      id: '/mission-hub/torqwings-design-studio/requirements'
-      path: '/requirements'
-      fullPath: '/mission-hub/torqwings-design-studio/requirements'
-      preLoaderRoute: typeof MissionHubTorqwingsDesignStudioRequirementsRouteImport
-      parentRoute: typeof MissionHubTorqwingsDesignStudioRoute
+    '/the-hangar/stack': {
+      id: '/the-hangar/stack'
+      path: '/stack'
+      fullPath: '/the-hangar/stack'
+      preLoaderRoute: typeof TheHangarStackRouteImport
+      parentRoute: typeof TheHangarRoute
     }
-    '/mission-hub/torqwings-design-studio/report': {
-      id: '/mission-hub/torqwings-design-studio/report'
-      path: '/report'
-      fullPath: '/mission-hub/torqwings-design-studio/report'
-      preLoaderRoute: typeof MissionHubTorqwingsDesignStudioReportRouteImport
-      parentRoute: typeof MissionHubTorqwingsDesignStudioRoute
+    '/the-hangar/structural': {
+      id: '/the-hangar/structural'
+      path: '/structural'
+      fullPath: '/the-hangar/structural'
+      preLoaderRoute: typeof TheHangarStructuralRouteImport
+      parentRoute: typeof TheHangarRoute
     }
-    '/mission-hub/torqwings-design-studio/new': {
-      id: '/mission-hub/torqwings-design-studio/new'
-      path: '/new'
-      fullPath: '/mission-hub/torqwings-design-studio/new'
-      preLoaderRoute: typeof MissionHubTorqwingsDesignStudioNewRouteImport
-      parentRoute: typeof MissionHubTorqwingsDesignStudioRoute
+    '/the-hangar/validation': {
+      id: '/the-hangar/validation'
+      path: '/validation'
+      fullPath: '/the-hangar/validation'
+      preLoaderRoute: typeof TheHangarValidationRouteImport
+      parentRoute: typeof TheHangarRoute
     }
-    '/mission-hub/torqwings-design-studio/history': {
-      id: '/mission-hub/torqwings-design-studio/history'
-      path: '/history'
-      fullPath: '/mission-hub/torqwings-design-studio/history'
-      preLoaderRoute: typeof MissionHubTorqwingsDesignStudioHistoryRouteImport
-      parentRoute: typeof MissionHubTorqwingsDesignStudioRoute
+    '/the-hangar/welcome': {
+      id: '/the-hangar/welcome'
+      path: '/welcome'
+      fullPath: '/the-hangar/welcome'
+      preLoaderRoute: typeof TheHangarWelcomeRouteImport
+      parentRoute: typeof TheHangarRoute
     }
-    '/mission-hub/torqwings-design-studio/design-rule': {
-      id: '/mission-hub/torqwings-design-studio/design-rule'
-      path: '/design-rule'
-      fullPath: '/mission-hub/torqwings-design-studio/design-rule'
-      preLoaderRoute: typeof MissionHubTorqwingsDesignStudioDesignRuleRouteImport
-      parentRoute: typeof MissionHubTorqwingsDesignStudioRoute
+    '/_layout/auth/callback': {
+      id: '/_layout/auth/callback'
+      path: '/auth/callback'
+      fullPath: '/auth/callback'
+      preLoaderRoute: typeof LayoutAuthCallbackRouteImport
+      parentRoute: typeof LayoutRoute
     }
-    '/mission-hub/torqwings-design-studio/design': {
-      id: '/mission-hub/torqwings-design-studio/design'
-      path: '/design'
-      fullPath: '/mission-hub/torqwings-design-studio/design'
-      preLoaderRoute: typeof MissionHubTorqwingsDesignStudioDesignRouteImport
-      parentRoute: typeof MissionHubTorqwingsDesignStudioRoute
-    }
-    '/mission-hub/torqwings-design-studio/components': {
-      id: '/mission-hub/torqwings-design-studio/components'
-      path: '/components'
-      fullPath: '/mission-hub/torqwings-design-studio/components'
-      preLoaderRoute: typeof MissionHubTorqwingsDesignStudioComponentsRouteImport
-      parentRoute: typeof MissionHubTorqwingsDesignStudioRoute
-    }
-    '/mission-hub/torqwings-design-studio/compliance': {
-      id: '/mission-hub/torqwings-design-studio/compliance'
-      path: '/compliance'
-      fullPath: '/mission-hub/torqwings-design-studio/compliance'
-      preLoaderRoute: typeof MissionHubTorqwingsDesignStudioComplianceRouteImport
-      parentRoute: typeof MissionHubTorqwingsDesignStudioRoute
-    }
-    '/mission-hub/torqwings-design-studio/advisor': {
-      id: '/mission-hub/torqwings-design-studio/advisor'
-      path: '/advisor'
-      fullPath: '/mission-hub/torqwings-design-studio/advisor'
-      preLoaderRoute: typeof MissionHubTorqwingsDesignStudioAdvisorRouteImport
-      parentRoute: typeof MissionHubTorqwingsDesignStudioRoute
-    }
-    '/destud/projects/$projectId': {
-      id: '/destud/projects/$projectId'
-      path: '/projects/$projectId'
-      fullPath: '/destud/projects/$projectId'
-      preLoaderRoute: typeof DestudProjectsProjectIdRouteImport
-      parentRoute: typeof DestudRoute
-    }
-    '/destud/dashboard/explorer': {
-      id: '/destud/dashboard/explorer'
-      path: '/dashboard/explorer'
-      fullPath: '/destud/dashboard/explorer'
-      preLoaderRoute: typeof DestudDashboardExplorerRouteImport
-      parentRoute: typeof DestudRoute
-    }
-    '/destud/dashboard/engineer': {
-      id: '/destud/dashboard/engineer'
-      path: '/dashboard/engineer'
-      fullPath: '/destud/dashboard/engineer'
-      preLoaderRoute: typeof DestudDashboardEngineerRouteImport
-      parentRoute: typeof DestudRoute
-    }
-    '/api/hangar/validations': {
-      id: '/api/hangar/validations'
-      path: '/api/hangar/validations'
-      fullPath: '/api/hangar/validations'
-      preLoaderRoute: typeof ApiHangarValidationsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/hangar/structurals': {
-      id: '/api/hangar/structurals'
-      path: '/api/hangar/structurals'
-      fullPath: '/api/hangar/structurals'
-      preLoaderRoute: typeof ApiHangarStructuralsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/hangar/store-document': {
-      id: '/api/hangar/store-document'
-      path: '/api/hangar/store-document'
-      fullPath: '/api/hangar/store-document'
-      preLoaderRoute: typeof ApiHangarStoreDocumentRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/hangar/source-catalogs': {
-      id: '/api/hangar/source-catalogs'
-      path: '/api/hangar/source-catalogs'
-      fullPath: '/api/hangar/source-catalogs'
-      preLoaderRoute: typeof ApiHangarSourceCatalogsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/hangar/simulations': {
-      id: '/api/hangar/simulations'
-      path: '/api/hangar/simulations'
-      fullPath: '/api/hangar/simulations'
-      preLoaderRoute: typeof ApiHangarSimulationsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/hangar/sagush-hello': {
-      id: '/api/hangar/sagush-hello'
-      path: '/api/hangar/sagush-hello'
-      fullPath: '/api/hangar/sagush-hello'
-      preLoaderRoute: typeof ApiHangarSagushHelloRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/hangar/sagush-design': {
-      id: '/api/hangar/sagush-design'
-      path: '/api/hangar/sagush-design'
-      fullPath: '/api/hangar/sagush-design'
-      preLoaderRoute: typeof ApiHangarSagushDesignRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/hangar/resolve-mission': {
-      id: '/api/hangar/resolve-mission'
-      path: '/api/hangar/resolve-mission'
-      fullPath: '/api/hangar/resolve-mission'
-      preLoaderRoute: typeof ApiHangarResolveMissionRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/hangar/optimizations': {
-      id: '/api/hangar/optimizations'
-      path: '/api/hangar/optimizations'
-      fullPath: '/api/hangar/optimizations'
-      preLoaderRoute: typeof ApiHangarOptimizationsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/hangar/missions': {
-      id: '/api/hangar/missions'
-      path: '/api/hangar/missions'
-      fullPath: '/api/hangar/missions'
-      preLoaderRoute: typeof ApiHangarMissionsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/hangar/materials': {
-      id: '/api/hangar/materials'
-      path: '/api/hangar/materials'
-      fullPath: '/api/hangar/materials'
-      preLoaderRoute: typeof ApiHangarMaterialsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/hangar/manufacturings': {
-      id: '/api/hangar/manufacturings'
-      path: '/api/hangar/manufacturings'
-      fullPath: '/api/hangar/manufacturings'
-      preLoaderRoute: typeof ApiHangarManufacturingsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/hangar/llm-status': {
-      id: '/api/hangar/llm-status'
-      path: '/api/hangar/llm-status'
-      fullPath: '/api/hangar/llm-status'
-      preLoaderRoute: typeof ApiHangarLlmStatusRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/hangar/extract-document': {
-      id: '/api/hangar/extract-document'
-      path: '/api/hangar/extract-document'
-      fullPath: '/api/hangar/extract-document'
-      preLoaderRoute: typeof ApiHangarExtractDocumentRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/hangar/documentations': {
-      id: '/api/hangar/documentations'
-      path: '/api/hangar/documentations'
-      fullPath: '/api/hangar/documentations'
-      preLoaderRoute: typeof ApiHangarDocumentationsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/hangar/concepts': {
-      id: '/api/hangar/concepts'
-      path: '/api/hangar/concepts'
-      fullPath: '/api/hangar/concepts'
-      preLoaderRoute: typeof ApiHangarConceptsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/hangar/cfd-analyses': {
-      id: '/api/hangar/cfd-analyses'
-      path: '/api/hangar/cfd-analyses'
-      fullPath: '/api/hangar/cfd-analyses'
-      preLoaderRoute: typeof ApiHangarCfdAnalysesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/hangar/certifications': {
-      id: '/api/hangar/certifications'
-      path: '/api/hangar/certifications'
-      fullPath: '/api/hangar/certifications'
-      preLoaderRoute: typeof ApiHangarCertificationsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/hangar/cad-designs': {
-      id: '/api/hangar/cad-designs'
-      path: '/api/hangar/cad-designs'
-      fullPath: '/api/hangar/cad-designs'
-      preLoaderRoute: typeof ApiHangarCadDesignsRouteImport
+    '/api/hangar/aircraft-designs': {
+      id: '/api/hangar/aircraft-designs'
+      path: '/api/hangar/aircraft-designs'
+      fullPath: '/api/hangar/aircraft-designs'
+      preLoaderRoute: typeof ApiHangarAircraftDesignsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/hangar/bernoulli-review': {
@@ -2469,158 +2284,277 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiHangarBernoulliReviewRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/hangar/aircraft-designs': {
-      id: '/api/hangar/aircraft-designs'
-      path: '/api/hangar/aircraft-designs'
-      fullPath: '/api/hangar/aircraft-designs'
-      preLoaderRoute: typeof ApiHangarAircraftDesignsRouteImport
+    '/api/hangar/cad-designs': {
+      id: '/api/hangar/cad-designs'
+      path: '/api/hangar/cad-designs'
+      fullPath: '/api/hangar/cad-designs'
+      preLoaderRoute: typeof ApiHangarCadDesignsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_layout/auth/callback': {
-      id: '/_layout/auth/callback'
-      path: '/auth/callback'
-      fullPath: '/auth/callback'
-      preLoaderRoute: typeof LayoutAuthCallbackRouteImport
-      parentRoute: typeof LayoutRoute
-    }
-    '/api/hangar/process-validation/compliance-validation': {
-      id: '/api/hangar/process-validation/compliance-validation'
-      path: '/api/hangar/process-validation/compliance-validation'
-      fullPath: '/api/hangar/process-validation/compliance-validation'
-      preLoaderRoute: typeof ApiHangarProcessValidationComplianceValidationRouteImport
+    '/api/hangar/certifications': {
+      id: '/api/hangar/certifications'
+      path: '/api/hangar/certifications'
+      fullPath: '/api/hangar/certifications'
+      preLoaderRoute: typeof ApiHangarCertificationsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/hangar/process-structural/structural-assessment': {
-      id: '/api/hangar/process-structural/structural-assessment'
-      path: '/api/hangar/process-structural/structural-assessment'
-      fullPath: '/api/hangar/process-structural/structural-assessment'
-      preLoaderRoute: typeof ApiHangarProcessStructuralStructuralAssessmentRouteImport
+    '/api/hangar/cfd-analyses': {
+      id: '/api/hangar/cfd-analyses'
+      path: '/api/hangar/cfd-analyses'
+      fullPath: '/api/hangar/cfd-analyses'
+      preLoaderRoute: typeof ApiHangarCfdAnalysesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/hangar/process-simulation/flight-dynamics-assessment': {
-      id: '/api/hangar/process-simulation/flight-dynamics-assessment'
-      path: '/api/hangar/process-simulation/flight-dynamics-assessment'
-      fullPath: '/api/hangar/process-simulation/flight-dynamics-assessment'
-      preLoaderRoute: typeof ApiHangarProcessSimulationFlightDynamicsAssessmentRouteImport
+    '/api/hangar/concepts': {
+      id: '/api/hangar/concepts'
+      path: '/api/hangar/concepts'
+      fullPath: '/api/hangar/concepts'
+      preLoaderRoute: typeof ApiHangarConceptsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/hangar/process-optimization/trade-off-optimization': {
-      id: '/api/hangar/process-optimization/trade-off-optimization'
-      path: '/api/hangar/process-optimization/trade-off-optimization'
-      fullPath: '/api/hangar/process-optimization/trade-off-optimization'
-      preLoaderRoute: typeof ApiHangarProcessOptimizationTradeOffOptimizationRouteImport
+    '/api/hangar/documentations': {
+      id: '/api/hangar/documentations'
+      path: '/api/hangar/documentations'
+      fullPath: '/api/hangar/documentations'
+      preLoaderRoute: typeof ApiHangarDocumentationsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/hangar/process-mission/reasoning-planning': {
-      id: '/api/hangar/process-mission/reasoning-planning'
-      path: '/api/hangar/process-mission/reasoning-planning'
-      fullPath: '/api/hangar/process-mission/reasoning-planning'
-      preLoaderRoute: typeof ApiHangarProcessMissionReasoningPlanningRouteImport
+    '/api/hangar/extract-document': {
+      id: '/api/hangar/extract-document'
+      path: '/api/hangar/extract-document'
+      fullPath: '/api/hangar/extract-document'
+      preLoaderRoute: typeof ApiHangarExtractDocumentRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/hangar/process-mission/output-interface': {
-      id: '/api/hangar/process-mission/output-interface'
-      path: '/api/hangar/process-mission/output-interface'
-      fullPath: '/api/hangar/process-mission/output-interface'
-      preLoaderRoute: typeof ApiHangarProcessMissionOutputInterfaceRouteImport
+    '/api/hangar/llm-status': {
+      id: '/api/hangar/llm-status'
+      path: '/api/hangar/llm-status'
+      fullPath: '/api/hangar/llm-status'
+      preLoaderRoute: typeof ApiHangarLlmStatusRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/hangar/process-mission/output-generation': {
-      id: '/api/hangar/process-mission/output-generation'
-      path: '/api/hangar/process-mission/output-generation'
-      fullPath: '/api/hangar/process-mission/output-generation'
-      preLoaderRoute: typeof ApiHangarProcessMissionOutputGenerationRouteImport
+    '/api/hangar/manufacturings': {
+      id: '/api/hangar/manufacturings'
+      path: '/api/hangar/manufacturings'
+      fullPath: '/api/hangar/manufacturings'
+      preLoaderRoute: typeof ApiHangarManufacturingsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/hangar/process-mission/input-processing': {
-      id: '/api/hangar/process-mission/input-processing'
-      path: '/api/hangar/process-mission/input-processing'
-      fullPath: '/api/hangar/process-mission/input-processing'
-      preLoaderRoute: typeof ApiHangarProcessMissionInputProcessingRouteImport
+    '/api/hangar/materials': {
+      id: '/api/hangar/materials'
+      path: '/api/hangar/materials'
+      fullPath: '/api/hangar/materials'
+      preLoaderRoute: typeof ApiHangarMaterialsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/hangar/process-mission/finalize': {
-      id: '/api/hangar/process-mission/finalize'
-      path: '/api/hangar/process-mission/finalize'
-      fullPath: '/api/hangar/process-mission/finalize'
-      preLoaderRoute: typeof ApiHangarProcessMissionFinalizeRouteImport
+    '/api/hangar/missions': {
+      id: '/api/hangar/missions'
+      path: '/api/hangar/missions'
+      fullPath: '/api/hangar/missions'
+      preLoaderRoute: typeof ApiHangarMissionsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/hangar/process-materials/material-selection': {
-      id: '/api/hangar/process-materials/material-selection'
-      path: '/api/hangar/process-materials/material-selection'
-      fullPath: '/api/hangar/process-materials/material-selection'
-      preLoaderRoute: typeof ApiHangarProcessMaterialsMaterialSelectionRouteImport
+    '/api/hangar/optimizations': {
+      id: '/api/hangar/optimizations'
+      path: '/api/hangar/optimizations'
+      fullPath: '/api/hangar/optimizations'
+      preLoaderRoute: typeof ApiHangarOptimizationsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/hangar/process-manufacturing/manufacturability-review': {
-      id: '/api/hangar/process-manufacturing/manufacturability-review'
-      path: '/api/hangar/process-manufacturing/manufacturability-review'
-      fullPath: '/api/hangar/process-manufacturing/manufacturability-review'
-      preLoaderRoute: typeof ApiHangarProcessManufacturingManufacturabilityReviewRouteImport
+    '/api/hangar/resolve-mission': {
+      id: '/api/hangar/resolve-mission'
+      path: '/api/hangar/resolve-mission'
+      fullPath: '/api/hangar/resolve-mission'
+      preLoaderRoute: typeof ApiHangarResolveMissionRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/hangar/process-documentation/content-compilation': {
-      id: '/api/hangar/process-documentation/content-compilation'
-      path: '/api/hangar/process-documentation/content-compilation'
-      fullPath: '/api/hangar/process-documentation/content-compilation'
-      preLoaderRoute: typeof ApiHangarProcessDocumentationContentCompilationRouteImport
+    '/api/hangar/sagush-design': {
+      id: '/api/hangar/sagush-design'
+      path: '/api/hangar/sagush-design'
+      fullPath: '/api/hangar/sagush-design'
+      preLoaderRoute: typeof ApiHangarSagushDesignRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/hangar/process-concept/trade-off-reasoning': {
-      id: '/api/hangar/process-concept/trade-off-reasoning'
-      path: '/api/hangar/process-concept/trade-off-reasoning'
-      fullPath: '/api/hangar/process-concept/trade-off-reasoning'
-      preLoaderRoute: typeof ApiHangarProcessConceptTradeOffReasoningRouteImport
+    '/api/hangar/sagush-hello': {
+      id: '/api/hangar/sagush-hello'
+      path: '/api/hangar/sagush-hello'
+      fullPath: '/api/hangar/sagush-hello'
+      preLoaderRoute: typeof ApiHangarSagushHelloRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/hangar/process-concept/ranking-scoring': {
-      id: '/api/hangar/process-concept/ranking-scoring'
-      path: '/api/hangar/process-concept/ranking-scoring'
-      fullPath: '/api/hangar/process-concept/ranking-scoring'
-      preLoaderRoute: typeof ApiHangarProcessConceptRankingScoringRouteImport
+    '/api/hangar/simulations': {
+      id: '/api/hangar/simulations'
+      path: '/api/hangar/simulations'
+      fullPath: '/api/hangar/simulations'
+      preLoaderRoute: typeof ApiHangarSimulationsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/hangar/process-concept/output-interface': {
-      id: '/api/hangar/process-concept/output-interface'
-      path: '/api/hangar/process-concept/output-interface'
-      fullPath: '/api/hangar/process-concept/output-interface'
-      preLoaderRoute: typeof ApiHangarProcessConceptOutputInterfaceRouteImport
+    '/api/hangar/source-catalogs': {
+      id: '/api/hangar/source-catalogs'
+      path: '/api/hangar/source-catalogs'
+      fullPath: '/api/hangar/source-catalogs'
+      preLoaderRoute: typeof ApiHangarSourceCatalogsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/hangar/process-concept/finalize': {
-      id: '/api/hangar/process-concept/finalize'
-      path: '/api/hangar/process-concept/finalize'
-      fullPath: '/api/hangar/process-concept/finalize'
-      preLoaderRoute: typeof ApiHangarProcessConceptFinalizeRouteImport
+    '/api/hangar/store-document': {
+      id: '/api/hangar/store-document'
+      path: '/api/hangar/store-document'
+      fullPath: '/api/hangar/store-document'
+      preLoaderRoute: typeof ApiHangarStoreDocumentRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/hangar/process-concept/concept-ideation': {
-      id: '/api/hangar/process-concept/concept-ideation'
-      path: '/api/hangar/process-concept/concept-ideation'
-      fullPath: '/api/hangar/process-concept/concept-ideation'
-      preLoaderRoute: typeof ApiHangarProcessConceptConceptIdeationRouteImport
+    '/api/hangar/structurals': {
+      id: '/api/hangar/structurals'
+      path: '/api/hangar/structurals'
+      fullPath: '/api/hangar/structurals'
+      preLoaderRoute: typeof ApiHangarStructuralsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/hangar/process-cfd-analysis/output-generation': {
-      id: '/api/hangar/process-cfd-analysis/output-generation'
-      path: '/api/hangar/process-cfd-analysis/output-generation'
-      fullPath: '/api/hangar/process-cfd-analysis/output-generation'
-      preLoaderRoute: typeof ApiHangarProcessCfdAnalysisOutputGenerationRouteImport
+    '/api/hangar/validations': {
+      id: '/api/hangar/validations'
+      path: '/api/hangar/validations'
+      fullPath: '/api/hangar/validations'
+      preLoaderRoute: typeof ApiHangarValidationsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/hangar/process-certification/regulatory-mapping': {
-      id: '/api/hangar/process-certification/regulatory-mapping'
-      path: '/api/hangar/process-certification/regulatory-mapping'
-      fullPath: '/api/hangar/process-certification/regulatory-mapping'
-      preLoaderRoute: typeof ApiHangarProcessCertificationRegulatoryMappingRouteImport
+    '/api/t-h/$agent': {
+      id: '/api/t-h/$agent'
+      path: '/api/t-h/$agent'
+      fullPath: '/api/t-h/$agent'
+      preLoaderRoute: typeof ApiTHAgentRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/hangar/process-cad-design/model-generation': {
-      id: '/api/hangar/process-cad-design/model-generation'
-      path: '/api/hangar/process-cad-design/model-generation'
-      fullPath: '/api/hangar/process-cad-design/model-generation'
-      preLoaderRoute: typeof ApiHangarProcessCadDesignModelGenerationRouteImport
+    '/destud/dashboard/engineer': {
+      id: '/destud/dashboard/engineer'
+      path: '/dashboard/engineer'
+      fullPath: '/destud/dashboard/engineer'
+      preLoaderRoute: typeof DestudDashboardEngineerRouteImport
+      parentRoute: typeof DestudRoute
+    }
+    '/destud/dashboard/explorer': {
+      id: '/destud/dashboard/explorer'
+      path: '/dashboard/explorer'
+      fullPath: '/destud/dashboard/explorer'
+      preLoaderRoute: typeof DestudDashboardExplorerRouteImport
+      parentRoute: typeof DestudRoute
+    }
+    '/destud/projects/$projectId': {
+      id: '/destud/projects/$projectId'
+      path: '/projects/$projectId'
+      fullPath: '/destud/projects/$projectId'
+      preLoaderRoute: typeof DestudProjectsProjectIdRouteImport
+      parentRoute: typeof DestudRoute
+    }
+    '/mission-hub/torqwings-design-studio/': {
+      id: '/mission-hub/torqwings-design-studio/'
+      path: '/'
+      fullPath: '/mission-hub/torqwings-design-studio/'
+      preLoaderRoute: typeof MissionHubTorqwingsDesignStudioIndexRouteImport
+      parentRoute: typeof MissionHubTorqwingsDesignStudioRoute
+    }
+    '/mission-hub/torqwings-design-studio/advisor': {
+      id: '/mission-hub/torqwings-design-studio/advisor'
+      path: '/advisor'
+      fullPath: '/mission-hub/torqwings-design-studio/advisor'
+      preLoaderRoute: typeof MissionHubTorqwingsDesignStudioAdvisorRouteImport
+      parentRoute: typeof MissionHubTorqwingsDesignStudioRoute
+    }
+    '/mission-hub/torqwings-design-studio/compliance': {
+      id: '/mission-hub/torqwings-design-studio/compliance'
+      path: '/compliance'
+      fullPath: '/mission-hub/torqwings-design-studio/compliance'
+      preLoaderRoute: typeof MissionHubTorqwingsDesignStudioComplianceRouteImport
+      parentRoute: typeof MissionHubTorqwingsDesignStudioRoute
+    }
+    '/mission-hub/torqwings-design-studio/components': {
+      id: '/mission-hub/torqwings-design-studio/components'
+      path: '/components'
+      fullPath: '/mission-hub/torqwings-design-studio/components'
+      preLoaderRoute: typeof MissionHubTorqwingsDesignStudioComponentsRouteImport
+      parentRoute: typeof MissionHubTorqwingsDesignStudioRoute
+    }
+    '/mission-hub/torqwings-design-studio/design': {
+      id: '/mission-hub/torqwings-design-studio/design'
+      path: '/design'
+      fullPath: '/mission-hub/torqwings-design-studio/design'
+      preLoaderRoute: typeof MissionHubTorqwingsDesignStudioDesignRouteImport
+      parentRoute: typeof MissionHubTorqwingsDesignStudioRoute
+    }
+    '/mission-hub/torqwings-design-studio/design-rule': {
+      id: '/mission-hub/torqwings-design-studio/design-rule'
+      path: '/design-rule'
+      fullPath: '/mission-hub/torqwings-design-studio/design-rule'
+      preLoaderRoute: typeof MissionHubTorqwingsDesignStudioDesignRuleRouteImport
+      parentRoute: typeof MissionHubTorqwingsDesignStudioRoute
+    }
+    '/mission-hub/torqwings-design-studio/history': {
+      id: '/mission-hub/torqwings-design-studio/history'
+      path: '/history'
+      fullPath: '/mission-hub/torqwings-design-studio/history'
+      preLoaderRoute: typeof MissionHubTorqwingsDesignStudioHistoryRouteImport
+      parentRoute: typeof MissionHubTorqwingsDesignStudioRoute
+    }
+    '/mission-hub/torqwings-design-studio/new': {
+      id: '/mission-hub/torqwings-design-studio/new'
+      path: '/new'
+      fullPath: '/mission-hub/torqwings-design-studio/new'
+      preLoaderRoute: typeof MissionHubTorqwingsDesignStudioNewRouteImport
+      parentRoute: typeof MissionHubTorqwingsDesignStudioRoute
+    }
+    '/mission-hub/torqwings-design-studio/report': {
+      id: '/mission-hub/torqwings-design-studio/report'
+      path: '/report'
+      fullPath: '/mission-hub/torqwings-design-studio/report'
+      preLoaderRoute: typeof MissionHubTorqwingsDesignStudioReportRouteImport
+      parentRoute: typeof MissionHubTorqwingsDesignStudioRoute
+    }
+    '/mission-hub/torqwings-design-studio/requirements': {
+      id: '/mission-hub/torqwings-design-studio/requirements'
+      path: '/requirements'
+      fullPath: '/mission-hub/torqwings-design-studio/requirements'
+      preLoaderRoute: typeof MissionHubTorqwingsDesignStudioRequirementsRouteImport
+      parentRoute: typeof MissionHubTorqwingsDesignStudioRoute
+    }
+    '/mission-hub/torqwings-design-studio/simulation': {
+      id: '/mission-hub/torqwings-design-studio/simulation'
+      path: '/simulation'
+      fullPath: '/mission-hub/torqwings-design-studio/simulation'
+      preLoaderRoute: typeof MissionHubTorqwingsDesignStudioSimulationRouteImport
+      parentRoute: typeof MissionHubTorqwingsDesignStudioRoute
+    }
+    '/mission-hub/verticals/$vertical': {
+      id: '/mission-hub/verticals/$vertical'
+      path: '/verticals/$vertical'
+      fullPath: '/mission-hub/verticals/$vertical'
+      preLoaderRoute: typeof MissionHubVerticalsVerticalRouteImport
+      parentRoute: typeof MissionHubRoute
+    }
+    '/pilot/missions/': {
+      id: '/pilot/missions/'
+      path: '/missions'
+      fullPath: '/pilot/missions/'
+      preLoaderRoute: typeof PilotMissionsIndexRouteImport
+      parentRoute: typeof PilotRoute
+    }
+    '/pilot/missions/$id': {
+      id: '/pilot/missions/$id'
+      path: '/missions/$id'
+      fullPath: '/pilot/missions/$id'
+      preLoaderRoute: typeof PilotMissionsIdRouteImport
+      parentRoute: typeof PilotRoute
+    }
+    '/academy/courses/$slug/learn': {
+      id: '/academy/courses/$slug/learn'
+      path: '/courses/$slug/learn'
+      fullPath: '/academy/courses/$slug/learn'
+      preLoaderRoute: typeof AcademyCoursesSlugLearnRouteImport
+      parentRoute: typeof AcademyRoute
+    }
+    '/api/hangar/process-aircraft-design/geometry-generation': {
+      id: '/api/hangar/process-aircraft-design/geometry-generation'
+      path: '/api/hangar/process-aircraft-design/geometry-generation'
+      fullPath: '/api/hangar/process-aircraft-design/geometry-generation'
+      preLoaderRoute: typeof ApiHangarProcessAircraftDesignGeometryGenerationRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/hangar/process-bernoulli/review': {
@@ -2630,25 +2564,151 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiHangarProcessBernoulliReviewRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/hangar/process-aircraft-design/geometry-generation': {
-      id: '/api/hangar/process-aircraft-design/geometry-generation'
-      path: '/api/hangar/process-aircraft-design/geometry-generation'
-      fullPath: '/api/hangar/process-aircraft-design/geometry-generation'
-      preLoaderRoute: typeof ApiHangarProcessAircraftDesignGeometryGenerationRouteImport
+    '/api/hangar/process-cad-design/model-generation': {
+      id: '/api/hangar/process-cad-design/model-generation'
+      path: '/api/hangar/process-cad-design/model-generation'
+      fullPath: '/api/hangar/process-cad-design/model-generation'
+      preLoaderRoute: typeof ApiHangarProcessCadDesignModelGenerationRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/academy/courses/$slug/learn': {
-      id: '/academy/courses/$slug/learn'
-      path: '/courses/$slug/learn'
-      fullPath: '/academy/courses/$slug/learn'
-      preLoaderRoute: typeof AcademyCoursesSlugLearnRouteImport
-      parentRoute: typeof AcademyRoute
+    '/api/hangar/process-certification/regulatory-mapping': {
+      id: '/api/hangar/process-certification/regulatory-mapping'
+      path: '/api/hangar/process-certification/regulatory-mapping'
+      fullPath: '/api/hangar/process-certification/regulatory-mapping'
+      preLoaderRoute: typeof ApiHangarProcessCertificationRegulatoryMappingRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/academy/module/$moduleId/quiz/$quizId': {
-      id: '/academy/module/$moduleId/quiz/$quizId'
-      path: '/module/$moduleId/quiz/$quizId'
-      fullPath: '/academy/module/$moduleId/quiz/$quizId'
-      preLoaderRoute: typeof AcademyModuleModuleIdQuizQuizIdRouteImport
+    '/api/hangar/process-cfd-analysis/output-generation': {
+      id: '/api/hangar/process-cfd-analysis/output-generation'
+      path: '/api/hangar/process-cfd-analysis/output-generation'
+      fullPath: '/api/hangar/process-cfd-analysis/output-generation'
+      preLoaderRoute: typeof ApiHangarProcessCfdAnalysisOutputGenerationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/hangar/process-concept/concept-ideation': {
+      id: '/api/hangar/process-concept/concept-ideation'
+      path: '/api/hangar/process-concept/concept-ideation'
+      fullPath: '/api/hangar/process-concept/concept-ideation'
+      preLoaderRoute: typeof ApiHangarProcessConceptConceptIdeationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/hangar/process-concept/finalize': {
+      id: '/api/hangar/process-concept/finalize'
+      path: '/api/hangar/process-concept/finalize'
+      fullPath: '/api/hangar/process-concept/finalize'
+      preLoaderRoute: typeof ApiHangarProcessConceptFinalizeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/hangar/process-concept/output-interface': {
+      id: '/api/hangar/process-concept/output-interface'
+      path: '/api/hangar/process-concept/output-interface'
+      fullPath: '/api/hangar/process-concept/output-interface'
+      preLoaderRoute: typeof ApiHangarProcessConceptOutputInterfaceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/hangar/process-concept/ranking-scoring': {
+      id: '/api/hangar/process-concept/ranking-scoring'
+      path: '/api/hangar/process-concept/ranking-scoring'
+      fullPath: '/api/hangar/process-concept/ranking-scoring'
+      preLoaderRoute: typeof ApiHangarProcessConceptRankingScoringRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/hangar/process-concept/trade-off-reasoning': {
+      id: '/api/hangar/process-concept/trade-off-reasoning'
+      path: '/api/hangar/process-concept/trade-off-reasoning'
+      fullPath: '/api/hangar/process-concept/trade-off-reasoning'
+      preLoaderRoute: typeof ApiHangarProcessConceptTradeOffReasoningRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/hangar/process-documentation/content-compilation': {
+      id: '/api/hangar/process-documentation/content-compilation'
+      path: '/api/hangar/process-documentation/content-compilation'
+      fullPath: '/api/hangar/process-documentation/content-compilation'
+      preLoaderRoute: typeof ApiHangarProcessDocumentationContentCompilationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/hangar/process-manufacturing/manufacturability-review': {
+      id: '/api/hangar/process-manufacturing/manufacturability-review'
+      path: '/api/hangar/process-manufacturing/manufacturability-review'
+      fullPath: '/api/hangar/process-manufacturing/manufacturability-review'
+      preLoaderRoute: typeof ApiHangarProcessManufacturingManufacturabilityReviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/hangar/process-materials/material-selection': {
+      id: '/api/hangar/process-materials/material-selection'
+      path: '/api/hangar/process-materials/material-selection'
+      fullPath: '/api/hangar/process-materials/material-selection'
+      preLoaderRoute: typeof ApiHangarProcessMaterialsMaterialSelectionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/hangar/process-mission/finalize': {
+      id: '/api/hangar/process-mission/finalize'
+      path: '/api/hangar/process-mission/finalize'
+      fullPath: '/api/hangar/process-mission/finalize'
+      preLoaderRoute: typeof ApiHangarProcessMissionFinalizeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/hangar/process-mission/input-processing': {
+      id: '/api/hangar/process-mission/input-processing'
+      path: '/api/hangar/process-mission/input-processing'
+      fullPath: '/api/hangar/process-mission/input-processing'
+      preLoaderRoute: typeof ApiHangarProcessMissionInputProcessingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/hangar/process-mission/output-generation': {
+      id: '/api/hangar/process-mission/output-generation'
+      path: '/api/hangar/process-mission/output-generation'
+      fullPath: '/api/hangar/process-mission/output-generation'
+      preLoaderRoute: typeof ApiHangarProcessMissionOutputGenerationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/hangar/process-mission/output-interface': {
+      id: '/api/hangar/process-mission/output-interface'
+      path: '/api/hangar/process-mission/output-interface'
+      fullPath: '/api/hangar/process-mission/output-interface'
+      preLoaderRoute: typeof ApiHangarProcessMissionOutputInterfaceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/hangar/process-mission/reasoning-planning': {
+      id: '/api/hangar/process-mission/reasoning-planning'
+      path: '/api/hangar/process-mission/reasoning-planning'
+      fullPath: '/api/hangar/process-mission/reasoning-planning'
+      preLoaderRoute: typeof ApiHangarProcessMissionReasoningPlanningRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/hangar/process-optimization/trade-off-optimization': {
+      id: '/api/hangar/process-optimization/trade-off-optimization'
+      path: '/api/hangar/process-optimization/trade-off-optimization'
+      fullPath: '/api/hangar/process-optimization/trade-off-optimization'
+      preLoaderRoute: typeof ApiHangarProcessOptimizationTradeOffOptimizationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/hangar/process-simulation/flight-dynamics-assessment': {
+      id: '/api/hangar/process-simulation/flight-dynamics-assessment'
+      path: '/api/hangar/process-simulation/flight-dynamics-assessment'
+      fullPath: '/api/hangar/process-simulation/flight-dynamics-assessment'
+      preLoaderRoute: typeof ApiHangarProcessSimulationFlightDynamicsAssessmentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/hangar/process-structural/structural-assessment': {
+      id: '/api/hangar/process-structural/structural-assessment'
+      path: '/api/hangar/process-structural/structural-assessment'
+      fullPath: '/api/hangar/process-structural/structural-assessment'
+      preLoaderRoute: typeof ApiHangarProcessStructuralStructuralAssessmentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/hangar/process-validation/compliance-validation': {
+      id: '/api/hangar/process-validation/compliance-validation'
+      path: '/api/hangar/process-validation/compliance-validation'
+      fullPath: '/api/hangar/process-validation/compliance-validation'
+      preLoaderRoute: typeof ApiHangarProcessValidationComplianceValidationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/academy/courses/$slug/modules/$moduleId': {
+      id: '/academy/courses/$slug/modules/$moduleId'
+      path: '/courses/$slug/modules/$moduleId'
+      fullPath: '/academy/courses/$slug/modules/$moduleId'
+      preLoaderRoute: typeof AcademyCoursesSlugModulesModuleIdRouteImport
       parentRoute: typeof AcademyRoute
     }
     '/academy/module/$moduleId/lesson/$lessonId': {
@@ -2658,11 +2718,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AcademyModuleModuleIdLessonLessonIdRouteImport
       parentRoute: typeof AcademyRoute
     }
-    '/academy/courses/$slug/modules/$moduleId': {
-      id: '/academy/courses/$slug/modules/$moduleId'
-      path: '/courses/$slug/modules/$moduleId'
-      fullPath: '/academy/courses/$slug/modules/$moduleId'
-      preLoaderRoute: typeof AcademyCoursesSlugModulesModuleIdRouteImport
+    '/academy/module/$moduleId/quiz/$quizId': {
+      id: '/academy/module/$moduleId/quiz/$quizId'
+      path: '/module/$moduleId/quiz/$quizId'
+      fullPath: '/academy/module/$moduleId/quiz/$quizId'
+      preLoaderRoute: typeof AcademyModuleModuleIdQuizQuizIdRouteImport
       parentRoute: typeof AcademyRoute
     }
   }
@@ -2926,6 +2986,8 @@ const rootRouteChildren: RootRouteChildren = {
   PilotRoute: PilotRouteWithChildren,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TheHangarRoute: TheHangarRouteWithChildren,
+  THLoginRoute: THLoginRoute,
+  THIndexRoute: THIndexRoute,
   ApiHangarAircraftDesignsRoute: ApiHangarAircraftDesignsRoute,
   ApiHangarBernoulliReviewRoute: ApiHangarBernoulliReviewRoute,
   ApiHangarCadDesignsRoute: ApiHangarCadDesignsRoute,
@@ -2947,6 +3009,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiHangarStoreDocumentRoute: ApiHangarStoreDocumentRoute,
   ApiHangarStructuralsRoute: ApiHangarStructuralsRoute,
   ApiHangarValidationsRoute: ApiHangarValidationsRoute,
+  ApiTHAgentRoute: ApiTHAgentRoute,
   ApiHangarProcessAircraftDesignGeometryGenerationRoute:
     ApiHangarProcessAircraftDesignGeometryGenerationRoute,
   ApiHangarProcessBernoulliReviewRoute: ApiHangarProcessBernoulliReviewRoute,
