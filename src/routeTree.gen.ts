@@ -102,6 +102,7 @@ import { Route as ApiHangarSourceCatalogsRouteImport } from './routes/api.hangar
 import { Route as ApiHangarStoreDocumentRouteImport } from './routes/api.hangar.store-document'
 import { Route as ApiHangarStructuralsRouteImport } from './routes/api.hangar.structurals'
 import { Route as ApiHangarValidationsRouteImport } from './routes/api.hangar.validations'
+import { Route as ApiHarnessCallRouteImport } from './routes/api.harness.call'
 import { Route as DestudDashboardEngineerRouteImport } from './routes/destud.dashboard.engineer'
 import { Route as DestudDashboardExplorerRouteImport } from './routes/destud.dashboard.explorer'
 import { Route as DestudProjectsProjectIdRouteImport } from './routes/destud.projects.$projectId'
@@ -142,7 +143,6 @@ import { Route as ApiHangarProcessOptimizationTradeOffOptimizationRouteImport } 
 import { Route as ApiHangarProcessSimulationFlightDynamicsAssessmentRouteImport } from './routes/api.hangar.process-simulation.flight-dynamics-assessment'
 import { Route as ApiHangarProcessStructuralStructuralAssessmentRouteImport } from './routes/api.hangar.process-structural.structural-assessment'
 import { Route as ApiHangarProcessValidationComplianceValidationRouteImport } from './routes/api.hangar.process-validation.compliance-validation'
-import { Route as ApiHarnessCallBayRouteImport } from './routes/api.harness.call.$bay'
 import { Route as AcademyCoursesSlugModulesModuleIdRouteImport } from './routes/academy.courses.$slug.modules.$moduleId'
 import { Route as AcademyModuleModuleIdLessonLessonIdRouteImport } from './routes/academy.module.$moduleId.lesson.$lessonId'
 import { Route as AcademyModuleModuleIdQuizQuizIdRouteImport } from './routes/academy.module.$moduleId.quiz.$quizId'
@@ -626,6 +626,11 @@ const ApiHangarValidationsRoute = ApiHangarValidationsRouteImport.update({
   path: '/api/hangar/validations',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiHarnessCallRoute = ApiHarnessCallRouteImport.update({
+  id: '/api/harness/call',
+  path: '/api/harness/call',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DestudDashboardEngineerRoute = DestudDashboardEngineerRouteImport.update({
   id: '/dashboard/engineer',
   path: '/dashboard/engineer',
@@ -860,11 +865,6 @@ const ApiHangarProcessValidationComplianceValidationRoute =
     path: '/api/hangar/process-validation/compliance-validation',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ApiHarnessCallBayRoute = ApiHarnessCallBayRouteImport.update({
-  id: '/api/harness/call/$bay',
-  path: '/api/harness/call/$bay',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AcademyCoursesSlugModulesModuleIdRoute =
   AcademyCoursesSlugModulesModuleIdRouteImport.update({
     id: '/courses/$slug/modules/$moduleId',
@@ -977,6 +977,7 @@ export interface FileRoutesByFullPath {
   '/api/hangar/store-document': typeof ApiHangarStoreDocumentRoute
   '/api/hangar/structurals': typeof ApiHangarStructuralsRoute
   '/api/hangar/validations': typeof ApiHangarValidationsRoute
+  '/api/harness/call': typeof ApiHarnessCallRoute
   '/destud/dashboard/engineer': typeof DestudDashboardEngineerRoute
   '/destud/dashboard/explorer': typeof DestudDashboardExplorerRoute
   '/destud/projects/$projectId': typeof DestudProjectsProjectIdRoute
@@ -1017,7 +1018,6 @@ export interface FileRoutesByFullPath {
   '/api/hangar/process-simulation/flight-dynamics-assessment': typeof ApiHangarProcessSimulationFlightDynamicsAssessmentRoute
   '/api/hangar/process-structural/structural-assessment': typeof ApiHangarProcessStructuralStructuralAssessmentRoute
   '/api/hangar/process-validation/compliance-validation': typeof ApiHangarProcessValidationComplianceValidationRoute
-  '/api/harness/call/$bay': typeof ApiHarnessCallBayRoute
   '/academy/courses/$slug/modules/$moduleId': typeof AcademyCoursesSlugModulesModuleIdRoute
   '/academy/module/$moduleId/lesson/$lessonId': typeof AcademyModuleModuleIdLessonLessonIdRoute
   '/academy/module/$moduleId/quiz/$quizId': typeof AcademyModuleModuleIdQuizQuizIdRoute
@@ -1109,6 +1109,7 @@ export interface FileRoutesByTo {
   '/api/hangar/store-document': typeof ApiHangarStoreDocumentRoute
   '/api/hangar/structurals': typeof ApiHangarStructuralsRoute
   '/api/hangar/validations': typeof ApiHangarValidationsRoute
+  '/api/harness/call': typeof ApiHarnessCallRoute
   '/destud/dashboard/engineer': typeof DestudDashboardEngineerRoute
   '/destud/dashboard/explorer': typeof DestudDashboardExplorerRoute
   '/destud/projects/$projectId': typeof DestudProjectsProjectIdRoute
@@ -1149,7 +1150,6 @@ export interface FileRoutesByTo {
   '/api/hangar/process-simulation/flight-dynamics-assessment': typeof ApiHangarProcessSimulationFlightDynamicsAssessmentRoute
   '/api/hangar/process-structural/structural-assessment': typeof ApiHangarProcessStructuralStructuralAssessmentRoute
   '/api/hangar/process-validation/compliance-validation': typeof ApiHangarProcessValidationComplianceValidationRoute
-  '/api/harness/call/$bay': typeof ApiHarnessCallBayRoute
   '/academy/courses/$slug/modules/$moduleId': typeof AcademyCoursesSlugModulesModuleIdRoute
   '/academy/module/$moduleId/lesson/$lessonId': typeof AcademyModuleModuleIdLessonLessonIdRoute
   '/academy/module/$moduleId/quiz/$quizId': typeof AcademyModuleModuleIdQuizQuizIdRoute
@@ -1249,6 +1249,7 @@ export interface FileRoutesById {
   '/api/hangar/store-document': typeof ApiHangarStoreDocumentRoute
   '/api/hangar/structurals': typeof ApiHangarStructuralsRoute
   '/api/hangar/validations': typeof ApiHangarValidationsRoute
+  '/api/harness/call': typeof ApiHarnessCallRoute
   '/destud/dashboard/engineer': typeof DestudDashboardEngineerRoute
   '/destud/dashboard/explorer': typeof DestudDashboardExplorerRoute
   '/destud/projects/$projectId': typeof DestudProjectsProjectIdRoute
@@ -1289,7 +1290,6 @@ export interface FileRoutesById {
   '/api/hangar/process-simulation/flight-dynamics-assessment': typeof ApiHangarProcessSimulationFlightDynamicsAssessmentRoute
   '/api/hangar/process-structural/structural-assessment': typeof ApiHangarProcessStructuralStructuralAssessmentRoute
   '/api/hangar/process-validation/compliance-validation': typeof ApiHangarProcessValidationComplianceValidationRoute
-  '/api/harness/call/$bay': typeof ApiHarnessCallBayRoute
   '/academy/courses/$slug/modules/$moduleId': typeof AcademyCoursesSlugModulesModuleIdRoute
   '/academy/module/$moduleId/lesson/$lessonId': typeof AcademyModuleModuleIdLessonLessonIdRoute
   '/academy/module/$moduleId/quiz/$quizId': typeof AcademyModuleModuleIdQuizQuizIdRoute
@@ -1389,6 +1389,7 @@ export interface FileRouteTypes {
     | '/api/hangar/store-document'
     | '/api/hangar/structurals'
     | '/api/hangar/validations'
+    | '/api/harness/call'
     | '/destud/dashboard/engineer'
     | '/destud/dashboard/explorer'
     | '/destud/projects/$projectId'
@@ -1429,7 +1430,6 @@ export interface FileRouteTypes {
     | '/api/hangar/process-simulation/flight-dynamics-assessment'
     | '/api/hangar/process-structural/structural-assessment'
     | '/api/hangar/process-validation/compliance-validation'
-    | '/api/harness/call/$bay'
     | '/academy/courses/$slug/modules/$moduleId'
     | '/academy/module/$moduleId/lesson/$lessonId'
     | '/academy/module/$moduleId/quiz/$quizId'
@@ -1521,6 +1521,7 @@ export interface FileRouteTypes {
     | '/api/hangar/store-document'
     | '/api/hangar/structurals'
     | '/api/hangar/validations'
+    | '/api/harness/call'
     | '/destud/dashboard/engineer'
     | '/destud/dashboard/explorer'
     | '/destud/projects/$projectId'
@@ -1561,7 +1562,6 @@ export interface FileRouteTypes {
     | '/api/hangar/process-simulation/flight-dynamics-assessment'
     | '/api/hangar/process-structural/structural-assessment'
     | '/api/hangar/process-validation/compliance-validation'
-    | '/api/harness/call/$bay'
     | '/academy/courses/$slug/modules/$moduleId'
     | '/academy/module/$moduleId/lesson/$lessonId'
     | '/academy/module/$moduleId/quiz/$quizId'
@@ -1660,6 +1660,7 @@ export interface FileRouteTypes {
     | '/api/hangar/store-document'
     | '/api/hangar/structurals'
     | '/api/hangar/validations'
+    | '/api/harness/call'
     | '/destud/dashboard/engineer'
     | '/destud/dashboard/explorer'
     | '/destud/projects/$projectId'
@@ -1700,7 +1701,6 @@ export interface FileRouteTypes {
     | '/api/hangar/process-simulation/flight-dynamics-assessment'
     | '/api/hangar/process-structural/structural-assessment'
     | '/api/hangar/process-validation/compliance-validation'
-    | '/api/harness/call/$bay'
     | '/academy/courses/$slug/modules/$moduleId'
     | '/academy/module/$moduleId/lesson/$lessonId'
     | '/academy/module/$moduleId/quiz/$quizId'
@@ -1739,6 +1739,7 @@ export interface RootRouteChildren {
   ApiHangarStoreDocumentRoute: typeof ApiHangarStoreDocumentRoute
   ApiHangarStructuralsRoute: typeof ApiHangarStructuralsRoute
   ApiHangarValidationsRoute: typeof ApiHangarValidationsRoute
+  ApiHarnessCallRoute: typeof ApiHarnessCallRoute
   ApiHangarProcessAircraftDesignGeometryGenerationRoute: typeof ApiHangarProcessAircraftDesignGeometryGenerationRoute
   ApiHangarProcessBernoulliReviewRoute: typeof ApiHangarProcessBernoulliReviewRoute
   ApiHangarProcessCadDesignModelGenerationRoute: typeof ApiHangarProcessCadDesignModelGenerationRoute
@@ -1761,7 +1762,6 @@ export interface RootRouteChildren {
   ApiHangarProcessSimulationFlightDynamicsAssessmentRoute: typeof ApiHangarProcessSimulationFlightDynamicsAssessmentRoute
   ApiHangarProcessStructuralStructuralAssessmentRoute: typeof ApiHangarProcessStructuralStructuralAssessmentRoute
   ApiHangarProcessValidationComplianceValidationRoute: typeof ApiHangarProcessValidationComplianceValidationRoute
-  ApiHarnessCallBayRoute: typeof ApiHarnessCallBayRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -2417,6 +2417,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiHangarValidationsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/harness/call': {
+      id: '/api/harness/call'
+      path: '/api/harness/call'
+      fullPath: '/api/harness/call'
+      preLoaderRoute: typeof ApiHarnessCallRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/destud/dashboard/engineer': {
       id: '/destud/dashboard/engineer'
       path: '/dashboard/engineer'
@@ -2695,13 +2702,6 @@ declare module '@tanstack/react-router' {
       path: '/api/hangar/process-validation/compliance-validation'
       fullPath: '/api/hangar/process-validation/compliance-validation'
       preLoaderRoute: typeof ApiHangarProcessValidationComplianceValidationRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/harness/call/$bay': {
-      id: '/api/harness/call/$bay'
-      path: '/api/harness/call/$bay'
-      fullPath: '/api/harness/call/$bay'
-      preLoaderRoute: typeof ApiHarnessCallBayRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/academy/courses/$slug/modules/$moduleId': {
@@ -3009,6 +3009,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiHangarStoreDocumentRoute: ApiHangarStoreDocumentRoute,
   ApiHangarStructuralsRoute: ApiHangarStructuralsRoute,
   ApiHangarValidationsRoute: ApiHangarValidationsRoute,
+  ApiHarnessCallRoute: ApiHarnessCallRoute,
   ApiHangarProcessAircraftDesignGeometryGenerationRoute:
     ApiHangarProcessAircraftDesignGeometryGenerationRoute,
   ApiHangarProcessBernoulliReviewRoute: ApiHangarProcessBernoulliReviewRoute,
@@ -3050,7 +3051,6 @@ const rootRouteChildren: RootRouteChildren = {
     ApiHangarProcessStructuralStructuralAssessmentRoute,
   ApiHangarProcessValidationComplianceValidationRoute:
     ApiHangarProcessValidationComplianceValidationRoute,
-  ApiHarnessCallBayRoute: ApiHarnessCallBayRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
