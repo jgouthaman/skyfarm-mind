@@ -29,6 +29,7 @@ import { Route as AcademyIndexRouteImport } from './routes/academy.index'
 import { Route as AcademyDashboardRouteImport } from './routes/academy.dashboard'
 import { Route as AcademyLessonDemoRouteImport } from './routes/academy.lesson-demo'
 import { Route as AcademyQuizDemoRouteImport } from './routes/academy.quiz-demo'
+import { Route as ApiZdiagRouteImport } from './routes/api.zdiag'
 import { Route as DestudIndexRouteImport } from './routes/destud.index'
 import { Route as DestudNewMissionRouteImport } from './routes/destud.new-mission'
 import { Route as MissionHubIndexRouteImport } from './routes/mission-hub.index'
@@ -245,6 +246,11 @@ const AcademyQuizDemoRoute = AcademyQuizDemoRouteImport.update({
   id: '/quiz-demo',
   path: '/quiz-demo',
   getParentRoute: () => AcademyRoute,
+} as any)
+const ApiZdiagRoute = ApiZdiagRouteImport.update({
+  id: '/api/zdiag',
+  path: '/api/zdiag',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const DestudIndexRoute = DestudIndexRouteImport.update({
   id: '/',
@@ -903,6 +909,7 @@ export interface FileRoutesByFullPath {
   '/academy/dashboard': typeof AcademyDashboardRoute
   '/academy/lesson-demo': typeof AcademyLessonDemoRoute
   '/academy/quiz-demo': typeof AcademyQuizDemoRoute
+  '/api/zdiag': typeof ApiZdiagRoute
   '/destud/new-mission': typeof DestudNewMissionRoute
   '/mission-hub/academy-users': typeof MissionHubAcademyUsersRoute
   '/mission-hub/contacts': typeof MissionHubContactsRoute
@@ -1035,6 +1042,7 @@ export interface FileRoutesByTo {
   '/academy/dashboard': typeof AcademyDashboardRoute
   '/academy/lesson-demo': typeof AcademyLessonDemoRoute
   '/academy/quiz-demo': typeof AcademyQuizDemoRoute
+  '/api/zdiag': typeof ApiZdiagRoute
   '/destud/new-mission': typeof DestudNewMissionRoute
   '/mission-hub/academy-users': typeof MissionHubAcademyUsersRoute
   '/mission-hub/contacts': typeof MissionHubContactsRoute
@@ -1174,6 +1182,7 @@ export interface FileRoutesById {
   '/academy/dashboard': typeof AcademyDashboardRoute
   '/academy/lesson-demo': typeof AcademyLessonDemoRoute
   '/academy/quiz-demo': typeof AcademyQuizDemoRoute
+  '/api/zdiag': typeof ApiZdiagRoute
   '/destud/new-mission': typeof DestudNewMissionRoute
   '/mission-hub/academy-users': typeof MissionHubAcademyUsersRoute
   '/mission-hub/contacts': typeof MissionHubContactsRoute
@@ -1315,6 +1324,7 @@ export interface FileRouteTypes {
     | '/academy/dashboard'
     | '/academy/lesson-demo'
     | '/academy/quiz-demo'
+    | '/api/zdiag'
     | '/destud/new-mission'
     | '/mission-hub/academy-users'
     | '/mission-hub/contacts'
@@ -1447,6 +1457,7 @@ export interface FileRouteTypes {
     | '/academy/dashboard'
     | '/academy/lesson-demo'
     | '/academy/quiz-demo'
+    | '/api/zdiag'
     | '/destud/new-mission'
     | '/mission-hub/academy-users'
     | '/mission-hub/contacts'
@@ -1585,6 +1596,7 @@ export interface FileRouteTypes {
     | '/academy/dashboard'
     | '/academy/lesson-demo'
     | '/academy/quiz-demo'
+    | '/api/zdiag'
     | '/destud/new-mission'
     | '/mission-hub/academy-users'
     | '/mission-hub/contacts'
@@ -1716,6 +1728,7 @@ export interface RootRouteChildren {
   PilotRoute: typeof PilotRouteWithChildren
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TheHangarRoute: typeof TheHangarRouteWithChildren
+  ApiZdiagRoute: typeof ApiZdiagRoute
   THLoginRoute: typeof THLoginRoute
   THIndexRoute: typeof THIndexRoute
   ApiHangarAircraftDesignsRoute: typeof ApiHangarAircraftDesignsRoute
@@ -1905,6 +1918,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/academy/quiz-demo'
       preLoaderRoute: typeof AcademyQuizDemoRouteImport
       parentRoute: typeof AcademyRoute
+    }
+    '/api/zdiag': {
+      id: '/api/zdiag'
+      path: '/api/zdiag'
+      fullPath: '/api/zdiag'
+      preLoaderRoute: typeof ApiZdiagRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/destud/': {
       id: '/destud/'
@@ -2986,6 +3006,7 @@ const rootRouteChildren: RootRouteChildren = {
   PilotRoute: PilotRouteWithChildren,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TheHangarRoute: TheHangarRouteWithChildren,
+  ApiZdiagRoute: ApiZdiagRoute,
   THLoginRoute: THLoginRoute,
   THIndexRoute: THIndexRoute,
   ApiHangarAircraftDesignsRoute: ApiHangarAircraftDesignsRoute,
