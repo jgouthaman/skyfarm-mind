@@ -634,9 +634,9 @@ const ApiHangarValidationsRoute = ApiHangarValidationsRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiHarnessCallRoute = ApiHarnessCallRouteImport.update({
-  id: '/call',
-  path: '/call',
-  getParentRoute: () => ApiHarnessRoute,
+  id: '/api/harness/call',
+  path: '/api/harness/call',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ApiZdiagTwoRoute = ApiZdiagTwoRouteImport.update({
   id: '/two',
@@ -1764,6 +1764,7 @@ export interface RootRouteChildren {
   ApiHangarStoreDocumentRoute: typeof ApiHangarStoreDocumentRoute
   ApiHangarStructuralsRoute: typeof ApiHangarStructuralsRoute
   ApiHangarValidationsRoute: typeof ApiHangarValidationsRoute
+  ApiHarnessCallRoute: typeof ApiHarnessCallRoute
   ApiHangarProcessAircraftDesignGeometryGenerationRoute: typeof ApiHangarProcessAircraftDesignGeometryGenerationRoute
   ApiHangarProcessBernoulliReviewRoute: typeof ApiHangarProcessBernoulliReviewRoute
   ApiHangarProcessCadDesignModelGenerationRoute: typeof ApiHangarProcessCadDesignModelGenerationRoute
@@ -2450,10 +2451,10 @@ declare module '@tanstack/react-router' {
     }
     '/api/harness/call': {
       id: '/api/harness/call'
-      path: '/call'
+      path: '/api/harness/call'
       fullPath: '/api/harness/call'
       preLoaderRoute: typeof ApiHarnessCallRouteImport
-      parentRoute: typeof ApiHarnessRoute
+      parentRoute: typeof rootRouteImport
     }
     '/api/zdiag/two': {
       id: '/api/zdiag/two'
@@ -3060,6 +3061,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiHangarStoreDocumentRoute: ApiHangarStoreDocumentRoute,
   ApiHangarStructuralsRoute: ApiHangarStructuralsRoute,
   ApiHangarValidationsRoute: ApiHangarValidationsRoute,
+  ApiHarnessCallRoute: ApiHarnessCallRoute,
   ApiHangarProcessAircraftDesignGeometryGenerationRoute:
     ApiHangarProcessAircraftDesignGeometryGenerationRoute,
   ApiHangarProcessBernoulliReviewRoute: ApiHangarProcessBernoulliReviewRoute,
