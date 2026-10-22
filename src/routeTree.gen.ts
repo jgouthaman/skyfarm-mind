@@ -104,6 +104,7 @@ import { Route as ApiHangarStoreDocumentRouteImport } from './routes/api.hangar.
 import { Route as ApiHangarStructuralsRouteImport } from './routes/api.hangar.structurals'
 import { Route as ApiHangarValidationsRouteImport } from './routes/api.hangar.validations'
 import { Route as ApiHarnessCallRouteImport } from './routes/api.harness.call'
+import { Route as ApiZdiagTwoRouteImport } from './routes/api.zdiag.two'
 import { Route as DestudDashboardEngineerRouteImport } from './routes/destud.dashboard.engineer'
 import { Route as DestudDashboardExplorerRouteImport } from './routes/destud.dashboard.explorer'
 import { Route as DestudProjectsProjectIdRouteImport } from './routes/destud.projects.$projectId'
@@ -637,6 +638,11 @@ const ApiHarnessCallRoute = ApiHarnessCallRouteImport.update({
   path: '/api/harness/call',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiZdiagTwoRoute = ApiZdiagTwoRouteImport.update({
+  id: '/two',
+  path: '/two',
+  getParentRoute: () => ApiZdiagRoute,
+} as any)
 const DestudDashboardEngineerRoute = DestudDashboardEngineerRouteImport.update({
   id: '/dashboard/engineer',
   path: '/dashboard/engineer',
@@ -909,7 +915,7 @@ export interface FileRoutesByFullPath {
   '/academy/dashboard': typeof AcademyDashboardRoute
   '/academy/lesson-demo': typeof AcademyLessonDemoRoute
   '/academy/quiz-demo': typeof AcademyQuizDemoRoute
-  '/api/zdiag': typeof ApiZdiagRoute
+  '/api/zdiag': typeof ApiZdiagRouteWithChildren
   '/destud/new-mission': typeof DestudNewMissionRoute
   '/mission-hub/academy-users': typeof MissionHubAcademyUsersRoute
   '/mission-hub/contacts': typeof MissionHubContactsRoute
@@ -985,6 +991,7 @@ export interface FileRoutesByFullPath {
   '/api/hangar/structurals': typeof ApiHangarStructuralsRoute
   '/api/hangar/validations': typeof ApiHangarValidationsRoute
   '/api/harness/call': typeof ApiHarnessCallRoute
+  '/api/zdiag/two': typeof ApiZdiagTwoRoute
   '/destud/dashboard/engineer': typeof DestudDashboardEngineerRoute
   '/destud/dashboard/explorer': typeof DestudDashboardExplorerRoute
   '/destud/projects/$projectId': typeof DestudProjectsProjectIdRoute
@@ -1042,7 +1049,7 @@ export interface FileRoutesByTo {
   '/academy/dashboard': typeof AcademyDashboardRoute
   '/academy/lesson-demo': typeof AcademyLessonDemoRoute
   '/academy/quiz-demo': typeof AcademyQuizDemoRoute
-  '/api/zdiag': typeof ApiZdiagRoute
+  '/api/zdiag': typeof ApiZdiagRouteWithChildren
   '/destud/new-mission': typeof DestudNewMissionRoute
   '/mission-hub/academy-users': typeof MissionHubAcademyUsersRoute
   '/mission-hub/contacts': typeof MissionHubContactsRoute
@@ -1118,6 +1125,7 @@ export interface FileRoutesByTo {
   '/api/hangar/structurals': typeof ApiHangarStructuralsRoute
   '/api/hangar/validations': typeof ApiHangarValidationsRoute
   '/api/harness/call': typeof ApiHarnessCallRoute
+  '/api/zdiag/two': typeof ApiZdiagTwoRoute
   '/destud/dashboard/engineer': typeof DestudDashboardEngineerRoute
   '/destud/dashboard/explorer': typeof DestudDashboardExplorerRoute
   '/destud/projects/$projectId': typeof DestudProjectsProjectIdRoute
@@ -1182,7 +1190,7 @@ export interface FileRoutesById {
   '/academy/dashboard': typeof AcademyDashboardRoute
   '/academy/lesson-demo': typeof AcademyLessonDemoRoute
   '/academy/quiz-demo': typeof AcademyQuizDemoRoute
-  '/api/zdiag': typeof ApiZdiagRoute
+  '/api/zdiag': typeof ApiZdiagRouteWithChildren
   '/destud/new-mission': typeof DestudNewMissionRoute
   '/mission-hub/academy-users': typeof MissionHubAcademyUsersRoute
   '/mission-hub/contacts': typeof MissionHubContactsRoute
@@ -1259,6 +1267,7 @@ export interface FileRoutesById {
   '/api/hangar/structurals': typeof ApiHangarStructuralsRoute
   '/api/hangar/validations': typeof ApiHangarValidationsRoute
   '/api/harness/call': typeof ApiHarnessCallRoute
+  '/api/zdiag/two': typeof ApiZdiagTwoRoute
   '/destud/dashboard/engineer': typeof DestudDashboardEngineerRoute
   '/destud/dashboard/explorer': typeof DestudDashboardExplorerRoute
   '/destud/projects/$projectId': typeof DestudProjectsProjectIdRoute
@@ -1400,6 +1409,7 @@ export interface FileRouteTypes {
     | '/api/hangar/structurals'
     | '/api/hangar/validations'
     | '/api/harness/call'
+    | '/api/zdiag/two'
     | '/destud/dashboard/engineer'
     | '/destud/dashboard/explorer'
     | '/destud/projects/$projectId'
@@ -1533,6 +1543,7 @@ export interface FileRouteTypes {
     | '/api/hangar/structurals'
     | '/api/hangar/validations'
     | '/api/harness/call'
+    | '/api/zdiag/two'
     | '/destud/dashboard/engineer'
     | '/destud/dashboard/explorer'
     | '/destud/projects/$projectId'
@@ -1673,6 +1684,7 @@ export interface FileRouteTypes {
     | '/api/hangar/structurals'
     | '/api/hangar/validations'
     | '/api/harness/call'
+    | '/api/zdiag/two'
     | '/destud/dashboard/engineer'
     | '/destud/dashboard/explorer'
     | '/destud/projects/$projectId'
@@ -1728,7 +1740,7 @@ export interface RootRouteChildren {
   PilotRoute: typeof PilotRouteWithChildren
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TheHangarRoute: typeof TheHangarRouteWithChildren
-  ApiZdiagRoute: typeof ApiZdiagRoute
+  ApiZdiagRoute: typeof ApiZdiagRouteWithChildren
   THLoginRoute: typeof THLoginRoute
   THIndexRoute: typeof THIndexRoute
   ApiHangarAircraftDesignsRoute: typeof ApiHangarAircraftDesignsRoute
@@ -2444,6 +2456,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiHarnessCallRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/zdiag/two': {
+      id: '/api/zdiag/two'
+      path: '/two'
+      fullPath: '/api/zdiag/two'
+      preLoaderRoute: typeof ApiZdiagTwoRouteImport
+      parentRoute: typeof ApiZdiagRoute
+    }
     '/destud/dashboard/engineer': {
       id: '/destud/dashboard/engineer'
       path: '/dashboard/engineer'
@@ -2996,6 +3015,18 @@ const TheHangarRouteWithChildren = TheHangarRoute._addFileChildren(
   TheHangarRouteChildren,
 )
 
+interface ApiZdiagRouteChildren {
+  ApiZdiagTwoRoute: typeof ApiZdiagTwoRoute
+}
+
+const ApiZdiagRouteChildren: ApiZdiagRouteChildren = {
+  ApiZdiagTwoRoute: ApiZdiagTwoRoute,
+}
+
+const ApiZdiagRouteWithChildren = ApiZdiagRoute._addFileChildren(
+  ApiZdiagRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   LayoutRoute: LayoutRouteWithChildren,
   AcademyRoute: AcademyRouteWithChildren,
@@ -3006,7 +3037,7 @@ const rootRouteChildren: RootRouteChildren = {
   PilotRoute: PilotRouteWithChildren,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TheHangarRoute: TheHangarRouteWithChildren,
-  ApiZdiagRoute: ApiZdiagRoute,
+  ApiZdiagRoute: ApiZdiagRouteWithChildren,
   THLoginRoute: THLoginRoute,
   THIndexRoute: THIndexRoute,
   ApiHangarAircraftDesignsRoute: ApiHangarAircraftDesignsRoute,
