@@ -29,7 +29,6 @@ import { Route as AcademyIndexRouteImport } from './routes/academy.index'
 import { Route as AcademyDashboardRouteImport } from './routes/academy.dashboard'
 import { Route as AcademyLessonDemoRouteImport } from './routes/academy.lesson-demo'
 import { Route as AcademyQuizDemoRouteImport } from './routes/academy.quiz-demo'
-import { Route as ApiZdiagRouteImport } from './routes/api.zdiag'
 import { Route as DestudIndexRouteImport } from './routes/destud.index'
 import { Route as DestudNewMissionRouteImport } from './routes/destud.new-mission'
 import { Route as MissionHubIndexRouteImport } from './routes/mission-hub.index'
@@ -104,7 +103,6 @@ import { Route as ApiHangarStoreDocumentRouteImport } from './routes/api.hangar.
 import { Route as ApiHangarStructuralsRouteImport } from './routes/api.hangar.structurals'
 import { Route as ApiHangarValidationsRouteImport } from './routes/api.hangar.validations'
 import { Route as ApiHarnessCallRouteImport } from './routes/api.harness.call'
-import { Route as ApiZdiagTwoRouteImport } from './routes/api.zdiag.two'
 import { Route as DestudDashboardEngineerRouteImport } from './routes/destud.dashboard.engineer'
 import { Route as DestudDashboardExplorerRouteImport } from './routes/destud.dashboard.explorer'
 import { Route as DestudProjectsProjectIdRouteImport } from './routes/destud.projects.$projectId'
@@ -247,11 +245,6 @@ const AcademyQuizDemoRoute = AcademyQuizDemoRouteImport.update({
   id: '/quiz-demo',
   path: '/quiz-demo',
   getParentRoute: () => AcademyRoute,
-} as any)
-const ApiZdiagRoute = ApiZdiagRouteImport.update({
-  id: '/api/zdiag',
-  path: '/api/zdiag',
-  getParentRoute: () => rootRouteImport,
 } as any)
 const DestudIndexRoute = DestudIndexRouteImport.update({
   id: '/',
@@ -634,14 +627,9 @@ const ApiHangarValidationsRoute = ApiHangarValidationsRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiHarnessCallRoute = ApiHarnessCallRouteImport.update({
-  id: '/api/harness/call',
-  path: '/api/harness/call',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiZdiagTwoRoute = ApiZdiagTwoRouteImport.update({
-  id: '/two',
-  path: '/two',
-  getParentRoute: () => ApiZdiagRoute,
+  id: '/call',
+  path: '/call',
+  getParentRoute: () => ApiHarnessRoute,
 } as any)
 const DestudDashboardEngineerRoute = DestudDashboardEngineerRouteImport.update({
   id: '/dashboard/engineer',
@@ -915,7 +903,6 @@ export interface FileRoutesByFullPath {
   '/academy/dashboard': typeof AcademyDashboardRoute
   '/academy/lesson-demo': typeof AcademyLessonDemoRoute
   '/academy/quiz-demo': typeof AcademyQuizDemoRoute
-  '/api/zdiag': typeof ApiZdiagRouteWithChildren
   '/destud/new-mission': typeof DestudNewMissionRoute
   '/mission-hub/academy-users': typeof MissionHubAcademyUsersRoute
   '/mission-hub/contacts': typeof MissionHubContactsRoute
@@ -991,7 +978,6 @@ export interface FileRoutesByFullPath {
   '/api/hangar/structurals': typeof ApiHangarStructuralsRoute
   '/api/hangar/validations': typeof ApiHangarValidationsRoute
   '/api/harness/call': typeof ApiHarnessCallRoute
-  '/api/zdiag/two': typeof ApiZdiagTwoRoute
   '/destud/dashboard/engineer': typeof DestudDashboardEngineerRoute
   '/destud/dashboard/explorer': typeof DestudDashboardExplorerRoute
   '/destud/projects/$projectId': typeof DestudProjectsProjectIdRoute
@@ -1049,7 +1035,6 @@ export interface FileRoutesByTo {
   '/academy/dashboard': typeof AcademyDashboardRoute
   '/academy/lesson-demo': typeof AcademyLessonDemoRoute
   '/academy/quiz-demo': typeof AcademyQuizDemoRoute
-  '/api/zdiag': typeof ApiZdiagRouteWithChildren
   '/destud/new-mission': typeof DestudNewMissionRoute
   '/mission-hub/academy-users': typeof MissionHubAcademyUsersRoute
   '/mission-hub/contacts': typeof MissionHubContactsRoute
@@ -1125,7 +1110,6 @@ export interface FileRoutesByTo {
   '/api/hangar/structurals': typeof ApiHangarStructuralsRoute
   '/api/hangar/validations': typeof ApiHangarValidationsRoute
   '/api/harness/call': typeof ApiHarnessCallRoute
-  '/api/zdiag/two': typeof ApiZdiagTwoRoute
   '/destud/dashboard/engineer': typeof DestudDashboardEngineerRoute
   '/destud/dashboard/explorer': typeof DestudDashboardExplorerRoute
   '/destud/projects/$projectId': typeof DestudProjectsProjectIdRoute
@@ -1190,7 +1174,6 @@ export interface FileRoutesById {
   '/academy/dashboard': typeof AcademyDashboardRoute
   '/academy/lesson-demo': typeof AcademyLessonDemoRoute
   '/academy/quiz-demo': typeof AcademyQuizDemoRoute
-  '/api/zdiag': typeof ApiZdiagRouteWithChildren
   '/destud/new-mission': typeof DestudNewMissionRoute
   '/mission-hub/academy-users': typeof MissionHubAcademyUsersRoute
   '/mission-hub/contacts': typeof MissionHubContactsRoute
@@ -1267,7 +1250,6 @@ export interface FileRoutesById {
   '/api/hangar/structurals': typeof ApiHangarStructuralsRoute
   '/api/hangar/validations': typeof ApiHangarValidationsRoute
   '/api/harness/call': typeof ApiHarnessCallRoute
-  '/api/zdiag/two': typeof ApiZdiagTwoRoute
   '/destud/dashboard/engineer': typeof DestudDashboardEngineerRoute
   '/destud/dashboard/explorer': typeof DestudDashboardExplorerRoute
   '/destud/projects/$projectId': typeof DestudProjectsProjectIdRoute
@@ -1333,7 +1315,6 @@ export interface FileRouteTypes {
     | '/academy/dashboard'
     | '/academy/lesson-demo'
     | '/academy/quiz-demo'
-    | '/api/zdiag'
     | '/destud/new-mission'
     | '/mission-hub/academy-users'
     | '/mission-hub/contacts'
@@ -1409,7 +1390,6 @@ export interface FileRouteTypes {
     | '/api/hangar/structurals'
     | '/api/hangar/validations'
     | '/api/harness/call'
-    | '/api/zdiag/two'
     | '/destud/dashboard/engineer'
     | '/destud/dashboard/explorer'
     | '/destud/projects/$projectId'
@@ -1467,7 +1447,6 @@ export interface FileRouteTypes {
     | '/academy/dashboard'
     | '/academy/lesson-demo'
     | '/academy/quiz-demo'
-    | '/api/zdiag'
     | '/destud/new-mission'
     | '/mission-hub/academy-users'
     | '/mission-hub/contacts'
@@ -1543,7 +1522,6 @@ export interface FileRouteTypes {
     | '/api/hangar/structurals'
     | '/api/hangar/validations'
     | '/api/harness/call'
-    | '/api/zdiag/two'
     | '/destud/dashboard/engineer'
     | '/destud/dashboard/explorer'
     | '/destud/projects/$projectId'
@@ -1607,7 +1585,6 @@ export interface FileRouteTypes {
     | '/academy/dashboard'
     | '/academy/lesson-demo'
     | '/academy/quiz-demo'
-    | '/api/zdiag'
     | '/destud/new-mission'
     | '/mission-hub/academy-users'
     | '/mission-hub/contacts'
@@ -1684,7 +1661,6 @@ export interface FileRouteTypes {
     | '/api/hangar/structurals'
     | '/api/hangar/validations'
     | '/api/harness/call'
-    | '/api/zdiag/two'
     | '/destud/dashboard/engineer'
     | '/destud/dashboard/explorer'
     | '/destud/projects/$projectId'
@@ -1740,7 +1716,6 @@ export interface RootRouteChildren {
   PilotRoute: typeof PilotRouteWithChildren
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TheHangarRoute: typeof TheHangarRouteWithChildren
-  ApiZdiagRoute: typeof ApiZdiagRouteWithChildren
   THLoginRoute: typeof THLoginRoute
   THIndexRoute: typeof THIndexRoute
   ApiHangarAircraftDesignsRoute: typeof ApiHangarAircraftDesignsRoute
@@ -1764,7 +1739,6 @@ export interface RootRouteChildren {
   ApiHangarStoreDocumentRoute: typeof ApiHangarStoreDocumentRoute
   ApiHangarStructuralsRoute: typeof ApiHangarStructuralsRoute
   ApiHangarValidationsRoute: typeof ApiHangarValidationsRoute
-  ApiHarnessCallRoute: typeof ApiHarnessCallRoute
   ApiHangarProcessAircraftDesignGeometryGenerationRoute: typeof ApiHangarProcessAircraftDesignGeometryGenerationRoute
   ApiHangarProcessBernoulliReviewRoute: typeof ApiHangarProcessBernoulliReviewRoute
   ApiHangarProcessCadDesignModelGenerationRoute: typeof ApiHangarProcessCadDesignModelGenerationRoute
@@ -1930,13 +1904,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/academy/quiz-demo'
       preLoaderRoute: typeof AcademyQuizDemoRouteImport
       parentRoute: typeof AcademyRoute
-    }
-    '/api/zdiag': {
-      id: '/api/zdiag'
-      path: '/api/zdiag'
-      fullPath: '/api/zdiag'
-      preLoaderRoute: typeof ApiZdiagRouteImport
-      parentRoute: typeof rootRouteImport
     }
     '/destud/': {
       id: '/destud/'
@@ -2451,17 +2418,10 @@ declare module '@tanstack/react-router' {
     }
     '/api/harness/call': {
       id: '/api/harness/call'
-      path: '/api/harness/call'
+      path: '/call'
       fullPath: '/api/harness/call'
       preLoaderRoute: typeof ApiHarnessCallRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/zdiag/two': {
-      id: '/api/zdiag/two'
-      path: '/two'
-      fullPath: '/api/zdiag/two'
-      preLoaderRoute: typeof ApiZdiagTwoRouteImport
-      parentRoute: typeof ApiZdiagRoute
+      parentRoute: typeof ApiHarnessRoute
     }
     '/destud/dashboard/engineer': {
       id: '/destud/dashboard/engineer'
@@ -3015,18 +2975,6 @@ const TheHangarRouteWithChildren = TheHangarRoute._addFileChildren(
   TheHangarRouteChildren,
 )
 
-interface ApiZdiagRouteChildren {
-  ApiZdiagTwoRoute: typeof ApiZdiagTwoRoute
-}
-
-const ApiZdiagRouteChildren: ApiZdiagRouteChildren = {
-  ApiZdiagTwoRoute: ApiZdiagTwoRoute,
-}
-
-const ApiZdiagRouteWithChildren = ApiZdiagRoute._addFileChildren(
-  ApiZdiagRouteChildren,
-)
-
 const rootRouteChildren: RootRouteChildren = {
   LayoutRoute: LayoutRouteWithChildren,
   AcademyRoute: AcademyRouteWithChildren,
@@ -3037,7 +2985,6 @@ const rootRouteChildren: RootRouteChildren = {
   PilotRoute: PilotRouteWithChildren,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TheHangarRoute: TheHangarRouteWithChildren,
-  ApiZdiagRoute: ApiZdiagRouteWithChildren,
   THLoginRoute: THLoginRoute,
   THIndexRoute: THIndexRoute,
   ApiHangarAircraftDesignsRoute: ApiHangarAircraftDesignsRoute,
@@ -3061,7 +3008,6 @@ const rootRouteChildren: RootRouteChildren = {
   ApiHangarStoreDocumentRoute: ApiHangarStoreDocumentRoute,
   ApiHangarStructuralsRoute: ApiHangarStructuralsRoute,
   ApiHangarValidationsRoute: ApiHangarValidationsRoute,
-  ApiHarnessCallRoute: ApiHarnessCallRoute,
   ApiHangarProcessAircraftDesignGeometryGenerationRoute:
     ApiHangarProcessAircraftDesignGeometryGenerationRoute,
   ApiHangarProcessBernoulliReviewRoute: ApiHangarProcessBernoulliReviewRoute,
