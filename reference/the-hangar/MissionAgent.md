@@ -1,6 +1,6 @@
 # Mission Agent — Bay 01
 
-**Status:** Stages 2.1–2.4 built for the natural-language path; RAG is a deferred stub; the event publish side is built (nothing consumes it yet) — see [Build Status](#14-build-status)
+**Status:** Stages 2.1–2.4 built for the natural-language path; RAG is a deferred stub; the event publish side is built (nothing consumes it yet) — see [Build Status](#14-build-status). A separate, parallel Python/GCP port of the same four stages also exists for Test Harness use — see [Section 20](#20-parallel-build--test-harness-gcp-python-implementation).
 **Agent ID:** `MISSION_AGENT`
 **Type:** Base Agent (Upstream)
 **Stage:** 1 of 15 — The Hangar
@@ -1677,3 +1677,27 @@ If either becomes a measured bottleneck, **Upstash Redis** (serverless-native, f
 - UI mockup: `mission-agent.html`
 - Full Hangar circuit: `welcome.html`
 - Landing page: `the-hangar-landing-page.html`
+
+## 20. Parallel Build — Test Harness / GCP Python Implementation
+
+**This does not change Section 18.6's decision.** Docker and FastAPI are still confirmed removed from `skyfarm-mind`'s own stack — the real Hangar pipeline (Sections 4, 12) stays Vercel + Supabase + TypeScript, exactly as documented above. What's described in this section is a **second, independent implementation** of the same four stages, built for a separate system: the Test Harness (`/t-h` in the main app, its own build-status thread outside this document), which exists to prove each of The Hangar's 15 agents end to end on a GCP-hosted Python backend before any of that logic is wired into Hangar itself. The two implementations share prompts and formulas by design (so behavior stays comparable); they do not share code, a database, or a deployment.
+
+**Why a second implementation exists at all:** the Test Harness's whole premise (`th-vercel-functions/README.md`, `th-gcp-service/README.md`) is proving a *different* infrastructure path — browser → same-origin Vercel route → a separate Vercel Python project → a GCP-hosted Python backend — independent of whether that path's actual agent logic matches this document's TypeScript implementation. Bay 01 was the first bay to get real logic (rather than a hardcoded stub) on that path, so it made sense to port this document's own stages rather than invent different ones.
+
+**What's built, where:**
+- `th-gcp-service/agents/mission/handler.py` (this repo) and its deployed copy at the GCP host's `Bay1/Prg/handler.py` — one `handle(function_name, payload) -> dict` entry point, routed to one of four stage functions by `function_name`: `input_processing`, `reasoning_planning`, `output_generation`, `output_interface` (same names `Hangar_agent_runs.stage` uses, Section 14's "Known drift" note).
+- Each stage ports the corresponding TypeScript module's actual logic, not a re-derivation from this document's prose:
+  - `input_processing` ports `intentExtraction.ts` — same system prompt, same intent-category list (`missionIntentCategories.ts`), same Claude model (`claude-sonnet-5`), plus a simplified validation-flags pass (Section 4.1's bounds-checking, not the full `rulesEngine.ts`).
+  - `reasoning_planning` ports `missionDecomposition.ts` (decomposition prompt), `domainRules.ts` (the REG-001–DOM-004 table, verbatim), `constraintIdentification.ts` (the combined constraint+KPI prompt and structured-field KPI overrides), and `tradeoffPrioritization.ts` (the gate-tier/score-tier logic, override detection, default weights) — all four ported as-is, not reinterpreted.
+  - `output_generation` ports a simplified `missionSpecAssembly.ts`-equivalent (deterministic mission-spec assembly, constraint dedup, KPI priority annotation) plus the Section 4.3.1 summary prompt and the exact confidence-score formula.
+  - `output_interface` packages Stage 3's result as a handoff object; it does not publish to `Hangar_events`, persist anything, or touch Supabase at all (see "What's deliberately NOT ported" below).
+- Falls back to clearly-marked mock output (`mock: true`) when `ANTHROPIC_API_KEY` isn't set, same contract as `llmGateway.ts`'s `callLlmGateway`.
+
+**What's deliberately NOT ported — this is a stateless function, not a second Mission Agent pipeline:**
+- No `Hangar_missions` / `Hangar_mission_specs` / `Hangar_agent_runs` rows, no mission ids, no versions. Each call is self-contained; chaining stage 1 → 2 → 3 → 4 is the caller's job (concretely: paste one stage's JSON response into the next stage's request payload via the `/t-h` UI), not this module's.
+- No mission ownership / multi-user auth — there is no `user_id` anywhere in this path.
+- No RAG stub, no document/market-data/regulation-catalog direct-reference resolution (Section 4.1.1 Step 0) — `input_processing` here takes `raw_text` and `structured_fields` directly, skipping the six-source intake entirely.
+- No `Hangar_events` publish, no export, no dashboard — `output_interface`'s response labels each of these explicitly as "not applicable here" rather than silently omitting them.
+- Constraint dedup is simplified: same-name constraints merge their `sources[]`, but unlike Section 4.3.1's dedup rule, this does not pick the more restrictive value on a genuine conflict — both the TS and Python versions should be reconciled if this GCP path ever needs more than Test Harness proof-of-connectivity use.
+
+**Current status (2026-10-22):** code is written and committed (`skyfarm-mind` PR #65); not yet deployed to the live GCP host as of this writing — the next step is deploying it there (with `ANTHROPIC_API_KEY` set in that environment) and testing each stage through `/t-h` before touching anything in this document's own Hangar pipeline. Bays 02–15 are still hardcoded stubs on this path (`mock: true` always, no LLM calls) — Bay 01 is the only one with real logic so far.
