@@ -10,36 +10,41 @@ import { createFileRoute } from "@tanstack/react-router";
 // the browser calling th-vercel-functions directly, cross-origin -- CORS-
 // prone by construction, not just an origin-list configuration bug).
 //
-// Path is /api/harness/call/$bay, NOT /api/t-h/... -- confirmed by a clean
-// (no-HMR) repro that ANY dynamic-segment route under /api/t-h/* 404s in
-// this app, regardless of extra static segments or the param's name,
-// while the identical shape under any other prefix works fine. The only
-// thing /api/t-h/* has that other prefixes don't is the sibling page
-// route group at /t-h (t-h.index.tsx, t-h.login.tsx) -- a dynamic API
-// route apparently can't coexist with a page route group sharing its
-// first path segment. Using an unrelated prefix avoids it entirely.
-export const Route = createFileRoute("/api/harness/call/$bay")({
+// Static path, with `bay` in the request body -- NOT /api/harness/call/$bay.
+// A dynamic path segment on this route 404s live on Vercel's production
+// target specifically (confirmed working on Preview, confirmed correct in
+// the compiled build output, confirmed correct via direct invocation of
+// the compiled function locally with NODE_ENV=production -- yet still
+// 404s on the live production edge). Every other working API route in
+// this codebase is a static path with no dynamic segment; every dynamic
+// segment in the app is on a page route, never a server route. This
+// follows that proven-working pattern instead of fighting the platform.
+export const Route = createFileRoute("/api/harness/call")({
   server: {
     handlers: {
-      POST: async ({ request, params }) => {
+      POST: async ({ request }) => {
         const baseUrl = process.env.TH_VERCEL_FUNCTIONS_URL;
         if (!baseUrl) {
           return Response.json({ error: "TH_VERCEL_FUNCTIONS_URL is not configured" }, { status: 500 });
         }
 
-        let body: unknown;
+        let body: { bay?: string; function_name?: string; payload?: unknown };
         try {
           body = await request.json();
         } catch {
           return Response.json({ error: "Invalid JSON body" }, { status: 400 });
         }
 
+        if (!body.bay) {
+          return Response.json({ error: "Request must include `bay`" }, { status: 400 });
+        }
+
         let upstream: Response;
         try {
-          upstream = await fetch(`${baseUrl.replace(/\/$/, "")}/api/th/${params.bay}`, {
+          upstream = await fetch(`${baseUrl.replace(/\/$/, "")}/api/th/${body.bay}`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(body),
+            body: JSON.stringify({ function_name: body.function_name, payload: body.payload }),
           });
         } catch (err) {
           return Response.json({ error: `Could not reach th-vercel-functions: ${String(err)}` }, { status: 502 });
