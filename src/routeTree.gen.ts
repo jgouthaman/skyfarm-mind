@@ -29,7 +29,6 @@ import { Route as AcademyIndexRouteImport } from './routes/academy.index'
 import { Route as AcademyDashboardRouteImport } from './routes/academy.dashboard'
 import { Route as AcademyLessonDemoRouteImport } from './routes/academy.lesson-demo'
 import { Route as AcademyQuizDemoRouteImport } from './routes/academy.quiz-demo'
-import { Route as ApiHarnessRouteImport } from './routes/api.harness'
 import { Route as ApiZdiagRouteImport } from './routes/api.zdiag'
 import { Route as DestudIndexRouteImport } from './routes/destud.index'
 import { Route as DestudNewMissionRouteImport } from './routes/destud.new-mission'
@@ -248,11 +247,6 @@ const AcademyQuizDemoRoute = AcademyQuizDemoRouteImport.update({
   id: '/quiz-demo',
   path: '/quiz-demo',
   getParentRoute: () => AcademyRoute,
-} as any)
-const ApiHarnessRoute = ApiHarnessRouteImport.update({
-  id: '/api/harness',
-  path: '/api/harness',
-  getParentRoute: () => rootRouteImport,
 } as any)
 const ApiZdiagRoute = ApiZdiagRouteImport.update({
   id: '/api/zdiag',
@@ -921,7 +915,6 @@ export interface FileRoutesByFullPath {
   '/academy/dashboard': typeof AcademyDashboardRoute
   '/academy/lesson-demo': typeof AcademyLessonDemoRoute
   '/academy/quiz-demo': typeof AcademyQuizDemoRoute
-  '/api/harness': typeof ApiHarnessRouteWithChildren
   '/api/zdiag': typeof ApiZdiagRouteWithChildren
   '/destud/new-mission': typeof DestudNewMissionRoute
   '/mission-hub/academy-users': typeof MissionHubAcademyUsersRoute
@@ -1056,7 +1049,6 @@ export interface FileRoutesByTo {
   '/academy/dashboard': typeof AcademyDashboardRoute
   '/academy/lesson-demo': typeof AcademyLessonDemoRoute
   '/academy/quiz-demo': typeof AcademyQuizDemoRoute
-  '/api/harness': typeof ApiHarnessRouteWithChildren
   '/api/zdiag': typeof ApiZdiagRouteWithChildren
   '/destud/new-mission': typeof DestudNewMissionRoute
   '/mission-hub/academy-users': typeof MissionHubAcademyUsersRoute
@@ -1198,7 +1190,6 @@ export interface FileRoutesById {
   '/academy/dashboard': typeof AcademyDashboardRoute
   '/academy/lesson-demo': typeof AcademyLessonDemoRoute
   '/academy/quiz-demo': typeof AcademyQuizDemoRoute
-  '/api/harness': typeof ApiHarnessRouteWithChildren
   '/api/zdiag': typeof ApiZdiagRouteWithChildren
   '/destud/new-mission': typeof DestudNewMissionRoute
   '/mission-hub/academy-users': typeof MissionHubAcademyUsersRoute
@@ -1342,7 +1333,6 @@ export interface FileRouteTypes {
     | '/academy/dashboard'
     | '/academy/lesson-demo'
     | '/academy/quiz-demo'
-    | '/api/harness'
     | '/api/zdiag'
     | '/destud/new-mission'
     | '/mission-hub/academy-users'
@@ -1477,7 +1467,6 @@ export interface FileRouteTypes {
     | '/academy/dashboard'
     | '/academy/lesson-demo'
     | '/academy/quiz-demo'
-    | '/api/harness'
     | '/api/zdiag'
     | '/destud/new-mission'
     | '/mission-hub/academy-users'
@@ -1618,7 +1607,6 @@ export interface FileRouteTypes {
     | '/academy/dashboard'
     | '/academy/lesson-demo'
     | '/academy/quiz-demo'
-    | '/api/harness'
     | '/api/zdiag'
     | '/destud/new-mission'
     | '/mission-hub/academy-users'
@@ -1752,7 +1740,6 @@ export interface RootRouteChildren {
   PilotRoute: typeof PilotRouteWithChildren
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TheHangarRoute: typeof TheHangarRouteWithChildren
-  ApiHarnessRoute: typeof ApiHarnessRouteWithChildren
   ApiZdiagRoute: typeof ApiZdiagRouteWithChildren
   THLoginRoute: typeof THLoginRoute
   THIndexRoute: typeof THIndexRoute
@@ -1942,13 +1929,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/academy/quiz-demo'
       preLoaderRoute: typeof AcademyQuizDemoRouteImport
       parentRoute: typeof AcademyRoute
-    }
-    '/api/harness': {
-      id: '/api/harness'
-      path: '/api/harness'
-      fullPath: '/api/harness'
-      preLoaderRoute: typeof ApiHarnessRouteImport
-      parentRoute: typeof rootRouteImport
     }
     '/api/zdiag': {
       id: '/api/zdiag'
@@ -3034,18 +3014,6 @@ const TheHangarRouteWithChildren = TheHangarRoute._addFileChildren(
   TheHangarRouteChildren,
 )
 
-interface ApiHarnessRouteChildren {
-  ApiHarnessCallRoute: typeof ApiHarnessCallRoute
-}
-
-const ApiHarnessRouteChildren: ApiHarnessRouteChildren = {
-  ApiHarnessCallRoute: ApiHarnessCallRoute,
-}
-
-const ApiHarnessRouteWithChildren = ApiHarnessRoute._addFileChildren(
-  ApiHarnessRouteChildren,
-)
-
 interface ApiZdiagRouteChildren {
   ApiZdiagTwoRoute: typeof ApiZdiagTwoRoute
 }
@@ -3068,7 +3036,6 @@ const rootRouteChildren: RootRouteChildren = {
   PilotRoute: PilotRouteWithChildren,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TheHangarRoute: TheHangarRouteWithChildren,
-  ApiHarnessRoute: ApiHarnessRouteWithChildren,
   ApiZdiagRoute: ApiZdiagRouteWithChildren,
   THLoginRoute: THLoginRoute,
   THIndexRoute: THIndexRoute,
