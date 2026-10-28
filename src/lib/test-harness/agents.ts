@@ -27,6 +27,7 @@ export const TEST_HARNESS_AGENTS: TestHarnessAgent[] = [
       { id: "reasoning_planning", label: "Reasoning & Planning — decompose, identify constraints/KPIs" },
       { id: "output_generation", label: "Output Generation — assemble mission spec" },
       { id: "output_interface", label: "Output Interface — hand off to Concept" },
+      { id: "agentic_run", label: "Agentic Run — Claude decides the stage order itself (payload: { raw_text, structured_fields?, attached_regulations? })" },
     ],
   },
   {
