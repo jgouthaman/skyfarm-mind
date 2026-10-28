@@ -244,7 +244,7 @@ function StageUsageTable({ flow }: { flow: ConceptFlowState }) {
                 {row?.mock && (
                   <span
                     className="hgr-c-usage-mock"
-                    title="No live Claude reply — this stage's content is placeholder output"
+                    title="No live TorqWings AI reply — this stage's content is placeholder output"
                   >
                     simulated
                   </span>
@@ -1164,7 +1164,7 @@ function StageStatusBadge({ num, mock }: { num: number; mock: boolean }) {
   return (
     <span
       className={`hgr-c-findings-badge ${mock ? "hgr-c-findings-badge-mock" : "hgr-c-findings-badge-live"}`}
-      title={mock ? "Simulated — no ANTHROPIC_API_KEY reply" : "Live — real Claude response"}
+      title={mock ? "Simulated — no ANTHROPIC_API_KEY reply" : "Live — real TorqWings AI response"}
     >
       {num}
     </span>

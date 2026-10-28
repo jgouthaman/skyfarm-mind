@@ -295,7 +295,7 @@ function StageUsageTable({ flow }: { flow: MissionFlowState }) {
                 {row?.mock && (
                   <span
                     className="hgr-m-usage-mock"
-                    title="No live Claude reply — this stage's content is placeholder output"
+                    title="No live TorqWings AI reply — this stage's content is placeholder output"
                   >
                     simulated
                   </span>
@@ -645,7 +645,7 @@ const STAGE_TITLES: Record<StageKey, string> = {
 // thinking.
 const PROGRESS_STEPS = [
   "Parsing your brief",
-  "Extracting intent & entities (Claude)",
+  "Extracting intent & entities (TorqWings AI)",
   "Validating against KPI bounds",
 ];
 const LLM_PROGRESS_STEP = 1;
@@ -2231,7 +2231,7 @@ function StageStatusBadge({ mock }: { mock: boolean }) {
   return (
     <span
       className={`hgr-m-findings-badge ${mock ? "hgr-m-findings-badge-mock" : "hgr-m-findings-badge-live"}`}
-      title={mock ? "Simulated — no ANTHROPIC_API_KEY reply" : "Live — real Claude response"}
+      title={mock ? "Simulated — no ANTHROPIC_API_KEY reply" : "Live — real TorqWings AI response"}
     >
       ✓
     </span>
@@ -3312,12 +3312,18 @@ function DashField({ label, value }: { label: string; value: string | null }) {
 
 const HGR_MISSION_CSS = `
 .hgr-m{
-  --hgr-m-navy-deep:#08131F; --hgr-m-navy-panel:#0F2136; --hgr-m-navy-panel-2:#132A44;
-  --hgr-m-blue-line:#3E7CA6; --hgr-m-blue-bright:#6FB4E0;
-  --hgr-m-amber:#E8A33D; --hgr-m-amber-bright:#F6C374;
-  --hgr-m-bernoulli:#9B7FE8; --hgr-m-bernoulli-bright:#B6A2F2;
-  --hgr-m-paper:#ECEFF3; --hgr-m-paper-dim:#8FA5BB;
-  --hgr-m-grid:rgba(111,180,224,0.08); --hgr-m-hairline:rgba(111,180,224,0.20);
+  /* Light theme matching /the-hangar/agents (HangarChrome's HGR_LANDING_CSS):
+     white page, blue grid, light-blue panels, dark text. navy-deep keeps its
+     name as "page background" (white now); text that sat on a coloured fill
+     using navy-deep still reads because those fills are the darker light-
+     theme blue. Amber buttons use --hgr-m-ink instead. amber-bright is only
+     ever text here, so it's darkened to stay readable on white. */
+  --hgr-m-navy-deep:#FFFFFF; --hgr-m-navy-panel:#F2F7FB; --hgr-m-navy-panel-2:#E4EEF7;
+  --hgr-m-blue-line:#3E7CA6; --hgr-m-blue-bright:#1C74B8;
+  --hgr-m-amber:#E8A33D; --hgr-m-amber-bright:#B4690E;
+  --hgr-m-bernoulli:#7A5BD6; --hgr-m-bernoulli-bright:#6A4BC4;
+  --hgr-m-paper:#12222F; --hgr-m-paper-dim:#4F6B80; --hgr-m-ink:#0A1826;
+  --hgr-m-grid:rgba(62,124,166,0.14); --hgr-m-hairline:rgba(62,124,166,0.28);
 
   background:var(--hgr-m-navy-deep); color:var(--hgr-m-paper); font-family:'IBM Plex Sans', sans-serif;
   background-image:linear-gradient(var(--hgr-m-grid) 1px, transparent 1px), linear-gradient(90deg, var(--hgr-m-grid) 1px, transparent 1px);
@@ -3330,7 +3336,10 @@ const HGR_MISSION_CSS = `
 .hgr-m-wrap{ max-width:1180px; margin:0 auto; padding:0 32px; }
 .hgr-m a{ color:inherit; }
 
-.hgr-m nav{ border-bottom:1px solid var(--hgr-m-hairline); position:sticky; top:0; background:rgba(8,19,31,0.9); backdrop-filter:blur(8px); z-index:20; }
+.hgr-m nav{ border-bottom:1px solid var(--hgr-m-hairline); position:sticky; top:0; background:rgba(10,24,38,0.92); backdrop-filter:blur(10px); z-index:20;
+  /* Dark nav strip on the light page, same as the agents page's nav. */
+  color:var(--hgr-m-paper);
+  --hgr-m-paper:#ECEFF3; --hgr-m-paper-dim:#8FA5BB; --hgr-m-blue-bright:#6FB4E0; --hgr-m-hairline:rgba(111,180,224,0.22); }
 .hgr-m nav .hgr-m-wrap{ display:flex; align-items:center; justify-content:space-between; height:68px; }
 .hgr-m-crumbs{ font-size:14px; color:var(--hgr-m-paper-dim); display:flex; align-items:center; gap:8px; }
 .hgr-m-crumbs a{ text-decoration:none; color:var(--hgr-m-paper-dim); }
@@ -3342,7 +3351,7 @@ const HGR_MISSION_CSS = `
 
 .hgr-m main{ padding-bottom:100px; }
 
-.hgr-m-hero{ padding:56px 0 20px; border-bottom:1px solid var(--hgr-m-hairline); position:relative; overflow:hidden; }
+.hgr-m-hero{ padding:56px 0 20px; border-bottom:1px solid var(--hgr-m-blue-line); position:relative; overflow:hidden; }
 .hgr-m-doors{ position:absolute; inset:0; z-index:5; display:flex; pointer-events:none; }
 .hgr-m-door{ flex:1; background: repeating-linear-gradient(90deg, #0C1E30 0 78px, #08131F 78px 80px); position:relative; }
 .hgr-m-door::after{ content:""; position:absolute; top:0; bottom:0; width:2px; background:var(--hgr-m-blue-line); opacity:.5; }
@@ -3358,17 +3367,17 @@ const HGR_MISSION_CSS = `
   font-family:'IBM Plex Mono',monospace; font-size:11.5px; letter-spacing:.1em; text-transform:uppercase;
   padding:6px 13px; border-radius:2px; display:inline-flex; align-items:center; gap:8px;
 }
-.hgr-m-badge-bay{ color:var(--hgr-m-paper-dim); border:1px solid var(--hgr-m-hairline); }
+.hgr-m-badge-bay{ color:var(--hgr-m-paper); font-weight:700; border:1px solid var(--hgr-m-blue-line); background:var(--hgr-m-navy-panel-2); }
 .hgr-m-badge-ai{ font-weight:700; }
 .hgr-m-badge-ai-dot{ width:7px; height:7px; border-radius:50%; flex-shrink:0; }
-.hgr-m-badge-ai-checking{ color:var(--hgr-m-paper-dim); border:1px solid var(--hgr-m-hairline); }
+.hgr-m-badge-ai-checking{ color:var(--hgr-m-paper); border:1px solid var(--hgr-m-blue-line); background:var(--hgr-m-navy-panel-2); }
 .hgr-m-badge-ai-checking .hgr-m-badge-ai-dot{ background:var(--hgr-m-paper-dim); }
-.hgr-m-badge-ai-live{ color:#4ADE80; border:1px solid rgba(74,222,128,.4); background:rgba(74,222,128,.08); }
-.hgr-m-badge-ai-live .hgr-m-badge-ai-dot{ background:#4ADE80; box-shadow:0 0 6px rgba(74,222,128,.8); animation:hgr-m-ai-pulse 2s ease-in-out infinite; }
-.hgr-m-badge-ai-offline{ color:var(--hgr-m-amber); border:1px solid rgba(232,163,61,.4); background:rgba(232,163,61,.08); }
+.hgr-m-badge-ai-live{ color:#166534; border:1px solid #16A34A; background:#DCFCE7; }
+.hgr-m-badge-ai-live .hgr-m-badge-ai-dot{ background:#16A34A; box-shadow:0 0 6px rgba(22,163,74,.7); animation:hgr-m-ai-pulse 2s ease-in-out infinite; }
+.hgr-m-badge-ai-offline{ color:var(--hgr-m-amber-bright); border:1px solid var(--hgr-m-amber); background:#FDF3E3; }
 .hgr-m-badge-ai-offline .hgr-m-badge-ai-dot{ background:var(--hgr-m-amber); box-shadow:0 0 6px rgba(232,163,61,.6); }
-.hgr-m-badge-ai-model{ display:inline-flex; align-items:center; gap:3px; margin-left:6px; padding-left:6px; border-left:1px solid rgba(74,222,128,.3); font-weight:500; opacity:.9; }
-.hgr-m-badge-ai-model-fallback{ border-left-color:rgba(232,163,61,.4); color:var(--hgr-m-amber); }
+.hgr-m-badge-ai-model{ display:inline-flex; align-items:center; gap:3px; margin-left:6px; padding-left:6px; border-left:1px solid rgba(22,101,52,.35); font-weight:600; }
+.hgr-m-badge-ai-model-fallback{ border-left-color:rgba(180,105,14,.4); color:var(--hgr-m-amber-bright); }
 @keyframes hgr-m-ai-pulse{ 0%,100%{ opacity:1; } 50%{ opacity:.4; } }
 
 .hgr-m-hero-row{ display:flex; align-items:center; gap:48px; flex-wrap:wrap; }
@@ -3400,8 +3409,8 @@ const HGR_MISSION_CSS = `
 .hgr-m-btn{ font-family:'IBM Plex Mono',monospace; font-size:13px; padding:12px 22px; border-radius:2px; display:inline-flex; align-items:center; gap:8px; text-decoration:none; border:1px solid transparent; cursor:pointer; background:none; }
 .hgr-m-btn-ghost{ border:1px solid var(--hgr-m-hairline); color:var(--hgr-m-paper-dim); }
 .hgr-m-btn-ghost:hover{ color:var(--hgr-m-paper); border-color:var(--hgr-m-blue-bright); }
-.hgr-m-btn-amber{ background:var(--hgr-m-amber); color:var(--hgr-m-navy-deep); font-weight:600; }
-.hgr-m-btn-amber:hover{ background:var(--hgr-m-amber-bright); }
+.hgr-m-btn-amber{ background:var(--hgr-m-amber); color:var(--hgr-m-ink); font-weight:600; }
+.hgr-m-btn-amber:hover{ background:#F6C374; }
 .hgr-m-btn:disabled{ opacity:.4; cursor:not-allowed; }
 .hgr-m-btn:disabled:hover{ color:var(--hgr-m-paper-dim); border-color:var(--hgr-m-hairline); }
 
@@ -3409,17 +3418,19 @@ const HGR_MISSION_CSS = `
 .hgr-m-plan-new-link{
   display:inline-flex; align-items:center; gap:6px; margin-bottom:20px;
   font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.04em;
-  color:var(--hgr-m-blue-bright); background:none; border:1px solid var(--hgr-m-hairline);
+  font-weight:700; color:var(--hgr-m-blue-bright); background:var(--hgr-m-navy-panel-2);
+  border:1px solid var(--hgr-m-blue-line);
   border-radius:2px; padding:9px 16px; cursor:pointer;
 }
-.hgr-m-plan-new-link:hover{ color:var(--hgr-m-paper); border-color:var(--hgr-m-blue-bright); }
+.hgr-m-plan-new-link:hover{ color:#FFFFFF; background:var(--hgr-m-blue-bright); border-color:var(--hgr-m-blue-bright); }
 .hgr-m-missions-panel{ border:1px solid var(--hgr-m-hairline); background:var(--hgr-m-navy-panel); border-radius:2px; margin-bottom:32px; }
 .hgr-m-missions-panel-title{
   display:flex; align-items:center; justify-content:space-between; width:100%;
   font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.08em; text-transform:uppercase;
-  color:var(--hgr-m-paper-dim); padding:14px 18px; border:none; background:none; cursor:pointer;
+  font-weight:700; color:var(--hgr-m-paper); padding:14px 18px; border:none;
+  background:var(--hgr-m-navy-panel-2); border-left:3px solid var(--hgr-m-blue-bright); cursor:pointer;
 }
-.hgr-m-missions-panel-title:hover{ color:var(--hgr-m-paper); }
+.hgr-m-missions-panel-title:hover{ color:var(--hgr-m-blue-bright); }
 .hgr-m-missions-arrow{ display:inline-block; font-size:11px; transition:transform .15s; }
 .hgr-m-missions-arrow-open{ transform:rotate(90deg); }
 .hgr-m-missions-list{ max-height:260px; overflow-y:auto; border-top:1px solid var(--hgr-m-hairline); }
@@ -3445,23 +3456,22 @@ const HGR_MISSION_CSS = `
 .hgr-m-mission-row-confidence{ font-family:'IBM Plex Mono',monospace; font-size:12.5px; color:var(--hgr-m-paper-dim); }
 .hgr-m-mission-row-date{ font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--hgr-m-paper-dim); text-align:right; }
 
-.hgr-m-stage-tracker{ display:flex; gap:1px; background:var(--hgr-m-hairline); border:1px solid var(--hgr-m-hairline); margin-bottom:28px; }
-.hgr-m-stage-tracker-item{ flex:1; background:var(--hgr-m-navy-panel); padding:12px 10px; text-align:center; }
+.hgr-m-stage-tracker{ display:flex; gap:1px; background:var(--hgr-m-blue-line); border:1px solid var(--hgr-m-blue-line); margin-bottom:28px; }
+.hgr-m-stage-tracker-item{ flex:1; background:var(--hgr-m-navy-panel-2); padding:12px 10px; text-align:center; }
 .hgr-m-stage-tracker-num{
   width:24px; height:24px; border-radius:50%; margin:0 auto 6px;
   display:flex; align-items:center; justify-content:center;
   font-family:'IBM Plex Mono',monospace; font-size:14px; font-weight:700;
-  border:1.5px solid var(--hgr-m-hairline); color:transparent; transition:.2s;
+  border:1.5px solid var(--hgr-m-blue-line); background:#FFFFFF; color:transparent; transition:.2s;
 }
-.hgr-m-stage-tracker-label{ font-size:12px; color:var(--hgr-m-paper-dim); }
-.hgr-m-stage-tracker-item-complete{ background:#132A44; }
-.hgr-m-stage-tracker-item-complete .hgr-m-stage-tracker-label{ color:var(--hgr-m-paper); }
+.hgr-m-stage-tracker-label{ font-size:12.5px; font-weight:600; color:var(--hgr-m-paper); }
+.hgr-m-stage-tracker-item-complete{ background:var(--hgr-m-navy-panel-2); }
 .hgr-m-stage-tracker-item-complete .hgr-m-stage-tracker-num{
   background:var(--hgr-m-blue-bright); border-color:var(--hgr-m-blue-bright);
-  color:var(--hgr-m-navy-deep); box-shadow:0 0 10px rgba(111,180,224,0.5);
+  color:#FFFFFF; box-shadow:0 0 6px rgba(28,116,184,0.35);
 }
-.hgr-m-stage-tracker-item-active{ background:#1B3A57; box-shadow:inset 0 0 0 1px rgba(232,163,61,.4); }
-.hgr-m-stage-tracker-item-active .hgr-m-stage-tracker-label{ color:var(--hgr-m-paper); }
+.hgr-m-stage-tracker-item-active{ background:#FDF3E3; box-shadow:inset 0 -3px 0 var(--hgr-m-amber); }
+.hgr-m-stage-tracker-item-active .hgr-m-stage-tracker-label{ color:var(--hgr-m-amber-bright); font-weight:700; }
 .hgr-m-stage-tracker-item-active .hgr-m-stage-tracker-num{ border-color:var(--hgr-m-amber); }
 
 /* ── Intake form + live status ── */
@@ -3470,6 +3480,13 @@ const HGR_MISSION_CSS = `
 .hgr-m-intake{ max-width:640px; }
 .hgr-m-field{ margin-bottom:22px; }
 .hgr-m-field label{ display:block; font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--hgr-m-paper-dim); margin-bottom:10px; }
+/* Section headings (Mission brief, live status) share the "Your missions"
+   bar style so the left and right columns start at the same height and
+   read as one set of headings. */
+.hgr-m-field label[for="hgrBrief"], .hgr-m-status-panel-title{
+  font-weight:700; color:var(--hgr-m-paper); background:var(--hgr-m-navy-panel-2);
+  border-left:3px solid var(--hgr-m-blue-bright); padding:12px 14px; line-height:1.2;
+}
 .hgr-m-field textarea{
   width:100%; background:var(--hgr-m-navy-panel); border:1px solid var(--hgr-m-hairline);
   color:var(--hgr-m-paper); font-family:'IBM Plex Sans',sans-serif; font-size:14.5px; line-height:1.6;
@@ -3510,7 +3527,7 @@ const HGR_MISSION_CSS = `
   font-size:11.5px; padding:3px 9px; border-radius:2px; cursor:pointer; margin-left:auto;
 }
 .hgr-m-doc-remove:hover{ color:var(--hgr-m-paper); border-color:var(--hgr-m-blue-bright); }
-.hgr-m-doc-error{ margin:8px 0 0; font-size:12.5px; color:#ffb4b4; }
+.hgr-m-doc-error{ margin:8px 0 0; font-size:12.5px; color:#C0392B; }
 .hgr-m-attached{ max-width:640px; margin:-8px 0 20px; }
 .hgr-m-attached .hgr-m-intake-summary-label{ margin-bottom:6px; }
 .hgr-m-attached-chips{ display:flex; flex-wrap:wrap; gap:6px; }
@@ -3529,9 +3546,9 @@ const HGR_MISSION_CSS = `
 /* ── Live status panel ── */
 .hgr-m-status-panel{
   border:1px solid var(--hgr-m-hairline); background:var(--hgr-m-navy-panel); border-radius:2px;
-  padding:20px;
+  padding:0 20px 20px;
 }
-.hgr-m-status-panel-title{ font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--hgr-m-paper-dim); margin-bottom:16px; }
+.hgr-m-status-panel-title{ font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.08em; text-transform:uppercase; margin:0 -20px 16px; border-top:3px solid var(--hgr-m-amber); }
 .hgr-m-status-idle{ color:var(--hgr-m-paper-dim); font-size:13px; line-height:1.6; margin:0; }
 .hgr-m-status-step{ display:flex; align-items:flex-start; gap:10px; padding:9px 0; border-top:1px dashed var(--hgr-m-hairline); }
 .hgr-m-status-step:first-child{ border-top:none; }
@@ -3634,7 +3651,7 @@ const HGR_MISSION_CSS = `
 .hgr-m-usage-table .hgr-m-usage-num{ text-align:right; font-variant-numeric:tabular-nums; }
 .hgr-m-export{ display:inline-flex; align-items:center; gap:8px; flex-wrap:wrap; }
 .hgr-m-export-label{ font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--hgr-m-paper-dim); }
-.hgr-m-export-error{ font-size:12.5px; color:#ffb4b4; }
+.hgr-m-export-error{ font-size:12.5px; color:#C0392B; }
 .hgr-m-usage-mock{
   margin-left:10px; font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.05em; text-transform:uppercase;
   color:var(--hgr-m-amber); border:1px solid rgba(232,163,61,.4); padding:2px 6px; border-radius:2px;
@@ -3816,10 +3833,10 @@ const HGR_MISSION_CSS = `
   flex:1; height:28px; border-radius:2px; display:flex; align-items:center; justify-content:center;
   font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:600; letter-spacing:.02em;
 }
-.hgr-m-confbar-slot-yes{ background:rgba(74,222,128,.15); border:1px solid rgba(74,222,128,.5); color:#4ADE80; }
+.hgr-m-confbar-slot-yes{ background:rgba(74,222,128,.15); border:1px solid rgba(74,222,128,.5); color:#15803D; }
 .hgr-m-confbar-slot-no{ background:rgba(248,113,113,.1); border:1px dashed rgba(248,113,113,.4); color:#F87171; }
 .hgr-m-confbar-fill{ height:100%; border-radius:4px; background:var(--hgr-m-blue-bright); }
-.hgr-m-confbar-fill-penalty{ background:var(--hgr-m-amber-bright); }
+.hgr-m-confbar-fill-penalty{ background:#F6C374; }
 .hgr-m-confbar-total{
   display:flex; justify-content:space-between; align-items:baseline; margin-top:18px; padding-top:14px;
   border-top:1px dashed var(--hgr-m-hairline);

@@ -282,7 +282,7 @@ function TheHangarSimulation() {
               Turn a spec-ready CAD design into a flight assessment.
             </h2>
             <p className="hgr-s-sec-sub">
-              Runs one real Claude Sonnet 5 call to estimate flight envelope and stability, then a
+              Runs one real TorqWings AI call to estimate flight envelope and stability, then a
               deterministic scoring pass. There's no real physics/simulation engine (JSBSim/X-Plane)
               yet, so this is Claude reasoning about plausible flight performance, not a simulated
               engineering result. Risk flags are advisory only — nothing here is blocked by them.

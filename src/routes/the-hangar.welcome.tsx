@@ -84,7 +84,7 @@ const NODES: NodeData[] = [
     href: "/the-hangar/aircraft-design",
     desc: "Selects configuration and design parameters -- gate-then-score against rules and reference designs, never a guess.",
     inp: "Concept",
-    tools: "Claude Sonnet 5, rule engine",
+    tools: "TorqWings AI, rule engine",
     out: "Aircraft geometry preview",
   },
   {
@@ -98,7 +98,7 @@ const NODES: NodeData[] = [
     href: "/the-hangar/cad-design",
     desc: "Builds real CAD geometry and assemblies from the validated design parameters -- the first fully physical output.",
     inp: "Aircraft design",
-    tools: "Claude Sonnet 5, rule engine",
+    tools: "TorqWings AI, rule engine",
     out: "CAD model & assembly",
   },
   {
@@ -112,7 +112,7 @@ const NODES: NodeData[] = [
     href: "/the-hangar/simulation",
     desc: "Assesses flight envelope, stability, and performance risk from the CAD design -- LLM reasoning bounded by vertical design rules.",
     inp: "CAD model",
-    tools: "Claude Sonnet 5, rule engine",
+    tools: "TorqWings AI, rule engine",
     out: "Simulation result: flight envelope, stability, risk flags",
   },
   {
@@ -126,7 +126,7 @@ const NODES: NodeData[] = [
     href: "/the-hangar/cfd-analysis",
     desc: "Reasons about aerodynamic forces, coefficients, and flow behavior from the CAD geometry -- Phase 1: LLM reasoning only, no real CFD solver runs yet.",
     inp: "CAD geometry",
-    tools: "Claude Sonnet 5, rule engine",
+    tools: "TorqWings AI, rule engine",
     out: "CFD estimate: forces, coefficients, flow description (Phase 1 -- mocked, not simulated)",
   },
   {
@@ -140,7 +140,7 @@ const NODES: NodeData[] = [
     href: "/the-hangar/structural",
     desc: "Reasons about stress, deformation and safety factor from the CAD design and load-case assumptions -- LLM reasoning only, no real FEA solver runs yet.",
     inp: "CAD mass properties & validation",
-    tools: "Claude Sonnet 5, rule engine",
+    tools: "TorqWings AI, rule engine",
     out: "Structural result: stress/deformation estimate, safety factor, risk flags (Phase 1 -- mocked, not solved)",
   },
   {
@@ -154,7 +154,7 @@ const NODES: NodeData[] = [
     href: "/the-hangar/optimization",
     desc: "Reasons about the weight/drag/cost/safety trade-off position from flight dynamics, CFD, and structural results -- LLM reasoning only, no real multi-objective search (Optuna/PyGMO) runs yet.",
     inp: "Flight dynamics + CFD + structural results",
-    tools: "Claude Sonnet 5, rule engine",
+    tools: "TorqWings AI, rule engine",
     out: "Trade-off assessment: objective scores, recommended adjustments (Phase 1 -- reasoning only, not a real Pareto search)",
   },
   {

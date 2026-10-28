@@ -268,7 +268,7 @@ function TheHangarStructural() {
               Turn a spec-ready CAD design into a structural estimate.
             </h2>
             <p className="hgr-t-sec-sub">
-              Runs one real Claude Sonnet 5 call to estimate mesh/material assignment, load cases,
+              Runs one real TorqWings AI call to estimate mesh/material assignment, load cases,
               stress results, and safety factor, then a deterministic confidence pass. There's no
               real FEA solver (CalculiX/Code_Aster/Abaqus) yet and no real Materials DB, so this is
               Claude reasoning about plausible structural behavior using approximated material

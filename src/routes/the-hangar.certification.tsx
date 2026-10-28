@@ -273,7 +273,7 @@ function TheHangarCertification() {
               Build a certification checklist for a validated design.
             </h2>
             <p className="hgr-c-sec-sub">
-              Runs one real Claude Sonnet 5 call to reason about certification readiness, then a
+              Runs one real TorqWings AI call to reason about certification readiness, then a
               deterministic confidence pass. There's no live regulatory clause database or
               certification-body integration yet -- so this is Claude reasoning qualitatively
               about certification for the one design you give it, not a claim of a formal

@@ -3,6 +3,7 @@ import { createFileRoute, Link, useSearch } from "@tanstack/react-router";
 import { useHangarSession } from "@/lib/the-hangar/session";
 import { supabase } from "@/integrations/supabase/client";
 import type { MissionListEntry } from "@/lib/the-hangar/missionAgentPipeline";
+import { describeInrCost, formatCostInr } from "@/lib/the-hangar/missionUsage";
 
 // Local view types mirroring the /api/hangar/process-bernoulli/review
 // response shape (bernoulliAgentPipeline.ts's BernoulliReviewResponse) --
@@ -13,6 +14,9 @@ interface BernoulliCheckView {
   status: "PASS" | "WARN" | "FAIL" | "INFO";
   message: string;
   sourceWasMock: boolean;
+  reasoning?: string;
+  usage?: { inputTokens: number; outputTokens: number };
+  provider?: "anthropic" | "groq";
 }
 
 interface BernoulliReviewView {
@@ -24,6 +28,107 @@ interface BernoulliReviewView {
   confidenceScore: number;
   specVersion: number;
   createdAt: string;
+  usage: { requests: number; inputTokens: number; outputTokens: number; estimatedCostUsd: number };
+  durationMs: number | null;
+}
+
+function formatDuration(ms: number): string {
+  if (ms < 1000) return `${ms}ms`;
+  return `${(ms / 1000).toFixed(1)}s`;
+}
+
+const PROVIDER_LABEL: Record<"anthropic" | "groq", string> = { anthropic: "Claude", groq: "Groq" };
+
+// Same telemetry bar Bay 01 shows (Requests / tokens / est. cost / time),
+// so both bays read their LLM spend the same way.
+function BernoulliTelemetryBar({ review }: { review: BernoulliReviewView }) {
+  const u = review.usage;
+  if (!u) return null;
+  return (
+    <div
+      className="hgr-ber-telemetry"
+      title="LLM usage for this review. Cost is an estimate in INR at a fixed USD rate, not a bill. Time is only known for a review run in this session."
+    >
+      <div className="hgr-ber-telemetry-item">
+        <span className="hgr-ber-telemetry-num">{u.requests}</span>
+        <span className="hgr-ber-telemetry-label">API calls</span>
+      </div>
+      <div className="hgr-ber-telemetry-item">
+        <span className="hgr-ber-telemetry-num">{u.inputTokens.toLocaleString()}</span>
+        <span className="hgr-ber-telemetry-label">Input tokens</span>
+      </div>
+      <div className="hgr-ber-telemetry-item">
+        <span className="hgr-ber-telemetry-num">{u.outputTokens.toLocaleString()}</span>
+        <span className="hgr-ber-telemetry-label">Output tokens</span>
+      </div>
+      <div className="hgr-ber-telemetry-item" title={describeInrCost(u.estimatedCostUsd)}>
+        <span className="hgr-ber-telemetry-num">~{formatCostInr(u.estimatedCostUsd)}</span>
+        <span className="hgr-ber-telemetry-label">Est. cost</span>
+      </div>
+      <div className="hgr-ber-telemetry-item">
+        <span className="hgr-ber-telemetry-num">
+          {review.durationMs !== null ? formatDuration(review.durationMs) : "—"}
+        </span>
+        <span className="hgr-ber-telemetry-label">Latency</span>
+      </div>
+    </div>
+  );
+}
+
+// Per-check usage, same shape as Bay 01's per-stage table: deterministic
+// checks are a real 0 (they ran, they just make no LLM call), LLM checks
+// show their actual tokens and which provider answered.
+function BernoulliUsageTable({ review }: { review: BernoulliReviewView }) {
+  const u = review.usage;
+  if (!u) return null;
+  return (
+    <table
+      className="hgr-ber-usage-table"
+      title="LLM requests and tokens per check. Cost is an estimate in INR at a fixed USD rate, not a bill."
+    >
+      <thead>
+        <tr>
+          <th>Check</th>
+          <th className="hgr-ber-usage-num">Requests</th>
+          <th className="hgr-ber-usage-num">Tokens</th>
+        </tr>
+      </thead>
+      <tbody>
+        {review.checks.map((c) => (
+          <tr key={c.ruleId}>
+            <td>
+              {c.ruleId} {BERN_RULE_NAMES[c.ruleId] ?? ""}
+              {c.provider && <span className="hgr-ber-usage-provider">{PROVIDER_LABEL[c.provider]}</span>}
+              {c.sourceWasMock && <span className="hgr-ber-usage-mock">simulated</span>}
+            </td>
+            <td className="hgr-ber-usage-num">{c.usage ? 1 : 0}</td>
+            <td className="hgr-ber-usage-num">
+              {c.usage ? (c.usage.inputTokens + c.usage.outputTokens).toLocaleString() : 0}
+              {c.usage && (
+                <span className="hgr-ber-usage-split">
+                  {" "}
+                  in {c.usage.inputTokens.toLocaleString()} · out {c.usage.outputTokens.toLocaleString()}
+                </span>
+              )}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+      <tfoot>
+        <tr>
+          <td>Total</td>
+          <td className="hgr-ber-usage-num">{u.requests}</td>
+          <td className="hgr-ber-usage-num">{(u.inputTokens + u.outputTokens).toLocaleString()}</td>
+        </tr>
+        <tr>
+          <td colSpan={2}>Estimated cost</td>
+          <td className="hgr-ber-usage-num" title={describeInrCost(u.estimatedCostUsd)}>
+            ~{formatCostInr(u.estimatedCostUsd)}
+          </td>
+        </tr>
+      </tfoot>
+    </table>
+  );
 }
 
 // -----------------------------------------------------------------------
@@ -96,11 +201,11 @@ const RIGHT_CALLERS = [
   { bay: "12", key: "certification", name: "Certification Agent", to: "/the-hangar/certification" },
 ] as const;
 
-// The 5 checks bernoulliChecks.ts actually runs (BERN-M01–M05), with a
+// The 6 checks bernoulliChecks.ts actually runs (BERN-M01–M06), with a
 // human-readable name and one-line description for each -- shown as a
 // legend before a check runs, and to label each row of the report after.
 // M01/M05 are the two hard gates (a FAIL on either fails the whole
-// review); M02-M04 can only WARN.
+// review); M02-M04 and M06 can only WARN.
 const BERN_RULES: { id: string; name: string; description: string; hardGate: boolean }[] = [
   {
     id: "BERN-M01",
@@ -117,7 +222,7 @@ const BERN_RULES: { id: string; name: string; description: string; hardGate: boo
   {
     id: "BERN-M03",
     name: "Payload/Endurance Plausibility",
-    description: "Claude-judged: is this payload/endurance combination realistic for this vehicle class?",
+    description: "TorqWings AI-judged: is this payload/endurance combination realistic for this vehicle class?",
     hardGate: false,
   },
   {
@@ -131,6 +236,12 @@ const BERN_RULES: { id: string; name: string; description: string; hardGate: boo
     name: "Dimensional Consistency",
     description: 'Do KPI units actually match what their names imply (e.g. "Range" isn\'t given in kg)?',
     hardGate: true,
+  },
+  {
+    id: "BERN-M06",
+    name: "Energy/Power Budget Plausibility",
+    description: "TorqWings AI-judged, grounded in reference ranges: could a battery/fuel load that fits this vehicle class actually deliver this payload+endurance?",
+    hardGate: false,
   },
 ];
 
@@ -159,6 +270,40 @@ function TheHangarBernoulli() {
   const [reviewStatus, setReviewStatus] = useState<"idle" | "loading" | "error">("idle");
   const [reviewResult, setReviewResult] = useState<BernoulliReviewView | null>(null);
   const [reviewError, setReviewError] = useState<string | null>(null);
+  const [llmStatus, setLlmStatus] = useState<"checking" | "live" | "offline">("checking");
+  const [llmProvider, setLlmProvider] = useState<"anthropic" | "groq" | null>(null);
+
+  // "AI" indicator -- same live check Bay 01's header uses, so both bays
+  // show the same provider (Claude, or Groq when Anthropic is down).
+  useEffect(() => {
+    let cancelled = false;
+    async function checkLlmStatus() {
+      const { data } = await supabase.auth.getSession();
+      const token = data.session?.access_token;
+      if (!token) return;
+      try {
+        const res = await fetch("/api/hangar/llm-status", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const json = await res.json();
+        if (!cancelled) {
+          setLlmStatus(res.ok && json.live ? "live" : "offline");
+          setLlmProvider(res.ok && json.live ? json.provider ?? null : null);
+        }
+      } catch {
+        if (!cancelled) {
+          setLlmStatus("offline");
+          setLlmProvider(null);
+        }
+      }
+    }
+    checkLlmStatus();
+    const interval = setInterval(checkLlmStatus, 60000);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, []);
   // Landing here with nothing at all (e.g. clicking the Bernoulli hub
   // directly on the welcome page, not "Ask Bernoulli" from a specific
   // bay) shows just the idle hub circle -- no picker, no legend, no spec
@@ -373,7 +518,40 @@ function TheHangarBernoulli() {
           <div className="hgr-ber-wrap">
             <div className="hgr-ber-status-row">
               <span className="hgr-ber-badge hgr-ber-badge-bay">BAY 14 -- CROSS-CUTTING</span>
-              <span className="hgr-ber-badge hgr-ber-badge-design">IN DESIGN</span>
+              <span
+                className={`hgr-ber-badge hgr-ber-badge-ai hgr-ber-badge-ai-${llmStatus}`}
+                title={
+                  llmStatus === "checking"
+                    ? "Checking connection to Anthropic/Groq…"
+                    : llmStatus === "live"
+                      ? llmProvider === "groq"
+                        ? "Live — Anthropic unreachable, falling back to Groq (gpt-oss-120b)"
+                        : "Live — connected to Anthropic (Claude Sonnet 5)"
+                      : "Offline — not connected to Anthropic or Groq. BERN-M03/M06 will fall back to mock output."
+                }
+              >
+                <span className="hgr-ber-badge-ai-dot" />
+                AI
+                {llmStatus === "live" && llmProvider === "anthropic" && (
+                  <span className="hgr-ber-badge-ai-model">
+                    <svg viewBox="0 0 16 16" width="10" height="10" aria-hidden="true">
+                      <path
+                        d="M8 0 L9.4 6.6 L16 8 L9.4 9.4 L8 16 L6.6 9.4 L0 8 L6.6 6.6 Z"
+                        fill="currentColor"
+                      />
+                    </svg>
+                    Claude
+                  </span>
+                )}
+                {llmStatus === "live" && llmProvider === "groq" && (
+                  <span className="hgr-ber-badge-ai-model hgr-ber-badge-ai-model-fallback">
+                    <svg viewBox="0 0 16 16" width="10" height="10" aria-hidden="true">
+                      <path d="M9 0 L2 9 L7 9 L6 16 L14 6 L9 6 Z" fill="currentColor" />
+                    </svg>
+                    Groq
+                  </span>
+                )}
+              </span>
             </div>
             <div className="hgr-ber-hero-row">
               <h1>Bernoulli Agent</h1>
@@ -485,7 +663,7 @@ function TheHangarBernoulli() {
                 </div>
                 <p className="hgr-ber-hub-select-hint">
                   {checkTriggered
-                    ? "Runs BERN-M01–M05 against the selected spec -- deterministic checks plus one Claude Sonnet 5 call."
+                    ? "Runs BERN-M01–M06 against the selected spec -- deterministic checks plus two TorqWings AI calls."
                     : "Picking a mission doesn't run a check yet -- Ask Bernoulli opens the report below."}
                 </p>
 
@@ -615,8 +793,8 @@ function TheHangarBernoulli() {
 
                     {reviewStatus === "loading" && (
                       <p className="hgr-ber-hub-report-placeholder">
-                        Running BERN-M01–M05 -- deterministic checks are instant, the Claude call
-                        (BERN-M03) can take a few seconds…
+                        Running BERN-M01–M06 -- deterministic checks are instant, the two TorqWings AI
+                        calls (BERN-M03, BERN-M06) can take a few seconds…
                       </p>
                     )}
 
@@ -658,12 +836,17 @@ function TheHangarBernoulli() {
                               <span className="hgr-ber-check-message">
                                 {c.message}
                                 {c.sourceWasMock && (
-                                  <span className="hgr-ber-check-mock"> -- via Claude (mock)</span>
+                                  <span className="hgr-ber-check-mock"> -- via TorqWings AI (mock)</span>
                                 )}
                               </span>
+                              {c.reasoning && (
+                                <span className="hgr-ber-check-reasoning">{c.reasoning}</span>
+                              )}
                             </li>
                           ))}
                         </ul>
+                        <BernoulliTelemetryBar review={reviewResult} />
+                        <BernoulliUsageTable review={reviewResult} />
                       </>
                     )}
                   </div>
@@ -722,12 +905,15 @@ function SpecField({ label, value }: { label: string; value: string | null }) {
 
 const HGR_BERNOULLI_CSS = `
 .hgr-ber{
-  --hgr-ber-navy-deep:#08131F; --hgr-ber-navy-panel:#0F2136;
-  --hgr-ber-blue-line:#3E7CA6; --hgr-ber-blue-bright:#6FB4E0;
-  --hgr-ber-amber:#E8A33D; --hgr-ber-amber-bright:#F6C374;
-  --hgr-ber-paper:#ECEFF3; --hgr-ber-paper-dim:#8FA5BB;
-  --hgr-ber-green:#5FBF8F; --hgr-ber-red:#E0715A;
-  --hgr-ber-grid:rgba(111,180,224,0.08); --hgr-ber-hairline:rgba(111,180,224,0.20);
+  /* Light theme matching /the-hangar/agents -- same token swap as Bay 01's
+     page (see HGR_MISSION_CSS): white page, blue grid, light panels, dark
+     text, amber-bright darkened since it's only used as text. */
+  --hgr-ber-navy-deep:#FFFFFF; --hgr-ber-navy-panel:#F2F7FB;
+  --hgr-ber-blue-line:#3E7CA6; --hgr-ber-blue-bright:#1C74B8;
+  --hgr-ber-amber:#E8A33D; --hgr-ber-amber-bright:#B4690E;
+  --hgr-ber-paper:#12222F; --hgr-ber-paper-dim:#4F6B80; --hgr-ber-ink:#0A1826;
+  --hgr-ber-green:#2E8B57; --hgr-ber-red:#C0392B;
+  --hgr-ber-grid:rgba(62,124,166,0.14); --hgr-ber-hairline:rgba(62,124,166,0.28);
 
   background:var(--hgr-ber-navy-deep); color:var(--hgr-ber-paper); font-family:'IBM Plex Sans', sans-serif;
   background-image:linear-gradient(var(--hgr-ber-grid) 1px, transparent 1px), linear-gradient(90deg, var(--hgr-ber-grid) 1px, transparent 1px);
@@ -740,7 +926,10 @@ const HGR_BERNOULLI_CSS = `
 .hgr-ber-wrap{ max-width:1180px; margin:0 auto; padding:0 32px; }
 .hgr-ber a{ color:inherit; }
 
-.hgr-ber nav{ border-bottom:1px solid var(--hgr-ber-hairline); position:sticky; top:0; background:rgba(8,19,31,0.9); backdrop-filter:blur(8px); z-index:20; }
+.hgr-ber nav{ border-bottom:1px solid var(--hgr-ber-hairline); position:sticky; top:0; background:rgba(10,24,38,0.92); backdrop-filter:blur(10px); z-index:20;
+  /* Dark nav strip on the light page, same as the agents page's nav. */
+  color:var(--hgr-ber-paper);
+  --hgr-ber-paper:#ECEFF3; --hgr-ber-paper-dim:#8FA5BB; --hgr-ber-blue-bright:#6FB4E0; --hgr-ber-hairline:rgba(111,180,224,0.22); }
 .hgr-ber nav .hgr-ber-wrap{ display:flex; align-items:center; justify-content:space-between; height:68px; }
 .hgr-ber-crumbs{ font-size:14px; color:var(--hgr-ber-paper-dim); display:flex; align-items:center; gap:8px; }
 .hgr-ber-crumbs a{ text-decoration:none; color:var(--hgr-ber-paper-dim); }
@@ -751,7 +940,7 @@ const HGR_BERNOULLI_CSS = `
 .hgr-ber-exit:hover{ color:var(--hgr-ber-paper); border-color:var(--hgr-ber-blue-bright); }
 
 .hgr-ber main{ padding-bottom:100px; }
-.hgr-ber-hero{ padding:56px 0 20px; border-bottom:1px solid var(--hgr-ber-hairline); position:relative; overflow:hidden; }
+.hgr-ber-hero{ padding:56px 0 20px; border-bottom:1px solid var(--hgr-ber-blue-line); position:relative; overflow:hidden; }
 .hgr-ber-doors{ position:absolute; inset:0; z-index:5; display:flex; pointer-events:none; }
 .hgr-ber-door{ flex:1; background: repeating-linear-gradient(90deg, #0C1E30 0 78px, #08131F 78px 80px); position:relative; }
 .hgr-ber-door::after{ content:""; position:absolute; top:0; bottom:0; width:2px; background:var(--hgr-ber-blue-line); opacity:.5; }
@@ -764,8 +953,30 @@ const HGR_BERNOULLI_CSS = `
 @media (prefers-reduced-motion: reduce){ .hgr-ber-doors{ display:none; } }
 .hgr-ber-status-row{ display:flex; align-items:center; gap:12px; margin-bottom:22px; flex-wrap:wrap; }
 .hgr-ber-badge{ font-family:'IBM Plex Mono',monospace; font-size:11.5px; letter-spacing:.1em; text-transform:uppercase; padding:6px 13px; border-radius:2px; display:inline-flex; align-items:center; gap:8px; }
-.hgr-ber-badge-bay{ color:var(--hgr-ber-paper-dim); border:1px solid var(--hgr-ber-hairline); }
-.hgr-ber-badge-design{ color:var(--hgr-ber-amber-bright); border:1px solid rgba(232,163,61,.4); background:rgba(232,163,61,.08); }
+.hgr-ber-badge-bay{ color:var(--hgr-ber-paper); font-weight:700; border:1px solid var(--hgr-ber-blue-line); background:#E4EEF7; }
+.hgr-ber-badge-ai{ font-weight:700; }
+.hgr-ber-badge-ai-dot{ width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+.hgr-ber-badge-ai-checking{ color:var(--hgr-ber-paper); border:1px solid var(--hgr-ber-blue-line); background:#E4EEF7; }
+.hgr-ber-badge-ai-checking .hgr-ber-badge-ai-dot{ background:var(--hgr-ber-paper-dim); }
+.hgr-ber-badge-ai-live{ color:#166534; border:1px solid #16A34A; background:#DCFCE7; }
+.hgr-ber-badge-ai-live .hgr-ber-badge-ai-dot{ background:#16A34A; box-shadow:0 0 6px rgba(22,163,74,.7); animation:hgr-ber-ai-pulse 2s ease-in-out infinite; }
+.hgr-ber-badge-ai-offline{ color:var(--hgr-ber-amber-bright); border:1px solid var(--hgr-ber-amber); background:#FDF3E3; }
+.hgr-ber-badge-ai-offline .hgr-ber-badge-ai-dot{ background:var(--hgr-ber-amber); box-shadow:0 0 6px rgba(232,163,61,.6); }
+.hgr-ber-badge-ai-model{ display:inline-flex; align-items:center; gap:3px; margin-left:6px; padding-left:6px; border-left:1px solid rgba(22,101,52,.35); font-weight:600; }
+.hgr-ber-badge-ai-model-fallback{ border-left-color:rgba(180,105,14,.4); color:var(--hgr-ber-amber-bright); }
+@keyframes hgr-ber-ai-pulse{ 0%,100%{ opacity:1; } 50%{ opacity:.45; } }
+.hgr-ber-telemetry{ display:flex; flex-wrap:wrap; gap:1px; margin-top:16px; background:var(--hgr-ber-hairline); border:1px solid var(--hgr-ber-hairline); }
+.hgr-ber-telemetry-item{ flex:1 1 110px; background:var(--hgr-ber-navy-panel); padding:10px 12px; display:flex; flex-direction:column; gap:2px; }
+.hgr-ber-telemetry-num{ font-family:'IBM Plex Mono',monospace; font-size:15px; color:var(--hgr-ber-paper); }
+.hgr-ber-telemetry-label{ font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--hgr-ber-paper-dim); }
+.hgr-ber-usage-table{ width:100%; margin-top:12px; border-collapse:collapse; font-size:12.5px; border:1px solid var(--hgr-ber-hairline); }
+.hgr-ber-usage-table th{ font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--hgr-ber-paper-dim); font-weight:400; text-align:left; padding:8px 12px; border-bottom:1px solid var(--hgr-ber-hairline); }
+.hgr-ber-usage-table td{ padding:8px 12px; border-bottom:1px solid var(--hgr-ber-hairline); color:var(--hgr-ber-paper); }
+.hgr-ber-usage-table tfoot td{ font-weight:600; }
+.hgr-ber-usage-num{ text-align:right !important; font-family:'IBM Plex Mono',monospace; }
+.hgr-ber-usage-split{ font-size:11px; color:var(--hgr-ber-paper-dim); }
+.hgr-ber-usage-provider{ margin-left:8px; font-family:'IBM Plex Mono',monospace; font-size:10px; color:#15803D; border:1px solid rgba(21,128,61,.35); padding:1px 5px; border-radius:2px; }
+.hgr-ber-usage-mock{ margin-left:8px; font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--hgr-ber-amber); border:1px solid rgba(232,163,61,.4); padding:1px 5px; border-radius:2px; }
 .hgr-ber-hero-row{ display:flex; align-items:center; gap:48px; flex-wrap:wrap; }
 @media(max-width:760px){ .hgr-ber-hero-row{ flex-direction:column; align-items:flex-start; gap:16px; } }
 .hgr-ber-hero h1{ font-size:clamp(34px,5vw,58px); margin:0; flex-shrink:0; }
@@ -817,9 +1028,9 @@ const HGR_BERNOULLI_CSS = `
 }
 .hgr-ber-hub-idle-circle{
   width:120px; height:120px; border-radius:50%; display:flex; align-items:center; justify-content:center;
-  background:#0C2338; border:1.5px dashed var(--hgr-ber-blue-line);
+  background:#E4EEF7; border:1.5px dashed var(--hgr-ber-blue-bright);
   font-family:'IBM Plex Mono',monospace; font-size:12px; font-weight:700; letter-spacing:.06em;
-  color:var(--hgr-ber-paper); text-align:center;
+  color:var(--hgr-ber-blue-bright); text-align:center;
 }
 .hgr-ber-hub-idle-hint{ color:var(--hgr-ber-paper-dim); font-size:12.5px; line-height:1.5; margin:0; text-align:center; }
 .hgr-ber-hub-select-label{ font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--hgr-ber-paper-dim); }
@@ -837,8 +1048,8 @@ const HGR_BERNOULLI_CSS = `
   font-family:'IBM Plex Mono',monospace; font-size:12.5px; font-weight:600; white-space:nowrap;
   padding:10px 16px; border-radius:2px; border:1px solid transparent; cursor:pointer;
 }
-.hgr-ber-btn-amber{ background:var(--hgr-ber-amber); color:var(--hgr-ber-navy-deep); }
-.hgr-ber-btn-amber:hover{ background:var(--hgr-ber-amber-bright); }
+.hgr-ber-btn-amber{ background:var(--hgr-ber-amber); color:var(--hgr-ber-ink); }
+.hgr-ber-btn-amber:hover{ background:#F6C374; }
 .hgr-ber-btn:disabled{ opacity:.4; cursor:not-allowed; background:var(--hgr-ber-hairline); color:var(--hgr-ber-paper-dim); }
 
 /* -- Selected mission's spec, shown by default below the picker. Header
@@ -867,7 +1078,7 @@ const HGR_BERNOULLI_CSS = `
 .hgr-ber-hub-spec-block-title{ font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--hgr-ber-paper-dim); margin-bottom:8px; }
 .hgr-ber-hub-spec-block ul{ margin:0; padding-left:18px; color:var(--hgr-ber-paper); font-size:12.5px; line-height:1.8; }
 
-/* -- Report, opened by Ask Bernoulli -- runs BERN-M01-M05 for real -- */
+/* -- Report, opened by Ask Bernoulli -- runs BERN-M01-M06 for real -- */
 .hgr-ber-hub-report{
   margin-top:16px; border:1px solid rgba(232,163,61,.4); background:rgba(232,163,61,.06);
   border-radius:2px; padding:20px 22px;
@@ -896,7 +1107,7 @@ const HGR_BERNOULLI_CSS = `
 .hgr-ber-check-rule{ font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--hgr-ber-blue-bright); }
 .hgr-ber-check-rule-name{ display:block; font-family:'IBM Plex Sans',sans-serif; font-size:10.5px; color:var(--hgr-ber-paper-dim); margin-top:2px; }
 
-/* -- Legend: what BERN-M01-M05 each check -- */
+/* -- Legend: what BERN-M01-M06 each check -- */
 .hgr-ber-rules-legend{ list-style:none; margin:14px 0 0; padding:0; display:flex; flex-direction:column; gap:8px; }
 .hgr-ber-rules-legend li{ display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; font-size:12px; line-height:1.5; }
 .hgr-ber-rules-legend-id{ font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--hgr-ber-blue-bright); flex-shrink:0; display:inline-flex; align-items:center; gap:6px; }
@@ -910,6 +1121,7 @@ const HGR_BERNOULLI_CSS = `
 .hgr-ber-check-badge-INFO{ background:rgba(111,180,224,.15); color:var(--hgr-ber-blue-bright); }
 .hgr-ber-check-message{ font-size:12.5px; color:var(--hgr-ber-paper); line-height:1.6; }
 .hgr-ber-check-mock{ color:var(--hgr-ber-paper-dim); font-style:italic; }
+.hgr-ber-check-reasoning{ grid-column:1 / -1; font-size:11.5px; color:var(--hgr-ber-paper-dim); line-height:1.5; border-top:1px dashed var(--hgr-ber-hairline); margin-top:6px; padding-top:6px; }
 
 .hgr-ber-hub-select-error button{
   background:none; border:none; color:var(--hgr-ber-blue-bright); text-decoration:underline; cursor:pointer; font-size:13px; padding:0;

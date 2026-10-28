@@ -268,7 +268,7 @@ function TheHangarManufacturing() {
               Assess build readiness for a validated design.
             </h2>
             <p className="hgr-mf-sec-sub">
-              Runs one real Claude Sonnet 5 call to reason about likely manufacturability
+              Runs one real TorqWings AI call to reason about likely manufacturability
               concerns, then a deterministic confidence pass. There's no real DFM rule engine or
               cost-modeling tool yet -- so this is Claude reasoning qualitatively about
               manufacturability for the one design you give it, not a claim of a real DFM
