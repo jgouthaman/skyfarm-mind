@@ -1,5 +1,10 @@
 import { getMission, getSpecsForMissions } from "./missionPersistence.ts";
-import { runBernoulliChecks, type BernoulliCheckResult } from "./bernoulliChecks.ts";
+import {
+  computeBernoulliUsage,
+  runBernoulliChecks,
+  type BernoulliCheckResult,
+  type BernoulliUsage,
+} from "./bernoulliChecks.ts";
 import type { FinalizedConstraint, FinalizedKpi, MissionSpecsFields } from "./missionSpecAssembly.ts";
 import {
   createBernoulliReview,
@@ -21,7 +26,7 @@ import {
 //
 // User-triggered review, not a pipeline stage -- there's no "gate before
 // reasoning" split here the way every sequential bay has, since Bernoulli
-// doesn't decide whether Mission's spec proceeds. All 5 checks always run
+// doesn't decide whether Mission's spec proceeds. All 6 checks always run
 // (or whichever subset checksRequested names); the checks THEMSELVES
 // (BERN-M01/M05) are what can fail, not an upstream eligibility gate.
 
@@ -43,7 +48,7 @@ export class InvalidBernoulliInputError extends Error {
   }
 }
 
-const ALL_CHECK_IDS = ["BERN-M01", "BERN-M02", "BERN-M03", "BERN-M04", "BERN-M05"];
+const ALL_CHECK_IDS = ["BERN-M01", "BERN-M02", "BERN-M03", "BERN-M04", "BERN-M05", "BERN-M06"];
 
 export interface BernoulliReviewRequest {
   userId: string;
@@ -60,6 +65,13 @@ export interface BernoulliReviewResponse {
   confidenceScore: number;
   specVersion: number;
   createdAt: string;
+  // Derived from `checks` (each LLM check carries its own usage), so a
+  // reloaded review gets the same numbers as a fresh one with no extra
+  // persistence.
+  usage: BernoulliUsage;
+  // Same convention as Bay 01's telemetry: only known for a run made in
+  // this request; null for a review reloaded from storage.
+  durationMs: number | null;
 }
 
 export async function runBernoulliReviewStage(
@@ -112,6 +124,7 @@ export async function runBernoulliReviewStage(
       confidenceScore: result.confidenceScore,
     });
     await updateBernoulliReviewStatus(reviewId, "spec_ready", result.verdict, result.confidenceScore);
+    const durationMs = Date.now() - start;
 
     await logBernoulliReviewRun(
       reviewId,
@@ -131,6 +144,8 @@ export async function runBernoulliReviewStage(
       confidenceScore: result.confidenceScore,
       specVersion: specRow.version,
       createdAt: specRow.created_at,
+      usage: computeBernoulliUsage(result.checks),
+      durationMs,
     };
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
@@ -152,14 +167,17 @@ export async function getLatestBernoulliReview(
   const found = await getLatestBernoulliReviewForMission(userId, missionId);
   if (!found) return null;
   const { review, spec } = found;
+  const checks = spec.checks as unknown as BernoulliCheckResult[];
   return {
     reviewId: review.id,
     reviewCode: review.review_code,
     missionId: review.mission_id,
     verdict: spec.verdict,
-    checks: spec.checks as unknown as BernoulliCheckResult[],
+    checks,
     confidenceScore: spec.confidence_score,
     specVersion: spec.version,
     createdAt: spec.created_at,
+    usage: computeBernoulliUsage(checks),
+    durationMs: null,
   };
 }
