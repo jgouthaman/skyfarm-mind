@@ -955,6 +955,7 @@ function TheHangarMission() {
   const [progressStepIdx, setProgressStepIdx] = useState(0);
   const [currentUserEmail, setCurrentUserEmail] = useState<string | null>(null);
   const [llmStatus, setLlmStatus] = useState<"checking" | "live" | "offline">("checking");
+  const [llmProvider, setLlmProvider] = useState<"anthropic" | "groq" | null>(null);
   const [missionsList, setMissionsList] = useState<MissionListEntry[] | null>(null);
   // Optional extra context attached to the brief (Section 3, sources 4-6).
   const [catalogs, setCatalogs] = useState<SourceCatalogsState>({
@@ -1029,9 +1030,15 @@ function TheHangarMission() {
           headers: { Authorization: `Bearer ${token}` },
         });
         const json = await res.json();
-        if (!cancelled) setLlmStatus(res.ok && json.live ? "live" : "offline");
+        if (!cancelled) {
+          setLlmStatus(res.ok && json.live ? "live" : "offline");
+          setLlmProvider(res.ok && json.live ? json.provider ?? null : null);
+        }
       } catch {
-        if (!cancelled) setLlmStatus("offline");
+        if (!cancelled) {
+          setLlmStatus("offline");
+          setLlmProvider(null);
+        }
       }
     }
     checkLlmStatus();
@@ -1736,15 +1743,17 @@ function TheHangarMission() {
                 className={`hgr-m-badge hgr-m-badge-ai hgr-m-badge-ai-${llmStatus}`}
                 title={
                   llmStatus === "checking"
-                    ? "Checking connection to Anthropic…"
+                    ? "Checking connection to Anthropic/Groq…"
                     : llmStatus === "live"
-                      ? "Live — connected to Anthropic (Claude Sonnet 5)"
-                      : "Offline — not connected to Anthropic. Stage LLM calls will fall back to mock output."
+                      ? llmProvider === "groq"
+                        ? "Live — Anthropic unreachable, falling back to Groq (gpt-oss-120b)"
+                        : "Live — connected to Anthropic (Claude Sonnet 5)"
+                      : "Offline — not connected to Anthropic or Groq. Stage LLM calls will fall back to mock output."
                 }
               >
                 <span className="hgr-m-badge-ai-dot" />
                 AI
-                {llmStatus === "live" && (
+                {llmStatus === "live" && llmProvider === "anthropic" && (
                   <span className="hgr-m-badge-ai-model">
                     {/* Generic spark mark, not a reproduction of any
                         vendor's trademarked logo — just a visual cue next
@@ -1756,6 +1765,17 @@ function TheHangarMission() {
                       />
                     </svg>
                     Claude
+                  </span>
+                )}
+                {llmStatus === "live" && llmProvider === "groq" && (
+                  <span className="hgr-m-badge-ai-model hgr-m-badge-ai-model-fallback">
+                    {/* Generic bolt mark for the fallback provider — same
+                        non-trademark-reproduction approach as the Claude
+                        spark above. */}
+                    <svg viewBox="0 0 16 16" width="10" height="10" aria-hidden="true">
+                      <path d="M9 0 L2 9 L7 9 L6 16 L14 6 L9 6 Z" fill="currentColor" />
+                    </svg>
+                    Groq
                   </span>
                 )}
               </span>
@@ -3348,6 +3368,7 @@ const HGR_MISSION_CSS = `
 .hgr-m-badge-ai-offline{ color:var(--hgr-m-amber); border:1px solid rgba(232,163,61,.4); background:rgba(232,163,61,.08); }
 .hgr-m-badge-ai-offline .hgr-m-badge-ai-dot{ background:var(--hgr-m-amber); box-shadow:0 0 6px rgba(232,163,61,.6); }
 .hgr-m-badge-ai-model{ display:inline-flex; align-items:center; gap:3px; margin-left:6px; padding-left:6px; border-left:1px solid rgba(74,222,128,.3); font-weight:500; opacity:.9; }
+.hgr-m-badge-ai-model-fallback{ border-left-color:rgba(232,163,61,.4); color:var(--hgr-m-amber); }
 @keyframes hgr-m-ai-pulse{ 0%,100%{ opacity:1; } 50%{ opacity:.4; } }
 
 .hgr-m-hero-row{ display:flex; align-items:center; gap:48px; flex-wrap:wrap; }
