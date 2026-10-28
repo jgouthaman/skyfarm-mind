@@ -273,7 +273,7 @@ function TheHangarValidation() {
               Check an optimization result's design against applicable standards.
             </h2>
             <p className="hgr-v-sec-sub">
-              Runs one real Claude Sonnet 5 call to reason about the current design's likely
+              Runs one real TorqWings AI call to reason about the current design's likely
               regulatory compliance, then a deterministic confidence pass. There's no live
               FAR/EASA/MIL/ISO clause database yet -- so this is Claude reasoning qualitatively
               about compliance for the one design you give it, not a claim of a certified

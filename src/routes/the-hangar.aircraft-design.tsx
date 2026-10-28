@@ -342,7 +342,7 @@ function TheHangarAircraftDesign() {
             <div className="hgr-a-kicker">Generate a design</div>
             <h2 className="hgr-a-sec-title">Turn a finalized concept into gated geometry.</h2>
             <p className="hgr-a-sec-sub">
-              Runs one real Claude Sonnet 5 call, after a deterministic hard-constraint gate has
+              Runs one real TorqWings AI call, after a deterministic hard-constraint gate has
               already ruled out anything infeasible — the LLM only reasons about a concept that
               already passed. There's no real airfoil database or OpenVSP/XFLR5 integration yet, so
               this is Claude reasoning about plausible geometry, not a simulated engineering result.

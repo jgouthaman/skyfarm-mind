@@ -271,7 +271,7 @@ function TheHangarDocumentation() {
               Compile a report for a validated design.
             </h2>
             <p className="hgr-d-sec-sub">
-              Runs one real Claude Sonnet 5 call to compile a summary report and structured logic
+              Runs one real TorqWings AI call to compile a summary report and structured logic
               record from Bay 09's result, then a deterministic confidence pass. There's no real
               template engine or drawing-generation tool yet, and this Phase 1 build summarizes
               only Bay 09's own result -- not a direct read of every upstream bay's data.

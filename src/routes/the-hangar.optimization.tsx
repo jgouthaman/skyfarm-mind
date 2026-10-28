@@ -313,7 +313,7 @@ function TheHangarOptimization() {
               Combine a CFD result and a structural result into a trade-off assessment.
             </h2>
             <p className="hgr-o-sec-sub">
-              Runs one real Claude Sonnet 5 call to reason about the current design's position on
+              Runs one real TorqWings AI call to reason about the current design's position on
               the weight/drag/cost/safety trade-off space, then a deterministic confidence pass.
               There's no real optimizer (Optuna/PyGMO) yet — there's exactly one design candidate
               here, not a population to search over — so this is Claude reasoning about trade-offs

@@ -1,19 +1,22 @@
-import { callLlmGateway, stripJsonFences } from "./llmGateway.ts";
+import { callLlmGateway, stripJsonFences, type LlmProvider, type LlmUsage } from "./llmGateway.ts";
+import { estimateCostUsd } from "./missionUsage.ts";
 import type { FinalizedConstraint, FinalizedKpi, MissionSpecsFields } from "./missionSpecAssembly.ts";
 
 // Bernoulli Agent -- Mission Agent (B01) spec review checks (BERN-M01
 // through BERN-M05), per "Ask Bernoulli — Mission Spec Review
-// Implementation Spec" §4. Table/route naming in this codebase uses the
-// "Bernoulli" rebrand throughout (matches every other Bernoulli file
-// already built this session) rather than the doc's alternate
-// `physics`-prefixed naming -- the doc itself says the logic doesn't
-// change either way.
+// Implementation Spec" §4, plus a locally-added BERN-M06 (energy/power
+// budget plausibility -- not in the original spec doc, added to make the
+// LLM-judged checks more rigorous for investor/technical scrutiny). Table/
+// route naming in this codebase uses the "Bernoulli" rebrand throughout
+// (matches every other Bernoulli file already built this session) rather
+// than the doc's alternate `physics`-prefixed naming -- the doc itself says
+// the logic doesn't change either way.
 //
 // M01 and M05 are the hard-gate checks (a FAIL on either fails the whole
-// review); M02-M04 can only WARN. This mirrors every other bay's
-// deterministic-gate-then-reasoning split, just expressed as five
-// independent checks instead of one gate + one generation call, since
-// that's the shape the spec's report UI (one row per check) needs.
+// review); M02-M04 and M06 can only WARN. This mirrors every other bay's
+// deterministic-gate-then-reasoning split, just expressed as independent
+// checks instead of one gate + one generation call, since that's the shape
+// the spec's report UI (one row per check) needs.
 
 export type BernoulliCheckStatus = "PASS" | "WARN" | "FAIL" | "INFO";
 
@@ -22,6 +25,45 @@ export interface BernoulliCheckResult {
   status: BernoulliCheckStatus;
   message: string;
   sourceWasMock: boolean;
+  // Populated only by the LLM-judged checks (M03, M06) -- the visible
+  // calculation/reasoning behind the verdict, not just the label, so a
+  // technical reviewer can check the logic instead of trusting a bare
+  // PASS/WARN/FAIL. Undefined for deterministic checks (nothing to show
+  // beyond `message`, which already states the arithmetic) and for INFO/
+  // mock results (nothing was actually reasoned about).
+  reasoning?: string;
+  // Real token usage + which provider answered -- set only when an LLM
+  // check (M03, M06) got a genuine reply (not mock, not INFO). Mirrors
+  // Bay 01's own per-stage usage shape (missionUsage.ts) so the telemetry
+  // table/bar can be built the same way for both bays.
+  usage?: LlmUsage;
+  provider?: LlmProvider;
+}
+
+// Requests/tokens/cost across however many LLM checks actually ran with a
+// real reply -- deterministic checks and INFO/mock results contribute
+// nothing (no `usage`), same "counts only what actually got billed"
+// convention as missionUsage.ts's aggregateMissionUsage. One check with a
+// real reply = one request (M03 and M06 are each a single callLlmGateway()
+// call, never a multi-call stage like Mission Agent's Stage 2).
+export interface BernoulliUsage {
+  requests: number;
+  inputTokens: number;
+  outputTokens: number;
+  estimatedCostUsd: number;
+}
+
+export function computeBernoulliUsage(checks: BernoulliCheckResult[]): BernoulliUsage {
+  let requests = 0;
+  let inputTokens = 0;
+  let outputTokens = 0;
+  for (const c of checks) {
+    if (!c.usage) continue;
+    requests += 1;
+    inputTokens += c.usage.inputTokens;
+    outputTokens += c.usage.outputTokens;
+  }
+  return { requests, inputTokens, outputTokens, estimatedCostUsd: estimateCostUsd(inputTokens, outputTokens) };
 }
 
 export interface BernoulliCheckInput {
@@ -192,12 +234,43 @@ function checkCoverageMath(input: BernoulliCheckInput): BernoulliCheckResult {
   };
 }
 
+// -- shared reference benchmarks for the LLM-judged checks (M03, M06) -------
+
+// Real, citable aerospace/battery reference ranges, embedded directly in
+// both LLM-judged checks' prompts so their verdicts are grounded in actual
+// numbers rather than Claude's own general knowledge alone -- reproducible
+// and checkable by a reviewer, not just "the AI said so". Conservative,
+// widely-cited ranges (not vehicle-specific datasheets); a judgment call
+// outside these ranges should be rare and worth flagging either way.
+const AEROSPACE_BENCHMARKS = `Reference ranges (typical, not absolute):
+- Li-ion/Li-poly pack energy density: 150-250 Wh/kg at the pack level (electric UAS).
+- Battery mass fraction of MTOW for electric UAS: typically 20-40%.
+- Multirotor hover power loading: ~120-200 W/kg of MTOW.
+- Fixed-wing/VTOL-cruise electric power loading: ~50-100 W/kg of MTOW.
+- Propulsive + ESC efficiency (battery to thrust): ~60-75%.
+- Typical payload fraction of MTOW: multirotor ~15-30%, fixed-wing ~10-25%.`;
+
 // -- BERN-M03: payload/endurance/vehicle-class plausibility (Claude call) ---
 
-const M03_SYSTEM = `You are Bernoulli Agent's physics-plausibility reviewer for TorqWings' aerospace design platform. Given a mission's vehicle class, payload KPI, and endurance KPI, judge whether the combination is physically plausible for that vehicle class using general aerospace engineering knowledge (typical payload-to-endurance trade-offs for the given class). This is an engineering judgment call, not a certified analysis -- ground it in the given numbers, don't invent specifics not present in the input. Return JSON only: { "status": "PASS | WARN | FAIL", "message": "one or two sentences" }.`;
+// Primary judgment is still payload-vs-endurance (same contract as before --
+// one ruleId, one status, one message, so the report UI's one-row-per-check
+// shape doesn't change) but the prompt is now grounded in the *other* four
+// checks' actual findings plus the spec's full KPI/constraint list, not just
+// the isolated payload+endurance pair. This catches compounding problems a
+// context-blind check can't see -- e.g. M01 already flagging an implausible
+// average speed is directly relevant to whether the endurance number is
+// trustworthy enough to judge payload against. `reasoning` surfaces the
+// actual calculation/logic behind the verdict (not just a label) so a
+// reviewer can check the work instead of trusting a bare PASS/WARN/FAIL.
+const M03_SYSTEM = `You are Bernoulli Agent's physics-plausibility reviewer for TorqWings' aerospace design platform, reviewing a mission spec before it's trusted downstream. Your primary judgment is whether the Payload and Endurance KPIs are physically plausible together for the given vehicle class, using general aerospace engineering knowledge (typical payload-to-endurance trade-offs for that class). You are also given the spec's full KPI and constraint list, and the results of four other deterministic checks already run on this same spec (speed consistency, coverage math, dimensional consistency, KPI/constraint provenance) -- use them as corroborating or contradicting evidence. If an earlier check already flagged a problem (e.g. an implausible implied speed, or a dimensional mismatch) that bears on payload/endurance plausibility, factor it in and say so explicitly rather than judging payload/endurance in isolation.
+
+${AEROSPACE_BENCHMARKS}
+
+This is an engineering judgment call, not a certified analysis -- ground it in the given numbers and the reference ranges above, don't invent specifics not present in the input. Return JSON only: { "status": "PASS | WARN | FAIL", "message": "one or two sentences", "reasoning": "the calculation/logic behind the verdict -- show what you estimated and against what reference range, 2-4 sentences" }.`;
 
 async function checkPayloadEndurancePlausibility(
   input: BernoulliCheckInput,
+  priorChecks: BernoulliCheckResult[],
 ): Promise<BernoulliCheckResult> {
   const payloadKpi = findKpi(input.kpis, "payload");
   const enduranceKpi = findKpi(input.kpis, "endurance", "flight time");
@@ -210,12 +283,22 @@ async function checkPayloadEndurancePlausibility(
     };
   }
 
+  const otherKpis = input.kpis.filter((k) => k !== payloadKpi && k !== enduranceKpi);
+  const priorFindings = priorChecks
+    .filter((c) => c.status !== "INFO")
+    .map((c) => `${c.ruleId} (${c.status}): ${c.message}`)
+    .join("\n");
+
   const userContent = `Vehicle class: ${input.missionSpecs.vehicleClass ?? "unknown"}
 Mission type: ${input.missionSpecs.missionType}
 Payload KPI: ${payloadKpi.target} ${payloadKpi.unit}
-Endurance KPI: ${enduranceKpi.target} ${enduranceKpi.unit}`;
+Endurance KPI: ${enduranceKpi.target} ${enduranceKpi.unit}
+Other KPIs on this spec: ${otherKpis.length > 0 ? otherKpis.map((k) => `${k.name}: ${k.target} ${k.unit}`).join("; ") : "none"}
+Constraints on this spec: ${input.constraints.length > 0 ? input.constraints.map((c) => `${c.name}: ${c.value}`).join("; ") : "none"}
+Findings from this spec's other Bernoulli checks so far:
+${priorFindings || "(none ran, or all were not-applicable)"}`;
 
-  const { content } = await callLlmGateway(M03_SYSTEM, userContent, { jsonMode: true });
+  const { content, usage, provider } = await callLlmGateway(M03_SYSTEM, userContent, { jsonMode: true });
   if (!content) return mockM03();
 
   try {
@@ -228,7 +311,15 @@ Endurance KPI: ${enduranceKpi.target} ${enduranceKpi.unit}`;
     ) {
       return mockM03();
     }
-    return { ruleId: "BERN-M03", status: obj.status, message: obj.message, sourceWasMock: false };
+    return {
+      ruleId: "BERN-M03",
+      status: obj.status,
+      message: obj.message,
+      sourceWasMock: false,
+      reasoning: typeof obj.reasoning === "string" ? obj.reasoning : undefined,
+      usage: usage ?? undefined,
+      provider: provider ?? undefined,
+    };
   } catch {
     return mockM03();
   }
@@ -239,6 +330,89 @@ function mockM03(): BernoulliCheckResult {
     ruleId: "BERN-M03",
     status: "INFO",
     message: "Couldn't reach Claude to judge payload/endurance plausibility -- no ANTHROPIC_API_KEY reply.",
+    sourceWasMock: true,
+  };
+}
+
+// -- BERN-M06: energy/power budget plausibility (Claude call) ---------------
+
+// Locally added, not in the original "Ask Bernoulli" spec doc -- the spec's
+// fields (payload, endurance, vehicle class) don't carry MTOW or battery
+// capacity, so a hard deterministic energy-budget calculation isn't
+// possible from what's actually on a mission spec. Instead this asks Claude
+// to estimate the implied power draw and required battery mass fraction
+// from payload+endurance+vehicle class, checked against the same reference
+// ranges as M03 (power loading, pack energy density, battery mass
+// fraction), and to show that estimate rather than just a verdict -- this
+// is the check most likely to catch an energy-infeasible spec (too much
+// payload/endurance for the implied battery to physically carry), which
+// none of M01-M05 check for. Non-hard-gate: an estimate this far upstream
+// of real geometry can only WARN, never fail the review outright.
+const M06_SYSTEM = `You are Bernoulli Agent's physics-plausibility reviewer for TorqWings' aerospace design platform. Given a mission's vehicle class, payload KPI, and endurance KPI, estimate whether there's a physically plausible energy/power budget for that combination -- i.e. would a battery (or fuel) that could fit this vehicle class actually be able to deliver that much endurance while carrying that payload. Show your estimate: implied power draw, required energy, and implied battery mass fraction of MTOW, checked against the reference ranges below. This is a rough plausibility estimate given only payload/endurance/class (no MTOW or battery capacity is available) -- say so if the estimate is too underconstrained to judge confidently, and use WARN rather than FAIL in that case.
+
+${AEROSPACE_BENCHMARKS}
+
+Return JSON only: { "status": "PASS | WARN | FAIL", "message": "one or two sentences", "reasoning": "your estimate -- implied power draw, required energy, implied battery mass fraction, and which reference range(s) you checked it against, 2-4 sentences" }.`;
+
+async function checkEnergyPowerPlausibility(
+  input: BernoulliCheckInput,
+  priorChecks: BernoulliCheckResult[],
+): Promise<BernoulliCheckResult> {
+  const payloadKpi = findKpi(input.kpis, "payload");
+  const enduranceKpi = findKpi(input.kpis, "endurance", "flight time");
+  if (!payloadKpi || !enduranceKpi) {
+    return {
+      ruleId: "BERN-M06",
+      status: "INFO",
+      message: "Not enough data to check -- this spec doesn't carry both a Payload and an Endurance KPI.",
+      sourceWasMock: false,
+    };
+  }
+
+  const priorFindings = priorChecks
+    .filter((c) => c.status !== "INFO")
+    .map((c) => `${c.ruleId} (${c.status}): ${c.message}`)
+    .join("\n");
+
+  const userContent = `Vehicle class: ${input.missionSpecs.vehicleClass ?? "unknown"}
+Mission type: ${input.missionSpecs.missionType}
+Payload KPI: ${payloadKpi.target} ${payloadKpi.unit}
+Endurance KPI: ${enduranceKpi.target} ${enduranceKpi.unit}
+Findings from this spec's other Bernoulli checks so far:
+${priorFindings || "(none ran, or all were not-applicable)"}`;
+
+  const { content, usage, provider } = await callLlmGateway(M06_SYSTEM, userContent, { jsonMode: true });
+  if (!content) return mockM06();
+
+  try {
+    const obj = JSON.parse(stripJsonFences(content));
+    if (
+      typeof obj !== "object" ||
+      obj === null ||
+      (obj.status !== "PASS" && obj.status !== "WARN" && obj.status !== "FAIL") ||
+      typeof obj.message !== "string"
+    ) {
+      return mockM06();
+    }
+    return {
+      ruleId: "BERN-M06",
+      status: obj.status,
+      message: obj.message,
+      sourceWasMock: false,
+      reasoning: typeof obj.reasoning === "string" ? obj.reasoning : undefined,
+      usage: usage ?? undefined,
+      provider: provider ?? undefined,
+    };
+  } catch {
+    return mockM06();
+  }
+}
+
+function mockM06(): BernoulliCheckResult {
+  return {
+    ruleId: "BERN-M06",
+    status: "INFO",
+    message: "Couldn't reach Claude to judge energy/power budget plausibility -- no ANTHROPIC_API_KEY reply.",
     sourceWasMock: true,
   };
 }
@@ -349,14 +523,20 @@ export async function runBernoulliChecks(
   const wants = (id: string) => checksRequested.includes(id);
   const checks: BernoulliCheckResult[] = [];
 
-  // Deterministic checks first -- cheap, no network round-trip.
+  // Deterministic checks first -- cheap, no network round-trip, and their
+  // results are what make M03's LLM judgment context-aware instead of
+  // isolated (see checkPayloadEndurancePlausibility's doc comment).
   if (wants("BERN-M01")) checks.push(checkSpeedConsistency(input));
   if (wants("BERN-M02")) checks.push(checkCoverageMath(input));
   if (wants("BERN-M05")) checks.push(checkDimensionalConsistency(input));
   if (wants("BERN-M04")) checks.push(checkKpiProvenance(input));
 
-  // Claude-backed check last -- the only one that blocks on the network.
-  if (wants("BERN-M03")) checks.push(await checkPayloadEndurancePlausibility(input));
+  // Claude-backed checks last -- the only ones that block on the network,
+  // and the only ones that benefit from seeing what the checks above found.
+  // M06 runs after M03 so it can also see M03's payload/endurance verdict,
+  // not just the four deterministic ones.
+  if (wants("BERN-M03")) checks.push(await checkPayloadEndurancePlausibility(input, checks));
+  if (wants("BERN-M06")) checks.push(await checkEnergyPowerPlausibility(input, checks));
 
   return {
     verdict: computeVerdict(checks),

@@ -254,7 +254,7 @@ function TheHangarCADDesign() {
             <div className="hgr-d-kicker">Generate a CAD model</div>
             <h2 className="hgr-d-sec-title">Turn a spec-ready design into structured CAD data.</h2>
             <p className="hgr-d-sec-sub">
-              Runs one real Claude Sonnet 5 call, followed by a deterministic validation pass
+              Runs one real TorqWings AI call, followed by a deterministic validation pass
               (interference / DFM-DFA / tolerance stack-up). There's no real CAD engine
               (FreeCAD/OpenSCAD) integration yet, so this is Claude reasoning about plausible CAD
               data plus rule-based checks, not a simulated engineering result.

@@ -269,7 +269,7 @@ function TheHangarMaterials() {
               Select materials for a validated design's components.
             </h2>
             <p className="hgr-m-sec-sub">
-              Runs one real Claude Sonnet 5 call to reason about likely component-level material
+              Runs one real TorqWings AI call to reason about likely component-level material
               choices, then a deterministic confidence pass. There's no live materials database or
               supplier catalog yet -- so this is Claude reasoning qualitatively about materials for
               the one design you give it, not a claim of a sourced catalog lookup. Sourcing risk

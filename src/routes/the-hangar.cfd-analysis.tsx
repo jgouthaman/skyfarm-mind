@@ -272,7 +272,7 @@ function TheHangarCFDAnalysis() {
             <div className="hgr-f-kicker">Generate a CFD analysis</div>
             <h2 className="hgr-f-sec-title">Turn a spec-ready CAD design into a CFD estimate.</h2>
             <p className="hgr-f-sec-sub">
-              Runs one real Claude Sonnet 5 call reasoning about mesh strategy, solver behavior, and
+              Runs one real TorqWings AI call reasoning about mesh strategy, solver behavior, and
               force/coefficient estimates. There's no real CFD solver integration yet, so every
               result here is Phase 1 LLM reasoning, not a simulated engineering result.
             </p>
