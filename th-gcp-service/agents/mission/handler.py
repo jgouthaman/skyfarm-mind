@@ -7,28 +7,55 @@ constraintIdentification,domainRules,tradeoffPrioritization}.ts,
 spec: reference/the-hangar/MissionAgent.md) to a single stateless Python
 module -- same prompts, same domain-rule table, same deterministic
 trade-off/confidence-score logic, but with no Supabase persistence, no
-mission ownership, no multi-user state. Each call is self-contained: the
-caller supplies whatever the stage needs in `payload` (typically the
-previous stage's own output, merged with any new fields that stage needs),
-and gets that stage's result back. Chaining stages is the caller's job
-(exactly how the Test Harness's /t-h UI is used -- run input_processing,
-paste its output into the next call's payload, run reasoning_planning,
-and so on), not this module's.
+mission ownership, no multi-user state.
 
-Four function_name values, matching src/lib/test-harness/agents.ts's Bay 01
-function ids exactly:
-  - input_processing   -> ParsedMissionInput-shaped result
-  - reasoning_planning  -> MissionReasoningResult-shaped result
-  - output_generation  -> MissionSpec-shaped result (mission_specs,
-                           constraints, kpis, summary, confidence_score)
-  - output_interface   -> wraps output_generation's result as a handoff
-                           package for Bay 02 (no real event bus/DB here,
-                           so this stage is a thin, honestly-labeled mock)
+Five function_name values:
+  - input_processing   -> ParsedMissionInput-shaped result (fixed stage)
+  - reasoning_planning  -> MissionReasoningResult-shaped result (fixed stage)
+  - output_generation  -> MissionSpec-shaped result (fixed stage)
+  - output_interface   -> handoff package for Bay 02 (fixed stage)
+  - agentic_run         -> genuinely agentic: Claude itself decides which
+                           of the underlying capabilities to call and in
+                           what order (Anthropic tool-use loop), rather
+                           than running the four stages in a fixed
+                           sequence. See "Agentic mode" below.
+
+The four fixed-stage functions chain manually -- the caller supplies
+whatever a stage needs in `payload` (typically the previous stage's own
+output), and gets that stage's result back. They stay as they were (PR
+#65): useful for testing one stage in isolation, and for comparing
+against agentic_run's behavior on the same input.
 
 Needs ANTHROPIC_API_KEY in the environment. Without it, every LLM-backed
-step falls back to a clearly-marked mock value (mock: true in the
-response) rather than failing the request -- same fallback contract as
-llmGateway.ts.
+step -- fixed-stage or agentic -- falls back to a clearly-marked mock
+value (mock: true) rather than failing the request.
+
+── Agentic mode (`agentic_run`) ─────────────────────────────────────────
+
+The fixed stages above call the LLM at hardcoded points in a hardcoded
+order -- that's an LLM-assisted pipeline, not agentic AI: the model never
+decides what to do next, never re-does a step it judges incomplete, never
+skips a step it judges unnecessary.
+
+`agentic_run` is different: Claude is given six tools (the same
+underlying capabilities as the four fixed stages, just broken into finer
+pieces) and one goal -- produce a complete MissionSpec -- and decides
+itself which tools to call, in what order, and whether to re-call one if
+an earlier result looks thin or wrong. The loop runs until Claude calls
+`finalize_mission_spec` (its "I'm done" signal) or a hard iteration cap
+is hit. This is the real distinction: the fixed stages encode a human's
+decision about the right sequence; agentic_run lets the model make that
+decision, call by call, and self-correct within the same run.
+
+Tools given to the agent:
+  - extract_intent_and_entities   (Stage 1's LLM call)
+  - decompose_mission             (Stage 2 Step 1's LLM call)
+  - check_domain_rules            (Stage 2 Step 2a, deterministic)
+  - infer_constraints_and_kpis    (Stage 2 Steps 2b+3's LLM call)
+  - prioritize_tradeoffs          (Stage 2 Step 4, deterministic)
+  - finalize_mission_spec         (Stage 3 assembly + summary LLM call +
+                                   confidence score -- also the loop's
+                                   termination signal)
 
 This is the working copy used by the th-gcp-service FastAPI app (see
 C:\\Workshop\\Glacier\\skyfarm-mind\\th-gcp-service\\agents\\mission\\handler.py,
@@ -42,10 +69,6 @@ from datetime import datetime, timezone
 from typing import Any, Optional
 
 AGENT_NAME = "mission"
-
-# ── Anthropic client (lazy import so this module still loads, and the
-# other three non-LLM functions still work, even if the package isn't
-# installed in a given environment) ─────────────────────────────────────
 
 _MODEL = "claude-sonnet-5"
 
@@ -142,9 +165,7 @@ _INPUT_PROCESSING_SYSTEM = (
 )
 
 
-def _compute_validation_flags(
-    extraction: dict, structured_fields: dict
-) -> list[str]:
+def _compute_validation_flags(extraction: dict, structured_fields: dict) -> list[str]:
     """Rules engine (Section 4.1's validateRange/flagMissingRequired),
     simplified: catches obviously-hallucinated numeric hints and flags
     core fields that are still missing after extraction."""
@@ -176,15 +197,13 @@ def _compute_validation_flags(
     return flags
 
 
-def _run_input_processing(payload: dict) -> dict:
-    raw_text = str(payload.get("raw_text") or payload.get("raw_text_combined") or "").strip()
-    structured_fields = payload.get("structured_fields") or {}
-    attached_regulations = payload.get("attached_regulations") or []
-
+def _extract_intent_and_entities(
+    raw_text: str, structured_fields: dict, attached_regulations: list[str]
+) -> dict:
+    """Core of Stage 1. Reused directly by `_run_input_processing` (fixed
+    stage) and by the `extract_intent_and_entities` tool (agentic mode)."""
     if not raw_text and not structured_fields:
-        return {
-            "error": "Sources contain no usable content -- provide `raw_text` and/or `structured_fields`.",
-        }
+        return {"error": "Provide `raw_text` and/or `structured_fields` -- nothing usable was given."}
 
     user_content = (
         f"Raw mission text: {raw_text}\n"
@@ -237,6 +256,13 @@ def _run_input_processing(payload: dict) -> dict:
         "mock": mock,
         "usage": usage,
     }
+
+
+def _run_input_processing(payload: dict) -> dict:
+    raw_text = str(payload.get("raw_text") or payload.get("raw_text_combined") or "").strip()
+    structured_fields = payload.get("structured_fields") or {}
+    attached_regulations = payload.get("attached_regulations") or []
+    return _extract_intent_and_entities(raw_text, structured_fields, attached_regulations)
 
 
 # ── Stage 2 -- Reasoning & Planning (MissionAgent.md Section 4.2) ───────
@@ -374,77 +400,82 @@ def _parse_leading_number(text: Optional[str]) -> Optional[float]:
     return float(match.group(0)) if match else None
 
 
-def _run_reasoning_planning(payload: dict) -> dict:
-    detected_intent = str(payload.get("detected_intent") or "")
-    extracted_entities = payload.get("extracted_entities") or {}
-    structured_fields = payload.get("structured_fields") or {}
-    attached_regulations = payload.get("attached_regulations") or []
-
+def _decompose_mission(detected_intent: str, extracted_entities: dict) -> dict:
+    """Stage 2 Step 1. Reused by the fixed stage and the `decompose_mission` tool."""
     if not detected_intent:
-        return {"error": "Payload must include `detected_intent` (paste input_processing's output here)."}
-
-    # Step 1 -- Mission Decomposition
+        return {"error": "`detected_intent` is required (e.g. from extract_intent_and_entities's output)."}
     decomp_user = (
         f"Mission intent: {detected_intent}\n"
         f"Extracted entities: {json.dumps(extracted_entities, indent=2)}\n\n"
         'Return:\n{ "decomposed_elements": ["string", ...] }'
     )
-    text, usage1 = _call_llm(_DECOMPOSITION_SYSTEM, decomp_user)
+    text, usage = _call_llm(_DECOMPOSITION_SYSTEM, decomp_user)
     parsed = _parse_json(text) if text else None
     decomposed_elements = (
         [e for e in parsed["decomposed_elements"] if isinstance(e, str)]
         if parsed and isinstance(parsed.get("decomposed_elements"), list)
         else None
     )
-    decomposition_mock = not decomposed_elements
-    if decomposition_mock:
+    mock = not decomposed_elements
+    if mock:
         decomposed_elements = [f'Mock decomposition of intent: "{detected_intent[:80]}"']
-        usage1 = None
+        usage = None
+    return {"decomposed_elements": decomposed_elements, "mock": mock, "usage": usage}
 
-    # Step 2a -- Domain rules (deterministic)
+
+def _check_domain_rules(
+    decomposed_elements: list[str],
+    attached_regulations: list[str],
+    structured_fields: dict,
+    constraint_hints: list[str],
+) -> dict:
+    """Stage 2 Step 2a (deterministic, no LLM). Reused by the fixed stage
+    and the `check_domain_rules` tool."""
     ctx = {
         "decomposed_elements": decomposed_elements,
         "attached_regulations": attached_regulations,
-        "payload_kg": structured_fields.get("payload_kg") or _parse_leading_number(extracted_entities.get("payload_hint")),
+        "payload_kg": structured_fields.get("payload_kg"),
         "altitude_ceiling_m": structured_fields.get("altitude_ceiling"),
         "operating_environment": structured_fields.get("operating_environment"),
         "budget_band": structured_fields.get("budget_band"),
     }
     rule_constraints = _evaluate_domain_rules(ctx)
-    known_constraints = rule_constraints + [
+    hint_constraints = [
         {"name": hint, "value": "", "source": "inferred", "source_label": "Stage 2.1 hint"}
-        for hint in (extracted_entities.get("constraint_hints") or [])
+        for hint in constraint_hints
     ]
+    return {"known_constraints": rule_constraints + hint_constraints}
 
-    # Step 2b + 3 -- combined LLM call: constraint inference + KPI derivation
+
+def _infer_constraints_and_kpis(
+    decomposed_elements: list[str], known_constraints: list[dict], structured_fields: dict
+) -> dict:
+    """Stage 2 Steps 2b+3 (one combined LLM call). Reused by the fixed
+    stage and the `infer_constraints_and_kpis` tool."""
     ck_user = (
         f"Decomposed mission elements: {json.dumps(decomposed_elements, indent=2)}\n"
         f"Constraints already known (do not repeat these): {json.dumps(known_constraints, indent=2)}\n\n"
         'Return:\n{ "identified_constraints": [ { "name": "string", "value": "string", "source": "inferred" } ], '
         '"derived_kpis": [ { "name": "string", "target": "string", "unit": "string" } ] }'
     )
-    text2, usage2 = _call_llm(_CONSTRAINT_KPI_SYSTEM, ck_user)
-    parsed2 = _parse_json(text2) if text2 else None
-    ck_mock = not (parsed2 and isinstance(parsed2.get("identified_constraints"), list) and isinstance(parsed2.get("derived_kpis"), list))
+    text, usage = _call_llm(_CONSTRAINT_KPI_SYSTEM, ck_user)
+    parsed = _parse_json(text) if text else None
+    mock = not (parsed and isinstance(parsed.get("identified_constraints"), list) and isinstance(parsed.get("derived_kpis"), list))
 
-    if ck_mock:
+    if mock:
         derived_kpis = []
-        for field, (name, unit) in (("payload_hint", ("Payload", "kg")), ("range_hint", ("Range", "km")), ("endurance_hint", ("Endurance", "min"))):
-            hint = extracted_entities.get(field)
-            if hint:
-                derived_kpis.append({"name": name, "target": hint, "unit": unit})
         identified_constraints = known_constraints
-        usage2 = None
+        usage = None
     else:
         llm_constraints = [
             {"name": c["name"], "value": c["value"], "source": "inferred", "source_label": "LLM inference (Stage 2.2)"}
-            for c in parsed2["identified_constraints"]
+            for c in parsed["identified_constraints"]
             if isinstance(c, dict) and isinstance(c.get("name"), str) and isinstance(c.get("value"), str)
         ]
         identified_constraints = known_constraints + llm_constraints
         derived_kpis = [
             {"name": k["name"], "target": k["target"], "unit": k["unit"]}
-            for k in parsed2["derived_kpis"]
+            for k in parsed["derived_kpis"]
             if isinstance(k, dict) and all(isinstance(k.get(f), str) for f in ("name", "target", "unit"))
         ]
 
@@ -460,24 +491,39 @@ def _run_reasoning_planning(payload: dict) -> dict:
         else:
             derived_kpis.append(kpi)
 
-    # Step 4 -- Trade-off prioritization (deterministic, no LLM)
-    prioritized_tradeoffs = _prioritize_tradeoffs(
-        identified_constraints, derived_kpis, extracted_entities.get("constraint_hints") or []
-    )
+    return {"identified_constraints": identified_constraints, "derived_kpis": derived_kpis, "mock": mock, "usage": usage}
+
+
+def _run_reasoning_planning(payload: dict) -> dict:
+    detected_intent = str(payload.get("detected_intent") or "")
+    extracted_entities = payload.get("extracted_entities") or {}
+    structured_fields = payload.get("structured_fields") or {}
+    attached_regulations = payload.get("attached_regulations") or []
+    constraint_hints = extracted_entities.get("constraint_hints") or []
+
+    decomp = _decompose_mission(detected_intent, extracted_entities)
+    if "error" in decomp:
+        return decomp
+    decomposed_elements = decomp["decomposed_elements"]
+
+    rules = _check_domain_rules(decomposed_elements, attached_regulations, structured_fields, constraint_hints)
+    ck = _infer_constraints_and_kpis(decomposed_elements, rules["known_constraints"], structured_fields)
+
+    prioritized_tradeoffs = _prioritize_tradeoffs(ck["identified_constraints"], ck["derived_kpis"], constraint_hints)
 
     usage = None
-    if usage1 or usage2:
+    if decomp["usage"] or ck["usage"]:
         usage = {
-            "input_tokens": (usage1["input_tokens"] if usage1 else 0) + (usage2["input_tokens"] if usage2 else 0),
-            "output_tokens": (usage1["output_tokens"] if usage1 else 0) + (usage2["output_tokens"] if usage2 else 0),
+            "input_tokens": (decomp["usage"]["input_tokens"] if decomp["usage"] else 0) + (ck["usage"]["input_tokens"] if ck["usage"] else 0),
+            "output_tokens": (decomp["usage"]["output_tokens"] if decomp["usage"] else 0) + (ck["usage"]["output_tokens"] if ck["usage"] else 0),
         }
 
     return {
         "decomposed_elements": decomposed_elements,
-        "identified_constraints": identified_constraints,
-        "derived_kpis": derived_kpis,
+        "identified_constraints": ck["identified_constraints"],
+        "derived_kpis": ck["derived_kpis"],
         "prioritized_tradeoffs": prioritized_tradeoffs,
-        "mock": decomposition_mock or ck_mock,
+        "mock": decomp["mock"] or ck["mock"],
         "usage": usage,
     }
 
@@ -598,10 +644,9 @@ def _dedupe_constraints(constraints: list[dict]) -> list[dict]:
     return list(by_name.values())
 
 
-def _assemble_mission_specs(payload: dict) -> dict:
-    intent_category = payload.get("intent_category")
-    decomposed_elements = payload.get("decomposed_elements") or []
-    extracted_entities = payload.get("extracted_entities") or {}
+def _assemble_mission_specs(
+    intent_category: Optional[str], decomposed_elements: list[str], extracted_entities: dict
+) -> dict:
     vertical = INTENT_CATEGORY_VERTICAL.get(intent_category)
     if not vertical:
         for cat, vert in INTENT_CATEGORY_VERTICAL.items():
@@ -641,9 +686,7 @@ def _finalize_kpis(derived_kpis: list[dict], prioritized_tradeoffs: list[dict], 
     return result
 
 
-def _compute_confidence_score(
-    source_types_used_count: int, derived_kpis: list[dict], validation_flag_count: int
-) -> float:
+def _compute_confidence_score(source_types_used_count: int, derived_kpis: list[dict], validation_flag_count: int) -> float:
     source_completeness = min(source_types_used_count / 3, 1)
     core_fields = {"payload", "range", "endurance"}
     present = sum(1 for k in derived_kpis if k["name"].strip().lower() in core_fields)
@@ -652,23 +695,7 @@ def _compute_confidence_score(
     return max(0.0, round(score, 2))
 
 
-def _run_output_generation(payload: dict) -> dict:
-    decomposed_elements = payload.get("decomposed_elements")
-    identified_constraints = payload.get("identified_constraints")
-    derived_kpis = payload.get("derived_kpis")
-    prioritized_tradeoffs = payload.get("prioritized_tradeoffs")
-    if decomposed_elements is None or identified_constraints is None or derived_kpis is None:
-        return {
-            "error": "Payload must include reasoning_planning's output (decomposed_elements, "
-            "identified_constraints, derived_kpis, prioritized_tradeoffs) plus input_processing's "
-            "intent_category/extracted_entities."
-        }
-    prioritized_tradeoffs = prioritized_tradeoffs or []
-
-    mission_specs = _assemble_mission_specs(payload)
-    constraints = _dedupe_constraints(identified_constraints)
-    kpis = _finalize_kpis(derived_kpis, prioritized_tradeoffs, identified_constraints)
-
+def _generate_summary(mission_specs: dict, constraints: list[dict], kpis: list[dict]) -> tuple[str, bool, Optional[dict]]:
     summary_user = (
         f"Mission specification: {json.dumps(mission_specs, indent=2)}\n"
         f"Constraints: {json.dumps(constraints, indent=2)}\n"
@@ -678,19 +705,33 @@ def _run_output_generation(payload: dict) -> dict:
     text, usage = _call_llm(_SUMMARY_SYSTEM, summary_user)
     parsed = _parse_json(text) if text else None
     summary = parsed.get("summary") if parsed and isinstance(parsed.get("summary"), str) else None
-    mock = summary is None
-    if mock:
+    if summary is None:
         summary = (
             f"[mock summary] {mission_specs.get('mission_type', 'Mission')} "
             f"with {len(constraints)} constraint(s) and {len(kpis)} KPI(s) identified."
         )
-        usage = None
+        return summary, True, None
+    return summary, False, usage
 
-    source_types_used_count = payload.get("source_types_used_count")
-    if not isinstance(source_types_used_count, int):
-        source_types_used_count = len(payload.get("source_types_used") or []) or 1
-    validation_flag_count = len(payload.get("validation_flags") or [])
-    confidence_score = _compute_confidence_score(source_types_used_count, derived_kpis, validation_flag_count)
+
+def _finalize_mission_spec(
+    intent_category: Optional[str],
+    decomposed_elements: list[str],
+    extracted_entities: dict,
+    identified_constraints: list[dict],
+    derived_kpis: list[dict],
+    prioritized_tradeoffs: list[dict],
+    source_types_used_count: int,
+    validation_flags: list[str],
+) -> dict:
+    """Stage 3's full assembly. Reused by the fixed stage (via
+    `_run_output_generation`) and the `finalize_mission_spec` tool, which
+    is also the agentic loop's termination signal."""
+    mission_specs = _assemble_mission_specs(intent_category, decomposed_elements, extracted_entities)
+    constraints = _dedupe_constraints(identified_constraints)
+    kpis = _finalize_kpis(derived_kpis, prioritized_tradeoffs, identified_constraints)
+    summary, summary_mock, usage = _generate_summary(mission_specs, constraints, kpis)
+    confidence_score = _compute_confidence_score(source_types_used_count, derived_kpis, len(validation_flags))
 
     return {
         "mission_specs": mission_specs,
@@ -698,17 +739,38 @@ def _run_output_generation(payload: dict) -> dict:
         "kpis": kpis,
         "summary": summary,
         "confidence_score": confidence_score,
-        "mock": mock,
+        "mock": summary_mock,
         "usage": usage,
     }
 
 
+def _run_output_generation(payload: dict) -> dict:
+    decomposed_elements = payload.get("decomposed_elements")
+    identified_constraints = payload.get("identified_constraints")
+    derived_kpis = payload.get("derived_kpis")
+    if decomposed_elements is None or identified_constraints is None or derived_kpis is None:
+        return {
+            "error": "Payload must include reasoning_planning's output (decomposed_elements, "
+            "identified_constraints, derived_kpis, prioritized_tradeoffs) plus input_processing's "
+            "intent_category/extracted_entities."
+        }
+    source_types_used_count = payload.get("source_types_used_count")
+    if not isinstance(source_types_used_count, int):
+        source_types_used_count = len(payload.get("source_types_used") or []) or 1
+
+    return _finalize_mission_spec(
+        intent_category=payload.get("intent_category"),
+        decomposed_elements=decomposed_elements,
+        extracted_entities=payload.get("extracted_entities") or {},
+        identified_constraints=identified_constraints,
+        derived_kpis=derived_kpis,
+        prioritized_tradeoffs=payload.get("prioritized_tradeoffs") or [],
+        source_types_used_count=source_types_used_count,
+        validation_flags=payload.get("validation_flags") or [],
+    )
+
+
 # ── Stage 4 -- Output Interface (MissionAgent.md Section 4.4) ───────────
-#
-# No Supabase/event bus here -- this is a stateless GCP function, not The
-# Hangar's DB-backed pipeline. Persistence/dashboard/export/event-publish
-# are each labeled for what they'd be in the real system vs. what actually
-# happens here (nothing stored, no bus, no file generated).
 
 
 def _run_output_interface(payload: dict) -> dict:
@@ -737,6 +799,275 @@ def _run_output_interface(payload: dict) -> dict:
     }
 
 
+# ── Agentic mode (`agentic_run`) ─────────────────────────────────────────
+
+_AGENTIC_SYSTEM = (
+    "You are Mission Agent for TorqWings' aerospace design platform, working "
+    "autonomously to turn a mission brief into a complete MissionSpec. You "
+    "have six tools covering intent extraction, decomposition, domain-rule "
+    "checking, constraint/KPI inference, trade-off prioritization, and final "
+    "assembly. Decide yourself which tools to call and in what order -- you "
+    "are not required to call them in any fixed sequence. If an earlier "
+    "result looks thin, contradictory, or incomplete (e.g. decomposition "
+    "produced only one vague element, or no KPIs were derived for a mission "
+    "that clearly implies some), call the relevant tool again with better "
+    "input rather than proceeding with a bad result. Do not call a tool "
+    "whose prerequisites you don't have yet. When you have enough to produce "
+    "a complete, well-supported mission spec, call finalize_mission_spec "
+    "exactly once -- that call ends your turn, so make sure you've genuinely "
+    "gathered intent, decomposition, constraints, and KPIs first. Work "
+    "efficiently: most missions need each tool called once, in roughly the "
+    "order they're listed, but you decide based on what you actually see."
+)
+
+_AGENTIC_TOOLS = [
+    {
+        "name": "extract_intent_and_entities",
+        "description": "Extract the mission's intent, an intent category, and payload/range/endurance hints from raw mission text. Call this first.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "raw_text": {"type": "string", "description": "The mission brief, verbatim."},
+                "structured_fields": {"type": "object", "description": "Any already-known fields, e.g. payload_kg, operating_environment. Optional."},
+                "attached_regulations": {"type": "array", "items": {"type": "string"}, "description": "Regulation codes already selected, e.g. FAR_107. Optional."},
+            },
+            "required": ["raw_text"],
+        },
+    },
+    {
+        "name": "decompose_mission",
+        "description": "Break the mission's intent into discrete functional elements (platform class, operational profile, domain). Needs extract_intent_and_entities's result first.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "detected_intent": {"type": "string"},
+                "extracted_entities": {"type": "object"},
+            },
+            "required": ["detected_intent", "extracted_entities"],
+        },
+    },
+    {
+        "name": "check_domain_rules",
+        "description": "Deterministic lookup against a fixed regulation/payload/environment/keyword rule table -- no inference, just known constraints that directly follow from what's already stated. Call after decompose_mission.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "decomposed_elements": {"type": "array", "items": {"type": "string"}},
+                "attached_regulations": {"type": "array", "items": {"type": "string"}},
+                "structured_fields": {"type": "object"},
+                "constraint_hints": {"type": "array", "items": {"type": "string"}, "description": "Constraint hints from extract_intent_and_entities's extracted_entities."},
+            },
+            "required": ["decomposed_elements"],
+        },
+    },
+    {
+        "name": "infer_constraints_and_kpis",
+        "description": "Infer additional constraints the rule table couldn't catch, and derive performance/cost/safety KPIs. Call after check_domain_rules, passing its known_constraints.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "decomposed_elements": {"type": "array", "items": {"type": "string"}},
+                "known_constraints": {"type": "array", "items": {"type": "object"}},
+                "structured_fields": {"type": "object"},
+            },
+            "required": ["decomposed_elements", "known_constraints"],
+        },
+    },
+    {
+        "name": "prioritize_tradeoffs",
+        "description": "Deterministic gate-tier/score-tier trade-off ranking (safety and regulatory constraints always win; everything else weighted). Call after infer_constraints_and_kpis.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "constraints": {"type": "array", "items": {"type": "object"}},
+                "kpis": {"type": "array", "items": {"type": "object"}},
+                "priority_signals": {"type": "array", "items": {"type": "string"}, "description": "Free-text signals that might indicate an explicit user priority, e.g. constraint_hints."},
+            },
+            "required": ["constraints", "kpis"],
+        },
+    },
+    {
+        "name": "finalize_mission_spec",
+        "description": "Assemble everything gathered so far into the final MissionSpec (mission_specs, deduplicated constraints, prioritized KPIs, a summary, and a confidence score). Calling this ends your turn -- only call it once you have intent, decomposition, constraints, and KPIs.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "intent_category": {"type": "string"},
+                "decomposed_elements": {"type": "array", "items": {"type": "string"}},
+                "extracted_entities": {"type": "object"},
+                "identified_constraints": {"type": "array", "items": {"type": "object"}},
+                "derived_kpis": {"type": "array", "items": {"type": "object"}},
+                "prioritized_tradeoffs": {"type": "array", "items": {"type": "object"}},
+                "source_types_used_count": {"type": "integer", "description": "How many distinct input sources contributed (defaults to 1 if unsure)."},
+                "validation_flags": {"type": "array", "items": {"type": "string"}},
+            },
+            "required": ["decomposed_elements", "identified_constraints", "derived_kpis"],
+        },
+    },
+]
+
+
+def _agentic_tool_extract(args: dict) -> dict:
+    return _extract_intent_and_entities(
+        str(args.get("raw_text") or ""), args.get("structured_fields") or {}, args.get("attached_regulations") or []
+    )
+
+
+def _agentic_tool_decompose(args: dict) -> dict:
+    return _decompose_mission(str(args.get("detected_intent") or ""), args.get("extracted_entities") or {})
+
+
+def _agentic_tool_check_rules(args: dict) -> dict:
+    return _check_domain_rules(
+        args.get("decomposed_elements") or [],
+        args.get("attached_regulations") or [],
+        args.get("structured_fields") or {},
+        args.get("constraint_hints") or [],
+    )
+
+
+def _agentic_tool_infer(args: dict) -> dict:
+    return _infer_constraints_and_kpis(
+        args.get("decomposed_elements") or [], args.get("known_constraints") or [], args.get("structured_fields") or {}
+    )
+
+
+def _agentic_tool_prioritize(args: dict) -> dict:
+    return {
+        "prioritized_tradeoffs": _prioritize_tradeoffs(
+            args.get("constraints") or [], args.get("kpis") or [], args.get("priority_signals") or []
+        )
+    }
+
+
+def _agentic_tool_finalize(args: dict) -> dict:
+    return _finalize_mission_spec(
+        intent_category=args.get("intent_category"),
+        decomposed_elements=args.get("decomposed_elements") or [],
+        extracted_entities=args.get("extracted_entities") or {},
+        identified_constraints=args.get("identified_constraints") or [],
+        derived_kpis=args.get("derived_kpis") or [],
+        prioritized_tradeoffs=args.get("prioritized_tradeoffs") or [],
+        source_types_used_count=args.get("source_types_used_count") or 1,
+        validation_flags=args.get("validation_flags") or [],
+    )
+
+
+_AGENTIC_TOOL_IMPLS = {
+    "extract_intent_and_entities": _agentic_tool_extract,
+    "decompose_mission": _agentic_tool_decompose,
+    "check_domain_rules": _agentic_tool_check_rules,
+    "infer_constraints_and_kpis": _agentic_tool_infer,
+    "prioritize_tradeoffs": _agentic_tool_prioritize,
+    "finalize_mission_spec": _agentic_tool_finalize,
+}
+
+_MAX_AGENTIC_ITERATIONS = 10
+
+
+def _run_agentic(payload: dict) -> dict:
+    raw_text = str(payload.get("raw_text") or "").strip()
+    structured_fields = payload.get("structured_fields") or {}
+    attached_regulations = payload.get("attached_regulations") or []
+
+    if not raw_text and not structured_fields:
+        return {"error": "Provide `raw_text` and/or `structured_fields` -- nothing usable was given."}
+
+    api_key = os.environ.get("ANTHROPIC_API_KEY")
+    if not api_key:
+        return {
+            "mock": True,
+            "error": None,
+            "trace": [],
+            "final_spec": None,
+            "message": "ANTHROPIC_API_KEY is not set -- the agentic loop needs real tool-use calls and has no mock mode of its own.",
+        }
+
+    import anthropic
+
+    client = anthropic.Anthropic(api_key=api_key)
+    user_message = (
+        f"Mission brief: {raw_text}\n"
+        f"Structured fields: {json.dumps(structured_fields, indent=2)}\n"
+        f"Attached regulations: {json.dumps(attached_regulations)}\n\n"
+        "Produce a complete MissionSpec using your tools."
+    )
+    messages: list[dict] = [{"role": "user", "content": user_message}]
+    trace: list[dict] = []
+    total_usage = {"input_tokens": 0, "output_tokens": 0}
+
+    for iteration in range(_MAX_AGENTIC_ITERATIONS):
+        try:
+            response = client.messages.create(
+                model=_MODEL,
+                max_tokens=4096,
+                system=_AGENTIC_SYSTEM,
+                tools=_AGENTIC_TOOLS,
+                messages=messages,
+            )
+        except Exception as exc:
+            return {
+                "mock": False,
+                "error": f"Agentic loop failed on iteration {iteration + 1}: {type(exc).__name__}: {exc}",
+                "trace": trace,
+                "final_spec": None,
+            }
+
+        total_usage["input_tokens"] += response.usage.input_tokens
+        total_usage["output_tokens"] += response.usage.output_tokens
+        messages.append({"role": "assistant", "content": response.content})
+
+        tool_uses = [b for b in response.content if b.type == "tool_use"]
+        if not tool_uses:
+            # The agent stopped talking without finalizing -- not necessarily
+            # wrong (it might be asking a clarifying question), but there's
+            # no human in this loop to answer it, so this run is done.
+            text = next((b.text for b in response.content if b.type == "text"), "")
+            return {
+                "mock": False,
+                "error": "Agent stopped without calling finalize_mission_spec.",
+                "agent_message": text,
+                "trace": trace,
+                "final_spec": None,
+                "usage": total_usage,
+                "iterations": iteration + 1,
+            }
+
+        tool_results = []
+        final_spec = None
+        for tu in tool_uses:
+            impl = _AGENTIC_TOOL_IMPLS.get(tu.name)
+            result = impl(tu.input) if impl else {"error": f"Unknown tool '{tu.name}'"}
+            trace.append({"tool": tu.name, "args": tu.input, "result": result})
+            tool_results.append(
+                {"type": "tool_result", "tool_use_id": tu.id, "content": json.dumps(result)}
+            )
+            if tu.name == "finalize_mission_spec" and "error" not in result:
+                final_spec = result
+
+        if final_spec is not None:
+            return {
+                "mock": False,
+                "error": None,
+                "final_spec": final_spec,
+                "trace": trace,
+                "usage": total_usage,
+                "iterations": iteration + 1,
+                "tool_calls": len(trace),
+            }
+
+        messages.append({"role": "user", "content": tool_results})
+
+    return {
+        "mock": False,
+        "error": f"Agentic loop did not finalize within {_MAX_AGENTIC_ITERATIONS} iterations.",
+        "trace": trace,
+        "final_spec": None,
+        "usage": total_usage,
+        "iterations": _MAX_AGENTIC_ITERATIONS,
+    }
+
+
 # ── Entry point ───────────────────────────────────────────────────────
 
 _HANDLERS = {
@@ -744,6 +1075,7 @@ _HANDLERS = {
     "reasoning_planning": _run_reasoning_planning,
     "output_generation": _run_output_generation,
     "output_interface": _run_output_interface,
+    "agentic_run": _run_agentic,
 }
 
 
@@ -769,7 +1101,7 @@ def handle(function_name: str, payload: object) -> dict:
             "error": f"{type(exc).__name__}: {exc}",
         }
 
-    status = "error" if "error" in result else "ok"
+    status = "error" if result.get("error") else "ok"
     return {
         "agent_name": AGENT_NAME,
         "function_name": function_name,

@@ -1744,6 +1744,20 @@ function TheHangarMission() {
               >
                 <span className="hgr-m-badge-ai-dot" />
                 AI
+                {llmStatus === "live" && (
+                  <span className="hgr-m-badge-ai-model">
+                    {/* Generic spark mark, not a reproduction of any
+                        vendor's trademarked logo — just a visual cue next
+                        to the provider's name. */}
+                    <svg viewBox="0 0 16 16" width="10" height="10" aria-hidden="true">
+                      <path
+                        d="M8 0 L9.4 6.6 L16 8 L9.4 9.4 L8 16 L6.6 9.4 L0 8 L6.6 6.6 Z"
+                        fill="currentColor"
+                      />
+                    </svg>
+                    Claude
+                  </span>
+                )}
               </span>
             </div>
             <div className="hgr-m-hero-row">
@@ -3333,6 +3347,7 @@ const HGR_MISSION_CSS = `
 .hgr-m-badge-ai-live .hgr-m-badge-ai-dot{ background:#4ADE80; box-shadow:0 0 6px rgba(74,222,128,.8); animation:hgr-m-ai-pulse 2s ease-in-out infinite; }
 .hgr-m-badge-ai-offline{ color:var(--hgr-m-amber); border:1px solid rgba(232,163,61,.4); background:rgba(232,163,61,.08); }
 .hgr-m-badge-ai-offline .hgr-m-badge-ai-dot{ background:var(--hgr-m-amber); box-shadow:0 0 6px rgba(232,163,61,.6); }
+.hgr-m-badge-ai-model{ display:inline-flex; align-items:center; gap:3px; margin-left:6px; padding-left:6px; border-left:1px solid rgba(74,222,128,.3); font-weight:500; opacity:.9; }
 @keyframes hgr-m-ai-pulse{ 0%,100%{ opacity:1; } 50%{ opacity:.4; } }
 
 .hgr-m-hero-row{ display:flex; align-items:center; gap:48px; flex-wrap:wrap; }
