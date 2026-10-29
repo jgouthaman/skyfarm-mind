@@ -44,6 +44,10 @@ interface NodeData {
   out: string;
 }
 
+// Bays whose circle is permanently green on the circuit: the fully built
+// and restyled ones. Add a bay here once it's finished.
+const LIVE_BAY_IDS = new Set([1, 2]);
+
 const NODES: NodeData[] = [
   {
     id: 1,
@@ -476,7 +480,7 @@ function TheHangarWelcome() {
           setDrawnLines((prev) => new Set([...prev, ...stage.lines]));
         }
         stage.nodes.forEach((nid) => {
-          if (nid === 1) return; // Mission Agent stays permanently 'online', never animated
+          if (LIVE_BAY_IDS.has(nid)) return; // live bays stay permanently green, never animated
           setNodeStatus((prev) => ({ ...prev, [nid]: "active" }));
           const id2 = setTimeout(() => {
             setNodeStatus((prev) => ({ ...prev, [nid]: "seen" }));
@@ -497,7 +501,7 @@ function TheHangarWelcome() {
     let cls = "hgr-w-node-circle";
     if (n.hub) cls += " hgr-w-hub";
     if (n.href) cls += " hgr-w-linkable";
-    if (n.id === 1) cls += " hgr-w-online";
+    if (LIVE_BAY_IDS.has(n.id)) cls += " hgr-w-online";
     else {
       const s = nodeStatus[n.id];
       if (s === "active") cls += " hgr-w-active";
