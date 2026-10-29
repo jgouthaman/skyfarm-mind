@@ -16,13 +16,13 @@ import Anthropic from "@anthropic-ai/sdk";
 // called from within each stage's own createServerFn handler (which is
 // where the server-only execution boundary actually needs to live).
 //
-// Falls back to Groq (GROQ_API_KEY, an OpenAI-compatible REST API — no SDK
-// dependency needed) whenever Anthropic is unreachable or unconfigured,
-// before giving up to the caller's own mock output. This is a lower-trust
-// path (the fallback model follows "return JSON only" less reliably than
-// Claude) so the result says which provider actually answered, and callers
-// that care (the "AI" status badge) can surface that rather than silently
-// treating a Groq answer as equivalent to a Claude one.
+// Two providers -- Anthropic and Groq (GROQ_API_KEY, an OpenAI-compatible
+// REST API, no SDK dependency) -- tried in the order set in Mission Hub ->
+// Configurations -> AI Providers (default: Anthropic first, Groq fallback).
+// A provider that's unconfigured or fails is skipped; if none answers, the
+// caller falls back to its own mock output. The result says which provider
+// actually answered, and callers that care (the "AI" status badge) surface
+// that rather than treating a Groq answer as equivalent to a Claude one.
 
 // Token usage for one real LLM call — surfaced up through each stage's
 // result so the UI can total requests/tokens across a whole mission run
@@ -130,48 +130,62 @@ export async function callLlmGateway(
   // every caller's system prompt already says "Return JSON only" and
   // stripJsonFences below already tolerates fenced output, so this is a
   // no-op passthrough rather than a stricter mode, same as before.
-  const anthropicResult = await callAnthropic(systemPrompt, userContent, opts?.model);
-  if (anthropicResult) return { ...anthropicResult, provider: "anthropic" };
-
-  const groqResult = await callGroq(systemPrompt, userContent);
-  if (groqResult) return { ...groqResult, provider: "groq" };
-
+  for (const provider of await providerOrder()) {
+    const result =
+      provider === "anthropic"
+        ? await callAnthropic(systemPrompt, userContent, opts?.model)
+        : await callGroq(systemPrompt, userContent);
+    if (result) return { ...result, provider };
+  }
   return { content: null, usage: null, provider: null };
 }
 
-// Live-connectivity check for the "AI" status indicator (Bay 01 header) —
-// reports which provider would actually answer the next call, not just a
-// boolean, so the badge can show the real model in use rather than always
-// assuming Claude. Checks Anthropic first (models.list — same cheap,
-// token-free pattern as before) and only checks Groq if Anthropic isn't
-// reachable, since Anthropic is always preferred when both are up.
-// AbortSignal.timeout keeps a slow/unreachable API from hanging the
-// indicator in a "checking" state.
-export async function checkLlmLiveStatus(): Promise<{ live: boolean; provider: LlmProvider | null }> {
-  const anthropicKey = process.env.ANTHROPIC_API_KEY;
-  if (anthropicKey) {
+// Order the providers are tried in, from Mission Hub -> Configurations -> AI
+// Providers (llmProviderSettings.ts, cached ~30s). Imported lazily so this
+// module stays free of the database client, and any failure falls back to
+// Anthropic first, Groq second -- the order before the setting existed.
+async function providerOrder(): Promise<LlmProvider[]> {
+  try {
+    const { getProviderOrder } = await import("./llmProviderSettings.ts");
+    return (await getProviderOrder()).order;
+  } catch {
+    return ["anthropic", "groq"];
+  }
+}
+
+async function isProviderLive(provider: LlmProvider): Promise<boolean> {
+  if (provider === "anthropic") {
+    const key = process.env.ANTHROPIC_API_KEY;
+    if (!key) return false;
     try {
-      const client = new Anthropic({ apiKey: anthropicKey });
+      const client = new Anthropic({ apiKey: key });
       await client.models.list({ limit: 1 }, { signal: AbortSignal.timeout(5000) });
-      return { live: true, provider: "anthropic" };
+      return true;
     } catch {
-      // fall through to Groq
+      return false;
     }
   }
-
-  const groqKey = process.env.GROQ_API_KEY;
-  if (groqKey) {
-    try {
-      const res = await fetch("https://api.groq.com/openai/v1/models", {
-        headers: { Authorization: `Bearer ${groqKey}` },
-        signal: AbortSignal.timeout(5000),
-      });
-      if (res.ok) return { live: true, provider: "groq" };
-    } catch {
-      // fall through to offline
-    }
+  const key = process.env.GROQ_API_KEY;
+  if (!key) return false;
+  try {
+    const res = await fetch("https://api.groq.com/openai/v1/models", {
+      headers: { Authorization: `Bearer ${key}` },
+      signal: AbortSignal.timeout(5000),
+    });
+    return res.ok;
+  } catch {
+    return false;
   }
+}
 
+// Live-connectivity check for the "AI" status indicator — reports which
+// provider would actually answer the next call: the first live one in the
+// configured order. Token-free probes (models list); AbortSignal.timeout
+// keeps a slow/unreachable API from hanging the indicator in "checking".
+export async function checkLlmLiveStatus(): Promise<{ live: boolean; provider: LlmProvider | null }> {
+  for (const provider of await providerOrder()) {
+    if (await isProviderLive(provider)) return { live: true, provider };
+  }
   return { live: false, provider: null };
 }
 

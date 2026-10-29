@@ -3,7 +3,7 @@ import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import {
   Clock, BookUser, Cpu, Sprout, Building2, Map as MapIcon,
   Shield, FlaskConical, GraduationCap, Users, Settings, Bell, Menu, X, LogOut, BookOpen,
-  ChevronDown, ChevronRight, Atom,
+  ChevronDown, ChevronRight, Atom, Sparkles,
 } from "lucide-react";
 import { useMissionHubAuth } from "@/lib/mission-hub/context";
 import { VERTICAL_LABELS, type Vertical } from "@/lib/mission-hub/types";
@@ -103,7 +103,7 @@ function getSectionFromPath(path: string, role?: string): Section | null {
   }
   if (path === "/mission-hub/waitlist" || path === "/mission-hub/contacts" || path === "/mission-hub/academy-users") return "business";
   if (path.startsWith("/mission-hub/twbc-") || path === "/mission-hub/knowledge-uav") return "twbc";
-  if (path === "/mission-hub/users" || path.startsWith("/mission-hub/settings")) return "config";
+  if (path === "/mission-hub/users" || path === "/mission-hub/ai-providers" || path.startsWith("/mission-hub/settings")) return "config";
   if (path.startsWith("/mission-hub/agents")) return "agents";
   return null;
 }
@@ -376,6 +376,11 @@ function Sidebar({
               {isAdmin && (
                 <NavLink to="/mission-hub/users" icon={Users} active={path === "/mission-hub/users"} onClick={onClose}>
                   Users
+                </NavLink>
+              )}
+              {isAdmin && (
+                <NavLink to="/mission-hub/ai-providers" icon={Sparkles} active={path === "/mission-hub/ai-providers"} onClick={onClose}>
+                  AI Providers
                 </NavLink>
               )}
               <NavLink to="/mission-hub/settings" icon={Settings} active={path === "/mission-hub/settings"} onClick={onClose}>

@@ -775,10 +775,10 @@ function TheHangarConcept() {
                 className={`hgr-c-badge hgr-c-badge-ai hgr-c-badge-ai-${llmStatus}`}
                 title={
                   llmStatus === "checking"
-                    ? "Checking connection to Anthropic/Groq…"
+                    ? "Checking the AI providers…"
                     : llmStatus === "live"
                       ? llmProvider === "groq"
-                        ? "Live — Anthropic unreachable, falling back to Groq (gpt-oss-120b)"
+                        ? "Live — answering via Groq (gpt-oss-120b), per the AI Providers order in Mission Hub"
                         : "Live — connected to Anthropic (Claude Sonnet 5)"
                       : "Offline — not connected to Anthropic or Groq. Stage LLM calls will fall back to mock output."
                 }

@@ -33,6 +33,7 @@ import { Route as DestudIndexRouteImport } from './routes/destud.index'
 import { Route as DestudNewMissionRouteImport } from './routes/destud.new-mission'
 import { Route as MissionHubIndexRouteImport } from './routes/mission-hub.index'
 import { Route as MissionHubAcademyUsersRouteImport } from './routes/mission-hub.academy-users'
+import { Route as MissionHubAiProvidersRouteImport } from './routes/mission-hub.ai-providers'
 import { Route as MissionHubContactsRouteImport } from './routes/mission-hub.contacts'
 import { Route as MissionHubDashboardRouteImport } from './routes/mission-hub.dashboard'
 import { Route as MissionHubDesignStudioRouteImport } from './routes/mission-hub.design-studio'
@@ -90,6 +91,7 @@ import { Route as ApiHangarCfdAnalysesRouteImport } from './routes/api.hangar.cf
 import { Route as ApiHangarConceptsRouteImport } from './routes/api.hangar.concepts'
 import { Route as ApiHangarDocumentationsRouteImport } from './routes/api.hangar.documentations'
 import { Route as ApiHangarExtractDocumentRouteImport } from './routes/api.hangar.extract-document'
+import { Route as ApiHangarLlmSettingsRouteImport } from './routes/api.hangar.llm-settings'
 import { Route as ApiHangarLlmStatusRouteImport } from './routes/api.hangar.llm-status'
 import { Route as ApiHangarManufacturingsRouteImport } from './routes/api.hangar.manufacturings'
 import { Route as ApiHangarMaterialsRouteImport } from './routes/api.hangar.materials'
@@ -266,6 +268,11 @@ const MissionHubIndexRoute = MissionHubIndexRouteImport.update({
 const MissionHubAcademyUsersRoute = MissionHubAcademyUsersRouteImport.update({
   id: '/academy-users',
   path: '/academy-users',
+  getParentRoute: () => MissionHubRoute,
+} as any)
+const MissionHubAiProvidersRoute = MissionHubAiProvidersRouteImport.update({
+  id: '/ai-providers',
+  path: '/ai-providers',
   getParentRoute: () => MissionHubRoute,
 } as any)
 const MissionHubContactsRoute = MissionHubContactsRouteImport.update({
@@ -568,6 +575,11 @@ const ApiHangarExtractDocumentRoute =
     path: '/api/hangar/extract-document',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiHangarLlmSettingsRoute = ApiHangarLlmSettingsRouteImport.update({
+  id: '/api/hangar/llm-settings',
+  path: '/api/hangar/llm-settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiHangarLlmStatusRoute = ApiHangarLlmStatusRouteImport.update({
   id: '/api/hangar/llm-status',
   path: '/api/hangar/llm-status',
@@ -918,6 +930,7 @@ export interface FileRoutesByFullPath {
   '/academy/quiz-demo': typeof AcademyQuizDemoRoute
   '/destud/new-mission': typeof DestudNewMissionRoute
   '/mission-hub/academy-users': typeof MissionHubAcademyUsersRoute
+  '/mission-hub/ai-providers': typeof MissionHubAiProvidersRoute
   '/mission-hub/contacts': typeof MissionHubContactsRoute
   '/mission-hub/dashboard': typeof MissionHubDashboardRoute
   '/mission-hub/design-studio': typeof MissionHubDesignStudioRoute
@@ -978,6 +991,7 @@ export interface FileRoutesByFullPath {
   '/api/hangar/concepts': typeof ApiHangarConceptsRoute
   '/api/hangar/documentations': typeof ApiHangarDocumentationsRoute
   '/api/hangar/extract-document': typeof ApiHangarExtractDocumentRoute
+  '/api/hangar/llm-settings': typeof ApiHangarLlmSettingsRoute
   '/api/hangar/llm-status': typeof ApiHangarLlmStatusRoute
   '/api/hangar/manufacturings': typeof ApiHangarManufacturingsRoute
   '/api/hangar/materials': typeof ApiHangarMaterialsRoute
@@ -1052,6 +1066,7 @@ export interface FileRoutesByTo {
   '/academy/quiz-demo': typeof AcademyQuizDemoRoute
   '/destud/new-mission': typeof DestudNewMissionRoute
   '/mission-hub/academy-users': typeof MissionHubAcademyUsersRoute
+  '/mission-hub/ai-providers': typeof MissionHubAiProvidersRoute
   '/mission-hub/contacts': typeof MissionHubContactsRoute
   '/mission-hub/dashboard': typeof MissionHubDashboardRoute
   '/mission-hub/design-studio': typeof MissionHubDesignStudioRoute
@@ -1112,6 +1127,7 @@ export interface FileRoutesByTo {
   '/api/hangar/concepts': typeof ApiHangarConceptsRoute
   '/api/hangar/documentations': typeof ApiHangarDocumentationsRoute
   '/api/hangar/extract-document': typeof ApiHangarExtractDocumentRoute
+  '/api/hangar/llm-settings': typeof ApiHangarLlmSettingsRoute
   '/api/hangar/llm-status': typeof ApiHangarLlmStatusRoute
   '/api/hangar/manufacturings': typeof ApiHangarManufacturingsRoute
   '/api/hangar/materials': typeof ApiHangarMaterialsRoute
@@ -1193,6 +1209,7 @@ export interface FileRoutesById {
   '/academy/quiz-demo': typeof AcademyQuizDemoRoute
   '/destud/new-mission': typeof DestudNewMissionRoute
   '/mission-hub/academy-users': typeof MissionHubAcademyUsersRoute
+  '/mission-hub/ai-providers': typeof MissionHubAiProvidersRoute
   '/mission-hub/contacts': typeof MissionHubContactsRoute
   '/mission-hub/dashboard': typeof MissionHubDashboardRoute
   '/mission-hub/design-studio': typeof MissionHubDesignStudioRoute
@@ -1254,6 +1271,7 @@ export interface FileRoutesById {
   '/api/hangar/concepts': typeof ApiHangarConceptsRoute
   '/api/hangar/documentations': typeof ApiHangarDocumentationsRoute
   '/api/hangar/extract-document': typeof ApiHangarExtractDocumentRoute
+  '/api/hangar/llm-settings': typeof ApiHangarLlmSettingsRoute
   '/api/hangar/llm-status': typeof ApiHangarLlmStatusRoute
   '/api/hangar/manufacturings': typeof ApiHangarManufacturingsRoute
   '/api/hangar/materials': typeof ApiHangarMaterialsRoute
@@ -1336,6 +1354,7 @@ export interface FileRouteTypes {
     | '/academy/quiz-demo'
     | '/destud/new-mission'
     | '/mission-hub/academy-users'
+    | '/mission-hub/ai-providers'
     | '/mission-hub/contacts'
     | '/mission-hub/dashboard'
     | '/mission-hub/design-studio'
@@ -1396,6 +1415,7 @@ export interface FileRouteTypes {
     | '/api/hangar/concepts'
     | '/api/hangar/documentations'
     | '/api/hangar/extract-document'
+    | '/api/hangar/llm-settings'
     | '/api/hangar/llm-status'
     | '/api/hangar/manufacturings'
     | '/api/hangar/materials'
@@ -1470,6 +1490,7 @@ export interface FileRouteTypes {
     | '/academy/quiz-demo'
     | '/destud/new-mission'
     | '/mission-hub/academy-users'
+    | '/mission-hub/ai-providers'
     | '/mission-hub/contacts'
     | '/mission-hub/dashboard'
     | '/mission-hub/design-studio'
@@ -1530,6 +1551,7 @@ export interface FileRouteTypes {
     | '/api/hangar/concepts'
     | '/api/hangar/documentations'
     | '/api/hangar/extract-document'
+    | '/api/hangar/llm-settings'
     | '/api/hangar/llm-status'
     | '/api/hangar/manufacturings'
     | '/api/hangar/materials'
@@ -1610,6 +1632,7 @@ export interface FileRouteTypes {
     | '/academy/quiz-demo'
     | '/destud/new-mission'
     | '/mission-hub/academy-users'
+    | '/mission-hub/ai-providers'
     | '/mission-hub/contacts'
     | '/mission-hub/dashboard'
     | '/mission-hub/design-studio'
@@ -1671,6 +1694,7 @@ export interface FileRouteTypes {
     | '/api/hangar/concepts'
     | '/api/hangar/documentations'
     | '/api/hangar/extract-document'
+    | '/api/hangar/llm-settings'
     | '/api/hangar/llm-status'
     | '/api/hangar/manufacturings'
     | '/api/hangar/materials'
@@ -1752,6 +1776,7 @@ export interface RootRouteChildren {
   ApiHangarConceptsRoute: typeof ApiHangarConceptsRoute
   ApiHangarDocumentationsRoute: typeof ApiHangarDocumentationsRoute
   ApiHangarExtractDocumentRoute: typeof ApiHangarExtractDocumentRoute
+  ApiHangarLlmSettingsRoute: typeof ApiHangarLlmSettingsRoute
   ApiHangarLlmStatusRoute: typeof ApiHangarLlmStatusRoute
   ApiHangarManufacturingsRoute: typeof ApiHangarManufacturingsRoute
   ApiHangarMaterialsRoute: typeof ApiHangarMaterialsRoute
@@ -1957,6 +1982,13 @@ declare module '@tanstack/react-router' {
       path: '/academy-users'
       fullPath: '/mission-hub/academy-users'
       preLoaderRoute: typeof MissionHubAcademyUsersRouteImport
+      parentRoute: typeof MissionHubRoute
+    }
+    '/mission-hub/ai-providers': {
+      id: '/mission-hub/ai-providers'
+      path: '/ai-providers'
+      fullPath: '/mission-hub/ai-providers'
+      preLoaderRoute: typeof MissionHubAiProvidersRouteImport
       parentRoute: typeof MissionHubRoute
     }
     '/mission-hub/contacts': {
@@ -2356,6 +2388,13 @@ declare module '@tanstack/react-router' {
       path: '/api/hangar/extract-document'
       fullPath: '/api/hangar/extract-document'
       preLoaderRoute: typeof ApiHangarExtractDocumentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/hangar/llm-settings': {
+      id: '/api/hangar/llm-settings'
+      path: '/api/hangar/llm-settings'
+      fullPath: '/api/hangar/llm-settings'
+      preLoaderRoute: typeof ApiHangarLlmSettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/hangar/llm-status': {
@@ -2885,6 +2924,7 @@ const MissionHubTorqwingsDesignStudioRouteWithChildren =
 
 interface MissionHubRouteChildren {
   MissionHubAcademyUsersRoute: typeof MissionHubAcademyUsersRoute
+  MissionHubAiProvidersRoute: typeof MissionHubAiProvidersRoute
   MissionHubContactsRoute: typeof MissionHubContactsRoute
   MissionHubDashboardRoute: typeof MissionHubDashboardRoute
   MissionHubDesignStudioRoute: typeof MissionHubDesignStudioRoute
@@ -2913,6 +2953,7 @@ interface MissionHubRouteChildren {
 
 const MissionHubRouteChildren: MissionHubRouteChildren = {
   MissionHubAcademyUsersRoute: MissionHubAcademyUsersRoute,
+  MissionHubAiProvidersRoute: MissionHubAiProvidersRoute,
   MissionHubContactsRoute: MissionHubContactsRoute,
   MissionHubDashboardRoute: MissionHubDashboardRoute,
   MissionHubDesignStudioRoute: MissionHubDesignStudioRoute,
@@ -3038,6 +3079,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiHangarConceptsRoute: ApiHangarConceptsRoute,
   ApiHangarDocumentationsRoute: ApiHangarDocumentationsRoute,
   ApiHangarExtractDocumentRoute: ApiHangarExtractDocumentRoute,
+  ApiHangarLlmSettingsRoute: ApiHangarLlmSettingsRoute,
   ApiHangarLlmStatusRoute: ApiHangarLlmStatusRoute,
   ApiHangarManufacturingsRoute: ApiHangarManufacturingsRoute,
   ApiHangarMaterialsRoute: ApiHangarMaterialsRoute,
