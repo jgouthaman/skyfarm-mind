@@ -73,22 +73,27 @@ export async function createBernoulliReview(
   userId: string,
   missionId: string,
   conceptId: string | null = null,
+  clientRunId: string | null = null,
 ): Promise<HangarBernoulliReviewRow> {
+  const row: Record<string, unknown> = {
+    user_id: userId,
+    mission_id: missionId,
+    status: "draft",
+    source_bay: conceptId ? "concept" : "mission",
+    concept_id: conceptId,
+  };
+  // Only sent when the page asked for progress, so a review still works on a
+  // database that hasn't had 20261030020000 applied.
+  if (clientRunId) row.client_run_id = clientRunId;
   const { data, error } = await db
     .from("Hangar_BernoulliReviews")
-    .insert({
-      user_id: userId,
-      mission_id: missionId,
-      status: "draft",
-      source_bay: conceptId ? "concept" : "mission",
-      concept_id: conceptId,
-    })
+    .insert(row)
     .select("*")
     .limit(1);
   if (error) throw new Error(`createBernoulliReview: ${error.message}`);
-  const row = data?.[0];
-  if (!row) throw new Error("createBernoulliReview: insert returned no row");
-  return row as unknown as HangarBernoulliReviewRow;
+  const created = data?.[0];
+  if (!created) throw new Error("createBernoulliReview: insert returned no row");
+  return created as unknown as HangarBernoulliReviewRow;
 }
 
 export async function getBernoulliReview(
@@ -255,4 +260,39 @@ export async function logBernoulliReviewRun(
       `logBernoulliReviewRun: failed to log stage ${stage} for review ${reviewId}: ${error.message}`,
     );
   }
+}
+
+// "Check 7 of 14" while a review runs: the pipeline writes progress to the
+// review row, the page polls it by the run id it generated itself (it only
+// learns the review id when the POST returns). Best-effort -- a failed write
+// never fails the review.
+export async function updateBernoulliReviewProgress(
+  reviewId: string,
+  progress: { done: number; total: number; current: string | null },
+): Promise<void> {
+  try {
+    await db.from("Hangar_BernoulliReviews").update({ progress }).eq("id", reviewId);
+  } catch {
+    // progress is cosmetic
+  }
+}
+
+export async function getBernoulliReviewProgress(
+  userId: string,
+  clientRunId: string,
+): Promise<{ status: string; progress: unknown } | null> {
+  const { data, error } = await (supabaseAdmin as unknown as {
+    from: (t: string) => {
+      select: (c: string) => {
+        eq: (c: string, v: string) => { eq: (c: string, v: string) => { limit: (n: number) => DbResult<Record<string, unknown>[] | null> } };
+      };
+    };
+  })
+    .from("Hangar_BernoulliReviews")
+    .select("status, progress")
+    .eq("client_run_id", clientRunId)
+    .eq("user_id", userId)
+    .limit(1);
+  if (error || !data?.[0]) return null;
+  return { status: String(data[0].status), progress: data[0].progress ?? null };
 }

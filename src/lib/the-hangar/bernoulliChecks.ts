@@ -39,12 +39,30 @@ export interface BernoulliCheckResult {
   // The rule's display name from the registry (Hangar_BernoulliRules), so a
   // page can label custom rules it has no hard-coded name for.
   ruleName?: string;
+  // What the verdict is about, as "kpi:<name>", "constraint:<name>" or
+  // "concept:<name>" -- the report marks these in the spec panels.
+  targets?: string[];
+  // Copy of the rule's settings at run time, so an old report keeps the
+  // wording and limits it was produced with even after the rule changes.
+  rule?: RuleSnapshot;
+  // The rule's max result turned a FAIL into a WARN.
+  capped?: boolean;
   // Real token usage + which provider answered -- set only when an LLM
-  // check (M03, M06) got a genuine reply (not mock, not INFO). Mirrors
-  // Bay 01's own per-stage usage shape (missionUsage.ts) so the telemetry
-  // table/bar can be built the same way for both bays.
+  // check got a genuine reply (not mock, not INFO). Mirrors Bay 01's own
+  // per-stage usage shape (missionUsage.ts) so the telemetry table/bar can
+  // be built the same way for every bay.
   usage?: LlmUsage;
   provider?: LlmProvider;
+}
+
+export interface RuleSnapshot {
+  name: string;
+  kind: "rule" | "llm";
+  builtin: boolean;
+  instruction: string | null;
+  version: number;
+  hardGate: boolean;
+  maxSeverity: "FAIL" | "WARN";
 }
 
 // Requests/tokens/cost across however many LLM checks actually ran with a
@@ -257,6 +275,19 @@ const AEROSPACE_BENCHMARKS = `Reference ranges (typical, not absolute):
 - Propulsive + ESC efficiency (battery to thrust): ~60-75%.
 - Typical payload fraction of MTOW: multirotor ~15-30%, fixed-wing ~10-25%.`;
 
+// Appended to every TorqWings AI check's instructions so the reply names
+// what it's about; parseTargets keeps only well-formed entries.
+const TARGETS_NOTE = `Also include "targets": a list of the exact items your verdict is about, each written as "kpi:<KPI name>", "constraint:<constraint name>" or "concept:<concept name>", using the names exactly as given in the input. Use [] when the verdict isn't about specific items.`;
+
+export function parseTargets(raw: unknown): string[] | undefined {
+  if (!Array.isArray(raw)) return undefined;
+  const out = raw
+    .filter((t): t is string => typeof t === "string")
+    .map((t) => t.trim())
+    .filter((t) => /^(kpi|constraint|concept):.+/.test(t));
+  return out.length > 0 ? Array.from(new Set(out)).slice(0, 20) : undefined;
+}
+
 // -- BERN-M03: payload/endurance/vehicle-class plausibility (Claude call) ---
 
 // Primary judgment is still payload-vs-endurance (same contract as before --
@@ -273,7 +304,9 @@ const M03_SYSTEM = `You are Bernoulli Agent's physics-plausibility reviewer for 
 
 ${AEROSPACE_BENCHMARKS}
 
-This is an engineering judgment call, not a certified analysis -- ground it in the given numbers and the reference ranges above, don't invent specifics not present in the input. Return JSON only: { "status": "PASS | WARN | FAIL", "message": "one or two sentences", "reasoning": "the calculation/logic behind the verdict -- show what you estimated and against what reference range, 2-4 sentences" }.`;
+This is an engineering judgment call, not a certified analysis -- ground it in the given numbers and the reference ranges above, don't invent specifics not present in the input. Return JSON only: { "status": "PASS | WARN | FAIL", "message": "one or two sentences", "reasoning": "the calculation/logic behind the verdict -- show what you estimated and against what reference range, 2-4 sentences" }.
+
+${TARGETS_NOTE}`;
 
 async function checkPayloadEndurancePlausibility(
   input: BernoulliCheckInput,
@@ -324,6 +357,7 @@ ${priorFindings || "(none ran, or all were not-applicable)"}`;
       message: obj.message,
       sourceWasMock: false,
       reasoning: typeof obj.reasoning === "string" ? obj.reasoning : undefined,
+      targets: parseTargets(obj.targets),
       usage: usage ?? undefined,
       provider: provider ?? undefined,
     };
@@ -359,7 +393,9 @@ const M06_SYSTEM = `You are Bernoulli Agent's physics-plausibility reviewer for 
 
 ${AEROSPACE_BENCHMARKS}
 
-Return JSON only: { "status": "PASS | WARN | FAIL", "message": "one or two sentences", "reasoning": "your estimate -- implied power draw, required energy, implied battery mass fraction, and which reference range(s) you checked it against, 2-4 sentences" }.`;
+Return JSON only: { "status": "PASS | WARN | FAIL", "message": "one or two sentences", "reasoning": "your estimate -- implied power draw, required energy, implied battery mass fraction, and which reference range(s) you checked it against, 2-4 sentences" }.
+
+${TARGETS_NOTE}`;
 
 async function checkEnergyPowerPlausibility(
   input: BernoulliCheckInput,
@@ -407,6 +443,7 @@ ${priorFindings || "(none ran, or all were not-applicable)"}`;
       message: obj.message,
       sourceWasMock: false,
       reasoning: typeof obj.reasoning === "string" ? obj.reasoning : undefined,
+      targets: parseTargets(obj.targets),
       usage: usage ?? undefined,
       provider: provider ?? undefined,
     };
@@ -480,6 +517,70 @@ function checkDimensionalConsistency(input: BernoulliCheckInput): BernoulliCheck
   };
 }
 
+// -- BERN-M07: payload vs MTOW (deterministic, hard gate) --------------------
+
+// Mass in kg from a value + unit ("0.55", "kg") or a constraint string
+// ("≤ 0.55 kg", "Maximum takeoff weight 250 g").
+function massKg(text: string, unitHint = ""): number | null {
+  const n = parseLeadingNumber(text);
+  if (n === null) return null;
+  const u = `${unitHint} ${text}`.toLowerCase();
+  if (/\b(lb|lbs|pound)/.test(u)) return n * 0.4536;
+  if (/\bkg\b|kilogram/.test(u)) return n;
+  if (/\bg\b|gram/.test(u)) return n / 1000;
+  return n; // unitless -- assume kg, the spec's own default unit for mass
+}
+
+function checkPayloadVsMtow(input: BernoulliCheckInput): BernoulliCheckResult {
+  const payloadKpi = findKpi(input.kpis, "payload");
+  const mtow = findConstraint(input.constraints, "takeoff weight", "take-off weight", "mtow", "gross weight", "maximum weight", "max weight", "all-up weight", "auw");
+  if (!payloadKpi || !mtow) {
+    return {
+      ruleId: "BERN-M07",
+      status: "INFO",
+      message: "Not applicable -- this spec doesn't carry both a Payload KPI and a maximum takeoff weight constraint.",
+      sourceWasMock: false,
+    };
+  }
+  const payload = massKg(payloadKpi.target, payloadKpi.unit);
+  const limit = massKg(mtow.value);
+  if (payload === null || limit === null || limit <= 0) {
+    return {
+      ruleId: "BERN-M07",
+      status: "INFO",
+      message: "Payload or MTOW couldn't be read as a mass -- skipped.",
+      sourceWasMock: false,
+    };
+  }
+  const targets = [`kpi:${payloadKpi.name}`, `constraint:${mtow.name}`];
+  const fraction = payload / limit;
+  const fmt = (kg: number) => (kg < 1 ? `${Math.round(kg * 1000)} g` : `${+kg.toFixed(2)} kg`);
+  if (fraction >= 1) {
+    return {
+      ruleId: "BERN-M07",
+      status: "FAIL",
+      message: `Payload (${fmt(payload)}) is ${fraction >= 2 ? `${+fraction.toFixed(1)}×` : `${Math.round(fraction * 100)}% of`} the maximum takeoff weight (${fmt(limit)}) -- the vehicle can't carry more than it's allowed to weigh in total.`,
+      sourceWasMock: false,
+      targets,
+    };
+  }
+  if (fraction > 0.4) {
+    return {
+      ruleId: "BERN-M07",
+      status: "WARN",
+      message: `Payload is ${Math.round(fraction * 100)}% of the maximum takeoff weight -- above the ~10-30% payload fraction typical for UAS, leaving little for airframe, battery and propulsion.`,
+      sourceWasMock: false,
+      targets,
+    };
+  }
+  return {
+    ruleId: "BERN-M07",
+    status: "PASS",
+    message: `Payload is ${Math.round(fraction * 100)}% of the maximum takeoff weight, within a plausible payload fraction.`,
+    sourceWasMock: false,
+  };
+}
+
 // -- orchestrator -------------------------------------------------------------
 
 export interface BernoulliReviewResult {
@@ -538,44 +639,139 @@ const MISSION_RULE_IMPLS: Record<string, CheckImpl<BernoulliCheckInput>> = {
   "BERN-M04": (i) => checkKpiProvenance(i),
   "BERN-M05": (i) => checkDimensionalConsistency(i),
   "BERN-M06": (i, prior) => checkEnergyPowerPlausibility(i, prior),
+  "BERN-M07": (i) => checkPayloadVsMtow(i),
 };
 
-// Runs the registry's enabled rules for a bay, in three passes so every AI
-// check sees what came before it: deterministic built-ins first (cheap, no
-// network), then built-in AI checks, then custom AI rules. Hard gates come
-// from the registry too.
+export interface BernoulliProgress {
+  done: number;
+  total: number;
+  current: string | null;
+}
+export type ProgressFn = (p: BernoulliProgress) => void | Promise<void>;
+
+interface NameIndex {
+  kpi: string[];
+  constraint: string[];
+  concept: string[];
+}
+
+function snapshotRule(rule: BernoulliRuleDef): RuleSnapshot {
+  return {
+    name: rule.name,
+    kind: rule.kind,
+    builtin: rule.builtin,
+    instruction: rule.instruction,
+    version: rule.version,
+    hardGate: rule.hardGate,
+    maxSeverity: rule.maxSeverity,
+  };
+}
+
+// Built-in rule-based checks already name what they're about in their
+// message; pick those names up as targets when a check didn't set its own.
+function targetsFromMessage(message: string, names: NameIndex): string[] | undefined {
+  const lower = message.toLowerCase();
+  const hits: string[] = [];
+  for (const [kind, list] of Object.entries(names) as [keyof NameIndex, string[]][]) {
+    for (const n of list) {
+      if (n && n.length >= 3 && lower.includes(n.toLowerCase())) hits.push(`${kind}:${n}`);
+    }
+  }
+  return hits.length > 0 ? hits : undefined;
+}
+
+function finishResult(result: BernoulliCheckResult, rule: BernoulliRuleDef, names: NameIndex): BernoulliCheckResult {
+  const capped = result.status === "FAIL" && rule.maxSeverity === "WARN";
+  const flagged = result.status === "WARN" || result.status === "FAIL";
+  return {
+    ...result,
+    status: capped ? "WARN" : result.status,
+    capped: capped || undefined,
+    ruleName: rule.name,
+    rule: snapshotRule(rule),
+    targets: flagged ? (result.targets ?? targetsFromMessage(result.message, names)) : undefined,
+  };
+}
+
+// Runs the registry's enabled rules for a bay in three passes, so each
+// TorqWings AI check sees what came before it:
+//   1. built-in rule-based checks (instant, no network)
+//   2. built-in AI checks, in order (M06 sees M03)
+//   3. custom AI rules, in parallel -- they only need passes 1-2
+// Hard gates and each rule's max result come from the registry.
 async function runRegisteredChecks<I>(
   input: I,
   rules: BernoulliRuleDef[],
   impls: Record<string, CheckImpl<I>>,
   describeForCustom: (input: I) => string,
+  nameIndex: (input: I) => NameIndex,
+  onProgress?: ProgressFn,
 ): Promise<BernoulliReviewResult> {
-  const active = rules.filter((r) => r.enabled).sort((a, b) => a.sortOrder - b.sortOrder);
-  const passes = [
-    active.filter((r) => r.builtin && r.kind === "rule"),
-    active.filter((r) => r.builtin && r.kind === "llm"),
-    active.filter((r) => !r.builtin),
-  ];
+  const active = rules
+    .filter((r) => r.enabled && (!r.builtin || impls[r.ruleId]))
+    .sort((a, b) => a.sortOrder - b.sortOrder);
+  const pass1 = active.filter((r) => r.builtin && r.kind === "rule");
+  const pass2 = active.filter((r) => r.builtin && r.kind === "llm");
+  const pass3 = active.filter((r) => !r.builtin);
+  const names = nameIndex(input);
+  const total = active.length;
   const checks: BernoulliCheckResult[] = [];
-  for (const pass of passes) {
-    for (const rule of pass) {
-      let result: BernoulliCheckResult;
-      if (rule.builtin) {
-        const impl = impls[rule.ruleId];
-        if (!impl) continue; // a built-in id this build has no code for
-        result = await impl(input, checks);
-      } else {
-        result = await runCustomRule(rule, describeForCustom(input), checks);
-      }
-      checks.push({ ...result, ruleName: rule.name });
-    }
+  const report = async (current: string | null) => {
+    if (onProgress) await onProgress({ done: checks.length, total, current });
+  };
+
+  for (const rule of [...pass1, ...pass2]) {
+    await report(`${rule.ruleId} ${rule.name}`);
+    const result = await impls[rule.ruleId](input, checks);
+    checks.push(finishResult(result, rule, names));
   }
-  const hardGates = new Set(active.filter((r) => r.hardGate).map((r) => r.ruleId));
+
+  if (pass3.length > 0) {
+    await report(pass3.length === 1 ? `${pass3[0].ruleId} ${pass3[0].name}` : `${pass3.length} custom rules`);
+    const prior = [...checks];
+    const description = describeForCustom(input);
+    const results = await Promise.all(pass3.map((rule) => runCustomRule(rule, description, prior)));
+    results.forEach((result, i) => checks.push(finishResult(result, pass3[i], names)));
+  }
+  await report(null);
+
+  const hardGates = new Set(active.filter((r) => r.hardGate && r.maxSeverity === "FAIL").map((r) => r.ruleId));
   return {
     verdict: computeVerdict(checks, hardGates),
     checks,
     confidenceScore: computeConfidenceScore(checks, hardGates),
   };
+}
+
+// One rule on its own, for the Mission Hub "Run test" button. Runs the free
+// rule-based built-ins first so an AI rule sees the same earlier findings it
+// would in a real review; returns only the tested rule's result. Nothing is
+// saved.
+async function testRegisteredRule<I>(
+  input: I,
+  rule: BernoulliRuleDef,
+  allRules: BernoulliRuleDef[],
+  impls: Record<string, CheckImpl<I>>,
+  describeForCustom: (input: I) => string,
+  nameIndex: (input: I) => NameIndex,
+): Promise<BernoulliCheckResult> {
+  const names = nameIndex(input);
+  const prior: BernoulliCheckResult[] = [];
+  if (rule.kind === "llm") {
+    for (const r of allRules.filter((x) => x.enabled && x.builtin && x.kind === "rule" && impls[x.ruleId])) {
+      prior.push(finishResult(await impls[r.ruleId](input, prior), r, names));
+    }
+  }
+  if (rule.builtin) {
+    const impl = impls[rule.ruleId];
+    if (!impl) throw new Error(`No code for built-in check ${rule.ruleId}.`);
+    return finishResult(await impl(input, prior), rule, names);
+  }
+  return finishResult(await runCustomRule(rule, describeForCustom(input), prior), rule, names);
+}
+
+function missionNames(input: BernoulliCheckInput): NameIndex {
+  return { kpi: input.kpis.map((k) => k.name), constraint: input.constraints.map((c) => c.name), concept: [] };
 }
 
 function describeMissionInput(input: BernoulliCheckInput): string {
@@ -592,8 +788,17 @@ Mission constraints: ${input.constraints.length > 0 ? input.constraints.map((c) 
 export async function runBernoulliChecks(
   input: BernoulliCheckInput,
   rules: BernoulliRuleDef[],
+  onProgress?: ProgressFn,
 ): Promise<BernoulliReviewResult> {
-  return runRegisteredChecks(input, rules, MISSION_RULE_IMPLS, describeMissionInput);
+  return runRegisteredChecks(input, rules, MISSION_RULE_IMPLS, describeMissionInput, missionNames, onProgress);
+}
+
+export async function testMissionRule(
+  input: BernoulliCheckInput,
+  rule: BernoulliRuleDef,
+  allRules: BernoulliRuleDef[],
+): Promise<BernoulliCheckResult> {
+  return testRegisteredRule(input, rule, allRules, MISSION_RULE_IMPLS, describeMissionInput, missionNames);
 }
 
 // -- custom rules: TorqWings AI checks defined in Mission Hub ---------------
@@ -602,7 +807,9 @@ const CUSTOM_RULE_SYSTEM = `You are Bernoulli Agent's physics-plausibility revie
 
 ${AEROSPACE_BENCHMARKS}
 
-This is an engineering judgment call, not a certified analysis -- ground it in the given numbers, don't invent specifics not present in the input. Return JSON only: { "status": "PASS | WARN | FAIL", "message": "one or two sentences", "reasoning": "what you checked and how, 2-4 sentences" }.`;
+This is an engineering judgment call, not a certified analysis -- ground it in the given numbers, don't invent specifics not present in the input. Return JSON only: { "status": "PASS | WARN | FAIL", "message": "one or two sentences", "reasoning": "what you checked and how, 2-4 sentences" }.
+
+${TARGETS_NOTE}`;
 
 async function runCustomRule(
   rule: BernoulliRuleDef,
@@ -646,6 +853,7 @@ ${priorFindings || "(none ran, or all were not-applicable)"}`;
       message: obj.message,
       sourceWasMock: false,
       reasoning: typeof obj.reasoning === "string" ? obj.reasoning : undefined,
+      targets: parseTargets(obj.targets),
       usage: usage ?? undefined,
       provider: provider ?? undefined,
     };
@@ -881,7 +1089,9 @@ const C04_SYSTEM = `You are Bernoulli Agent's physics-plausibility reviewer for 
 
 ${AEROSPACE_BENCHMARKS}
 
-This is an engineering judgment call, not a certified analysis -- ground it in the given numbers and the reference ranges above, don't invent specifics not present in the input. Return JSON only: { "status": "PASS | WARN | FAIL", "message": "one or two sentences naming the concept(s) at issue", "reasoning": "one short line per concept -- name: estimate, reference range used, verdict" }.`;
+This is an engineering judgment call, not a certified analysis -- ground it in the given numbers and the reference ranges above, don't invent specifics not present in the input. Return JSON only: { "status": "PASS | WARN | FAIL", "message": "one or two sentences naming the concept(s) at issue", "reasoning": "one short line per concept -- name: estimate, reference range used, verdict" }.
+
+${TARGETS_NOTE}`;
 
 async function checkConceptPhysicalFeasibility(
   input: BernoulliConceptCheckInput,
@@ -941,6 +1151,7 @@ ${priorFindings || "(none ran, or all were not-applicable)"}`;
       message: obj.message,
       sourceWasMock: false,
       reasoning: typeof obj.reasoning === "string" ? obj.reasoning : undefined,
+      targets: parseTargets(obj.targets),
       usage: usage ?? undefined,
       provider: provider ?? undefined,
     };
@@ -981,9 +1192,22 @@ Candidate concepts generated for this mission, in rank order:
 ${concepts || "(none)"}`;
 }
 
+function conceptNames(input: BernoulliConceptCheckInput): NameIndex {
+  return { ...missionNames(input), concept: input.candidates.map((c) => c.conceptName) };
+}
+
 export async function runBernoulliConceptChecks(
   input: BernoulliConceptCheckInput,
   rules: BernoulliRuleDef[],
+  onProgress?: ProgressFn,
 ): Promise<BernoulliReviewResult> {
-  return runRegisteredChecks(input, rules, CONCEPT_RULE_IMPLS, describeConceptInput);
+  return runRegisteredChecks(input, rules, CONCEPT_RULE_IMPLS, describeConceptInput, conceptNames, onProgress);
+}
+
+export async function testConceptRule(
+  input: BernoulliConceptCheckInput,
+  rule: BernoulliRuleDef,
+  allRules: BernoulliRuleDef[],
+): Promise<BernoulliCheckResult> {
+  return testRegisteredRule(input, rule, allRules, CONCEPT_RULE_IMPLS, describeConceptInput, conceptNames);
 }
