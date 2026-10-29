@@ -2,6 +2,8 @@
 
 **Status: built and live**, unlike `MissionAgent.md`, which was written as a build spec before Bay 01 existed. This document describes the actual shipped implementation — every section is a direct read of the real files, not a plan. Written after the fact specifically so it stays honest about where the implementation departs from what `MissionAgent.md` Section 17 ("Handover to Bay 02") assumed Concept Agent would do — see Section 11 below for exactly where it does.
 
+**Updated 2026-10-29:** see [Section 13](#13-october-2026-updates) for what changed since: AI provider order, page layout, source-mission trace, and Bernoulli reviewing concepts directly. Where Section 13 conflicts with an earlier section, Section 13 is current.
+
 ## 1. Overview
 
 Concept Agent takes one of a user's **finalized** Mission Agent specs and generates, reasons about, and ranks candidate vehicle concepts against it — 3 candidates per run, each scored for fit against the source mission's own constraints and KPIs. Nothing is committed to before this ranking exists.
@@ -127,7 +129,7 @@ Assigns `rank` 1..N off the sorted order. Still logged as its own `Hangar_concep
 2. `computeConceptConfidence(rankedConcepts)` — see Section 7.
 3. `persistConceptSpec` (`conceptPersistence.ts`) — gets the next version from `get_next_concept_spec_version` (Section 6.2), inserts into `Hangar_concept_specs`.
 4. Status → `spec_ready`, with the confidence score.
-5. `stubExport()` / `stubEventPublish()` (`exportAndEventStubs.ts`) — the same two stub functions Mission Agent's own Stage 4 calls, reused as-is, not concept-specific. `eventPublish.eventType` is hardcoded `"mission.spec_ready"` inside that shared file — **known cosmetic inaccuracy**: a concept's own `Hangar_concept_runs` audit row records this mission-flavored string verbatim, since the function wasn't parameterized. Harmless (nothing reads `eventType` downstream) but not accurate.
+5. `stubExport()` / `stubEventPublish()` (`exportAndEventStubs.ts`) — reused as-is, not concept-specific. `stubExport()` is shared with Mission Agent's Stage 4; `stubEventPublish()` is now used only here, because Mission Agent's Stage 4 publishes a real event (`publishMissionEvent`). `eventPublish.eventType` is hardcoded `"mission.spec_ready"` inside that shared file — **known cosmetic inaccuracy**: a concept's own `Hangar_concept_runs` audit row records this mission-flavored string verbatim, since the function wasn't parameterized. Harmless (nothing reads `eventType` downstream) but not accurate.
 6. Logs to `Hangar_concept_runs` (stage `output_interface`, output includes `persistedSpecId`/`version`/`export`/`eventPublish`).
 
 **Save as final:** `finalizeConcept` — `assertConceptOwnership` then `updateConceptStatus(conceptId, "finalized")`. Not one of the 4 stages, so — same as Mission Agent's `finalizeMission` — it does not call `logConceptStageRun` (`Hangar_concept_runs.stage`'s check constraint only accepts the 4 named stages).
@@ -144,6 +146,8 @@ async function assertConceptOwnership(conceptId: string, userId: string): Promis
   return concept;
 }
 ```
+
+**Stage 1** checks the source mission instead: `assertMissionOwnership(sourceMissionId, userId)` rejects a mission that doesn't exist, belongs to another user, or isn't `finalized`, before any `Hangar_concepts` row is created.
 
 Every call from Stage 2 onward carries a client-supplied `conceptId` (the gated flow always resumes an existing concept) — without this check, any authenticated user who learned or guessed a `conceptId` could advance or read someone else's in-flight concept. `userId` itself is never client-supplied — every route resolves it server-side from the request's Bearer token via `resolveUserId` (`apiAuth.ts`) before calling any stage function.
 
@@ -223,7 +227,7 @@ $$;
 
 **`get_next_concept_spec_version` is used** — `conceptPersistence.ts`'s `getNextConceptSpecVersion` calls it directly, exactly mirroring Mission Agent's `get_next_mission_spec_version` fix (same reasoning: a concept can be regenerated against the same `concept_id`, so the version can't be hardcoded).
 
-**`get_latest_concept_spec` exists in the schema but is not called anywhere in the application code** — confirmed by search, zero references in `src/`. `conceptPersistence.ts`'s `getSpecsForConcepts` gets the same "latest version per concept" result a different way: it selects all matching rows ordered `(concept_id, version desc)` and keeps the first row seen per `concept_id` in JavaScript, batched across every concept in one query — the same pattern `missionPersistence.ts`'s `getSpecsForMissions` already uses for missions, since PostgREST has no `DISTINCT ON` and supabase-js's query builder can't express one. `get_latest_concept_spec` looks like it was added directly against the live schema mirroring the version-RPC pattern, but nothing in the app was ever wired to call it for a single concept lookup — it's live, callable, and currently unused. (The equivalent `get_latest_mission_spec` RPC exists live for Mission Agent too, for the same reason, and is equally unused by any Mission Agent code path.)
+**`get_latest_concept_spec` is used, but not by Concept Agent's own pages.** `conceptPersistence.ts`'s `getLatestConceptSpec` wraps it, and it is called by Aircraft Design Agent (Bay 03, `aircraftDesignAgentPipeline.ts`) and by Bernoulli's concept review (`bernoulliAgentPipeline.ts`) to load one concept's latest spec. Concept Agent's list view uses `getSpecsForConcepts`, which gets the same "latest version per concept" result a different way: it selects all matching rows ordered `(concept_id, version desc)` and keeps the first row seen per `concept_id` in JavaScript, batched across every concept in one query — the same pattern `missionPersistence.ts`'s `getSpecsForMissions` already uses for missions, since PostgREST has no `DISTINCT ON` and supabase-js's query builder can't express one. (The equivalent `get_latest_mission_spec` RPC exists live for Mission Agent too, for the same reason, and is equally unused by any Mission Agent code path.)
 
 ### 6.3 Row Level Security — enabled, but not the enforcement mechanism
 
@@ -271,7 +275,7 @@ The top-ranked concept's own `fitScore` (1-10, from Stage 2's LLM output), linea
 | **Rules engine / deterministic scoring** | Yes | Stage 3 (`conceptRanking.ts`) — gate-then-score, no LLM |
 | **Knowledge graph / benchmark database** | **No** | Referenced in the welcome page's own one-line description of Bay 02 ("benchmarks, trends") and in the original architecture reference, but nothing was ever built — same status as Mission Agent's own "Knowledge Graph" entry in `MissionAgent.md` Section 5.2 ("not used ... no plan at all"). Stage 2's system prompt explicitly instructs Claude *not* to invent benchmark or market data, specifically because no real data source backs it. |
 | **RAG / vector search** | No | `contextRetrieval.ts` is still the Mission Agent stub returning `[]`; Concept Agent has no RAG step of its own at all, stubbed or otherwise. |
-| **Export (PDF/DOCX/Excel)** | No | `stubExport()`, shared with Mission Agent, always returns `{status:"stubbed"}` |
+| **Export (PDF/DOCX/Excel)** | Yes, in the browser | `conceptExport.ts` generates PDF/DOCX/Excel downloads from the dashboard. Stage 4's server-side `stubExport()` result is still `{status:"stubbed"}`. |
 | **Event publish** | No | `stubEventPublish()`, shared with Mission Agent, always returns `{status:"stubbed"}` — see the `eventType` inaccuracy noted in Section 4.4 |
 
 ## 9. API Routes
@@ -293,6 +297,8 @@ All internal-only (no public wire contract the way `MissionAgent.md` Section 11 
 
 ## 10. UI — `the-hangar.concept.tsx`
 
+> Superseded in part by [Section 13.2](#132-page-layout): panel order, the removed "Generate a concept" bar, and the finished-concept layout have changed.
+
 New, self-contained route (`/the-hangar/concept`) — no shared imports with `the-hangar.mission.tsx`, matching the welcome page's own stated per-bay isolation convention. Small local duplicates of `callStageApi`, `StageErrorCard`, `ProceedRow`, etc. exist in this file rather than being extracted into a shared module, for the same reason.
 
 Page sections, top to bottom:
@@ -310,17 +316,17 @@ Mission Agent's own dashboard (`the-hangar.mission.tsx`) was updated alongside t
 | Section 17 said | What actually happens |
 |---|---|
 | "Fetched from `Hangar_mission_specs` by `mission_id` — Concept Agent does not receive the spec embedded in whatever triggers it." | **Does receive it embedded.** Stage 1's request body carries `missionSpecs`/`constraints`/`kpis`/`summary` directly, client-supplied. `runConceptIdeationStage` never queries `Hangar_mission_specs` itself. See Section 3.1. |
-| "If Concept Agent should only ever act on human-confirmed [`finalized`] specs, it must check `status = 'finalized'` specifically." | **Enforced client-side only.** The "Your saved specs" panel only ever fetches `?status=finalized`, so nothing not finalized is ever *offered*. But `runConceptIdeationStage` itself performs no server-side check on the source mission's status at all — it doesn't look the mission up. A request crafted directly against the API with a non-finalized (or nonexistent) `sourceMissionId` and arbitrary `missionSpecs`/`constraints`/`kpis` would still succeed. |
-| (implied) Concept Agent should verify it's acting on a mission the caller actually owns. | **Not checked.** Nothing verifies `sourceMissionId` belongs to `userId`. The only foreign-key relationship enforced is the DB-level `references public."Hangar_missions"(id)` on `Hangar_concepts.source_mission_id` — it must be *a* real mission id, not necessarily the caller's own. In practice this is unreachable through the UI (the mission list is already scoped to the caller), but it is not defended at the API layer the way `assertConceptOwnership` defends every later stage. |
+| "If Concept Agent should only ever act on human-confirmed [`finalized`] specs, it must check `status = 'finalized'` specifically." | **Enforced server-side.** `runConceptIdeationStage` calls `assertMissionOwnership` (Section 5), which looks the mission up and rejects it unless it exists, belongs to the caller and is `finalized`. The spec *content* is still client-supplied, not re-read from `Hangar_mission_specs` (row above), so a crafted request against a real finalized mission could still send different `missionSpecs`/`constraints`/`kpis`. |
+| (implied) Concept Agent should verify it's acting on a mission the caller actually owns. | **Checked.** `assertMissionOwnership` rejects a `sourceMissionId` that belongs to another user, at the API layer, the same way `assertConceptOwnership` defends every later stage. |
 
 Additional gaps not tied to Section 17:
 
-- **`get_latest_concept_spec` RPC is unused** (Section 6.2) — exists live, callable, mirrors the version-lookup pattern, but no code path calls it.
+- ~~**`get_latest_concept_spec` RPC is unused**~~ — now used by Aircraft Design Agent (Bay 03) and Bernoulli's concept review, via `getLatestConceptSpec` (Section 6.2).
 - **`stubEventPublish()`'s `eventType` is hardcoded to `"mission.spec_ready"`** (Section 4.4) — reused as-is from Mission Agent's stub rather than parameterized, so a concept's own audit log records the wrong event name. Cosmetic only; nothing reads it.
 - **No real benchmark/knowledge-graph data exists** (Section 8) — "benchmarks, trends and design preferences" (the welcome page's own description of this bay) is Claude reasoning against the mission's own stated KPIs/constraints, explicitly instructed not to invent external data. This is a deliberate, disclosed simplification, not an oversight — confirmed with the user before building.
 - **Fixed at 3 candidates, not configurable** — `conceptIdeation.ts`'s system prompt hardcodes "exactly 3 distinct candidate vehicle-concept options." No UI or API path changes this count.
 - **No update-in-place / true regeneration** — "Edit and regenerate" on the Concept Dashboard creates a brand-new `Hangar_concepts` row against the same source mission, same limitation Mission Agent's own "Edit and regenerate" has relative to `MissionAgent.md` Section 13.2's documented version-2-of-the-same-record flow (also not built for missions).
-- **Export and event publish are both stubs** — `StubResult`/`EventStubResult`, unchanged from Mission Agent, per `exportAndEventStubs.ts`'s own "specified now, built when needed" treatment.
+- **Server-side export and event publish are stubs** — Stage 4 returns `StubResult`/`EventStubResult` from `exportAndEventStubs.ts`. Users can still export: the dashboard's PDF/DOCX/Excel buttons generate files in the browser (`conceptExport.ts`). Unlike Mission Agent, no real event is published.
 
 ## 12. Build Status
 
@@ -330,11 +336,54 @@ Additional gaps not tied to Section 17:
 | Trade-off Reasoning (Stage 2, LLM) | ✅ Built, real Claude calls confirmed live |
 | Ranking & Scoring (Stage 3, deterministic) | ✅ Built |
 | Output Interface (Stage 4, persistence) | ✅ Built |
-| Ownership enforcement | ✅ Built for Stages 2-4 and finalize; source-mission ownership/status not checked (Section 11) |
+| Ownership enforcement | ✅ Built: source mission checked in Stage 1 (owner + finalized); concept ownership in Stages 2–4 and finalize |
 | `Hangar_concepts` / `Hangar_concept_specs` / `Hangar_concept_runs` | ✅ Live in Supabase (manually-applied migration) |
 | RLS policies | ✅ Enabled, correct, but not load-bearing today (Section 6.3) |
 | "Your saved specs" / "Your concepts" UI | ✅ Built |
-| Export (PDF/DOCX/Excel) | ❌ Stub only |
+| Export (PDF/DOCX/Excel) | ✅ Browser downloads (`conceptExport.ts`); server-side export result still a stub |
 | Event publish / bus | ❌ Stub only |
 | Real benchmark / knowledge-graph data | ❌ Not built — reasoning-only, disclosed |
 | Bay 03 (Aircraft Design Agent) hand-off | ❌ Not built — placeholder button only |
+
+## 13. October 2026 updates
+
+As of production `0e986c4` (2026-10-29).
+
+### 13.1 LLM calls and providers
+
+Still **2 LLM calls per concept run**: Stage 1 ideation and Stage 2 trade-off reasoning (one call covering all candidates). Stage 3 ranking and Stage 4 persistence make none. Both calls go through the shared `callLlmGateway`, which now tries Anthropic (Claude Sonnet 5) and Groq (`openai/gpt-oss-120b`) in the order set on **Mission Hub → Configurations → AI Providers** (`Hangar_LlmSettings`, cached ~30s, default Anthropic first). The page's AI badge shows which provider is answering. User-facing copy says "TorqWings AI" rather than naming a model.
+
+### 13.2 Page layout
+
+- **Theme:** light, matching `/the-hangar/agents`, with the same header, badge, step-tracker and status-panel treatment as Bay 01.
+- **Panels, top to bottom:**
+  1. **Your concepts**
+  2. **Your saved Mission Specs** (renamed from "Your saved specs")
+
+  Opening one closes the other.
+- **"Generate a concept" bar removed.** The four-step flow opens directly below the panels once a saved Mission Spec is picked, or a concept is reopened.
+- **Status label:** `spec_ready` concepts are labelled **Concept Ready** (stored status unchanged).
+- **Finished concept layout:**
+  1. Title: concept code, top concept name, generated date (replaces the step tracker)
+  2. Collapsible **Requests & tokens**, closed by default with the totals in its header. It contains the summary bar (requests, tokens, estimated cost, time) and the per-stage table.
+  3. The Concept Ready details: source trace, confidence, Ask Bernoulli, ranked concepts, actions
+
+### 13.3 Source-mission trace
+
+- **"Generated from mission" bar:** every concept header shows it, with the mission code, type, confidence and created date.
+- **Side panel:** clicking the bar opens the source mission beside the concept, with the original brief as submitted, spec fields, summary, KPIs and constraints. It closes on navigation.
+- **Bug fix:** reopening a non-finalized concept now keeps its source mission. Previously the dashboard lost it, which also hid Ask Bernoulli.
+
+### 13.4 Bernoulli
+
+"Ask Bernoulli" now reviews **the concept run itself**, not its source mission spec. The link carries `source=concept`, `missionId` (the source mission) and `sourceId` (the concept), and runs BERN-C01–C04 plus any custom concept rules from the Mission Hub check registry. A finalized concept's read-only view ends with its latest saved Bernoulli report. See `BernoulliAgent.md`.
+
+### 13.5 Build status changes
+
+| Component | Status |
+|---|---|
+| Provider order (Anthropic / Groq) | ✅ Configurable in Mission Hub |
+| Requests & tokens + run title layout | ✅ Built |
+| Source-mission trace + side panel | ✅ Built |
+| Bernoulli review of concept output (C01–C04) | ✅ Built |
+| Saved Bernoulli report on finalized concepts | ✅ Built |
