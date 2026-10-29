@@ -21,8 +21,8 @@ export const Route = createFileRoute("/the-hangar/stack")({
 // stack each agent is designed to run once that integration lands, not as
 // tools already wired in.
 const TOOLS: { name: string; role: string; agent: string; sourced: boolean }[] = [
-  { name: "OpenVSP", role: "Parametric aircraft geometry & vortex-lattice aero.", agent: "Bay 03 · Aircraft Design Agent", sourced: true },
-  { name: "XFLR5", role: "Airfoil and low-Reynolds wing analysis.", agent: "Bay 03 · Aircraft Design Agent", sourced: true },
+  { name: "OpenVSP", role: "Parametric aircraft geometry & vortex-lattice aero.", agent: "Bay 03 · Vehicle Design Agent", sourced: true },
+  { name: "XFLR5", role: "Airfoil and low-Reynolds wing analysis.", agent: "Bay 03 · Vehicle Design Agent", sourced: true },
   { name: "FreeCAD", role: "Parametric CAD modelling.", agent: "Bay 04 · CAD Agent", sourced: true },
   { name: "OpenCascade", role: "Geometry kernel for CAD export.", agent: "Bay 04 · CAD Agent", sourced: false },
   { name: "SALOME", role: "Meshing and pre-processing.", agent: "Bay 05 · Flight Dynamics", sourced: false },

@@ -94,6 +94,7 @@ interface ConceptTarget {
   candidates: CandidateConcept[];
   tradeoffNotes: ConceptTradeoffNote[];
   rankedConcepts: RankedConcept[];
+  chosenConceptName: string | null;
 }
 
 async function loadConceptTarget(userId: string, conceptId: string): Promise<{ target: ConceptTarget; missionId: string }> {
@@ -113,6 +114,8 @@ async function loadConceptTarget(userId: string, conceptId: string): Promise<{ t
       candidates: (spec.candidate_concepts ?? []) as unknown as CandidateConcept[],
       tradeoffNotes: (spec.trade_off_notes ?? []) as unknown as ConceptTradeoffNote[],
       rankedConcepts: (spec.ranked_concepts ?? []) as unknown as RankedConcept[],
+      // The concept the user chose and saved in Bay 02 (rank 1 when unset).
+      chosenConceptName: concept.selected_concept_name ?? null,
     },
   };
 }
@@ -208,6 +211,7 @@ export async function runBernoulliReviewStage(
             candidates: conceptTarget.candidates,
             tradeoffNotes: conceptTarget.tradeoffNotes,
             rankedConcepts: conceptTarget.rankedConcepts,
+            chosenConceptName: conceptTarget.chosenConceptName,
           },
           rulesToRun,
           onProgress,
@@ -328,6 +332,7 @@ export async function testBernoulliRule(
           candidates: conceptTarget.candidates,
           tradeoffNotes: conceptTarget.tradeoffNotes,
           rankedConcepts: conceptTarget.rankedConcepts,
+          chosenConceptName: conceptTarget.chosenConceptName,
         },
         rule,
         rules,

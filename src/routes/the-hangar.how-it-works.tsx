@@ -22,7 +22,7 @@ export const Route = createFileRoute("/the-hangar/how-it-works")({
 const WORKED_EXAMPLE = [
   { stage: "01 Mission", output: "40 km corridor survey, 1.2 kg payload, 20% battery reserve, endurance target derived." },
   { stage: "02 Concept", output: "Fixed-wing selected over multirotor and VTOL — best endurance-to-payload fit for the range." },
-  { stage: "03 Aircraft Design", output: "Wingspan, aspect ratio, and cruise speed set to meet the endurance target within the payload limit." },
+  { stage: "03 Vehicle Design", output: "Wingspan, aspect ratio, and cruise speed set to meet the endurance target within the payload limit." },
   { stage: "04 CAD", output: "Geometry and mass properties generated from the selected configuration." },
   { stage: "06–07 CFD / Structural", output: "Lift/drag estimated; structural safety factor checked against the airframe loads." },
   { stage: "09 Validation", output: "Design passes against the mission spec — cleared for materials and build planning." },
@@ -55,7 +55,7 @@ function HangarHowItWorksPage() {
                     <FlowArrow />
                     <FlowNode n="02" label="Concept" />
                     <FlowArrow />
-                    <FlowNode n="03" label="Aircraft Design" />
+                    <FlowNode n="03" label="Vehicle Design" />
                     <FlowArrow />
                     <FlowNode n="04" label="CAD" />
                   </div>

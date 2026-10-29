@@ -100,13 +100,12 @@ import { Route as ApiHangarMaterialsRouteImport } from './routes/api.hangar.mate
 import { Route as ApiHangarMissionsRouteImport } from './routes/api.hangar.missions'
 import { Route as ApiHangarOptimizationsRouteImport } from './routes/api.hangar.optimizations'
 import { Route as ApiHangarResolveMissionRouteImport } from './routes/api.hangar.resolve-mission'
-import { Route as ApiHangarSagushDesignRouteImport } from './routes/api.hangar.sagush-design'
-import { Route as ApiHangarSagushHelloRouteImport } from './routes/api.hangar.sagush-hello'
 import { Route as ApiHangarSimulationsRouteImport } from './routes/api.hangar.simulations'
 import { Route as ApiHangarSourceCatalogsRouteImport } from './routes/api.hangar.source-catalogs'
 import { Route as ApiHangarStoreDocumentRouteImport } from './routes/api.hangar.store-document'
 import { Route as ApiHangarStructuralsRouteImport } from './routes/api.hangar.structurals'
 import { Route as ApiHangarValidationsRouteImport } from './routes/api.hangar.validations'
+import { Route as ApiHangarVehicleDesignFilesRouteImport } from './routes/api.hangar.vehicle-design-files'
 import { Route as ApiHarnessCallRouteImport } from './routes/api.harness.call'
 import { Route as DestudDashboardEngineerRouteImport } from './routes/destud.dashboard.engineer'
 import { Route as DestudDashboardExplorerRouteImport } from './routes/destud.dashboard.explorer'
@@ -127,7 +126,6 @@ import { Route as MissionHubVerticalsVerticalRouteImport } from './routes/missio
 import { Route as PilotMissionsIndexRouteImport } from './routes/pilot.missions.index'
 import { Route as PilotMissionsIdRouteImport } from './routes/pilot.missions.$id'
 import { Route as AcademyCoursesSlugLearnRouteImport } from './routes/academy.courses.$slug.learn'
-import { Route as ApiHangarProcessAircraftDesignGeometryGenerationRouteImport } from './routes/api.hangar.process-aircraft-design.geometry-generation'
 import { Route as ApiHangarProcessBernoulliReviewRouteImport } from './routes/api.hangar.process-bernoulli.review'
 import { Route as ApiHangarProcessCadDesignModelGenerationRouteImport } from './routes/api.hangar.process-cad-design.model-generation'
 import { Route as ApiHangarProcessCertificationRegulatoryMappingRouteImport } from './routes/api.hangar.process-certification.regulatory-mapping'
@@ -136,6 +134,7 @@ import { Route as ApiHangarProcessConceptConceptIdeationRouteImport } from './ro
 import { Route as ApiHangarProcessConceptFinalizeRouteImport } from './routes/api.hangar.process-concept.finalize'
 import { Route as ApiHangarProcessConceptOutputInterfaceRouteImport } from './routes/api.hangar.process-concept.output-interface'
 import { Route as ApiHangarProcessConceptRankingScoringRouteImport } from './routes/api.hangar.process-concept.ranking-scoring'
+import { Route as ApiHangarProcessConceptSelectRouteImport } from './routes/api.hangar.process-concept.select'
 import { Route as ApiHangarProcessConceptTradeOffReasoningRouteImport } from './routes/api.hangar.process-concept.trade-off-reasoning'
 import { Route as ApiHangarProcessDocumentationContentCompilationRouteImport } from './routes/api.hangar.process-documentation.content-compilation'
 import { Route as ApiHangarProcessManufacturingManufacturabilityReviewRouteImport } from './routes/api.hangar.process-manufacturing.manufacturability-review'
@@ -149,6 +148,7 @@ import { Route as ApiHangarProcessOptimizationTradeOffOptimizationRouteImport } 
 import { Route as ApiHangarProcessSimulationFlightDynamicsAssessmentRouteImport } from './routes/api.hangar.process-simulation.flight-dynamics-assessment'
 import { Route as ApiHangarProcessStructuralStructuralAssessmentRouteImport } from './routes/api.hangar.process-structural.structural-assessment'
 import { Route as ApiHangarProcessValidationComplianceValidationRouteImport } from './routes/api.hangar.process-validation.compliance-validation'
+import { Route as ApiHangarVehicleDesignRunRouteImport } from './routes/api.hangar.vehicle-design.run'
 import { Route as AcademyCoursesSlugModulesModuleIdRouteImport } from './routes/academy.courses.$slug.modules.$moduleId'
 import { Route as AcademyModuleModuleIdLessonLessonIdRouteImport } from './routes/academy.module.$moduleId.lesson.$lessonId'
 import { Route as AcademyModuleModuleIdQuizQuizIdRouteImport } from './routes/academy.module.$moduleId.quiz.$quizId'
@@ -624,16 +624,6 @@ const ApiHangarResolveMissionRoute = ApiHangarResolveMissionRouteImport.update({
   path: '/api/hangar/resolve-mission',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiHangarSagushDesignRoute = ApiHangarSagushDesignRouteImport.update({
-  id: '/api/hangar/sagush-design',
-  path: '/api/hangar/sagush-design',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiHangarSagushHelloRoute = ApiHangarSagushHelloRouteImport.update({
-  id: '/api/hangar/sagush-hello',
-  path: '/api/hangar/sagush-hello',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ApiHangarSimulationsRoute = ApiHangarSimulationsRouteImport.update({
   id: '/api/hangar/simulations',
   path: '/api/hangar/simulations',
@@ -659,6 +649,12 @@ const ApiHangarValidationsRoute = ApiHangarValidationsRouteImport.update({
   path: '/api/hangar/validations',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiHangarVehicleDesignFilesRoute =
+  ApiHangarVehicleDesignFilesRouteImport.update({
+    id: '/api/hangar/vehicle-design-files',
+    path: '/api/hangar/vehicle-design-files',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiHarnessCallRoute = ApiHarnessCallRouteImport.update({
   id: '/call',
   path: '/call',
@@ -772,12 +768,6 @@ const AcademyCoursesSlugLearnRoute = AcademyCoursesSlugLearnRouteImport.update({
   path: '/courses/$slug/learn',
   getParentRoute: () => AcademyRoute,
 } as any)
-const ApiHangarProcessAircraftDesignGeometryGenerationRoute =
-  ApiHangarProcessAircraftDesignGeometryGenerationRouteImport.update({
-    id: '/api/hangar/process-aircraft-design/geometry-generation',
-    path: '/api/hangar/process-aircraft-design/geometry-generation',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 const ApiHangarProcessBernoulliReviewRoute =
   ApiHangarProcessBernoulliReviewRouteImport.update({
     id: '/api/hangar/process-bernoulli/review',
@@ -824,6 +814,12 @@ const ApiHangarProcessConceptRankingScoringRoute =
   ApiHangarProcessConceptRankingScoringRouteImport.update({
     id: '/api/hangar/process-concept/ranking-scoring',
     path: '/api/hangar/process-concept/ranking-scoring',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiHangarProcessConceptSelectRoute =
+  ApiHangarProcessConceptSelectRouteImport.update({
+    id: '/api/hangar/process-concept/select',
+    path: '/api/hangar/process-concept/select',
     getParentRoute: () => rootRouteImport,
   } as any)
 const ApiHangarProcessConceptTradeOffReasoningRoute =
@@ -902,6 +898,12 @@ const ApiHangarProcessValidationComplianceValidationRoute =
   ApiHangarProcessValidationComplianceValidationRouteImport.update({
     id: '/api/hangar/process-validation/compliance-validation',
     path: '/api/hangar/process-validation/compliance-validation',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiHangarVehicleDesignRunRoute =
+  ApiHangarVehicleDesignRunRouteImport.update({
+    id: '/api/hangar/vehicle-design/run',
+    path: '/api/hangar/vehicle-design/run',
     getParentRoute: () => rootRouteImport,
   } as any)
 const AcademyCoursesSlugModulesModuleIdRoute =
@@ -1014,13 +1016,12 @@ export interface FileRoutesByFullPath {
   '/api/hangar/missions': typeof ApiHangarMissionsRoute
   '/api/hangar/optimizations': typeof ApiHangarOptimizationsRoute
   '/api/hangar/resolve-mission': typeof ApiHangarResolveMissionRoute
-  '/api/hangar/sagush-design': typeof ApiHangarSagushDesignRoute
-  '/api/hangar/sagush-hello': typeof ApiHangarSagushHelloRoute
   '/api/hangar/simulations': typeof ApiHangarSimulationsRoute
   '/api/hangar/source-catalogs': typeof ApiHangarSourceCatalogsRoute
   '/api/hangar/store-document': typeof ApiHangarStoreDocumentRoute
   '/api/hangar/structurals': typeof ApiHangarStructuralsRoute
   '/api/hangar/validations': typeof ApiHangarValidationsRoute
+  '/api/hangar/vehicle-design-files': typeof ApiHangarVehicleDesignFilesRoute
   '/api/harness/call': typeof ApiHarnessCallRoute
   '/destud/dashboard/engineer': typeof DestudDashboardEngineerRoute
   '/destud/dashboard/explorer': typeof DestudDashboardExplorerRoute
@@ -1041,7 +1042,6 @@ export interface FileRoutesByFullPath {
   '/mission-hub/torqwings-design-studio/': typeof MissionHubTorqwingsDesignStudioIndexRoute
   '/pilot/missions/': typeof PilotMissionsIndexRoute
   '/academy/courses/$slug/learn': typeof AcademyCoursesSlugLearnRoute
-  '/api/hangar/process-aircraft-design/geometry-generation': typeof ApiHangarProcessAircraftDesignGeometryGenerationRoute
   '/api/hangar/process-bernoulli/review': typeof ApiHangarProcessBernoulliReviewRoute
   '/api/hangar/process-cad-design/model-generation': typeof ApiHangarProcessCadDesignModelGenerationRoute
   '/api/hangar/process-certification/regulatory-mapping': typeof ApiHangarProcessCertificationRegulatoryMappingRoute
@@ -1050,6 +1050,7 @@ export interface FileRoutesByFullPath {
   '/api/hangar/process-concept/finalize': typeof ApiHangarProcessConceptFinalizeRoute
   '/api/hangar/process-concept/output-interface': typeof ApiHangarProcessConceptOutputInterfaceRoute
   '/api/hangar/process-concept/ranking-scoring': typeof ApiHangarProcessConceptRankingScoringRoute
+  '/api/hangar/process-concept/select': typeof ApiHangarProcessConceptSelectRoute
   '/api/hangar/process-concept/trade-off-reasoning': typeof ApiHangarProcessConceptTradeOffReasoningRoute
   '/api/hangar/process-documentation/content-compilation': typeof ApiHangarProcessDocumentationContentCompilationRoute
   '/api/hangar/process-manufacturing/manufacturability-review': typeof ApiHangarProcessManufacturingManufacturabilityReviewRoute
@@ -1063,6 +1064,7 @@ export interface FileRoutesByFullPath {
   '/api/hangar/process-simulation/flight-dynamics-assessment': typeof ApiHangarProcessSimulationFlightDynamicsAssessmentRoute
   '/api/hangar/process-structural/structural-assessment': typeof ApiHangarProcessStructuralStructuralAssessmentRoute
   '/api/hangar/process-validation/compliance-validation': typeof ApiHangarProcessValidationComplianceValidationRoute
+  '/api/hangar/vehicle-design/run': typeof ApiHangarVehicleDesignRunRoute
   '/academy/courses/$slug/modules/$moduleId': typeof AcademyCoursesSlugModulesModuleIdRoute
   '/academy/module/$moduleId/lesson/$lessonId': typeof AcademyModuleModuleIdLessonLessonIdRoute
   '/academy/module/$moduleId/quiz/$quizId': typeof AcademyModuleModuleIdQuizQuizIdRoute
@@ -1152,13 +1154,12 @@ export interface FileRoutesByTo {
   '/api/hangar/missions': typeof ApiHangarMissionsRoute
   '/api/hangar/optimizations': typeof ApiHangarOptimizationsRoute
   '/api/hangar/resolve-mission': typeof ApiHangarResolveMissionRoute
-  '/api/hangar/sagush-design': typeof ApiHangarSagushDesignRoute
-  '/api/hangar/sagush-hello': typeof ApiHangarSagushHelloRoute
   '/api/hangar/simulations': typeof ApiHangarSimulationsRoute
   '/api/hangar/source-catalogs': typeof ApiHangarSourceCatalogsRoute
   '/api/hangar/store-document': typeof ApiHangarStoreDocumentRoute
   '/api/hangar/structurals': typeof ApiHangarStructuralsRoute
   '/api/hangar/validations': typeof ApiHangarValidationsRoute
+  '/api/hangar/vehicle-design-files': typeof ApiHangarVehicleDesignFilesRoute
   '/api/harness/call': typeof ApiHarnessCallRoute
   '/destud/dashboard/engineer': typeof DestudDashboardEngineerRoute
   '/destud/dashboard/explorer': typeof DestudDashboardExplorerRoute
@@ -1179,7 +1180,6 @@ export interface FileRoutesByTo {
   '/mission-hub/torqwings-design-studio': typeof MissionHubTorqwingsDesignStudioIndexRoute
   '/pilot/missions': typeof PilotMissionsIndexRoute
   '/academy/courses/$slug/learn': typeof AcademyCoursesSlugLearnRoute
-  '/api/hangar/process-aircraft-design/geometry-generation': typeof ApiHangarProcessAircraftDesignGeometryGenerationRoute
   '/api/hangar/process-bernoulli/review': typeof ApiHangarProcessBernoulliReviewRoute
   '/api/hangar/process-cad-design/model-generation': typeof ApiHangarProcessCadDesignModelGenerationRoute
   '/api/hangar/process-certification/regulatory-mapping': typeof ApiHangarProcessCertificationRegulatoryMappingRoute
@@ -1188,6 +1188,7 @@ export interface FileRoutesByTo {
   '/api/hangar/process-concept/finalize': typeof ApiHangarProcessConceptFinalizeRoute
   '/api/hangar/process-concept/output-interface': typeof ApiHangarProcessConceptOutputInterfaceRoute
   '/api/hangar/process-concept/ranking-scoring': typeof ApiHangarProcessConceptRankingScoringRoute
+  '/api/hangar/process-concept/select': typeof ApiHangarProcessConceptSelectRoute
   '/api/hangar/process-concept/trade-off-reasoning': typeof ApiHangarProcessConceptTradeOffReasoningRoute
   '/api/hangar/process-documentation/content-compilation': typeof ApiHangarProcessDocumentationContentCompilationRoute
   '/api/hangar/process-manufacturing/manufacturability-review': typeof ApiHangarProcessManufacturingManufacturabilityReviewRoute
@@ -1201,6 +1202,7 @@ export interface FileRoutesByTo {
   '/api/hangar/process-simulation/flight-dynamics-assessment': typeof ApiHangarProcessSimulationFlightDynamicsAssessmentRoute
   '/api/hangar/process-structural/structural-assessment': typeof ApiHangarProcessStructuralStructuralAssessmentRoute
   '/api/hangar/process-validation/compliance-validation': typeof ApiHangarProcessValidationComplianceValidationRoute
+  '/api/hangar/vehicle-design/run': typeof ApiHangarVehicleDesignRunRoute
   '/academy/courses/$slug/modules/$moduleId': typeof AcademyCoursesSlugModulesModuleIdRoute
   '/academy/module/$moduleId/lesson/$lessonId': typeof AcademyModuleModuleIdLessonLessonIdRoute
   '/academy/module/$moduleId/quiz/$quizId': typeof AcademyModuleModuleIdQuizQuizIdRoute
@@ -1298,13 +1300,12 @@ export interface FileRoutesById {
   '/api/hangar/missions': typeof ApiHangarMissionsRoute
   '/api/hangar/optimizations': typeof ApiHangarOptimizationsRoute
   '/api/hangar/resolve-mission': typeof ApiHangarResolveMissionRoute
-  '/api/hangar/sagush-design': typeof ApiHangarSagushDesignRoute
-  '/api/hangar/sagush-hello': typeof ApiHangarSagushHelloRoute
   '/api/hangar/simulations': typeof ApiHangarSimulationsRoute
   '/api/hangar/source-catalogs': typeof ApiHangarSourceCatalogsRoute
   '/api/hangar/store-document': typeof ApiHangarStoreDocumentRoute
   '/api/hangar/structurals': typeof ApiHangarStructuralsRoute
   '/api/hangar/validations': typeof ApiHangarValidationsRoute
+  '/api/hangar/vehicle-design-files': typeof ApiHangarVehicleDesignFilesRoute
   '/api/harness/call': typeof ApiHarnessCallRoute
   '/destud/dashboard/engineer': typeof DestudDashboardEngineerRoute
   '/destud/dashboard/explorer': typeof DestudDashboardExplorerRoute
@@ -1325,7 +1326,6 @@ export interface FileRoutesById {
   '/mission-hub/torqwings-design-studio/': typeof MissionHubTorqwingsDesignStudioIndexRoute
   '/pilot/missions/': typeof PilotMissionsIndexRoute
   '/academy/courses/$slug/learn': typeof AcademyCoursesSlugLearnRoute
-  '/api/hangar/process-aircraft-design/geometry-generation': typeof ApiHangarProcessAircraftDesignGeometryGenerationRoute
   '/api/hangar/process-bernoulli/review': typeof ApiHangarProcessBernoulliReviewRoute
   '/api/hangar/process-cad-design/model-generation': typeof ApiHangarProcessCadDesignModelGenerationRoute
   '/api/hangar/process-certification/regulatory-mapping': typeof ApiHangarProcessCertificationRegulatoryMappingRoute
@@ -1334,6 +1334,7 @@ export interface FileRoutesById {
   '/api/hangar/process-concept/finalize': typeof ApiHangarProcessConceptFinalizeRoute
   '/api/hangar/process-concept/output-interface': typeof ApiHangarProcessConceptOutputInterfaceRoute
   '/api/hangar/process-concept/ranking-scoring': typeof ApiHangarProcessConceptRankingScoringRoute
+  '/api/hangar/process-concept/select': typeof ApiHangarProcessConceptSelectRoute
   '/api/hangar/process-concept/trade-off-reasoning': typeof ApiHangarProcessConceptTradeOffReasoningRoute
   '/api/hangar/process-documentation/content-compilation': typeof ApiHangarProcessDocumentationContentCompilationRoute
   '/api/hangar/process-manufacturing/manufacturability-review': typeof ApiHangarProcessManufacturingManufacturabilityReviewRoute
@@ -1347,6 +1348,7 @@ export interface FileRoutesById {
   '/api/hangar/process-simulation/flight-dynamics-assessment': typeof ApiHangarProcessSimulationFlightDynamicsAssessmentRoute
   '/api/hangar/process-structural/structural-assessment': typeof ApiHangarProcessStructuralStructuralAssessmentRoute
   '/api/hangar/process-validation/compliance-validation': typeof ApiHangarProcessValidationComplianceValidationRoute
+  '/api/hangar/vehicle-design/run': typeof ApiHangarVehicleDesignRunRoute
   '/academy/courses/$slug/modules/$moduleId': typeof AcademyCoursesSlugModulesModuleIdRoute
   '/academy/module/$moduleId/lesson/$lessonId': typeof AcademyModuleModuleIdLessonLessonIdRoute
   '/academy/module/$moduleId/quiz/$quizId': typeof AcademyModuleModuleIdQuizQuizIdRoute
@@ -1444,13 +1446,12 @@ export interface FileRouteTypes {
     | '/api/hangar/missions'
     | '/api/hangar/optimizations'
     | '/api/hangar/resolve-mission'
-    | '/api/hangar/sagush-design'
-    | '/api/hangar/sagush-hello'
     | '/api/hangar/simulations'
     | '/api/hangar/source-catalogs'
     | '/api/hangar/store-document'
     | '/api/hangar/structurals'
     | '/api/hangar/validations'
+    | '/api/hangar/vehicle-design-files'
     | '/api/harness/call'
     | '/destud/dashboard/engineer'
     | '/destud/dashboard/explorer'
@@ -1471,7 +1472,6 @@ export interface FileRouteTypes {
     | '/mission-hub/torqwings-design-studio/'
     | '/pilot/missions/'
     | '/academy/courses/$slug/learn'
-    | '/api/hangar/process-aircraft-design/geometry-generation'
     | '/api/hangar/process-bernoulli/review'
     | '/api/hangar/process-cad-design/model-generation'
     | '/api/hangar/process-certification/regulatory-mapping'
@@ -1480,6 +1480,7 @@ export interface FileRouteTypes {
     | '/api/hangar/process-concept/finalize'
     | '/api/hangar/process-concept/output-interface'
     | '/api/hangar/process-concept/ranking-scoring'
+    | '/api/hangar/process-concept/select'
     | '/api/hangar/process-concept/trade-off-reasoning'
     | '/api/hangar/process-documentation/content-compilation'
     | '/api/hangar/process-manufacturing/manufacturability-review'
@@ -1493,6 +1494,7 @@ export interface FileRouteTypes {
     | '/api/hangar/process-simulation/flight-dynamics-assessment'
     | '/api/hangar/process-structural/structural-assessment'
     | '/api/hangar/process-validation/compliance-validation'
+    | '/api/hangar/vehicle-design/run'
     | '/academy/courses/$slug/modules/$moduleId'
     | '/academy/module/$moduleId/lesson/$lessonId'
     | '/academy/module/$moduleId/quiz/$quizId'
@@ -1582,13 +1584,12 @@ export interface FileRouteTypes {
     | '/api/hangar/missions'
     | '/api/hangar/optimizations'
     | '/api/hangar/resolve-mission'
-    | '/api/hangar/sagush-design'
-    | '/api/hangar/sagush-hello'
     | '/api/hangar/simulations'
     | '/api/hangar/source-catalogs'
     | '/api/hangar/store-document'
     | '/api/hangar/structurals'
     | '/api/hangar/validations'
+    | '/api/hangar/vehicle-design-files'
     | '/api/harness/call'
     | '/destud/dashboard/engineer'
     | '/destud/dashboard/explorer'
@@ -1609,7 +1610,6 @@ export interface FileRouteTypes {
     | '/mission-hub/torqwings-design-studio'
     | '/pilot/missions'
     | '/academy/courses/$slug/learn'
-    | '/api/hangar/process-aircraft-design/geometry-generation'
     | '/api/hangar/process-bernoulli/review'
     | '/api/hangar/process-cad-design/model-generation'
     | '/api/hangar/process-certification/regulatory-mapping'
@@ -1618,6 +1618,7 @@ export interface FileRouteTypes {
     | '/api/hangar/process-concept/finalize'
     | '/api/hangar/process-concept/output-interface'
     | '/api/hangar/process-concept/ranking-scoring'
+    | '/api/hangar/process-concept/select'
     | '/api/hangar/process-concept/trade-off-reasoning'
     | '/api/hangar/process-documentation/content-compilation'
     | '/api/hangar/process-manufacturing/manufacturability-review'
@@ -1631,6 +1632,7 @@ export interface FileRouteTypes {
     | '/api/hangar/process-simulation/flight-dynamics-assessment'
     | '/api/hangar/process-structural/structural-assessment'
     | '/api/hangar/process-validation/compliance-validation'
+    | '/api/hangar/vehicle-design/run'
     | '/academy/courses/$slug/modules/$moduleId'
     | '/academy/module/$moduleId/lesson/$lessonId'
     | '/academy/module/$moduleId/quiz/$quizId'
@@ -1727,13 +1729,12 @@ export interface FileRouteTypes {
     | '/api/hangar/missions'
     | '/api/hangar/optimizations'
     | '/api/hangar/resolve-mission'
-    | '/api/hangar/sagush-design'
-    | '/api/hangar/sagush-hello'
     | '/api/hangar/simulations'
     | '/api/hangar/source-catalogs'
     | '/api/hangar/store-document'
     | '/api/hangar/structurals'
     | '/api/hangar/validations'
+    | '/api/hangar/vehicle-design-files'
     | '/api/harness/call'
     | '/destud/dashboard/engineer'
     | '/destud/dashboard/explorer'
@@ -1754,7 +1755,6 @@ export interface FileRouteTypes {
     | '/mission-hub/torqwings-design-studio/'
     | '/pilot/missions/'
     | '/academy/courses/$slug/learn'
-    | '/api/hangar/process-aircraft-design/geometry-generation'
     | '/api/hangar/process-bernoulli/review'
     | '/api/hangar/process-cad-design/model-generation'
     | '/api/hangar/process-certification/regulatory-mapping'
@@ -1763,6 +1763,7 @@ export interface FileRouteTypes {
     | '/api/hangar/process-concept/finalize'
     | '/api/hangar/process-concept/output-interface'
     | '/api/hangar/process-concept/ranking-scoring'
+    | '/api/hangar/process-concept/select'
     | '/api/hangar/process-concept/trade-off-reasoning'
     | '/api/hangar/process-documentation/content-compilation'
     | '/api/hangar/process-manufacturing/manufacturability-review'
@@ -1776,6 +1777,7 @@ export interface FileRouteTypes {
     | '/api/hangar/process-simulation/flight-dynamics-assessment'
     | '/api/hangar/process-structural/structural-assessment'
     | '/api/hangar/process-validation/compliance-validation'
+    | '/api/hangar/vehicle-design/run'
     | '/academy/courses/$slug/modules/$moduleId'
     | '/academy/module/$moduleId/lesson/$lessonId'
     | '/academy/module/$moduleId/quiz/$quizId'
@@ -1811,14 +1813,12 @@ export interface RootRouteChildren {
   ApiHangarMissionsRoute: typeof ApiHangarMissionsRoute
   ApiHangarOptimizationsRoute: typeof ApiHangarOptimizationsRoute
   ApiHangarResolveMissionRoute: typeof ApiHangarResolveMissionRoute
-  ApiHangarSagushDesignRoute: typeof ApiHangarSagushDesignRoute
-  ApiHangarSagushHelloRoute: typeof ApiHangarSagushHelloRoute
   ApiHangarSimulationsRoute: typeof ApiHangarSimulationsRoute
   ApiHangarSourceCatalogsRoute: typeof ApiHangarSourceCatalogsRoute
   ApiHangarStoreDocumentRoute: typeof ApiHangarStoreDocumentRoute
   ApiHangarStructuralsRoute: typeof ApiHangarStructuralsRoute
   ApiHangarValidationsRoute: typeof ApiHangarValidationsRoute
-  ApiHangarProcessAircraftDesignGeometryGenerationRoute: typeof ApiHangarProcessAircraftDesignGeometryGenerationRoute
+  ApiHangarVehicleDesignFilesRoute: typeof ApiHangarVehicleDesignFilesRoute
   ApiHangarProcessBernoulliReviewRoute: typeof ApiHangarProcessBernoulliReviewRoute
   ApiHangarProcessCadDesignModelGenerationRoute: typeof ApiHangarProcessCadDesignModelGenerationRoute
   ApiHangarProcessCertificationRegulatoryMappingRoute: typeof ApiHangarProcessCertificationRegulatoryMappingRoute
@@ -1827,6 +1827,7 @@ export interface RootRouteChildren {
   ApiHangarProcessConceptFinalizeRoute: typeof ApiHangarProcessConceptFinalizeRoute
   ApiHangarProcessConceptOutputInterfaceRoute: typeof ApiHangarProcessConceptOutputInterfaceRoute
   ApiHangarProcessConceptRankingScoringRoute: typeof ApiHangarProcessConceptRankingScoringRoute
+  ApiHangarProcessConceptSelectRoute: typeof ApiHangarProcessConceptSelectRoute
   ApiHangarProcessConceptTradeOffReasoningRoute: typeof ApiHangarProcessConceptTradeOffReasoningRoute
   ApiHangarProcessDocumentationContentCompilationRoute: typeof ApiHangarProcessDocumentationContentCompilationRoute
   ApiHangarProcessManufacturingManufacturabilityReviewRoute: typeof ApiHangarProcessManufacturingManufacturabilityReviewRoute
@@ -1840,6 +1841,7 @@ export interface RootRouteChildren {
   ApiHangarProcessSimulationFlightDynamicsAssessmentRoute: typeof ApiHangarProcessSimulationFlightDynamicsAssessmentRoute
   ApiHangarProcessStructuralStructuralAssessmentRoute: typeof ApiHangarProcessStructuralStructuralAssessmentRoute
   ApiHangarProcessValidationComplianceValidationRoute: typeof ApiHangarProcessValidationComplianceValidationRoute
+  ApiHangarVehicleDesignRunRoute: typeof ApiHangarVehicleDesignRunRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -2481,20 +2483,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiHangarResolveMissionRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/hangar/sagush-design': {
-      id: '/api/hangar/sagush-design'
-      path: '/api/hangar/sagush-design'
-      fullPath: '/api/hangar/sagush-design'
-      preLoaderRoute: typeof ApiHangarSagushDesignRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/hangar/sagush-hello': {
-      id: '/api/hangar/sagush-hello'
-      path: '/api/hangar/sagush-hello'
-      fullPath: '/api/hangar/sagush-hello'
-      preLoaderRoute: typeof ApiHangarSagushHelloRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/hangar/simulations': {
       id: '/api/hangar/simulations'
       path: '/api/hangar/simulations'
@@ -2528,6 +2516,13 @@ declare module '@tanstack/react-router' {
       path: '/api/hangar/validations'
       fullPath: '/api/hangar/validations'
       preLoaderRoute: typeof ApiHangarValidationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/hangar/vehicle-design-files': {
+      id: '/api/hangar/vehicle-design-files'
+      path: '/api/hangar/vehicle-design-files'
+      fullPath: '/api/hangar/vehicle-design-files'
+      preLoaderRoute: typeof ApiHangarVehicleDesignFilesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/harness/call': {
@@ -2670,13 +2665,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AcademyCoursesSlugLearnRouteImport
       parentRoute: typeof AcademyRoute
     }
-    '/api/hangar/process-aircraft-design/geometry-generation': {
-      id: '/api/hangar/process-aircraft-design/geometry-generation'
-      path: '/api/hangar/process-aircraft-design/geometry-generation'
-      fullPath: '/api/hangar/process-aircraft-design/geometry-generation'
-      preLoaderRoute: typeof ApiHangarProcessAircraftDesignGeometryGenerationRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/hangar/process-bernoulli/review': {
       id: '/api/hangar/process-bernoulli/review'
       path: '/api/hangar/process-bernoulli/review'
@@ -2731,6 +2719,13 @@ declare module '@tanstack/react-router' {
       path: '/api/hangar/process-concept/ranking-scoring'
       fullPath: '/api/hangar/process-concept/ranking-scoring'
       preLoaderRoute: typeof ApiHangarProcessConceptRankingScoringRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/hangar/process-concept/select': {
+      id: '/api/hangar/process-concept/select'
+      path: '/api/hangar/process-concept/select'
+      fullPath: '/api/hangar/process-concept/select'
+      preLoaderRoute: typeof ApiHangarProcessConceptSelectRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/hangar/process-concept/trade-off-reasoning': {
@@ -2822,6 +2817,13 @@ declare module '@tanstack/react-router' {
       path: '/api/hangar/process-validation/compliance-validation'
       fullPath: '/api/hangar/process-validation/compliance-validation'
       preLoaderRoute: typeof ApiHangarProcessValidationComplianceValidationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/hangar/vehicle-design/run': {
+      id: '/api/hangar/vehicle-design/run'
+      path: '/api/hangar/vehicle-design/run'
+      fullPath: '/api/hangar/vehicle-design/run'
+      preLoaderRoute: typeof ApiHangarVehicleDesignRunRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/academy/courses/$slug/modules/$moduleId': {
@@ -3130,15 +3132,12 @@ const rootRouteChildren: RootRouteChildren = {
   ApiHangarMissionsRoute: ApiHangarMissionsRoute,
   ApiHangarOptimizationsRoute: ApiHangarOptimizationsRoute,
   ApiHangarResolveMissionRoute: ApiHangarResolveMissionRoute,
-  ApiHangarSagushDesignRoute: ApiHangarSagushDesignRoute,
-  ApiHangarSagushHelloRoute: ApiHangarSagushHelloRoute,
   ApiHangarSimulationsRoute: ApiHangarSimulationsRoute,
   ApiHangarSourceCatalogsRoute: ApiHangarSourceCatalogsRoute,
   ApiHangarStoreDocumentRoute: ApiHangarStoreDocumentRoute,
   ApiHangarStructuralsRoute: ApiHangarStructuralsRoute,
   ApiHangarValidationsRoute: ApiHangarValidationsRoute,
-  ApiHangarProcessAircraftDesignGeometryGenerationRoute:
-    ApiHangarProcessAircraftDesignGeometryGenerationRoute,
+  ApiHangarVehicleDesignFilesRoute: ApiHangarVehicleDesignFilesRoute,
   ApiHangarProcessBernoulliReviewRoute: ApiHangarProcessBernoulliReviewRoute,
   ApiHangarProcessCadDesignModelGenerationRoute:
     ApiHangarProcessCadDesignModelGenerationRoute,
@@ -3153,6 +3152,7 @@ const rootRouteChildren: RootRouteChildren = {
     ApiHangarProcessConceptOutputInterfaceRoute,
   ApiHangarProcessConceptRankingScoringRoute:
     ApiHangarProcessConceptRankingScoringRoute,
+  ApiHangarProcessConceptSelectRoute: ApiHangarProcessConceptSelectRoute,
   ApiHangarProcessConceptTradeOffReasoningRoute:
     ApiHangarProcessConceptTradeOffReasoningRoute,
   ApiHangarProcessDocumentationContentCompilationRoute:
@@ -3178,6 +3178,7 @@ const rootRouteChildren: RootRouteChildren = {
     ApiHangarProcessStructuralStructuralAssessmentRoute,
   ApiHangarProcessValidationComplianceValidationRoute:
     ApiHangarProcessValidationComplianceValidationRoute,
+  ApiHangarVehicleDesignRunRoute: ApiHangarVehicleDesignRunRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

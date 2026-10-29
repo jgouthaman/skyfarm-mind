@@ -241,7 +241,7 @@ function TheHangarCADDesign() {
             <div className="hgr-d-hero-row">
               <h1>CAD Agent</h1>
               <p className="hgr-d-lead">
-                Takes a <b>spec-ready aircraft design</b> from Bay 03 and generates structured CAD
+                Takes a <b>Design Ready vehicle design</b> from Bay 03 and generates structured CAD
                 model data — model file metadata, a bill of materials, mass properties, and
                 deterministic manufacturability/interference validation.
               </p>
@@ -269,7 +269,7 @@ function TheHangarCADDesign() {
               specReadyDesigns.length > 0 &&
               !selectedCADDesign && (
                 <ListPanel
-                  title={`Your spec-ready aircraft designs (${specReadyDesigns.length})`}
+                  title={`Your Design Ready vehicle designs (${specReadyDesigns.length})`}
                   expanded={designsExpanded}
                   onToggleExpanded={() => setDesignsExpanded((v) => !v)}
                 >
@@ -301,8 +301,8 @@ function TheHangarCADDesign() {
               specReadyDesigns &&
               specReadyDesigns.length === 0 && (
                 <p className="hgr-d-empty-hint">
-                  No spec-ready aircraft designs yet — generate one in{" "}
-                  <Link to="/the-hangar/aircraft-design">Aircraft Design Agent</Link> first, then
+                  No Design Ready vehicle designs yet — generate one in{" "}
+                  <Link to="/the-hangar/aircraft-design">Vehicle Design Agent</Link> first, then
                   come back here to build a CAD model from it.
                 </p>
               )}
@@ -390,7 +390,7 @@ function TheHangarCADDesign() {
                             </div>
                           ) : (
                             <p className="hgr-d-status-idle">
-                              Select a spec-ready aircraft design above to begin generating a CAD
+                              Select a Design Ready vehicle design above to begin generating a CAD
                               model.
                             </p>
                           )}
@@ -422,7 +422,7 @@ function TheHangarCADDesign() {
                             </p>
                           ) : (
                             <p className="hgr-d-status-idle">
-                              Select a spec-ready aircraft design, then generate to begin.
+                              Select a Design Ready vehicle design, then generate to begin.
                             </p>
                           )}
                         </div>
@@ -511,7 +511,7 @@ function MockSourceBadge({ show, compact }: { show: boolean; compact?: boolean }
   if (!show) return null;
   return (
     <span className={`hgr-d-mock-badge${compact ? " hgr-d-mock-badge-compact" : ""}`}>
-      ⚠ Source aircraft design was mock-generated
+      ⚠ Source vehicle design was mock-generated
     </span>
   );
 }

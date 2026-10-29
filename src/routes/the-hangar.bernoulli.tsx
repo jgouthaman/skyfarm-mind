@@ -271,7 +271,7 @@ const LEFT_CALLERS = [
   {
     bay: "03",
     key: "aircraft-design",
-    name: "Aircraft Design Agent",
+    name: "Vehicle Design Agent",
     to: "/the-hangar/aircraft-design",
   },
   { bay: "04", key: "cad", name: "CAD Agent", to: "/the-hangar/cad-design" },

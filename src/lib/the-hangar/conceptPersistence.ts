@@ -45,6 +45,9 @@ export interface HangarConceptRow {
   concept_code: string;
   status: ConceptStatus;
   confidence_score: number | null;
+  // The user's chosen concept (ranked_concepts[].conceptName), or null for
+  // the default rank-1 concept. 20261030030000_hangar_concept_selection.sql.
+  selected_concept_name?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -81,6 +84,12 @@ export async function getConcept(conceptId: string): Promise<HangarConceptRow | 
     .maybeSingle();
   if (error) throw new Error(`getConcept: ${error.message}`);
   return data as HangarConceptRow | null;
+}
+
+// Saves (or clears, with null) the user's chosen concept for a run.
+export async function setConceptSelection(conceptId: string, conceptName: string | null): Promise<void> {
+  const { error } = await db.from("Hangar_concepts").update({ selected_concept_name: conceptName }).eq("id", conceptId);
+  if (error) throw new Error(`setConceptSelection: ${error.message}`);
 }
 
 export async function updateConceptStatus(

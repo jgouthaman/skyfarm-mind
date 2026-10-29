@@ -18,6 +18,8 @@ import {
   listUserConcepts,
   getSpecsForConcepts,
   getUsageForConcepts,
+  getLatestConceptSpec,
+  setConceptSelection,
   type ConceptRunStage,
   type HangarConceptRow,
   type ConceptStatus,
@@ -332,6 +334,55 @@ export interface FinalizeConceptResult {
   status: "finalized";
 }
 
+// ── Choosing a concept ────────────────────────────────────────────────────
+//
+// A run ranks 3 concepts and the rank-1 one carries forward by default. The
+// user may pick any concept scoring at least SELECTABLE_FIT_SCORE instead,
+// and save it before finalizing; Vehicle Design (Bay 03) then builds from
+// the saved choice. Picking the rank-1 concept again clears the choice.
+
+export const SELECTABLE_FIT_SCORE = 8;
+
+export interface SelectConceptRequest {
+  userId: string;
+  conceptId: string;
+  conceptName: string;
+}
+
+export interface SelectConceptResult {
+  conceptId: string;
+  selectedConceptName: string;
+}
+
+// Rank-1 concept name for a ranked list, or null.
+export function rankOneName(ranked: RankedConcept[] | null | undefined): string | null {
+  return ranked?.find((r) => r.rank === 1)?.conceptName ?? ranked?.[0]?.conceptName ?? null;
+}
+
+export async function selectConcept(request: SelectConceptRequest): Promise<SelectConceptResult> {
+  const { userId, conceptId, conceptName } = request;
+  const concept = await assertConceptOwnership(conceptId, userId);
+  if (concept.status !== "spec_ready") {
+    throw new InvalidConceptInputError(
+      concept.status === "finalized"
+        ? "This concept is finalized -- its chosen concept can't change any more."
+        : "Concepts can only be chosen once the run is Concept Ready.",
+    );
+  }
+  const spec = await getLatestConceptSpec(conceptId);
+  const ranked = (spec?.ranked_concepts ?? []) as unknown as RankedConcept[];
+  const target = ranked.find((r) => r.conceptName === conceptName);
+  if (!target) throw new InvalidConceptInputError(`"${conceptName}" isn't one of this run's ranked concepts.`);
+  const isRankOne = target.conceptName === rankOneName(ranked);
+  if (!isRankOne && !(target.fitScore >= SELECTABLE_FIT_SCORE)) {
+    throw new InvalidConceptInputError(
+      `Only concepts with a fit score of ${SELECTABLE_FIT_SCORE} or above can be chosen -- "${conceptName}" scored ${target.fitScore}/10.`,
+    );
+  }
+  await setConceptSelection(conceptId, isRankOne ? null : conceptName);
+  return { conceptId, selectedConceptName: conceptName };
+}
+
 export async function finalizeConcept(
   request: FinalizeConceptRequest,
 ): Promise<FinalizeConceptResult> {
@@ -357,6 +408,8 @@ export interface ConceptListEntry {
   specVersion: number | null;
   /** LLM requests/tokens/estimated cost, rebuilt from the run log. null when unavailable. */
   usage: ConceptUsage | null;
+  /** The concept that carries forward to Bay 03: the user's saved choice, or the rank-1 concept. */
+  selectedConceptName: string | null;
 }
 
 export async function listConceptsForUser(userId: string): Promise<ConceptListEntry[]> {
@@ -387,6 +440,9 @@ export async function listConceptsForUser(userId: string): Promise<ConceptListEn
       confidenceScore: spec?.confidence_score ?? null,
       specVersion: spec?.version ?? null,
       usage: usageByConcept.get(c.id) ?? null,
+      selectedConceptName:
+        c.selected_concept_name ??
+        rankOneName(spec ? (spec.ranked_concepts as unknown as RankedConcept[]) : null),
     };
   });
 }

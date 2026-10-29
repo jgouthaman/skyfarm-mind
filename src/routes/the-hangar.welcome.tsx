@@ -46,7 +46,7 @@ interface NodeData {
 
 // Bays whose circle is permanently green on the circuit: the fully built
 // and restyled ones. Add a bay here once it's finished.
-const LIVE_BAY_IDS = new Set([1, 2]);
+const LIVE_BAY_IDS = new Set([1, 2, 3]);
 
 const NODES: NodeData[] = [
   {
@@ -82,8 +82,8 @@ const NODES: NodeData[] = [
     x: 575,
     y: 140,
     bay: "03",
-    name: "Aircraft Design",
-    title: "Aircraft Design Agent",
+    name: "Vehicle Design",
+    title: "Vehicle Design Agent",
     status: "online",
     href: "/the-hangar/aircraft-design",
     desc: "Selects configuration and design parameters -- gate-then-score against rules and reference designs, never a guess.",
@@ -101,7 +101,7 @@ const NODES: NodeData[] = [
     status: "online",
     href: "/the-hangar/cad-design",
     desc: "Builds real CAD geometry and assemblies from the validated design parameters -- the first fully physical output.",
-    inp: "Aircraft design",
+    inp: "Vehicle design",
     tools: "TorqWings AI, rule engine",
     out: "CAD model & assembly",
   },
@@ -278,7 +278,7 @@ const NODES: NodeData[] = [
 const PHYSICS_HUB_LINES = [
   "M500,390 L215,140", // Bay 01 Mission
   "M500,390 L395,140", // Bay 02 Concept
-  "M500,390 L575,140", // Bay 03 Aircraft Design
+  "M500,390 L575,140", // Bay 03 Vehicle Design
   "M500,390 L755,140", // Bay 04 CAD
   "M500,390 L625,300", // Bay 05 Flight Dynamics
   "M500,390 L805,300", // Bay 06 CFD
@@ -355,7 +355,7 @@ const STAGES: Stage[] = [
   {
     lines: ["ln-2-3"],
     nodes: [3],
-    text: "BAY 03 -- Aircraft Design Agent -- gating and scoring configurations...",
+    text: "BAY 03 -- Vehicle Design Agent -- gating and scoring configurations...",
   },
   { lines: ["ln-3-4"], nodes: [4], text: "BAY 04 -- CAD Agent -- building geometry & assembly..." },
   {

@@ -264,3 +264,43 @@ export async function logAircraftDesignStageRun(
     );
   }
 }
+
+// Requests & tokens for "Your aircraft designs": sums the one AI call's usage
+// from each successful geometry_generation run (output_snapshot.generation),
+// so a reopened design shows the same numbers a live run did. Best-effort:
+// a design with nothing recorded is simply absent from the map.
+export async function getUsageForAircraftDesigns(
+  ids: string[],
+): Promise<Map<string, { requests: number; inputTokens: number; outputTokens: number; provider: "anthropic" | "groq" | null }>> {
+  const out = new Map<string, { requests: number; inputTokens: number; outputTokens: number; provider: "anthropic" | "groq" | null }>();
+  if (ids.length === 0) return out;
+  const runsDb = supabaseAdmin as unknown as {
+    from: (t: string) => {
+      select: (c: string) => {
+        in: (c: string, v: string[]) => {
+          eq: (c: string, v: string) => Promise<{ data: Record<string, unknown>[] | null; error: { message: string } | null }>;
+        };
+      };
+    };
+  };
+  const { data, error } = await runsDb
+    .from("Hangar_aircraft_design_runs")
+    .select("aircraft_design_id, output_snapshot")
+    .in("aircraft_design_id", ids)
+    .eq("status", "success");
+  if (error) return out;
+  for (const row of data ?? []) {
+    const gen = (row.output_snapshot as { generation?: { usage?: { inputTokens?: unknown; outputTokens?: unknown }; provider?: unknown } } | null)?.generation;
+    const u = gen?.usage;
+    if (!u || typeof u.inputTokens !== "number" || typeof u.outputTokens !== "number") continue;
+    const id = String(row.aircraft_design_id);
+    const cur = out.get(id) ?? { requests: 0, inputTokens: 0, outputTokens: 0, provider: null };
+    cur.requests += 1;
+    cur.inputTokens += u.inputTokens;
+    cur.outputTokens += u.outputTokens;
+    cur.provider = gen?.provider === "groq" || gen?.provider === "anthropic" ? gen.provider : cur.provider;
+    out.set(id, cur);
+  }
+  return out;
+}
+

@@ -1,4 +1,4 @@
-import type { ConstraintFit } from "./tradeoffReasoning.ts";
+import type { ConstraintFit } from "../../tradeoffReasoning.ts";
 
 // Bay 03 Stage 1's hard-constraint gate (AircraftDesignAgent.md Section
 // 3.d / 4.1) — deterministic, no LLM, evaluated before any geometry is
