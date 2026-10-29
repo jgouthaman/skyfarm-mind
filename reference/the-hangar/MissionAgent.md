@@ -1,6 +1,6 @@
 # Mission Agent — Bay 01
 
-**Status:** Stages 2.1–2.4 built for the natural-language path; RAG is a deferred stub; the event publish side is built (nothing consumes it yet) — see [Build Status](#14-build-status). A separate, parallel Python/GCP port of the same four stages also exists for Test Harness use — see [Section 20](#20-parallel-build--test-harness-gcp-python-implementation).
+**Status:** Stages 2.1–2.4 built for the natural-language path; RAG is a deferred stub; the event publish side is built (nothing consumes it yet) — see [Build Status](#14-build-status). A separate, parallel Python/GCP port of the same four stages also exists for Test Harness use — see [Section 20](#20-parallel-build--test-harness-gcp-python-implementation). **Updated 2026-10-29:** AI provider order, page layout, and Bernoulli integration — see [Section 21](#21-october-2026-updates); where it conflicts with an earlier section, Section 21 is current.
 **Agent ID:** `MISSION_AGENT`
 **Type:** Base Agent (Upstream)
 **Stage:** 1 of 15 — The Hangar
@@ -573,7 +573,7 @@ This stage is shaped differently from 2.1–2.3. Those three were dependency cha
 | 0 | Persistence *(prerequisite — not one of the 4 named channels)* | `MissionSpec` (Stage 2.3's finished output) | **First — blocks everything below.** Nothing can be delivered before it's saved. | The persisted row, with its final `id`/`version` | `Hangar_mission_specs` table |
 | 1 | Structured Data API | The persisted `MissionSpec` (#0) | **Synchronous.** The caller (the intake UI's "Process Mission" action) is directly waiting on this — it's the critical path. | `MissionSpec` serialized as JSON | Nowhere new — it's the HTTP response body, ephemeral, gone once the request completes |
 | 2 | Dashboard View | **The API response from #1** — not a separate fetch of `MissionSpec` | Client-side, strictly after #1 returns. This is the one component that isn't parallel to the others — it's downstream of #1 specifically. | Rendered UI — full content spec in [Section 13.1](#131-dashboard-view--content-spec) | Browser only — no new stored artifact, it's a display of data already in `Hangar_mission_specs` |
-| 3 | Export | The persisted `MissionSpec` (#0) | Async, on-demand — a user action taken later, not automatic on every mission. **Deferred (v2)**, same treatment as RAG — documented here, not built in this pass. | A generated file (PDF/DOCX/Excel) | Would live in Supabase Storage, tracked by a future `Hangar_mission_exports` table (not part of the current schema — add when this is actually built) |
+| 3 | Export | The persisted `MissionSpec` (#0) | Async, on-demand — a user action taken later, not automatic on every mission. **Built in the browser:** the Spec Ready dashboard's PDF / Word (DOCX) / Excel buttons generate the file client-side (`missionExport.ts`). The server-side Stage 4 export result is still a stub (`stubExport()`). | A generated file (PDF/DOCX/Excel) | Downloaded directly; not stored — no Supabase Storage copy, no `Hangar_mission_exports` table |
 | 4 | Event Publish | The persisted `MissionSpec` (#0) + `missionId` | Async, fire-and-forget — does **not** block #1's response to the caller | `mission.spec_ready` event — minimal payload, full spec fetched separately by the consumer. Full detail in [Section 4.4.3](#443-event-publish--type-bus-consumer--lifecycle) | `Hangar_events` (Section 4.4.3) — built; also recorded in the stage's `Hangar_agent_runs` row |
 
 **Execution diagram:**
@@ -720,7 +720,7 @@ Auth Service · File Storage (Supabase Storage) · Event Bus · Workflow Engine 
 **File Storage**
 - **What it is:** Supabase Storage — same project, no new service.
 - **Role in Mission Agent:** holds uploaded documents (source type: document — PDF/DOCX), referenced by `Hangar_mission_documents.storage_path` (Section 10). Also where generated exports (Section 4.4.2, v2) would live once built.
-- **Status:** table schema exists (`Hangar_mission_documents`); the actual upload-to-Storage wiring isn't built yet.
+- **Status:** built, but not as designed here. The original uploaded file is saved to the private `BK_HangarMission` bucket, keyed `<mission_id>.<ext>` — the key is the link to the mission, and there is no `Hangar_mission_documents` table (see the Document intake row in Section 14). Generated exports aren't stored; they download in the browser (Section 4.4.1).
 
 **Event Bus**
 - **What it is:** Supabase Realtime, backed by the `Hangar_events` table — fully specified in Section 4.4.3. Not RabbitMQ or a separate broker, deliberately (no new infrastructure with no consumer to justify it).
@@ -856,7 +856,7 @@ The full path, start to finish, cross-referenced to where each step is actually 
  Concept Agent (Bay 02) subscribes, fetches by mission_id (17)
 ```
 
-**What's real today vs. planned — cross-check against Section 14.** Every box above is fully *specified*; not every box is *built*. As of this document: the intake UI exists as a mockup (not wired to a backend), RAG returns `[]` by design, Export is deferred (v2), and Event Publish is a stub — there is no real Concept Agent subscribing yet. This diagram shows the complete intended path; Section 14's Build Status table is the source of truth for what's actually running.
+**What's real today vs. planned — cross-check against Section 14.** Every box above is fully *specified*; not every box is *built*. As of 2026-10-29: the intake UI is built and wired to the real pipeline; RAG returns `[]` by design; Export is built as browser-side downloads (PDF/DOCX/Excel) while the server-side export result is still a stub; and Event Publish is real (`publishMissionEvent` writes the `mission.spec_ready` event) but nothing consumes it — Concept Agent reads finalized missions directly instead. The diagram's "stub" labels show the original plan. This diagram shows the complete intended path; Section 14's Build Status table is the source of truth for what's actually running.
 
 ## 9. Observability & Governance
 
@@ -1504,7 +1504,7 @@ The internal 4-stage architecture is intentionally **not** shown on this screen 
 
 ### 13.1 Dashboard View — Content Spec
 
-This is Stage 2.4's Dashboard View channel (Section 4.4.1, component #2) — currently unbuilt, no results display exists anywhere in the UI yet. Content, in reading order:
+This is Stage 2.4's Dashboard View channel (Section 4.4.1, component #2) — built as the Spec Ready dashboard in `the-hangar.mission.tsx` (current layout: Section 21.2). Content, in reading order:
 
 1. **Header strip** — mission code/title (from `mission_specs`), a status badge, and `confidence_score` shown prominently (e.g. `92%` with a label), not buried in a details panel.
 2. **Mission Summary** — the `summary` string. Reads first, deliberately — it's the one field written specifically to be human-readable, everything below it is structured data.
@@ -1512,7 +1512,7 @@ This is Stage 2.4's Dashboard View channel (Section 4.4.1, component #2) — cur
 4. **Constraints** — each `constraints[]` entry with its `sources[]` shown as small tags (e.g. "Max altitude: 122m" next to a `FAR Part 107` chip). This is where Section 4.3's dedup/traceability work actually becomes visible to a human, not just data sitting in a table.
 5. **KPIs & Targets** — each `kpis[]` entry, with `priority` driving visual treatment: `"critical"` KPIs (gate-tier — safety or regulatory backed) get an amber/highlighted treatment, ranked KPIs show their rank more quietly. This is where Stage 2.2's trade-off prioritization becomes visible, rather than being computed and never seen.
 6. **Validation flags** (if any) — shown honestly, not hidden, since they already factored into the confidence score at the top.
-7. **Actions** — "Save as final" / "Edit and regenerate" (see 13.2 below), and "Continue to Concept Agent" shown **disabled**, honestly labeled "Bay 02 not yet built" — same honesty pattern as every other not-yet-built bay in The Hangar, not a dead link pretending to work.
+7. **Actions** — "Save as final" / "Edit and regenerate" (see 13.2 below), and "Continue to Concept Agent →", which links to `/the-hangar/concept` now that Bay 02 is built (it was disabled, labelled "Bay 02 not yet built", until then).
 
 ### 13.2 Review-Before-Save, Resolved via Versioning
 
@@ -1530,7 +1530,7 @@ Status below reflects the code as of 2026-09-21 (read from the source, not from 
 |---|---|---|
 | Input intake UI | Phase 1 | Built for Natural Language, plus an optional **"Add more context"** area under the brief (`IntakeSources` on the Mission page): **Regulations** (checkboxes over `Hangar_regulations_catalog` — deliberately minimal, how regulations should shape a mission still needs a proper study), **Existing project** (a dropdown of your own past missions that have a spec) and **Market data** (checkboxes over `Hangar_market_data_catalog`, currently empty so it shows an empty state; a row can carry a curated link, see the next row). **Document** is built: upload a PDF, Word (.docx) or plain-text file and its text is extracted server-side and used exactly like typed brief text — see the Document row below. Requirements-form answers still arrive only via the confidence-boost wizard. Everything selected is sent as extra entries in the same `sources` list, so it runs through the same four stages, Save as final, export and Concept Agent. The options are served by `GET /api/hangar/source-catalogs` |
 | Market-data links | Phase 1 | Built — **migration not yet applied** (`20260922010000_hangar_market_data_source_url.sql`, adds `Hangar_market_data_catalog.source_url`). A catalog row can carry an HTTPS link, set only by whoever curates the catalog; a user just ticks the row. When a mission selects it, Stage 1 reads the page server-side (`marketDataFetch.ts`) and gives its text to the extraction model as `linkedContent`, marked in the prompt as untrusted reference data. Guards: https only, no credentials, IP-literal or non-public hostnames, every DNS answer and every redirect hop checked as public, 8s timeout, 256 KB read cap, text-like content types only, 6,000 characters per page and 12,000 per mission. A link that can't be read never fails the mission (the row falls back to its name and description); Stage 1's run log records only a summary per link (`attachedSources.marketDataLinks`: status, reason, size), not the fetched text. Known limit: the DNS check and the fetch are separate lookups, acceptable for curated links, not for arbitrary user URLs. The catalog is publicly readable, so never put a secret in a link. Before the migration is applied everything works as before (rows simply have no link) |
-| Document intake | Phase 1 | Built (`documentExtraction.ts`, `POST /api/hangar/extract-document`) — the file is uploaded, its text extracted server-side, and **the file itself is never persisted**: no storage bucket, no `Hangar_mission_documents` table (the spec's Section 10 design). The extracted text travels into `rawTextCombined` exactly like typed text (the caller's own content — no "untrusted reference data" framing is needed, unlike market-data links). The **original file** is separately persisted to Supabase Storage — bucket `BK_HangarMission`, key `<mission_id>.<ext>` (that key IS the link to the mission; no separate table) — once Stage 1 has created the mission and an id exists to name it after (`documentStorage.ts`, `POST /api/hangar/store-document`, called right after Stage 1 returns). Private bucket, written only by the service role; never read back into the pipeline. Best-effort: a failed store never fails the mission, same contract as the audit log. Migration: `20260922020000_hangar_mission_document_bucket.sql`. Type is checked by content (magic bytes / valid-UTF-8-with-low-control-character-ratio for plain text), never by the browser-supplied MIME type or file extension, both of which can be wrong. Limits: 4 MB upload (Vercel's Node functions hard-cap the request body around 4.5 MB regardless of any limit set here), 20,000 characters kept, 15s extraction timeout. A file that can't be read never fails the mission — nothing is added from that source. Uses `pdf-parse` (PDF) and `mammoth` (.docx) |
+| Document intake | Phase 1 | Built (`documentExtraction.ts`, `POST /api/hangar/extract-document`) — the file is uploaded and its text extracted server-side; it's that extracted text, not the file, that feeds the pipeline. There is no `Hangar_mission_documents` table (the spec's Section 10 design). The extracted text travels into `rawTextCombined` exactly like typed text (the caller's own content — no "untrusted reference data" framing is needed, unlike market-data links). The **original file** is separately persisted to Supabase Storage — bucket `BK_HangarMission`, key `<mission_id>.<ext>` (that key IS the link to the mission; no separate table) — once Stage 1 has created the mission and an id exists to name it after (`documentStorage.ts`, `POST /api/hangar/store-document`, called right after Stage 1 returns). Private bucket, written only by the service role; never read back into the pipeline. Best-effort: a failed store never fails the mission, same contract as the audit log. Migration: `20260922020000_hangar_mission_document_bucket.sql`. Type is checked by content (magic bytes / valid-UTF-8-with-low-control-character-ratio for plain text), never by the browser-supplied MIME type or file extension, both of which can be wrong. Limits: 4 MB upload (Vercel's Node functions hard-cap the request body around 4.5 MB regardless of any limit set here), 20,000 characters kept, 15s extraction timeout. A file that can't be read never fails the mission — nothing is added from that source. Uses `pdf-parse` (PDF) and `mammoth` (.docx) |
 | Source counting | Phase 1 | A source counts toward `source_types_used` — and so toward the confidence score's source completeness — only if it carries content, and a reference only if it resolved (a regulation code the catalog doesn't know, or an imported mission with no spec, is dropped: `finalizeSourceTypes`). Previously any source entry counted, even an empty one. Stage 1's run log now also records what was attached (`attachedSources`: imported mission id, market-data ids). Keys are read in camelCase or snake_case, since Section 11's example writes `regulation_codes` |
 | `Hangar_*` Supabase tables | Phase 1 | `Hangar_missions`, `Hangar_mission_specs`, `Hangar_agent_runs` and the regulations / market-data catalogs exist live. Their migration was missing; `20260801000000_hangar_mission_agent_baseline.sql` now reconstructs them from the live schema (idempotent — a no-op on the live project, builds them on a fresh one). `Hangar_mission_audit` and `Hangar_events` came later, each with its own migration, both applied |
 | Core-table access hardening | Phase 1 | Migration written, **not yet applied** — `20260922000000_hangar_mission_agent_hardening.sql`. The live schema let a signed-in user write their own `Hangar_missions` rows directly (`owner_all_hangar_missions` is `FOR ALL`), skipping every server check, e.g. setting `status = 'finalized'` with no spec; and `get_next_mission_spec_version` (SECURITY DEFINER) was executable by any API key, revealing whether a mission has specs. The migration makes missions select-only for users, restricts that function to the service role, and indexes `Hangar_agent_runs (mission_id, stage)`. The server uses the service role and is unaffected |
@@ -1701,3 +1701,58 @@ If either becomes a measured bottleneck, **Upstash Redis** (serverless-native, f
 - Constraint dedup is simplified: same-name constraints merge their `sources[]`, but unlike Section 4.3.1's dedup rule, this does not pick the more restrictive value on a genuine conflict — both the TS and Python versions should be reconciled if this GCP path ever needs more than Test Harness proof-of-connectivity use.
 
 **Current status (2026-10-22):** code is written and committed (`skyfarm-mind` PR #65); not yet deployed to the live GCP host as of this writing — the next step is deploying it there (with `ANTHROPIC_API_KEY` set in that environment) and testing each stage through `/t-h` before touching anything in this document's own Hangar pipeline. Bays 02–15 are still hardcoded stubs on this path (`mock: true` always, no LLM calls) — Bay 01 is the only one with real logic so far.
+
+## 21. October 2026 updates
+
+As of production `0e986c4` (2026-10-29). This covers the real Hangar pipeline (TypeScript, Vercel + Supabase), not the Test Harness port in Section 20.
+
+### 21.1 LLM calls and providers
+
+**4 LLM calls per mission run:**
+
+| Stage | Calls | Where |
+|---|---|---|
+| 2.1 Input Processing | 1 | `intentExtraction.ts`: intent + entity extraction |
+| 2.2 Reasoning & Planning | 2 | `missionDecomposition.ts` (decomposition); `constraintIdentification.ts` (combined constraints + KPIs). The domain rules in between are deterministic. |
+| 2.3 Output Generation | 1 | `missionSummary.ts`: summary paragraph. Assembly and the confidence score are deterministic. |
+| 2.4 Output Interface | 0 | Persistence, API response, event publish |
+
+All four go through `callLlmGateway` (`llmGateway.ts`):
+
+- **Two providers:** Anthropic (Claude Sonnet 5) and Groq (`openai/gpt-oss-120b`, an OpenAI-compatible REST API with no SDK dependency), tried in the order set on **Mission Hub → Configurations → AI Providers**.
+- **The order setting:** stored in `Hangar_LlmSettings` (migration `20261030010000_hangar_llm_provider_order.sql`) and cached for about 30 seconds, so a change goes live without a redeploy. If it can't be read, the default is Anthropic first, Groq second.
+- **Failures:** a provider with no API key, or that fails, is skipped. If none answers, the stage falls back to its own mock output, exactly as before.
+- **Visibility:** the result records which provider answered. `GET /api/hangar/llm-status` reports the first live provider in the configured order, and the page's AI badge shows it as **AI · Claude** (green) or **AI · Groq** (amber).
+
+User-facing copy says "TorqWings AI" instead of naming a model. Only the AI badge names the provider.
+
+**Not agentic.** The pipeline is still a fixed sequence of LLM calls; the model never decides the next step. A genuinely agentic tool-use loop (`agentic_run`) exists only in the Test Harness Python port (Section 20). Making Stage 2.2 agentic in the real pipeline was scoped but not built.
+
+### 21.2 Page layout — `the-hangar.mission.tsx`
+
+- **Theme:** light, matching `/the-hangar/agents` (white page, blue grid, light-blue panels, dark text, dark nav strip), with a solid header/body divider under the opening curtain.
+- **Header badges:** "BAY 01 OF 15" and the AI badge use the darker light-theme style.
+- **Panels:** **Your missions** and **Plan a new mission** are bold section bars. Opening one closes the other.
+- **Run view:**
+  - The four-step tracker shows the current step as an amber tile.
+  - The **Mission brief** heading and the status panel's title use the same bar style and line up; the status bar has an amber top border.
+- **Finished mission:**
+  1. Title: mission code, mission type, generated date (replaces the tracker)
+  2. Collapsible **Requests & tokens**, closed by default with the totals in its header. It contains the summary bar (requests, tokens, estimated cost in ₹, time) and the per-stage table.
+  3. The Spec Ready dashboard
+- **Reopened finalized mission:** same title and Requests & tokens, then the read-only details, ending with the **latest saved Bernoulli report** for the mission.
+
+### 21.3 Bernoulli
+
+"Ask Bernoulli →" opens `/the-hangar/bernoulli` with `source=mission` and the mission ID. The Bernoulli page lists only **Spec Ready** missions when arrived at from Bay 01. The review runs every enabled mission rule from the check registry: built-in BERN-M01–M06, plus any custom TorqWings AI rules added in Mission Hub → Agents → Bernoulli. See `BernoulliAgent.md`.
+
+### 21.4 Build status changes
+
+| Component | Status |
+|---|---|
+| Groq fallback + configurable provider order | ✅ Built (Mission Hub → AI Providers) |
+| Live AI badge with provider name | ✅ Built |
+| Light theme + run title + Requests & tokens | ✅ Built |
+| Saved Bernoulli report on finalized missions | ✅ Built |
+| Agentic (tool-use) mode in the real pipeline | ❌ Not built — Test Harness Python port only |
+| Deep link from another bay to one specific mission | ❌ Not built — links land on the Mission Agent page |

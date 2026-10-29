@@ -1,37 +1,55 @@
 # Bernoulli Integration — Bay 02 Concept Agent
 
-**Status:** Navigation wired (reuses Mission's real backend — see note below)
+**Status:** Built. Bernoulli reviews the **concept run's own output** with BERN-C01–C04, plus any custom concept rules, judged against the source mission's KPIs. Updated 2026-10-29. The full design is in `BernoulliAgent.md`.
+
+> This replaces the earlier navigation-only version, where "Ask Bernoulli" from Concept re-reviewed the source mission spec with the mission checks. That was changed so Bernoulli checks the output of the bay that called it.
 
 ## Overview
 
-Concept Agent doesn't define its own physics-checkable spec — it ranks configuration *options* against its **source mission's** existing constraints and KPIs (`FinalizedConstraint[]` / `FinalizedKpi[]`, passed into concept generation as inputs, never redefined as outputs). So "Ask Bernoulli" from Concept really means *"review the Mission spec this concept came from"* — no new schema or checks were needed, just a link carrying the right `missionId`.
+A concept run doesn't redefine the mission's numbers. It proposes candidate vehicle concepts and ranks them against the source mission's existing constraints and KPIs. So Bernoulli's concept checks ask whether each candidate can physically meet those KPIs, and whether the ranking is consistent with that:
+
+| ID | Check | Type |
+|---|---|---|
+| BERN-C01 | Vehicle-class consistency with the spec | Rule-based |
+| BERN-C02 | Speed feasibility per concept (hard gate: fails if the top-ranked concept can't fly the required average speed) | Rule-based |
+| BERN-C03 | Ranking coherence (fit order, 1–10 scores, "pass" contradicted by C02) | Rule-based |
+| BERN-C04 | Physical feasibility per concept (power draw, battery mass fraction) | TorqWings AI |
 
 ## How the link works
 
-- **Trigger:** "Ask Bernoulli →" link next to the confidence score.
-  - Live view: `ConceptDashboard` (in `src/routes/the-hangar.concept.tsx`), which takes a new `sourceMissionId` prop
-  - Read-only past view: `PastConceptDetail` (same file)
-- **Target:** `/the-hangar/bernoulli`
+- **Trigger:** "Ask Bernoulli →" on the Concept Ready dashboard (`ConceptDashboard`) and on the read-only past view (`PastConceptDetail`), both in `src/routes/the-hangar.concept.tsx`.
+- **Target:** `/the-hangar/bernoulli`.
 - **Search params:**
   ```
-  { source: "concept", missionId: <mission id>, sourceId: "" }
+  { source: "concept", missionId: <source mission id>, sourceId: <concept id> }
   ```
-  - Live view: `sourceMissionId={selectedSpec?.missionId ?? null}` — `selectedSpec` (a `MissionListEntry`) is already held in page state from picking a finalized mission to build the concept from, so this is free, no extra fetch
-  - Past view: `concept.sourceMissionId` — `ConceptListEntry` carries this field directly (`sourceMissionId: string`)
+- **Source mission on reopen:** a reopened concept keeps its source mission (looked up from "Your saved Mission Specs"), so the button stays available.
 
-## Mission resolution
+## On the Bernoulli page
 
-None needed client-side — both code paths already have the mission id in scope without an extra hop.
+- **Concept mode:** arriving with `source=concept` switches the page into concept mode:
+  - the dropdown lists **Concept Ready** concepts (from `GET /api/hangar/concepts`) instead of missions
+  - picking one also selects its source mission
+- **Order:**
+  1. dropdown
+  2. report ("Concept Bernoulli report")
+  3. collapsible Concept Spec
+  4. collapsible Source Mission Spec
+  5. the concept checks' definitions
+- **Request:** the review is sent as `{ missionId, source: "concept", sourceId }`. The server anchors it to the concept's own `source_mission_id`.
+
+## Storage
+
+Concept reviews are saved with `source_bay = 'concept'` and `concept_id` (migration `20261029000000_hangar_bernoulli_caller_bay.sql`). Saved-report lookups filter on both, so a concept review never appears when the source mission is reopened from Bay 01. A finalized concept's read-only view ends with its latest saved concept review.
 
 ## Round trip back
 
 `search.source === "concept"` highlights **Bay 02 Concept Agent** on the Bernoulli page and links back to `/the-hangar/concept`.
 
-## Files touched
+## Files
 
-- `src/routes/the-hangar.concept.tsx` — `ConceptDashboard` (added `sourceMissionId` prop), `PastConceptDetail`, `.hgr-c-dash-bernoulli-link`
-- `src/routes/the-hangar.bernoulli.tsx` — `LEFT_CALLERS` entry `{ bay: "02", key: "concept", to: "/the-hangar/concept" }`
-
-## Note on Bernoulli's own dropdown
-
-Concept Agent only ever builds from a **finalized** mission (`fetchSavedSpecs` on the Concept page filters `?status=finalized`). This surfaced a real gap: Bernoulli's own "Your missions" picker originally fetched `spec_ready` only, so a Concept-sourced link would never resolve. Fixed by broadening Bernoulli's fetch to include both statuses, filtered client-side by "has a real spec" (`missionSpecs !== null`) instead of a fixed status list — see `the-hangar.bernoulli.tsx`'s `fetchMissions()`.
+- `src/lib/the-hangar/bernoulliChecks.ts`: C01–C04 and the shared custom-rule runner
+- `src/lib/the-hangar/bernoulliAgentPipeline.ts`: concept target loading (`getConcept`, `getLatestConceptSpec`)
+- `src/lib/the-hangar/bernoulliPersistence.ts`: `source_bay` / `concept_id`
+- `src/routes/the-hangar.concept.tsx`: links carry `sourceId`; saved report on finalized concepts
+- `src/routes/the-hangar.bernoulli.tsx`: concept mode (dropdown, report and spec order)
