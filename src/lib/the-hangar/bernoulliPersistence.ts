@@ -41,10 +41,16 @@ const db = supabaseAdmin as unknown as {
 
 export type BernoulliReviewStatus = "draft" | "processing" | "spec_ready" | "error";
 
+// Which bay's output a review checks (20261029000000_hangar_bernoulli_caller_bay.sql).
+// A concept review still carries its concept's source mission_id.
+export type BernoulliSourceBay = "mission" | "concept";
+
 export interface HangarBernoulliReviewRow {
   id: string;
   user_id: string;
   mission_id: string;
+  source_bay: BernoulliSourceBay;
+  concept_id: string | null;
   review_code: string;
   status: BernoulliReviewStatus;
   verdict: "PASS" | "WARN" | "FAIL" | null;
@@ -66,10 +72,17 @@ export interface HangarBernoulliReviewSpecRow {
 export async function createBernoulliReview(
   userId: string,
   missionId: string,
+  conceptId: string | null = null,
 ): Promise<HangarBernoulliReviewRow> {
   const { data, error } = await db
     .from("Hangar_BernoulliReviews")
-    .insert({ user_id: userId, mission_id: missionId, status: "draft" })
+    .insert({
+      user_id: userId,
+      mission_id: missionId,
+      status: "draft",
+      source_bay: conceptId ? "concept" : "mission",
+      concept_id: conceptId,
+    })
     .select("*")
     .limit(1);
   if (error) throw new Error(`createBernoulliReview: ${error.message}`);
@@ -147,26 +160,6 @@ type ListQueryResult = Promise<{
   error: { message: string } | null;
 }>;
 
-const listDb = supabaseAdmin as unknown as {
-  from: (table: string) => {
-    select: (columns: string) => {
-      eq: (
-        column: string,
-        value: string,
-      ) => {
-        eq: (
-          column: string,
-          value: string,
-        ) => {
-          order: (column: string, opts: { ascending: boolean }) => {
-            limit: (n: number) => ListQueryResult;
-          };
-        };
-      };
-    };
-  };
-};
-
 const specsListDb = supabaseAdmin as unknown as {
   from: (table: string) => {
     select: (columns: string) => {
@@ -182,15 +175,37 @@ const specsListDb = supabaseAdmin as unknown as {
   };
 };
 
+// User + target (mission or concept) + source_bay.
+const scopedListDb = supabaseAdmin as unknown as {
+  from: (table: string) => {
+    select: (columns: string) => {
+      eq: (column: string, value: string) => {
+        eq: (column: string, value: string) => {
+          eq: (column: string, value: string) => {
+            order: (column: string, opts: { ascending: boolean }) => {
+              limit: (n: number) => ListQueryResult;
+            };
+          };
+        };
+      };
+    };
+  };
+};
+
+// Latest saved review of one bay's output: a mission review (conceptId null)
+// or a concept review. Filtering on source_bay keeps a concept review from
+// surfacing when the same source mission is reopened from Bay 01.
 export async function getLatestBernoulliReviewForMission(
   userId: string,
   missionId: string,
+  conceptId: string | null = null,
 ): Promise<{ review: HangarBernoulliReviewRow; spec: HangarBernoulliReviewSpecRow } | null> {
-  const { data, error } = await listDb
+  const { data, error } = await scopedListDb
     .from("Hangar_BernoulliReviews")
     .select("*")
     .eq("user_id", userId)
-    .eq("mission_id", missionId)
+    .eq(conceptId ? "concept_id" : "mission_id", conceptId ?? missionId)
+    .eq("source_bay", conceptId ? "concept" : "mission")
     .order("created_at", { ascending: false })
     .limit(1);
   if (error) throw new Error(`getLatestBernoulliReviewForMission: ${error.message}`);

@@ -266,6 +266,19 @@ function computeStageUsage(flow: MissionFlowState): (StageUsageRow | null)[] {
   ];
 }
 
+// Finished mission: its code + mission type become the title, in place of
+// the four-step tracker, followed by Requests & tokens, then the details --
+// same layout as Bay 02's generated concept.
+function MissionRunTitle({ code, title, generatedAt }: { code: string; title: string; generatedAt: string | null }) {
+  return (
+    <div className="hgr-m-run-title">
+      <span className="hgr-m-run-title-code">{code}</span>
+      <h3>{title}</h3>
+      {generatedAt && <span className="hgr-m-run-title-date">Generated {formatGeneratedAt(generatedAt)}</span>}
+    </div>
+  );
+}
+
 function StageUsageTable({ flow }: { flow: MissionFlowState }) {
   const rows = computeStageUsage(flow);
   const done = rows.filter((r): r is StageUsageRow => r !== null);
@@ -273,7 +286,20 @@ function StageUsageTable({ flow }: { flow: MissionFlowState }) {
   const totalInput = done.reduce((n, r) => n + r.inputTokens, 0);
   const totalOutput = done.reduce((n, r) => n + r.outputTokens, 0);
   const partial = !!flow.persistedUsage && !flow.persistedUsage.complete;
+  // Collapsed by default, same as Bay 02 -- the header still shows the
+  // totals, and the summary bar + per-stage breakdown are one click away.
   return (
+    <details className="hgr-m-usage-details">
+      <summary title="LLM requests and tokens per stage. Cost is an estimate in INR at a fixed USD rate, not a bill.">
+        <span className="hgr-m-usage-details-label">Requests &amp; tokens</span>
+        <span className="hgr-m-usage-details-totals">
+          {partial ? "≥ " : ""}
+          {totalRequests} req · {(totalInput + totalOutput).toLocaleString()} tokens ·{" "}
+          {partial ? "≥ " : "~"}
+          {formatCostInr(estimateCostUsd(totalInput, totalOutput))}
+        </span>
+      </summary>
+    <TelemetryBar telemetry={computeTelemetry(flow)} />
     <table
       className="hgr-m-usage-table"
       title="LLM requests and tokens per stage. Cost is an estimate in INR at a fixed USD rate, not a bill."
@@ -336,6 +362,7 @@ function StageUsageTable({ flow }: { flow: MissionFlowState }) {
         </tr>
       </tfoot>
     </table>
+    </details>
   );
 }
 
@@ -1805,7 +1832,10 @@ function TheHangarMission() {
               <MissionsListPanel
                 missions={missionsList}
                 expanded={missionsExpanded}
-                onToggleExpanded={() => setMissionsExpanded((v) => !v)}
+                onToggleExpanded={() => {
+                  setMissionsExpanded(!missionsExpanded);
+                  setPlanExpanded(false);
+                }}
                 onSelect={(m) => {
                   // Collapse the row list once something's picked -- the
                   // spec shows directly below -- but the panel itself (and
@@ -1844,7 +1874,10 @@ function TheHangarMission() {
                   <button
                     type="button"
                     className="hgr-m-missions-panel-title"
-                    onClick={() => setPlanExpanded((v) => !v)}
+                    onClick={() => {
+                      setPlanExpanded(!planExpanded);
+                      setMissionsExpanded(false);
+                    }}
                     aria-expanded={planExpanded}
                   >
                     <span>Plan a new mission</span>
@@ -1857,6 +1890,16 @@ function TheHangarMission() {
                 )}
                 {(!isIdle || planExpanded) && (
                   <div className={isIdle ? "hgr-m-plan-panel-body" : undefined}>
+                    {activeStage === "done" && flow.stage4.result ? (
+                      <MissionRunTitle
+                        code={flow.stage4.result.mission_code}
+                        title={
+                          (flow.stage4.result.mission_specs as unknown as MissionSpecsView)?.missionType ??
+                          flow.stage4.result.mission_code
+                        }
+                        generatedAt={flow.generatedAt}
+                      />
+                    ) : (
                     <div className="hgr-m-stage-tracker">
                       {STAGE_ORDER.map((key) => {
                         const complete =
@@ -1876,6 +1919,7 @@ function TheHangarMission() {
                         );
                       })}
                     </div>
+                    )}
 
                     {(flow.stage1.result || flow.persistedUsage) && <StageUsageTable flow={flow} />}
 
@@ -2100,7 +2144,6 @@ function TheHangarMission() {
                           result={toMissionResult(flow.stage4.result)}
                           briefText={briefText}
                           generatedAt={flow.generatedAt}
-                          telemetry={computeTelemetry(flow)}
                           sourceTypesUsedCount={flow.sourceTypesUsedCount ?? 0}
                           sourceTypesUsed={flow.stage1.result?.sourceTypesUsed ?? null}
                           onStartNew={resetFlow}
@@ -2357,6 +2400,116 @@ function ExportButtons({ input }: { input: MissionExportInput }) {
 // here deliberately: those act on "the mission currently in flow," and a
 // past mission being viewed isn't that — the one action offered is getting
 // back out, either to the list or to a genuinely new brief.
+// Latest saved Bernoulli review of this mission's spec (BERN-M01-M06,
+// source_bay = 'mission'), read-only -- a finalized mission can't run a new
+// review. Same component as Bay 02's finalized-concept view, scoped to
+// mission reviews (no conceptId), so a concept review of this mission never
+// shows up here. Shape mirrors bernoulliAgentPipeline.ts's
+// BernoulliReviewResponse, duplicated per this page's convention.
+interface SavedBernoulliCheck {
+  ruleId: string;
+  ruleName?: string;
+  status: "PASS" | "WARN" | "FAIL" | "INFO";
+  message: string;
+  sourceWasMock: boolean;
+  reasoning?: string;
+}
+interface SavedBernoulliReview {
+  reviewCode: string;
+  verdict: "PASS" | "WARN" | "FAIL";
+  confidenceScore: number;
+  createdAt: string;
+  checks: SavedBernoulliCheck[];
+  usage?: { requests: number; inputTokens: number; outputTokens: number; estimatedCostUsd: number };
+}
+
+const MISSION_BERN_RULE_NAMES: Record<string, string> = {
+  "BERN-M01": "Speed Consistency",
+  "BERN-M02": "Coverage Math",
+  "BERN-M03": "Payload/Endurance Plausibility",
+  "BERN-M04": "KPI/Constraint Provenance",
+  "BERN-M05": "Dimensional Consistency",
+  "BERN-M06": "Energy/Power Budget Plausibility",
+};
+
+function SavedBernoulliReport({ missionId }: { missionId: string }) {
+  const [state, setState] = useState<
+    { status: "loading" } | { status: "none" } | { status: "error" } | { status: "ready"; review: SavedBernoulliReview }
+  >({ status: "loading" });
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase.auth.getSession();
+      const token = data.session?.access_token;
+      if (!token) {
+        if (!cancelled) setState({ status: "error" });
+        return;
+      }
+      try {
+        const res = await fetch(`/api/hangar/bernoulli-review?missionId=${encodeURIComponent(missionId)}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const json = (await res.json()) as SavedBernoulliReview | null;
+        if (!cancelled) setState(json ? { status: "ready", review: json } : { status: "none" });
+      } catch {
+        if (!cancelled) setState({ status: "error" });
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [missionId]);
+
+  return (
+    <div className="hgr-m-dash-section hgr-m-bern">
+      <h4>Bernoulli report</h4>
+      {state.status === "loading" && <p className="hgr-m-dash-empty">Loading the saved Bernoulli report…</p>}
+      {state.status === "error" && <p className="hgr-m-dash-empty">Couldn't load the Bernoulli report.</p>}
+      {state.status === "none" && (
+        <p className="hgr-m-dash-empty">No Bernoulli report was run on this mission before it was finalized.</p>
+      )}
+      {state.status === "ready" && (
+        <>
+          <div className="hgr-m-bern-summary">
+            <span className={`hgr-m-bern-verdict hgr-m-bern-verdict-${state.review.verdict}`}>
+              {state.review.verdict}
+            </span>
+            <span className="hgr-m-bern-meta">
+              {Math.round(state.review.confidenceScore * 100)}% confidence · {state.review.reviewCode} · reviewed{" "}
+              {new Date(state.review.createdAt).toLocaleString()}
+            </span>
+            {state.review.usage && state.review.usage.requests > 0 && (
+              <span className="hgr-m-bern-meta" title={describeInrCost(state.review.usage.estimatedCostUsd)}>
+                {state.review.usage.requests} req ·{" "}
+                {(state.review.usage.inputTokens + state.review.usage.outputTokens).toLocaleString()} tokens · ~
+                {formatCostInr(state.review.usage.estimatedCostUsd)}
+              </span>
+            )}
+          </div>
+          <ul className="hgr-m-bern-checks">
+            {state.review.checks.map((c) => (
+              <li key={c.ruleId}>
+                <span className="hgr-m-bern-rule">
+                  {c.ruleId}
+                  <span>{c.ruleName ?? MISSION_BERN_RULE_NAMES[c.ruleId] ?? ""}</span>
+                </span>
+                <span className={`hgr-m-bern-badge hgr-m-bern-badge-${c.status}`}>{c.status}</span>
+                <span className="hgr-m-bern-message">
+                  {c.message}
+                  {c.sourceWasMock && <em> -- via TorqWings AI (mock)</em>}
+                </span>
+                {c.reasoning && <span className="hgr-m-bern-reasoning">{c.reasoning}</span>}
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+    </div>
+  );
+}
+
 function PastMissionDetail({ mission, onBack }: { mission: MissionListEntry; onBack: () => void }) {
   const hasSpec =
     mission.missionSpecs && mission.constraints && mission.kpis && mission.summary !== null;
@@ -2376,17 +2529,18 @@ function PastMissionDetail({ mission, onBack }: { mission: MissionListEntry; onB
   };
 
   return (
+    <>
+    <MissionRunTitle
+      code={mission.missionCode}
+      title={mission.missionSpecs?.missionType ?? mission.missionCode}
+      generatedAt={mission.createdAt}
+    />
+    {mission.usage && <StageUsageTable flow={usageFlow} />}
     <div className="hgr-m-dash">
-      <TelemetryBar telemetry={computeTelemetry(usageFlow)} />
       <div className="hgr-m-dash-header">
         <div>
           <div className="hgr-m-dash-badge">
             {MISSION_STATUS_LABEL[mission.status] ?? mission.status}
-          </div>
-          <h3>{mission.missionSpecs?.missionType ?? mission.missionCode}</h3>
-          <div className="hgr-m-dash-id">
-            {mission.missionCode}
-            <span className="hgr-m-dash-generated-at"> · Generated {formatGeneratedAt(mission.createdAt)}</span>
           </div>
         </div>
         {mission.confidenceScore !== null && (
@@ -2455,12 +2609,7 @@ function PastMissionDetail({ mission, onBack }: { mission: MissionListEntry; onB
         </div>
       )}
 
-      {mission.usage && (
-        <div className="hgr-m-dash-section">
-          <h4>LLM Usage</h4>
-          <StageUsageTable flow={usageFlow} />
-        </div>
-      )}
+      {hasSpec && <SavedBernoulliReport missionId={mission.missionId} />}
 
       <div className="hgr-m-dash-actions">
         {hasSpec && (
@@ -2485,6 +2634,7 @@ function PastMissionDetail({ mission, onBack }: { mission: MissionListEntry; onB
         </button>
       </div>
     </div>
+    </>
   );
 }
 
@@ -2677,7 +2827,6 @@ function MissionDashboard({
   result,
   briefText,
   generatedAt,
-  telemetry,
   sourceTypesUsedCount,
   sourceTypesUsed,
   onStartNew,
@@ -2698,12 +2847,11 @@ function MissionDashboard({
   result: MissionResult;
   briefText: string;
   generatedAt: string | null;
-  telemetry: MissionTelemetry | null;
   sourceTypesUsedCount: number;
   // The real distinct SourceType values used this run (see
   // types/hangar-mission.ts) — only available for a mission run THIS
   // session (Stage 1's own result), same resumed-mission limitation as
-  // generatedAt/telemetry. null falls back to anonymous count-only slots.
+  // generatedAt. null falls back to anonymous count-only slots.
   sourceTypesUsed: SourceType[] | null;
   onStartNew: () => void;
   onEditAndRegenerate: () => void;
@@ -2741,19 +2889,11 @@ function MissionDashboard({
 
   return (
     <div className="hgr-m-dash">
-      <TelemetryBar telemetry={telemetry} />
-
-      {/* 1. Header strip */}
+      {/* 1. Header strip -- mission type, code and generated date sit in
+          the title above (MissionRunTitle); usage sits in Requests & tokens. */}
       <div className="hgr-m-dash-header">
         <div>
           <div className="hgr-m-dash-badge">Spec Ready</div>
-          <h3>{result.missionSpecs.missionType}</h3>
-          <div className="hgr-m-dash-id">
-            {result.missionCode}
-            {generatedAt && (
-              <span className="hgr-m-dash-generated-at"> · Generated {formatGeneratedAt(generatedAt)}</span>
-            )}
-          </div>
         </div>
         <div className="hgr-m-dash-confidence">
           <div className="hgr-m-dash-confidence-top-row">
@@ -3638,6 +3778,43 @@ const HGR_MISSION_CSS = `
   font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.06em; text-transform:uppercase;
   color:var(--hgr-m-paper-dim);
 }
+.hgr-m-usage-details{ margin:0 0 20px; border:1px solid var(--hgr-m-hairline); border-radius:2px; background:var(--hgr-m-navy-panel); }
+.hgr-m-usage-details > summary{
+  display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+  padding:11px 16px; cursor:pointer; list-style:none;
+  background:var(--hgr-m-navy-panel-2); border-left:3px solid var(--hgr-m-blue-bright);
+}
+.hgr-m-usage-details > summary::-webkit-details-marker{ display:none; }
+.hgr-m-usage-details-label{ font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.08em; text-transform:uppercase; font-weight:700; color:var(--hgr-m-paper); }
+.hgr-m-usage-details-label::before{ content:"▸ "; }
+.hgr-m-usage-details[open] .hgr-m-usage-details-label::before{ content:"▾ "; }
+.hgr-m-usage-details-totals{ font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--hgr-m-paper-dim); }
+.hgr-m-usage-details .hgr-m-usage-table{ margin:0; border:none; border-top:1px solid var(--hgr-m-hairline); }
+/* Saved Bernoulli report on a finalized mission (read-only) -- same look as Bay 02's. */
+.hgr-m-bern{ border-top:3px solid var(--hgr-m-bernoulli); }
+.hgr-m-bern-summary{ display:flex; align-items:center; flex-wrap:wrap; gap:8px 14px; margin-bottom:12px; }
+.hgr-m-bern-verdict{ font-family:'IBM Plex Mono',monospace; font-size:12px; font-weight:700; letter-spacing:.06em; padding:4px 10px; border-radius:2px; }
+.hgr-m-bern-verdict-PASS{ background:#DCFCE7; color:#166534; }
+.hgr-m-bern-verdict-WARN{ background:#FDF3E3; color:var(--hgr-m-amber-bright); }
+.hgr-m-bern-verdict-FAIL{ background:#FDE8E6; color:#C0392B; }
+.hgr-m-bern-meta{ font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--hgr-m-paper-dim); }
+.hgr-m-bern-checks{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:1px; background:var(--hgr-m-hairline); border:1px solid var(--hgr-m-hairline); }
+.hgr-m-bern-checks li{ display:grid; grid-template-columns:190px 60px 1fr; gap:10px; align-items:start; background:var(--hgr-m-navy-deep); padding:10px 12px; }
+@media(max-width:760px){ .hgr-m-bern-checks li{ grid-template-columns:1fr; gap:4px; } }
+.hgr-m-bern-rule{ font-family:'IBM Plex Mono',monospace; font-size:11.5px; font-weight:700; color:var(--hgr-m-paper); display:flex; flex-direction:column; gap:2px; }
+.hgr-m-bern-rule span{ font-family:'IBM Plex Sans',sans-serif; font-weight:400; font-size:11.5px; color:var(--hgr-m-paper-dim); }
+.hgr-m-bern-badge{ font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:700; text-align:center; padding:3px 0; border-radius:2px; }
+.hgr-m-bern-badge-PASS{ background:#DCFCE7; color:#166534; }
+.hgr-m-bern-badge-WARN{ background:#FDF3E3; color:var(--hgr-m-amber-bright); }
+.hgr-m-bern-badge-FAIL{ background:#FDE8E6; color:#C0392B; }
+.hgr-m-bern-badge-INFO{ background:var(--hgr-m-navy-panel-2); color:var(--hgr-m-paper-dim); }
+.hgr-m-bern-message{ font-size:12.5px; line-height:1.6; color:var(--hgr-m-paper); }
+.hgr-m-bern-message em{ color:var(--hgr-m-paper-dim); }
+.hgr-m-bern-reasoning{ grid-column:1 / -1; font-size:11.5px; line-height:1.5; color:var(--hgr-m-paper-dim); border-top:1px dashed var(--hgr-m-hairline); padding-top:6px; }
+.hgr-m-run-title{ display:flex; align-items:baseline; flex-wrap:wrap; gap:6px 14px; margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid var(--hgr-m-blue-line); }
+.hgr-m-run-title-code{ font-family:'IBM Plex Mono',monospace; font-size:13px; font-weight:700; letter-spacing:.04em; color:var(--hgr-m-blue-bright); }
+.hgr-m-run-title h3{ font-size:clamp(20px,2.4vw,26px); margin:0; color:var(--hgr-m-paper); }
+.hgr-m-run-title-date{ margin-left:auto; font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--hgr-m-paper-dim); }
 .hgr-m-usage-table{
   width:100%; border-collapse:collapse; margin:0 0 20px; background:var(--hgr-m-navy-deep);
   border:1px solid var(--hgr-m-hairline); font-size:13px;
@@ -3677,9 +3854,9 @@ const HGR_MISSION_CSS = `
 .hgr-m-dash-confidence-label-row{ display:flex; align-items:center; justify-content:center; gap:6px; margin-top:6px; }
 .hgr-m-dash-bernoulli-link{
   display:inline-flex; align-items:center; gap:6px; margin-top:10px; font-family:'IBM Plex Mono',monospace;
-  font-size:12.5px; font-weight:700; color:#160F2E; text-decoration:none;
+  font-size:12.5px; font-weight:700; color:#FFFFFF; text-decoration:none;
   background:var(--hgr-m-bernoulli); border:1px solid var(--hgr-m-bernoulli); border-radius:2px;
-  padding:9px 16px; white-space:nowrap; box-shadow:0 0 14px rgba(155,127,232,.45);
+  padding:9px 16px; white-space:nowrap; box-shadow:0 0 10px rgba(122,91,214,.35);
   transition:background .2s, box-shadow .2s;
 }
 .hgr-m-dash-bernoulli-link:hover{

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useHangarSession } from "@/lib/the-hangar/session";
 import { supabase } from "@/integrations/supabase/client";
@@ -106,7 +106,7 @@ function getActiveStage(flow: ConceptFlowState): StageKey | "done" {
 const CONCEPT_STATUS_LABEL: Record<string, string> = {
   draft: "Draft",
   processing: "Processing",
-  spec_ready: "Spec Ready",
+  spec_ready: "Concept Ready",
   finalized: "Finalized",
   error: "Error",
 };
@@ -222,7 +222,20 @@ function StageUsageTable({ flow }: { flow: ConceptFlowState }) {
   const totalInput = done.reduce((n, r) => n + r.inputTokens, 0);
   const totalOutput = done.reduce((n, r) => n + r.outputTokens, 0);
   const partial = !!flow.persistedUsage && !flow.persistedUsage.complete;
+  // Collapsed by default -- the header still shows the totals, so the
+  // per-stage breakdown is one click away without pushing the concept down.
   return (
+    <details className="hgr-c-usage-details">
+      <summary title="LLM requests and tokens per stage. Cost is an estimate in INR at a fixed USD rate, not a bill.">
+        <span className="hgr-c-usage-details-label">Requests &amp; tokens</span>
+        <span className="hgr-c-usage-details-totals">
+          {partial ? "≥ " : ""}
+          {totalRequests} req · {(totalInput + totalOutput).toLocaleString()} tokens ·{" "}
+          {partial ? "≥ " : "~"}
+          {formatCostInr(estimateCostUsd(totalInput, totalOutput))}
+        </span>
+      </summary>
+    <TelemetryBar telemetry={computeTelemetry(flow)} />
     <table
       className="hgr-c-usage-table"
       title="LLM requests and tokens per stage. Cost is an estimate in INR at a fixed USD rate, not a bill."
@@ -282,6 +295,7 @@ function StageUsageTable({ flow }: { flow: ConceptFlowState }) {
         </tr>
       </tfoot>
     </table>
+    </details>
   );
 }
 
@@ -383,12 +397,16 @@ function TheHangarConcept() {
   }>({ status: "idle", errorMessage: null });
   const [currentUserEmail, setCurrentUserEmail] = useState<string | null>(null);
   const [llmStatus, setLlmStatus] = useState<"checking" | "live" | "offline">("checking");
+  const [llmProvider, setLlmProvider] = useState<"anthropic" | "groq" | null>(null);
   const [savedSpecs, setSavedSpecs] = useState<MissionListEntry[] | null>(null);
   const [savedSpecsStatus, setSavedSpecsStatus] = useState<"idle" | "loading" | "error">("idle");
   const [savedSpecsExpanded, setSavedSpecsExpanded] = useState(false);
   const [concepts, setConcepts] = useState<ConceptListEntry[] | null>(null);
   const [conceptsStatus, setConceptsStatus] = useState<"idle" | "loading" | "error">("idle");
   const [conceptsExpanded, setConceptsExpanded] = useState(false);
+  // Source-mission side panel next to the concept being viewed. Closed again
+  // whenever the user navigates to a different concept, back, or a new run.
+  const [sourcePanelOpen, setSourcePanelOpen] = useState(false);
   const [selectedSpec, setSelectedSpec] = useState<MissionListEntry | null>(null);
   const [selectedConcept, setSelectedConcept] = useState<ConceptListEntry | null>(null);
   const [planExpanded, setPlanExpanded] = useState(false);
@@ -420,9 +438,15 @@ function TheHangarConcept() {
           headers: { Authorization: `Bearer ${token}` },
         });
         const json = await res.json();
-        if (!cancelled) setLlmStatus(res.ok && json.live ? "live" : "offline");
+        if (!cancelled) {
+          setLlmStatus(res.ok && json.live ? "live" : "offline");
+          setLlmProvider(res.ok && json.live ? json.provider ?? null : null);
+        }
       } catch {
-        if (!cancelled) setLlmStatus("offline");
+        if (!cancelled) {
+          setLlmStatus("offline");
+          setLlmProvider(null);
+        }
       }
     }
     checkLlmStatus();
@@ -497,6 +521,7 @@ function TheHangarConcept() {
     setFlow(INITIAL_FLOW_STATE);
     setSelectedSpec(null);
     setSelectedConcept(null);
+    setSourcePanelOpen(false);
     setFinalizeState({ status: "idle", errorMessage: null });
   }
 
@@ -512,6 +537,7 @@ function TheHangarConcept() {
   // one with no persisted spec at all (failed before spec_ready), is
   // routed to the read-only detail view.
   function resumeConcept(c: ConceptListEntry) {
+    setSourcePanelOpen(false);
     if (
       c.status === "finalized" ||
       !c.candidateConcepts ||
@@ -550,7 +576,9 @@ function TheHangarConcept() {
         errorMessage: null,
       },
     });
-    setSelectedSpec(null);
+    // Point back at the Mission Spec this concept came from, so the
+    // dashboard can trace its source and Ask Bernoulli stays available.
+    setSelectedSpec(savedSpecs?.find((m) => m.missionId === c.sourceMissionId) ?? null);
     setSelectedConcept(null);
     setFinalizeState({ status: "idle", errorMessage: null });
     setPlanExpanded(true);
@@ -747,14 +775,35 @@ function TheHangarConcept() {
                 className={`hgr-c-badge hgr-c-badge-ai hgr-c-badge-ai-${llmStatus}`}
                 title={
                   llmStatus === "checking"
-                    ? "Checking connection to Anthropic…"
+                    ? "Checking connection to Anthropic/Groq…"
                     : llmStatus === "live"
-                      ? "Live — connected to Anthropic (Claude Sonnet 5)"
-                      : "Offline — not connected to Anthropic. Stage LLM calls will fall back to mock output."
+                      ? llmProvider === "groq"
+                        ? "Live — Anthropic unreachable, falling back to Groq (gpt-oss-120b)"
+                        : "Live — connected to Anthropic (Claude Sonnet 5)"
+                      : "Offline — not connected to Anthropic or Groq. Stage LLM calls will fall back to mock output."
                 }
               >
                 <span className="hgr-c-badge-ai-dot" />
                 AI
+                {llmStatus === "live" && llmProvider === "anthropic" && (
+                  <span className="hgr-c-badge-ai-model">
+                    <svg viewBox="0 0 16 16" width="10" height="10" aria-hidden="true">
+                      <path
+                        d="M8 0 L9.4 6.6 L16 8 L9.4 9.4 L8 16 L6.6 9.4 L0 8 L6.6 6.6 Z"
+                        fill="currentColor"
+                      />
+                    </svg>
+                    Claude
+                  </span>
+                )}
+                {llmStatus === "live" && llmProvider === "groq" && (
+                  <span className="hgr-c-badge-ai-model hgr-c-badge-ai-model-fallback">
+                    <svg viewBox="0 0 16 16" width="10" height="10" aria-hidden="true">
+                      <path d="M9 0 L2 9 L7 9 L6 16 L14 6 L9 6 Z" fill="currentColor" />
+                    </svg>
+                    Groq
+                  </span>
+                )}
               </span>
             </div>
             <div className="hgr-c-hero-row">
@@ -773,12 +822,48 @@ function TheHangarConcept() {
             <div className="hgr-c-kicker">Generate a concept</div>
             <h2 className="hgr-c-sec-title">Turn a finalized spec into ranked concept options.</h2>
             <p className="hgr-c-sec-sub">
-              Runs 4 steps against the real Claude backend — concept ideation, trade-off reasoning,
+              Runs 4 steps against the real TorqWings AI backend — concept ideation, trade-off reasoning,
               ranking &amp; scoring, and persistence. There's no real benchmark database or
-              knowledge-graph yet, so trade-off reasoning is Claude reasoning against your mission's
+              knowledge-graph yet, so trade-off reasoning is TorqWings AI reasoning against your mission's
               own stated KPIs and constraints, not a market lookup — review each stage's findings
               and proceed when you're ready.
             </p>
+
+            {conceptsStatus === "error" && <ListFetchError onRetry={fetchConceptsList} />}
+
+            {concepts && concepts.length > 0 && !selectedConcept && (
+              <ListPanel
+                title={`Your concepts (${concepts.length})`}
+                expanded={conceptsExpanded}
+                onToggleExpanded={() => {
+                  setConceptsExpanded(!conceptsExpanded);
+                  setSavedSpecsExpanded(false);
+                }}
+              >
+                {concepts.map((c) => (
+                  <button
+                    key={c.conceptId}
+                    type="button"
+                    className="hgr-c-list-row"
+                    onClick={() => resumeConcept(c)}
+                  >
+                    <span className="hgr-c-list-row-code">{c.conceptCode}</span>
+                    <span className="hgr-c-list-row-type">
+                      {c.rankedConcepts?.[0]?.conceptName ?? "—"}
+                    </span>
+                    <span className={`hgr-c-list-row-status hgr-c-list-row-status-${c.status}`}>
+                      {CONCEPT_STATUS_LABEL[c.status] ?? c.status}
+                    </span>
+                    <span className="hgr-c-list-row-confidence">
+                      {c.confidenceScore !== null ? `${Math.round(c.confidenceScore * 100)}%` : "—"}
+                    </span>
+                    <span className="hgr-c-list-row-date">
+                      {new Date(c.createdAt).toLocaleDateString()}
+                    </span>
+                  </button>
+                ))}
+              </ListPanel>
+            )}
 
             {savedSpecsStatus === "error" && <ListFetchError onRetry={fetchSavedSpecs} />}
 
@@ -787,9 +872,12 @@ function TheHangarConcept() {
               savedSpecs.length > 0 &&
               !selectedConcept && (
                 <ListPanel
-                  title={`Your saved specs (${savedSpecs.length})`}
+                  title={`Your saved Mission Specs (${savedSpecs.length})`}
                   expanded={savedSpecsExpanded}
-                  onToggleExpanded={() => setSavedSpecsExpanded((v) => !v)}
+                  onToggleExpanded={() => {
+                    setSavedSpecsExpanded(!savedSpecsExpanded);
+                    setConceptsExpanded(false);
+                  }}
                 >
                   {savedSpecs.map((m) => (
                     <button
@@ -823,61 +911,42 @@ function TheHangarConcept() {
               </p>
             )}
 
-            {conceptsStatus === "error" && <ListFetchError onRetry={fetchConceptsList} />}
-
-            {concepts && concepts.length > 0 && !selectedConcept && (
-              <ListPanel
-                title={`Your concepts (${concepts.length})`}
-                expanded={conceptsExpanded}
-                onToggleExpanded={() => setConceptsExpanded((v) => !v)}
-              >
-                {concepts.map((c) => (
-                  <button
-                    key={c.conceptId}
-                    type="button"
-                    className="hgr-c-list-row"
-                    onClick={() => resumeConcept(c)}
-                  >
-                    <span className="hgr-c-list-row-code">{c.conceptCode}</span>
-                    <span className="hgr-c-list-row-type">
-                      {c.rankedConcepts?.[0]?.conceptName ?? "—"}
-                    </span>
-                    <span className={`hgr-c-list-row-status hgr-c-list-row-status-${c.status}`}>
-                      {CONCEPT_STATUS_LABEL[c.status] ?? c.status}
-                    </span>
-                    <span className="hgr-c-list-row-confidence">
-                      {c.confidenceScore !== null ? `${Math.round(c.confidenceScore * 100)}%` : "—"}
-                    </span>
-                    <span className="hgr-c-list-row-date">
-                      {new Date(c.createdAt).toLocaleDateString()}
-                    </span>
-                  </button>
-                ))}
-              </ListPanel>
-            )}
-
             {selectedConcept ? (
-              <PastConceptDetail
-                concept={selectedConcept}
-                onBack={() => setSelectedConcept(null)}
-              />
+              <SourceMissionSplit
+                open={sourcePanelOpen}
+                missionId={selectedConcept.sourceMissionId}
+                missions={savedSpecs}
+                onClose={() => setSourcePanelOpen(false)}
+              >
+                <PastConceptDetail
+                  concept={selectedConcept}
+                  missions={savedSpecs}
+                  sourceOpen={sourcePanelOpen}
+                  onToggleSource={() => setSourcePanelOpen(!sourcePanelOpen)}
+                  onBack={() => {
+                    setSelectedConcept(null);
+                    setSourcePanelOpen(false);
+                  }}
+                />
+              </SourceMissionSplit>
             ) : (
-              <div className={isIdle ? "hgr-c-collapsible" : undefined}>
-                {isIdle && (
-                  <button
-                    type="button"
-                    className="hgr-c-collapsible-title"
-                    onClick={() => setPlanExpanded((v) => !v)}
-                    aria-expanded={planExpanded}
-                  >
-                    <span>Generate a concept</span>
-                    <span className={`hgr-c-arrow${planExpanded ? " hgr-c-arrow-open" : ""}`}>
-                      ▸
-                    </span>
-                  </button>
-                )}
+              <div>
                 {(!isIdle || planExpanded) && (
-                  <div className={isIdle ? "hgr-c-collapsible-body" : undefined}>
+                  <div>
+                    {/* A generated concept doesn't need the four-step
+                        tracker any more -- its code and name become the
+                        title, followed by usage, then the details. */}
+                    {activeStage === "done" && flow.stage4.result ? (
+                      <div className="hgr-c-concept-title">
+                        <span className="hgr-c-concept-title-code">{flow.stage4.result.conceptCode}</span>
+                        <h3>{flow.stage4.result.rankedConcepts[0]?.conceptName ?? "Concept"}</h3>
+                        {flow.generatedAt && (
+                          <span className="hgr-c-concept-title-date">
+                            Generated {formatGeneratedAt(flow.generatedAt)}
+                          </span>
+                        )}
+                      </div>
+                    ) : (
                     <div className="hgr-c-stage-tracker">
                       {STAGE_ORDER.map((key) => {
                         const complete =
@@ -897,6 +966,7 @@ function TheHangarConcept() {
                         );
                       })}
                     </div>
+                    )}
 
                     {(flow.stage1.result || flow.persistedUsage) && <StageUsageTable flow={flow} />}
 
@@ -926,7 +996,7 @@ function TheHangarConcept() {
                                   </div>
                                 ) : (
                                   <p className="hgr-c-status-idle">
-                                    Select a saved spec above to begin generating concepts.
+                                    Select a saved Mission Spec above to begin generating concepts.
                                   </p>
                                 )}
                                 {flow.stage1.status === "error" && (
@@ -1015,16 +1085,25 @@ function TheHangarConcept() {
                     )}
 
                     {activeStage === "done" && flow.stage4.result && (
+                      <SourceMissionSplit
+                        open={sourcePanelOpen}
+                        missionId={selectedSpec?.missionId ?? null}
+                        missions={savedSpecs}
+                        onClose={() => setSourcePanelOpen(false)}
+                      >
                       <ConceptDashboard
                         result={flow.stage4.result}
                         sourceMissionId={selectedSpec?.missionId ?? null}
+                        missions={savedSpecs}
+                        sourceOpen={sourcePanelOpen}
+                        onToggleSource={() => setSourcePanelOpen(!sourcePanelOpen)}
                         generatedAt={flow.generatedAt}
-                        telemetry={computeTelemetry(flow)}
                         onStartNew={resetFlow}
                         onEditAndRegenerate={editAndRegenerate}
                         finalizeState={finalizeState}
                         onSaveAsFinal={saveAsFinal}
                       />
+                      </SourceMissionSplit>
                     )}
                   </div>
                 )}
@@ -1046,7 +1125,7 @@ function ListPanel({
   title: string;
   expanded: boolean;
   onToggleExpanded: () => void;
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   return (
     <div className="hgr-c-collapsible" style={{ marginBottom: 20 }}>
@@ -1313,11 +1392,304 @@ function RankedConceptsSection({ rankedConcepts }: { rankedConcepts: RankedConce
   );
 }
 
+// Latest saved Bernoulli review of this concept's own output (BERN-C01-C04,
+// stored with source_bay = 'concept'), read-only. A finalized concept can't
+// run a new review, so this only ever shows what was run before finalizing.
+// Shape mirrors bernoulliAgentPipeline.ts's BernoulliReviewResponse --
+// duplicated, same client/server type-duplication convention as the rest
+// of this page.
+interface SavedBernoulliCheck {
+  ruleId: string;
+  ruleName?: string;
+  status: "PASS" | "WARN" | "FAIL" | "INFO";
+  message: string;
+  sourceWasMock: boolean;
+  reasoning?: string;
+}
+interface SavedBernoulliReview {
+  reviewCode: string;
+  verdict: "PASS" | "WARN" | "FAIL";
+  confidenceScore: number;
+  createdAt: string;
+  checks: SavedBernoulliCheck[];
+  usage?: { requests: number; inputTokens: number; outputTokens: number; estimatedCostUsd: number };
+}
+
+const CONCEPT_BERN_RULE_NAMES: Record<string, string> = {
+  "BERN-C01": "Vehicle-Class Consistency",
+  "BERN-C02": "Speed Feasibility per Concept",
+  "BERN-C03": "Ranking Coherence",
+  "BERN-C04": "Physical Feasibility per Concept",
+};
+
+function SavedBernoulliReport({ missionId, conceptId }: { missionId: string; conceptId: string }) {
+  const [state, setState] = useState<
+    { status: "loading" } | { status: "none" } | { status: "error" } | { status: "ready"; review: SavedBernoulliReview }
+  >({ status: "loading" });
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase.auth.getSession();
+      const token = data.session?.access_token;
+      if (!token) {
+        if (!cancelled) setState({ status: "error" });
+        return;
+      }
+      try {
+        const qs = `missionId=${encodeURIComponent(missionId)}&conceptId=${encodeURIComponent(conceptId)}`;
+        const res = await fetch(`/api/hangar/bernoulli-review?${qs}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const json = (await res.json()) as SavedBernoulliReview | null;
+        if (!cancelled) setState(json ? { status: "ready", review: json } : { status: "none" });
+      } catch {
+        if (!cancelled) setState({ status: "error" });
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [missionId, conceptId]);
+
+  return (
+    <div className="hgr-c-dash-section hgr-c-bern">
+      <h4>Bernoulli report</h4>
+      {state.status === "loading" && <p className="hgr-c-dash-empty">Loading the saved Bernoulli report…</p>}
+      {state.status === "error" && <p className="hgr-c-dash-empty">Couldn't load the Bernoulli report.</p>}
+      {state.status === "none" && (
+        <p className="hgr-c-dash-empty">
+          No Bernoulli report was run on this concept before it was finalized.
+        </p>
+      )}
+      {state.status === "ready" && (
+        <>
+          <div className="hgr-c-bern-summary">
+            <span className={`hgr-c-bern-verdict hgr-c-bern-verdict-${state.review.verdict}`}>
+              {state.review.verdict}
+            </span>
+            <span className="hgr-c-bern-meta">
+              {Math.round(state.review.confidenceScore * 100)}% confidence · {state.review.reviewCode} · reviewed{" "}
+              {new Date(state.review.createdAt).toLocaleString()}
+            </span>
+            {state.review.usage && state.review.usage.requests > 0 && (
+              <span className="hgr-c-bern-meta" title={describeInrCost(state.review.usage.estimatedCostUsd)}>
+                {state.review.usage.requests} req ·{" "}
+                {(state.review.usage.inputTokens + state.review.usage.outputTokens).toLocaleString()} tokens · ~
+                {formatCostInr(state.review.usage.estimatedCostUsd)}
+              </span>
+            )}
+          </div>
+          <ul className="hgr-c-bern-checks">
+            {state.review.checks.map((c) => (
+              <li key={c.ruleId}>
+                <span className="hgr-c-bern-rule">
+                  {c.ruleId}
+                  <span>{c.ruleName ?? CONCEPT_BERN_RULE_NAMES[c.ruleId] ?? ""}</span>
+                </span>
+                <span className={`hgr-c-bern-badge hgr-c-bern-badge-${c.status}`}>{c.status}</span>
+                <span className="hgr-c-bern-message">
+                  {c.message}
+                  {c.sourceWasMock && <em> -- via TorqWings AI (mock)</em>}
+                </span>
+                {c.reasoning && <span className="hgr-c-bern-reasoning">{c.reasoning}</span>}
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+    </div>
+  );
+}
+
+// "Generated from mission ..." line on a concept's header -- the trace back
+// to the Bay 01 spec it was built from. Looked up in the already-loaded
+// "Your saved Mission Specs" list; falls back to the short id if that
+// mission isn't in the list (e.g. no longer finalized). Clicking it opens
+// the source mission beside the concept (SourceMissionSplit) instead of
+// leaving the page.
+function SourceMissionTrace({
+  missionId,
+  missions,
+  open,
+  onToggle,
+}: {
+  missionId: string | null;
+  missions: MissionListEntry[] | null;
+  open: boolean;
+  onToggle: () => void;
+}) {
+  if (!missionId) return null;
+  const m = missions?.find((x) => x.missionId === missionId) ?? null;
+  return (
+    <button
+      type="button"
+      className={`hgr-c-source-trace${open ? " hgr-c-source-trace-open" : ""}`}
+      onClick={onToggle}
+      aria-expanded={open}
+      title={open ? "Hide the source mission" : "Show the source mission beside this concept"}
+    >
+      <span className="hgr-c-source-trace-label">Generated from mission</span>
+      {m ? (
+        <>
+          <b>{m.missionCode}</b>
+          <span>{m.missionSpecs?.missionType ?? "—"}</span>
+          {m.confidenceScore !== null && <span>{Math.round(m.confidenceScore * 100)}% confidence</span>}
+          <span>created {new Date(m.createdAt).toLocaleDateString()}</span>
+        </>
+      ) : (
+        <b title={missionId}>{missionId.slice(0, 8)}…</b>
+      )}
+      <span className="hgr-c-source-trace-link">{open ? "Hide ◂" : "View mission ▸"}</span>
+    </button>
+  );
+}
+
+// Two-column layout: the concept on the left, its source mission spec on
+// the right. Renders the concept alone when closed, so nothing else in the
+// page layout changes. Stacks vertically on narrow screens.
+function SourceMissionSplit({
+  open,
+  missionId,
+  missions,
+  onClose,
+  children,
+}: {
+  open: boolean;
+  missionId: string | null;
+  missions: MissionListEntry[] | null;
+  onClose: () => void;
+  children: React.ReactNode;
+}) {
+  if (!open || !missionId) return <>{children}</>;
+  return (
+    <div className="hgr-c-split">
+      <div className="hgr-c-split-main">{children}</div>
+      <SourceMissionPanel missionId={missionId} missions={missions} onClose={onClose} />
+    </div>
+  );
+}
+
+function SourceMissionPanel({
+  missionId,
+  missions,
+  onClose,
+}: {
+  missionId: string;
+  missions: MissionListEntry[] | null;
+  onClose: () => void;
+}) {
+  const m = missions?.find((x) => x.missionId === missionId) ?? null;
+  const specRows: [string, string | null | undefined][] = m?.missionSpecs
+    ? [
+        ["Mission type", m.missionSpecs.missionType],
+        ["Domain", m.missionSpecs.domain],
+        ["Vertical", m.missionSpecs.vertical],
+        ["Vehicle class", m.missionSpecs.vehicleClass],
+        ["Phase", m.missionSpecs.phase],
+        ["Environment", m.missionSpecs.operatingEnvironment],
+      ]
+    : [];
+  return (
+    <aside className="hgr-c-source-panel" aria-label="Source mission">
+      <div className="hgr-c-source-panel-head">
+        <div>
+          <div className="hgr-c-source-panel-kicker">Source mission · Bay 01</div>
+          <div className="hgr-c-source-panel-code">{m?.missionCode ?? `${missionId.slice(0, 8)}…`}</div>
+        </div>
+        <button type="button" className="hgr-c-source-panel-close" onClick={onClose} aria-label="Close source mission">
+          ✕
+        </button>
+      </div>
+
+      {!m ? (
+        <p className="hgr-c-source-panel-empty">
+          This mission isn't in your saved Mission Specs anymore, so its details can't be shown here.
+        </p>
+      ) : (
+        <>
+          {m.confidenceScore !== null && (
+            <div className="hgr-c-source-panel-confidence">
+              {Math.round(m.confidenceScore * 100)}% confidence · created {new Date(m.createdAt).toLocaleDateString()}
+            </div>
+          )}
+          {/* The brief exactly as the user submitted it in Bay 01, before any
+              extraction -- so the concept can be read against what was
+              actually asked for, not only the processed spec below. */}
+          <section className="hgr-c-source-panel-brief">
+            <h5>Mission brief · as submitted</h5>
+            {m.briefText ? (
+              <blockquote>{m.briefText}</blockquote>
+            ) : (
+              <p className="hgr-c-source-panel-empty">
+                No original brief text was recorded for this mission.
+              </p>
+            )}
+          </section>
+          {specRows.length > 0 && (
+            <dl className="hgr-c-source-panel-specs">
+              {specRows
+                .filter(([, v]) => v)
+                .map(([k, v]) => (
+                  <div key={k}>
+                    <dt>{k}</dt>
+                    <dd>{v}</dd>
+                  </div>
+                ))}
+            </dl>
+          )}
+          {m.summary && (
+            <section className="hgr-c-source-panel-section">
+              <h5>Summary</h5>
+              <p>{m.summary}</p>
+            </section>
+          )}
+          {m.kpis && m.kpis.length > 0 && (
+            <section className="hgr-c-source-panel-section">
+              <h5>KPIs ({m.kpis.length})</h5>
+              <ul>
+                {m.kpis.map((k) => (
+                  <li key={k.name}>
+                    <span>{k.name}</span>
+                    <b>
+                      {k.target} {k.unit}
+                    </b>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+          {m.constraints && m.constraints.length > 0 && (
+            <section className="hgr-c-source-panel-section">
+              <h5>Constraints ({m.constraints.length})</h5>
+              <ul>
+                {m.constraints.map((c) => (
+                  <li key={c.name}>
+                    <span>{c.name}</span>
+                    <b>{c.value}</b>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+        </>
+      )}
+
+      <Link to="/the-hangar/mission" className="hgr-c-source-panel-open">
+        Open in Bay 01 →
+      </Link>
+    </aside>
+  );
+}
+
 function ConceptDashboard({
   result,
   sourceMissionId,
+  missions,
+  sourceOpen,
+  onToggleSource,
   generatedAt,
-  telemetry,
   onStartNew,
   onEditAndRegenerate,
   finalizeState,
@@ -1325,28 +1697,24 @@ function ConceptDashboard({
 }: {
   result: Stage4Result;
   sourceMissionId: string | null;
+  missions: MissionListEntry[] | null;
+  sourceOpen: boolean;
+  onToggleSource: () => void;
   generatedAt: string | null;
-  telemetry: ConceptTelemetry | null;
   onStartNew: () => void;
   onEditAndRegenerate: () => void;
   finalizeState: { status: "idle" | "saving" | "saved" | "error"; errorMessage: string | null };
   onSaveAsFinal: () => void;
 }) {
-  const top = result.rankedConcepts[0];
   return (
     <div className="hgr-c-dash">
-      <TelemetryBar telemetry={telemetry} />
-
       <div className="hgr-c-dash-header">
         <div>
-          <div className="hgr-c-dash-badge">Spec Ready</div>
-          <h3>{top?.conceptName ?? result.conceptCode}</h3>
-          <div className="hgr-c-dash-id">
-            {result.conceptCode}
-            {generatedAt && (
-              <span className="hgr-c-dash-generated-at"> · Generated {formatGeneratedAt(generatedAt)}</span>
-            )}
-          </div>
+          {/* Name, code and generated date now sit in the page title above
+              (hgr-c-concept-title), so the header carries only the status,
+              source trace, confidence and Ask Bernoulli. */}
+          <div className="hgr-c-dash-badge">Concept Ready</div>
+          <SourceMissionTrace missionId={sourceMissionId} missions={missions} open={sourceOpen} onToggle={onToggleSource} />
         </div>
         <div className="hgr-c-dash-confidence">
           <div className="hgr-c-dash-confidence-num">
@@ -1356,7 +1724,7 @@ function ConceptDashboard({
           {sourceMissionId && (
             <Link
               to="/the-hangar/bernoulli"
-              search={{ source: "concept", missionId: sourceMissionId, sourceId: "" }}
+              search={{ source: "concept", missionId: sourceMissionId, sourceId: result.conceptId }}
               className="hgr-c-dash-bernoulli-link"
               style={
                 finalizeState.status === "saved" ? { pointerEvents: "none", opacity: 0.4 } : undefined
@@ -1365,7 +1733,7 @@ function ConceptDashboard({
               title={
                 finalizeState.status === "saved"
                   ? "This concept is finalized — a physics check on a locked spec isn't useful groundwork anymore."
-                  : "Sanity-check this concept's source mission spec against conservation laws and aerospace empiricals."
+                  : "Physics-check these concepts against the mission they were generated for."
               }
             >
               Ask Bernoulli →
@@ -1421,7 +1789,7 @@ function ConceptDashboard({
         {sourceMissionId && (
           <Link
             to="/the-hangar/bernoulli"
-            search={{ source: "concept", missionId: sourceMissionId, sourceId: "" }}
+            search={{ source: "concept", missionId: sourceMissionId, sourceId: result.conceptId }}
             className="hgr-c-btn hgr-c-dash-bernoulli-link"
             style={
               finalizeState.status === "saved" ? { pointerEvents: "none", opacity: 0.4 } : undefined
@@ -1430,7 +1798,7 @@ function ConceptDashboard({
             title={
               finalizeState.status === "saved"
                 ? "This concept is finalized — a physics check on a locked spec isn't useful groundwork anymore."
-                : "Sanity-check this concept's source mission spec against conservation laws and aerospace empiricals."
+                : "Physics-check these concepts against the mission they were generated for."
             }
           >
             Ask Bernoulli →
@@ -1450,7 +1818,19 @@ function ConceptDashboard({
 // RankedConceptsSection so a historical spec looks the same as one you
 // just generated. No Save-as-final/Edit-and-regenerate here, same
 // reasoning as Mission Agent's PastMissionDetail.
-function PastConceptDetail({ concept, onBack }: { concept: ConceptListEntry; onBack: () => void }) {
+function PastConceptDetail({
+  concept,
+  missions,
+  sourceOpen,
+  onToggleSource,
+  onBack,
+}: {
+  concept: ConceptListEntry;
+  missions: MissionListEntry[] | null;
+  sourceOpen: boolean;
+  onToggleSource: () => void;
+  onBack: () => void;
+}) {
   const hasSpec = concept.rankedConcepts && concept.rankedConcepts.length > 0;
   return (
     <div className="hgr-c-dash">
@@ -1464,6 +1844,7 @@ function PastConceptDetail({ concept, onBack }: { concept: ConceptListEntry; onB
             {concept.conceptCode}
             <span className="hgr-c-dash-generated-at"> · Generated {formatGeneratedAt(concept.createdAt)}</span>
           </div>
+          <SourceMissionTrace missionId={concept.sourceMissionId} missions={missions} open={sourceOpen} onToggle={onToggleSource} />
         </div>
         {concept.confidenceScore !== null && (
           <div className="hgr-c-dash-confidence">
@@ -1474,7 +1855,7 @@ function PastConceptDetail({ concept, onBack }: { concept: ConceptListEntry; onB
             {hasSpec && (
               <Link
                 to="/the-hangar/bernoulli"
-                search={{ source: "concept", missionId: concept.sourceMissionId, sourceId: "" }}
+                search={{ source: "concept", missionId: concept.sourceMissionId, sourceId: concept.conceptId }}
                 className="hgr-c-dash-bernoulli-link"
                 style={
                   concept.status === "finalized"
@@ -1485,7 +1866,7 @@ function PastConceptDetail({ concept, onBack }: { concept: ConceptListEntry; onB
                 title={
                   concept.status === "finalized"
                     ? "This concept is finalized — a physics check on a locked spec isn't useful groundwork anymore."
-                    : "Sanity-check this concept's source mission spec against conservation laws and aerospace empiricals."
+                    : "Physics-check these concepts against the mission they were generated for."
                 }
               >
                 Ask Bernoulli →
@@ -1506,6 +1887,9 @@ function PastConceptDetail({ concept, onBack }: { concept: ConceptListEntry; onB
             {CONCEPT_STATUS_LABEL[concept.status] ?? concept.status}".
           </p>
         </div>
+      )}
+      {hasSpec && (
+        <SavedBernoulliReport missionId={concept.sourceMissionId} conceptId={concept.conceptId} />
       )}
       <div className="hgr-c-dash-actions">
         <button type="button" className="hgr-c-btn hgr-c-btn-ghost" onClick={onBack}>
@@ -1531,13 +1915,16 @@ function PastConceptDetail({ concept, onBack }: { concept: ConceptListEntry; onB
 
 const HGR_CONCEPT_CSS = `
 .hgr-c{
-  --hgr-c-navy-deep:#08131F; --hgr-c-navy-panel:#0F2136;
-  --hgr-c-blue-line:#3E7CA6; --hgr-c-blue-bright:#6FB4E0;
-  --hgr-c-amber:#E8A33D; --hgr-c-amber-bright:#F6C374;
-  --hgr-c-paper:#ECEFF3; --hgr-c-paper-dim:#8FA5BB;
-  --hgr-c-green:#5FBF8F; --hgr-c-red:#E0715A;
-  --hgr-c-bernoulli:#9B7FE8; --hgr-c-bernoulli-bright:#B6A2F2;
-  --hgr-c-grid:rgba(111,180,224,0.08); --hgr-c-hairline:rgba(111,180,224,0.20);
+  /* Light theme matching /the-hangar/agents -- same token swap as Bay 01
+     (see HGR_MISSION_CSS): white page, blue grid, light panels, dark text,
+     amber-bright darkened since it's only used as text. */
+  --hgr-c-navy-deep:#FFFFFF; --hgr-c-navy-panel:#F2F7FB; --hgr-c-navy-panel-2:#E4EEF7;
+  --hgr-c-blue-line:#3E7CA6; --hgr-c-blue-bright:#1C74B8;
+  --hgr-c-amber:#E8A33D; --hgr-c-amber-bright:#B4690E;
+  --hgr-c-paper:#12222F; --hgr-c-paper-dim:#4F6B80; --hgr-c-ink:#0A1826;
+  --hgr-c-green:#2E8B57; --hgr-c-red:#C0392B;
+  --hgr-c-bernoulli:#7A5BD6; --hgr-c-bernoulli-bright:#6A4BC4;
+  --hgr-c-grid:rgba(62,124,166,0.14); --hgr-c-hairline:rgba(62,124,166,0.28);
 
   background:var(--hgr-c-navy-deep); color:var(--hgr-c-paper); font-family:'IBM Plex Sans', sans-serif;
   background-image:linear-gradient(var(--hgr-c-grid) 1px, transparent 1px), linear-gradient(90deg, var(--hgr-c-grid) 1px, transparent 1px);
@@ -1550,7 +1937,10 @@ const HGR_CONCEPT_CSS = `
 .hgr-c-wrap{ max-width:1180px; margin:0 auto; padding:0 32px; }
 .hgr-c a{ color:inherit; }
 
-.hgr-c nav{ border-bottom:1px solid var(--hgr-c-hairline); position:sticky; top:0; background:rgba(8,19,31,0.9); backdrop-filter:blur(8px); z-index:20; }
+.hgr-c nav{ border-bottom:1px solid var(--hgr-c-hairline); position:sticky; top:0; background:rgba(10,24,38,0.92); backdrop-filter:blur(10px); z-index:20;
+  /* Dark nav strip on the light page, same as the agents page's nav. */
+  color:var(--hgr-c-paper);
+  --hgr-c-paper:#ECEFF3; --hgr-c-paper-dim:#8FA5BB; --hgr-c-blue-bright:#6FB4E0; --hgr-c-hairline:rgba(111,180,224,0.22); }
 .hgr-c nav .hgr-c-wrap{ display:flex; align-items:center; justify-content:space-between; height:68px; }
 .hgr-c-crumbs{ font-size:14px; color:var(--hgr-c-paper-dim); display:flex; align-items:center; gap:8px; }
 .hgr-c-crumbs a{ text-decoration:none; color:var(--hgr-c-paper-dim); }
@@ -1561,7 +1951,7 @@ const HGR_CONCEPT_CSS = `
 .hgr-c-exit:hover{ color:var(--hgr-c-paper); border-color:var(--hgr-c-blue-bright); }
 
 .hgr-c main{ padding-bottom:100px; }
-.hgr-c-hero{ padding:56px 0 20px; border-bottom:1px solid var(--hgr-c-hairline); position:relative; overflow:hidden; }
+.hgr-c-hero{ padding:56px 0 20px; border-bottom:1px solid var(--hgr-c-blue-line); position:relative; overflow:hidden; }
 .hgr-c-doors{ position:absolute; inset:0; z-index:5; display:flex; pointer-events:none; }
 .hgr-c-door{ flex:1; background: repeating-linear-gradient(90deg, #0C1E30 0 78px, #08131F 78px 80px); position:relative; }
 .hgr-c-door::after{ content:""; position:absolute; top:0; bottom:0; width:2px; background:var(--hgr-c-blue-line); opacity:.5; }
@@ -1574,15 +1964,17 @@ const HGR_CONCEPT_CSS = `
 @media (prefers-reduced-motion: reduce){ .hgr-c-doors{ display:none; } }
 .hgr-c-status-row{ display:flex; align-items:center; gap:12px; margin-bottom:22px; flex-wrap:wrap; }
 .hgr-c-badge{ font-family:'IBM Plex Mono',monospace; font-size:11.5px; letter-spacing:.1em; text-transform:uppercase; padding:6px 13px; border-radius:2px; display:inline-flex; align-items:center; gap:8px; }
-.hgr-c-badge-bay{ color:var(--hgr-c-paper-dim); border:1px solid var(--hgr-c-hairline); }
+.hgr-c-badge-bay{ color:var(--hgr-c-paper); font-weight:700; border:1px solid var(--hgr-c-blue-line); background:var(--hgr-c-navy-panel-2); }
 .hgr-c-badge-ai{ font-weight:700; }
 .hgr-c-badge-ai-dot{ width:7px; height:7px; border-radius:50%; flex-shrink:0; }
-.hgr-c-badge-ai-checking{ color:var(--hgr-c-paper-dim); border:1px solid var(--hgr-c-hairline); }
+.hgr-c-badge-ai-checking{ color:var(--hgr-c-paper); border:1px solid var(--hgr-c-blue-line); background:var(--hgr-c-navy-panel-2); }
 .hgr-c-badge-ai-checking .hgr-c-badge-ai-dot{ background:var(--hgr-c-paper-dim); }
-.hgr-c-badge-ai-live{ color:#4ADE80; border:1px solid rgba(74,222,128,.4); background:rgba(74,222,128,.08); }
-.hgr-c-badge-ai-live .hgr-c-badge-ai-dot{ background:#4ADE80; box-shadow:0 0 6px rgba(74,222,128,.8); animation:hgr-c-ai-pulse 2s ease-in-out infinite; }
-.hgr-c-badge-ai-offline{ color:var(--hgr-c-amber); border:1px solid rgba(232,163,61,.4); background:rgba(232,163,61,.08); }
+.hgr-c-badge-ai-live{ color:#166534; border:1px solid #16A34A; background:#DCFCE7; }
+.hgr-c-badge-ai-live .hgr-c-badge-ai-dot{ background:#16A34A; box-shadow:0 0 6px rgba(22,163,74,.7); animation:hgr-c-ai-pulse 2s ease-in-out infinite; }
+.hgr-c-badge-ai-offline{ color:var(--hgr-c-amber-bright); border:1px solid var(--hgr-c-amber); background:#FDF3E3; }
 .hgr-c-badge-ai-offline .hgr-c-badge-ai-dot{ background:var(--hgr-c-amber); box-shadow:0 0 6px rgba(232,163,61,.6); }
+.hgr-c-badge-ai-model{ display:inline-flex; align-items:center; gap:3px; margin-left:6px; padding-left:6px; border-left:1px solid rgba(22,101,52,.35); font-weight:600; }
+.hgr-c-badge-ai-model-fallback{ border-left-color:rgba(180,105,14,.4); color:var(--hgr-c-amber-bright); }
 @keyframes hgr-c-ai-pulse{ 0%,100%{ opacity:1; } 50%{ opacity:.4; } }
 .hgr-c-hero-row{ display:flex; align-items:center; gap:48px; flex-wrap:wrap; }
 @media(max-width:760px){ .hgr-c-hero-row{ flex-direction:column; align-items:flex-start; gap:16px; } }
@@ -1601,15 +1993,15 @@ const HGR_CONCEPT_CSS = `
 .hgr-c-btn{ font-family:'IBM Plex Mono',monospace; font-size:13px; padding:12px 22px; border-radius:2px; display:inline-flex; align-items:center; gap:8px; text-decoration:none; border:1px solid transparent; cursor:pointer; background:none; }
 .hgr-c-btn-ghost{ border:1px solid var(--hgr-c-hairline); color:var(--hgr-c-paper-dim); }
 .hgr-c-btn-ghost:hover{ color:var(--hgr-c-paper); border-color:var(--hgr-c-blue-bright); }
-.hgr-c-btn-amber{ background:var(--hgr-c-amber); color:var(--hgr-c-navy-deep); font-weight:600; }
-.hgr-c-btn-amber:hover{ background:var(--hgr-c-amber-bright); }
+.hgr-c-btn-amber{ background:var(--hgr-c-amber); color:var(--hgr-c-ink); font-weight:600; }
+.hgr-c-btn-amber:hover{ background:#F6C374; }
 .hgr-c-btn:disabled{ opacity:.4; cursor:not-allowed; }
 .hgr-c-btn:disabled:hover{ color:var(--hgr-c-paper-dim); border-color:var(--hgr-c-hairline); }
 
-/* ── Collapsible panels (Your saved specs / Your concepts / Generate a concept) ── */
+/* ── Collapsible panels (Your concepts / Your saved Mission Specs) ── */
 .hgr-c-collapsible{ border:1px solid var(--hgr-c-hairline); background:var(--hgr-c-navy-panel); border-radius:2px; margin-bottom:32px; }
-.hgr-c-collapsible-title{ display:flex; align-items:center; justify-content:space-between; width:100%; font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--hgr-c-paper-dim); padding:14px 18px; border:none; background:none; cursor:pointer; }
-.hgr-c-collapsible-title:hover{ color:var(--hgr-c-paper); }
+.hgr-c-collapsible-title{ display:flex; align-items:center; justify-content:space-between; width:100%; font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.08em; text-transform:uppercase; font-weight:700; color:var(--hgr-c-paper); padding:14px 18px; border:none; background:var(--hgr-c-navy-panel-2); border-left:3px solid var(--hgr-c-blue-bright); cursor:pointer; }
+.hgr-c-collapsible-title:hover{ color:var(--hgr-c-blue-bright); }
 .hgr-c-collapsible-body{ padding: 0 0 0; }
 .hgr-c-arrow{ display:inline-block; font-size:11px; transition:transform .15s; }
 .hgr-c-arrow-open{ transform:rotate(90deg); }
@@ -1628,18 +2020,34 @@ const HGR_CONCEPT_CSS = `
 .hgr-c-list-row-date{ font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--hgr-c-paper-dim); text-align:right; }
 
 /* ── Stage tracker ── */
-.hgr-c-stage-tracker{ display:flex; gap:1px; background:var(--hgr-c-hairline); border:1px solid var(--hgr-c-hairline); margin-bottom:28px; }
-.hgr-c-stage-tracker-item{ flex:1; background:var(--hgr-c-navy-panel); padding:12px 10px; text-align:center; }
-.hgr-c-stage-tracker-num{ width:24px; height:24px; border-radius:50%; margin:0 auto 6px; display:flex; align-items:center; justify-content:center; font-family:'IBM Plex Mono',monospace; font-size:14px; font-weight:700; border:1.5px solid var(--hgr-c-hairline); color:transparent; transition:.2s; }
-.hgr-c-stage-tracker-label{ font-size:12px; color:var(--hgr-c-paper-dim); }
-.hgr-c-stage-tracker-item-complete{ background:#132A44; }
-.hgr-c-stage-tracker-item-complete .hgr-c-stage-tracker-label{ color:var(--hgr-c-paper); }
-.hgr-c-stage-tracker-item-complete .hgr-c-stage-tracker-num{ background:var(--hgr-c-blue-bright); border-color:var(--hgr-c-blue-bright); color:var(--hgr-c-navy-deep); box-shadow:0 0 10px rgba(111,180,224,0.5); }
-.hgr-c-stage-tracker-item-active{ background:#1B3A57; box-shadow:inset 0 0 0 1px rgba(232,163,61,.4); }
-.hgr-c-stage-tracker-item-active .hgr-c-stage-tracker-label{ color:var(--hgr-c-paper); }
+.hgr-c-stage-tracker{ display:flex; gap:1px; background:var(--hgr-c-blue-line); border:1px solid var(--hgr-c-blue-line); margin-bottom:28px; }
+.hgr-c-stage-tracker-item{ flex:1; background:var(--hgr-c-navy-panel-2); padding:12px 10px; text-align:center; }
+.hgr-c-stage-tracker-num{ width:24px; height:24px; border-radius:50%; margin:0 auto 6px; display:flex; align-items:center; justify-content:center; font-family:'IBM Plex Mono',monospace; font-size:14px; font-weight:700; border:1.5px solid var(--hgr-c-blue-line); background:#FFFFFF; color:transparent; transition:.2s; }
+.hgr-c-stage-tracker-label{ font-size:12.5px; font-weight:600; color:var(--hgr-c-paper); }
+.hgr-c-stage-tracker-item-complete{ background:var(--hgr-c-navy-panel-2); }
+.hgr-c-stage-tracker-item-complete .hgr-c-stage-tracker-num{ background:var(--hgr-c-blue-bright); border-color:var(--hgr-c-blue-bright); color:#FFFFFF; box-shadow:0 0 6px rgba(28,116,184,0.35); }
+.hgr-c-stage-tracker-item-active{ background:#FDF3E3; box-shadow:inset 0 -3px 0 var(--hgr-c-amber); }
+.hgr-c-stage-tracker-item-active .hgr-c-stage-tracker-label{ color:var(--hgr-c-amber-bright); font-weight:700; }
 .hgr-c-stage-tracker-item-active .hgr-c-stage-tracker-num{ border-color:var(--hgr-c-amber); }
+/* Generated concept: code + name as the title, in place of the tracker. */
+.hgr-c-concept-title{ display:flex; align-items:baseline; flex-wrap:wrap; gap:6px 14px; margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid var(--hgr-c-blue-line); }
+.hgr-c-concept-title-code{ font-family:'IBM Plex Mono',monospace; font-size:13px; font-weight:700; letter-spacing:.04em; color:var(--hgr-c-blue-bright); }
+.hgr-c-concept-title h3{ font-size:clamp(20px,2.4vw,26px); margin:0; color:var(--hgr-c-paper); }
+.hgr-c-concept-title-date{ margin-left:auto; font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--hgr-c-paper-dim); }
 
 /* ── Per-stage usage table + export buttons ── */
+.hgr-c-usage-details{ margin:0 0 20px; border:1px solid var(--hgr-c-hairline); border-radius:2px; background:var(--hgr-c-navy-panel); }
+.hgr-c-usage-details > summary{
+  display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+  padding:11px 16px; cursor:pointer; list-style:none;
+  background:var(--hgr-c-navy-panel-2); border-left:3px solid var(--hgr-c-blue-bright);
+}
+.hgr-c-usage-details > summary::-webkit-details-marker{ display:none; }
+.hgr-c-usage-details-label{ font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.08em; text-transform:uppercase; font-weight:700; color:var(--hgr-c-paper); }
+.hgr-c-usage-details-label::before{ content:"▸ "; display:inline-block; transition:transform .15s; }
+.hgr-c-usage-details[open] .hgr-c-usage-details-label::before{ content:"▾ "; }
+.hgr-c-usage-details-totals{ font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--hgr-c-paper-dim); }
+.hgr-c-usage-details .hgr-c-usage-table{ margin:0; border:none; border-top:1px solid var(--hgr-c-hairline); }
 .hgr-c-usage-table{
   width:100%; border-collapse:collapse; margin:0 0 20px; background:var(--hgr-c-navy-deep);
   border:1px solid var(--hgr-c-hairline); font-size:13px;
@@ -1658,17 +2066,19 @@ const HGR_CONCEPT_CSS = `
 .hgr-c-usage-split{ font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--hgr-c-paper-dim); }
 .hgr-c-export{ display:inline-flex; align-items:center; gap:8px; flex-wrap:wrap; }
 .hgr-c-export-label{ font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--hgr-c-paper-dim); }
-.hgr-c-export-error{ font-size:12.5px; color:#ffb4b4; }
+.hgr-c-export-error{ font-size:12.5px; color:#C0392B; }
 
 /* ── Process grid + selected-spec / status panel ── */
 .hgr-c-process-grid{ display:grid; grid-template-columns:1fr 320px; gap:32px; align-items:start; }
 @media(max-width:820px){ .hgr-c-process-grid{ grid-template-columns:1fr; } }
 .hgr-c-selected-spec{ max-width:640px; padding:14px 16px; border:1px solid rgba(111,180,224,.3); border-left:3px solid var(--hgr-c-blue-bright); background:rgba(111,180,224,.09); border-radius:2px; margin-bottom:20px; }
-.hgr-c-selected-spec-label{ display:block; font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--hgr-c-blue-bright); margin-bottom:8px; }
+.hgr-c-selected-spec-label{ display:block; font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--hgr-c-blue-bright); margin-bottom:8px; }
 .hgr-c-selected-spec p{ margin:0 0 14px; font-size:14px; color:var(--hgr-c-paper); line-height:1.6; }
 
-.hgr-c-status-panel{ border:1px solid var(--hgr-c-hairline); background:var(--hgr-c-navy-panel); border-radius:2px; padding:20px; }
-.hgr-c-status-panel-title{ font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--hgr-c-paper-dim); margin-bottom:16px; }
+.hgr-c-status-panel{ border:1px solid var(--hgr-c-hairline); background:var(--hgr-c-navy-panel); border-radius:2px; padding:0 20px 20px; }
+.hgr-c-status-panel-title{ font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.08em; text-transform:uppercase; margin:0 -20px 16px;
+  font-weight:700; color:var(--hgr-c-paper); background:var(--hgr-c-navy-panel-2); line-height:1.2; padding:12px 14px;
+  border-left:3px solid var(--hgr-c-blue-bright); border-top:3px solid var(--hgr-c-amber); }
 .hgr-c-status-idle{ color:var(--hgr-c-paper-dim); font-size:13px; line-height:1.6; margin:0; }
 .hgr-c-status-step{ display:flex; align-items:flex-start; gap:10px; padding:9px 0; }
 .hgr-c-status-icon{ width:18px; height:18px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; margin-top:1px; border-radius:50%; }
@@ -1732,14 +2142,88 @@ const HGR_CONCEPT_CSS = `
 .hgr-c-dash-header h3{ font-size:20px; margin-bottom:6px; }
 .hgr-c-dash-id{ font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--hgr-c-paper-dim); }
 .hgr-c-dash-generated-at{ opacity:.75; }
+/* Saved Bernoulli report on a finalized concept (read-only). */
+.hgr-c-bern{ border-top:3px solid var(--hgr-c-bernoulli); }
+.hgr-c-bern-summary{ display:flex; align-items:center; flex-wrap:wrap; gap:8px 14px; margin-bottom:12px; }
+.hgr-c-bern-verdict{ font-family:'IBM Plex Mono',monospace; font-size:12px; font-weight:700; letter-spacing:.06em; padding:4px 10px; border-radius:2px; }
+.hgr-c-bern-verdict-PASS{ background:#DCFCE7; color:#166534; }
+.hgr-c-bern-verdict-WARN{ background:#FDF3E3; color:var(--hgr-c-amber-bright); }
+.hgr-c-bern-verdict-FAIL{ background:#FDE8E6; color:var(--hgr-c-red); }
+.hgr-c-bern-meta{ font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--hgr-c-paper-dim); }
+.hgr-c-bern-checks{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:1px; background:var(--hgr-c-hairline); border:1px solid var(--hgr-c-hairline); }
+.hgr-c-bern-checks li{ display:grid; grid-template-columns:190px 60px 1fr; gap:10px; align-items:start; background:var(--hgr-c-navy-deep); padding:10px 12px; }
+@media(max-width:760px){ .hgr-c-bern-checks li{ grid-template-columns:1fr; gap:4px; } }
+.hgr-c-bern-rule{ font-family:'IBM Plex Mono',monospace; font-size:11.5px; font-weight:700; color:var(--hgr-c-paper); display:flex; flex-direction:column; gap:2px; }
+.hgr-c-bern-rule span{ font-family:'IBM Plex Sans',sans-serif; font-weight:400; font-size:11.5px; color:var(--hgr-c-paper-dim); }
+.hgr-c-bern-badge{ font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:700; text-align:center; padding:3px 0; border-radius:2px; }
+.hgr-c-bern-badge-PASS{ background:#DCFCE7; color:#166534; }
+.hgr-c-bern-badge-WARN{ background:#FDF3E3; color:var(--hgr-c-amber-bright); }
+.hgr-c-bern-badge-FAIL{ background:#FDE8E6; color:var(--hgr-c-red); }
+.hgr-c-bern-badge-INFO{ background:var(--hgr-c-navy-panel-2); color:var(--hgr-c-paper-dim); }
+.hgr-c-bern-message{ font-size:12.5px; line-height:1.6; color:var(--hgr-c-paper); }
+.hgr-c-bern-message em{ color:var(--hgr-c-paper-dim); }
+.hgr-c-bern-reasoning{ grid-column:1 / -1; font-size:11.5px; line-height:1.5; color:var(--hgr-c-paper-dim); border-top:1px dashed var(--hgr-c-hairline); padding-top:6px; }
+.hgr-c-source-trace{
+  display:flex; align-items:center; flex-wrap:wrap; gap:6px 12px; width:100%; margin-top:12px; padding:8px 12px;
+  font-family:'IBM Plex Sans',sans-serif; font-size:12.5px; text-align:left; color:var(--hgr-c-paper-dim);
+  background:var(--hgr-c-navy-panel-2); border:1px solid transparent; border-left:3px solid var(--hgr-c-blue-bright);
+  border-radius:2px; cursor:pointer; transition:border-color .15s, background .15s;
+}
+.hgr-c-source-trace:hover{ border-color:var(--hgr-c-blue-line); border-left-color:var(--hgr-c-blue-bright); }
+.hgr-c-source-trace-open{ background:#FDF3E3; border-left-color:var(--hgr-c-amber); }
+.hgr-c-source-trace-open:hover{ border-left-color:var(--hgr-c-amber); }
+.hgr-c-source-trace-label{ font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; font-weight:700; color:var(--hgr-c-paper); }
+.hgr-c-source-trace b{ font-family:'IBM Plex Mono',monospace; color:var(--hgr-c-blue-bright); }
+.hgr-c-source-trace-link{ margin-left:auto; font-family:'IBM Plex Mono',monospace; font-size:11.5px; font-weight:700; color:var(--hgr-c-blue-bright); }
+
+/* ── Concept | source mission split ── */
+.hgr-c-split{ display:grid; grid-template-columns:minmax(0,1fr) 360px; gap:20px; align-items:start; }
+.hgr-c-split-main{ min-width:0; }
+@media(max-width:980px){ .hgr-c-split{ grid-template-columns:1fr; } }
+.hgr-c-source-panel{
+  position:sticky; top:84px; max-height:calc(100vh - 100px); overflow-y:auto;
+  background:var(--hgr-c-navy-panel); border:1px solid var(--hgr-c-hairline);
+  border-top:3px solid var(--hgr-c-amber); border-radius:2px; padding:0 18px 18px;
+  animation:hgr-c-panel-in .25s ease both;
+}
+@keyframes hgr-c-panel-in{ from{ opacity:0; transform:translateX(24px); } to{ opacity:1; transform:none; } }
+@media(max-width:980px){ .hgr-c-source-panel{ position:static; max-height:none; } }
+.hgr-c-source-panel-head{
+  display:flex; align-items:flex-start; justify-content:space-between; gap:12px;
+  margin:0 -18px 14px; padding:12px 18px; background:var(--hgr-c-navy-panel-2); border-left:3px solid var(--hgr-c-blue-bright);
+}
+.hgr-c-source-panel-kicker{ font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; font-weight:700; color:var(--hgr-c-paper); }
+.hgr-c-source-panel-code{ font-family:'IBM Plex Mono',monospace; font-size:13px; font-weight:700; color:var(--hgr-c-blue-bright); margin-top:4px; word-break:break-all; }
+.hgr-c-source-panel-close{ background:none; border:1px solid var(--hgr-c-hairline); color:var(--hgr-c-paper-dim); width:26px; height:26px; border-radius:2px; cursor:pointer; flex-shrink:0; }
+.hgr-c-source-panel-close:hover{ color:var(--hgr-c-paper); border-color:var(--hgr-c-blue-bright); }
+.hgr-c-source-panel-confidence{ font-family:'IBM Plex Mono',monospace; font-size:11.5px; font-weight:700; color:var(--hgr-c-amber-bright); margin-bottom:12px; }
+.hgr-c-source-panel-empty{ font-size:13px; color:var(--hgr-c-paper-dim); line-height:1.6; }
+.hgr-c-source-panel-specs{ margin:0 0 14px; display:grid; grid-template-columns:1fr 1fr; gap:8px 12px; }
+.hgr-c-source-panel-specs dt{ font-family:'IBM Plex Mono',monospace; font-size:9.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--hgr-c-paper-dim); }
+.hgr-c-source-panel-specs dd{ margin:2px 0 0; font-size:12.5px; color:var(--hgr-c-paper); }
+.hgr-c-source-panel-section{ border-top:1px dashed var(--hgr-c-hairline); padding:12px 0 4px; }
+.hgr-c-source-panel-section h5{ margin:0 0 8px; font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; font-weight:700; color:var(--hgr-c-paper); }
+.hgr-c-source-panel-section p{ margin:0; font-size:12.5px; line-height:1.6; color:var(--hgr-c-paper-dim); }
+.hgr-c-source-panel-section ul{ list-style:none; margin:0; padding:0; }
+.hgr-c-source-panel-section li{ display:flex; justify-content:space-between; gap:10px; padding:4px 0; font-size:12.5px; color:var(--hgr-c-paper-dim); }
+.hgr-c-source-panel-section li b{ color:var(--hgr-c-paper); font-weight:600; text-align:right; }
+.hgr-c-source-panel-brief{ margin-bottom:14px; }
+.hgr-c-source-panel-brief h5{ margin:0 0 8px; font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; font-weight:700; color:var(--hgr-c-paper); }
+.hgr-c-source-panel-brief blockquote{
+  margin:0; padding:10px 12px; max-height:220px; overflow-y:auto; white-space:pre-wrap;
+  font-size:12.5px; line-height:1.6; color:var(--hgr-c-paper); background:#FFFFFF;
+  border:1px solid var(--hgr-c-hairline); border-left:3px solid var(--hgr-c-amber); border-radius:2px;
+}
+.hgr-c-source-panel-open{ display:inline-block; margin-top:14px; font-family:'IBM Plex Mono',monospace; font-size:12px; font-weight:700; color:var(--hgr-c-blue-bright); text-decoration:none; }
+.hgr-c-source-panel-open:hover{ text-decoration:underline; }
 .hgr-c-dash-confidence{ text-align:center; flex-shrink:0; }
 .hgr-c-dash-confidence-num{ font-family:'Space Grotesk',sans-serif; font-size:32px; font-weight:700; color:var(--hgr-c-amber-bright); line-height:1; }
 .hgr-c-dash-confidence-label{ font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--hgr-c-paper-dim); }
 .hgr-c-dash-bernoulli-link{
   display:inline-flex; align-items:center; gap:6px; margin-top:10px; font-family:'IBM Plex Mono',monospace;
-  font-size:12.5px; font-weight:700; color:#160F2E; text-decoration:none;
+  font-size:12.5px; font-weight:700; color:#FFFFFF; text-decoration:none;
   background:var(--hgr-c-bernoulli); border:1px solid var(--hgr-c-bernoulli); border-radius:2px;
-  padding:9px 16px; white-space:nowrap; box-shadow:0 0 14px rgba(155,127,232,.45);
+  padding:9px 16px; white-space:nowrap; box-shadow:0 0 10px rgba(122,91,214,.35);
   transition:background .2s, box-shadow .2s;
 }
 .hgr-c-dash-bernoulli-link:hover{
@@ -1763,7 +2247,7 @@ const HGR_CONCEPT_CSS = `
 /* ── Ranked concept cards ── */
 .hgr-c-rank-list{ display:flex; flex-direction:column; gap:14px; }
 .hgr-c-rank-card{ display:flex; gap:16px; padding:18px 20px; background:var(--hgr-c-navy-deep); border:1px solid var(--hgr-c-hairline); border-radius:2px; }
-.hgr-c-rank-card-top{ box-shadow:inset 0 0 0 1px rgba(232,163,61,.4); background:#1A1509; }
+.hgr-c-rank-card-top{ box-shadow:inset 0 0 0 1px var(--hgr-c-amber); background:#FDF3E3; }
 .hgr-c-rank-num{ font-family:'Space Grotesk',sans-serif; font-size:22px; font-weight:700; color:var(--hgr-c-paper-dim); flex-shrink:0; width:36px; }
 .hgr-c-rank-card-top .hgr-c-rank-num{ color:var(--hgr-c-amber-bright); }
 .hgr-c-rank-name{ font-size:15px; font-weight:600; margin-bottom:6px; }
