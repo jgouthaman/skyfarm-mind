@@ -1,5 +1,5 @@
 import { callLlmGateway, stripJsonFences } from "./llmGateway.ts";
-import type { GeometryParameters, ComponentSelection } from "./aircraftDesignGeneration.ts";
+import type { GeometryParameters, ComponentSelection } from "./aircraftDesignTypes.ts";
 
 // Bay 04 (CAD Agent) Stage 1's generation step — callLlmGateway +
 // mock-fallback pattern, same as aircraftDesignGeneration.ts.

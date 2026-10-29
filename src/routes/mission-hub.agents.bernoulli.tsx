@@ -76,7 +76,7 @@ interface TargetOption {
 const AGENTS: { num: string; name: string; bay: string; wired: boolean }[] = [
   { num: "01", name: "Mission", bay: "mission", wired: true },
   { num: "02", name: "Concept", bay: "concept", wired: true },
-  { num: "03", name: "Aircraft Design", bay: "aircraft-design", wired: false },
+  { num: "03", name: "Vehicle Design", bay: "aircraft-design", wired: false },
   { num: "04", name: "CAD", bay: "cad", wired: false },
   { num: "05", name: "Flight Dynamics", bay: "simulation", wired: false },
   { num: "06", name: "CFD", bay: "cfd", wired: false },

@@ -407,6 +407,9 @@ function TheHangarConcept() {
   // Source-mission side panel next to the concept being viewed. Closed again
   // whenever the user navigates to a different concept, back, or a new run.
   const [sourcePanelOpen, setSourcePanelOpen] = useState(false);
+  // The concept that carries forward to Bay 03 for the run on screen: the
+  // user's saved choice, or the rank-1 concept by default.
+  const [chosenConceptName, setChosenConceptName] = useState<string | null>(null);
   const [selectedSpec, setSelectedSpec] = useState<MissionListEntry | null>(null);
   const [selectedConcept, setSelectedConcept] = useState<ConceptListEntry | null>(null);
   const [planExpanded, setPlanExpanded] = useState(false);
@@ -522,6 +525,7 @@ function TheHangarConcept() {
     setSelectedSpec(null);
     setSelectedConcept(null);
     setSourcePanelOpen(false);
+    setChosenConceptName(null);
     setFinalizeState({ status: "idle", errorMessage: null });
   }
 
@@ -529,6 +533,9 @@ function TheHangarConcept() {
     resetFlow();
     setSelectedSpec(m);
     setPlanExpanded(true);
+    // The pick is made -- fold both lists so the flow below is in view.
+    setConceptsExpanded(false);
+    setSavedSpecsExpanded(false);
   }
 
   // A concept clicked from "Your concepts" that isn't finalized yet stays
@@ -538,6 +545,10 @@ function TheHangarConcept() {
   // routed to the read-only detail view.
   function resumeConcept(c: ConceptListEntry) {
     setSourcePanelOpen(false);
+    setChosenConceptName(c.selectedConceptName);
+    // The pick is made -- fold both lists so the concept below is in view.
+    setConceptsExpanded(false);
+    setSavedSpecsExpanded(false);
     if (
       c.status === "finalized" ||
       !c.candidateConcepts ||
@@ -707,6 +718,7 @@ function TheHangarConcept() {
       generatedAt: new Date().toISOString(),
       stage4: { status: "complete", result: outcome.data, errorMessage: null },
     }));
+    setChosenConceptName(rankOneConceptName(outcome.data.rankedConcepts));
   }
 
   async function saveAsFinal() {
@@ -819,15 +831,6 @@ function TheHangarConcept() {
 
         <section id="generate-concept">
           <div className="hgr-c-wrap">
-            <div className="hgr-c-kicker">Generate a concept</div>
-            <h2 className="hgr-c-sec-title">Turn a finalized spec into ranked concept options.</h2>
-            <p className="hgr-c-sec-sub">
-              Runs 4 steps against the real TorqWings AI backend — concept ideation, trade-off reasoning,
-              ranking &amp; scoring, and persistence. There's no real benchmark database or
-              knowledge-graph yet, so trade-off reasoning is TorqWings AI reasoning against your mission's
-              own stated KPIs and constraints, not a market lookup — review each stage's findings
-              and proceed when you're ready.
-            </p>
 
             {conceptsStatus === "error" && <ListFetchError onRetry={fetchConceptsList} />}
 
@@ -849,7 +852,7 @@ function TheHangarConcept() {
                   >
                     <span className="hgr-c-list-row-code">{c.conceptCode}</span>
                     <span className="hgr-c-list-row-type">
-                      {c.rankedConcepts?.[0]?.conceptName ?? "—"}
+                      {c.selectedConceptName ?? c.rankedConcepts?.[0]?.conceptName ?? "—"}
                     </span>
                     <span className={`hgr-c-list-row-status hgr-c-list-row-status-${c.status}`}>
                       {CONCEPT_STATUS_LABEL[c.status] ?? c.status}
@@ -939,7 +942,7 @@ function TheHangarConcept() {
                     {activeStage === "done" && flow.stage4.result ? (
                       <div className="hgr-c-concept-title">
                         <span className="hgr-c-concept-title-code">{flow.stage4.result.conceptCode}</span>
-                        <h3>{flow.stage4.result.rankedConcepts[0]?.conceptName ?? "Concept"}</h3>
+                        <h3>{chosenConceptName ?? rankOneConceptName(flow.stage4.result.rankedConcepts) ?? "Concept"}</h3>
                         {flow.generatedAt && (
                           <span className="hgr-c-concept-title-date">
                             Generated {formatGeneratedAt(flow.generatedAt)}
@@ -1102,6 +1105,11 @@ function TheHangarConcept() {
                         onEditAndRegenerate={editAndRegenerate}
                         finalizeState={finalizeState}
                         onSaveAsFinal={saveAsFinal}
+                        chosenConceptName={chosenConceptName}
+                        onChoiceSaved={(name) => {
+                          setChosenConceptName(name);
+                          fetchConceptsList();
+                        }}
                       />
                       </SourceMissionSplit>
                     )}
@@ -1368,26 +1376,112 @@ function Stage3Findings({ result }: { result: Stage3Result }) {
   );
 }
 
-function RankedConceptsSection({ rankedConcepts }: { rankedConcepts: RankedConcept[] }) {
+// Any concept scoring this or more can be chosen to carry forward to Bay 03
+// instead of the rank-1 default (conceptAgentPipeline.ts SELECTABLE_FIT_SCORE).
+const SELECTABLE_FIT_SCORE = 8;
+
+function rankOneConceptName(ranked: RankedConcept[] | null | undefined): string | null {
+  return ranked?.find((r) => r.rank === 1)?.conceptName ?? ranked?.[0]?.conceptName ?? null;
+}
+
+// Ranked concepts, with the chosen one marked. While the run is Concept
+// Ready (editable), concepts scoring 8+ can be picked and the choice saved;
+// finalized runs show the saved choice read-only.
+function RankedConceptsSection({
+  rankedConcepts,
+  conceptId,
+  savedName,
+  editable,
+  onSaved,
+}: {
+  rankedConcepts: RankedConcept[];
+  conceptId?: string;
+  savedName?: string | null;
+  editable?: boolean;
+  onSaved?: (name: string) => void;
+}) {
+  const saved = savedName ?? rankOneConceptName(rankedConcepts);
+  const [pending, setPending] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const shown = pending ?? saved;
+  const sorted = [...rankedConcepts].sort((a, b) => a.rank - b.rank);
+  const choosable = sorted.filter((r) => r.fitScore >= SELECTABLE_FIT_SCORE || r.rank === 1);
+  const dirty = pending !== null && pending !== saved;
+
+  async function save() {
+    if (!conceptId || !pending) return;
+    setSaving(true);
+    setError(null);
+    const outcome = await callStageApi<{ selectedConceptName: string }>("/api/hangar/process-concept/select", {
+      conceptId,
+      conceptName: pending,
+    });
+    setSaving(false);
+    if (!outcome.ok) {
+      setError(outcome.error);
+      return;
+    }
+    setPending(null);
+    onSaved?.(outcome.data.selectedConceptName);
+  }
+
   return (
     <div className="hgr-c-rank-list">
-      {rankedConcepts.map((r) => (
-        <div
-          key={r.conceptName}
-          className={`hgr-c-rank-card${r.rank === 1 ? " hgr-c-rank-card-top" : ""}`}
-        >
-          <div className="hgr-c-rank-num">#{r.rank}</div>
-          <div className="hgr-c-rank-body">
-            <div className="hgr-c-rank-name">{r.conceptName}</div>
-            <p className="hgr-c-rank-desc">{r.description}</p>
-            <div className="hgr-c-rank-meta">
-              <FitBadge fit={r.constraintFit} />
-              <span className="hgr-c-rank-score">Fit {r.fitScore}/10</span>
+      {editable && (
+        <p className="hgr-c-choice-hint">
+          The chosen concept is the one Vehicle Design (Bay 03) builds from. Any concept with a fit score of{" "}
+          {SELECTABLE_FIT_SCORE} or above can be chosen{choosable.length <= 1 ? " -- none of the others qualify on this run" : ""}.
+        </p>
+      )}
+      {sorted.map((r) => {
+        const isChosen = r.conceptName === shown;
+        const canChoose = editable && !isChosen && (r.fitScore >= SELECTABLE_FIT_SCORE || r.rank === 1);
+        return (
+          <div
+            key={r.conceptName}
+            className={`hgr-c-rank-card${isChosen ? " hgr-c-rank-card-top" : ""}`}
+          >
+            <div className="hgr-c-rank-num">#{r.rank}</div>
+            <div className="hgr-c-rank-body">
+              <div className="hgr-c-rank-name">
+                {r.conceptName}
+                {isChosen && (
+                  <span className="hgr-c-chosen-badge">{dirty ? "Chosen -- not saved" : "Selected"}</span>
+                )}
+              </div>
+              <p className="hgr-c-rank-desc">{r.description}</p>
+              <div className="hgr-c-rank-meta">
+                <FitBadge fit={r.constraintFit} />
+                <span className="hgr-c-rank-score">Fit {r.fitScore}/10</span>
+                {canChoose && (
+                  <button type="button" className="hgr-c-choose-btn" onClick={() => setPending(r.conceptName)}>
+                    Choose this concept
+                  </button>
+                )}
+                {editable && !isChosen && !canChoose && (
+                  <span className="hgr-c-choose-note">Below {SELECTABLE_FIT_SCORE} -- can't be chosen</span>
+                )}
+              </div>
+              <p className="hgr-c-rank-rationale">{r.rationale}</p>
             </div>
-            <p className="hgr-c-rank-rationale">{r.rationale}</p>
           </div>
+        );
+      })}
+      {dirty && (
+        <div className="hgr-c-choice-bar" role="status">
+          <span>
+            Carry <b>{pending}</b> forward to Vehicle Design instead of <b>{saved}</b>?
+          </span>
+          <button type="button" className="hgr-c-btn hgr-c-btn-amber" disabled={saving} onClick={save}>
+            {saving ? "Saving…" : "Save choice"}
+          </button>
+          <button type="button" className="hgr-c-btn hgr-c-btn-ghost" disabled={saving} onClick={() => setPending(null)}>
+            Cancel
+          </button>
         </div>
-      ))}
+      )}
+      {error && <div className="hgr-c-export-error">{error}</div>}
     </div>
   );
 }
@@ -1694,6 +1788,8 @@ function ConceptDashboard({
   onEditAndRegenerate,
   finalizeState,
   onSaveAsFinal,
+  chosenConceptName,
+  onChoiceSaved,
 }: {
   result: Stage4Result;
   sourceMissionId: string | null;
@@ -1705,6 +1801,8 @@ function ConceptDashboard({
   onEditAndRegenerate: () => void;
   finalizeState: { status: "idle" | "saving" | "saved" | "error"; errorMessage: string | null };
   onSaveAsFinal: () => void;
+  chosenConceptName: string | null;
+  onChoiceSaved: (name: string) => void;
 }) {
   return (
     <div className="hgr-c-dash">
@@ -1744,7 +1842,13 @@ function ConceptDashboard({
 
       <div className="hgr-c-dash-section">
         <h4>Ranked Concepts ({result.rankedConcepts.length})</h4>
-        <RankedConceptsSection rankedConcepts={result.rankedConcepts} />
+        <RankedConceptsSection
+          rankedConcepts={result.rankedConcepts}
+          conceptId={result.conceptId}
+          savedName={chosenConceptName ?? rankOneConceptName(result.rankedConcepts)}
+          editable={finalizeState.status !== "saved"}
+          onSaved={onChoiceSaved}
+        />
       </div>
 
       <div className="hgr-c-dash-actions">
@@ -1770,7 +1874,7 @@ function ConceptDashboard({
           disabled
           title="Bay 03 not yet built"
         >
-          Continue to Aircraft Design Agent →
+          Continue to Vehicle Design Agent →
         </button>
         <button type="button" className="hgr-c-btn hgr-c-btn-amber" onClick={onStartNew}>
           Start a new concept
@@ -1839,7 +1943,7 @@ function PastConceptDetail({
           <div className="hgr-c-dash-badge">
             {CONCEPT_STATUS_LABEL[concept.status] ?? concept.status}
           </div>
-          <h3>{concept.rankedConcepts?.[0]?.conceptName ?? concept.conceptCode}</h3>
+          <h3>{concept.selectedConceptName ?? concept.rankedConcepts?.[0]?.conceptName ?? concept.conceptCode}</h3>
           <div className="hgr-c-dash-id">
             {concept.conceptCode}
             <span className="hgr-c-dash-generated-at"> · Generated {formatGeneratedAt(concept.createdAt)}</span>
@@ -1878,7 +1982,12 @@ function PastConceptDetail({
       {hasSpec ? (
         <div className="hgr-c-dash-section">
           <h4>Ranked Concepts ({concept.rankedConcepts!.length})</h4>
-          <RankedConceptsSection rankedConcepts={concept.rankedConcepts!} />
+          <RankedConceptsSection
+            rankedConcepts={concept.rankedConcepts!}
+            conceptId={concept.conceptId}
+            savedName={concept.selectedConceptName}
+            editable={false}
+          />
         </div>
       ) : (
         <div className="hgr-c-dash-section">
@@ -2247,6 +2356,13 @@ const HGR_CONCEPT_CSS = `
 /* ── Ranked concept cards ── */
 .hgr-c-rank-list{ display:flex; flex-direction:column; gap:14px; }
 .hgr-c-rank-card{ display:flex; gap:16px; padding:18px 20px; background:var(--hgr-c-navy-deep); border:1px solid var(--hgr-c-hairline); border-radius:2px; }
+.hgr-c-choice-hint{ margin:0 0 4px; font-size:12.5px; color:var(--hgr-c-paper-dim); line-height:1.6; }
+.hgr-c-chosen-badge{ margin-left:10px; font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:#FFFFFF; background:var(--hgr-c-amber-bright); padding:2px 8px; border-radius:2px; vertical-align:middle; }
+.hgr-c-choose-btn{ margin-left:auto; font-family:'IBM Plex Mono',monospace; font-size:11.5px; font-weight:700; color:var(--hgr-c-blue-bright); background:var(--hgr-c-navy-panel-2); border:1px solid var(--hgr-c-blue-line); border-radius:2px; padding:5px 10px; cursor:pointer; }
+.hgr-c-choose-btn:hover{ background:var(--hgr-c-blue-bright); color:#FFFFFF; }
+.hgr-c-choose-note{ margin-left:auto; font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--hgr-c-paper-dim); }
+.hgr-c-choice-bar{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; padding:12px 16px; background:#FDF3E3; border:1px solid var(--hgr-c-amber); border-radius:2px; font-size:13px; color:var(--hgr-c-paper); }
+.hgr-c-choice-bar span{ flex:1; min-width:220px; }
 .hgr-c-rank-card-top{ box-shadow:inset 0 0 0 1px var(--hgr-c-amber); background:#FDF3E3; }
 .hgr-c-rank-num{ font-family:'Space Grotesk',sans-serif; font-size:22px; font-weight:700; color:var(--hgr-c-paper-dim); flex-shrink:0; width:36px; }
 .hgr-c-rank-card-top .hgr-c-rank-num{ color:var(--hgr-c-amber-bright); }

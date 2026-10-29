@@ -1,4 +1,6 @@
-import { callLlmGateway, stripJsonFences } from "./llmGateway.ts";
+import { callLlmGateway, stripJsonFences, type LlmProvider, type LlmUsage } from "../../llmGateway.ts";
+import type { GeometryParameters, ComponentSelection } from "../../aircraftDesignTypes.ts";
+export type { GeometryParameters, ComponentSelection };
 
 // Bay 03 Stage 1's SCORE + GENERATE step (AircraftDesignAgent.md Section
 // 4.1/4.2) — callLlmGateway + mock-fallback pattern, same as Concept
@@ -26,25 +28,15 @@ export interface GeometryGenerationInput {
   constraintFit: "pass" | "partial" | "fail";
 }
 
-export interface GeometryParameters {
-  wingspan_m: number;
-  fuselageLength_m: number;
-  wingArea_m2: number;
-  aspectRatio: number;
-  vehicleClass: string;
-}
-
-export interface ComponentSelection {
-  category: string;
-  selection: string;
-  rationale: string;
-}
-
 export interface GeometryGenerationResult {
   geometryParameters: GeometryParameters;
   componentSelections: ComponentSelection[];
   designRationale: string;
   mock: boolean;
+  // The one AI call's token usage and which provider answered -- null on
+  // mock output. Shown in the page's Requests & tokens section.
+  usage?: LlmUsage | null;
+  provider?: LlmProvider | null;
 }
 
 export async function generateAircraftDesignGeometry(data: GeometryGenerationInput): Promise<GeometryGenerationResult> {
@@ -52,12 +44,12 @@ export async function generateAircraftDesignGeometry(data: GeometryGenerationInp
 
 Return: { "geometry_parameters": { "wingspan_m": number, "fuselage_length_m": number, "wing_area_m2": number, "aspect_ratio": number }, "component_selections": [{ "category": "string", "selection": "string", "rationale": "string" }], "design_rationale": "string" }`;
 
-  const { content } = await callLlmGateway(SYSTEM, userContent, { jsonMode: true });
+  const { content, usage, provider } = await callLlmGateway(SYSTEM, userContent, { jsonMode: true });
   if (!content) return mockGeometry(data);
 
   const parsed = parseGeometryResponse(content, data.vehicleClass);
   if (!parsed) return mockGeometry(data);
-  return { ...parsed, mock: false };
+  return { ...parsed, mock: false, usage, provider };
 }
 
 function isFiniteNumber(v: unknown): v is number {

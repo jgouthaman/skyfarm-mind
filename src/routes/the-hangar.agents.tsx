@@ -24,7 +24,7 @@ const BAY_GROUPS: BayGroup[] = [
     bays: [
       { num: "BAY 01", title: "Mission Agent", desc: "Turns a mission brief into structured specs, constraints, and KPIs." },
       { num: "BAY 02", title: "Concept Agent", desc: "Generates and ranks concept options against benchmarks and trends." },
-      { num: "BAY 03", title: "Aircraft Design Agent", desc: "Selects configuration and design parameters from rules and reference designs." },
+      { num: "BAY 03", title: "Vehicle Design Agent", desc: "Selects configuration and design parameters from rules and reference designs." },
       { num: "BAY 04", title: "CAD Agent", desc: "Builds CAD geometry and assemblies from validated design parameters." },
     ],
   },

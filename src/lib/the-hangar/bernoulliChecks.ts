@@ -869,7 +869,8 @@ ${priorFindings || "(none ran, or all were not-applicable)"}`;
 // Called when "Ask Bernoulli" comes from Bay 02: checks the concepts Concept
 // Agent produced, not the mission spec they came from (that's BERN-M01-M06's
 // job). The mission's KPIs are still the yardstick -- every concept is judged
-// on whether it can meet them. C02 is the only hard gate: a top-ranked
+// on whether it can meet them. "Top" below means the CHOSEN concept -- the
+// one the user saved in Bay 02, rank 1 by default. C02 is the only hard gate: a top-ranked
 // concept whose vehicle class physically can't fly the mission is the one
 // failure that should fail the review.
 
@@ -877,6 +878,22 @@ export interface BernoulliConceptCheckInput extends BernoulliCheckInput {
   candidates: CandidateConcept[];
   tradeoffNotes: ConceptTradeoffNote[];
   rankedConcepts: RankedConcept[];
+  // The concept the user chose in Bay 02 (fit score 8+) and that carries
+  // forward to Vehicle Design; null/absent means the rank-1 concept.
+  chosenConceptName?: string | null;
+}
+
+// The concept the review is about: the user's saved choice if it's one of
+// this run's concepts, otherwise the rank-1 concept. The checks judge this
+// one most strictly, since it's what gets carried into detailed design.
+function chosenConceptName(input: BernoulliConceptCheckInput): string | null {
+  const order = conceptsInRankOrder(input);
+  if (input.chosenConceptName && order.some((c) => c.name === input.chosenConceptName)) return input.chosenConceptName;
+  return order[0]?.name ?? null;
+}
+
+function conceptLabel(input: BernoulliConceptCheckInput, name: string): string {
+  return name === chosenConceptName(input) ? " [CHOSEN -- carried forward to Vehicle Design]" : "";
 }
 
 // Concept Agent writes vehicle classes as free text ("Quadcopter multirotor",
@@ -939,13 +956,14 @@ function checkConceptVehicleClass(input: BernoulliConceptCheckInput): BernoulliC
       sourceWasMock: false,
     };
   }
-  const topOff = off.some((c) => c.name === concepts[0].name);
+  const chosen = chosenConceptName(input);
+  const topOff = off.some((c) => c.name === chosen);
   return {
     ruleId: "BERN-C01",
     status: "WARN",
     message: `${off.length} of ${concepts.length} concept(s) depart from the spec's ${specClassRaw} class: ${off
       .map((c) => `"${c.name}" (${c.vehicleClass})`)
-      .join(", ")}${topOff ? " -- including the top-ranked concept" : ""}.`,
+      .join(", ")}${topOff ? " -- including the chosen concept" : ""}.`,
     sourceWasMock: false,
   };
 }
@@ -1011,13 +1029,14 @@ function checkConceptSpeedFeasibility(input: BernoulliConceptCheckInput): Bernou
       sourceWasMock: false,
     };
   }
-  const top = f.concepts[0];
+  const chosen = chosenConceptName(input);
+  const top = f.concepts.find((c) => c.name === chosen) ?? f.concepts[0];
   if (!top.feasible) {
     const others = infeasible.filter((c) => c.name !== top.name);
     return {
       ruleId: "BERN-C02",
       status: "FAIL",
-      message: `Top-ranked ${describeSpeedRow(top)} can't fly the ~${avg} km/h average the mission's range/endurance need${
+      message: `The chosen concept ${describeSpeedRow(top)} can't fly the ~${avg} km/h average the mission's range/endurance need${
         others.length > 0 ? `; also short: ${others.map(describeSpeedRow).join(", ")}` : ""
       }.`,
       sourceWasMock: false,
@@ -1026,7 +1045,7 @@ function checkConceptSpeedFeasibility(input: BernoulliConceptCheckInput): Bernou
   return {
     ruleId: "BERN-C02",
     status: "WARN",
-    message: `${infeasible.length} lower-ranked concept(s) can't reach the ~${avg} km/h average needed: ${infeasible
+    message: `${infeasible.length} concept(s) other than the chosen one can't reach the ~${avg} km/h average needed: ${infeasible
       .map(describeSpeedRow)
       .join(", ")}.`,
     sourceWasMock: false,
@@ -1057,8 +1076,9 @@ function checkConceptRankingCoherence(input: BernoulliConceptCheckInput): Bernou
       issues.push(`"${r.conceptName}" has a fit score of ${r.fitScore}, outside 1-10`);
     }
   }
-  if (ranked[0].constraintFit === "fail") {
-    issues.push(`the top-ranked concept "${ranked[0].conceptName}" fails the mission's constraints`);
+  const chosenRanked = ranked.find((r) => r.conceptName === chosenConceptName(input)) ?? ranked[0];
+  if (chosenRanked.constraintFit === "fail") {
+    issues.push(`the chosen concept "${chosenRanked.conceptName}" fails the mission's constraints`);
   }
   // A trade-off "pass" that the physics contradicts is the most useful thing
   // to surface: Concept Agent's own LLM judged it a fit, C02 shows it can't
@@ -1085,7 +1105,7 @@ function checkConceptRankingCoherence(input: BernoulliConceptCheckInput): Bernou
 
 // -- BERN-C04: per-concept physical feasibility (TorqWings AI call) ---------
 
-const C04_SYSTEM = `You are Bernoulli Agent's physics-plausibility reviewer for TorqWings' aerospace design platform, reviewing the candidate vehicle concepts Concept Agent generated for a mission, before one is carried into detailed design. For each concept, judge whether its vehicle class and described configuration can physically meet the mission's Payload, Endurance and Range KPIs: estimate the implied power draw and battery mass fraction for that class against the reference ranges below, and say whether it fits. You are also given each concept's own trade-off verdict (constraint fit pass/partial/fail and fit score, from Concept Agent's own reasoning) and the findings of the deterministic checks already run -- call out explicitly any concept whose trade-off verdict claims a fit the physics doesn't support, especially the top-ranked one. Use FAIL only if the top-ranked concept is physically implausible; WARN if only lower-ranked concepts are, or if the inputs are too underconstrained to judge confidently; PASS if every concept is plausible.
+const C04_SYSTEM = `You are Bernoulli Agent's physics-plausibility reviewer for TorqWings' aerospace design platform, reviewing the candidate vehicle concepts Concept Agent generated for a mission, before one is carried into detailed design. For each concept, judge whether its vehicle class and described configuration can physically meet the mission's Payload, Endurance and Range KPIs: estimate the implied power draw and battery mass fraction for that class against the reference ranges below, and say whether it fits. You are also given each concept's own trade-off verdict (constraint fit pass/partial/fail and fit score, from Concept Agent's own reasoning) and the findings of the deterministic checks already run -- call out explicitly any concept whose trade-off verdict claims a fit the physics doesn't support, especially the one marked CHOSEN (the concept the user picked to carry into detailed design). Use FAIL only if the CHOSEN concept is physically implausible; WARN if only other concepts are, or if the inputs are too underconstrained to judge confidently; PASS if every concept is plausible.
 
 ${AEROSPACE_BENCHMARKS}
 
@@ -1115,7 +1135,7 @@ async function checkConceptPhysicalFeasibility(
       const cand = input.candidates.find((x) => x.conceptName === c.name);
       const ranked = input.rankedConcepts.find((r) => r.conceptName === c.name);
       const fit = ranked ? ` | trade-off verdict: ${ranked.constraintFit}, fit score ${ranked.fitScore}/10` : "";
-      return `#${ranked?.rank ?? i + 1} ${c.name} (${c.vehicleClass || "class unknown"}): ${cand?.description ?? ""}${fit}`;
+      return `#${ranked?.rank ?? i + 1} ${c.name}${conceptLabel(input, c.name)} (${c.vehicleClass || "class unknown"}): ${cand?.description ?? ""}${fit}`;
     })
     .join("\n");
   const priorFindings = priorChecks
@@ -1184,7 +1204,7 @@ function describeConceptInput(input: BernoulliConceptCheckInput): string {
       const cand = input.candidates.find((x) => x.conceptName === c.name);
       const ranked = input.rankedConcepts.find((r) => r.conceptName === c.name);
       const fit = ranked ? ` | trade-off verdict: ${ranked.constraintFit}, fit score ${ranked.fitScore}/10` : "";
-      return `#${ranked?.rank ?? i + 1} ${c.name} (${c.vehicleClass || "class unknown"}): ${cand?.description ?? ""}${fit}`;
+      return `#${ranked?.rank ?? i + 1} ${c.name}${conceptLabel(input, c.name)} (${c.vehicleClass || "class unknown"}): ${cand?.description ?? ""}${fit}`;
     })
     .join("\n");
   return `${describeMissionInput(input)}
