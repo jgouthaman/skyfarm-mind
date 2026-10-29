@@ -3,7 +3,7 @@ import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import {
   Clock, BookUser, Cpu, Sprout, Building2, Map as MapIcon,
   Shield, FlaskConical, GraduationCap, Users, Settings, Bell, Menu, X, LogOut, BookOpen,
-  ChevronDown, ChevronRight,
+  ChevronDown, ChevronRight, Atom,
 } from "lucide-react";
 import { useMissionHubAuth } from "@/lib/mission-hub/context";
 import { VERTICAL_LABELS, type Vertical } from "@/lib/mission-hub/types";
@@ -95,7 +95,7 @@ export function MissionHubShell({ title, children }: { title: string; children: 
   );
 }
 
-type Section = "business" | "twbc" | "knowledge" | "config";
+type Section = "business" | "agents" | "twbc" | "knowledge" | "config";
 
 function getSectionFromPath(path: string, role?: string): Section | null {
   if (path === "/mission-hub/twbc-drone-proven-designs") {
@@ -104,6 +104,7 @@ function getSectionFromPath(path: string, role?: string): Section | null {
   if (path === "/mission-hub/waitlist" || path === "/mission-hub/contacts" || path === "/mission-hub/academy-users") return "business";
   if (path.startsWith("/mission-hub/twbc-") || path === "/mission-hub/knowledge-uav") return "twbc";
   if (path === "/mission-hub/users" || path.startsWith("/mission-hub/settings")) return "config";
+  if (path.startsWith("/mission-hub/agents")) return "agents";
   return null;
 }
 
@@ -224,6 +225,21 @@ function Sidebar({
                 <NavLink to="/mission-hub/contacts" icon={BookUser} active={path === "/mission-hub/contacts"} onClick={onClose}>Contacts</NavLink>
               </>
             )}
+
+            {/* ── Agents -- per-agent configuration for The Hangar's agents.
+                Bernoulli is the first: its check registry. ── */}
+            <div className="mt-5">
+              <button type="button" onClick={() => toggle("agents")}
+                className="mh-mono mb-2 flex w-full items-center px-3 text-[10px] uppercase tracking-wider transition-colors" style={sectionLabelStyle}>
+                <span className="flex-1 text-left">Agents</span>
+                {openSection === "agents" ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
+              </button>
+              {openSection === "agents" && (
+                <NavLink to="/mission-hub/agents/bernoulli" icon={Atom} active={path === "/mission-hub/agents/bernoulli"} onClick={onClose}>
+                  Bernoulli
+                </NavLink>
+              )}
+            </div>
           </>
         )}
 

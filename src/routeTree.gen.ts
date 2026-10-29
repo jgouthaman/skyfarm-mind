@@ -83,6 +83,7 @@ import { Route as TheHangarWelcomeRouteImport } from './routes/the-hangar.welcom
 import { Route as LayoutAuthCallbackRouteImport } from './routes/_layout.auth.callback'
 import { Route as ApiHangarAircraftDesignsRouteImport } from './routes/api.hangar.aircraft-designs'
 import { Route as ApiHangarBernoulliReviewRouteImport } from './routes/api.hangar.bernoulli-review'
+import { Route as ApiHangarBernoulliRulesRouteImport } from './routes/api.hangar.bernoulli-rules'
 import { Route as ApiHangarCadDesignsRouteImport } from './routes/api.hangar.cad-designs'
 import { Route as ApiHangarCertificationsRouteImport } from './routes/api.hangar.certifications'
 import { Route as ApiHangarCfdAnalysesRouteImport } from './routes/api.hangar.cfd-analyses'
@@ -106,6 +107,7 @@ import { Route as ApiHarnessCallRouteImport } from './routes/api.harness.call'
 import { Route as DestudDashboardEngineerRouteImport } from './routes/destud.dashboard.engineer'
 import { Route as DestudDashboardExplorerRouteImport } from './routes/destud.dashboard.explorer'
 import { Route as DestudProjectsProjectIdRouteImport } from './routes/destud.projects.$projectId'
+import { Route as MissionHubAgentsBernoulliRouteImport } from './routes/mission-hub.agents.bernoulli'
 import { Route as MissionHubTorqwingsDesignStudioIndexRouteImport } from './routes/mission-hub.torqwings-design-studio.index'
 import { Route as MissionHubTorqwingsDesignStudioAdvisorRouteImport } from './routes/mission-hub.torqwings-design-studio.advisor'
 import { Route as MissionHubTorqwingsDesignStudioComplianceRouteImport } from './routes/mission-hub.torqwings-design-studio.compliance'
@@ -530,6 +532,11 @@ const ApiHangarBernoulliReviewRoute =
     path: '/api/hangar/bernoulli-review',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiHangarBernoulliRulesRoute = ApiHangarBernoulliRulesRouteImport.update({
+  id: '/api/hangar/bernoulli-rules',
+  path: '/api/hangar/bernoulli-rules',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiHangarCadDesignsRoute = ApiHangarCadDesignsRouteImport.update({
   id: '/api/hangar/cad-designs',
   path: '/api/hangar/cad-designs',
@@ -646,6 +653,12 @@ const DestudProjectsProjectIdRoute = DestudProjectsProjectIdRouteImport.update({
   path: '/projects/$projectId',
   getParentRoute: () => DestudRoute,
 } as any)
+const MissionHubAgentsBernoulliRoute =
+  MissionHubAgentsBernoulliRouteImport.update({
+    id: '/agents/bernoulli',
+    path: '/agents/bernoulli',
+    getParentRoute: () => MissionHubRoute,
+  } as any)
 const MissionHubTorqwingsDesignStudioIndexRoute =
   MissionHubTorqwingsDesignStudioIndexRouteImport.update({
     id: '/',
@@ -958,6 +971,7 @@ export interface FileRoutesByFullPath {
   '/auth/callback': typeof LayoutAuthCallbackRoute
   '/api/hangar/aircraft-designs': typeof ApiHangarAircraftDesignsRoute
   '/api/hangar/bernoulli-review': typeof ApiHangarBernoulliReviewRoute
+  '/api/hangar/bernoulli-rules': typeof ApiHangarBernoulliRulesRoute
   '/api/hangar/cad-designs': typeof ApiHangarCadDesignsRoute
   '/api/hangar/certifications': typeof ApiHangarCertificationsRoute
   '/api/hangar/cfd-analyses': typeof ApiHangarCfdAnalysesRoute
@@ -981,6 +995,7 @@ export interface FileRoutesByFullPath {
   '/destud/dashboard/engineer': typeof DestudDashboardEngineerRoute
   '/destud/dashboard/explorer': typeof DestudDashboardExplorerRoute
   '/destud/projects/$projectId': typeof DestudProjectsProjectIdRoute
+  '/mission-hub/agents/bernoulli': typeof MissionHubAgentsBernoulliRoute
   '/mission-hub/torqwings-design-studio/advisor': typeof MissionHubTorqwingsDesignStudioAdvisorRoute
   '/mission-hub/torqwings-design-studio/compliance': typeof MissionHubTorqwingsDesignStudioComplianceRoute
   '/mission-hub/torqwings-design-studio/components': typeof MissionHubTorqwingsDesignStudioComponentsRoute
@@ -1090,6 +1105,7 @@ export interface FileRoutesByTo {
   '/auth/callback': typeof LayoutAuthCallbackRoute
   '/api/hangar/aircraft-designs': typeof ApiHangarAircraftDesignsRoute
   '/api/hangar/bernoulli-review': typeof ApiHangarBernoulliReviewRoute
+  '/api/hangar/bernoulli-rules': typeof ApiHangarBernoulliRulesRoute
   '/api/hangar/cad-designs': typeof ApiHangarCadDesignsRoute
   '/api/hangar/certifications': typeof ApiHangarCertificationsRoute
   '/api/hangar/cfd-analyses': typeof ApiHangarCfdAnalysesRoute
@@ -1113,6 +1129,7 @@ export interface FileRoutesByTo {
   '/destud/dashboard/engineer': typeof DestudDashboardEngineerRoute
   '/destud/dashboard/explorer': typeof DestudDashboardExplorerRoute
   '/destud/projects/$projectId': typeof DestudProjectsProjectIdRoute
+  '/mission-hub/agents/bernoulli': typeof MissionHubAgentsBernoulliRoute
   '/mission-hub/torqwings-design-studio/advisor': typeof MissionHubTorqwingsDesignStudioAdvisorRoute
   '/mission-hub/torqwings-design-studio/compliance': typeof MissionHubTorqwingsDesignStudioComplianceRoute
   '/mission-hub/torqwings-design-studio/components': typeof MissionHubTorqwingsDesignStudioComponentsRoute
@@ -1230,6 +1247,7 @@ export interface FileRoutesById {
   '/_layout/auth/callback': typeof LayoutAuthCallbackRoute
   '/api/hangar/aircraft-designs': typeof ApiHangarAircraftDesignsRoute
   '/api/hangar/bernoulli-review': typeof ApiHangarBernoulliReviewRoute
+  '/api/hangar/bernoulli-rules': typeof ApiHangarBernoulliRulesRoute
   '/api/hangar/cad-designs': typeof ApiHangarCadDesignsRoute
   '/api/hangar/certifications': typeof ApiHangarCertificationsRoute
   '/api/hangar/cfd-analyses': typeof ApiHangarCfdAnalysesRoute
@@ -1253,6 +1271,7 @@ export interface FileRoutesById {
   '/destud/dashboard/engineer': typeof DestudDashboardEngineerRoute
   '/destud/dashboard/explorer': typeof DestudDashboardExplorerRoute
   '/destud/projects/$projectId': typeof DestudProjectsProjectIdRoute
+  '/mission-hub/agents/bernoulli': typeof MissionHubAgentsBernoulliRoute
   '/mission-hub/torqwings-design-studio/advisor': typeof MissionHubTorqwingsDesignStudioAdvisorRoute
   '/mission-hub/torqwings-design-studio/compliance': typeof MissionHubTorqwingsDesignStudioComplianceRoute
   '/mission-hub/torqwings-design-studio/components': typeof MissionHubTorqwingsDesignStudioComponentsRoute
@@ -1370,6 +1389,7 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/api/hangar/aircraft-designs'
     | '/api/hangar/bernoulli-review'
+    | '/api/hangar/bernoulli-rules'
     | '/api/hangar/cad-designs'
     | '/api/hangar/certifications'
     | '/api/hangar/cfd-analyses'
@@ -1393,6 +1413,7 @@ export interface FileRouteTypes {
     | '/destud/dashboard/engineer'
     | '/destud/dashboard/explorer'
     | '/destud/projects/$projectId'
+    | '/mission-hub/agents/bernoulli'
     | '/mission-hub/torqwings-design-studio/advisor'
     | '/mission-hub/torqwings-design-studio/compliance'
     | '/mission-hub/torqwings-design-studio/components'
@@ -1502,6 +1523,7 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/api/hangar/aircraft-designs'
     | '/api/hangar/bernoulli-review'
+    | '/api/hangar/bernoulli-rules'
     | '/api/hangar/cad-designs'
     | '/api/hangar/certifications'
     | '/api/hangar/cfd-analyses'
@@ -1525,6 +1547,7 @@ export interface FileRouteTypes {
     | '/destud/dashboard/engineer'
     | '/destud/dashboard/explorer'
     | '/destud/projects/$projectId'
+    | '/mission-hub/agents/bernoulli'
     | '/mission-hub/torqwings-design-studio/advisor'
     | '/mission-hub/torqwings-design-studio/compliance'
     | '/mission-hub/torqwings-design-studio/components'
@@ -1641,6 +1664,7 @@ export interface FileRouteTypes {
     | '/_layout/auth/callback'
     | '/api/hangar/aircraft-designs'
     | '/api/hangar/bernoulli-review'
+    | '/api/hangar/bernoulli-rules'
     | '/api/hangar/cad-designs'
     | '/api/hangar/certifications'
     | '/api/hangar/cfd-analyses'
@@ -1664,6 +1688,7 @@ export interface FileRouteTypes {
     | '/destud/dashboard/engineer'
     | '/destud/dashboard/explorer'
     | '/destud/projects/$projectId'
+    | '/mission-hub/agents/bernoulli'
     | '/mission-hub/torqwings-design-studio/advisor'
     | '/mission-hub/torqwings-design-studio/compliance'
     | '/mission-hub/torqwings-design-studio/components'
@@ -1720,6 +1745,7 @@ export interface RootRouteChildren {
   THIndexRoute: typeof THIndexRoute
   ApiHangarAircraftDesignsRoute: typeof ApiHangarAircraftDesignsRoute
   ApiHangarBernoulliReviewRoute: typeof ApiHangarBernoulliReviewRoute
+  ApiHangarBernoulliRulesRoute: typeof ApiHangarBernoulliRulesRoute
   ApiHangarCadDesignsRoute: typeof ApiHangarCadDesignsRoute
   ApiHangarCertificationsRoute: typeof ApiHangarCertificationsRoute
   ApiHangarCfdAnalysesRoute: typeof ApiHangarCfdAnalysesRoute
@@ -2283,6 +2309,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiHangarBernoulliReviewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/hangar/bernoulli-rules': {
+      id: '/api/hangar/bernoulli-rules'
+      path: '/api/hangar/bernoulli-rules'
+      fullPath: '/api/hangar/bernoulli-rules'
+      preLoaderRoute: typeof ApiHangarBernoulliRulesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/hangar/cad-designs': {
       id: '/api/hangar/cad-designs'
       path: '/api/hangar/cad-designs'
@@ -2443,6 +2476,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/destud/projects/$projectId'
       preLoaderRoute: typeof DestudProjectsProjectIdRouteImport
       parentRoute: typeof DestudRoute
+    }
+    '/mission-hub/agents/bernoulli': {
+      id: '/mission-hub/agents/bernoulli'
+      path: '/agents/bernoulli'
+      fullPath: '/mission-hub/agents/bernoulli'
+      preLoaderRoute: typeof MissionHubAgentsBernoulliRouteImport
+      parentRoute: typeof MissionHubRoute
     }
     '/mission-hub/torqwings-design-studio/': {
       id: '/mission-hub/torqwings-design-studio/'
@@ -2867,6 +2907,7 @@ interface MissionHubRouteChildren {
   MissionHubUsersRoute: typeof MissionHubUsersRoute
   MissionHubWaitlistRoute: typeof MissionHubWaitlistRoute
   MissionHubIndexRoute: typeof MissionHubIndexRoute
+  MissionHubAgentsBernoulliRoute: typeof MissionHubAgentsBernoulliRoute
   MissionHubVerticalsVerticalRoute: typeof MissionHubVerticalsVerticalRoute
 }
 
@@ -2898,6 +2939,7 @@ const MissionHubRouteChildren: MissionHubRouteChildren = {
   MissionHubUsersRoute: MissionHubUsersRoute,
   MissionHubWaitlistRoute: MissionHubWaitlistRoute,
   MissionHubIndexRoute: MissionHubIndexRoute,
+  MissionHubAgentsBernoulliRoute: MissionHubAgentsBernoulliRoute,
   MissionHubVerticalsVerticalRoute: MissionHubVerticalsVerticalRoute,
 }
 
@@ -2989,6 +3031,7 @@ const rootRouteChildren: RootRouteChildren = {
   THIndexRoute: THIndexRoute,
   ApiHangarAircraftDesignsRoute: ApiHangarAircraftDesignsRoute,
   ApiHangarBernoulliReviewRoute: ApiHangarBernoulliReviewRoute,
+  ApiHangarBernoulliRulesRoute: ApiHangarBernoulliRulesRoute,
   ApiHangarCadDesignsRoute: ApiHangarCadDesignsRoute,
   ApiHangarCertificationsRoute: ApiHangarCertificationsRoute,
   ApiHangarCfdAnalysesRoute: ApiHangarCfdAnalysesRoute,

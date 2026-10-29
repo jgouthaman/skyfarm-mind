@@ -3,6 +3,7 @@ import { createFileRoute, Link, useSearch } from "@tanstack/react-router";
 import { useHangarSession } from "@/lib/the-hangar/session";
 import { supabase } from "@/integrations/supabase/client";
 import type { MissionListEntry } from "@/lib/the-hangar/missionAgentPipeline";
+import type { ConceptListEntry } from "@/lib/the-hangar/conceptAgentPipeline";
 import { describeInrCost, formatCostInr } from "@/lib/the-hangar/missionUsage";
 
 // Local view types mirroring the /api/hangar/process-bernoulli/review
@@ -11,12 +12,24 @@ import { describeInrCost, formatCostInr } from "@/lib/the-hangar/missionUsage";
 // convention every other bay page already follows.
 interface BernoulliCheckView {
   ruleId: string;
+  ruleName?: string;
   status: "PASS" | "WARN" | "FAIL" | "INFO";
   message: string;
   sourceWasMock: boolean;
   reasoning?: string;
   usage?: { inputTokens: number; outputTokens: number };
   provider?: "anthropic" | "groq";
+}
+
+// One row of the check registry (/api/hangar/bernoulli-rules), the fields
+// this page uses. Mirrors bernoulliRules.ts's BernoulliRuleDef.
+interface RegistryRule {
+  ruleId: string;
+  name: string;
+  description: string;
+  kind: "rule" | "llm";
+  hardGate: boolean;
+  enabled: boolean;
 }
 
 interface BernoulliReviewView {
@@ -30,6 +43,9 @@ interface BernoulliReviewView {
   createdAt: string;
   usage: { requests: number; inputTokens: number; outputTokens: number; estimatedCostUsd: number };
   durationMs: number | null;
+  sourceBay?: "mission" | "concept";
+  conceptId?: string | null;
+  conceptCode?: string | null;
 }
 
 function formatDuration(ms: number): string {
@@ -38,6 +54,26 @@ function formatDuration(ms: number): string {
 }
 
 const PROVIDER_LABEL: Record<"anthropic" | "groq", string> = { anthropic: "Claude", groq: "Groq" };
+
+// Collapsible "Requests & tokens", same as Bay 01/02: closed by default with
+// the totals in its header; opens to the summary bar + per-check table.
+function BernoulliUsageDetails({ review }: { review: BernoulliReviewView }) {
+  const u = review.usage;
+  if (!u) return null;
+  return (
+    <details className="hgr-ber-usage-details">
+      <summary title="LLM usage for this review. Cost is an estimate in INR at a fixed USD rate, not a bill.">
+        <span className="hgr-ber-usage-details-label">Requests &amp; tokens</span>
+        <span className="hgr-ber-usage-details-totals">
+          {u.requests} req · {(u.inputTokens + u.outputTokens).toLocaleString()} tokens · ~
+          {formatCostInr(u.estimatedCostUsd)}
+        </span>
+      </summary>
+      <BernoulliTelemetryBar review={review} />
+      <BernoulliUsageTable review={review} />
+    </details>
+  );
+}
 
 // Same telemetry bar Bay 01 shows (Requests / tokens / est. cost / time),
 // so both bays read their LLM spend the same way.
@@ -97,7 +133,7 @@ function BernoulliUsageTable({ review }: { review: BernoulliReviewView }) {
         {review.checks.map((c) => (
           <tr key={c.ruleId}>
             <td>
-              {c.ruleId} {BERN_RULE_NAMES[c.ruleId] ?? ""}
+              {c.ruleId} {c.ruleName ?? BERN_RULE_NAMES[c.ruleId] ?? ""}
               {c.provider && <span className="hgr-ber-usage-provider">{PROVIDER_LABEL[c.provider]}</span>}
               {c.sourceWasMock && <span className="hgr-ber-usage-mock">simulated</span>}
             </td>
@@ -201,46 +237,80 @@ const RIGHT_CALLERS = [
   { bay: "12", key: "certification", name: "Certification Agent", to: "/the-hangar/certification" },
 ] as const;
 
-// The 6 checks bernoulliChecks.ts actually runs (BERN-M01–M06), with a
-// human-readable name and one-line description for each -- shown as a
-// legend before a check runs, and to label each row of the report after.
-// M01/M05 are the two hard gates (a FAIL on either fails the whole
-// review); M02-M04 and M06 can only WARN.
-const BERN_RULES: { id: string; name: string; description: string; hardGate: boolean }[] = [
+// Every check bernoulliChecks.ts runs, with a human-readable name and
+// one-line description -- shown as a legend before a check runs, and to
+// label each row of the report after. `bay` is whose output the check
+// reviews: BERN-M01-M06 for a Bay 01 mission spec (hard gates M01/M05),
+// BERN-C01-C04 for a Bay 02 concept run (hard gate C02).
+const BERN_RULES: { id: string; bay: "mission" | "concept"; name: string; description: string; hardGate: boolean }[] = [
   {
     id: "BERN-M01",
+    bay: "mission",
     name: "Speed Consistency",
     description: "Range ÷ Endurance implies an average speed -- flagged if implausible for the vehicle class.",
     hardGate: true,
   },
   {
     id: "BERN-M02",
+    bay: "mission",
     name: "Coverage Math",
     description: "For multi-unit/swarm specs: units × per-unit coverage angle should reach 360°.",
     hardGate: false,
   },
   {
     id: "BERN-M03",
+    bay: "mission",
     name: "Payload/Endurance Plausibility",
     description: "TorqWings AI-judged: is this payload/endurance combination realistic for this vehicle class?",
     hardGate: false,
   },
   {
     id: "BERN-M04",
+    bay: "mission",
     name: "KPI/Constraint Provenance",
     description: "Does every constraint cite a source, or are some untagged?",
     hardGate: false,
   },
   {
     id: "BERN-M05",
+    bay: "mission",
     name: "Dimensional Consistency",
     description: 'Do KPI units actually match what their names imply (e.g. "Range" isn\'t given in kg)?',
     hardGate: true,
   },
   {
     id: "BERN-M06",
+    bay: "mission",
     name: "Energy/Power Budget Plausibility",
     description: "TorqWings AI-judged, grounded in reference ranges: could a battery/fuel load that fits this vehicle class actually deliver this payload+endurance?",
+    hardGate: false,
+  },
+  {
+    id: "BERN-C01",
+    bay: "concept",
+    name: "Vehicle-Class Consistency",
+    description: "Do the concepts stay within the vehicle class the mission spec calls for?",
+    hardGate: false,
+  },
+  {
+    id: "BERN-C02",
+    bay: "concept",
+    name: "Speed Feasibility per Concept",
+    description: "Can each concept's vehicle class fly the average speed the mission's range ÷ endurance needs?",
+    hardGate: true,
+  },
+  {
+    id: "BERN-C03",
+    bay: "concept",
+    name: "Ranking Coherence",
+    description: "Is the ranking consistent with constraint fit, and is any \"pass\" contradicted by the physics?",
+    hardGate: false,
+  },
+  {
+    id: "BERN-C04",
+    bay: "concept",
+    name: "Physical Feasibility per Concept",
+    description: "TorqWings AI-judged, grounded in reference ranges: can each concept physically carry the payload for the required endurance?",
     hardGate: false,
   },
 ];
@@ -266,6 +336,7 @@ function TheHangarBernoulli() {
   // report below; clicking that header again re-expands it independently
   // of whether a report is showing.
   const [specExpanded, setSpecExpanded] = useState(true);
+  const [conceptSpecExpanded, setConceptSpecExpanded] = useState(true);
   const [checkTriggered, setCheckTriggered] = useState(false);
   const [reviewStatus, setReviewStatus] = useState<"idle" | "loading" | "error">("idle");
   const [reviewResult, setReviewResult] = useState<BernoulliReviewView | null>(null);
@@ -314,13 +385,78 @@ function TheHangarBernoulli() {
   // navigates -- only the box matching the true `search.source` is ever
   // a real back-link (see the caller-box rendering below).
   const [activeSource, setActiveSource] = useState<string>(search.source);
+  const [concepts, setConcepts] = useState<ConceptListEntry[] | null>(null);
+  const [conceptsStatus, setConceptsStatus] = useState<"idle" | "loading" | "error">("idle");
+  const [selectedConceptId, setSelectedConceptId] = useState<string>(
+    search.source === "concept" ? search.sourceId : "",
+  );
 
   const selectedMission = missions?.find((m) => m.missionId === selectedMissionId) ?? null;
+
+  // From Bay 02 the dropdown lists concepts, not missions: the review checks
+  // the selected concept's output, judged against its source mission (which
+  // is selected alongside it, so the spec block still shows the yardstick).
+  const conceptMode = activeSource === "concept";
+  const reviewConceptId = conceptMode && selectedConceptId ? selectedConceptId : null;
+  const listedConcepts =
+    concepts?.filter((c) => c.status === "spec_ready" || c.conceptId === selectedConceptId) ?? null;
+
+  // Dropdown scoped to the calling bay: from Mission only specs still open
+  // for review (spec_ready -- finalized ones have moved on to Concept), from
+  // Concept the finalized specs concepts are built from. The mission the
+  // caller linked with always stays listed so the preselection never blanks.
+  const listedStatus = activeSource === "mission" ? "spec_ready" : activeSource === "concept" ? "finalized" : null;
+  const listedMissions =
+    missions?.filter(
+      (m) => !listedStatus || m.status === listedStatus || m.missionId === selectedMissionId,
+    ) ?? null;
+  // Legend + run summary come from the check registry (Mission Hub ->
+  // Agents -> Bernoulli) for the current bay; BERN_RULES is only the fallback
+  // while it loads or if it can't be read.
+  const ruleBay = conceptMode ? "concept" : "mission";
+  const [registry, setRegistry] = useState<Record<string, RegistryRule[]>>({});
+  useEffect(() => {
+    if (!currentUserEmail || registry[ruleBay]) return;
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase.auth.getSession();
+      const token = data.session?.access_token;
+      if (!token) return;
+      try {
+        const res = await fetch(`/api/hangar/bernoulli-rules?bay=${ruleBay}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) return;
+        const json = (await res.json()) as { rules: RegistryRule[] };
+        if (!cancelled) setRegistry((cur) => ({ ...cur, [ruleBay]: json.rules }));
+      } catch {
+        // keep the fallback legend
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentUserEmail, ruleBay]);
+  const visibleRules: { id: string; name: string; description: string; hardGate: boolean; kind: "rule" | "llm" }[] =
+    registry[ruleBay]
+      ? registry[ruleBay]
+          .filter((r) => r.enabled)
+          .map((r) => ({ id: r.ruleId, name: r.name, description: r.description, hardGate: r.hardGate, kind: r.kind }))
+      : BERN_RULES.filter((r) => r.bay === ruleBay).map((r) => ({
+          ...r,
+          kind: (r.id === "BERN-M03" || r.id === "BERN-M06" || r.id === "BERN-C04" ? "llm" : "rule") as "rule" | "llm",
+        }));
+  const aiCallCount = visibleRules.filter((r) => r.kind === "llm").length;
+  const ruleCount = visibleRules.length - aiCallCount;
+  const runSummary = `${visibleRules.length} check${visibleRules.length === 1 ? "" : "s"} -- ${ruleCount} rule-based plus ${aiCallCount} TorqWings AI call${aiCallCount === 1 ? "" : "s"}`;
 
   function activateSource(key: string) {
     setActiveSource(key);
     setSelectedMissionId("");
+    setSelectedConceptId("");
     setSpecExpanded(true);
+    setConceptSpecExpanded(true);
     setCheckTriggered(false);
     setReviewResult(null);
     setReviewStatus("idle");
@@ -331,6 +467,7 @@ function TheHangarBernoulli() {
     if (!selectedMissionId) return;
     setCheckTriggered(true);
     setSpecExpanded(false);
+    setConceptSpecExpanded(false);
     setReviewStatus("loading");
     setReviewError(null);
     const { data } = await supabase.auth.getSession();
@@ -344,7 +481,11 @@ function TheHangarBernoulli() {
       const res = await fetch("/api/hangar/process-bernoulli/review", {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ missionId: selectedMissionId }),
+        body: JSON.stringify(
+          reviewConceptId
+            ? { missionId: selectedMissionId, source: "concept", sourceId: reviewConceptId }
+            : { missionId: selectedMissionId },
+        ),
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? `Request failed (HTTP ${res.status}).`);
@@ -365,12 +506,13 @@ function TheHangarBernoulli() {
   // normal state, not an error) or if the fetch itself fails -- this is
   // a convenience pre-load, not something worth surfacing an error banner
   // for.
-  async function fetchSavedReview(missionId: string) {
+  async function fetchSavedReview(missionId: string, conceptId: string | null = null) {
     const { data } = await supabase.auth.getSession();
     const token = data.session?.access_token;
     if (!token) return;
     try {
-      const res = await fetch(`/api/hangar/bernoulli-review?missionId=${missionId}`, {
+      const qs = `missionId=${encodeURIComponent(missionId)}${conceptId ? `&conceptId=${encodeURIComponent(conceptId)}` : ""}`;
+      const res = await fetch(`/api/hangar/bernoulli-review?${qs}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) return;
@@ -379,6 +521,7 @@ function TheHangarBernoulli() {
       setReviewResult(json as BernoulliReviewView);
       setCheckTriggered(true);
       setSpecExpanded(false);
+    setConceptSpecExpanded(false);
     } catch {
       // best-effort pre-load only
     }
@@ -387,12 +530,49 @@ function TheHangarBernoulli() {
   function selectMission(id: string) {
     setSelectedMissionId(id);
     setSpecExpanded(true);
+    setConceptSpecExpanded(true);
     setCheckTriggered(false);
     setReviewResult(null);
     setReviewStatus("idle");
     setReviewError(null);
     fetchSavedReview(id);
   }
+
+  function selectConcept(id: string) {
+    const c = concepts?.find((x) => x.conceptId === id) ?? null;
+    setSelectedConceptId(id);
+    setSelectedMissionId(c?.sourceMissionId ?? "");
+    setSpecExpanded(true);
+    setConceptSpecExpanded(true);
+    setCheckTriggered(false);
+    setReviewResult(null);
+    setReviewStatus("idle");
+    setReviewError(null);
+    if (c) fetchSavedReview(c.sourceMissionId, id);
+  }
+
+  async function fetchConcepts() {
+    setConceptsStatus("loading");
+    const { data } = await supabase.auth.getSession();
+    const token = data.session?.access_token;
+    if (!token) {
+      setConceptsStatus("error");
+      return;
+    }
+    try {
+      const res = await fetch("/api/hangar/concepts", { headers: { Authorization: `Bearer ${token}` } });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      setConcepts(await res.json());
+      setConceptsStatus("idle");
+    } catch {
+      setConceptsStatus("error");
+    }
+  }
+
+  useEffect(() => {
+    if (currentUserEmail && conceptMode && concepts === null) fetchConcepts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentUserEmail, conceptMode]);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -410,7 +590,9 @@ function TheHangarBernoulli() {
   // own "Ask Bernoulli" link) -- try loading a saved report for it once
   // auth is ready, same as picking it from the dropdown would.
   useEffect(() => {
-    if (currentUserEmail && search.missionId) fetchSavedReview(search.missionId);
+    if (currentUserEmail && search.missionId) {
+      fetchSavedReview(search.missionId, search.source === "concept" && search.sourceId ? search.sourceId : null);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUserEmail]);
 
@@ -474,6 +656,190 @@ function TheHangarBernoulli() {
   useEffect(() => {
     if (currentUserEmail) fetchMissions();
   }, [currentUserEmail]);
+
+  // Collapsible spec blocks. Mission mode: mission spec above the report
+  // (unchanged). Concept mode: report first, then the concept's own spec,
+  // then the source mission spec it's judged against.
+  const missionSpecBlock = selectedMission ? (
+    <div className="hgr-ber-hub-spec">
+      <button
+        type="button"
+        className="hgr-ber-hub-spec-header"
+        onClick={() => setSpecExpanded((v) => !v)}
+        aria-expanded={specExpanded}
+      >
+        <span className="hgr-ber-hub-spec-header-left">
+          <span
+            className={`hgr-ber-hub-spec-arrow${specExpanded ? " hgr-ber-hub-spec-arrow-open" : ""}`}
+          >
+            ▸
+          </span>
+          <span className="hgr-ber-hub-spec-code">
+            {conceptMode ? "Source Mission Spec" : "Spec ID"}: {selectedMission.missionCode}
+          </span>
+        </span>
+        {selectedMission.confidenceScore !== null && (
+          <span className="hgr-ber-hub-spec-confidence">
+            Score: {Math.round(selectedMission.confidenceScore * 100)}%
+          </span>
+        )}
+      </button>
+
+      {specExpanded && (
+        <div className="hgr-ber-hub-spec-body">
+          {selectedMission.summary && (
+            <p className="hgr-ber-hub-spec-summary">{selectedMission.summary}</p>
+          )}
+
+          {selectedMission.missionSpecs && (
+            <div className="hgr-ber-hub-spec-fields">
+              <SpecField label="Domain" value={selectedMission.missionSpecs.domain} />
+              <SpecField
+                label="Vertical"
+                value={selectedMission.missionSpecs.vertical}
+              />
+              <SpecField
+                label="Vehicle class"
+                value={selectedMission.missionSpecs.vehicleClass}
+              />
+              <SpecField
+                label="Mission type"
+                value={selectedMission.missionSpecs.missionType}
+              />
+              <SpecField label="Phase" value={selectedMission.missionSpecs.phase} />
+              <SpecField
+                label="Environment"
+                value={selectedMission.missionSpecs.operatingEnvironment}
+              />
+            </div>
+          )}
+
+          {selectedMission.constraints && selectedMission.constraints.length > 0 && (
+            <div className="hgr-ber-hub-spec-block">
+              <div className="hgr-ber-hub-spec-block-title">
+                Constraints ({selectedMission.constraints.length})
+              </div>
+              <ul>
+                {selectedMission.constraints.map((c, i) => (
+                  <li key={i}>
+                    <b>{c.name}</b>: {c.value}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {selectedMission.kpis && selectedMission.kpis.length > 0 && (
+            <div className="hgr-ber-hub-spec-block">
+              <div className="hgr-ber-hub-spec-block-title">
+                KPIs ({selectedMission.kpis.length})
+              </div>
+              <ul>
+                {selectedMission.kpis.map((k, i) => (
+                  <li key={i}>
+                    <b>{k.name}</b>: {k.target} {k.unit} (
+                    {k.priority === "critical" ? "critical" : `#${k.priority}`})
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* In concept mode the review targets the concept, so the run
+              button lives next to the concept dropdown, not here. */}
+          {!conceptMode && (
+            <button
+              type="button"
+              className="hgr-ber-btn hgr-ber-btn-amber"
+              disabled={reviewStatus === "loading"}
+              onClick={requestCheck}
+              style={{ marginTop: 4 }}
+            >
+              {reviewStatus === "loading" ? "Checking…" : "Ask Bernoulli"}
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  ) : null;
+
+  const selectedConceptEntry = concepts?.find((c) => c.conceptId === selectedConceptId) ?? null;
+  const conceptSpecBlock =
+    conceptMode && selectedConceptEntry ? (
+      <div className="hgr-ber-hub-spec">
+        <button
+          type="button"
+          className="hgr-ber-hub-spec-header"
+          onClick={() => setConceptSpecExpanded((v) => !v)}
+          aria-expanded={conceptSpecExpanded}
+        >
+          <span className="hgr-ber-hub-spec-header-left">
+            <span className={`hgr-ber-hub-spec-arrow${conceptSpecExpanded ? " hgr-ber-hub-spec-arrow-open" : ""}`}>
+              ▸
+            </span>
+            <span className="hgr-ber-hub-spec-code">Concept Spec: {selectedConceptEntry.conceptCode}</span>
+          </span>
+          {selectedConceptEntry.confidenceScore !== null && (
+            <span className="hgr-ber-hub-spec-confidence">
+              Score: {Math.round(selectedConceptEntry.confidenceScore * 100)}%
+            </span>
+          )}
+        </button>
+
+        {conceptSpecExpanded && (
+          <div className="hgr-ber-hub-spec-body">
+            {selectedConceptEntry.rankedConcepts?.[0] && (
+              <p className="hgr-ber-hub-spec-summary">
+                Top concept: <b>{selectedConceptEntry.rankedConcepts[0].conceptName}</b>
+                {selectedConceptEntry.rankedConcepts[0].description
+                  ? ` -- ${selectedConceptEntry.rankedConcepts[0].description}`
+                  : ""}
+              </p>
+            )}
+
+            {selectedConceptEntry.rankedConcepts && selectedConceptEntry.rankedConcepts.length > 0 && (
+              <div className="hgr-ber-hub-spec-block">
+                <div className="hgr-ber-hub-spec-block-title">
+                  Ranked concepts ({selectedConceptEntry.rankedConcepts.length})
+                </div>
+                <ul>
+                  {[...selectedConceptEntry.rankedConcepts]
+                    .sort((a, b) => a.rank - b.rank)
+                    .map((r) => {
+                      const cls = selectedConceptEntry.candidateConcepts?.find(
+                        (c) => c.conceptName === r.conceptName,
+                      )?.vehicleClass;
+                      return (
+                        <li key={r.conceptName}>
+                          <b>
+                            #{r.rank} {r.conceptName}
+                          </b>
+                          {cls ? ` (${cls})` : ""}: fit {r.constraintFit}, score {r.fitScore}/10
+                        </li>
+                      );
+                    })}
+                </ul>
+              </div>
+            )}
+
+            {selectedConceptEntry.tradeOffNotes && selectedConceptEntry.tradeOffNotes.length > 0 && (
+              <div className="hgr-ber-hub-spec-block">
+                <div className="hgr-ber-hub-spec-block-title">
+                  Trade-off notes ({selectedConceptEntry.tradeOffNotes.length})
+                </div>
+                <ul>
+                  {selectedConceptEntry.tradeOffNotes.map((n) => (
+                    <li key={n.conceptName}>
+                      <b>{n.conceptName}</b>: {n.prosCons.join("; ")}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    ) : null;
 
   if (!ready) return null;
 
@@ -619,10 +985,45 @@ function TheHangarBernoulli() {
                 ) : (
                   <>
                 <label className="hgr-ber-hub-select-label" htmlFor="bernoulli-mission-select">
-                  Your missions -- spec ready or finalized
+                  {conceptMode
+                    ? "Your concepts -- concept ready"
+                    : listedStatus === "spec_ready"
+                      ? "Your missions -- spec ready"
+                      : "Your missions -- spec ready or finalized"}
                 </label>
                 <div className="hgr-ber-hub-select-row">
-                  {missionsStatus === "error" ? (
+                  {conceptMode ? (
+                    conceptsStatus === "error" ? (
+                      <div className="hgr-ber-hub-select-error">
+                        Couldn't load your concepts.{" "}
+                        <button type="button" onClick={fetchConcepts}>
+                          Retry
+                        </button>
+                      </div>
+                    ) : (
+                      <select
+                        id="bernoulli-mission-select"
+                        className="hgr-ber-hub-select"
+                        value={selectedConceptId}
+                        disabled={conceptsStatus === "loading" || concepts === null || (listedConcepts?.length ?? 0) === 0}
+                        onChange={(e) => selectConcept(e.target.value)}
+                      >
+                        <option value="">
+                          {conceptsStatus === "loading" || concepts === null
+                            ? "Loading concepts…"
+                            : (listedConcepts?.length ?? 0) === 0
+                              ? "No concept-ready concepts yet"
+                              : `Select a concept-ready concept (${listedConcepts?.length})`}
+                        </option>
+                        {listedConcepts?.map((c) => (
+                          <option key={c.conceptId} value={c.conceptId}>
+                            {c.conceptCode}
+                            {c.rankedConcepts?.[0]?.conceptName ? ` -- ${c.rankedConcepts[0].conceptName}` : ""}
+                          </option>
+                        ))}
+                      </select>
+                    )
+                  ) : missionsStatus === "error" ? (
                     <div className="hgr-ber-hub-select-error">
                       Couldn't load your missions.{" "}
                       <button type="button" onClick={fetchMissions}>
@@ -634,17 +1035,21 @@ function TheHangarBernoulli() {
                       id="bernoulli-mission-select"
                       className="hgr-ber-hub-select"
                       value={selectedMissionId}
-                      disabled={missionsStatus === "loading" || (missions?.length ?? 0) === 0}
+                      disabled={missionsStatus === "loading" || (listedMissions?.length ?? 0) === 0}
                       onChange={(e) => selectMission(e.target.value)}
                     >
                       <option value="">
                         {missionsStatus === "loading"
                           ? "Loading missions…"
-                          : (missions?.length ?? 0) === 0
-                            ? "No missions with a spec yet"
-                            : `Select a mission (${missions?.length})`}
+                          : (listedMissions?.length ?? 0) === 0
+                            ? listedStatus === "spec_ready"
+                              ? "No spec-ready missions yet"
+                              : listedStatus === "finalized"
+                                ? "No finalized missions yet"
+                                : "No missions with a spec yet"
+                            : `Select a ${listedStatus === "spec_ready" ? "spec-ready " : listedStatus === "finalized" ? "finalized " : ""}mission (${listedMissions?.length})`}
                       </option>
-                      {missions?.map((m) => (
+                      {listedMissions?.map((m) => (
                         <option key={m.missionId} value={m.missionId}>
                           {m.missionCode}
                           {m.summary ? ` -- ${m.summary.slice(0, 40)}` : ""}
@@ -663,138 +1068,40 @@ function TheHangarBernoulli() {
                 </div>
                 <p className="hgr-ber-hub-select-hint">
                   {checkTriggered
-                    ? "Runs BERN-M01–M06 against the selected spec -- deterministic checks plus two TorqWings AI calls."
+                    ? reviewConceptId
+                      ? `Runs ${runSummary} against this concept run's output, judged against the mission's KPIs.`
+                      : `Runs ${runSummary} against the selected spec.`
                     : "Picking a mission doesn't run a check yet -- Ask Bernoulli opens the report below."}
                 </p>
 
-                <ul className="hgr-ber-rules-legend">
-                  {BERN_RULES.map((r) => (
-                    <li key={r.id}>
-                      <span className="hgr-ber-rules-legend-id">
-                        {r.id}
-                        {r.hardGate && <span className="hgr-ber-rules-legend-gate">HARD GATE</span>}
-                      </span>
-                      <span className="hgr-ber-rules-legend-name">{r.name}</span>
-                      <span className="hgr-ber-rules-legend-desc">{r.description}</span>
-                    </li>
-                  ))}
-                </ul>
-
-                {selectedMission && (
-                  <div className="hgr-ber-hub-spec">
-                    <button
-                      type="button"
-                      className="hgr-ber-hub-spec-header"
-                      onClick={() => setSpecExpanded((v) => !v)}
-                      aria-expanded={specExpanded}
-                    >
-                      <span className="hgr-ber-hub-spec-header-left">
-                        <span
-                          className={`hgr-ber-hub-spec-arrow${specExpanded ? " hgr-ber-hub-spec-arrow-open" : ""}`}
-                        >
-                          ▸
-                        </span>
-                        <span className="hgr-ber-hub-spec-code">
-                          Spec ID: {selectedMission.missionCode}
-                        </span>
-                      </span>
-                      {selectedMission.confidenceScore !== null && (
-                        <span className="hgr-ber-hub-spec-confidence">
-                          Score: {Math.round(selectedMission.confidenceScore * 100)}%
-                        </span>
-                      )}
-                    </button>
-
-                    {specExpanded && (
-                      <div className="hgr-ber-hub-spec-body">
-                        {selectedMission.summary && (
-                          <p className="hgr-ber-hub-spec-summary">{selectedMission.summary}</p>
-                        )}
-
-                        {selectedMission.missionSpecs && (
-                          <div className="hgr-ber-hub-spec-fields">
-                            <SpecField label="Domain" value={selectedMission.missionSpecs.domain} />
-                            <SpecField
-                              label="Vertical"
-                              value={selectedMission.missionSpecs.vertical}
-                            />
-                            <SpecField
-                              label="Vehicle class"
-                              value={selectedMission.missionSpecs.vehicleClass}
-                            />
-                            <SpecField
-                              label="Mission type"
-                              value={selectedMission.missionSpecs.missionType}
-                            />
-                            <SpecField label="Phase" value={selectedMission.missionSpecs.phase} />
-                            <SpecField
-                              label="Environment"
-                              value={selectedMission.missionSpecs.operatingEnvironment}
-                            />
-                          </div>
-                        )}
-
-                        {selectedMission.constraints && selectedMission.constraints.length > 0 && (
-                          <div className="hgr-ber-hub-spec-block">
-                            <div className="hgr-ber-hub-spec-block-title">
-                              Constraints ({selectedMission.constraints.length})
-                            </div>
-                            <ul>
-                              {selectedMission.constraints.map((c, i) => (
-                                <li key={i}>
-                                  <b>{c.name}</b>: {c.value}
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-
-                        {selectedMission.kpis && selectedMission.kpis.length > 0 && (
-                          <div className="hgr-ber-hub-spec-block">
-                            <div className="hgr-ber-hub-spec-block-title">
-                              KPIs ({selectedMission.kpis.length})
-                            </div>
-                            <ul>
-                              {selectedMission.kpis.map((k, i) => (
-                                <li key={i}>
-                                  <b>{k.name}</b>: {k.target} {k.unit} (
-                                  {k.priority === "critical" ? "critical" : `#${k.priority}`})
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-
-                        <button
-                          type="button"
-                          className="hgr-ber-btn hgr-ber-btn-amber"
-                          disabled={reviewStatus === "loading"}
-                          onClick={requestCheck}
-                          style={{ marginTop: 4 }}
-                        >
-                          {reviewStatus === "loading" ? "Checking…" : "Ask Bernoulli"}
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                )}
+                {!conceptMode && missionSpecBlock}
 
                 {checkTriggered && selectedMission && (
                   <div className="hgr-ber-hub-report">
-                    <div className="hgr-ber-hub-report-title">
-                      Bernoulli report -- {selectedMission.missionCode}
+                    {/* Same title -> Requests & tokens -> details order as Bay 01/02. */}
+                    <div className="hgr-ber-run-title">
+                      <span className="hgr-ber-run-title-code">
+                        {reviewResult?.sourceBay === "concept" && reviewResult.conceptCode
+                          ? reviewResult.conceptCode
+                          : selectedMission.missionCode}
+                      </span>
+                      <h3>
+                        {(reviewResult?.sourceBay ?? (reviewConceptId ? "concept" : "mission")) === "concept"
+                          ? "Concept Bernoulli report"
+                          : "Mission Spec Bernoulli report"}
+                      </h3>
                       {reviewResult && (
-                        <span className="hgr-ber-hub-report-date">
-                          {" "}
-                          -- {new Date(reviewResult.createdAt).toLocaleString()}
+                        <span className="hgr-ber-run-title-date">
+                          Reviewed {new Date(reviewResult.createdAt).toLocaleString()}
                         </span>
                       )}
                     </div>
 
                     {reviewStatus === "loading" && (
                       <p className="hgr-ber-hub-report-placeholder">
-                        Running BERN-M01–M06 -- deterministic checks are instant, the two TorqWings AI
-                        calls (BERN-M03, BERN-M06) can take a few seconds…
+                        {reviewConceptId
+                          ? `Running ${runSummary} -- the rule-based checks are instant, the TorqWings AI calls can take a few seconds…`
+                          : `Running ${runSummary} -- the rule-based checks are instant, the TorqWings AI calls can take a few seconds…`}
                       </p>
                     )}
 
@@ -813,12 +1120,18 @@ function TheHangarBernoulli() {
 
                     {reviewStatus === "idle" && reviewResult && (
                       <>
+                        <BernoulliUsageDetails review={reviewResult} />
                         <div className="hgr-ber-report-summary">
                           <span className={`hgr-ber-verdict hgr-ber-verdict-${reviewResult.verdict}`}>
                             {reviewResult.verdict}
                           </span>
                           <span className="hgr-ber-report-confidence">
                             {Math.round(reviewResult.confidenceScore * 100)}% confidence
+                          </span>
+                          <span className="hgr-ber-report-target">
+                            {reviewResult.sourceBay === "concept"
+                              ? `Reviewed: Bay 02 concept run${reviewResult.conceptCode ? ` ${reviewResult.conceptCode}` : ""}`
+                              : "Reviewed: Bay 01 mission spec"}
                           </span>
                         </div>
                         <ul className="hgr-ber-check-list">
@@ -827,7 +1140,7 @@ function TheHangarBernoulli() {
                               <span className="hgr-ber-check-rule">
                                 {c.ruleId}
                                 <span className="hgr-ber-check-rule-name">
-                                  {BERN_RULE_NAMES[c.ruleId] ?? ""}
+                                  {c.ruleName ?? BERN_RULE_NAMES[c.ruleId] ?? ""}
                                 </span>
                               </span>
                               <span className={`hgr-ber-check-badge hgr-ber-check-badge-${c.status}`}>
@@ -845,12 +1158,32 @@ function TheHangarBernoulli() {
                             </li>
                           ))}
                         </ul>
-                        <BernoulliTelemetryBar review={reviewResult} />
-                        <BernoulliUsageTable review={reviewResult} />
                       </>
                     )}
                   </div>
                 )}
+
+                {conceptMode && conceptSpecBlock}
+                {conceptMode && missionSpecBlock}
+
+                {/* Check definitions sit below the report: reference
+                    material, not something to read before every run. */}
+                <div className="hgr-ber-rules-legend-title">What each check does</div>
+                <ul className="hgr-ber-rules-legend">
+                  {visibleRules.map((r) => (
+                    <li key={r.id}>
+                      <span className="hgr-ber-rules-legend-id">
+                        {r.id}
+                        {r.hardGate && <span className="hgr-ber-rules-legend-gate">HARD GATE</span>}
+                        <span className={`hgr-ber-rules-legend-kind hgr-ber-rules-legend-kind-${r.kind}`}>
+                          {r.kind === "llm" ? "TORQWINGS AI" : "RULE"}
+                        </span>
+                      </span>
+                      <span className="hgr-ber-rules-legend-name">{r.name}</span>
+                      <span className="hgr-ber-rules-legend-desc">{r.description}</span>
+                    </li>
+                  ))}
+                </ul>
                   </>
                 )}
               </div>
@@ -1084,6 +1417,24 @@ const HGR_BERNOULLI_CSS = `
   border-radius:2px; padding:20px 22px;
 }
 .hgr-ber-hub-report-title{ font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--hgr-ber-amber-bright); margin-bottom:10px; }
+.hgr-ber-rules-legend-title{ margin-top:18px; font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; font-weight:700; color:var(--hgr-ber-paper); }
+.hgr-ber-run-title{ display:flex; align-items:baseline; flex-wrap:wrap; gap:4px 12px; margin-bottom:14px; padding-bottom:10px; border-bottom:1px solid var(--hgr-ber-blue-line); }
+.hgr-ber-run-title-code{ font-family:'IBM Plex Mono',monospace; font-size:12.5px; font-weight:700; letter-spacing:.04em; color:var(--hgr-ber-blue-bright); }
+.hgr-ber-run-title h3{ font-size:18px; margin:0; color:var(--hgr-ber-paper); }
+.hgr-ber-run-title-date{ flex-basis:100%; font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--hgr-ber-paper-dim); }
+.hgr-ber-usage-details{ margin:0 0 14px; border:1px solid var(--hgr-ber-hairline); border-radius:2px; background:var(--hgr-ber-navy-panel); }
+.hgr-ber-usage-details > summary{
+  display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;
+  padding:10px 14px; cursor:pointer; list-style:none;
+  background:#E4EEF7; border-left:3px solid var(--hgr-ber-blue-bright);
+}
+.hgr-ber-usage-details > summary::-webkit-details-marker{ display:none; }
+.hgr-ber-usage-details-label{ font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.08em; text-transform:uppercase; font-weight:700; color:var(--hgr-ber-paper); }
+.hgr-ber-usage-details-label::before{ content:"▸ "; }
+.hgr-ber-usage-details[open] .hgr-ber-usage-details-label::before{ content:"▾ "; }
+.hgr-ber-usage-details-totals{ font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--hgr-ber-paper-dim); }
+.hgr-ber-usage-details .hgr-ber-telemetry{ margin:0; border:none; border-top:1px solid var(--hgr-ber-hairline); }
+.hgr-ber-usage-details .hgr-ber-usage-table{ margin:0; border:none; border-top:1px solid var(--hgr-ber-hairline); }
 .hgr-ber-hub-report-date{ text-transform:none; color:var(--hgr-ber-paper-dim); font-weight:400; }
 .hgr-ber-hub-report-placeholder{ font-size:13px; color:var(--hgr-ber-paper-dim); line-height:1.6; margin:0; }
 .hgr-ber-hub-report-error p{ font-size:13px; color:var(--hgr-ber-paper); margin:0 0 10px; }
@@ -1100,6 +1451,7 @@ const HGR_BERNOULLI_CSS = `
 .hgr-ber-verdict-WARN{ background:rgba(232,163,61,.18); color:var(--hgr-ber-amber-bright); }
 .hgr-ber-verdict-FAIL{ background:rgba(224,113,90,.18); color:var(--hgr-ber-red); }
 .hgr-ber-report-confidence{ font-family:'IBM Plex Mono',monospace; font-size:12.5px; color:var(--hgr-ber-paper-dim); }
+.hgr-ber-report-target{ margin-left:auto; font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:700; letter-spacing:.04em; color:var(--hgr-ber-blue-bright); border:1px solid var(--hgr-ber-blue-line); background:#E4EEF7; padding:3px 9px; border-radius:2px; }
 
 .hgr-ber-check-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:1px; background:var(--hgr-ber-hairline); border:1px solid var(--hgr-ber-hairline); }
 .hgr-ber-check-row{ display:grid; grid-template-columns:140px 60px 1fr; gap:10px; align-items:start; background:var(--hgr-ber-navy-panel); padding:10px 12px; }
@@ -1111,6 +1463,9 @@ const HGR_BERNOULLI_CSS = `
 .hgr-ber-rules-legend{ list-style:none; margin:14px 0 0; padding:0; display:flex; flex-direction:column; gap:8px; }
 .hgr-ber-rules-legend li{ display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; font-size:12px; line-height:1.5; }
 .hgr-ber-rules-legend-id{ font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--hgr-ber-blue-bright); flex-shrink:0; display:inline-flex; align-items:center; gap:6px; }
+.hgr-ber-rules-legend-kind{ font-family:'IBM Plex Mono',monospace; font-size:8.5px; letter-spacing:.05em; border-radius:2px; padding:1px 5px; margin-left:4px; }
+.hgr-ber-rules-legend-kind-rule{ color:var(--hgr-ber-blue-bright); border:1px solid rgba(28,116,184,.35); }
+.hgr-ber-rules-legend-kind-llm{ color:#6A4BC4; border:1px solid rgba(106,75,196,.4); }
 .hgr-ber-rules-legend-gate{ font-family:'IBM Plex Mono',monospace; font-size:8.5px; letter-spacing:.05em; color:var(--hgr-ber-amber-bright); border:1px solid rgba(232,163,61,.4); border-radius:2px; padding:1px 5px; }
 .hgr-ber-rules-legend-name{ font-weight:600; color:var(--hgr-ber-paper); flex-shrink:0; }
 .hgr-ber-rules-legend-desc{ color:var(--hgr-ber-paper-dim); }
