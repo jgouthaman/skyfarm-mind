@@ -84,7 +84,9 @@ import { Route as TheHangarWelcomeRouteImport } from './routes/the-hangar.welcom
 import { Route as LayoutAuthCallbackRouteImport } from './routes/_layout.auth.callback'
 import { Route as ApiHangarAircraftDesignsRouteImport } from './routes/api.hangar.aircraft-designs'
 import { Route as ApiHangarBernoulliReviewRouteImport } from './routes/api.hangar.bernoulli-review'
+import { Route as ApiHangarBernoulliReviewProgressRouteImport } from './routes/api.hangar.bernoulli-review-progress'
 import { Route as ApiHangarBernoulliRulesRouteImport } from './routes/api.hangar.bernoulli-rules'
+import { Route as ApiHangarBernoulliRulesTestRouteImport } from './routes/api.hangar.bernoulli-rules-test'
 import { Route as ApiHangarCadDesignsRouteImport } from './routes/api.hangar.cad-designs'
 import { Route as ApiHangarCertificationsRouteImport } from './routes/api.hangar.certifications'
 import { Route as ApiHangarCfdAnalysesRouteImport } from './routes/api.hangar.cfd-analyses'
@@ -539,11 +541,23 @@ const ApiHangarBernoulliReviewRoute =
     path: '/api/hangar/bernoulli-review',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiHangarBernoulliReviewProgressRoute =
+  ApiHangarBernoulliReviewProgressRouteImport.update({
+    id: '/api/hangar/bernoulli-review-progress',
+    path: '/api/hangar/bernoulli-review-progress',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiHangarBernoulliRulesRoute = ApiHangarBernoulliRulesRouteImport.update({
   id: '/api/hangar/bernoulli-rules',
   path: '/api/hangar/bernoulli-rules',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiHangarBernoulliRulesTestRoute =
+  ApiHangarBernoulliRulesTestRouteImport.update({
+    id: '/api/hangar/bernoulli-rules-test',
+    path: '/api/hangar/bernoulli-rules-test',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiHangarCadDesignsRoute = ApiHangarCadDesignsRouteImport.update({
   id: '/api/hangar/cad-designs',
   path: '/api/hangar/cad-designs',
@@ -984,7 +998,9 @@ export interface FileRoutesByFullPath {
   '/auth/callback': typeof LayoutAuthCallbackRoute
   '/api/hangar/aircraft-designs': typeof ApiHangarAircraftDesignsRoute
   '/api/hangar/bernoulli-review': typeof ApiHangarBernoulliReviewRoute
+  '/api/hangar/bernoulli-review-progress': typeof ApiHangarBernoulliReviewProgressRoute
   '/api/hangar/bernoulli-rules': typeof ApiHangarBernoulliRulesRoute
+  '/api/hangar/bernoulli-rules-test': typeof ApiHangarBernoulliRulesTestRoute
   '/api/hangar/cad-designs': typeof ApiHangarCadDesignsRoute
   '/api/hangar/certifications': typeof ApiHangarCertificationsRoute
   '/api/hangar/cfd-analyses': typeof ApiHangarCfdAnalysesRoute
@@ -1120,7 +1136,9 @@ export interface FileRoutesByTo {
   '/auth/callback': typeof LayoutAuthCallbackRoute
   '/api/hangar/aircraft-designs': typeof ApiHangarAircraftDesignsRoute
   '/api/hangar/bernoulli-review': typeof ApiHangarBernoulliReviewRoute
+  '/api/hangar/bernoulli-review-progress': typeof ApiHangarBernoulliReviewProgressRoute
   '/api/hangar/bernoulli-rules': typeof ApiHangarBernoulliRulesRoute
+  '/api/hangar/bernoulli-rules-test': typeof ApiHangarBernoulliRulesTestRoute
   '/api/hangar/cad-designs': typeof ApiHangarCadDesignsRoute
   '/api/hangar/certifications': typeof ApiHangarCertificationsRoute
   '/api/hangar/cfd-analyses': typeof ApiHangarCfdAnalysesRoute
@@ -1264,7 +1282,9 @@ export interface FileRoutesById {
   '/_layout/auth/callback': typeof LayoutAuthCallbackRoute
   '/api/hangar/aircraft-designs': typeof ApiHangarAircraftDesignsRoute
   '/api/hangar/bernoulli-review': typeof ApiHangarBernoulliReviewRoute
+  '/api/hangar/bernoulli-review-progress': typeof ApiHangarBernoulliReviewProgressRoute
   '/api/hangar/bernoulli-rules': typeof ApiHangarBernoulliRulesRoute
+  '/api/hangar/bernoulli-rules-test': typeof ApiHangarBernoulliRulesTestRoute
   '/api/hangar/cad-designs': typeof ApiHangarCadDesignsRoute
   '/api/hangar/certifications': typeof ApiHangarCertificationsRoute
   '/api/hangar/cfd-analyses': typeof ApiHangarCfdAnalysesRoute
@@ -1408,7 +1428,9 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/api/hangar/aircraft-designs'
     | '/api/hangar/bernoulli-review'
+    | '/api/hangar/bernoulli-review-progress'
     | '/api/hangar/bernoulli-rules'
+    | '/api/hangar/bernoulli-rules-test'
     | '/api/hangar/cad-designs'
     | '/api/hangar/certifications'
     | '/api/hangar/cfd-analyses'
@@ -1544,7 +1566,9 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/api/hangar/aircraft-designs'
     | '/api/hangar/bernoulli-review'
+    | '/api/hangar/bernoulli-review-progress'
     | '/api/hangar/bernoulli-rules'
+    | '/api/hangar/bernoulli-rules-test'
     | '/api/hangar/cad-designs'
     | '/api/hangar/certifications'
     | '/api/hangar/cfd-analyses'
@@ -1687,7 +1711,9 @@ export interface FileRouteTypes {
     | '/_layout/auth/callback'
     | '/api/hangar/aircraft-designs'
     | '/api/hangar/bernoulli-review'
+    | '/api/hangar/bernoulli-review-progress'
     | '/api/hangar/bernoulli-rules'
+    | '/api/hangar/bernoulli-rules-test'
     | '/api/hangar/cad-designs'
     | '/api/hangar/certifications'
     | '/api/hangar/cfd-analyses'
@@ -1769,7 +1795,9 @@ export interface RootRouteChildren {
   THIndexRoute: typeof THIndexRoute
   ApiHangarAircraftDesignsRoute: typeof ApiHangarAircraftDesignsRoute
   ApiHangarBernoulliReviewRoute: typeof ApiHangarBernoulliReviewRoute
+  ApiHangarBernoulliReviewProgressRoute: typeof ApiHangarBernoulliReviewProgressRoute
   ApiHangarBernoulliRulesRoute: typeof ApiHangarBernoulliRulesRoute
+  ApiHangarBernoulliRulesTestRoute: typeof ApiHangarBernoulliRulesTestRoute
   ApiHangarCadDesignsRoute: typeof ApiHangarCadDesignsRoute
   ApiHangarCertificationsRoute: typeof ApiHangarCertificationsRoute
   ApiHangarCfdAnalysesRoute: typeof ApiHangarCfdAnalysesRoute
@@ -2341,11 +2369,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiHangarBernoulliReviewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/hangar/bernoulli-review-progress': {
+      id: '/api/hangar/bernoulli-review-progress'
+      path: '/api/hangar/bernoulli-review-progress'
+      fullPath: '/api/hangar/bernoulli-review-progress'
+      preLoaderRoute: typeof ApiHangarBernoulliReviewProgressRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/hangar/bernoulli-rules': {
       id: '/api/hangar/bernoulli-rules'
       path: '/api/hangar/bernoulli-rules'
       fullPath: '/api/hangar/bernoulli-rules'
       preLoaderRoute: typeof ApiHangarBernoulliRulesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/hangar/bernoulli-rules-test': {
+      id: '/api/hangar/bernoulli-rules-test'
+      path: '/api/hangar/bernoulli-rules-test'
+      fullPath: '/api/hangar/bernoulli-rules-test'
+      preLoaderRoute: typeof ApiHangarBernoulliRulesTestRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/hangar/cad-designs': {
@@ -3072,7 +3114,9 @@ const rootRouteChildren: RootRouteChildren = {
   THIndexRoute: THIndexRoute,
   ApiHangarAircraftDesignsRoute: ApiHangarAircraftDesignsRoute,
   ApiHangarBernoulliReviewRoute: ApiHangarBernoulliReviewRoute,
+  ApiHangarBernoulliReviewProgressRoute: ApiHangarBernoulliReviewProgressRoute,
   ApiHangarBernoulliRulesRoute: ApiHangarBernoulliRulesRoute,
+  ApiHangarBernoulliRulesTestRoute: ApiHangarBernoulliRulesTestRoute,
   ApiHangarCadDesignsRoute: ApiHangarCadDesignsRoute,
   ApiHangarCertificationsRoute: ApiHangarCertificationsRoute,
   ApiHangarCfdAnalysesRoute: ApiHangarCfdAnalysesRoute,

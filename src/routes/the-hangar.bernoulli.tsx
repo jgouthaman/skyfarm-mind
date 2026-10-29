@@ -13,6 +13,8 @@ import { describeInrCost, formatCostInr } from "@/lib/the-hangar/missionUsage";
 interface BernoulliCheckView {
   ruleId: string;
   ruleName?: string;
+  targets?: string[];
+  capped?: boolean;
   status: "PASS" | "WARN" | "FAIL" | "INFO";
   message: string;
   sourceWasMock: boolean;
@@ -46,6 +48,58 @@ interface BernoulliReviewView {
   sourceBay?: "mission" | "concept";
   conceptId?: string | null;
   conceptCode?: string | null;
+}
+
+// FAIL first, then WARN, then INFO -- PASS checks are listed separately,
+// collapsed (PassedChecks).
+const REPORT_ORDER: Record<string, number> = { FAIL: 0, WARN: 1, INFO: 2, PASS: 3 };
+function sortForReport(checks: BernoulliCheckView[]): BernoulliCheckView[] {
+  return [...checks].sort((a, b) => (REPORT_ORDER[a.status] ?? 9) - (REPORT_ORDER[b.status] ?? 9));
+}
+
+function describeTarget(t: string): string {
+  const [kind, ...rest] = t.split(":");
+  const name = rest.join(":");
+  return kind === "kpi" ? `KPI ${name}` : kind === "constraint" ? `constraint ${name}` : kind === "concept" ? `concept ${name}` : t;
+}
+
+function ReportSummaryStrip({ checks }: { checks: BernoulliCheckView[] }) {
+  const n = (s: string) => checks.filter((c) => c.status === s).length;
+  const parts: [string, number, string][] = [
+    ["FAIL", n("FAIL"), "failed"],
+    ["WARN", n("WARN"), "to review"],
+    ["PASS", n("PASS"), "passed"],
+    ["INFO", n("INFO"), "not applicable"],
+  ];
+  return (
+    <div className="hgr-ber-strip" aria-label="Check results">
+      {parts
+        .filter(([, count]) => count > 0)
+        .map(([s, count, label]) => (
+          <span key={s} className={`hgr-ber-strip-item hgr-ber-strip-${s}`}>
+            <b>{count}</b> {label}
+          </span>
+        ))}
+    </div>
+  );
+}
+
+function PassedChecks({ checks }: { checks: BernoulliCheckView[] }) {
+  if (checks.length === 0) return null;
+  return (
+    <details className="hgr-ber-passed">
+      <summary>
+        {checks.length} passed check{checks.length === 1 ? "" : "s"}
+      </summary>
+      <ul>
+        {checks.map((c) => (
+          <li key={c.ruleId}>
+            <b>{c.ruleId}</b> {c.ruleName ?? BERN_RULE_NAMES[c.ruleId] ?? ""} -- {c.message}
+          </li>
+        ))}
+      </ul>
+    </details>
+  );
 }
 
 function formatDuration(ms: number): string {
@@ -463,8 +517,13 @@ function TheHangarBernoulli() {
     setReviewError(null);
   }
 
+  // "Check 7 of 14" while a review runs: the page generates a run id, sends
+  // it with the POST, and polls the progress endpoint until the POST returns.
+  const [runProgress, setRunProgress] = useState<{ done: number; total: number; current: string | null } | null>(null);
+
   async function requestCheck() {
     if (!selectedMissionId) return;
+    setRunProgress(null);
     setCheckTriggered(true);
     setSpecExpanded(false);
     setConceptSpecExpanded(false);
@@ -477,14 +536,32 @@ function TheHangarBernoulli() {
       setReviewError("No signed-in TorqWings session found. Sign in with a real TorqWings account first, then retry.");
       return;
     }
+    const clientRunId = crypto.randomUUID();
+    let finished = false;
+    const poll = async () => {
+      while (!finished) {
+        await new Promise((r) => setTimeout(r, 1500));
+        if (finished) break;
+        try {
+          const res = await fetch(`/api/hangar/bernoulli-review-progress?clientRunId=${clientRunId}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          const json = res.ok ? await res.json() : null;
+          if (!finished && json?.progress) setRunProgress(json.progress);
+        } catch {
+          // progress is cosmetic -- the POST below is what matters
+        }
+      }
+    };
+    void poll();
     try {
       const res = await fetch("/api/hangar/process-bernoulli/review", {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify(
           reviewConceptId
-            ? { missionId: selectedMissionId, source: "concept", sourceId: reviewConceptId }
-            : { missionId: selectedMissionId },
+            ? { missionId: selectedMissionId, source: "concept", sourceId: reviewConceptId, clientRunId }
+            : { missionId: selectedMissionId, clientRunId },
         ),
       });
       const json = await res.json();
@@ -496,6 +573,9 @@ function TheHangarBernoulli() {
       setReviewError(
         err instanceof Error ? err.message : "Unexpected error -- check your connection and try again.",
       );
+    } finally {
+      finished = true;
+      setRunProgress(null);
     }
   }
 
@@ -660,6 +740,31 @@ function TheHangarBernoulli() {
   // Collapsible spec blocks. Mission mode: mission spec above the report
   // (unchanged). Concept mode: report first, then the concept's own spec,
   // then the source mission spec it's judged against.
+  // Spec items named by a WARN/FAIL check's targets get a marker in the spec
+  // panels -- only while the report shown is for the selected mission/concept.
+  const STATUS_RANK: Record<string, number> = { FAIL: 2, WARN: 1 };
+  const targetStatus = new Map<string, "FAIL" | "WARN">();
+  if (reviewResult && reviewResult.missionId === selectedMissionId) {
+    for (const c of reviewResult.checks) {
+      if (c.status !== "FAIL" && c.status !== "WARN") continue;
+      for (const t of c.targets ?? []) {
+        const key = t.toLowerCase();
+        const cur = targetStatus.get(key);
+        if (!cur || STATUS_RANK[c.status] > STATUS_RANK[cur]) targetStatus.set(key, c.status);
+      }
+    }
+  }
+  const mark = (kind: "kpi" | "constraint" | "concept", name: string) => {
+    const st = targetStatus.get(`${kind}:${name}`.toLowerCase());
+    return st ? (
+      <span
+        className={`hgr-ber-target-dot hgr-ber-target-dot-${st}`}
+        title={`Flagged ${st} by this Bernoulli report`}
+        aria-label={`Flagged ${st}`}
+      />
+    ) : null;
+  };
+
   const missionSpecBlock = selectedMission ? (
     <div className="hgr-ber-hub-spec">
       <button
@@ -722,6 +827,7 @@ function TheHangarBernoulli() {
               <ul>
                 {selectedMission.constraints.map((c, i) => (
                   <li key={i}>
+                    {mark("constraint", c.name)}
                     <b>{c.name}</b>: {c.value}
                   </li>
                 ))}
@@ -737,6 +843,7 @@ function TheHangarBernoulli() {
               <ul>
                 {selectedMission.kpis.map((k, i) => (
                   <li key={i}>
+                    {mark("kpi", k.name)}
                     <b>{k.name}</b>: {k.target} {k.unit} (
                     {k.priority === "critical" ? "critical" : `#${k.priority}`})
                   </li>
@@ -811,6 +918,7 @@ function TheHangarBernoulli() {
                       )?.vehicleClass;
                       return (
                         <li key={r.conceptName}>
+                          {mark("concept", r.conceptName)}
                           <b>
                             #{r.rank} {r.conceptName}
                           </b>
@@ -1098,11 +1206,24 @@ function TheHangarBernoulli() {
                     </div>
 
                     {reviewStatus === "loading" && (
-                      <p className="hgr-ber-hub-report-placeholder">
-                        {reviewConceptId
-                          ? `Running ${runSummary} -- the rule-based checks are instant, the TorqWings AI calls can take a few seconds…`
-                          : `Running ${runSummary} -- the rule-based checks are instant, the TorqWings AI calls can take a few seconds…`}
-                      </p>
+                      <div className="hgr-ber-progress">
+                        {runProgress && runProgress.total > 0 ? (
+                          <>
+                            <div className="hgr-ber-progress-line">
+                              Check {Math.min(runProgress.done + 1, runProgress.total)} of {runProgress.total}
+                              {runProgress.current ? ` -- ${runProgress.current}` : " -- saving the report"}
+                            </div>
+                            <div className="hgr-ber-progress-bar">
+                              <span style={{ width: `${Math.round((runProgress.done / runProgress.total) * 100)}%` }} />
+                            </div>
+                          </>
+                        ) : (
+                          <div className="hgr-ber-progress-line">
+                            Starting {runSummary} -- the rule-based checks are instant, the TorqWings AI calls take a few
+                            seconds…
+                          </div>
+                        )}
+                      </div>
                     )}
 
                     {reviewStatus === "error" && (
@@ -1134,8 +1255,11 @@ function TheHangarBernoulli() {
                               : "Reviewed: Bay 01 mission spec"}
                           </span>
                         </div>
+                        <ReportSummaryStrip checks={reviewResult.checks} />
                         <ul className="hgr-ber-check-list">
-                          {reviewResult.checks.map((c) => (
+                          {sortForReport(reviewResult.checks)
+                            .filter((c) => c.status !== "PASS")
+                            .map((c) => (
                             <li key={c.ruleId} className="hgr-ber-check-row">
                               <span className="hgr-ber-check-rule">
                                 {c.ruleId}
@@ -1152,12 +1276,21 @@ function TheHangarBernoulli() {
                                   <span className="hgr-ber-check-mock"> -- via TorqWings AI (mock)</span>
                                 )}
                               </span>
+                              {c.capped && (
+                                <span className="hgr-ber-check-capped">Capped at WARN by the rule's max result (the AI said FAIL).</span>
+                              )}
+                              {c.targets && c.targets.length > 0 && (
+                                <span className="hgr-ber-check-targets">
+                                  About: {c.targets.map(describeTarget).join(" · ")}
+                                </span>
+                              )}
                               {c.reasoning && (
                                 <span className="hgr-ber-check-reasoning">{c.reasoning}</span>
                               )}
                             </li>
                           ))}
                         </ul>
+                        <PassedChecks checks={reviewResult.checks.filter((c) => c.status === "PASS")} />
                       </>
                     )}
                   </div>
@@ -1418,6 +1551,24 @@ const HGR_BERNOULLI_CSS = `
 }
 .hgr-ber-hub-report-title{ font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--hgr-ber-amber-bright); margin-bottom:10px; }
 .hgr-ber-rules-legend-title{ margin-top:18px; font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; font-weight:700; color:var(--hgr-ber-paper); }
+.hgr-ber-progress{ margin:6px 0 12px; }
+.hgr-ber-progress-line{ font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--hgr-ber-paper); }
+.hgr-ber-progress-bar{ margin-top:6px; height:6px; background:#E4EEF7; border-radius:3px; overflow:hidden; }
+.hgr-ber-progress-bar span{ display:block; height:100%; background:var(--hgr-ber-blue-bright); transition:width .4s ease; }
+.hgr-ber-strip{ display:flex; flex-wrap:wrap; gap:6px; margin:10px 0; }
+.hgr-ber-strip-item{ font-family:'IBM Plex Mono',monospace; font-size:11.5px; padding:4px 10px; border-radius:3px; }
+.hgr-ber-strip-FAIL{ background:#FDE8E6; color:#B23A3A; }
+.hgr-ber-strip-WARN{ background:#FDF3E3; color:var(--hgr-ber-amber-bright); }
+.hgr-ber-strip-PASS{ background:#DCFCE7; color:#166534; }
+.hgr-ber-strip-INFO{ background:#E4EEF7; color:var(--hgr-ber-paper-dim); }
+.hgr-ber-check-capped{ grid-column:1 / -1; font-size:11.5px; color:var(--hgr-ber-amber-bright); }
+.hgr-ber-check-targets{ grid-column:1 / -1; font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--hgr-ber-paper); }
+.hgr-ber-passed{ margin-top:8px; border:1px solid var(--hgr-ber-hairline); border-radius:2px; background:var(--hgr-ber-navy-panel); }
+.hgr-ber-passed summary{ cursor:pointer; padding:8px 12px; font-family:'IBM Plex Mono',monospace; font-size:11.5px; font-weight:700; color:#166534; }
+.hgr-ber-passed ul{ margin:0; padding:4px 12px 10px 28px; font-size:12px; line-height:1.6; color:var(--hgr-ber-paper-dim); }
+.hgr-ber-target-dot{ display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:6px; vertical-align:middle; }
+.hgr-ber-target-dot-FAIL{ background:#C0392B; box-shadow:0 0 0 2px rgba(192,57,43,.2); }
+.hgr-ber-target-dot-WARN{ background:var(--hgr-ber-amber); box-shadow:0 0 0 2px rgba(232,163,61,.25); }
 .hgr-ber-run-title{ display:flex; align-items:baseline; flex-wrap:wrap; gap:4px 12px; margin-bottom:14px; padding-bottom:10px; border-bottom:1px solid var(--hgr-ber-blue-line); }
 .hgr-ber-run-title-code{ font-family:'IBM Plex Mono',monospace; font-size:12.5px; font-weight:700; letter-spacing:.04em; color:var(--hgr-ber-blue-bright); }
 .hgr-ber-run-title h3{ font-size:18px; margin:0; color:var(--hgr-ber-paper); }
