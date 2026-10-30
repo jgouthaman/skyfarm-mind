@@ -1,0 +1,1354 @@
+{
+  "design": {
+    "id": "agile_recon",
+    "name": "Agile Recon UAV",
+    "title": "Agile Recon UAV · complete aircraft",
+    "subtitle": "52-part assembly generated from Bay 03 parameters · parsed and checked on upload"
+  },
+  "source": {
+    "file": "AGILE_RECON_UAV_complete_aircraft.step",
+    "size_bytes": 19818595,
+    "schema": "AP214 (AUTOMOTIVE_DESIGN)",
+    "generator": "build123d · Open CASCADE STEP processor 8.0",
+    "created": "2026-10-07T16:24:35",
+    "entities": 250081,
+    "line_count": 319088
+  },
+  "units": {
+    "length": "mm",
+    "angle": "rad",
+    "tolerance_mm": 0.001
+  },
+  "envelope_mm": {
+    "length": 841.6,
+    "span": 1201.6,
+    "height": 339.8
+  },
+  "wing_derived": {
+    "root_chord_mm": 240.8,
+    "tip_chord_mm": 161.8,
+    "taper_ratio": 0.67,
+    "ref_area_m2": 0.2399,
+    "aspect_ratio": 6.02,
+    "le_sweep_deg": 25,
+    "note": "derived from rib stations 000 and 005"
+  },
+  "assembly": {
+    "root": "parametric_aircraft",
+    "parts": 52,
+    "brep_solids": 88,
+    "faces": 425,
+    "groups": {
+      "Outer mould line": [
+        "fuselage",
+        "left_wing",
+        "right_wing",
+        "left_horizontal_tail",
+        "right_horizontal_tail",
+        "vertical_tail"
+      ],
+      "Propulsion": [
+        "motor_mount",
+        "motor_envelope",
+        "propeller",
+        "Motor_Firewall"
+      ],
+      "Internal envelopes": [
+        "payload_envelope",
+        "battery_envelope",
+        "avionics_envelope"
+      ],
+      "Wing structure": [
+        "MainWing_Left_MainSpar",
+        "MainWing_Left_RearSpar",
+        "MainWing_Left_Rib_000",
+        "MainWing_Left_Rib_001",
+        "MainWing_Left_Rib_002",
+        "MainWing_Left_Rib_003",
+        "MainWing_Left_Rib_004",
+        "MainWing_Left_Rib_005",
+        "MainWing_Right_MainSpar",
+        "MainWing_Right_RearSpar",
+        "MainWing_Right_Rib_000",
+        "MainWing_Right_Rib_001",
+        "MainWing_Right_Rib_002",
+        "MainWing_Right_Rib_003",
+        "MainWing_Right_Rib_004",
+        "MainWing_Right_Rib_005"
+      ],
+      "Fuselage structure": [
+        "Fuselage_Former_000",
+        "Fuselage_Former_001",
+        "Fuselage_Former_002",
+        "Fuselage_Former_003",
+        "Fuselage_Former_004",
+        "Fuselage_Former_005",
+        "Fuselage_Longeron_UpperLeft",
+        "Fuselage_Longeron_UpperRight",
+        "Fuselage_Longeron_LowerLeft",
+        "Fuselage_Longeron_LowerRight",
+        "Wing_Fuselage_Attachment"
+      ],
+      "Tail structure": [
+        "HorizontalTail_Left_Spar",
+        "HorizontalTail_Left_Rib_000",
+        "HorizontalTail_Left_Rib_001",
+        "HorizontalTail_Left_Rib_002",
+        "HorizontalTail_Right_Spar",
+        "HorizontalTail_Right_Rib_000",
+        "HorizontalTail_Right_Rib_001",
+        "HorizontalTail_Right_Rib_002",
+        "VerticalTail_MainSpar",
+        "VerticalTail_Rib_000",
+        "VerticalTail_Rib_001",
+        "VerticalTail_Rib_002"
+      ]
+    }
+  },
+  "parts": [
+    {
+      "name": "fuselage",
+      "group": "Outer mould line",
+      "faces": 5,
+      "volume_mm3": 3659246.7,
+      "area_mm2": 178232,
+      "centroid_mm": [
+        330.8,
+        0,
+        50
+      ],
+      "bbox_mm": [
+        -0.9,
+        -61,
+        -1,
+        800.9,
+        60.9,
+        101
+      ]
+    },
+    {
+      "name": "left_wing",
+      "group": "Outer mould line",
+      "faces": 3,
+      "volume_mm3": 1261916,
+      "area_mm2": 250577.6,
+      "centroid_mm": [
+        619,
+        -248.2,
+        47.9
+      ],
+      "bbox_mm": [
+        399.2,
+        -600.8,
+        35.4,
+        840.7,
+        0.8,
+        59.4
+      ]
+    },
+    {
+      "name": "right_wing",
+      "group": "Outer mould line",
+      "faces": 3,
+      "volume_mm3": 1261916,
+      "area_mm2": 250577.6,
+      "centroid_mm": [
+        619,
+        248.2,
+        47.9
+      ],
+      "bbox_mm": [
+        399.2,
+        -0.8,
+        35.4,
+        840.7,
+        600.8,
+        59.4
+      ]
+    },
+    {
+      "name": "left_horizontal_tail",
+      "group": "Outer mould line",
+      "faces": 3,
+      "volume_mm3": 102862.1,
+      "area_mm2": 38287.6,
+      "centroid_mm": [
+        701.1,
+        -74.8,
+        50
+      ],
+      "bbox_mm": [
+        649,
+        -181,
+        43,
+        771.1,
+        1,
+        56.9
+      ]
+    },
+    {
+      "name": "right_horizontal_tail",
+      "group": "Outer mould line",
+      "faces": 3,
+      "volume_mm3": 102862.1,
+      "area_mm2": 38287.6,
+      "centroid_mm": [
+        701.1,
+        74.8,
+        50
+      ],
+      "bbox_mm": [
+        649,
+        -1,
+        43,
+        771.1,
+        181,
+        56.9
+      ]
+    },
+    {
+      "name": "vertical_tail",
+      "group": "Outer mould line",
+      "faces": 3,
+      "volume_mm3": 164579.4,
+      "area_mm2": 60228.2,
+      "centroid_mm": [
+        701.1,
+        0,
+        169.7
+      ],
+      "bbox_mm": [
+        649.2,
+        -6.8,
+        49.2,
+        770.9,
+        6.8,
+        338.8
+      ]
+    },
+    {
+      "name": "motor_mount",
+      "group": "Propulsion",
+      "faces": 3,
+      "volume_mm3": 9817.5,
+      "area_mm2": 4712.4,
+      "centroid_mm": [
+        800,
+        0,
+        50
+      ],
+      "bbox_mm": [
+        797.4,
+        -25.1,
+        24.9,
+        802.6,
+        25.1,
+        75.1
+      ]
+    },
+    {
+      "name": "motor_envelope",
+      "group": "Propulsion",
+      "faces": 3,
+      "volume_mm3": 50265.5,
+      "area_mm2": 7539.8,
+      "centroid_mm": [
+        775,
+        0,
+        50
+      ],
+      "bbox_mm": [
+        754.9,
+        -20.1,
+        29.9,
+        795.1,
+        20.1,
+        70.1
+      ]
+    },
+    {
+      "name": "propeller",
+      "group": "Propulsion",
+      "faces": 13,
+      "volume_mm3": 9141.8,
+      "area_mm2": 6112.7,
+      "centroid_mm": [
+        750,
+        0,
+        50
+      ],
+      "bbox_mm": [
+        746,
+        -127,
+        38,
+        754,
+        127,
+        62
+      ]
+    },
+    {
+      "name": "payload_envelope",
+      "group": "Internal envelopes",
+      "faces": 6,
+      "volume_mm3": 288000,
+      "area_mm2": 28800,
+      "centroid_mm": [
+        200,
+        0,
+        50
+      ],
+      "bbox_mm": [
+        140,
+        -30,
+        30,
+        260,
+        30,
+        70
+      ]
+    },
+    {
+      "name": "battery_envelope",
+      "group": "Internal envelopes",
+      "faces": 6,
+      "volume_mm3": 120000,
+      "area_mm2": 16400,
+      "centroid_mm": [
+        360,
+        0,
+        50
+      ],
+      "bbox_mm": [
+        310,
+        -20,
+        35,
+        410,
+        20,
+        65
+      ]
+    },
+    {
+      "name": "avionics_envelope",
+      "group": "Internal envelopes",
+      "faces": 6,
+      "volume_mm3": 756000,
+      "area_mm2": 56640,
+      "centroid_mm": [
+        520,
+        0,
+        50
+      ],
+      "bbox_mm": [
+        430,
+        -42,
+        25,
+        610,
+        42,
+        75
+      ]
+    },
+    {
+      "name": "MainWing_Left_MainSpar",
+      "group": "Wing structure",
+      "faces": 6,
+      "volume_mm3": 32087.6,
+      "area_mm2": 27015.5,
+      "centroid_mm": [
+        581.2,
+        -280,
+        49
+      ],
+      "bbox_mm": [
+        458,
+        -600.5,
+        36.6,
+        721.8,
+        0.5,
+        59.1
+      ]
+    },
+    {
+      "name": "MainWing_Left_RearSpar",
+      "group": "Wing structure",
+      "faces": 6,
+      "volume_mm3": 22312.7,
+      "area_mm2": 19594.5,
+      "centroid_mm": [
+        662.3,
+        -280,
+        47.4
+      ],
+      "bbox_mm": [
+        554,
+        -600.5,
+        36.6,
+        785.8,
+        0.5,
+        55.6
+      ]
+    },
+    {
+      "name": "MainWing_Left_Rib_000",
+      "group": "Wing structure",
+      "faces": 14,
+      "volume_mm3": 8475.2,
+      "area_mm2": 8213.8,
+      "centroid_mm": [
+        502.5,
+        -5,
+        46.5
+      ],
+      "bbox_mm": [
+        401.5,
+        -6.5,
+        36,
+        642.3,
+        -3.5,
+        58.9
+      ]
+    },
+    {
+      "name": "MainWing_Left_Rib_001",
+      "group": "Wing structure",
+      "faces": 14,
+      "volume_mm3": 7406,
+      "area_mm2": 7262.4,
+      "centroid_mm": [
+        549.7,
+        -120,
+        47.4
+      ],
+      "bbox_mm": [
+        455.1,
+        -121.5,
+        37.5,
+        680.7,
+        -118.5,
+        58.7
+      ]
+    },
+    {
+      "name": "MainWing_Left_Rib_002",
+      "group": "Wing structure",
+      "faces": 14,
+      "volume_mm3": 6362.1,
+      "area_mm2": 6319.7,
+      "centroid_mm": [
+        598.9,
+        -240,
+        48.2
+      ],
+      "bbox_mm": [
+        511.1,
+        -241.5,
+        38.9,
+        720.6,
+        -238.5,
+        58.4
+      ]
+    },
+    {
+      "name": "MainWing_Left_Rib_003",
+      "group": "Wing structure",
+      "faces": 15,
+      "volume_mm3": 5411.9,
+      "area_mm2": 5474.2,
+      "centroid_mm": [
+        648.4,
+        -360,
+        48.9
+      ],
+      "bbox_mm": [
+        567.1,
+        -361.5,
+        40.3,
+        760.6,
+        -358.5,
+        58.1
+      ]
+    },
+    {
+      "name": "MainWing_Left_Rib_004",
+      "group": "Wing structure",
+      "faces": 14,
+      "volume_mm3": 4523.4,
+      "area_mm2": 4650.9,
+      "centroid_mm": [
+        697.4,
+        -480,
+        49.5
+      ],
+      "bbox_mm": [
+        623,
+        -481.5,
+        41.5,
+        800.5,
+        -478.5,
+        57.8
+      ]
+    },
+    {
+      "name": "MainWing_Left_Rib_005",
+      "group": "Wing structure",
+      "faces": 14,
+      "volume_mm3": 3734.3,
+      "area_mm2": 3922.2,
+      "centroid_mm": [
+        745.9,
+        -598,
+        50
+      ],
+      "bbox_mm": [
+        678,
+        -599.5,
+        42.5,
+        839.8,
+        -596.5,
+        57.5
+      ]
+    },
+    {
+      "name": "MainWing_Right_MainSpar",
+      "group": "Wing structure",
+      "faces": 6,
+      "volume_mm3": 32087.6,
+      "area_mm2": 27015.5,
+      "centroid_mm": [
+        581.2,
+        280,
+        49
+      ],
+      "bbox_mm": [
+        458,
+        -0.5,
+        36.6,
+        721.8,
+        600.5,
+        59.1
+      ]
+    },
+    {
+      "name": "MainWing_Right_RearSpar",
+      "group": "Wing structure",
+      "faces": 6,
+      "volume_mm3": 22312.7,
+      "area_mm2": 19594.5,
+      "centroid_mm": [
+        662.3,
+        280,
+        47.4
+      ],
+      "bbox_mm": [
+        554,
+        -0.5,
+        36.6,
+        785.8,
+        600.5,
+        55.6
+      ]
+    },
+    {
+      "name": "MainWing_Right_Rib_000",
+      "group": "Wing structure",
+      "faces": 14,
+      "volume_mm3": 8475.2,
+      "area_mm2": 8213.8,
+      "centroid_mm": [
+        502.5,
+        5,
+        46.5
+      ],
+      "bbox_mm": [
+        401.5,
+        3.5,
+        36,
+        642.3,
+        6.5,
+        58.9
+      ]
+    },
+    {
+      "name": "MainWing_Right_Rib_001",
+      "group": "Wing structure",
+      "faces": 14,
+      "volume_mm3": 7406,
+      "area_mm2": 7262.4,
+      "centroid_mm": [
+        549.7,
+        120,
+        47.4
+      ],
+      "bbox_mm": [
+        455.1,
+        118.5,
+        37.5,
+        680.7,
+        121.5,
+        58.7
+      ]
+    },
+    {
+      "name": "MainWing_Right_Rib_002",
+      "group": "Wing structure",
+      "faces": 14,
+      "volume_mm3": 6362.1,
+      "area_mm2": 6319.7,
+      "centroid_mm": [
+        598.9,
+        240,
+        48.2
+      ],
+      "bbox_mm": [
+        511.1,
+        238.5,
+        38.9,
+        720.6,
+        241.5,
+        58.4
+      ]
+    },
+    {
+      "name": "MainWing_Right_Rib_003",
+      "group": "Wing structure",
+      "faces": 15,
+      "volume_mm3": 5411.9,
+      "area_mm2": 5474.2,
+      "centroid_mm": [
+        648.4,
+        360,
+        48.9
+      ],
+      "bbox_mm": [
+        567.1,
+        358.5,
+        40.3,
+        760.6,
+        361.5,
+        58.1
+      ]
+    },
+    {
+      "name": "MainWing_Right_Rib_004",
+      "group": "Wing structure",
+      "faces": 14,
+      "volume_mm3": 4523.4,
+      "area_mm2": 4650.9,
+      "centroid_mm": [
+        697.4,
+        480,
+        49.5
+      ],
+      "bbox_mm": [
+        623,
+        478.5,
+        41.5,
+        800.5,
+        481.5,
+        57.8
+      ]
+    },
+    {
+      "name": "MainWing_Right_Rib_005",
+      "group": "Wing structure",
+      "faces": 14,
+      "volume_mm3": 3734.3,
+      "area_mm2": 3922.2,
+      "centroid_mm": [
+        745.9,
+        598,
+        50
+      ],
+      "bbox_mm": [
+        678,
+        596.5,
+        42.5,
+        839.8,
+        599.5,
+        57.5
+      ]
+    },
+    {
+      "name": "Fuselage_Former_000",
+      "group": "Fuselage structure",
+      "faces": 3,
+      "volume_mm3": 18472.4,
+      "area_mm2": 10226.7,
+      "centroid_mm": [
+        120,
+        0,
+        50
+      ],
+      "bbox_mm": [
+        117.9,
+        -42.6,
+        14.5,
+        122.1,
+        42.6,
+        85.5
+      ]
+    },
+    {
+      "name": "Fuselage_Former_001",
+      "group": "Fuselage structure",
+      "faces": 7,
+      "volume_mm3": 16586.6,
+      "area_mm2": 10260.9,
+      "centroid_mm": [
+        160,
+        0,
+        50
+      ],
+      "bbox_mm": [
+        157.9,
+        -50.5,
+        7.9,
+        162.1,
+        50.5,
+        92.1
+      ]
+    },
+    {
+      "name": "Fuselage_Former_002",
+      "group": "Fuselage structure",
+      "faces": 3,
+      "volume_mm3": 37968.5,
+      "area_mm2": 20373.2,
+      "centroid_mm": [
+        280,
+        0,
+        50
+      ],
+      "bbox_mm": [
+        277.8,
+        -60.4,
+        -0.4,
+        282.2,
+        60.4,
+        100.4
+      ]
+    },
+    {
+      "name": "Fuselage_Former_003",
+      "group": "Fuselage structure",
+      "faces": 7,
+      "volume_mm3": 32899.1,
+      "area_mm2": 18394.7,
+      "centroid_mm": [
+        320,
+        0,
+        50
+      ],
+      "bbox_mm": [
+        317.8,
+        -60.1,
+        -0.2,
+        322.2,
+        60.2,
+        100.2
+      ]
+    },
+    {
+      "name": "Fuselage_Former_004",
+      "group": "Fuselage structure",
+      "faces": 16,
+      "volume_mm3": 8168.2,
+      "area_mm2": 6130.7,
+      "centroid_mm": [
+        440,
+        0,
+        50
+      ],
+      "bbox_mm": [
+        437.9,
+        -51.2,
+        10.7,
+        442.1,
+        51.1,
+        89.3
+      ]
+    },
+    {
+      "name": "Fuselage_Former_005",
+      "group": "Fuselage structure",
+      "faces": 3,
+      "volume_mm3": 4089.3,
+      "area_mm2": 2516.4,
+      "centroid_mm": [
+        680,
+        0,
+        50
+      ],
+      "bbox_mm": [
+        677.9,
+        -22.7,
+        35.3,
+        682.1,
+        22.7,
+        64.8
+      ]
+    },
+    {
+      "name": "Fuselage_Longeron_UpperLeft",
+      "group": "Fuselage structure",
+      "faces": 6,
+      "volume_mm3": 8092.1,
+      "area_mm2": 5971.5,
+      "centroid_mm": [
+        293.4,
+        -38.9,
+        79.8
+      ],
+      "bbox_mm": [
+        150.8,
+        -42.3,
+        76.7,
+        443.9,
+        -35.7,
+        83.3
+      ]
+    },
+    {
+      "name": "Fuselage_Longeron_UpperRight",
+      "group": "Fuselage structure",
+      "faces": 6,
+      "volume_mm3": 8092.1,
+      "area_mm2": 5971.5,
+      "centroid_mm": [
+        293.4,
+        38.9,
+        79.8
+      ],
+      "bbox_mm": [
+        150.8,
+        35.7,
+        76.7,
+        443.9,
+        42.3,
+        83.3
+      ]
+    },
+    {
+      "name": "Fuselage_Longeron_LowerLeft",
+      "group": "Fuselage structure",
+      "faces": 8,
+      "volume_mm3": 9852.2,
+      "area_mm2": 6962.7,
+      "centroid_mm": [
+        292.8,
+        -38.9,
+        25.1
+      ],
+      "bbox_mm": [
+        131.7,
+        -42.3,
+        21.7,
+        458,
+        -35.7,
+        28.3
+      ]
+    },
+    {
+      "name": "Fuselage_Longeron_LowerRight",
+      "group": "Fuselage structure",
+      "faces": 8,
+      "volume_mm3": 9852.2,
+      "area_mm2": 6962.7,
+      "centroid_mm": [
+        292.8,
+        38.9,
+        25.1
+      ],
+      "bbox_mm": [
+        131.7,
+        35.7,
+        21.7,
+        458,
+        42.3,
+        28.3
+      ]
+    },
+    {
+      "name": "Motor_Firewall",
+      "group": "Propulsion",
+      "faces": 3,
+      "volume_mm3": 632.6,
+      "area_mm2": 432.6,
+      "centroid_mm": [
+        796.9,
+        0,
+        50
+      ],
+      "bbox_mm": [
+        793.7,
+        -7.1,
+        44.3,
+        800.3,
+        7.1,
+        55.7
+      ]
+    },
+    {
+      "name": "HorizontalTail_Left_Spar",
+      "group": "Tail structure",
+      "faces": 6,
+      "volume_mm3": 3568.8,
+      "area_mm2": 4338.6,
+      "centroid_mm": [
+        685.5,
+        -84,
+        50
+      ],
+      "bbox_mm": [
+        676.8,
+        -180.2,
+        43.8,
+        693.2,
+        0.2,
+        56.2
+      ]
+    },
+    {
+      "name": "HorizontalTail_Left_Rib_000",
+      "group": "Tail structure",
+      "faces": 9,
+      "volume_mm3": 1841.1,
+      "area_mm2": 2412.9,
+      "centroid_mm": [
+        700.8,
+        -5,
+        50
+      ],
+      "bbox_mm": [
+        649.8,
+        -6.2,
+        43.8,
+        769.4,
+        -3.8,
+        56.2
+      ]
+    },
+    {
+      "name": "HorizontalTail_Left_Rib_001",
+      "group": "Tail structure",
+      "faces": 9,
+      "volume_mm3": 1296.4,
+      "area_mm2": 1769.3,
+      "centroid_mm": [
+        692.7,
+        -90,
+        50
+      ],
+      "bbox_mm": [
+        649.8,
+        -91.2,
+        44.8,
+        750.5,
+        -88.8,
+        55.2
+      ]
+    },
+    {
+      "name": "HorizontalTail_Left_Rib_002",
+      "group": "Tail structure",
+      "faces": 9,
+      "volume_mm3": 832.9,
+      "area_mm2": 1206.1,
+      "centroid_mm": [
+        684.4,
+        -178,
+        50
+      ],
+      "bbox_mm": [
+        649.8,
+        -179.2,
+        45.7,
+        730.9,
+        -176.8,
+        54.3
+      ]
+    },
+    {
+      "name": "HorizontalTail_Right_Spar",
+      "group": "Tail structure",
+      "faces": 6,
+      "volume_mm3": 3568.8,
+      "area_mm2": 4338.6,
+      "centroid_mm": [
+        685.5,
+        84,
+        50
+      ],
+      "bbox_mm": [
+        676.8,
+        -0.2,
+        43.8,
+        693.2,
+        180.2,
+        56.2
+      ]
+    },
+    {
+      "name": "HorizontalTail_Right_Rib_000",
+      "group": "Tail structure",
+      "faces": 9,
+      "volume_mm3": 1841.1,
+      "area_mm2": 2412.9,
+      "centroid_mm": [
+        700.8,
+        5,
+        50
+      ],
+      "bbox_mm": [
+        649.8,
+        3.8,
+        43.8,
+        769.4,
+        6.2,
+        56.2
+      ]
+    },
+    {
+      "name": "HorizontalTail_Right_Rib_001",
+      "group": "Tail structure",
+      "faces": 9,
+      "volume_mm3": 1296.4,
+      "area_mm2": 1769.3,
+      "centroid_mm": [
+        692.7,
+        90,
+        50
+      ],
+      "bbox_mm": [
+        649.8,
+        88.8,
+        44.8,
+        750.5,
+        91.2,
+        55.2
+      ]
+    },
+    {
+      "name": "HorizontalTail_Right_Rib_002",
+      "group": "Tail structure",
+      "faces": 9,
+      "volume_mm3": 832.9,
+      "area_mm2": 1206.1,
+      "centroid_mm": [
+        684.4,
+        178,
+        50
+      ],
+      "bbox_mm": [
+        649.8,
+        176.8,
+        45.7,
+        730.9,
+        179.2,
+        54.3
+      ]
+    },
+    {
+      "name": "VerticalTail_MainSpar",
+      "group": "Tail structure",
+      "faces": 6,
+      "volume_mm3": 5710.1,
+      "area_mm2": 6907.5,
+      "centroid_mm": [
+        685.5,
+        0,
+        184.4
+      ],
+      "bbox_mm": [
+        676.8,
+        -6.2,
+        49.8,
+        693.2,
+        6.2,
+        338.2
+      ]
+    },
+    {
+      "name": "VerticalTail_Rib_000",
+      "group": "Tail structure",
+      "faces": 8,
+      "volume_mm3": 1861.4,
+      "area_mm2": 2435.8,
+      "centroid_mm": [
+        700.6,
+        0,
+        55
+      ],
+      "bbox_mm": [
+        649.7,
+        -6.3,
+        53.7,
+        769.8,
+        6.3,
+        56.3
+      ]
+    },
+    {
+      "name": "VerticalTail_Rib_001",
+      "group": "Tail structure",
+      "faces": 8,
+      "volume_mm3": 1298.6,
+      "area_mm2": 1773.2,
+      "centroid_mm": [
+        692.5,
+        0,
+        194
+      ],
+      "bbox_mm": [
+        649.8,
+        -5.2,
+        192.8,
+        750.4,
+        5.2,
+        195.2
+      ]
+    },
+    {
+      "name": "VerticalTail_Rib_002",
+      "group": "Tail structure",
+      "faces": 8,
+      "volume_mm3": 830.8,
+      "area_mm2": 1204.6,
+      "centroid_mm": [
+        684.1,
+        0,
+        336
+      ],
+      "bbox_mm": [
+        649.8,
+        -4.3,
+        334.8,
+        730.7,
+        4.3,
+        337.2
+      ]
+    },
+    {
+      "name": "Wing_Fuselage_Attachment",
+      "group": "Fuselage structure",
+      "faces": 8,
+      "volume_mm3": 200172.4,
+      "area_mm2": 39852.6,
+      "centroid_mm": [
+        487.8,
+        0,
+        44.1
+      ],
+      "bbox_mm": [
+        399.2,
+        -54.8,
+        37.2,
+        592.8,
+        54.8,
+        50.8
+      ]
+    }
+  ],
+  "interference": [
+    {
+      "part_a": "propeller",
+      "part_b": "left_horizontal_tail",
+      "common_mm3": 1387.7,
+      "pct_of_a": 15.2
+    },
+    {
+      "part_a": "propeller",
+      "part_b": "right_horizontal_tail",
+      "common_mm3": 1387.7,
+      "pct_of_a": 15.2
+    },
+    {
+      "part_a": "propeller",
+      "part_b": "vertical_tail",
+      "common_mm3": 412.9,
+      "pct_of_a": 4.5
+    },
+    {
+      "part_a": "propeller",
+      "part_b": "fuselage",
+      "common_mm3": 2805.3,
+      "pct_of_a": 30.7
+    },
+    {
+      "part_a": "motor_envelope",
+      "part_b": "fuselage",
+      "common_mm3": 8372.3,
+      "pct_of_a": 16.7
+    },
+    {
+      "part_a": "payload_envelope",
+      "part_b": "fuselage",
+      "common_mm3": 288000,
+      "pct_of_a": 100
+    },
+    {
+      "part_a": "battery_envelope",
+      "part_b": "fuselage",
+      "common_mm3": 120000,
+      "pct_of_a": 100
+    },
+    {
+      "part_a": "avionics_envelope",
+      "part_b": "fuselage",
+      "common_mm3": 620206.8,
+      "pct_of_a": 82
+    },
+    {
+      "part_a": "left_wing",
+      "part_b": "left_horizontal_tail",
+      "common_mm3": 2192.3,
+      "pct_of_a": 0.2
+    },
+    {
+      "part_a": "avionics_envelope",
+      "part_b": "Fuselage_Former_004",
+      "common_mm3": 0,
+      "pct_of_a": 0
+    },
+    {
+      "part_a": "battery_envelope",
+      "part_b": "Fuselage_Former_003",
+      "common_mm3": 0,
+      "pct_of_a": 0
+    },
+    {
+      "part_a": "payload_envelope",
+      "part_b": "Fuselage_Former_001",
+      "common_mm3": 0,
+      "pct_of_a": 0
+    }
+  ],
+  "checks": [
+    {
+      "severity": "critical",
+      "title": "Propeller disc intersects tail surfaces",
+      "detail": "Propeller (x 746–754 mm, Ø254 mm) overlaps both horizontal tails by 1,388 mm³ each, the vertical tail by 413 mm³ and the fuselage by 2,805 mm³. The disc sits inside the tail’s chordwise range (x 649–771 mm).",
+      "parts": [
+        "propeller",
+        "left_horizontal_tail",
+        "right_horizontal_tail",
+        "vertical_tail"
+      ],
+      "route": "Bay 03 · Aircraft Design"
+    },
+    {
+      "severity": "warning",
+      "title": "Avionics bay protrudes through the skin",
+      "detail": "18% of the avionics envelope (≈135,800 mm³) lies outside the fuselage mould line, mostly aft of x≈560 mm where the fuselage tapers.",
+      "parts": [
+        "avionics_envelope",
+        "fuselage"
+      ],
+      "route": "Bay 03 · Aircraft Design"
+    },
+    {
+      "severity": "warning",
+      "title": "Wing and horizontal tail touch",
+      "detail": "Swept wing tip trailing edge reaches x 840 mm, past the tail leading edge at x 649 mm. Left wing and left tail share 2,192 mm³. Tail moment arm is short for a conventional layout.",
+      "parts": [
+        "left_wing",
+        "left_horizontal_tail",
+        "right_wing",
+        "right_horizontal_tail"
+      ],
+      "route": "Bay 06 · CFD"
+    },
+    {
+      "severity": "info",
+      "title": "Motor envelope sits mostly outside the fuselage",
+      "detail": "83% of the motor envelope is outside the tapered tail cone. Expected for a pusher layout; confirm cooling and fairing intent.",
+      "parts": [
+        "motor_envelope",
+        "motor_mount"
+      ],
+      "route": "Bay 04 · CAD"
+    },
+    {
+      "severity": "pass",
+      "title": "Payload and battery fully enclosed",
+      "detail": "Payload (288,000 mm³) and battery (120,000 mm³) envelopes are 100% inside the fuselage and clear of formers 001 and 003.",
+      "parts": [
+        "payload_envelope",
+        "battery_envelope"
+      ],
+      "route": null
+    },
+    {
+      "severity": "pass",
+      "title": "Left / right symmetry holds",
+      "detail": "All 19 mirrored pairs (wings, tails, spars, ribs, longerons) have identical volume and surface area.",
+      "parts": [],
+      "route": null
+    },
+    {
+      "severity": "info",
+      "title": "No material data in the file",
+      "detail": "The STEP carries geometry only — no material, density or colour. Mass and CG cannot be computed until Bay 10 · Materials assigns them.",
+      "parts": [],
+      "route": "Bay 10 · Materials"
+    }
+  ],
+  "status": {
+    "critical": 1,
+    "warning": 2,
+    "info": 2,
+    "pass": 2
+  },
+  "step_header": {
+    "lines": [
+      "ISO-10303-21;",
+      "HEADER;",
+      "FILE_DESCRIPTION(('Open CASCADE Model'),'2;1');",
+      "FILE_NAME('parametric_aircraft','2026-10-07T16:24:35',('Author'),(",
+      "    'Open CASCADE'),'Open CASCADE STEP processor 8.0','build123d',",
+      "  'Unknown');",
+      "FILE_SCHEMA(('AUTOMOTIVE_DESIGN { 1 0 10303 214 1 1 1 1 }'));",
+      "ENDSEC;",
+      "DATA;",
+      "#1 = APPLICATION_PROTOCOL_DEFINITION('international standard',",
+      "  'automotive_design',2000,#2);",
+      "#2 = APPLICATION_CONTEXT("
+    ]
+  },
+  "entity_counts": [
+    {
+      "type": "CARTESIAN_POINT",
+      "count": 235225
+    },
+    {
+      "type": "B_SPLINE_CURVE_WITH_KNOTS",
+      "count": 1779
+    },
+    {
+      "type": "EDGE_CURVE",
+      "count": 745
+    },
+    {
+      "type": "ADVANCED_FACE",
+      "count": 425
+    },
+    {
+      "type": "PLANE",
+      "count": 226
+    },
+    {
+      "type": "B_SPLINE_SURFACE_WITH_KNOTS",
+      "count": 194
+    },
+    {
+      "type": "MANIFOLD_SOLID_BREP",
+      "count": 88
+    },
+    {
+      "type": "PRODUCT",
+      "count": 53
+    },
+    {
+      "type": "NEXT_ASSEMBLY_USAGE_OCCURRENCE",
+      "count": 52
+    }
+  ]
+}
