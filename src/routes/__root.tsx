@@ -11,6 +11,8 @@ import {
 
 import appCss from "../styles.css?url";
 
+const GA_MEASUREMENT_ID = "G-250F24TPY1";
+
 function NotFoundComponent() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -102,6 +104,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "apple-touch-icon", href: "/apple-touch-icon-tw.png" },
       { rel: "icon", href: "/favicon-tw.svg", type: "image/svg+xml" },
       { rel: "icon", href: "/apple-touch-icon-tw.png", type: "image/png" },
+    ],
+    // Google Analytics (GA4). vercel.json's CSP allows these Google hosts.
+    scripts: [
+      { src: `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`, async: true },
+      {
+        children: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${GA_MEASUREMENT_ID}');`,
+      },
     ],
   }),
   shellComponent: RootShell,
