@@ -6,7 +6,8 @@ import { resolveUserId, jsonResponse, errorResponse } from "@/lib/the-hangar/api
 // of the original implementation spec. A GET, unlike
 // process-bernoulli/review's own POST: this one only reads, never runs a
 // new review. Required `?missionId=`; optional `?conceptId=` returns the
-// latest review of that concept's output (Bay 02) instead of the mission's.
+// latest review of that concept's output (Bay 02) instead of the mission's,
+// and `&bay=vehicle_design` the latest review of its Vehicle Design (Bay 03).
 export const Route = createFileRoute("/api/hangar/bernoulli-review")({
   server: {
     handlers: {
@@ -18,7 +19,13 @@ export const Route = createFileRoute("/api/hangar/bernoulli-review")({
           if (!missionId) {
             return jsonResponse({ error: "missionId query param is required" }, 400);
           }
-          const result = await getLatestBernoulliReview(userId, missionId, params.get("conceptId") || null);
+          const bay = params.get("bay");
+          const result = await getLatestBernoulliReview(
+            userId,
+            missionId,
+            params.get("conceptId") || null,
+            bay === "vehicle_design" || bay === "concept" || bay === "mission" ? bay : undefined,
+          );
           return jsonResponse(result);
         } catch (err) {
           return errorResponse(err);

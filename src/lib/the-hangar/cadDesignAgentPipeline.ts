@@ -132,14 +132,10 @@ export async function runModelGenerationStage(request: Stage1Request): Promise<S
   // assertConceptOwnership/assertMissionOwnership already apply upstream.
   const aircraftDesign = await assertAircraftDesignOwnership(aircraftDesignId, userId);
 
-  // Aircraft designs can never reach "finalized" — Bay 03 has no finalize
-  // stage built (updateAircraftDesignStatus is only ever called with
-  // "processing" or "spec_ready"/"error"). Gating on "finalized" the way
-  // Bay 03 gates on the concept being finalized would make this bay
-  // permanently unusable. "spec_ready" is the actual reachable success
-  // state.
-  if (aircraftDesign.status !== "spec_ready") {
-    throw new InvalidCADDesignInputError("Source aircraft design is not spec-ready.");
+  // v1 AI designs stop at "spec_ready"; designs saved from Bay 03's Vehicle
+  // Design output (Save button) are "finalized". Either is a usable source.
+  if (aircraftDesign.status !== "spec_ready" && aircraftDesign.status !== "finalized") {
+    throw new InvalidCADDesignInputError("Source aircraft design is not spec-ready or saved.");
   }
 
   const spec = await getLatestAircraftDesignSpec(aircraftDesignId);

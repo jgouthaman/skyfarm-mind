@@ -126,6 +126,11 @@ function TheHangarAircraftDesign() {
   // Generate Design now loads the Python backend's output for the concept
   // from the TorqWings GCP server (torqwings/bay3/<concept code>/).
   const [report, setReport] = useState<DesignFilesState>({ status: "idle" });
+  // Save of the design on screen: Mission -> Concept -> Design, for Bay 04.
+  const [save, setSave] = useState<SaveState>({ status: "idle" });
+  // Latest Bernoulli review of this concept's vehicle design (advisory --
+  // it never blocks Save); "none" when it hasn't been reviewed yet.
+  const [bern, setBern] = useState<BernoulliBrief | "none" | null>(null);
   const reportPreview = report.status !== "idle";
 
   // Clicking the open source again closes it; clicking the other switches.
@@ -277,6 +282,8 @@ function TheHangarAircraftDesign() {
   async function generateDesign() {
     if (!selectedConcept) return;
     setReport({ status: "running" });
+    setSave({ status: "idle" });
+    setBern(null);
     const outcome = await callStageApi<VehicleDesignRun>("/api/hangar/vehicle-design/run", {
       conceptId: selectedConcept.conceptId,
     });
@@ -285,6 +292,37 @@ function TheHangarAircraftDesign() {
       return;
     }
     await loadDesignFiles(outcome.data);
+  }
+
+  async function saveDesign() {
+    if (!selectedConcept) return;
+    setSave({ status: "saving" });
+    const outcome = await callStageApi<SavedDesign>("/api/hangar/vehicle-design/save", {
+      conceptId: selectedConcept.conceptId,
+    });
+    if (!outcome.ok) {
+      setSave({ status: "error", message: outcome.error });
+      return;
+    }
+    setSave({ status: "saved", result: outcome.data });
+    fetchAircraftDesigns();
+  }
+
+  async function fetchBernoulliBrief(c: ConceptListEntry) {
+    const { data } = await supabase.auth.getSession();
+    const token = data.session?.access_token;
+    if (!token) return;
+    try {
+      const res = await fetch(
+        `/api/hangar/bernoulli-review?missionId=${encodeURIComponent(c.sourceMissionId)}&conceptId=${encodeURIComponent(c.conceptId)}&bay=vehicle_design`,
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      if (!res.ok) return;
+      const json = await res.json();
+      setBern(json ? { verdict: json.verdict, designRef: json.designRef ?? null, reviewCode: json.reviewCode, createdAt: json.createdAt } : "none");
+    } catch {
+      // the verdict is a convenience; Save works without it
+    }
   }
 
   // Reads the concept's design files (no re-run) -- also behind Reload/Retry.
@@ -302,6 +340,7 @@ function TheHangarAircraftDesign() {
       if (!res.ok) throw new Error(json.error ?? `HTTP ${res.status}`);
       if (json.found) {
         setReport({ status: "ready", design: json.design, markdown: json.markdown ?? "", location: json.location, run });
+        fetchBernoulliBrief(selectedConcept);
       } else {
         setReport({ status: "missing", location: json.location, run });
       }
@@ -620,6 +659,38 @@ function TheHangarAircraftDesign() {
                             <StageErrorCard title="Generate Design didn't complete on the GCP server." message={report.message} onRetry={generateDesign} />
                           )}
                           {report.status === "ready" && selectedConcept && (
+                            <div className="hgr-a-save-bar" role="status">
+                              {save.status === "saved" ? (
+                                <>
+                                  <span className="hgr-a-save-ok">✓ {save.result.alreadySaved ? "Already saved" : "Saved"}</span>
+                                  <span className="hgr-a-save-chain">
+                                    Mission <b>{save.result.missionCode}</b> → Concept <b>{save.result.conceptCode}</b> → Design{" "}
+                                    <b>{save.result.designCode}</b>
+                                    <span className="hgr-a-save-src"> ({save.result.sourceDesignId})</span>
+                                  </span>
+                                  <Link to="/the-hangar/cad-design" className="hgr-a-btn hgr-a-btn-amber">
+                                    Continue to CAD (Bay 04) →
+                                  </Link>
+                                </>
+                              ) : (
+                                <>
+                                  <span className="hgr-a-save-chain">
+                                    Save this design to link it <b>Mission → Concept → Design</b> and hand its JSON to CAD (Bay 04).
+                                  </span>
+                                  <button type="button" className="hgr-a-btn hgr-a-btn-amber" disabled={save.status === "saving"} onClick={saveDesign}>
+                                    {save.status === "saving" ? "Saving…" : "Save design"}
+                                  </button>
+                                </>
+                              )}
+                              {save.status === "error" && <span className="hgr-a-save-err">{save.message}</span>}
+                              <BernoulliBriefRow
+                                brief={bern}
+                                currentDesignId={typeof report.design.design_id === "string" ? report.design.design_id : null}
+                                concept={selectedConcept}
+                              />
+                            </div>
+                          )}
+                          {report.status === "ready" && selectedConcept && (
                             <VehicleDesignReport
                               design={report.design}
                               markdown={report.markdown}
@@ -917,6 +988,60 @@ interface DesignFilesLocation {
   files: string[];
   updated?: string | null;
 }
+
+interface BernoulliBrief {
+  verdict: "PASS" | "WARN" | "FAIL";
+  designRef: string | null;
+  reviewCode: string;
+  createdAt: string;
+}
+
+// The design's latest Bernoulli review, on the Save bar. Advisory: a FAIL is
+// shown loudly but never blocks Save.
+function BernoulliBriefRow({ brief, currentDesignId, concept }: { brief: BernoulliBrief | "none" | null; currentDesignId: string | null; concept: ConceptListEntry }) {
+  const stale = brief && brief !== "none" && brief.designRef && currentDesignId && brief.designRef !== currentDesignId;
+  return (
+    <span className="hgr-a-bern-row">
+      {brief === null ? (
+        <span className="hgr-a-save-src">Checking for a Bernoulli review…</span>
+      ) : brief === "none" ? (
+        <span className="hgr-a-save-src">Not reviewed by Bernoulli yet.</span>
+      ) : (
+        <>
+          <span className={`hgr-a-bern-chip hgr-a-bern-chip-${brief.verdict}`}>Bernoulli {brief.verdict}</span>
+          <span className="hgr-a-save-src">
+            {brief.reviewCode} · {new Date(brief.createdAt).toLocaleString()}
+            {stale ? ` · for an older design (${brief.designRef})` : ""}
+            {brief.verdict === "FAIL" && !stale ? " · a hard-gate check failed -- review before handing to CAD" : ""}
+          </span>
+        </>
+      )}
+      <Link
+        to="/the-hangar/bernoulli"
+        search={{ source: "aircraft-design", missionId: concept.sourceMissionId, sourceId: concept.conceptId }}
+        className="hgr-a-dash-bernoulli-link"
+      >
+        {brief && brief !== "none" && !stale ? "Open Bernoulli report →" : "Ask Bernoulli →"}
+      </Link>
+    </span>
+  );
+}
+
+// What Save returns (api.hangar.vehicle-design.save.ts).
+interface SavedDesign {
+  aircraftDesignId: string;
+  designCode: string;
+  conceptCode: string;
+  missionCode: string;
+  sourceDesignId: string;
+  alreadySaved: boolean;
+  bernoulliVerdict: "PASS" | "WARN" | "FAIL" | null;
+}
+
+type SaveState =
+  | { status: "idle" | "saving" }
+  | { status: "saved"; result: SavedDesign }
+  | { status: "error"; message: string };
 
 // What VehicleDesign.py reported back (api.hangar.vehicle-design.run.ts).
 interface VehicleDesignRun {
@@ -1288,6 +1413,13 @@ function GeometryResultView({
 // reuses GeometryParametersGrid/ComponentSelectionsList so a historical
 // design looks the same as one just generated. No actions besides going
 // back, same reasoning as Concept Agent's PastConceptDetail.
+// The mission a saved design traces to: recorded on the design, else via its concept.
+function missionCodeFor(design: AircraftDesignListEntry, concepts: ConceptListEntry[] | null, missions: MissionListEntry[] | null) {
+  const missionId = design.sourceMissionId ?? concepts?.find((c) => c.conceptId === design.sourceConceptId)?.sourceMissionId ?? null;
+  if (!missionId) return "—";
+  return missions?.find((m) => m.missionId === missionId)?.missionCode ?? missionId.slice(0, 8);
+}
+
 function PastDesignDetail({
   design,
   concepts,
@@ -1326,7 +1458,11 @@ function PastDesignDetail({
             {hasSpec && (
               <Link
                 to="/the-hangar/bernoulli"
-                search={{ source: "aircraft-design", missionId: "", sourceId: design.aircraftDesignId }}
+                search={{
+                  source: "aircraft-design",
+                  missionId: design.sourceMissionId ?? concepts?.find((c) => c.conceptId === design.sourceConceptId)?.sourceMissionId ?? "",
+                  sourceId: design.sourceConceptId,
+                }}
                 className="hgr-a-dash-bernoulli-link"
                 title="Sanity-check this design's origin mission spec against conservation laws and aerospace empiricals."
               >
@@ -1336,7 +1472,31 @@ function PastDesignDetail({
           </div>
         )}
       </div>
-      {hasSpec ? (
+      {design.designOutput ? (
+        // Saved from the Vehicle Design backend: the full report, as on Generate.
+        <>
+          <div className="hgr-a-save-bar">
+            <span className="hgr-a-save-ok">✓ Saved</span>
+            <span className="hgr-a-save-chain">
+              Mission <b>{missionCodeFor(design, concepts, missions)}</b> → Concept{" "}
+              <b>{concepts?.find((c) => c.conceptId === design.sourceConceptId)?.conceptCode ?? design.sourceConceptId.slice(0, 8)}</b> → Design{" "}
+              <b>{design.designCode}</b>
+              {design.sourceDesignId && <span className="hgr-a-save-src"> ({design.sourceDesignId})</span>}
+              {design.bernoulliVerdict && (
+                <span className={`hgr-a-bern-chip hgr-a-bern-chip-${design.bernoulliVerdict}`}>Bernoulli {design.bernoulliVerdict} at save</span>
+              )}
+            </span>
+            <Link to="/the-hangar/cad-design" className="hgr-a-btn hgr-a-btn-amber">
+              Continue to CAD (Bay 04) →
+            </Link>
+          </div>
+          <VehicleDesignReport
+            design={design.designOutput as unknown as VehicleDesignOutput}
+            markdown={design.designMarkdown ?? ""}
+            banner={design.sourceLocation ? <div className="vdr-banner">Saved copy of <code>{design.sourceLocation}</code></div> : undefined}
+          />
+        </>
+      ) : hasSpec ? (
         <>
           <div className="hgr-a-dash-section">
             <h4>Geometry Parameters</h4>
@@ -1555,6 +1715,18 @@ const HGR_AIRCRAFT_DESIGN_CSS = `
 .hgr-a-usage-table .hgr-a-usage-num{ text-align:right; font-variant-numeric:tabular-nums; }
 .hgr-a-usage-split{ font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--hgr-a-paper-dim); }
 .hgr-a-usage-provider{ margin-left:8px; font-family:'IBM Plex Mono',monospace; font-size:10px; color:#166534; border:1px solid rgba(22,101,52,.35); padding:1px 5px; border-radius:2px; }
+.hgr-a-save-bar{ margin:14px 0; display:flex; align-items:center; gap:12px 16px; flex-wrap:wrap; padding:12px 16px; background:var(--hgr-a-navy-panel-2); border-left:3px solid var(--hgr-a-amber); font-size:13px; }
+.hgr-a-save-chain{ flex:1; min-width:240px; line-height:1.6; }
+.hgr-a-save-chain b{ font-family:'IBM Plex Mono',monospace; font-size:12.5px; }
+.hgr-a-save-src{ color:var(--hgr-a-paper-dim); font-family:'IBM Plex Mono',monospace; font-size:11.5px; }
+.hgr-a-save-ok{ font-family:'IBM Plex Mono',monospace; font-size:12px; font-weight:700; color:var(--hgr-a-green); }
+.hgr-a-bern-row{ flex-basis:100%; display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding-top:8px; border-top:1px dashed var(--hgr-a-hairline); }
+.hgr-a-bern-chip{ font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:700; letter-spacing:.04em; padding:3px 9px; border-radius:2px; margin-left:8px; }
+.hgr-a-bern-row .hgr-a-bern-chip{ margin-left:0; }
+.hgr-a-bern-chip-PASS{ color:#2E7D4F; background:#E6F4EC; border:1px solid #B9DEC8; }
+.hgr-a-bern-chip-WARN{ color:#A35F00; background:#FCF1E0; border:1px solid #EFD3A6; }
+.hgr-a-bern-chip-FAIL{ color:#B03A2E; background:#FBE9E7; border:1px solid #F1C1BB; }
+.hgr-a-save-err{ flex-basis:100%; color:var(--hgr-a-red); font-size:12.5px; }
 .hgr-a-files-note{ margin-top:14px; font-size:13px; line-height:1.6; color:var(--hgr-a-paper); background:var(--hgr-a-navy-panel-2); border-left:3px solid var(--hgr-a-amber); padding:12px 16px; }
 .hgr-a-files-note code{ font-family:'IBM Plex Mono',monospace; font-size:12px; }
 .hgr-a-link-btn{ background:none; border:none; padding:0; color:var(--hgr-a-blue-bright); font:inherit; text-decoration:underline; cursor:pointer; }

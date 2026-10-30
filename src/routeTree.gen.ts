@@ -149,6 +149,7 @@ import { Route as ApiHangarProcessSimulationFlightDynamicsAssessmentRouteImport 
 import { Route as ApiHangarProcessStructuralStructuralAssessmentRouteImport } from './routes/api.hangar.process-structural.structural-assessment'
 import { Route as ApiHangarProcessValidationComplianceValidationRouteImport } from './routes/api.hangar.process-validation.compliance-validation'
 import { Route as ApiHangarVehicleDesignRunRouteImport } from './routes/api.hangar.vehicle-design.run'
+import { Route as ApiHangarVehicleDesignSaveRouteImport } from './routes/api.hangar.vehicle-design.save'
 import { Route as AcademyCoursesSlugModulesModuleIdRouteImport } from './routes/academy.courses.$slug.modules.$moduleId'
 import { Route as AcademyModuleModuleIdLessonLessonIdRouteImport } from './routes/academy.module.$moduleId.lesson.$lessonId'
 import { Route as AcademyModuleModuleIdQuizQuizIdRouteImport } from './routes/academy.module.$moduleId.quiz.$quizId'
@@ -906,6 +907,12 @@ const ApiHangarVehicleDesignRunRoute =
     path: '/api/hangar/vehicle-design/run',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiHangarVehicleDesignSaveRoute =
+  ApiHangarVehicleDesignSaveRouteImport.update({
+    id: '/api/hangar/vehicle-design/save',
+    path: '/api/hangar/vehicle-design/save',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AcademyCoursesSlugModulesModuleIdRoute =
   AcademyCoursesSlugModulesModuleIdRouteImport.update({
     id: '/courses/$slug/modules/$moduleId',
@@ -1065,6 +1072,7 @@ export interface FileRoutesByFullPath {
   '/api/hangar/process-structural/structural-assessment': typeof ApiHangarProcessStructuralStructuralAssessmentRoute
   '/api/hangar/process-validation/compliance-validation': typeof ApiHangarProcessValidationComplianceValidationRoute
   '/api/hangar/vehicle-design/run': typeof ApiHangarVehicleDesignRunRoute
+  '/api/hangar/vehicle-design/save': typeof ApiHangarVehicleDesignSaveRoute
   '/academy/courses/$slug/modules/$moduleId': typeof AcademyCoursesSlugModulesModuleIdRoute
   '/academy/module/$moduleId/lesson/$lessonId': typeof AcademyModuleModuleIdLessonLessonIdRoute
   '/academy/module/$moduleId/quiz/$quizId': typeof AcademyModuleModuleIdQuizQuizIdRoute
@@ -1203,6 +1211,7 @@ export interface FileRoutesByTo {
   '/api/hangar/process-structural/structural-assessment': typeof ApiHangarProcessStructuralStructuralAssessmentRoute
   '/api/hangar/process-validation/compliance-validation': typeof ApiHangarProcessValidationComplianceValidationRoute
   '/api/hangar/vehicle-design/run': typeof ApiHangarVehicleDesignRunRoute
+  '/api/hangar/vehicle-design/save': typeof ApiHangarVehicleDesignSaveRoute
   '/academy/courses/$slug/modules/$moduleId': typeof AcademyCoursesSlugModulesModuleIdRoute
   '/academy/module/$moduleId/lesson/$lessonId': typeof AcademyModuleModuleIdLessonLessonIdRoute
   '/academy/module/$moduleId/quiz/$quizId': typeof AcademyModuleModuleIdQuizQuizIdRoute
@@ -1349,6 +1358,7 @@ export interface FileRoutesById {
   '/api/hangar/process-structural/structural-assessment': typeof ApiHangarProcessStructuralStructuralAssessmentRoute
   '/api/hangar/process-validation/compliance-validation': typeof ApiHangarProcessValidationComplianceValidationRoute
   '/api/hangar/vehicle-design/run': typeof ApiHangarVehicleDesignRunRoute
+  '/api/hangar/vehicle-design/save': typeof ApiHangarVehicleDesignSaveRoute
   '/academy/courses/$slug/modules/$moduleId': typeof AcademyCoursesSlugModulesModuleIdRoute
   '/academy/module/$moduleId/lesson/$lessonId': typeof AcademyModuleModuleIdLessonLessonIdRoute
   '/academy/module/$moduleId/quiz/$quizId': typeof AcademyModuleModuleIdQuizQuizIdRoute
@@ -1495,6 +1505,7 @@ export interface FileRouteTypes {
     | '/api/hangar/process-structural/structural-assessment'
     | '/api/hangar/process-validation/compliance-validation'
     | '/api/hangar/vehicle-design/run'
+    | '/api/hangar/vehicle-design/save'
     | '/academy/courses/$slug/modules/$moduleId'
     | '/academy/module/$moduleId/lesson/$lessonId'
     | '/academy/module/$moduleId/quiz/$quizId'
@@ -1633,6 +1644,7 @@ export interface FileRouteTypes {
     | '/api/hangar/process-structural/structural-assessment'
     | '/api/hangar/process-validation/compliance-validation'
     | '/api/hangar/vehicle-design/run'
+    | '/api/hangar/vehicle-design/save'
     | '/academy/courses/$slug/modules/$moduleId'
     | '/academy/module/$moduleId/lesson/$lessonId'
     | '/academy/module/$moduleId/quiz/$quizId'
@@ -1778,6 +1790,7 @@ export interface FileRouteTypes {
     | '/api/hangar/process-structural/structural-assessment'
     | '/api/hangar/process-validation/compliance-validation'
     | '/api/hangar/vehicle-design/run'
+    | '/api/hangar/vehicle-design/save'
     | '/academy/courses/$slug/modules/$moduleId'
     | '/academy/module/$moduleId/lesson/$lessonId'
     | '/academy/module/$moduleId/quiz/$quizId'
@@ -1842,6 +1855,7 @@ export interface RootRouteChildren {
   ApiHangarProcessStructuralStructuralAssessmentRoute: typeof ApiHangarProcessStructuralStructuralAssessmentRoute
   ApiHangarProcessValidationComplianceValidationRoute: typeof ApiHangarProcessValidationComplianceValidationRoute
   ApiHangarVehicleDesignRunRoute: typeof ApiHangarVehicleDesignRunRoute
+  ApiHangarVehicleDesignSaveRoute: typeof ApiHangarVehicleDesignSaveRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -2826,6 +2840,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiHangarVehicleDesignRunRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/hangar/vehicle-design/save': {
+      id: '/api/hangar/vehicle-design/save'
+      path: '/api/hangar/vehicle-design/save'
+      fullPath: '/api/hangar/vehicle-design/save'
+      preLoaderRoute: typeof ApiHangarVehicleDesignSaveRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/academy/courses/$slug/modules/$moduleId': {
       id: '/academy/courses/$slug/modules/$moduleId'
       path: '/courses/$slug/modules/$moduleId'
@@ -3179,6 +3200,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiHangarProcessValidationComplianceValidationRoute:
     ApiHangarProcessValidationComplianceValidationRoute,
   ApiHangarVehicleDesignRunRoute: ApiHangarVehicleDesignRunRoute,
+  ApiHangarVehicleDesignSaveRoute: ApiHangarVehicleDesignSaveRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
