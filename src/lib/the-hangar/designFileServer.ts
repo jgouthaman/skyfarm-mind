@@ -18,11 +18,12 @@ export function bay3FilesBaseUrl(): string {
   return (process.env.HANGAR_BAY3_FILES_URL?.trim() || DEFAULT_FILES_URL).replace(/\/+$/, "");
 }
 
-function bay3RunnerBaseUrl(): string {
+// Also used by Raman (Bay 16), whose engine runs on the same runner at /run/raman.
+export function bay3RunnerBaseUrl(): string {
   return (process.env.HANGAR_BAY3_RUNNER_URL?.trim() || DEFAULT_RUNNER_URL).replace(/\/+$/, "");
 }
 
-function keyHeader(): Record<string, string> {
+export function keyHeader(): Record<string, string> {
   const key = process.env.HANGAR_BAY3_KEY?.trim();
   return key ? { "X-Hangar-Key": key } : {};
 }

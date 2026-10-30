@@ -7,6 +7,9 @@ request must carry the shared key in X-Hangar-Key (HANGAR_KEY in runner.env).
 
     POST /run/vehicle-design  {"conceptCode": "...", "conceptId": "..."}
         -> runs VehicleDesign.py, returns its JSON
+    POST /run/raman           {"function": "noise_check" | "evaluate_design" | "lever_ranges" | "health",
+                               "payload": {...}, "request_id": "..."}
+        -> Bay 16 Raman engine, run in-process (fast: sliders call it many times), returns its JSON
     GET  /health              -> {"ok": true}
 
 Standard library only. Run by systemd (hangar-runner.service).
@@ -30,6 +33,27 @@ UUID_RE = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]
 # Each Bay's shared script lives in a private folder inside that Bay's folder
 # (Apache denies it; see torqwings.conf).
 SCRIPTS = {"/run/vehicle-design": os.path.join(BAY3_DIR, "VehicleDesigner", "VehicleDesign.py")}
+
+# Bay 16 Raman: deterministic standard-library engine, imported once and called in-process.
+# After updating the Raman files, restart the service: sudo systemctl restart hangar-runner
+RAMAN_DIR = os.environ.get("HANGAR_RAMAN_DIR", os.path.expanduser("~/Bay16/raman"))
+RAMAN_FUNCTIONS = {"noise_check", "evaluate_design", "lever_ranges", "health"}
+RAMAN_MAX_BODY = 64_000
+_raman_handler = None
+
+
+def _load_raman():
+    """Import ~/Bay16/raman/handler.py once (it imports raman_engine.py from the same folder)."""
+    global _raman_handler
+    if _raman_handler is None:
+        import importlib.util
+        if RAMAN_DIR not in sys.path:
+            sys.path.insert(0, RAMAN_DIR)
+        spec = importlib.util.spec_from_file_location("raman_handler", os.path.join(RAMAN_DIR, "handler.py"))
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        _raman_handler = module
+    return _raman_handler
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -55,6 +79,8 @@ class Handler(BaseHTTPRequestHandler):
     def do_POST(self):
         if not self._authorized():
             return self._send(401, {"ok": False, "error": "missing or wrong X-Hangar-Key"})
+        if self.path == "/run/raman":
+            return self._run_raman()
         script = SCRIPTS.get(self.path)
         if not script:
             return self._send(404, {"ok": False, "error": "not found"})
@@ -92,6 +118,35 @@ class Handler(BaseHTTPRequestHandler):
                 500,
                 {"ok": False, "error": error or f"{os.path.basename(script)} failed (exit {proc.returncode})", "stderr": proc.stderr[-2000:]},
             )
+        self._send(200, result)
+
+    def _run_raman(self):
+        try:
+            length = int(self.headers.get("Content-Length", "0"))
+            if length > RAMAN_MAX_BODY:
+                return self._send(413, {"ok": False, "error": "request body too large"})
+            body = json.loads(self.rfile.read(length) or b"{}")
+        except (ValueError, json.JSONDecodeError):
+            return self._send(400, {"ok": False, "error": "body must be JSON"})
+        if not isinstance(body, dict):
+            return self._send(400, {"ok": False, "error": "body must be a JSON object"})
+        function = str(body.get("function", "")).strip()
+        if function not in RAMAN_FUNCTIONS:
+            return self._send(400, {"ok": False, "error": f"function must be one of {sorted(RAMAN_FUNCTIONS)}"})
+        payload = body.get("payload") or {}
+        if not isinstance(payload, dict):
+            return self._send(400, {"ok": False, "error": "payload must be a JSON object"})
+        try:
+            handler = _load_raman()
+        except Exception as exc:  # missing files or import error
+            return self._send(500, {"ok": False, "error": f"Raman engine not available: {exc}"})
+        result = handler.handle({"function": function, "payload": payload, "request_id": body.get("request_id")})
+        # Input errors are the caller's fault (400); anything else that failed is ours (500).
+        if result.get("status") == "error":
+            status = 400 if result.get("error") in ("invalid_input", "unknown_function") else 500
+            result["ok"] = False
+            return self._send(status, result)
+        result["ok"] = True
         self._send(200, result)
 
     def log_message(self, fmt, *args):

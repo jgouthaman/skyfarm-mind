@@ -140,6 +140,248 @@ export async function callLlmGateway(
   return { content: null, usage: null, provider: null };
 }
 
+// ── Claude-only calls with tools (Raman, Bay 16) ─────────────────────────
+//
+// For callers that need what callLlmGateway can't give: tool use (the Noise
+// Fix agent, via anthropicTurn below), Anthropic's server-side web search
+// (propeller research -- Claude only, Groq has no equivalent here), and the
+// reason a call failed rather than a bare null -- Raman's fallbacks must be
+// loud, so the caller logs and shows `error`.
+// Claude Opus 5.5 rejects forced tool_choice (any/tool), so callers steer
+// tool use from the prompt with tool_choice auto and strict tool schemas.
+
+export const RAMAN_CLAUDE_MODEL = "claude-opus-5-5";
+
+export type ClaudeCallResult =
+  | { ok: true; message: Anthropic.Message; usage: LlmUsage; model: string }
+  | { ok: false; error: string };
+
+export async function callClaude(params: {
+  system: string;
+  messages: Anthropic.MessageParam[];
+  tools?: Anthropic.ToolUnion[];
+  maxTokens?: number;
+  effort?: "low" | "medium" | "high";
+  timeoutMs?: number;
+}): Promise<ClaudeCallResult> {
+  const key = process.env.ANTHROPIC_API_KEY;
+  if (!key) return { ok: false, error: "ANTHROPIC_API_KEY is not set" };
+  try {
+    const client = new Anthropic({ apiKey: key, timeout: params.timeoutMs ?? 60_000, maxRetries: 1 });
+    const message = await client.messages.create({
+      model: RAMAN_CLAUDE_MODEL,
+      max_tokens: params.maxTokens ?? 16000,
+      output_config: { effort: params.effort ?? "medium" },
+      system: params.system,
+      messages: params.messages,
+      ...(params.tools ? { tools: params.tools, tool_choice: { type: "auto" as const } } : {}),
+    });
+    if (message.stop_reason === "refusal") {
+      return { ok: false, error: `Claude declined the request (${message.stop_details?.category ?? "no category"})` };
+    }
+    if (message.stop_reason === "max_tokens") {
+      return { ok: false, error: "Claude's reply hit max_tokens before finishing" };
+    }
+    return {
+      ok: true,
+      message,
+      model: message.model,
+      usage: { inputTokens: message.usage.input_tokens, outputTokens: message.usage.output_tokens },
+    };
+  } catch (err) {
+    if (err instanceof Anthropic.APIError) return { ok: false, error: `Anthropic API ${err.status ?? "error"}: ${err.message}` };
+    return { ok: false, error: err instanceof Error ? err.message : String(err) };
+  }
+}
+
+// ── Provider-ordered tool conversations (Raman, Bay 16) ──────────────────
+//
+// Raman follows the same AI Providers order as Bay 01 (primary first, then
+// secondary) for the Noise Check summary and the Noise Fix agent. One
+// conversation shape over both providers: Anthropic (Claude Opus 5.5, tool
+// use) and Groq (gpt-oss-120b, OpenAI-style function calling). A turn
+// either succeeds with text + tool calls and a reply() to continue, or
+// fails with the reason -- the caller tries the next provider, and only
+// falls back to a mock/rule-based path loudly when none answers.
+
+export interface AgentToolDef {
+  name: string;
+  description: string;
+  input_schema: Record<string, unknown>;
+}
+
+export interface AgentToolCall {
+  id: string;
+  name: string;
+  input: Record<string, unknown>;
+}
+
+export type AgentTurnResult =
+  | {
+      ok: true;
+      provider: LlmProvider;
+      model: string;
+      text: string;
+      toolCalls: AgentToolCall[];
+      // Continue the conversation: tool results for this turn's calls, and/or a follow-up user line.
+      reply: (results: { id: string; content: string }[], userText?: string) => Promise<AgentTurnResult>;
+    }
+  | { ok: false; provider: LlmProvider; error: string };
+
+interface TurnOpts {
+  system: string;
+  tools?: AgentToolDef[];
+  maxTokens?: number;
+  effort?: "low" | "medium" | "high";
+  timeoutMs?: number;
+}
+
+export const RAMAN_GROQ_MODEL = GROQ_FALLBACK_MODEL;
+
+async function anthropicTurn(messages: Anthropic.MessageParam[], opts: TurnOpts): Promise<AgentTurnResult> {
+  const res = await callClaude({
+    system: opts.system,
+    messages,
+    tools: opts.tools?.map((t) => ({ ...t, strict: true }) as Anthropic.Tool),
+    maxTokens: opts.maxTokens,
+    effort: opts.effort,
+    timeoutMs: opts.timeoutMs,
+  });
+  if (!res.ok) return { ok: false, provider: "anthropic", error: res.error };
+  const msg = res.message;
+  return {
+    ok: true,
+    provider: "anthropic",
+    model: msg.model,
+    text: claudeText(msg),
+    toolCalls: msg.content
+      .filter((b): b is Anthropic.ToolUseBlock => b.type === "tool_use")
+      .map((b) => ({ id: b.id, name: b.name, input: (b.input ?? {}) as Record<string, unknown> })),
+    reply: (results, userText) =>
+      anthropicTurn(
+        [
+          ...messages,
+          // The full reply, thinking blocks included, passed back unchanged.
+          { role: "assistant", content: msg.content },
+          {
+            role: "user",
+            content: [
+              ...results.map((r) => ({ type: "tool_result" as const, tool_use_id: r.id, content: r.content })),
+              ...(userText ? [{ type: "text" as const, text: userText }] : []),
+            ],
+          },
+        ],
+        opts,
+      ),
+  };
+}
+
+type GroqMessage = Record<string, unknown>;
+
+async function groqTurn(messages: GroqMessage[], opts: TurnOpts): Promise<AgentTurnResult> {
+  const key = process.env.GROQ_API_KEY;
+  if (!key) return { ok: false, provider: "groq", error: "GROQ_API_KEY is not set" };
+  try {
+    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: GROQ_FALLBACK_MODEL,
+        max_tokens: opts.maxTokens ?? 8000,
+        messages: [{ role: "system", content: opts.system }, ...messages],
+        ...(opts.tools
+          ? {
+              tools: opts.tools.map((t) => ({
+                type: "function",
+                function: { name: t.name, description: t.description, parameters: t.input_schema },
+              })),
+              tool_choice: "auto",
+            }
+          : {}),
+      }),
+      signal: AbortSignal.timeout(opts.timeoutMs ?? 60_000),
+    });
+    const json = await res.json().catch(() => null);
+    if (!res.ok) return { ok: false, provider: "groq", error: `Groq HTTP ${res.status}: ${json?.error?.message ?? "no details"}` };
+    const choice = json?.choices?.[0];
+    const m = choice?.message;
+    if (!m) return { ok: false, provider: "groq", error: "Groq returned no message" };
+    if (choice.finish_reason === "length") return { ok: false, provider: "groq", error: "Groq's reply hit max_tokens before finishing" };
+    const rawCalls: { id: string; function: { name: string; arguments: string } }[] = m.tool_calls ?? [];
+    const toolCalls: AgentToolCall[] = rawCalls.map((tc) => {
+      let input: Record<string, unknown> = {};
+      try {
+        input = JSON.parse(tc.function.arguments || "{}");
+      } catch {
+        input = {};
+      }
+      return { id: tc.id, name: tc.function.name, input };
+    });
+    const assistant: GroqMessage = { role: "assistant", content: m.content ?? "" };
+    if (rawCalls.length) assistant.tool_calls = rawCalls;
+    return {
+      ok: true,
+      provider: "groq",
+      model: json.model ?? GROQ_FALLBACK_MODEL,
+      text: String(m.content ?? "").trim(),
+      toolCalls,
+      reply: (results, userText) =>
+        groqTurn(
+          [
+            ...messages,
+            assistant,
+            ...results.map((r) => ({ role: "tool", tool_call_id: r.id, content: r.content })),
+            ...(userText ? [{ role: "user", content: userText }] : []),
+          ],
+          opts,
+        ),
+    };
+  } catch (err) {
+    return { ok: false, provider: "groq", error: err instanceof Error ? err.message : String(err) };
+  }
+}
+
+// First turn of a conversation with one provider.
+export function startAgentTurn(provider: LlmProvider, userText: string, opts: TurnOpts): Promise<AgentTurnResult> {
+  return provider === "anthropic"
+    ? anthropicTurn([{ role: "user", content: userText }], opts)
+    : groqTurn([{ role: "user", content: userText }], opts);
+}
+
+// The Mission Hub AI Providers order (primary first).
+export function llmProviderOrder(): Promise<LlmProvider[]> {
+  return providerOrder();
+}
+
+export function modelForProvider(provider: LlmProvider): string {
+  return provider === "anthropic" ? RAMAN_CLAUDE_MODEL : RAMAN_GROQ_MODEL;
+}
+
+// Backs Raman's "AI" flag -- same logic as Bay 01's checkLlmLiveStatus:
+// the first provider in the AI Providers order that's genuinely reachable
+// (token-free probe), with the model Raman uses on it and the order itself.
+export async function checkRamanAiStatus(): Promise<{
+  live: boolean;
+  provider: LlmProvider | null;
+  model: string | null;
+  configuredOrder: LlmProvider[];
+}> {
+  const configuredOrder = await providerOrder();
+  for (const provider of configuredOrder) {
+    if (await isProviderLive(provider)) return { live: true, provider, model: modelForProvider(provider), configuredOrder };
+  }
+  return { live: false, provider: null, model: null, configuredOrder };
+}
+
+// All text blocks of a Claude reply, joined.
+export function claudeText(message: Anthropic.Message): string {
+  return message.content
+    .filter((b): b is Anthropic.TextBlock => b.type === "text")
+    .map((b) => b.text)
+    .join("\n")
+    .trim();
+}
+
 // Order the providers are tried in, from Mission Hub -> Configurations -> AI
 // Providers (llmProviderSettings.ts, cached ~30s). Imported lazily so this
 // module stays free of the database client, and any failure falls back to

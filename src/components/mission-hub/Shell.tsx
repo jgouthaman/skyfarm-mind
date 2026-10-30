@@ -2,7 +2,7 @@ import { type ReactNode, useEffect, useState } from "react";
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import {
   Clock, BookUser, ClipboardList, GraduationCap, Users, Settings, Bell, Menu, X, LogOut,
-  ChevronDown, ChevronRight, Atom, Sparkles,
+  ChevronDown, ChevronRight, Atom, Sparkles, AudioLines,
 } from "lucide-react";
 import { useMissionHubAuth } from "@/lib/mission-hub/context";
 import { type Vertical } from "@/lib/mission-hub/types";
@@ -88,9 +88,10 @@ export function MissionHubShell({ title, children }: { title: string; children: 
   );
 }
 
-type Section = "business" | "agents" | "config";
+type Section = "business" | "agents" | "upcoming" | "config";
 
 function getSectionFromPath(path: string, role?: string): Section | null {
+  if (path.startsWith("/mission-hub/raman")) return "upcoming";
   if (path === "/mission-hub/waitlist" || path === "/mission-hub/contacts" || path === "/mission-hub/academy-users" || path === "/mission-hub/service-requests") return "business";
   if (path === "/mission-hub/users" || path === "/mission-hub/ai-providers" || path.startsWith("/mission-hub/settings")) return "config";
   if (path.startsWith("/mission-hub/agents")) return "agents";
@@ -176,6 +177,21 @@ function Sidebar({
               {openSection === "agents" && (
                 <NavLink to="/mission-hub/agents/bernoulli" icon={Atom} active={path === "/mission-hub/agents/bernoulli"} onClick={onClose}>
                   Bernoulli
+                </NavLink>
+              )}
+            </div>
+
+            {/* ── Upcoming Agents -- the test lab: new agents run here as a
+                standalone beta before they're promoted to The Hangar. ── */}
+            <div className="mt-5">
+              <button type="button" onClick={() => toggle("upcoming")}
+                className="mh-mono mb-2 flex w-full items-center px-3 text-[10px] uppercase tracking-wider transition-colors" style={sectionLabelStyle}>
+                <span className="flex-1 text-left">Upcoming Agents</span>
+                {openSection === "upcoming" ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
+              </button>
+              {openSection === "upcoming" && (
+                <NavLink to="/mission-hub/raman" icon={AudioLines} active={path.startsWith("/mission-hub/raman")} onClick={onClose}>
+                  Ask Raman
                 </NavLink>
               )}
             </div>
