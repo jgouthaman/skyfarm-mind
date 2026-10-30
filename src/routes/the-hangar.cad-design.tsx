@@ -11,9 +11,13 @@ import type { CADModelFiles, BomEntry, MassProperties } from "@/lib/the-hangar/c
 // page (no shared imports with the-hangar.aircraft-design.tsx or any other
 // bay page, matching the welcome page's own "fully isolated" convention).
 //
+// Look and feel match Bay 03 (Vehicle Design): the light hangar theme, the
+// live "AI" badge in the status row, input and output lists side by side
+// (one open at a time, folded once a design is picked), and an inline
+// spinner in the "Generating from" box instead of a separate status panel.
+//
 // Deliberately NOT a 4-item gated-stage tracker — same reasoning as Bay 03:
-// this bay has exactly one real stage today (Model Generation). Single
-// spinner-or-idle-text pattern, no tracker header.
+// this bay has exactly one real stage today (Model Generation).
 //
 // source_was_mock is surfaced durably (live result, list row, past-design
 // view) via MockSourceBadge, matching Bay 03's own convention — not
@@ -96,6 +100,8 @@ function TheHangarCADDesign() {
     useState<AircraftDesignListEntry | null>(null);
   const [selectedCADDesign, setSelectedCADDesign] = useState<CADDesignListEntry | null>(null);
   const [planExpanded, setPlanExpanded] = useState(false);
+  const [llmStatus, setLlmStatus] = useState<"checking" | "live" | "offline">("checking");
+  const [llmProvider, setLlmProvider] = useState<"anthropic" | "groq" | null>(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -107,6 +113,35 @@ function TheHangarCADDesign() {
       setCurrentUserEmail(session?.user.email ?? null);
     });
     return () => subscription.unsubscribe();
+  }, []);
+
+  // "AI" indicator -- same live check (and provider order) every Hangar bay uses.
+  useEffect(() => {
+    let cancelled = false;
+    async function checkLlmStatus() {
+      const { data } = await supabase.auth.getSession();
+      const token = data.session?.access_token;
+      if (!token) return;
+      try {
+        const res = await fetch("/api/hangar/llm-status", { headers: { Authorization: `Bearer ${token}` } });
+        const json = await res.json();
+        if (!cancelled) {
+          setLlmStatus(res.ok && json.live ? "live" : "offline");
+          setLlmProvider(res.ok && json.live ? json.provider ?? null : null);
+        }
+      } catch {
+        if (!cancelled) {
+          setLlmStatus("offline");
+          setLlmProvider(null);
+        }
+      }
+    }
+    checkLlmStatus();
+    const interval = setInterval(checkLlmStatus, 60000);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
   }, []);
 
   // "Your spec-ready aircraft designs" — reuses /api/hangar/aircraft-designs
@@ -175,6 +210,9 @@ function TheHangarCADDesign() {
     resetFlow();
     setSelectedAircraftDesign(d);
     setPlanExpanded(true);
+    // The pick is made -- fold both lists so the Generate button is in view.
+    setDesignsExpanded(false);
+    setCADDesignsExpanded(false);
   }
 
   async function generateCADModel() {
@@ -238,6 +276,37 @@ function TheHangarCADDesign() {
           <div className="hgr-d-wrap">
             <div className="hgr-d-status-row">
               <span className="hgr-d-badge hgr-d-badge-bay">BAY 04 OF 15</span>
+              <span
+                className={`hgr-d-badge hgr-d-badge-ai hgr-d-badge-ai-${llmStatus}`}
+                title={
+                  llmStatus === "checking"
+                    ? "Checking the AI providers…"
+                    : llmStatus === "live"
+                      ? llmProvider === "groq"
+                        ? "Live — answering via Groq (gpt-oss-120b), per the AI Providers order in Mission Hub"
+                        : "Live — connected to Anthropic (Claude Sonnet 5)"
+                      : "Offline — not connected to Anthropic or Groq. CAD model generation will fall back to mock output."
+                }
+              >
+                <span className="hgr-d-badge-ai-dot" />
+                AI
+                {llmStatus === "live" && llmProvider === "anthropic" && (
+                  <span className="hgr-d-badge-ai-model">
+                    <svg viewBox="0 0 16 16" width="10" height="10" aria-hidden="true">
+                      <path d="M8 0 L9.4 6.6 L16 8 L9.4 9.4 L8 16 L6.6 9.4 L0 8 L6.6 6.6 Z" fill="currentColor" />
+                    </svg>
+                    Claude
+                  </span>
+                )}
+                {llmStatus === "live" && llmProvider === "groq" && (
+                  <span className="hgr-d-badge-ai-model hgr-d-badge-ai-model-fallback">
+                    <svg viewBox="0 0 16 16" width="10" height="10" aria-hidden="true">
+                      <path d="M9 0 L2 9 L7 9 L6 16 L14 6 L9 6 Z" fill="currentColor" />
+                    </svg>
+                    Groq
+                  </span>
+                )}
+              </span>
             </div>
             <div className="hgr-d-hero-row">
               <h1>CAD Agent</h1>
@@ -252,27 +321,27 @@ function TheHangarCADDesign() {
 
         <section id="generate-cad-model">
           <div className="hgr-d-wrap">
-            <div className="hgr-d-kicker">Generate a CAD model</div>
-            <h2 className="hgr-d-sec-title">Turn a spec-ready design into structured CAD data.</h2>
-            <p className="hgr-d-sec-sub">
-              Runs one real TorqWings AI call, followed by a deterministic validation pass
-              (interference / DFM-DFA / tolerance stack-up). There's no real CAD engine
-              (FreeCAD/OpenSCAD) integration yet, so this is Claude reasoning about plausible CAD
-              data plus rule-based checks, not a simulated engineering result.
-            </p>
 
+            {/* Input and output side by side, as on Bay 03: the Design Ready
+                vehicle designs a CAD model can be generated from, and the CAD
+                designs already generated. Only one is open at a time. */}
+            {!selectedCADDesign && (
+              <div className="hgr-d-lists">
+                <div className="hgr-d-lists-col">
             {specReadyDesignsStatus === "error" && (
               <ListFetchError onRetry={fetchSpecReadyDesigns} />
             )}
 
             {specReadyDesignsStatus !== "error" &&
               specReadyDesigns &&
-              specReadyDesigns.length > 0 &&
-              !selectedCADDesign && (
+              specReadyDesigns.length > 0 && (
                 <ListPanel
                   title={`Your Design Ready vehicle designs (${specReadyDesigns.length})`}
                   expanded={designsExpanded}
-                  onToggleExpanded={() => setDesignsExpanded((v) => !v)}
+                  onToggleExpanded={() => {
+                    setDesignsExpanded(!designsExpanded);
+                    setCADDesignsExpanded(false);
+                  }}
                 >
                   {specReadyDesigns.map((d) => (
                     <button
@@ -308,23 +377,30 @@ function TheHangarCADDesign() {
                 </p>
               )}
 
+                </div>
+                <div className="hgr-d-lists-col">
             {cadDesignsStatus === "error" && <ListFetchError onRetry={fetchCADDesigns} />}
 
             {cadDesignsStatus !== "error" &&
               cadDesigns &&
-              cadDesigns.length > 0 &&
-              !selectedCADDesign && (
+              cadDesigns.length > 0 && (
                 <ListPanel
                   title={`Your CAD designs (${cadDesigns.length})`}
                   expanded={cadDesignsExpanded}
-                  onToggleExpanded={() => setCADDesignsExpanded((v) => !v)}
+                  onToggleExpanded={() => {
+                    setCADDesignsExpanded(!cadDesignsExpanded);
+                    setDesignsExpanded(false);
+                  }}
                 >
                   {cadDesigns.map((d) => (
                     <button
                       key={d.cadDesignId}
                       type="button"
                       className="hgr-d-list-row"
-                      onClick={() => setSelectedCADDesign(d)}
+                      onClick={() => {
+                        setSelectedCADDesign(d);
+                        setCADDesignsExpanded(false);
+                      }}
                     >
                       <span className="hgr-d-list-row-code">{d.cadCode}</span>
                       <span className="hgr-d-list-row-type">
@@ -346,6 +422,9 @@ function TheHangarCADDesign() {
                   ))}
                 </ListPanel>
               )}
+                </div>
+              </div>
+            )}
 
             {selectedCADDesign ? (
               <PastCADDesignDetail
@@ -353,89 +432,62 @@ function TheHangarCADDesign() {
                 onBack={() => setSelectedCADDesign(null)}
               />
             ) : (
-              <div className={isIdle ? "hgr-d-collapsible" : undefined}>
-                {isIdle && (
-                  <button
-                    type="button"
-                    className="hgr-d-collapsible-title"
-                    onClick={() => setPlanExpanded((v) => !v)}
-                    aria-expanded={planExpanded}
-                  >
-                    <span>Generate a CAD model</span>
-                    <span className={`hgr-d-arrow${planExpanded ? " hgr-d-arrow-open" : ""}`}>
-                      ▸
-                    </span>
-                  </button>
-                )}
-                {(!isIdle || planExpanded) && (
-                  <div className={isIdle ? "hgr-d-collapsible-body" : undefined}>
-                    {flow.status !== "complete" && (
-                      <div className="hgr-d-process-grid">
-                        <div>
-                          {selectedAircraftDesign ? (
-                            <div className="hgr-d-selected-spec">
-                              <span className="hgr-d-selected-spec-label">Generating from</span>
-                              <p>
-                                <b>{selectedAircraftDesign.designCode}</b> —{" "}
-                                {selectedAircraftDesign.geometryParameters?.vehicleClass ?? "—"}
-                              </p>
-                              {flow.status !== "running" && (
-                                <button
-                                  type="button"
-                                  className="hgr-d-btn hgr-d-btn-amber"
-                                  onClick={generateCADModel}
-                                >
-                                  Generate CAD Model →
-                                </button>
-                              )}
-                            </div>
-                          ) : (
-                            <p className="hgr-d-status-idle">
-                              Select a Design Ready vehicle design above to begin generating a CAD
-                              model.
-                            </p>
-                          )}
-                          {flow.status === "error" && (
-                            <StageErrorCard
-                              title="Couldn't complete Model Generation."
-                              message={flow.errorMessage}
-                              onRetry={generateCADModel}
-                            />
-                          )}
-                        </div>
-
-                        {/* No 4-item stage tracker here, deliberately — see the
-                            file header comment. Just the one real stage's name
-                            and a single spinner, matching every other bay's
-                            own non-Stage-1 stages. */}
-                        <div className="hgr-d-status-panel">
-                          <div className="hgr-d-status-panel-title">Model Generation</div>
+              (!isIdle || planExpanded) && (
+                <div>
+                  {flow.status !== "complete" && (
+                    <div className="hgr-d-process-grid">
+                      {selectedAircraftDesign ? (
+                        <div className="hgr-d-selected-spec">
+                          <span className="hgr-d-selected-spec-label">Generating from</span>
+                          <p>
+                            <b>{selectedAircraftDesign.designCode}</b> —{" "}
+                            {selectedAircraftDesign.geometryParameters?.vehicleClass ?? "—"}
+                          </p>
+                          {/* What this output is: one AI call plus rule-based
+                              checks, not a CAD engine (yet). */}
+                          <p className="hgr-d-status-idle">
+                            One TorqWings AI call, then a deterministic validation pass (interference /
+                            DFM-DFA / tolerance stack-up). There's no CAD engine (FreeCAD/OpenSCAD)
+                            integration yet, so this is AI reasoning about plausible CAD data plus
+                            rule-based checks, not a simulated engineering result.
+                          </p>
                           {flow.status === "running" ? (
-                            <div className="hgr-d-status-step hgr-d-status-step-active">
-                              <span className="hgr-d-status-icon">
-                                <span className="hgr-d-status-spinner" />
-                              </span>
-                              <span className="hgr-d-status-text">Processing…</span>
+                            <div className="hgr-d-running" role="status">
+                              <span className="hgr-d-status-spinner" />
+                              Generating the CAD model -- one TorqWings AI call, usually a few seconds…
                             </div>
-                          ) : flow.status === "error" ? (
-                            <p className="hgr-d-status-idle">
-                              Stopped — see the error below, then retry.
-                            </p>
                           ) : (
-                            <p className="hgr-d-status-idle">
-                              Select a Design Ready vehicle design, then generate to begin.
-                            </p>
+                            <div className="hgr-d-btn-row">
+                              <button
+                                type="button"
+                                className="hgr-d-btn hgr-d-btn-amber"
+                                onClick={generateCADModel}
+                              >
+                                Generate CAD Model →
+                              </button>
+                            </div>
                           )}
                         </div>
-                      </div>
-                    )}
+                      ) : (
+                        <p className="hgr-d-status-idle">
+                          Select a Design Ready vehicle design above to begin generating a CAD model.
+                        </p>
+                      )}
+                      {flow.status === "error" && (
+                        <StageErrorCard
+                          title="Couldn't complete Model Generation."
+                          message={flow.errorMessage}
+                          onRetry={generateCADModel}
+                        />
+                      )}
+                    </div>
+                  )}
 
-                    {flow.status === "complete" && flow.result && (
-                      <CADResultView result={flow.result} onStartNew={resetFlow} />
-                    )}
-                  </div>
-                )}
-              </div>
+                  {flow.status === "complete" && flow.result && (
+                    <CADResultView result={flow.result} onStartNew={resetFlow} />
+                  )}
+                </div>
+              )
             )}
           </div>
         </section>
@@ -755,12 +807,16 @@ function PastCADDesignDetail({
 
 const HGR_CAD_DESIGN_CSS = `
 .hgr-d{
-  --hgr-d-navy-deep:#08131F; --hgr-d-navy-panel:#0F2136;
-  --hgr-d-blue-line:#3E7CA6; --hgr-d-blue-bright:#6FB4E0;
-  --hgr-d-amber:#E8A33D; --hgr-d-amber-bright:#F6C374;
-  --hgr-d-paper:#ECEFF3; --hgr-d-paper-dim:#8FA5BB;
-  --hgr-d-green:#5FBF8F; --hgr-d-red:#E0715A;
-  --hgr-d-grid:rgba(111,180,224,0.08); --hgr-d-hairline:rgba(111,180,224,0.20);
+  /* Same light theme as Bay 03 (the-hangar.aircraft-design.tsx) and the
+     /the-hangar/agents page: white page, blue grid, light panels, dark
+     text, amber-bright darkened since it's only used as text. */
+  --hgr-d-navy-deep:#FFFFFF; --hgr-d-navy-panel:#F2F7FB; --hgr-d-navy-panel-2:#E4EEF7;
+  --hgr-d-blue-line:#3E7CA6; --hgr-d-blue-bright:#1C74B8;
+  --hgr-d-amber:#E8A33D; --hgr-d-amber-bright:#B4690E;
+  --hgr-d-paper:#12222F; --hgr-d-paper-dim:#4F6B80; --hgr-d-ink:#0A1826;
+  --hgr-d-green:#2E8B57; --hgr-d-red:#C0392B;
+  --hgr-d-bernoulli:#7A5BD6; --hgr-d-bernoulli-bright:#6A4BC4;
+  --hgr-d-grid:rgba(62,124,166,0.14); --hgr-d-hairline:rgba(62,124,166,0.28);
 
   background:var(--hgr-d-navy-deep); color:var(--hgr-d-paper); font-family:'IBM Plex Sans', sans-serif;
   background-image:linear-gradient(var(--hgr-d-grid) 1px, transparent 1px), linear-gradient(90deg, var(--hgr-d-grid) 1px, transparent 1px);
@@ -773,7 +829,10 @@ const HGR_CAD_DESIGN_CSS = `
 .hgr-d-wrap{ max-width:1180px; margin:0 auto; padding:0 32px; }
 .hgr-d a{ color:inherit; }
 
-.hgr-d nav{ border-bottom:1px solid var(--hgr-d-hairline); position:sticky; top:0; background:rgba(8,19,31,0.9); backdrop-filter:blur(8px); z-index:20; }
+.hgr-d nav{ border-bottom:1px solid var(--hgr-d-hairline); position:sticky; top:0; background:rgba(10,24,38,0.92); backdrop-filter:blur(10px); z-index:20;
+  /* Dark nav strip on the light page, same as Bay 03 and the agents page. */
+  color:var(--hgr-d-paper);
+  --hgr-d-paper:#ECEFF3; --hgr-d-paper-dim:#8FA5BB; --hgr-d-blue-bright:#6FB4E0; --hgr-d-hairline:rgba(111,180,224,0.22); }
 .hgr-d nav .hgr-d-wrap{ display:flex; align-items:center; justify-content:space-between; height:68px; }
 .hgr-d-crumbs{ font-size:14px; color:var(--hgr-d-paper-dim); display:flex; align-items:center; gap:8px; }
 .hgr-d-crumbs a{ text-decoration:none; color:var(--hgr-d-paper-dim); }
@@ -784,7 +843,7 @@ const HGR_CAD_DESIGN_CSS = `
 .hgr-d-exit:hover{ color:var(--hgr-d-paper); border-color:var(--hgr-d-blue-bright); }
 
 .hgr-d main{ padding-bottom:100px; }
-.hgr-d-hero{ padding:56px 0 20px; border-bottom:1px solid var(--hgr-d-hairline); position:relative; overflow:hidden; }
+.hgr-d-hero{ padding:56px 0 20px; border-bottom:1px solid var(--hgr-d-blue-line); position:relative; overflow:hidden; }
 .hgr-d-doors{ position:absolute; inset:0; z-index:5; display:flex; pointer-events:none; }
 .hgr-d-door{ flex:1; background: repeating-linear-gradient(90deg, #0C1E30 0 78px, #08131F 78px 80px); position:relative; }
 .hgr-d-door::after{ content:""; position:absolute; top:0; bottom:0; width:2px; background:var(--hgr-d-blue-line); opacity:.5; }
@@ -797,7 +856,18 @@ const HGR_CAD_DESIGN_CSS = `
 @media (prefers-reduced-motion: reduce){ .hgr-d-doors{ display:none; } }
 .hgr-d-status-row{ display:flex; align-items:center; gap:12px; margin-bottom:22px; flex-wrap:wrap; }
 .hgr-d-badge{ font-family:'IBM Plex Mono',monospace; font-size:11.5px; letter-spacing:.1em; text-transform:uppercase; padding:6px 13px; border-radius:2px; display:inline-flex; align-items:center; gap:8px; }
-.hgr-d-badge-bay{ color:var(--hgr-d-paper-dim); border:1px solid var(--hgr-d-hairline); }
+.hgr-d-badge-bay{ color:var(--hgr-d-paper); font-weight:700; border:1px solid var(--hgr-d-blue-line); background:var(--hgr-d-navy-panel-2); }
+.hgr-d-badge-ai{ font-weight:700; }
+.hgr-d-badge-ai-dot{ width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+.hgr-d-badge-ai-checking{ color:var(--hgr-d-paper); border:1px solid var(--hgr-d-blue-line); background:var(--hgr-d-navy-panel-2); }
+.hgr-d-badge-ai-checking .hgr-d-badge-ai-dot{ background:var(--hgr-d-paper-dim); }
+.hgr-d-badge-ai-live{ color:#166534; border:1px solid #16A34A; background:#DCFCE7; }
+.hgr-d-badge-ai-live .hgr-d-badge-ai-dot{ background:#16A34A; box-shadow:0 0 6px rgba(22,163,74,.7); animation:hgr-d-ai-pulse 2s ease-in-out infinite; }
+.hgr-d-badge-ai-offline{ color:var(--hgr-d-amber-bright); border:1px solid var(--hgr-d-amber); background:#FDF3E3; }
+.hgr-d-badge-ai-offline .hgr-d-badge-ai-dot{ background:var(--hgr-d-amber); box-shadow:0 0 6px rgba(232,163,61,.6); }
+.hgr-d-badge-ai-model{ display:inline-flex; align-items:center; gap:3px; margin-left:6px; padding-left:6px; border-left:1px solid rgba(22,101,52,.35); font-weight:600; }
+.hgr-d-badge-ai-model-fallback{ border-left-color:rgba(180,105,14,.4); color:var(--hgr-d-amber-bright); }
+@keyframes hgr-d-ai-pulse{ 0%,100%{ opacity:1; } 50%{ opacity:.4; } }
 .hgr-d-hero-row{ display:flex; align-items:center; gap:48px; flex-wrap:wrap; }
 @media(max-width:760px){ .hgr-d-hero-row{ flex-direction:column; align-items:flex-start; gap:16px; } }
 .hgr-d-hero h1{ font-size:clamp(34px,5vw,58px); margin:0; flex-shrink:0; }
@@ -806,24 +876,22 @@ const HGR_CAD_DESIGN_CSS = `
 
 .hgr-d section{ padding:60px 0; }
 #generate-cad-model{ padding-top:32px; }
-.hgr-d-kicker{ font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--hgr-d-amber); margin-bottom:12px; }
-.hgr-d-sec-title{ font-size:clamp(22px,2.6vw,30px); margin-bottom:10px; }
-.hgr-d-sec-sub{ color:var(--hgr-d-paper-dim); font-size:14.5px; max-width:640px; margin-bottom:36px; }
 .hgr-d-empty-hint{ color:var(--hgr-d-paper-dim); font-size:13.5px; margin-bottom:24px; }
 .hgr-d-empty-hint a{ color:var(--hgr-d-blue-bright); }
 
 .hgr-d-btn{ font-family:'IBM Plex Mono',monospace; font-size:13px; padding:12px 22px; border-radius:2px; display:inline-flex; align-items:center; gap:8px; text-decoration:none; border:1px solid transparent; cursor:pointer; background:none; }
 .hgr-d-btn-ghost{ border:1px solid var(--hgr-d-hairline); color:var(--hgr-d-paper-dim); }
 .hgr-d-btn-ghost:hover{ color:var(--hgr-d-paper); border-color:var(--hgr-d-blue-bright); }
-.hgr-d-btn-amber{ background:var(--hgr-d-amber); color:var(--hgr-d-navy-deep); font-weight:600; }
-.hgr-d-btn-amber:hover{ background:var(--hgr-d-amber-bright); }
+.hgr-d-btn-amber{ background:var(--hgr-d-amber); color:var(--hgr-d-ink); font-weight:600; }
+.hgr-d-btn-amber:hover{ background:#F6C374; }
 .hgr-d-btn:disabled{ opacity:.4; cursor:not-allowed; }
 .hgr-d-btn:disabled:hover{ color:var(--hgr-d-paper-dim); border-color:var(--hgr-d-hairline); }
+.hgr-d-btn-row{ display:flex; gap:12px; flex-wrap:wrap; }
 
-/* ── Collapsible panels ── */
+/* ── Collapsible list panels ── */
 .hgr-d-collapsible{ border:1px solid var(--hgr-d-hairline); background:var(--hgr-d-navy-panel); border-radius:2px; margin-bottom:32px; }
-.hgr-d-collapsible-title{ display:flex; align-items:center; justify-content:space-between; width:100%; font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--hgr-d-paper-dim); padding:14px 18px; border:none; background:none; cursor:pointer; }
-.hgr-d-collapsible-title:hover{ color:var(--hgr-d-paper); }
+.hgr-d-collapsible-title{ display:flex; align-items:center; justify-content:space-between; width:100%; font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.08em; text-transform:uppercase; font-weight:700; color:var(--hgr-d-paper); padding:14px 18px; border:none; background:var(--hgr-d-navy-panel-2); border-left:3px solid var(--hgr-d-blue-bright); cursor:pointer; }
+.hgr-d-collapsible-title:hover{ color:var(--hgr-d-blue-bright); }
 .hgr-d-arrow{ display:inline-block; font-size:11px; transition:transform .15s; }
 .hgr-d-arrow-open{ transform:rotate(90deg); }
 .hgr-d-list{ max-height:260px; overflow-y:auto; border-top:1px solid var(--hgr-d-hairline); }
@@ -840,25 +908,28 @@ const HGR_CAD_DESIGN_CSS = `
 .hgr-d-list-row-confidence{ font-family:'IBM Plex Mono',monospace; font-size:12.5px; color:var(--hgr-d-paper-dim); }
 .hgr-d-list-row-date{ font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--hgr-d-paper-dim); text-align:right; }
 
+/* ── Side-by-side lists (as on Bay 03) ── */
+.hgr-d-lists{ display:grid; grid-template-columns:1fr 1fr; gap:20px; align-items:start; margin-bottom:12px; }
+@media(max-width:900px){ .hgr-d-lists{ grid-template-columns:1fr; } }
+.hgr-d-lists-col{ min-width:0; }
+/* Half-width columns: rows wrap instead of squeezing six fixed columns. */
+.hgr-d-lists .hgr-d-list-row{ display:flex; flex-wrap:wrap; align-items:center; gap:6px 12px; }
+.hgr-d-lists .hgr-d-list-row-type{ flex:1 1 140px; }
+.hgr-d-lists .hgr-d-list-row-date{ margin-left:auto; }
+.hgr-d-running{ display:flex; align-items:center; gap:10px; font-size:13px; font-weight:600; color:var(--hgr-d-paper); }
+
 /* ── List-fetch error ── */
 .hgr-d-list-fetch-error{ display:flex; align-items:center; justify-content:space-between; gap:16px; padding:14px 18px; margin-bottom:20px; border:1px solid rgba(232,163,61,.4); background:rgba(232,163,61,.08); border-radius:2px; }
 .hgr-d-list-fetch-error p{ margin:0; color:var(--hgr-d-paper-dim); font-size:13.5px; }
 
-/* ── Process grid + selected-spec / status panel ── */
-.hgr-d-process-grid{ display:grid; grid-template-columns:1fr 320px; gap:32px; align-items:start; }
-@media(max-width:820px){ .hgr-d-process-grid{ grid-template-columns:1fr; } }
-.hgr-d-selected-spec{ max-width:640px; padding:14px 16px; border:1px solid rgba(111,180,224,.3); border-left:3px solid var(--hgr-d-blue-bright); background:rgba(111,180,224,.09); border-radius:2px; margin-bottom:20px; }
-.hgr-d-selected-spec-label{ display:block; font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--hgr-d-blue-bright); margin-bottom:8px; }
+/* ── Selected design + running state ── */
+.hgr-d-process-grid{ display:block; min-width:0; }
+.hgr-d-selected-spec{ padding:14px 16px; border:1px solid rgba(111,180,224,.3); border-left:3px solid var(--hgr-d-blue-bright); background:rgba(111,180,224,.09); border-radius:2px; margin-bottom:20px; }
+.hgr-d-selected-spec-label{ display:block; font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--hgr-d-blue-bright); margin-bottom:8px; }
 .hgr-d-selected-spec p{ margin:0 0 14px; font-size:14px; color:var(--hgr-d-paper); line-height:1.6; }
-
-.hgr-d-status-panel{ border:1px solid var(--hgr-d-hairline); background:var(--hgr-d-navy-panel); border-radius:2px; padding:20px; }
-.hgr-d-status-panel-title{ font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--hgr-d-paper-dim); margin-bottom:16px; }
+.hgr-d-selected-spec p.hgr-d-status-idle{ font-size:13px; color:var(--hgr-d-paper-dim); }
 .hgr-d-status-idle{ color:var(--hgr-d-paper-dim); font-size:13px; line-height:1.6; margin:0; }
-.hgr-d-status-step{ display:flex; align-items:flex-start; gap:10px; padding:9px 0; }
-.hgr-d-status-icon{ width:18px; height:18px; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
-.hgr-d-status-spinner{ width:13px; height:13px; border-radius:50%; border:2px solid var(--hgr-d-hairline); border-top-color:var(--hgr-d-amber); animation:hgr-d-spin 0.8s linear infinite; }
-.hgr-d-status-text{ font-size:12.5px; line-height:1.5; color:var(--hgr-d-paper-dim); }
-.hgr-d-status-step-active .hgr-d-status-text{ color:var(--hgr-d-paper); }
+.hgr-d-status-spinner{ width:13px; height:13px; border-radius:50%; border:2px solid var(--hgr-d-hairline); border-top-color:var(--hgr-d-amber); animation:hgr-d-spin 0.8s linear infinite; flex-shrink:0; }
 
 /* ── Mock source badge (durable, matches Bay 03's convention) ── */
 .hgr-d-mock-badge{ display:inline-flex; font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.03em; color:var(--hgr-d-amber-bright); border:1px solid rgba(232,163,61,.4); background:rgba(232,163,61,.08); padding:4px 9px; border-radius:2px; margin-top:8px; }
@@ -878,30 +949,34 @@ const HGR_CAD_DESIGN_CSS = `
 .hgr-d-dash-confidence{ text-align:center; flex-shrink:0; }
 .hgr-d-dash-confidence-num{ font-family:'Space Grotesk',sans-serif; font-size:32px; font-weight:700; color:var(--hgr-d-amber-bright); line-height:1; }
 .hgr-d-dash-confidence-label{ font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--hgr-d-paper-dim); }
+/* Same "Ask Bernoulli" button as Bay 01/02/03. */
 .hgr-d-dash-bernoulli-link{
-  display:inline-block; margin-top:10px; font-family:'IBM Plex Mono',monospace; font-size:11px;
-  color:var(--hgr-d-blue-bright); text-decoration:none; border:1px solid var(--hgr-d-hairline);
-  border-radius:2px; padding:5px 10px; white-space:nowrap;
+  display:inline-flex; align-items:center; gap:6px; margin-top:10px; font-family:'IBM Plex Mono',monospace;
+  font-size:12.5px; font-weight:700; color:#FFFFFF; text-decoration:none;
+  background:var(--hgr-d-bernoulli); border:1px solid var(--hgr-d-bernoulli); border-radius:2px;
+  padding:9px 16px; white-space:nowrap; box-shadow:0 0 10px rgba(122,91,214,.35);
+  transition:background .2s, box-shadow .2s;
 }
-.hgr-d-dash-bernoulli-link:hover{ border-color:var(--hgr-d-blue-bright); color:var(--hgr-d-paper); }
+.hgr-d-dash-bernoulli-link:hover{ background:var(--hgr-d-bernoulli-bright); border-color:var(--hgr-d-bernoulli-bright); }
 .hgr-d-dash-section{ padding:24px 28px; border-bottom:1px solid var(--hgr-d-hairline); }
 .hgr-d-dash-section:last-of-type{ border-bottom:none; }
 .hgr-d-dash-section h4{ font-family:'Space Grotesk',sans-serif; font-size:14.5px; font-weight:600; margin-bottom:16px; }
 .hgr-d-dash-empty{ color:var(--hgr-d-paper-dim); font-size:13px; margin:0; }
 .hgr-d-dash-rationale{ color:var(--hgr-d-paper); font-size:14px; line-height:1.7; margin:0; }
+.hgr-d-dash-actions{ display:flex; flex-wrap:wrap; gap:12px; padding:24px 28px; }
 .hgr-d-dash-fields{ display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
 @media(max-width:700px){ .hgr-d-dash-fields{ grid-template-columns:1fr 1fr; } }
 .hgr-d-dash-field-label{ font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--hgr-d-paper-dim); margin-bottom:6px; }
 .hgr-d-dash-field-value{ font-size:14px; }
 
 /* ── BOM table ── */
-.hgr-d-bom-table{ display:flex; flex-direction:column; border:1px solid var(--hgr-d-hairline); border-radius:2px; overflow:hidden; }
-.hgr-d-bom-row{ display:grid; grid-template-columns:2fr 0.6fr 1.4fr; gap:12px; padding:10px 14px; font-size:13px; border-bottom:1px solid var(--hgr-d-hairline); }
+.hgr-d-bom-table{ display:flex; flex-direction:column; border:1px solid var(--hgr-d-hairline); border-radius:2px; overflow:hidden; background:var(--hgr-d-navy-deep); }
+.hgr-d-bom-row{ display:grid; grid-template-columns:2fr 0.6fr 1.4fr; gap:12px; padding:10px 14px; font-size:13px; border-bottom:1px dashed var(--hgr-d-hairline); }
 .hgr-d-bom-row:last-child{ border-bottom:none; }
-.hgr-d-bom-header{ font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--hgr-d-paper-dim); background:var(--hgr-d-navy-deep); }
+.hgr-d-bom-header{ font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.06em; text-transform:uppercase; font-weight:700; color:var(--hgr-d-paper); background:var(--hgr-d-navy-panel-2); border-bottom:1px solid var(--hgr-d-hairline); }
 
 /* ── Validation ── */
-.hgr-d-interference-badge{ display:inline-flex; font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.05em; text-transform:uppercase; color:var(--hgr-d-green); border:1px solid rgba(95,191,143,.4); background:rgba(95,191,143,.08); padding:5px 11px; border-radius:2px; margin-bottom:12px; }
-.hgr-d-interference-flagged{ color:var(--hgr-d-red); border-color:rgba(224,113,90,.4); background:rgba(224,113,90,.08); }
+.hgr-d-interference-badge{ display:inline-flex; font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:#2E7D4F; border:1px solid #B9DEC8; background:#E6F4EC; padding:5px 11px; border-radius:2px; margin-bottom:12px; }
+.hgr-d-interference-flagged{ color:#B03A2E; border-color:#F1C1BB; background:#FBE9E7; }
 .hgr-d-dfm-list{ margin:0; padding-left:18px; color:var(--hgr-d-paper-dim); font-size:13px; line-height:1.7; }
 `;
