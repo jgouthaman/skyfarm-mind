@@ -112,7 +112,8 @@ function TheHangarCADDesign() {
   // "Your spec-ready aircraft designs" — reuses /api/hangar/aircraft-designs
   // (Aircraft Design Agent's own list route, no status filter) and filters
   // to spec_ready client-side, same pattern Bay 03 used filtering concepts
-  // to finalized.
+  // to finalized. Designs saved from Bay 03's Vehicle Design output are
+  // "finalized" and are offered too.
   async function fetchSpecReadyDesigns() {
     setSpecReadyDesignsStatus("loading");
     const { data } = await supabase.auth.getSession();
@@ -127,7 +128,7 @@ function TheHangarCADDesign() {
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const all: AircraftDesignListEntry[] = await res.json();
-      setSpecReadyDesigns(all.filter((d) => d.status === "spec_ready"));
+      setSpecReadyDesigns(all.filter((d) => d.status === "spec_ready" || d.status === "finalized"));
       setSpecReadyDesignsStatus("idle");
     } catch {
       setSpecReadyDesignsStatus("error");

@@ -38,6 +38,15 @@ export interface HangarAircraftDesignRow {
   confidence_score: number | null;
   created_at: string;
   updated_at: string;
+  // Set when the design was saved from the Python backend's output
+  // (migration 20261030040000); null on v1 AI designs.
+  source_mission_id: string | null;
+  source_design_id: string | null;
+  design_source: "ai_v1" | "python_vm";
+  // Latest Bernoulli review of the same backend design_id at save time
+  // (migration 20261030050000).
+  bernoulli_review_id: string | null;
+  bernoulli_verdict: "PASS" | "WARN" | "FAIL" | null;
 }
 
 export interface HangarAircraftDesignSpecRow {
@@ -50,15 +59,38 @@ export interface HangarAircraftDesignSpecRow {
   confidence_score: number;
   source_was_mock: boolean;
   created_at: string;
+  design_output: Record<string, unknown> | null;
+  design_markdown: string | null;
+  source_location: string | null;
 }
 
 export async function createAircraftDesign(
   userId: string,
   sourceConceptId: string,
+  // Saved Python designs also record their mission and backend design_id.
+  extra?: {
+    sourceMissionId: string;
+    sourceDesignId: string;
+    designSource: "python_vm";
+    status: AircraftDesignStatus;
+    bernoulli?: { reviewId: string; verdict: "PASS" | "WARN" | "FAIL" } | null;
+  },
 ): Promise<HangarAircraftDesignRow> {
   const { data, error } = await db
     .from("Hangar_aircraft_designs")
-    .insert({ user_id: userId, source_concept_id: sourceConceptId, status: "draft" })
+    .insert({
+      user_id: userId,
+      source_concept_id: sourceConceptId,
+      status: extra?.status ?? "draft",
+      ...(extra
+        ? {
+            source_mission_id: extra.sourceMissionId,
+            source_design_id: extra.sourceDesignId,
+            design_source: extra.designSource,
+            ...(extra.bernoulli ? { bernoulli_review_id: extra.bernoulli.reviewId, bernoulli_verdict: extra.bernoulli.verdict } : {}),
+          }
+        : {}),
+    })
     .select("*")
     .single();
   if (error) throw new Error(`createAircraftDesign: ${error.message}`);
@@ -74,6 +106,29 @@ export async function getAircraftDesign(
     .eq("id", aircraftDesignId)
     .maybeSingle();
   if (error) throw new Error(`getAircraftDesign: ${error.message}`);
+  return data as HangarAircraftDesignRow | null;
+}
+
+// The design already saved from this concept's backend output, if any
+// (one per concept + Python design_id; see the migration's unique index).
+export async function findSavedPythonDesign(
+  sourceConceptId: string,
+  sourceDesignId: string,
+): Promise<HangarAircraftDesignRow | null> {
+  const q = supabaseAdmin as unknown as {
+    from: (t: string) => {
+      select: (c: string) => {
+        eq: (c: string, v: string) => { eq: (c: string, v: string) => { maybeSingle: () => DbResult<Record<string, unknown> | null> } };
+      };
+    };
+  };
+  const { data, error } = await q
+    .from("Hangar_aircraft_designs")
+    .select("*")
+    .eq("source_concept_id", sourceConceptId)
+    .eq("source_design_id", sourceDesignId)
+    .maybeSingle();
+  if (error) throw new Error(`findSavedPythonDesign: ${error.message}`);
   return data as HangarAircraftDesignRow | null;
 }
 
@@ -133,6 +188,10 @@ export async function persistAircraftDesignSpec(
     designRationale: string;
     confidenceScore: number;
     sourceWasMock: boolean;
+    // The Python backend's full output, kept whole for Bay 04 (CAD).
+    designOutput?: Record<string, unknown>;
+    designMarkdown?: string | null;
+    sourceLocation?: string;
   },
 ): Promise<HangarAircraftDesignSpecRow> {
   const version = await getNextAircraftDesignSpecVersion(aircraftDesignId);
@@ -146,6 +205,9 @@ export async function persistAircraftDesignSpec(
       design_rationale: spec.designRationale,
       confidence_score: spec.confidenceScore,
       source_was_mock: spec.sourceWasMock,
+      ...(spec.designOutput
+        ? { design_output: spec.designOutput, design_markdown: spec.designMarkdown ?? null, source_location: spec.sourceLocation ?? null }
+        : {}),
     })
     .select("*")
     .single();
@@ -200,6 +262,9 @@ export interface HangarAircraftDesignSpecSummary {
   design_rationale: string;
   confidence_score: number;
   source_was_mock: boolean;
+  design_output: Record<string, unknown> | null;
+  design_markdown: string | null;
+  source_location: string | null;
 }
 
 export async function listUserAircraftDesigns(userId: string): Promise<HangarAircraftDesignRow[]> {
@@ -219,7 +284,7 @@ export async function getSpecsForAircraftDesigns(
   const { data, error } = await orderedListDb
     .from("Hangar_aircraft_design_specs")
     .select(
-      "aircraft_design_id,geometry_parameters,component_selections,design_rationale,confidence_score,source_was_mock",
+      "aircraft_design_id,geometry_parameters,component_selections,design_rationale,confidence_score,source_was_mock,design_output,design_markdown,source_location",
     )
     .in("aircraft_design_id", aircraftDesignIds)
     .order("aircraft_design_id", { ascending: true })

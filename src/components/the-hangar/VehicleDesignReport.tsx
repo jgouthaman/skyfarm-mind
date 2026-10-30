@@ -1,6 +1,8 @@
 import { useMemo, useState, type ReactNode } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { VehicleModelView } from "./VehicleModelView";
+import { DragPolarCharts, FlightEnvelope, MarginsPanel, ProvenancePanel, WeightBySystem, VDC_CSS } from "./VehicleDesignCharts";
 
 // Bay 03 (Vehicle Design) result view for the Python backend's output: the
 // final_aircraft_design.json (drives every visual here) and the matching
@@ -17,8 +19,9 @@ export interface VehicleDesignOutput {
   mission: { mission_type: string; payload_kg: number; cruise_speed_kmh: number; target_flight_time_min: number; target_range_km: number };
   requirement_traceability: {
     requirement: string;
-    required_value: number;
-    design_value: number;
+    // Numbers for sized requirements; text ("RESOLVED", "VALID") for status ones.
+    required_value: number | string;
+    design_value: number | string;
     margin: number;
     limit: string;
     unit: string;
@@ -36,22 +39,59 @@ export interface VehicleDesignOutput {
     forward_cg_limit_x_m: number;
     aft_cg_limit_x_m: number;
     cg_margin_m: number;
-    component_breakdown: { name: string; mass_kg: number; x_cg_m: number; provenance: string }[];
-    inertia: { status: string; reason: string | null };
+    component_breakdown: { name: string; mass_kg: number; x_cg_m: number; y_cg_m?: number; z_cg_m?: number; provenance: string; category?: string }[];
+    inertia?: { status: string; reason: string | null };
   };
   aerodynamics: { cl_cruise: number; cl_max: number; cd0: number; cd_cruise: number; k_induced: number; lift_to_drag_cruise: number; lift_to_drag_max: number; stall_speed_clean_mps: number; reynolds_number_cruise: number; trim_alpha_cruise_deg: number };
   assumptions: { air_density_kg_m3: number; gravity_m_s2: number };
   geometry: {
     wing: { span_m: number; area_m2: number; aspect_ratio: number; root_chord_m: number; tip_chord_m: number; taper_ratio: number; mac_m: number; mac_le_x_m: number; sweep_deg: number; dihedral_deg: number; airfoil_root: string; airfoil_tip: string; spar_locations_chord_pct: number[] };
-    fuselage: { length_m: number; max_width_m: number; max_height_m: number; fineness_ratio: number };
-    tail: { tail_type: string; span_m: number; root_chord_m: number; tip_chord_m: number; airfoil: string; total_area_m2: number };
+    fuselage: {
+      length_m: number;
+      max_width_m: number;
+      max_height_m: number;
+      fineness_ratio: number;
+      battery_bay_dimensions_m?: Vec3;
+      payload_bay_dimensions_m?: Vec3;
+      avionics_bay_dimensions_m?: Vec3;
+    };
+    tail: { tail_type: string; span_m: number; root_chord_m: number; tip_chord_m: number; airfoil: string; total_area_m2: number; projected_vertical_area_m2?: number };
+    multirotor_frame?: { arm_count?: number; arm_length_m?: number; frame_type?: string; status?: string };
   };
-  cad_handover: { mounting_coordinates: Record<string, Vec3>; component_envelopes: { component: string; location_m: Vec3 }[]; reference_datum: string; coordinate_system: { axis_conventions: string } };
-  propulsion: { cruise_propulsion: { motor_model: string; motor_count: number; propeller_model: string; propeller_diameter_in: number; propeller_pitch_in: number; esc_model: string; esc_rating_a: number; cruise_power_electrical_w: number; cruise_thrust_per_motor_n: number; max_thrust_per_motor_n: number }; total_installed_power_w: number };
+  cad_handover: {
+    mounting_coordinates: Record<string, Vec3>;
+    // Fixed-wing outputs give component + location_m; multirotor ones give
+    // component_name and may leave the envelope unresolved (no location).
+    component_envelopes: {
+      component?: string;
+      component_name?: string;
+      location_m?: Vec3;
+      dimensions_m?: Vec3 | null;
+      handover_note?: string;
+    }[];
+    reference_datum: string;
+    coordinate_system: { axis_conventions: string };
+  };
+  propulsion: {
+    cruise_propulsion: { motor_model: string; motor_count: number; propeller_model: string; propeller_diameter_in: number; propeller_pitch_in: number; esc_model: string; esc_rating_a: number; cruise_power_electrical_w: number; cruise_thrust_per_motor_n: number; max_thrust_per_motor_n: number };
+    lift_propulsion?: {
+      motor_count?: number;
+      motor_model?: string;
+      propeller_diameter_in?: number;
+      esc_model?: string;
+      esc_rating_a?: number;
+      hover_power_electrical_w?: number;
+      hover_thrust_per_motor_n?: number;
+      total_hover_thrust_required_n?: number;
+      thrust_to_weight_ratio?: number;
+      disk_loading_kg_m2?: number;
+    };
+    total_installed_power_w: number;
+  };
   battery: { pack_model: string; chemistry: string; cell_series_count: number; capacity_mah: number; energy_wh: number; voltage_nominal_v: number; mass_kg: number; max_continuous_current_a: number };
   energy: { energy_required_mission_wh: number; total_energy_stored_wh: number; energy_reserve_pct: number; cruise_energy_wh: number; avionics_energy_wh: number };
   electrical: { main_bus_voltage_v: number; avionics_bus_voltage_v: number; power_module: string };
-  performance: { cruise_speed_kmh: number; cruise_speed_mps: number; endurance_min: number; range_km: number; max_speed_kmh: number; stall_speed_kmh: number; climb_rate_max_mps: number; service_ceiling_m: number; cruise_altitude_m: number };
+  performance: { cruise_speed_kmh: number; cruise_speed_mps: number; endurance_min: number; hover_endurance_min?: number; range_km: number; max_speed_kmh: number; stall_speed_kmh: number; climb_rate_max_mps: number; service_ceiling_m: number; cruise_altitude_m: number };
   stability: { neutral_point_x_m: number; neutral_point_mac_pct: number; static_margin_mac_pct: number; c_m_alpha_per_rad: number; c_n_beta_per_rad: number; c_l_beta_per_rad: number; is_longitudinally_stable: boolean; is_directionally_stable: boolean; is_laterally_stable: boolean };
   controls: { trim_feasible: boolean; trim_elevator_cruise_deg: number; c_m_delta_e_per_rad: number };
   commercial_components: { category: string; role: string; manufacturer: string; model: string; part_number: string | null; quantity: number; mass_per_unit_kg: number; total_mass_kg: number; verification_status: string }[];
@@ -59,9 +99,29 @@ export interface VehicleDesignOutput {
   manufacturing: Record<string, string>;
   installation: Record<string, string>;
   validation_status: { design_validated: boolean; flight_validated: boolean; physical_ground_validated: boolean; flight_status_note: string; status: string };
+  // Per-field record of which backend stage produced a value and how.
+  provenance?: Record<
+    string,
+    { field_name?: string; provenance?: string; source_module?: string; status?: string; unit?: string; value?: number | string | null; notes?: string | null; reason?: string | null }
+  >;
 }
 
 type Tab = "visual" | "report" | "json";
+
+// A real wing to analyse (area and MAC set, not a rotorcraft). Rotorcraft get
+// rotor/hover panels instead of the wing, polar and CG-strip panels.
+export function isFixedWing(d: VehicleDesignOutput): boolean {
+  return !/multirotor|rotor|quad|hex|octo/i.test(d.aircraft_class ?? "") && pos(d.geometry?.wing?.area_m2) && pos(d.geometry?.wing?.mac_m);
+}
+
+// A set value -- the backend writes 0 for "not applicable / not set".
+function pos(v: unknown): v is number {
+  return typeof v === "number" && Number.isFinite(v) && v > 0;
+}
+
+function envelopeName(e: VehicleDesignOutput["cad_handover"]["component_envelopes"][number]) {
+  return e.component ?? e.component_name ?? "component";
+}
 
 export function VehicleDesignReport({
   design,
@@ -78,7 +138,7 @@ export function VehicleDesignReport({
 
   return (
     <div className="vdr">
-      <style>{VDR_CSS}</style>
+      <style>{VDR_CSS + VDC_CSS}</style>
       {banner}
       <header className="vdr-head">
         <div className="vdr-head-main">
@@ -133,15 +193,31 @@ export function VehicleDesignReport({
 function VisualView({ d }: { d: VehicleDesignOutput }) {
   const checks = useMemo(() => consistencyChecks(d), [d]);
   const p = d.performance;
+  const fw = isFixedWing(d);
+  const lp = d.propulsion.lift_propulsion;
+  const limit = (v: number, unit: string) => (pos(v) ? `max ${v} ${unit}` : undefined);
   return (
     <div className="vdr-visual">
       <div className="vdr-tiles">
-        <Tile label="MTOW" value={fmt(d.mass_properties.mtow_kg, 2)} unit="kg" sub={`max ${d.constraints.max_allowable_mtow_kg} kg`} />
-        <Tile label="Wingspan" value={fmt(d.geometry.wing.span_m, 2)} unit="m" sub={`max ${d.constraints.max_wingspan_m} m`} />
-        <Tile label="Endurance" value={fmt(p.endurance_min, 0)} unit="min" sub={`at ${fmt(p.cruise_speed_kmh, 0)} km/h`} />
+        <Tile label="MTOW" value={fmt(d.mass_properties.mtow_kg, 2)} unit="kg" sub={limit(d.constraints.max_allowable_mtow_kg, "kg")} />
+        {fw ? (
+          <Tile label="Wingspan" value={fmt(d.geometry.wing.span_m, 2)} unit="m" sub={limit(d.constraints.max_wingspan_m, "m")} />
+        ) : (
+          <Tile label="Rotors" value={String(lp?.motor_count ?? d.geometry.multirotor_frame?.arm_count ?? "—")} sub={pos(lp?.propeller_diameter_in) ? `${fmt(lp.propeller_diameter_in, 1)}" props` : d.configuration} />
+        )}
+        <Tile label="Endurance" value={fmt(p.endurance_min, 0)} unit="min" sub={pos(p.cruise_speed_kmh) ? `at ${fmt(p.cruise_speed_kmh, 0)} km/h` : undefined} />
         <Tile label="Range" value={fmt(p.range_km, 0)} unit="km" />
-        <Tile label="Cruise L/D" value={fmt(d.aerodynamics.lift_to_drag_cruise, 1)} sub={`max ${fmt(d.aerodynamics.lift_to_drag_max, 1)}`} />
-        <Tile label="Static margin" value={fmt(d.stability.static_margin_mac_pct, 1)} unit="% MAC" />
+        {fw ? (
+          <>
+            <Tile label="Cruise L/D" value={fmt(d.aerodynamics.lift_to_drag_cruise, 1)} sub={`max ${fmt(d.aerodynamics.lift_to_drag_max, 1)}`} />
+            <Tile label="Static margin" value={fmt(d.stability.static_margin_mac_pct, 1)} unit="% MAC" />
+          </>
+        ) : (
+          <>
+            <Tile label="Thrust / weight" value={pos(lp?.thrust_to_weight_ratio) ? fmt(lp.thrust_to_weight_ratio, 2) : "—"} sub="hover" />
+            <Tile label="Disk loading" value={pos(lp?.disk_loading_kg_m2) ? fmt(lp.disk_loading_kg_m2, 1) : "—"} unit="kg/m²" />
+          </>
+        )}
       </div>
 
       <Section title="Mission requirements" note="Required vs sized, each on its own scale. The tick is the requirement.">
@@ -152,10 +228,28 @@ function VisualView({ d }: { d: VehicleDesignOutput }) {
         </div>
       </Section>
 
+      <Section title="Margins at a glance" note="How much room each design limit leaves, from the mission constraints.">
+        <MarginsPanel d={d} />
+      </Section>
+
       <div className="vdr-grid-2">
-        <Section title="Layout · top view" note="Drawn to scale from the geometry and CAD handover. Nose up, datum at the nose apex.">
-          <PlanView d={d} />
+        <Section title="Layout" note="To scale from the geometry and CAD handover. Pick a view, drag to rotate, or press Rotate.">
+          <VehicleModelView d={d} />
         </Section>
+        {!fw ? (
+          <Section title="Rotor layout & hover" note="From the lift propulsion and CAD motor mounts.">
+            <dl className="vdr-kv">
+              <KV k="Frame" v={`${d.geometry.multirotor_frame?.frame_type ?? d.configuration}${d.geometry.multirotor_frame?.status === "DEFERRED" ? " (arm sizing deferred)" : ""}`} />
+              <KV k="Rotors" v={`${lp?.motor_count ?? "—"} × ${pos(lp?.propeller_diameter_in) ? `${fmt(lp.propeller_diameter_in, 2)}"` : "—"}`} />
+              <KV k="Motor mounts" v={rotorRadiusText(d)} />
+              <KV k="Hover power" v={pos(lp?.hover_power_electrical_w) ? `${fmt(lp.hover_power_electrical_w, 0)} W` : "—"} />
+              <KV k="Hover thrust" v={pos(lp?.hover_thrust_per_motor_n) ? `${fmt(lp.hover_thrust_per_motor_n, 1)} N per rotor · ${fmt(lp.total_hover_thrust_required_n ?? 0, 1)} N needed` : "—"} />
+              <KV k="Thrust / weight" v={pos(lp?.thrust_to_weight_ratio) ? fmt(lp.thrust_to_weight_ratio, 2) : "—"} />
+              <KV k="Disk loading" v={pos(lp?.disk_loading_kg_m2) ? `${fmt(lp.disk_loading_kg_m2, 2)} kg/m²` : "—"} />
+              <KV k="CG" v={`[${[d.mass_properties.cg_x_m, (d.mass_properties as { cg_y_m?: number }).cg_y_m ?? 0, (d.mass_properties as { cg_z_m?: number }).cg_z_m ?? 0].map((n) => fmt(n, 3)).join(", ")}] m`} />
+            </dl>
+          </Section>
+        ) : (
         <Section title="Balance · CG and neutral point" note="Along the fuselage (x, metres aft of the nose).">
           <BalanceStrip d={d} />
           <dl className="vdr-kv vdr-kv-tight">
@@ -165,6 +259,7 @@ function VisualView({ d }: { d: VehicleDesignOutput }) {
             <KV k="MAC" v={`${fmt(d.geometry.wing.mac_m, 3)} m, LE at ${fmt(d.geometry.wing.mac_le_x_m, 2)} m`} />
           </dl>
         </Section>
+        )}
       </div>
 
       <Section title="Consistency checks" note="Recomputed in the browser from the JSON's own numbers -- not part of the backend output.">
@@ -180,7 +275,12 @@ function VisualView({ d }: { d: VehicleDesignOutput }) {
         </ul>
       </Section>
 
+      <Section title="Where the numbers come from" note="Which backend stage produced each tracked value, and whether it still matches the design.">
+        <ProvenancePanel d={d} />
+      </Section>
+
       <div className="vdr-grid-2">
+        {fw && (
         <Section title="Aerodynamics & wing">
           <dl className="vdr-kv">
             <KV k="Wing area / AR" v={`${fmt(d.geometry.wing.area_m2, 3)} m² · AR ${fmt(d.geometry.wing.aspect_ratio, 1)}`} />
@@ -190,9 +290,20 @@ function VisualView({ d }: { d: VehicleDesignOutput }) {
             <KV k="CL cruise / CL max" v={`${fmt(d.aerodynamics.cl_cruise, 2)} / ${fmt(d.aerodynamics.cl_max, 2)}`} />
             <KV k="CD0 / CD cruise" v={`${fmt(d.aerodynamics.cd0, 3)} / ${fmt(d.aerodynamics.cd_cruise, 3)}`} />
             <KV k="Stall speed" v={`${fmt(d.aerodynamics.stall_speed_clean_mps, 1)} m/s (${fmt(p.stall_speed_kmh, 0)} km/h)`} />
-            <KV k="Reynolds (cruise)" v={d.aerodynamics.reynolds_number_cruise.toLocaleString()} />
+            <KV k="Reynolds (cruise)" v={(d.aerodynamics.reynolds_number_cruise ?? 0).toLocaleString()} />
           </dl>
         </Section>
+        )}
+        {!fw && lp ? (
+        <Section title="Lift propulsion">
+          <dl className="vdr-kv">
+            <KV k="Motors" v={`${lp.motor_count ?? "—"}${lp.motor_model ? ` × ${lp.motor_model}` : ""}`} />
+            <KV k="ESC" v={`${lp.esc_model || "—"}${pos(lp.esc_rating_a) ? ` (${lp.esc_rating_a} A)` : ""}`} />
+            <KV k="Hover power" v={pos(lp.hover_power_electrical_w) ? `${fmt(lp.hover_power_electrical_w, 0)} W electrical` : "—"} />
+            <KV k="Installed power" v={pos(d.propulsion.total_installed_power_w) ? `${fmt(d.propulsion.total_installed_power_w, 0)} W` : "—"} />
+          </dl>
+        </Section>
+        ) : (
         <Section title="Propulsion">
           <dl className="vdr-kv">
             <KV k="Motor" v={`${d.propulsion.cruise_propulsion.motor_model} × ${d.propulsion.cruise_propulsion.motor_count}`} />
@@ -203,13 +314,30 @@ function VisualView({ d }: { d: VehicleDesignOutput }) {
             <KV k="Installed power" v={`${fmt(d.propulsion.total_installed_power_w, 0)} W`} />
           </dl>
         </Section>
+        )}
       </div>
+
+      {fw && pos(d.aerodynamics.cd0) && pos(d.aerodynamics.k_induced) && pos(d.aerodynamics.cl_max) && (
+        <Section title="Aerodynamic performance" note="Drag polar and lift-to-drag across the flight range; hover either chart to read a point.">
+          <DragPolarCharts d={d} />
+        </Section>
+      )}
+
+      <Section
+        title="Flight envelope"
+        note={fw ? "Speeds from stall to max on one axis; the green band is the flyable range. Hover a marker or row." : "Hover to max speed on one axis, with climb and ceiling. Hover a marker or row."}
+      >
+        <FlightEnvelope d={d} />
+      </Section>
 
       <div className="vdr-grid-2">
         <Section title="Energy & battery">
           <EnergyBar d={d} />
           <dl className="vdr-kv">
-            <KV k="Battery" v={`${d.battery.pack_model} · ${d.battery.cell_series_count}S ${d.battery.chemistry}, ${d.battery.voltage_nominal_v} V`} />
+            <KV
+              k="Battery"
+              v={[d.battery.pack_model, [d.battery.cell_series_count > 0 ? `${d.battery.cell_series_count}S` : "", d.battery.chemistry].filter(Boolean).join(" "), `${d.battery.voltage_nominal_v} V`].filter(Boolean).join(" · ")}
+            />
             <KV k="Capacity / energy" v={`${d.battery.capacity_mah} mAh / ${fmt(d.battery.energy_wh, 1)} Wh`} />
             <KV k="Max continuous current" v={`${d.battery.max_continuous_current_a} A`} />
             <KV k="Bus voltage main / avionics" v={`${d.electrical.main_bus_voltage_v} V / ${d.electrical.avionics_bus_voltage_v} V`} />
@@ -220,10 +348,14 @@ function VisualView({ d }: { d: VehicleDesignOutput }) {
             <BoolRow ok={d.stability.is_longitudinally_stable} label="Longitudinal" detail={`Cmα ${d.stability.c_m_alpha_per_rad} /rad`} />
             <BoolRow ok={d.stability.is_directionally_stable} label="Directional" detail={`Cnβ ${d.stability.c_n_beta_per_rad} /rad`} />
             <BoolRow ok={d.stability.is_laterally_stable} label="Lateral" detail={`Clβ ${d.stability.c_l_beta_per_rad} /rad`} />
-            <BoolRow ok={d.controls.trim_feasible} label="Trim" detail={`elevator ${d.controls.trim_elevator_cruise_deg}° at cruise, α ${d.aerodynamics.trim_alpha_cruise_deg}°`} />
+            <BoolRow ok={d.controls.trim_feasible} label="Trim" detail={fw ? `elevator ${d.controls.trim_elevator_cruise_deg}° at cruise, α ${d.aerodynamics.trim_alpha_cruise_deg}°` : "hover trim"} />
           </ul>
         </Section>
       </div>
+
+      <Section title="Weight by system" note="Component masses grouped by system, against the stated MTOW and the mission's MTOW limit. Hover a segment or row.">
+        <WeightBySystem d={d} />
+      </Section>
 
       <Section title="Mass breakdown" note={`Component masses, heaviest first. Sum ${fmt(sumMass(d), 3)} kg vs MTOW ${fmt(d.mass_properties.mtow_kg, 3)} kg.`}>
         <MassBars d={d} />
@@ -248,12 +380,12 @@ function VisualView({ d }: { d: VehicleDesignOutput }) {
                   <td>{c.category}</td>
                   <td>{c.role}</td>
                   <td>
-                    <b>{c.manufacturer}</b> {c.model.replace(`${c.manufacturer} `, "")}
+                    <b>{c.manufacturer}</b> {(c.model ?? "").replace(`${c.manufacturer} `, "")}
                   </td>
                   <td>{c.quantity}</td>
                   <td className="vdr-num">{fmt(c.total_mass_kg, 3)} kg</td>
                   <td>
-                    <StatusChip ok={c.verification_status.includes("VERIFIED")} label={c.verification_status.includes("VERIFIED") ? "Verified" : c.verification_status} />
+                    <StatusChip ok={(c.verification_status ?? "").includes("VERIFIED")} label={(c.verification_status ?? "").includes("VERIFIED") ? "Verified" : c.verification_status || "Unverified"} />
                   </td>
                 </tr>
               ))}
@@ -275,14 +407,18 @@ function VisualView({ d }: { d: VehicleDesignOutput }) {
           {Object.entries(d.cad_handover.mounting_coordinates).map(([k, xyz]) => (
             <KV key={k} k={humanize(k)} v={`[${xyz.map((n) => fmt(n, 3)).join(", ")}] m`} />
           ))}
-          {d.cad_handover.component_envelopes.map((e) => (
-            <KV key={e.component} k={`${humanize(e.component)} envelope`} v={`[${e.location_m.map((n) => fmt(n, 3)).join(", ")}] m`} />
+          {d.cad_handover.component_envelopes.map((e, i) => (
+            <KV
+              key={`${envelopeName(e)}-${i}`}
+              k={`${humanize(envelopeName(e))} envelope`}
+              v={e.location_m ? `[${e.location_m.map((n) => fmt(n, 3)).join(", ")}] m` : e.handover_note ?? "unresolved"}
+            />
           ))}
         </dl>
       </Details>
       <Details title="Simulation handover">
         <p className="vdr-muted">
-          Inertia tensor: {d.mass_properties.inertia.status} -- {d.mass_properties.inertia.reason}
+          Inertia tensor: {d.mass_properties.inertia?.status ?? "—"} -- {d.mass_properties.inertia?.reason ?? ""}
         </p>
         <p className="vdr-muted">The full polar, derivatives and trim conditions are in the Data (.json) tab under simulation_handover.</p>
       </Details>
@@ -291,8 +427,24 @@ function VisualView({ d }: { d: VehicleDesignOutput }) {
 }
 
 function RequirementRow({ r }: { r: VehicleDesignOutput["requirement_traceability"][number] }) {
-  const max = Math.max(r.required_value, r.design_value) * 1.15 || 1;
   const pass = r.status === "PASS";
+  if (typeof r.required_value !== "number" || typeof r.design_value !== "number") {
+    // A status-type requirement ("RESOLVED" vs "VALID") -- nothing to draw.
+    return (
+      <div className="vdr-req" title={`${r.requirement}: needs ${r.required_value}, design ${r.design_value}. ${r.source_module}`}>
+        <div className="vdr-req-name">
+          {r.requirement}
+          <span className="vdr-req-limit">{r.unit === "status" ? "status" : r.unit}</span>
+        </div>
+        <div className="vdr-req-text">
+          needs <b>{String(r.required_value ?? "—")}</b> · design <b>{String(r.design_value ?? "—")}</b>
+        </div>
+        <span />
+        <StatusChip ok={pass} label={r.status} />
+      </div>
+    );
+  }
+  const max = Math.max(r.required_value, r.design_value) * 1.15 || 1;
   const tip = `${r.requirement}: required ${r.required_value} ${r.unit} (${r.limit}), sized ${r.design_value} ${r.unit}, margin ${signed(r.margin)} ${r.unit}. ${r.source_module}`;
   return (
     <div className="vdr-req" title={tip}>
@@ -317,101 +469,17 @@ function RequirementRow({ r }: { r: VehicleDesignOutput["requirement_traceabilit
   );
 }
 
-// Plan view: span across, fuselage x (aft) down the page.
-function PlanView({ d }: { d: VehicleDesignOutput }) {
-  const w = d.geometry.wing;
-  const f = d.geometry.fuselage;
-  const t = d.geometry.tail;
-  const tailX = d.cad_handover.mounting_coordinates.tail_mount?.[0] ?? f.length_m - t.root_chord_m;
-  const motorX = d.cad_handover.mounting_coordinates.cruise_motor?.[0] ?? 0.05;
-  const propD = d.propulsion.cruise_propulsion.propeller_diameter_in * 0.0254;
-  const S = 260; // px per metre
-  const pad = 40;
-  const halfSpan = w.span_m / 2;
-  const length = Math.max(f.length_m, tailX + t.root_chord_m);
-  const W = w.span_m * S + pad * 2;
-  const H = (length + 0.12) * S + pad * 2;
-  const X = (y: number) => pad + (y + halfSpan) * S; // spanwise -> svg x
-  const Y = (x: number) => pad + 0.08 * S + x * S; // fuselage x -> svg y
-  // Straight leading edge (0° sweep), so the root LE sits at the MAC LE.
-  const le = w.mac_le_x_m;
-  const wingPts = [
-    [-halfSpan, le],
-    [0, le],
-    [halfSpan, le],
-    [halfSpan, le + w.tip_chord_m],
-    [0, le + w.root_chord_m],
-    [-halfSpan, le + w.tip_chord_m],
-  ];
-  const hs = t.span_m / 2;
-  const tailPts = [
-    [-hs, tailX],
-    [hs, tailX],
-    [hs, tailX + t.tip_chord_m],
-    [0, tailX + t.root_chord_m],
-    [-hs, tailX + t.tip_chord_m],
-  ];
-  const poly = (pts: number[][]) => pts.map(([y, x]) => `${X(y)},${Y(x)}`).join(" ");
-  const cg = d.mass_properties.cg_x_m;
-  const np = d.stability.neutral_point_x_m;
-  const spars = w.spar_locations_chord_pct.map((pct) => le + (pct / 100) * w.root_chord_m);
-
-  return (
-    <svg className="vdr-plan" viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Top view: ${w.span_m} m span, ${f.length_m} m fuselage`}>
-      {/* propeller disc (edge-on) */}
-      <line x1={X(-propD / 2)} x2={X(propD / 2)} y1={Y(motorX) - 14} y2={Y(motorX) - 14} className="vdr-plan-prop">
-        <title>{`Propeller ${d.propulsion.cruise_propulsion.propeller_model}, ${fmt(propD, 3)} m`}</title>
-      </line>
-      <polygon points={poly(wingPts)} className="vdr-plan-wing">
-        <title>{`Wing: span ${w.span_m} m, area ${w.area_m2} m², root ${w.root_chord_m} m, tip ${w.tip_chord_m} m`}</title>
-      </polygon>
-      {spars.map((x, i) => (
-        <line key={i} x1={X(-halfSpan)} x2={X(halfSpan)} y1={Y(x)} y2={Y(x)} className="vdr-plan-spar">
-          <title>{`Spar at ${fmt(x, 3)} m (${w.spar_locations_chord_pct[i]}% chord)`}</title>
-        </line>
-      ))}
-      <polygon points={poly(tailPts)} className="vdr-plan-wing">
-        <title>{`Horizontal tail: span ${t.span_m} m, area ${t.total_area_m2} m²`}</title>
-      </polygon>
-      <rect x={X(-f.max_width_m / 2)} y={Y(0)} width={f.max_width_m * S} height={f.length_m * S} rx={f.max_width_m * S * 0.5} className="vdr-plan-fus">
-        <title>{`Fuselage ${f.length_m} × ${f.max_width_m} × ${f.max_height_m} m`}</title>
-      </rect>
-      {/* fin, seen edge-on on the centreline */}
-      <line x1={X(0)} x2={X(0)} y1={Y(tailX - 0.02)} y2={Y(tailX + t.root_chord_m)} className="vdr-plan-fin" />
-      {/* CG and NP */}
-      <g>
-        <circle cx={X(0)} cy={Y(cg)} r={7} className="vdr-plan-cg" />
-        <line x1={X(0) - 7} x2={X(0) + 7} y1={Y(cg)} y2={Y(cg)} className="vdr-plan-cg-cross" />
-        <line x1={X(0)} x2={X(0)} y1={Y(cg) - 7} y2={Y(cg) + 7} className="vdr-plan-cg-cross" />
-        <title>{`CG at ${cg} m`}</title>
-      </g>
-      <line x1={X(0) + 14} x2={X(halfSpan * 0.55)} y1={Y(cg)} y2={Y(cg)} className="vdr-plan-leader" />
-      <text x={X(halfSpan * 0.55) + 4} y={Y(cg) - 4} className="vdr-plan-label">
-        CG {fmt(cg, 3)} m
-      </text>
-      <path d={`M ${X(0) - 6} ${Y(np)} l 6 -6 l 6 6 l -6 6 z`} className="vdr-plan-np">
-        <title>{`Neutral point at ${np} m`}</title>
-      </path>
-      <line x1={X(0) - 12} x2={X(-halfSpan * 0.55)} y1={Y(np)} y2={Y(np)} className="vdr-plan-leader" />
-      <text x={X(-halfSpan * 0.55) - 4} y={Y(np) + 14} textAnchor="end" className="vdr-plan-label">
-        NP {fmt(np, 3)} m
-      </text>
-      {/* span dimension */}
-      <line x1={X(-halfSpan)} x2={X(halfSpan)} y1={H - 14} y2={H - 14} className="vdr-plan-dim" />
-      <text x={X(0)} y={H - 20} textAnchor="middle" className="vdr-plan-label">
-        span {fmt(w.span_m, 2)} m
-      </text>
-      <text x={X(halfSpan) - 4} y={Y(f.length_m)} textAnchor="end" className="vdr-plan-label vdr-plan-label-dim">
-        fuselage {fmt(f.length_m, 2)} m
-      </text>
-    </svg>
-  );
+function rotorRadiusText(d: VehicleDesignOutput) {
+  const mounts = Object.entries(d.cad_handover.mounting_coordinates ?? {}).filter(([k]) => /motor/i.test(k));
+  if (mounts.length === 0) return "—";
+  const r = Math.max(...mounts.map(([, v]) => Math.hypot(v[0], v[1])));
+  return `${mounts.length} at ${fmt(r, 3)} m from centre`;
 }
 
 function BalanceStrip({ d }: { d: VehicleDesignOutput }) {
   const m = d.mass_properties;
   const np = d.stability.neutral_point_x_m;
-  const env = d.cad_handover.component_envelopes;
+  const env = d.cad_handover.component_envelopes.filter((e): e is typeof e & { location_m: Vec3 } => Array.isArray(e.location_m));
   const xs = [m.forward_cg_limit_x_m, m.aft_cg_limit_x_m, m.cg_x_m, np, ...env.map((e) => e.location_m[0])];
   const lo = Math.floor((Math.min(...xs) - 0.03) * 20) / 20;
   const hi = Math.ceil((Math.max(...xs) + 0.03) * 20) / 20;
@@ -450,11 +518,11 @@ function BalanceStrip({ d }: { d: VehicleDesignOutput }) {
         static margin {fmt(d.stability.static_margin_mac_pct, 1)}%
       </text>
       {env.map((e, i) => (
-        <g key={e.component}>
+        <g key={`${envelopeName(e)}-${i}`}>
           <line x1={sx(e.location_m[0])} x2={sx(e.location_m[0])} y1={axisY + 24} y2={axisY + 34 + i * 14} className="vdr-plan-leader" />
           <rect x={sx(e.location_m[0]) - 3} y={axisY + 34 + i * 14 - 3} width={6} height={6} className="vdr-strip-env" />
           <text x={sx(e.location_m[0]) + 8} y={axisY + 38 + i * 14} className="vdr-strip-tick">
-            {humanize(e.component)} {fmt(e.location_m[0], 2)}
+            {humanize(envelopeName(e))} {fmt(e.location_m[0], 2)}
           </text>
         </g>
       ))}
@@ -522,37 +590,75 @@ function within(a: number, b: number, tol = 0.05) {
   return Math.abs(a - b) <= Math.abs(b) * tol + 1e-9;
 }
 
+// Each check only runs when the numbers it needs are actually set (the
+// backend writes 0 for "not applicable"), so a rotorcraft gets the checks
+// that apply to it instead of NaNs from wing maths.
 function consistencyChecks(d: VehicleDesignOutput): Check[] {
   const m = d.mass_properties;
   const w = d.geometry.wing;
-  const rho = d.assumptions.air_density_kg_m3;
-  const g = d.assumptions.gravity_m_s2;
+  const fw = isFixedWing(d);
+  const rho = d.assumptions.air_density_kg_m3 || 1.225;
+  const g = d.assumptions.gravity_m_s2 || 9.80665;
   const weightN = m.mtow_kg * g;
   const v = d.performance.cruise_speed_mps;
   const sum = sumMass(d);
-  const momentCg = sum > 0 ? m.component_breakdown.reduce((s, c) => s + c.mass_kg * c.x_cg_m, 0) / sum : 0;
-  const stall = Math.sqrt((2 * weightN) / (rho * w.area_m2 * d.aerodynamics.cl_max));
-  const clCruise = weightN / (0.5 * rho * v * v * w.area_m2);
-  const cruiseWh = d.propulsion.cruise_propulsion.cruise_power_electrical_w * (d.performance.endurance_min / 60);
-  const rangeFromSpeed = d.performance.cruise_speed_kmh * (d.performance.endurance_min / 60);
-  const usable = d.energy.total_energy_stored_wh * (1 - d.energy.energy_reserve_pct / 100);
-  const sm = ((d.stability.neutral_point_x_m - m.cg_x_m) / w.mac_m) * 100;
-  const ar = (w.span_m * w.span_m) / w.area_m2;
-  return [
-    { label: "Mass breakdown adds up to MTOW", ok: within(sum, m.mtow_kg), detail: `components sum to ${fmt(sum, 3)} kg, MTOW ${fmt(m.mtow_kg, 3)} kg` },
-    { label: "Breakdown CG matches stated CG", ok: within(momentCg, m.cg_x_m, 0.1), detail: `mass-weighted x ${fmt(momentCg, 3)} m vs CG ${fmt(m.cg_x_m, 3)} m` },
-    { label: "Battery mass agrees", ok: within(m.battery_mass_kg, d.battery.mass_kg, 0.02), detail: `mass properties ${m.battery_mass_kg} kg vs battery pack ${d.battery.mass_kg} kg` },
-    { label: "CG inside allowed range", ok: m.cg_x_m >= m.forward_cg_limit_x_m && m.cg_x_m <= m.aft_cg_limit_x_m, detail: `${m.cg_x_m} m in ${m.forward_cg_limit_x_m}–${m.aft_cg_limit_x_m} m` },
-    { label: "Static margin from NP and CG", ok: within(sm, d.stability.static_margin_mac_pct), detail: `(NP − CG) / MAC = ${fmt(sm, 1)}% vs ${d.stability.static_margin_mac_pct}%` },
-    { label: "Aspect ratio from span and area", ok: within(ar, w.aspect_ratio), detail: `b²/S = ${fmt(ar, 2)} vs ${w.aspect_ratio}` },
-    { label: "Stall speed from CL max", ok: within(stall, d.aerodynamics.stall_speed_clean_mps, 0.1), detail: `√(2W/ρSCLmax) = ${fmt(stall, 1)} m/s vs ${d.aerodynamics.stall_speed_clean_mps} m/s` },
-    { label: "Cruise CL from weight and speed", ok: within(clCruise, d.aerodynamics.cl_cruise, 0.1), detail: `W/(qS) = ${fmt(clCruise, 2)} at ${fmt(v, 1)} m/s vs ${d.aerodynamics.cl_cruise}` },
-    { label: "Cruise energy from power × time", ok: within(cruiseWh, d.energy.cruise_energy_wh, 0.1), detail: `${d.propulsion.cruise_propulsion.cruise_power_electrical_w} W × ${d.performance.endurance_min} min = ${fmt(cruiseWh, 1)} Wh vs ${d.energy.cruise_energy_wh} Wh` },
-    { label: "Range from speed × endurance", ok: within(rangeFromSpeed, d.performance.range_km, 0.1), detail: `${d.performance.cruise_speed_kmh} km/h × ${d.performance.endurance_min} min = ${fmt(rangeFromSpeed, 1)} km vs ${d.performance.range_km} km` },
-    { label: "Energy reserve covers the mission", ok: usable + 1e-6 >= d.energy.energy_required_mission_wh, detail: `usable ${fmt(usable, 1)} Wh vs needed ${d.energy.energy_required_mission_wh} Wh` },
-    { label: "Main bus matches battery voltage", ok: within(d.electrical.main_bus_voltage_v, d.battery.voltage_nominal_v), detail: `bus ${d.electrical.main_bus_voltage_v} V vs ${d.battery.cell_series_count}S pack ${d.battery.voltage_nominal_v} V` },
-    { label: "MTOW and span within limits", ok: m.mtow_kg <= d.constraints.max_allowable_mtow_kg && w.span_m <= d.constraints.max_wingspan_m, detail: `${m.mtow_kg} ≤ ${d.constraints.max_allowable_mtow_kg} kg, ${w.span_m} ≤ ${d.constraints.max_wingspan_m} m` },
-  ];
+  const out: Check[] = [];
+  const add = (applies: boolean, check: () => Check) => {
+    if (applies) out.push(check());
+  };
+
+  add(pos(m.mtow_kg) && sum > 0, () => ({ label: "Mass breakdown adds up to MTOW", ok: within(sum, m.mtow_kg), detail: `components sum to ${fmt(sum, 3)} kg, MTOW ${fmt(m.mtow_kg, 3)} kg` }));
+  add(fw && sum > 0, () => {
+    const momentCg = m.component_breakdown.reduce((s, c) => s + c.mass_kg * c.x_cg_m, 0) / sum;
+    return { label: "Breakdown CG matches stated CG", ok: within(momentCg, m.cg_x_m, 0.1), detail: `mass-weighted x ${fmt(momentCg, 3)} m vs CG ${fmt(m.cg_x_m, 3)} m` };
+  });
+  add(pos(m.battery_mass_kg) && pos(d.battery.mass_kg), () => ({ label: "Battery mass agrees", ok: within(m.battery_mass_kg, d.battery.mass_kg, 0.02), detail: `mass properties ${m.battery_mass_kg} kg vs battery pack ${d.battery.mass_kg} kg` }));
+  add(pos(m.forward_cg_limit_x_m) && pos(m.aft_cg_limit_x_m), () => ({ label: "CG inside allowed range", ok: m.cg_x_m >= m.forward_cg_limit_x_m && m.cg_x_m <= m.aft_cg_limit_x_m, detail: `${m.cg_x_m} m in ${m.forward_cg_limit_x_m}–${m.aft_cg_limit_x_m} m` }));
+  add(fw && pos(d.stability.neutral_point_x_m), () => {
+    const sm = ((d.stability.neutral_point_x_m - m.cg_x_m) / w.mac_m) * 100;
+    return { label: "Static margin from NP and CG", ok: within(sm, d.stability.static_margin_mac_pct), detail: `(NP − CG) / MAC = ${fmt(sm, 1)}% vs ${d.stability.static_margin_mac_pct}%` };
+  });
+  add(fw && pos(w.span_m), () => {
+    const ar = (w.span_m * w.span_m) / w.area_m2;
+    return { label: "Aspect ratio from span and area", ok: within(ar, w.aspect_ratio), detail: `b²/S = ${fmt(ar, 2)} vs ${w.aspect_ratio}` };
+  });
+  add(fw && pos(d.aerodynamics.cl_max) && pos(d.aerodynamics.stall_speed_clean_mps), () => {
+    const stall = Math.sqrt((2 * weightN) / (rho * w.area_m2 * d.aerodynamics.cl_max));
+    return { label: "Stall speed from CL max", ok: within(stall, d.aerodynamics.stall_speed_clean_mps, 0.1), detail: `√(2W/ρSCLmax) = ${fmt(stall, 1)} m/s vs ${d.aerodynamics.stall_speed_clean_mps} m/s` };
+  });
+  add(fw && pos(v) && pos(d.aerodynamics.cl_cruise), () => {
+    const clCruise = weightN / (0.5 * rho * v * v * w.area_m2);
+    return { label: "Cruise CL from weight and speed", ok: within(clCruise, d.aerodynamics.cl_cruise, 0.1), detail: `W/(qS) = ${fmt(clCruise, 2)} at ${fmt(v, 1)} m/s vs ${d.aerodynamics.cl_cruise}` };
+  });
+  const cp = d.propulsion.cruise_propulsion;
+  add(pos(cp.cruise_power_electrical_w) && pos(d.performance.endurance_min) && pos(d.energy.cruise_energy_wh), () => {
+    const wh = cp.cruise_power_electrical_w * (d.performance.endurance_min / 60);
+    return { label: "Cruise energy from power × time", ok: within(wh, d.energy.cruise_energy_wh, 0.1), detail: `${cp.cruise_power_electrical_w} W × ${d.performance.endurance_min} min = ${fmt(wh, 1)} Wh vs ${d.energy.cruise_energy_wh} Wh` };
+  });
+  const lp = d.propulsion.lift_propulsion;
+  const hoverWh = (d.energy as { hover_energy_wh?: number }).hover_energy_wh;
+  const hoverMin = d.performance.hover_endurance_min;
+  add(pos(lp?.hover_power_electrical_w) && pos(hoverMin) && pos(hoverWh), () => {
+    const wh = (lp?.hover_power_electrical_w ?? 0) * ((hoverMin ?? 0) / 60);
+    return { label: "Hover energy from power × time", ok: within(wh, hoverWh ?? 0, 0.1), detail: `${fmt(lp?.hover_power_electrical_w ?? 0, 0)} W × ${fmt(hoverMin ?? 0, 0)} min = ${fmt(wh, 1)} Wh vs ${hoverWh} Wh` };
+  });
+  add(pos(lp?.thrust_to_weight_ratio), () => ({
+    label: "Hover thrust-to-weight",
+    ok: (lp?.thrust_to_weight_ratio ?? 0) >= 2,
+    detail: `T/W ${fmt(lp?.thrust_to_weight_ratio ?? 0, 2)} (2+ typical for control authority)`,
+  }));
+  add(pos(d.performance.cruise_speed_kmh) && pos(d.performance.endurance_min) && pos(d.performance.range_km), () => {
+    const km = d.performance.cruise_speed_kmh * (d.performance.endurance_min / 60);
+    return { label: "Range from speed × endurance", ok: within(km, d.performance.range_km, 0.1), detail: `${d.performance.cruise_speed_kmh} km/h × ${fmt(d.performance.endurance_min, 0)} min = ${fmt(km, 1)} km vs ${d.performance.range_km} km` };
+  });
+  add(pos(d.energy.total_energy_stored_wh) && pos(d.energy.energy_required_mission_wh), () => {
+    const usable = d.energy.total_energy_stored_wh * (1 - d.energy.energy_reserve_pct / 100);
+    return { label: "Energy reserve covers the mission", ok: usable + 1e-6 >= d.energy.energy_required_mission_wh, detail: `usable ${fmt(usable, 1)} Wh vs needed ${d.energy.energy_required_mission_wh} Wh` };
+  });
+  add(pos(d.electrical.main_bus_voltage_v) && pos(d.battery.voltage_nominal_v), () => ({ label: "Main bus matches battery voltage", ok: within(d.electrical.main_bus_voltage_v, d.battery.voltage_nominal_v), detail: `bus ${d.electrical.main_bus_voltage_v} V vs ${d.battery.cell_series_count}S pack ${d.battery.voltage_nominal_v} V` }));
+  add(pos(d.constraints.max_allowable_mtow_kg), () => ({ label: "MTOW within limit", ok: m.mtow_kg <= d.constraints.max_allowable_mtow_kg, detail: `${m.mtow_kg} ≤ ${d.constraints.max_allowable_mtow_kg} kg` }));
+  add(fw && pos(d.constraints.max_wingspan_m), () => ({ label: "Span within limit", ok: w.span_m <= d.constraints.max_wingspan_m, detail: `${w.span_m} ≤ ${d.constraints.max_wingspan_m} m` }));
+  return out;
 }
 
 // ── Small pieces ─────────────────────────────────────────────────────────
@@ -733,6 +839,8 @@ const VDR_CSS = `
 .vdr-req-fill,.vdr-energy-fill,.vdr-bar-fill{ position:absolute; left:0; top:0; bottom:0; background:var(--vdr-blue); border-radius:0 4px 4px 0; }
 .vdr-bar-fill{ display:block; }
 .vdr-req-tick{ position:absolute; top:-4px; bottom:-4px; width:2px; background:var(--vdr-ink); margin-left:-1px; }
+.vdr-req-text{ font-size:12.5px; color:var(--vdr-dim); }
+.vdr-req-text b{ color:var(--vdr-ink); font-family:'IBM Plex Mono',monospace; font-size:12px; }
 .vdr-req-nums{ display:flex; flex-direction:column; font-size:12.5px; font-variant-numeric:tabular-nums; }
 .vdr-req-nums span{ color:var(--vdr-dim); font-size:11.5px; }
 .vdr-plan{ width:100%; height:auto; max-height:520px; display:block; }

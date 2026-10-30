@@ -50,6 +50,45 @@ export async function readDesignFile(folder: string, file: string): Promise<Desi
   return { text: await res.text(), updated: lastModified ? new Date(lastModified).toISOString() : null };
 }
 
+export interface FoundDesignFiles {
+  design: Record<string, unknown>;
+  markdown: string | null;
+  folder: string;
+  files: [string, string];
+  updated: string | null;
+}
+
+// A concept's design files, wherever the backend put them: folder named by
+// the concept code (or C-<code>, or the concept's UUID), files named
+// final_aircraft_design.* or <code>_aircraft_design.*. null when none exist.
+export async function findDesignFiles(conceptCode: string, conceptId: string): Promise<FoundDesignFiles | null> {
+  const stems = ["final_aircraft_design", `${conceptCode}_aircraft_design`];
+  for (const folder of [conceptCode, `C-${conceptCode}`, conceptId]) {
+    for (const stem of stems) {
+      const json = await readDesignFile(folder, `${stem}.json`);
+      if (!json) continue;
+      let design: unknown;
+      try {
+        design = JSON.parse(json.text);
+      } catch {
+        throw new Error(`${bay3FilesBaseUrl()}/${folder}/${stem}.json is not valid JSON`);
+      }
+      if (!design || typeof design !== "object" || Array.isArray(design)) {
+        throw new Error(`${bay3FilesBaseUrl()}/${folder}/${stem}.json is not a JSON object`);
+      }
+      const md = await readDesignFile(folder, `${stem}.md`);
+      return {
+        design: design as Record<string, unknown>,
+        markdown: md?.text ?? null,
+        folder,
+        files: [`${stem}.json`, `${stem}.md`],
+        updated: json.updated,
+      };
+    }
+  }
+  return null;
+}
+
 export interface VehicleDesignRunResult {
   ok: true;
   conceptCode: string;

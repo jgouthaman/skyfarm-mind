@@ -76,7 +76,7 @@ interface TargetOption {
 const AGENTS: { num: string; name: string; bay: string; wired: boolean }[] = [
   { num: "01", name: "Mission", bay: "mission", wired: true },
   { num: "02", name: "Concept", bay: "concept", wired: true },
-  { num: "03", name: "Vehicle Design", bay: "aircraft-design", wired: false },
+  { num: "03", name: "Vehicle Design", bay: "vehicle_design", wired: true },
   { num: "04", name: "CAD", bay: "cad", wired: false },
   { num: "05", name: "Flight Dynamics", bay: "simulation", wired: false },
   { num: "06", name: "CFD", bay: "cfd", wired: false },
@@ -296,6 +296,24 @@ function BernoulliRulesPage() {
             .map((m) => ({
               id: m.missionId,
               label: `${m.missionCode} -- ${m.missionSpecs?.missionType ?? "mission"} (${m.status === "finalized" ? "finalized" : "Spec Ready"})`,
+            })),
+        }));
+      } else if (bay === "vehicle_design") {
+        // Vehicle Design rules run on a finalized concept's design files.
+        const list = (await authedFetch("/api/hangar/concepts")) as {
+          conceptId: string;
+          conceptCode: string;
+          status: string;
+          selectedConceptName: string | null;
+          rankedConcepts: { conceptName: string }[] | null;
+        }[];
+        setTargets((t) => ({
+          ...t,
+          vehicle_design: list
+            .filter((c) => c.status === "finalized")
+            .map((c) => ({
+              id: c.conceptId,
+              label: `${c.conceptCode} -- ${c.selectedConceptName ?? c.rankedConcepts?.[0]?.conceptName ?? "concept"} (vehicle design)`,
             })),
         }));
       } else {
@@ -727,7 +745,7 @@ function TestPanel({
         body: JSON.stringify({
           bay,
           ...rule,
-          ...(bay === "concept" ? { conceptId: targetId } : { missionId: targetId }),
+          ...(bay === "concept" || bay === "vehicle_design" ? { conceptId: targetId } : { missionId: targetId }),
         }),
       });
       setOut(json);
@@ -739,7 +757,7 @@ function TestPanel({
     }
   }
 
-  const noun = bay === "concept" ? "concept" : "mission";
+  const noun = bay === "concept" || bay === "vehicle_design" ? "concept" : "mission";
   return (
     <div className="br-test">
       {title && (
@@ -760,7 +778,7 @@ function TestPanel({
               {targets === null
                 ? `Loading your ${noun}s…`
                 : targets.length === 0
-                  ? `No ${bay === "concept" ? "Concept Ready" : "Spec Ready or finalized"} ${noun}s yet`
+                  ? `No ${bay === "concept" ? "Concept Ready" : bay === "vehicle_design" ? "finalized" : "Spec Ready or finalized"} ${noun}s yet`
                   : `Pick a ${noun}`}
             </option>
             {targets?.map((t) => (

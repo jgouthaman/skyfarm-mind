@@ -45,9 +45,25 @@ interface BernoulliReviewView {
   createdAt: string;
   usage: { requests: number; inputTokens: number; outputTokens: number; estimatedCostUsd: number };
   durationMs: number | null;
-  sourceBay?: "mission" | "concept";
+  sourceBay?: "mission" | "concept" | "vehicle_design";
   conceptId?: string | null;
   conceptCode?: string | null;
+  // Vehicle design reviews: the backend design_id that was reviewed.
+  designRef?: string | null;
+}
+
+// The few fields of a concept's Vehicle Design output this page summarises
+// (/api/hangar/vehicle-design-files).
+interface DesignSummary {
+  designId: string | null;
+  aircraftClass: string | null;
+  configuration: string | null;
+  mtowKg: number | null;
+  spanM: number | null;
+  rotors: number | null;
+  enduranceMin: number | null;
+  rangeKm: number | null;
+  folder: string;
 }
 
 // FAIL first, then WARN, then INFO -- PASS checks are listed separately,
@@ -296,7 +312,7 @@ const RIGHT_CALLERS = [
 // label each row of the report after. `bay` is whose output the check
 // reviews: BERN-M01-M06 for a Bay 01 mission spec (hard gates M01/M05),
 // BERN-C01-C04 for a Bay 02 concept run (hard gate C02).
-const BERN_RULES: { id: string; bay: "mission" | "concept"; name: string; description: string; hardGate: boolean }[] = [
+const BERN_RULES: { id: string; bay: "mission" | "concept" | "vehicle_design"; name: string; description: string; hardGate: boolean }[] = [
   {
     id: "BERN-M01",
     bay: "mission",
@@ -367,6 +383,15 @@ const BERN_RULES: { id: string; bay: "mission" | "concept"; name: string; descri
     description: "TorqWings AI-judged, grounded in reference ranges: can each concept physically carry the payload for the required endurance?",
     hardGate: false,
   },
+  { id: "BERN-V01", bay: "vehicle_design", name: "Mass Closure", description: "The component masses must add up to the stated MTOW, and the battery mass must agree everywhere it appears.", hardGate: true },
+  { id: "BERN-V02", bay: "vehicle_design", name: "Balance Closure", description: "The mass-weighted CG of the components must match the stated CG, with every component inside the airframe.", hardGate: false },
+  { id: "BERN-V03", bay: "vehicle_design", name: "Stability & Trim", description: "CG inside its allowed range, a positive static margin that matches NP and CG, stable in all axes and trimmable.", hardGate: true },
+  { id: "BERN-V04", bay: "vehicle_design", name: "Lift & Stall Consistency", description: "Stall speed and cruise lift coefficient recomputed from weight, wing area and CL max must match the stated values.", hardGate: false },
+  { id: "BERN-V05", bay: "vehicle_design", name: "Energy Budget", description: "Usable battery energy must cover the mission energy with at least the required reserve, and the budget must add up.", hardGate: true },
+  { id: "BERN-V06", bay: "vehicle_design", name: "Performance Closure", description: "Range must follow from cruise speed x endurance, and endurance from usable energy / cruise power.", hardGate: false },
+  { id: "BERN-V07", bay: "vehicle_design", name: "Requirements & Limits", description: "The design must meet every mission requirement and constraint: MTOW and span limits, endurance, range and payload.", hardGate: true },
+  { id: "BERN-V08", bay: "vehicle_design", name: "Electrical Consistency", description: "Bus voltage must match the battery, and the ESC and battery current ratings must cover the cruise draw with margin.", hardGate: false },
+  { id: "BERN-V09", bay: "vehicle_design", name: "Engineering Plausibility", description: "TorqWings AI-judged, grounded in reference ranges: are the sizing and the selected motor, propeller, ESC and battery realistic for this mission?", hardGate: false },
 ];
 
 const BERN_RULE_NAMES: Record<string, string> = Object.fromEntries(
@@ -442,8 +467,11 @@ function TheHangarBernoulli() {
   const [concepts, setConcepts] = useState<ConceptListEntry[] | null>(null);
   const [conceptsStatus, setConceptsStatus] = useState<"idle" | "loading" | "error">("idle");
   const [selectedConceptId, setSelectedConceptId] = useState<string>(
-    search.source === "concept" ? search.sourceId : "",
+    search.source === "concept" || search.source === "aircraft-design" ? search.sourceId : "",
   );
+  // From Bay 03: the selected concept's Vehicle Design files (summary panel).
+  const [designSummary, setDesignSummary] = useState<DesignSummary | null>(null);
+  const [designSummaryStatus, setDesignSummaryStatus] = useState<"idle" | "loading" | "missing" | "error">("idle");
 
   const selectedMission = missions?.find((m) => m.missionId === selectedMissionId) ?? null;
 
@@ -451,9 +479,16 @@ function TheHangarBernoulli() {
   // the selected concept's output, judged against its source mission (which
   // is selected alongside it, so the spec block still shows the yardstick).
   const conceptMode = activeSource === "concept";
-  const reviewConceptId = conceptMode && selectedConceptId ? selectedConceptId : null;
+  // From Bay 03 the dropdown also lists concepts -- finalized ones, the only
+  // ones Vehicle Design builds from -- and the review checks that concept's
+  // Vehicle Design output, judged against its source mission.
+  const designMode = activeSource === "aircraft-design";
+  const pickConcept = conceptMode || designMode;
+  const reviewConceptId = pickConcept && selectedConceptId ? selectedConceptId : null;
   const listedConcepts =
-    concepts?.filter((c) => c.status === "spec_ready" || c.conceptId === selectedConceptId) ?? null;
+    concepts?.filter(
+      (c) => (designMode ? c.status === "finalized" : c.status === "spec_ready") || c.conceptId === selectedConceptId,
+    ) ?? null;
 
   // Dropdown scoped to the calling bay: from Mission only specs still open
   // for review (spec_ready -- finalized ones have moved on to Concept), from
@@ -467,7 +502,7 @@ function TheHangarBernoulli() {
   // Legend + run summary come from the check registry (Mission Hub ->
   // Agents -> Bernoulli) for the current bay; BERN_RULES is only the fallback
   // while it loads or if it can't be read.
-  const ruleBay = conceptMode ? "concept" : "mission";
+  const ruleBay = designMode ? "vehicle_design" : conceptMode ? "concept" : "mission";
   const [registry, setRegistry] = useState<Record<string, RegistryRule[]>>({});
   useEffect(() => {
     if (!currentUserEmail || registry[ruleBay]) return;
@@ -499,7 +534,7 @@ function TheHangarBernoulli() {
           .map((r) => ({ id: r.ruleId, name: r.name, description: r.description, hardGate: r.hardGate, kind: r.kind }))
       : BERN_RULES.filter((r) => r.bay === ruleBay).map((r) => ({
           ...r,
-          kind: (r.id === "BERN-M03" || r.id === "BERN-M06" || r.id === "BERN-C04" ? "llm" : "rule") as "rule" | "llm",
+          kind: (r.id === "BERN-M03" || r.id === "BERN-M06" || r.id === "BERN-C04" || r.id === "BERN-V09" ? "llm" : "rule") as "rule" | "llm",
         }));
   const aiCallCount = visibleRules.filter((r) => r.kind === "llm").length;
   const ruleCount = visibleRules.length - aiCallCount;
@@ -509,6 +544,8 @@ function TheHangarBernoulli() {
     setActiveSource(key);
     setSelectedMissionId("");
     setSelectedConceptId("");
+    setDesignSummary(null);
+    setDesignSummaryStatus("idle");
     setSpecExpanded(true);
     setConceptSpecExpanded(true);
     setCheckTriggered(false);
@@ -560,7 +597,7 @@ function TheHangarBernoulli() {
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify(
           reviewConceptId
-            ? { missionId: selectedMissionId, source: "concept", sourceId: reviewConceptId, clientRunId }
+            ? { missionId: selectedMissionId, source: designMode ? "vehicle-design" : "concept", sourceId: reviewConceptId, clientRunId }
             : { missionId: selectedMissionId, clientRunId },
         ),
       });
@@ -586,12 +623,12 @@ function TheHangarBernoulli() {
   // normal state, not an error) or if the fetch itself fails -- this is
   // a convenience pre-load, not something worth surfacing an error banner
   // for.
-  async function fetchSavedReview(missionId: string, conceptId: string | null = null) {
+  async function fetchSavedReview(missionId: string, conceptId: string | null = null, bay: string | null = null) {
     const { data } = await supabase.auth.getSession();
     const token = data.session?.access_token;
     if (!token) return;
     try {
-      const qs = `missionId=${encodeURIComponent(missionId)}${conceptId ? `&conceptId=${encodeURIComponent(conceptId)}` : ""}`;
+      const qs = `missionId=${encodeURIComponent(missionId)}${conceptId ? `&conceptId=${encodeURIComponent(conceptId)}` : ""}${bay ? `&bay=${bay}` : ""}`;
       const res = await fetch(`/api/hangar/bernoulli-review?${qs}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -628,7 +665,43 @@ function TheHangarBernoulli() {
     setReviewResult(null);
     setReviewStatus("idle");
     setReviewError(null);
-    if (c) fetchSavedReview(c.sourceMissionId, id);
+    if (c) fetchSavedReview(c.sourceMissionId, id, designMode ? "vehicle_design" : null);
+    if (designMode && id) fetchDesignSummary(id);
+  }
+
+  async function fetchDesignSummary(conceptId: string) {
+    setDesignSummary(null);
+    setDesignSummaryStatus("loading");
+    const { data } = await supabase.auth.getSession();
+    const token = data.session?.access_token;
+    if (!token) return;
+    try {
+      const res = await fetch(`/api/hangar/vehicle-design-files?conceptId=${encodeURIComponent(conceptId)}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error ?? `HTTP ${res.status}`);
+      if (!json.found) {
+        setDesignSummaryStatus("missing");
+        return;
+      }
+      const d = json.design as Record<string, any>;
+      const num = (v: unknown) => (typeof v === "number" && v > 0 ? v : null);
+      setDesignSummary({
+        designId: typeof d.design_id === "string" ? d.design_id : null,
+        aircraftClass: typeof d.aircraft_class === "string" ? d.aircraft_class : null,
+        configuration: typeof d.configuration === "string" ? d.configuration : null,
+        mtowKg: num(d.mass_properties?.mtow_kg),
+        spanM: num(d.geometry?.wing?.span_m),
+        rotors: num(d.propulsion?.lift_propulsion?.motor_count),
+        enduranceMin: num(d.performance?.endurance_min),
+        rangeKm: num(d.performance?.range_km),
+        folder: `${json.location.server}/${json.location.folder}/`,
+      });
+      setDesignSummaryStatus("idle");
+    } catch {
+      setDesignSummaryStatus("error");
+    }
   }
 
   async function fetchConcepts() {
@@ -650,9 +723,9 @@ function TheHangarBernoulli() {
   }
 
   useEffect(() => {
-    if (currentUserEmail && conceptMode && concepts === null) fetchConcepts();
+    if (currentUserEmail && pickConcept && concepts === null) fetchConcepts();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentUserEmail, conceptMode]);
+  }, [currentUserEmail, pickConcept]);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -671,7 +744,13 @@ function TheHangarBernoulli() {
   // auth is ready, same as picking it from the dropdown would.
   useEffect(() => {
     if (currentUserEmail && search.missionId) {
-      fetchSavedReview(search.missionId, search.source === "concept" && search.sourceId ? search.sourceId : null);
+      const fromDesign = search.source === "aircraft-design" && !!search.sourceId;
+      fetchSavedReview(
+        search.missionId,
+        (search.source === "concept" || fromDesign) && search.sourceId ? search.sourceId : null,
+        fromDesign ? "vehicle_design" : null,
+      );
+      if (fromDesign) fetchDesignSummary(search.sourceId);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUserEmail]);
@@ -949,6 +1028,46 @@ function TheHangarBernoulli() {
       </div>
     ) : null;
 
+  const designSpecBlock = designMode && selectedConceptEntry ? (
+    <div className="hgr-ber-hub-spec">
+      <div className="hgr-ber-hub-spec-header" style={{ cursor: "default" }}>
+        <span className="hgr-ber-hub-spec-header-left">
+          <span className="hgr-ber-hub-spec-code">
+            Vehicle Design: {designSummary?.designId ?? selectedConceptEntry.conceptCode}
+          </span>
+        </span>
+        <Link to="/the-hangar/aircraft-design" className="hgr-ber-hub-spec-confidence">
+          Open in Bay 03 →
+        </Link>
+      </div>
+      <div className="hgr-ber-hub-spec-body">
+        {designSummaryStatus === "loading" && <p className="hgr-ber-hub-spec-summary">Loading the design files from the GCP server…</p>}
+        {designSummaryStatus === "missing" && (
+          <p className="hgr-ber-hub-spec-summary">No Vehicle Design files for this concept yet -- run Generate Design in Bay 03 first.</p>
+        )}
+        {designSummaryStatus === "error" && <p className="hgr-ber-hub-spec-summary">Couldn't read the design files from the GCP server.</p>}
+        {designSummary && (
+          <>
+            <p className="hgr-ber-hub-spec-summary">
+              {designSummary.aircraftClass?.replace(/_/g, " ")}
+              {designSummary.configuration ? ` -- ${designSummary.configuration}` : ""}
+            </p>
+            <div className="hgr-ber-hub-spec-block">
+              <ul>
+                {designSummary.mtowKg !== null && <li><b>MTOW</b>: {designSummary.mtowKg} kg</li>}
+                {designSummary.spanM !== null && <li><b>Wingspan</b>: {designSummary.spanM} m</li>}
+                {designSummary.rotors !== null && <li><b>Rotors</b>: {designSummary.rotors}</li>}
+                {designSummary.enduranceMin !== null && <li><b>Endurance</b>: {Math.round(designSummary.enduranceMin)} min</li>}
+                {designSummary.rangeKm !== null && <li><b>Range</b>: {designSummary.rangeKm} km</li>}
+                <li><b>Files</b>: {designSummary.folder}</li>
+              </ul>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  ) : null;
+
   if (!ready) return null;
 
   return (
@@ -1088,19 +1207,21 @@ function TheHangarBernoulli() {
                     <div className="hgr-ber-hub-idle-circle">
                       <span>BERNOULLI</span>
                     </div>
-                    <p className="hgr-ber-hub-idle-hint">Click a bay to pick a mission to review.</p>
+                    <p className="hgr-ber-hub-idle-hint">Click a bay to pick what to review.</p>
                   </div>
                 ) : (
                   <>
                 <label className="hgr-ber-hub-select-label" htmlFor="bernoulli-mission-select">
-                  {conceptMode
+                  {designMode
+                    ? "Your concepts -- finalized, with a vehicle design"
+                    : conceptMode
                     ? "Your concepts -- concept ready"
                     : listedStatus === "spec_ready"
                       ? "Your missions -- spec ready"
                       : "Your missions -- spec ready or finalized"}
                 </label>
                 <div className="hgr-ber-hub-select-row">
-                  {conceptMode ? (
+                  {pickConcept ? (
                     conceptsStatus === "error" ? (
                       <div className="hgr-ber-hub-select-error">
                         Couldn't load your concepts.{" "}
@@ -1120,13 +1241,17 @@ function TheHangarBernoulli() {
                           {conceptsStatus === "loading" || concepts === null
                             ? "Loading concepts…"
                             : (listedConcepts?.length ?? 0) === 0
-                              ? "No concept-ready concepts yet"
-                              : `Select a concept-ready concept (${listedConcepts?.length})`}
+                              ? designMode
+                                ? "No finalized concepts yet"
+                                : "No concept-ready concepts yet"
+                              : designMode
+                                ? `Select a finalized concept (${listedConcepts?.length})`
+                                : `Select a concept-ready concept (${listedConcepts?.length})`}
                         </option>
                         {listedConcepts?.map((c) => (
                           <option key={c.conceptId} value={c.conceptId}>
                             {c.conceptCode}
-                            {c.rankedConcepts?.[0]?.conceptName ? ` -- ${c.rankedConcepts[0].conceptName}` : ""}
+                            {(c.selectedConceptName ?? c.rankedConcepts?.[0]?.conceptName) ? ` -- ${c.selectedConceptName ?? c.rankedConcepts?.[0]?.conceptName}` : ""}
                           </option>
                         ))}
                       </select>
@@ -1177,26 +1302,33 @@ function TheHangarBernoulli() {
                 <p className="hgr-ber-hub-select-hint">
                   {checkTriggered
                     ? reviewConceptId
-                      ? `Runs ${runSummary} against this concept run's output, judged against the mission's KPIs.`
+                      ? designMode
+                        ? `Runs ${runSummary} against this concept's Vehicle Design output, judged against the mission's KPIs.`
+                        : `Runs ${runSummary} against this concept run's output, judged against the mission's KPIs.`
                       : `Runs ${runSummary} against the selected spec.`
                     : "Picking a mission doesn't run a check yet -- Ask Bernoulli opens the report below."}
                 </p>
 
-                {!conceptMode && missionSpecBlock}
+                {!pickConcept && missionSpecBlock}
 
                 {checkTriggered && selectedMission && (
                   <div className="hgr-ber-hub-report">
                     {/* Same title -> Requests & tokens -> details order as Bay 01/02. */}
                     <div className="hgr-ber-run-title">
                       <span className="hgr-ber-run-title-code">
-                        {reviewResult?.sourceBay === "concept" && reviewResult.conceptCode
+                        {(reviewResult?.sourceBay === "concept" || reviewResult?.sourceBay === "vehicle_design") && reviewResult.conceptCode
                           ? reviewResult.conceptCode
                           : selectedMission.missionCode}
                       </span>
                       <h3>
-                        {(reviewResult?.sourceBay ?? (reviewConceptId ? "concept" : "mission")) === "concept"
-                          ? "Concept Bernoulli report"
-                          : "Mission Spec Bernoulli report"}
+                        {(() => {
+                          const bay = reviewResult?.sourceBay ?? (designMode ? "vehicle_design" : reviewConceptId ? "concept" : "mission");
+                          return bay === "vehicle_design"
+                            ? "Vehicle Design Bernoulli report"
+                            : bay === "concept"
+                              ? "Concept Bernoulli report"
+                              : "Mission Spec Bernoulli report";
+                        })()}
                       </h3>
                       {reviewResult && (
                         <span className="hgr-ber-run-title-date">
@@ -1250,11 +1382,22 @@ function TheHangarBernoulli() {
                             {Math.round(reviewResult.confidenceScore * 100)}% confidence
                           </span>
                           <span className="hgr-ber-report-target">
-                            {reviewResult.sourceBay === "concept"
-                              ? `Reviewed: Bay 02 concept run${reviewResult.conceptCode ? ` ${reviewResult.conceptCode}` : ""}`
-                              : "Reviewed: Bay 01 mission spec"}
+                            {reviewResult.sourceBay === "vehicle_design"
+                              ? `Reviewed: Bay 03 vehicle design${reviewResult.designRef ? ` ${reviewResult.designRef}` : ""}`
+                              : reviewResult.sourceBay === "concept"
+                                ? `Reviewed: Bay 02 concept run${reviewResult.conceptCode ? ` ${reviewResult.conceptCode}` : ""}`
+                                : "Reviewed: Bay 01 mission spec"}
                           </span>
                         </div>
+                        {reviewResult.sourceBay === "vehicle_design" &&
+                          designSummary?.designId &&
+                          reviewResult.designRef &&
+                          reviewResult.designRef !== designSummary.designId && (
+                            <div className="hgr-ber-stale">
+                              ⚠ This report is for design {reviewResult.designRef}; the concept's files now hold {designSummary.designId}.
+                              Ask Bernoulli again to review the current design.
+                            </div>
+                          )}
                         <ReportSummaryStrip checks={reviewResult.checks} />
                         <ul className="hgr-ber-check-list">
                           {sortForReport(reviewResult.checks)
@@ -1297,7 +1440,8 @@ function TheHangarBernoulli() {
                 )}
 
                 {conceptMode && conceptSpecBlock}
-                {conceptMode && missionSpecBlock}
+                {designMode && designSpecBlock}
+                {pickConcept && missionSpecBlock}
 
                 {/* Check definitions sit below the report: reference
                     material, not something to read before every run. */}
@@ -1552,6 +1696,7 @@ const HGR_BERNOULLI_CSS = `
 .hgr-ber-hub-report-title{ font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--hgr-ber-amber-bright); margin-bottom:10px; }
 .hgr-ber-rules-legend-title{ margin-top:18px; font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; font-weight:700; color:var(--hgr-ber-paper); }
 .hgr-ber-progress{ margin:6px 0 12px; }
+.hgr-ber-stale{ margin:8px 0 12px; font-size:13px; color:#A35F00; background:#FCF1E0; border:1px solid #EFD3A6; padding:8px 12px; }
 .hgr-ber-progress-line{ font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--hgr-ber-paper); }
 .hgr-ber-progress-bar{ margin-top:6px; height:6px; background:#E4EEF7; border-radius:3px; overflow:hidden; }
 .hgr-ber-progress-bar span{ display:block; height:100%; background:var(--hgr-ber-blue-bright); transition:width .4s ease; }

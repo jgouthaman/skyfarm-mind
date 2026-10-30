@@ -1231,3 +1231,531 @@ export async function testConceptRule(
 ): Promise<BernoulliCheckResult> {
   return testRegisteredRule(input, rule, allRules, CONCEPT_RULE_IMPLS, describeConceptInput, conceptNames);
 }
+
+// =============================================================================
+// Vehicle Design (B03) output review -- BERN-V01 through BERN-V09
+// =============================================================================
+//
+// Called when "Ask Bernoulli" comes from Bay 03: checks the concept's Vehicle
+// Design output (final_aircraft_design.json from the Python backend on the
+// GCP server) for internal consistency -- does the design's own arithmetic
+// close? -- and against the mission it was built for. V01, V03, V05 and V07
+// are the hard gates by default: a mass budget that doesn't close, an
+// unstable or untrimmable aircraft, an energy budget that can't fly the
+// mission, or a missed requirement should fail the review.
+
+// Only the fields the checks read; every one optional, since the backend's
+// output is untyped JSON.
+interface ReviewedVehicleDesign {
+  design_id?: string;
+  aircraft_class?: string;
+  configuration?: string;
+  mass_properties?: {
+    mtow_kg?: number;
+    payload_mass_kg?: number;
+    battery_mass_kg?: number;
+    cg_x_m?: number;
+    forward_cg_limit_x_m?: number;
+    aft_cg_limit_x_m?: number;
+    cg_y_m?: number;
+    component_breakdown?: { name: string; mass_kg: number; x_cg_m?: number; y_cg_m?: number }[];
+  };
+  geometry?: {
+    wing?: { span_m?: number; area_m2?: number; mac_m?: number; aspect_ratio?: number };
+    fuselage?: { length_m?: number };
+    tail?: { root_chord_m?: number };
+    multirotor_frame?: { arm_count?: number; arm_length_m?: number; frame_type?: string };
+  };
+  cad_handover?: { mounting_coordinates?: Record<string, number[]> };
+  aerodynamics?: { cl_max?: number; cl_cruise?: number; cd0?: number; k_induced?: number; stall_speed_clean_mps?: number; lift_to_drag_cruise?: number };
+  assumptions?: { air_density_kg_m3?: number; gravity_m_s2?: number };
+  performance?: { cruise_speed_kmh?: number; cruise_speed_mps?: number; endurance_min?: number; hover_endurance_min?: number; range_km?: number; max_speed_kmh?: number };
+  stability?: {
+    neutral_point_x_m?: number;
+    static_margin_mac_pct?: number;
+    is_longitudinally_stable?: boolean;
+    is_directionally_stable?: boolean;
+    is_laterally_stable?: boolean;
+  };
+  controls?: { trim_feasible?: boolean };
+  energy?: {
+    total_energy_stored_wh?: number;
+    energy_required_mission_wh?: number;
+    energy_reserve_pct?: number;
+    cruise_energy_wh?: number;
+    avionics_energy_wh?: number;
+    hover_energy_wh?: number;
+    transition_energy_wh?: number;
+  };
+  battery?: { energy_wh?: number; voltage_nominal_v?: number; mass_kg?: number; max_continuous_current_a?: number; cell_series_count?: number; pack_model?: string; chemistry?: string };
+  electrical?: { main_bus_voltage_v?: number };
+  propulsion?: {
+    cruise_propulsion?: { cruise_power_electrical_w?: number; esc_rating_a?: number; motor_count?: number; motor_model?: string; propeller_model?: string; esc_model?: string; max_thrust_per_motor_n?: number };
+    lift_propulsion?: {
+      hover_power_electrical_w?: number;
+      esc_rating_a?: number;
+      esc_model?: string;
+      motor_count?: number;
+      motor_model?: string;
+      propeller_diameter_in?: number;
+      thrust_to_weight_ratio?: number;
+      disk_loading_kg_m2?: number;
+      hover_thrust_per_motor_n?: number;
+      total_hover_thrust_required_n?: number;
+    };
+    total_installed_power_w?: number;
+  };
+  constraints?: { max_allowable_mtow_kg?: number; max_wingspan_m?: number; battery_reserve_min_pct?: number; min_endurance_min?: number; min_range_km?: number };
+  requirement_traceability?: { requirement: string; status: string; required_value?: number; design_value?: number; unit?: string; limit?: string }[];
+}
+
+export interface BernoulliVehicleDesignCheckInput extends BernoulliCheckInput {
+  design: Record<string, unknown>;
+  // The backend's design_id the review is about (Bay3/<code>/ may change later).
+  designRef: string;
+  conceptName: string | null;
+}
+
+const isNum = (v: unknown): v is number => typeof v === "number" && Number.isFinite(v);
+const pctOff = (a: number, b: number) => (b === 0 ? Infinity : Math.abs(a - b) / Math.abs(b));
+const f2 = (n: number, d = 2) => n.toFixed(d);
+const vd = (input: BernoulliVehicleDesignCheckInput) => input.design as ReviewedVehicleDesign;
+// A real, set value -- the backend writes 0 for "not applicable / not set".
+const pos = (v: unknown): v is number => isNum(v) && v > 0;
+// Lift/stall and static-margin checks only mean something with a real wing.
+const hasWing = (d: ReviewedVehicleDesign) =>
+  !/multirotor|rotor|quad|hex|octo/i.test(d.aircraft_class ?? "") && pos(d.geometry?.wing?.area_m2) && pos(d.geometry?.wing?.mac_m);
+// Electrical power the mission flies on: cruise propulsion, else hover.
+function flightPower(d: ReviewedVehicleDesign): { watts: number; phase: "cruise" | "hover" } | null {
+  const c = d.propulsion?.cruise_propulsion?.cruise_power_electrical_w;
+  if (pos(c)) return { watts: c, phase: "cruise" };
+  const h = d.propulsion?.lift_propulsion?.hover_power_electrical_w;
+  return pos(h) ? { watts: h, phase: "hover" } : null;
+}
+// Rotor positions from the CAD motor mounts (multirotors).
+function motorMounts(d: ReviewedVehicleDesign): number[][] {
+  return Object.entries(d.cad_handover?.mounting_coordinates ?? {})
+    .filter(([k, v]) => /motor/i.test(k) && Array.isArray(v) && v.length >= 2)
+    .map(([, v]) => v);
+}
+
+type Level = "PASS" | "WARN" | "FAIL";
+const worst = (levels: Level[]): Level => (levels.includes("FAIL") ? "FAIL" : levels.includes("WARN") ? "WARN" : "PASS");
+
+function vResult(ruleId: string, findings: { level: Level; text: string }[], passMessage: string, targets?: string[]): BernoulliCheckResult {
+  const flagged = findings.filter((x) => x.level !== "PASS");
+  if (flagged.length === 0) return { ruleId, status: "PASS", message: passMessage, sourceWasMock: false };
+  return {
+    ruleId,
+    status: worst(flagged.map((x) => x.level)),
+    message: flagged.map((x) => x.text).join(" "),
+    sourceWasMock: false,
+    targets,
+  };
+}
+
+function info(ruleId: string, message: string): BernoulliCheckResult {
+  return { ruleId, status: "INFO", message, sourceWasMock: false };
+}
+
+// -- BERN-V01: mass closure ---------------------------------------------------
+function checkMassClosure(input: BernoulliVehicleDesignCheckInput): BernoulliCheckResult {
+  const mp = vd(input).mass_properties;
+  const parts = mp?.component_breakdown ?? [];
+  if (!mp || !isNum(mp.mtow_kg) || parts.length === 0) return info("BERN-V01", "Not enough data to check -- no MTOW or component breakdown in the design.");
+  const sum = parts.reduce((s, c) => s + (isNum(c.mass_kg) ? c.mass_kg : 0), 0);
+  const off = pctOff(sum, mp.mtow_kg);
+  const findings: { level: Level; text: string }[] = [];
+  if (off > 0.05) {
+    findings.push({
+      level: off > 0.1 ? "FAIL" : "WARN",
+      text: `The ${parts.length} components add up to ${f2(sum)} kg but MTOW is stated as ${f2(mp.mtow_kg)} kg (${sum > mp.mtow_kg ? "+" : "-"}${f2(off * 100, 0)}%) -- the mass budget doesn't close.`,
+    });
+  }
+  const bat = vd(input).battery?.mass_kg;
+  if (isNum(mp.battery_mass_kg) && isNum(bat) && pctOff(mp.battery_mass_kg, bat) > 0.03) {
+    findings.push({ level: "WARN", text: `Battery mass is ${f2(mp.battery_mass_kg, 3)} kg in the mass properties but ${f2(bat, 3)} kg for the selected pack.` });
+  }
+  return vResult("BERN-V01", findings, `Components add up to ${f2(sum)} kg against MTOW ${f2(mp.mtow_kg)} kg (within 5%).`);
+}
+
+// -- BERN-V02: balance closure ------------------------------------------------
+function checkBalanceClosure(input: BernoulliVehicleDesignCheckInput): BernoulliCheckResult {
+  const d = vd(input);
+  const parts = (d.mass_properties?.component_breakdown ?? []).filter((c) => isNum(c.mass_kg) && c.mass_kg > 0 && isNum(c.x_cg_m));
+  const cg = d.mass_properties?.cg_x_m;
+  const mac = d.geometry?.wing?.mac_m;
+  if (!hasWing(d)) return checkRotorBalance(d, parts);
+  if (parts.length === 0 || !isNum(cg) || !isNum(mac) || mac <= 0) return info("BERN-V02", "Not enough data to check -- needs component positions, CG and MAC.");
+  const total = parts.reduce((s, c) => s + c.mass_kg, 0);
+  const momentCg = parts.reduce((s, c) => s + c.mass_kg * (c.x_cg_m as number), 0) / total;
+  const diffMac = Math.abs(momentCg - cg) / mac;
+  const findings: { level: Level; text: string }[] = [];
+  if (diffMac > 0.1) {
+    findings.push({
+      level: diffMac > 0.25 ? "FAIL" : "WARN",
+      text: `The components' mass-weighted CG is at x ${f2(momentCg, 3)} m but the stated CG is ${f2(cg, 3)} m -- ${f2(diffMac * 100, 0)}% of MAC apart.`,
+    });
+  }
+  const length = Math.max(d.geometry?.fuselage?.length_m ?? 0, (d.cad_handover?.mounting_coordinates?.tail_mount?.[0] ?? 0) + (d.geometry?.tail?.root_chord_m ?? 0));
+  if (length > 0) {
+    const outside = parts.filter((c) => (c.x_cg_m as number) < -0.05 || (c.x_cg_m as number) > length + 0.02);
+    if (outside.length > 0) {
+      findings.push({
+        level: "WARN",
+        text: `${outside.length} component position(s) lie outside the ${f2(length)} m airframe: ${outside.map((c) => `${c.name} at ${f2(c.x_cg_m as number)} m`).join(", ")}.`,
+      });
+    }
+  }
+  return vResult("BERN-V02", findings, `Component CG ${f2(momentCg, 3)} m matches the stated ${f2(cg, 3)} m, all parts inside the airframe.`);
+}
+
+// Multirotor: the CG should sit at the centre of the rotor layout, and every
+// mass point inside the frame (about the motor-mount radius).
+function checkRotorBalance(d: ReviewedVehicleDesign, parts: { name: string; mass_kg: number; x_cg_m?: number; y_cg_m?: number }[]): BernoulliCheckResult {
+  const mounts = motorMounts(d);
+  if (parts.length === 0 || mounts.length < 3) return info("BERN-V02", "Not enough data to check -- needs component positions and the rotor mounts.");
+  const cx = mounts.reduce((s, m) => s + m[0], 0) / mounts.length;
+  const cy = mounts.reduce((s, m) => s + m[1], 0) / mounts.length;
+  const radius = Math.max(...mounts.map((m) => Math.hypot(m[0] - cx, m[1] - cy)));
+  const total = parts.reduce((s, c) => s + c.mass_kg, 0);
+  const gx = parts.reduce((s, c) => s + c.mass_kg * (c.x_cg_m as number), 0) / total;
+  const gy = parts.reduce((s, c) => s + c.mass_kg * (c.y_cg_m ?? 0), 0) / total;
+  const off = Math.hypot(gx - cx, gy - cy) / radius;
+  const findings: { level: Level; text: string }[] = [];
+  if (off > 0.1) {
+    findings.push({ level: off > 0.25 ? "FAIL" : "WARN", text: `The components' CG is ${f2(off * 100, 0)}% of the rotor radius off the centre of the rotor layout -- the rotors would have to work unevenly to hover.` });
+  }
+  const outside = parts.filter((c) => Math.hypot((c.x_cg_m as number) - cx, (c.y_cg_m ?? 0) - cy) > radius * 1.3);
+  if (outside.length > 0) {
+    findings.push({
+      level: "WARN",
+      text: `${outside.length} mass point(s) sit beyond the ${f2(radius, 2)} m motor-mount radius: ${outside.map((c) => `${c.name} at ${f2(Math.hypot(c.x_cg_m as number, c.y_cg_m ?? 0), 2)} m`).join(", ")} -- the breakdown positions don't match the CAD mounts.`,
+    });
+  }
+  return vResult("BERN-V02", findings, `Components balance at the centre of the ${mounts.length}-rotor layout, all inside the frame.`);
+}
+
+// -- BERN-V03: stability & trim -----------------------------------------------
+function checkStabilityTrim(input: BernoulliVehicleDesignCheckInput): BernoulliCheckResult {
+  const d = vd(input);
+  const mp = d.mass_properties;
+  const st = d.stability;
+  const mac = d.geometry?.wing?.mac_m;
+  if (!hasWing(d)) return checkHoverAuthority(d);
+  if (!mp || !st || !isNum(mp.cg_x_m) || !isNum(st.neutral_point_x_m) || !isNum(mac)) return info("BERN-V03", "Not enough data to check -- needs CG, neutral point and MAC.");
+  const findings: { level: Level; text: string }[] = [];
+  if (pos(mp.forward_cg_limit_x_m) && pos(mp.aft_cg_limit_x_m) && (mp.cg_x_m < mp.forward_cg_limit_x_m || mp.cg_x_m > mp.aft_cg_limit_x_m)) {
+    findings.push({ level: "FAIL", text: `CG ${f2(mp.cg_x_m, 3)} m is outside its allowed range ${mp.forward_cg_limit_x_m}–${mp.aft_cg_limit_x_m} m.` });
+  }
+  const sm = ((st.neutral_point_x_m - mp.cg_x_m) / mac) * 100;
+  if (sm <= 0) findings.push({ level: "FAIL", text: `Static margin is ${f2(sm, 1)}% MAC -- the CG is behind the neutral point, so the aircraft is unstable in pitch.` });
+  else if (sm < 5 || sm > 25) findings.push({ level: "WARN", text: `Static margin ${f2(sm, 1)}% MAC is outside the usual 5–25% band.` });
+  if (isNum(st.static_margin_mac_pct) && Math.abs(st.static_margin_mac_pct - sm) > 2) {
+    findings.push({ level: "WARN", text: `The stated static margin (${st.static_margin_mac_pct}%) doesn't match (NP − CG) / MAC = ${f2(sm, 1)}%.` });
+  }
+  const axes = [
+    ["longitudinally", st.is_longitudinally_stable],
+    ["directionally", st.is_directionally_stable],
+    ["laterally", st.is_laterally_stable],
+  ] as const;
+  for (const [axis, ok] of axes) if (ok === false) findings.push({ level: "FAIL", text: `The design reports it is not ${axis} stable.` });
+  if (d.controls?.trim_feasible === false) findings.push({ level: "FAIL", text: "The design reports cruise trim is not feasible." });
+  return vResult("BERN-V03", findings, `Stable and trimmable: static margin ${f2(sm, 1)}% MAC, CG inside its range.`);
+}
+
+// Multirotor: enough thrust over weight to hover, climb and control.
+function checkHoverAuthority(d: ReviewedVehicleDesign): BernoulliCheckResult {
+  const lp = d.propulsion?.lift_propulsion;
+  const m = d.mass_properties?.mtow_kg;
+  const g = d.assumptions?.gravity_m_s2 ?? 9.80665;
+  let tw = lp?.thrust_to_weight_ratio;
+  if (!pos(tw) && pos(lp?.hover_thrust_per_motor_n) && pos(lp?.motor_count) && pos(m)) tw = (lp.hover_thrust_per_motor_n * lp.motor_count) / (m * g);
+  const findings: { level: Level; text: string }[] = [];
+  if (pos(tw)) {
+    if (tw < 1.5) findings.push({ level: "FAIL", text: `Thrust-to-weight is ${f2(tw, 2)} -- a multirotor needs at least about 1.5 to hover with control authority (2+ is typical).` });
+    else if (tw < 2) findings.push({ level: "WARN", text: `Thrust-to-weight ${f2(tw, 2)} leaves little margin for climb, wind and control (2+ is typical).` });
+  } else {
+    return info("BERN-V03", "Not enough data to check -- no thrust-to-weight or hover thrust for this rotorcraft.");
+  }
+  const st = d.stability;
+  for (const [axis, ok] of [["longitudinally", st?.is_longitudinally_stable], ["directionally", st?.is_directionally_stable], ["laterally", st?.is_laterally_stable]] as const) {
+    if (ok === false) findings.push({ level: "FAIL", text: `The design reports it is not ${axis} stable.` });
+  }
+  if (d.controls?.trim_feasible === false) findings.push({ level: "FAIL", text: "The design reports hover trim is not feasible." });
+  return vResult("BERN-V03", findings, `Thrust-to-weight ${f2(tw, 2)} gives enough hover and control authority.`);
+}
+
+// -- BERN-V04: lift & stall consistency ---------------------------------------
+function checkLiftStall(input: BernoulliVehicleDesignCheckInput): BernoulliCheckResult {
+  const d = vd(input);
+  const m = d.mass_properties?.mtow_kg;
+  const S = d.geometry?.wing?.area_m2;
+  const a = d.aerodynamics;
+  const rho = d.assumptions?.air_density_kg_m3 ?? 1.225;
+  const g = d.assumptions?.gravity_m_s2 ?? 9.80665;
+  const v = d.performance?.cruise_speed_mps ?? (isNum(d.performance?.cruise_speed_kmh) ? (d.performance?.cruise_speed_kmh as number) / 3.6 : undefined);
+  if (!hasWing(d)) return info("BERN-V04", "Not applicable -- this design has no wing, so there's no wing lift or stall speed to check.");
+  if (!pos(m) || !pos(S) || !a || !pos(a.cl_max) || !pos(v)) return info("BERN-V04", "Not enough data to check -- needs MTOW, wing area, CL max and cruise speed.");
+  const W = m * g;
+  const stall = Math.sqrt((2 * W) / (rho * S * a.cl_max));
+  const clCruise = W / (0.5 * rho * v * v * S);
+  const findings: { level: Level; text: string }[] = [];
+  if (pos(a.stall_speed_clean_mps)) {
+    const off = pctOff(a.stall_speed_clean_mps, stall);
+    if (off > 0.1) findings.push({ level: off > 0.25 ? "FAIL" : "WARN", text: `Stated stall speed ${f2(a.stall_speed_clean_mps, 1)} m/s, but √(2W/ρS·CLmax) gives ${f2(stall, 1)} m/s.` });
+  }
+  if (pos(a.cl_cruise)) {
+    const off = pctOff(a.cl_cruise, clCruise);
+    if (off > 0.1) findings.push({ level: off > 0.3 ? "FAIL" : "WARN", text: `Stated cruise CL ${a.cl_cruise}, but holding ${f2(m)} kg level at ${f2(v, 1)} m/s needs CL ${f2(clCruise)}.` });
+  }
+  const vStall = Math.max(stall, pos(a.stall_speed_clean_mps) ? a.stall_speed_clean_mps : 0);
+  if (v < vStall * 1.2) findings.push({ level: "WARN", text: `Cruise ${f2(v, 1)} m/s is less than 1.2× stall (${f2(vStall, 1)} m/s) -- little margin.` });
+  if (isNum(a.cd0) && isNum(a.k_induced) && a.cd0 > 0 && a.k_induced > 0) {
+    const vBest = Math.sqrt((2 * W) / (rho * S * Math.sqrt(a.cd0 / a.k_induced)));
+    if (pos(a.stall_speed_clean_mps) && vBest < a.stall_speed_clean_mps) {
+      findings.push({ level: "WARN", text: `The best-L/D speed (${f2(vBest * 3.6, 0)} km/h) is below the stated stall speed (${f2(a.stall_speed_clean_mps * 3.6, 0)} km/h) -- the polar and stall figures disagree.` });
+    }
+  }
+  return vResult("BERN-V04", findings, `Stall ${f2(stall, 1)} m/s and cruise CL ${f2(clCruise)} recompute to the stated values.`);
+}
+
+// -- BERN-V05: energy budget --------------------------------------------------
+function checkEnergyBudget(input: BernoulliVehicleDesignCheckInput): BernoulliCheckResult {
+  const d = vd(input);
+  const e = d.energy;
+  if (!e || !pos(e.total_energy_stored_wh) || !pos(e.energy_required_mission_wh)) return info("BERN-V05", "Not enough data to check -- needs stored and required mission energy.");
+  const reserve = isNum(e.energy_reserve_pct) ? e.energy_reserve_pct : 0;
+  const usable = e.total_energy_stored_wh * (1 - reserve / 100);
+  const findings: { level: Level; text: string }[] = [];
+  if (usable + 1e-6 < e.energy_required_mission_wh) {
+    findings.push({ level: "FAIL", text: `Usable energy ${f2(usable, 1)} Wh (after a ${reserve}% reserve) doesn't cover the ${f2(e.energy_required_mission_wh, 1)} Wh the mission needs.` });
+  }
+  const minReserve = d.constraints?.battery_reserve_min_pct;
+  const realReserve = (1 - e.energy_required_mission_wh / e.total_energy_stored_wh) * 100;
+  if (pos(minReserve) && realReserve + 1e-6 < minReserve) {
+    findings.push({ level: "FAIL", text: `The mission leaves a ${f2(realReserve, 0)}% reserve, below the required ${minReserve}%.` });
+  }
+  const parts = [e.cruise_energy_wh, e.avionics_energy_wh, e.hover_energy_wh, e.transition_energy_wh].filter(isNum);
+  const partsSum = parts.reduce((s, x) => s + x, 0);
+  if (parts.length > 0 && pctOff(partsSum, e.energy_required_mission_wh) > 0.05) {
+    findings.push({ level: "WARN", text: `The energy phases add up to ${f2(partsSum, 1)} Wh, not the stated ${f2(e.energy_required_mission_wh, 1)} Wh mission energy.` });
+  }
+  // Each flight phase's energy should be its power x its time.
+  const phases: [string, number | undefined, number | undefined, number | undefined][] = [
+    ["cruise", d.propulsion?.cruise_propulsion?.cruise_power_electrical_w, d.performance?.endurance_min, e.cruise_energy_wh],
+    ["hover", d.propulsion?.lift_propulsion?.hover_power_electrical_w, d.performance?.hover_endurance_min, e.hover_energy_wh],
+  ];
+  for (const [phase, p, t, wh] of phases) {
+    if (pos(p) && pos(t) && pos(wh) && pctOff(p * (t / 60), wh) > 0.1) {
+      findings.push({ level: "WARN", text: `${f2(p, 0)} W for ${f2(t, 0)} min is ${f2(p * (t / 60), 1)} Wh, but ${phase} energy is stated as ${f2(wh, 1)} Wh.` });
+    }
+  }
+  if (pos(d.battery?.energy_wh) && pctOff(d.battery.energy_wh, e.total_energy_stored_wh) > 0.05) {
+    findings.push({ level: "WARN", text: `The pack is ${f2(d.battery.energy_wh, 1)} Wh but stored energy is stated as ${f2(e.total_energy_stored_wh, 1)} Wh.` });
+  }
+  return vResult("BERN-V05", findings, `Usable ${f2(usable, 1)} Wh covers the ${f2(e.energy_required_mission_wh, 1)} Wh mission with a ${reserve}% reserve.`);
+}
+
+// -- BERN-V06: performance closure --------------------------------------------
+function checkPerformanceClosure(input: BernoulliVehicleDesignCheckInput): BernoulliCheckResult {
+  const d = vd(input);
+  const pf = d.performance;
+  if (!pf || !pos(pf.cruise_speed_kmh) || !pos(pf.endurance_min) || !pos(pf.range_km)) return info("BERN-V06", "Not enough data to check -- needs cruise speed, endurance and range.");
+  const findings: { level: Level; text: string }[] = [];
+  const rangeCalc = pf.cruise_speed_kmh * (pf.endurance_min / 60);
+  if (pctOff(pf.range_km, rangeCalc) > 0.1) {
+    findings.push({ level: "WARN", text: `${f2(pf.cruise_speed_kmh, 0)} km/h for ${f2(pf.endurance_min, 0)} min covers ${f2(rangeCalc, 1)} km, but range is stated as ${f2(pf.range_km, 1)} km.` });
+  }
+  const e = d.energy;
+  const power = flightPower(d);
+  if (e && pos(e.total_energy_stored_wh) && power) {
+    const usable = e.total_energy_stored_wh * (1 - (isNum(e.energy_reserve_pct) ? e.energy_reserve_pct : 0) / 100);
+    const enduranceCalc = (usable / power.watts) * 60;
+    if (pctOff(pf.endurance_min, enduranceCalc) > 0.15) {
+      findings.push({ level: "WARN", text: `Usable ${f2(usable, 1)} Wh at ${f2(power.watts, 0)} W (${power.phase}) lasts about ${f2(enduranceCalc, 0)} min, but endurance is stated as ${f2(pf.endurance_min, 0)} min.` });
+    }
+  }
+  if (pos(pf.max_speed_kmh) && pf.max_speed_kmh < pf.cruise_speed_kmh) {
+    findings.push({ level: "WARN", text: `Max speed ${pf.max_speed_kmh} km/h is below the ${pf.cruise_speed_kmh} km/h cruise speed.` });
+  }
+  return vResult("BERN-V06", findings, `Range ${f2(pf.range_km, 1)} km and endurance ${f2(pf.endurance_min, 0)} min follow from the cruise speed and energy.`);
+}
+
+// -- BERN-V07: requirements & limits ------------------------------------------
+function checkRequirementsLimits(input: BernoulliVehicleDesignCheckInput): BernoulliCheckResult {
+  const d = vd(input);
+  const c = d.constraints ?? {};
+  const findings: { level: Level; text: string }[] = [];
+  const targets: string[] = [];
+  const mtow = d.mass_properties?.mtow_kg;
+  const span = d.geometry?.wing?.span_m;
+  const end = d.performance?.endurance_min;
+  const range = d.performance?.range_km;
+  // A limit of 0 means the backend didn't set one.
+  if (pos(mtow) && pos(c.max_allowable_mtow_kg) && mtow > c.max_allowable_mtow_kg) findings.push({ level: "FAIL", text: `MTOW ${f2(mtow)} kg exceeds the ${c.max_allowable_mtow_kg} kg limit.` });
+  if (pos(span) && pos(c.max_wingspan_m) && span > c.max_wingspan_m) findings.push({ level: "FAIL", text: `Wingspan ${f2(span)} m exceeds the ${c.max_wingspan_m} m limit.` });
+  if (pos(end) && pos(c.min_endurance_min) && end < c.min_endurance_min) findings.push({ level: "FAIL", text: `Endurance ${f2(end, 0)} min is below the ${c.min_endurance_min} min minimum.` });
+  if (pos(range) && pos(c.min_range_km) && range < c.min_range_km) findings.push({ level: "FAIL", text: `Range ${f2(range, 1)} km is below the ${c.min_range_km} km minimum.` });
+  const unresolved: string[] = [];
+  for (const r of d.requirement_traceability ?? []) {
+    const status = String(r.status ?? "").toUpperCase();
+    if (status === "PASS") continue;
+    if (status === "FAIL" || status.startsWith("NOT")) {
+      findings.push({ level: "FAIL", text: `Requirement "${r.requirement}" is not met (needs ${r.required_value ?? "?"} ${r.unit ?? ""}, design ${r.design_value ?? "?"}).` });
+    } else {
+      unresolved.push(`${r.requirement} (${status.toLowerCase()})`);
+    }
+  }
+  if (unresolved.length > 0) {
+    findings.push({ level: "WARN", text: `${unresolved.length} requirement(s) aren't resolved yet: ${unresolved.join(", ")}.` });
+  }
+  // Against the Bay 01 mission KPIs themselves, not only the backend's own copy of them.
+  const checks: [string[], number | undefined, string][] = [
+    [["payload"], d.mass_properties?.payload_mass_kg, "kg"],
+    [["endurance", "flight time"], end, "min"],
+    [["range"], range, "km"],
+  ];
+  for (const [kw, value, unit] of checks) {
+    const k = findKpi(input.kpis, ...kw);
+    const target = k ? parseLeadingNumber(k.target) : null;
+    if (k && target !== null && isNum(value) && value + 1e-6 < target) {
+      findings.push({ level: "FAIL", text: `The mission's ${k.name} KPI is ${k.target} ${k.unit} but the design delivers ${f2(value, 1)} ${unit}.` });
+      targets.push(`kpi:${k.name}`);
+    }
+  }
+  const met = (d.requirement_traceability ?? []).filter((r) => String(r.status).toUpperCase() === "PASS").length;
+  return vResult("BERN-V07", findings, `Meets every limit and all ${met} traced requirement(s), and the mission KPIs it can be checked against.`, targets.length ? targets : undefined);
+}
+
+// -- BERN-V08: electrical consistency -----------------------------------------
+function checkElectrical(input: BernoulliVehicleDesignCheckInput): BernoulliCheckResult {
+  const d = vd(input);
+  const vb = d.battery?.voltage_nominal_v;
+  if (!pos(vb)) return info("BERN-V08", "Not enough data to check -- no battery voltage.");
+  const findings: { level: Level; text: string }[] = [];
+  const bus = d.electrical?.main_bus_voltage_v;
+  if (pos(bus) && pctOff(bus, vb) > 0.1) findings.push({ level: "WARN", text: `The main bus is ${bus} V but the ${d.battery?.cell_series_count ?? "?"}S pack is ${vb} V nominal.` });
+  const power = flightPower(d);
+  const prop = power?.phase === "hover" ? d.propulsion?.lift_propulsion : d.propulsion?.cruise_propulsion;
+  if (power && prop) {
+    const motors = pos(prop.motor_count) ? prop.motor_count : 1;
+    const perMotor = power.watts / vb / motors;
+    if (pos(prop.esc_rating_a) && prop.esc_rating_a < perMotor * 1.5) {
+      findings.push({ level: "WARN", text: `The ${prop.esc_rating_a} A ESC has under 50% margin over the ${f2(perMotor, 1)} A ${power.phase} draw per motor.` });
+    }
+    const max = d.battery?.max_continuous_current_a;
+    if (pos(max) && pos(prop.esc_rating_a) && max < prop.esc_rating_a * motors) {
+      findings.push({ level: "WARN", text: `The battery's ${max} A continuous rating is below the ${motors} ESCs' combined ${prop.esc_rating_a * motors} A.` });
+    }
+  }
+  return vResult("BERN-V08", findings, `Bus voltage matches the ${vb} V pack; ESC and battery ratings cover the cruise draw.`);
+}
+
+// -- BERN-V09: engineering plausibility (TorqWings AI call) -------------------
+const V09_SYSTEM = `You are Bernoulli Agent's physics-plausibility reviewer for TorqWings' aerospace design platform, reviewing a complete vehicle design produced for a mission before it is handed to CAD. Judge whether the design is physically realistic as a whole: wing loading (W/S), power loading and installed power vs MTOW, battery mass fraction and specific energy, cruise L/D for the configuration, and whether the selected motor, propeller, ESC and battery are a sensible match for this MTOW, cruise speed and endurance. Use the reference ranges below. You are also given the findings of the deterministic checks already run on this design -- weigh them, but don't simply repeat them. Use FAIL only if the design as specified physically could not fly the mission; WARN if parts look unrealistic or the numbers are too inconsistent to judge confidently; PASS if it is plausible.
+
+${AEROSPACE_BENCHMARKS}
+
+This is an engineering judgment call, not a certified analysis -- ground it in the given numbers, don't invent specifics not present in the input. Return JSON only: { "status": "PASS | WARN | FAIL", "message": "one or two sentences", "reasoning": "one short line per aspect checked -- estimate, reference range, verdict" }.
+
+${TARGETS_NOTE}`;
+
+async function checkEngineeringPlausibility(
+  input: BernoulliVehicleDesignCheckInput,
+  priorChecks: BernoulliCheckResult[],
+): Promise<BernoulliCheckResult> {
+  const priorFindings = priorChecks
+    .filter((c) => c.status !== "INFO")
+    .map((c) => `${c.ruleId} (${c.status}): ${c.message}`)
+    .join("\n");
+  const userContent = `${describeVehicleDesignInput(input)}
+Findings from this review's deterministic checks:
+${priorFindings || "(none ran, or all were not-applicable)"}`;
+  const mock = (): BernoulliCheckResult => ({
+    ruleId: "BERN-V09",
+    status: "INFO",
+    message: "Couldn't reach TorqWings AI to judge the design's engineering plausibility -- no live reply.",
+    sourceWasMock: true,
+  });
+  const { content, usage, provider } = await callLlmGateway(V09_SYSTEM, userContent, { jsonMode: true });
+  if (!content) return mock();
+  try {
+    const obj = JSON.parse(stripJsonFences(content));
+    if (typeof obj !== "object" || obj === null || (obj.status !== "PASS" && obj.status !== "WARN" && obj.status !== "FAIL") || typeof obj.message !== "string") {
+      return mock();
+    }
+    return {
+      ruleId: "BERN-V09",
+      status: obj.status,
+      message: obj.message,
+      sourceWasMock: false,
+      reasoning: typeof obj.reasoning === "string" ? obj.reasoning : undefined,
+      targets: parseTargets(obj.targets),
+      usage: usage ?? undefined,
+      provider: provider ?? undefined,
+    };
+  } catch {
+    return mock();
+  }
+}
+
+// -- vehicle design orchestrator ----------------------------------------------
+
+const VEHICLE_DESIGN_RULE_IMPLS: Record<string, CheckImpl<BernoulliVehicleDesignCheckInput>> = {
+  "BERN-V01": (i) => checkMassClosure(i),
+  "BERN-V02": (i) => checkBalanceClosure(i),
+  "BERN-V03": (i) => checkStabilityTrim(i),
+  "BERN-V04": (i) => checkLiftStall(i),
+  "BERN-V05": (i) => checkEnergyBudget(i),
+  "BERN-V06": (i) => checkPerformanceClosure(i),
+  "BERN-V07": (i) => checkRequirementsLimits(i),
+  "BERN-V08": (i) => checkElectrical(i),
+  "BERN-V09": (i, prior) => checkEngineeringPlausibility(i, prior),
+};
+
+function describeVehicleDesignInput(input: BernoulliVehicleDesignCheckInput): string {
+  const d = vd(input);
+  const cp = d.propulsion?.cruise_propulsion;
+  const mp = d.mass_properties;
+  const w = d.geometry?.wing;
+  const lines = [
+    `Design ${input.designRef}${input.conceptName ? ` for concept "${input.conceptName}"` : ""}: ${d.aircraft_class ?? "class unknown"}, ${d.configuration ?? ""}`,
+    `Mass: MTOW ${mp?.mtow_kg ?? "?"} kg, payload ${mp?.payload_mass_kg ?? "?"} kg, battery ${mp?.battery_mass_kg ?? d.battery?.mass_kg ?? "?"} kg; components sum to ${f2((mp?.component_breakdown ?? []).reduce((s, c) => s + (c.mass_kg || 0), 0))} kg`,
+    `Wing: span ${w?.span_m ?? "?"} m, area ${w?.area_m2 ?? "?"} m², AR ${w?.aspect_ratio ?? "?"}, MAC ${w?.mac_m ?? "?"} m`,
+    `Aero: CL max ${d.aerodynamics?.cl_max ?? "?"}, cruise CL ${d.aerodynamics?.cl_cruise ?? "?"}, CD0 ${d.aerodynamics?.cd0 ?? "?"}, k ${d.aerodynamics?.k_induced ?? "?"}, cruise L/D ${d.aerodynamics?.lift_to_drag_cruise ?? "?"}, stall ${d.aerodynamics?.stall_speed_clean_mps ?? "?"} m/s`,
+    `Performance: cruise ${d.performance?.cruise_speed_kmh ?? "?"} km/h, endurance ${d.performance?.endurance_min ?? "?"} min, range ${d.performance?.range_km ?? "?"} km, max ${d.performance?.max_speed_kmh ?? "?"} km/h`,
+    `Propulsion: ${cp?.motor_count ?? 1}× ${cp?.motor_model ?? "?"}, prop ${cp?.propeller_model ?? "?"}, ESC ${cp?.esc_model ?? "?"} (${cp?.esc_rating_a ?? "?"} A), cruise ${cp?.cruise_power_electrical_w ?? "?"} W, max thrust ${cp?.max_thrust_per_motor_n ?? "?"} N/motor, installed ${d.propulsion?.total_installed_power_w ?? "?"} W`,
+    ...(d.propulsion?.lift_propulsion && pos(d.propulsion.lift_propulsion.hover_power_electrical_w)
+      ? [
+          `Lift/hover: ${d.propulsion.lift_propulsion.motor_count ?? "?"} rotors of ${d.propulsion.lift_propulsion.propeller_diameter_in ?? "?"} in, hover ${d.propulsion.lift_propulsion.hover_power_electrical_w} W, thrust-to-weight ${d.propulsion.lift_propulsion.thrust_to_weight_ratio ?? "?"}, disk loading ${d.propulsion.lift_propulsion.disk_loading_kg_m2 ?? "?"} kg/m², ESC ${d.propulsion.lift_propulsion.esc_model ?? "?"} (${d.propulsion.lift_propulsion.esc_rating_a ?? "?"} A); frame ${d.geometry?.multirotor_frame?.frame_type ?? "?"}`,
+        ]
+      : []),
+    `Energy: ${d.battery?.pack_model ?? "?"} ${d.battery?.chemistry ?? ""} ${d.battery?.voltage_nominal_v ?? "?"} V, stored ${d.energy?.total_energy_stored_wh ?? "?"} Wh, mission ${d.energy?.energy_required_mission_wh ?? "?"} Wh, reserve ${d.energy?.energy_reserve_pct ?? "?"}%`,
+    `Stability: CG ${mp?.cg_x_m ?? "?"} m (allowed ${mp?.forward_cg_limit_x_m ?? "?"}–${mp?.aft_cg_limit_x_m ?? "?"}), NP ${d.stability?.neutral_point_x_m ?? "?"} m, static margin ${d.stability?.static_margin_mac_pct ?? "?"}% MAC`,
+    `Limits: MTOW ≤ ${d.constraints?.max_allowable_mtow_kg ?? "?"} kg, span ≤ ${d.constraints?.max_wingspan_m ?? "?"} m, reserve ≥ ${d.constraints?.battery_reserve_min_pct ?? "?"}%`,
+  ];
+  return `${describeMissionInput(input)}
+Vehicle design under review:
+${lines.join("\n")}`;
+}
+
+function vehicleDesignNames(input: BernoulliVehicleDesignCheckInput): NameIndex {
+  return { ...missionNames(input), concept: input.conceptName ? [input.conceptName] : [] };
+}
+
+export async function runBernoulliVehicleDesignChecks(
+  input: BernoulliVehicleDesignCheckInput,
+  rules: BernoulliRuleDef[],
+  onProgress?: ProgressFn,
+): Promise<BernoulliReviewResult> {
+  return runRegisteredChecks(input, rules, VEHICLE_DESIGN_RULE_IMPLS, describeVehicleDesignInput, vehicleDesignNames, onProgress);
+}
+
+export async function testVehicleDesignRule(
+  input: BernoulliVehicleDesignCheckInput,
+  rule: BernoulliRuleDef,
+  allRules: BernoulliRuleDef[],
+): Promise<BernoulliCheckResult> {
+  return testRegisteredRule(input, rule, allRules, VEHICLE_DESIGN_RULE_IMPLS, describeVehicleDesignInput, vehicleDesignNames);
+}

@@ -43,7 +43,9 @@ export type BernoulliReviewStatus = "draft" | "processing" | "spec_ready" | "err
 
 // Which bay's output a review checks (20261029000000_hangar_bernoulli_caller_bay.sql).
 // A concept review still carries its concept's source mission_id.
-export type BernoulliSourceBay = "mission" | "concept";
+// "vehicle_design" (20261030050000): a concept's Vehicle Design output, with
+// design_ref = the backend design_id that was reviewed.
+export type BernoulliSourceBay = "mission" | "concept" | "vehicle_design";
 
 export interface HangarBernoulliReviewRow {
   id: string;
@@ -51,6 +53,7 @@ export interface HangarBernoulliReviewRow {
   mission_id: string;
   source_bay: BernoulliSourceBay;
   concept_id: string | null;
+  design_ref?: string | null;
   review_code: string;
   status: BernoulliReviewStatus;
   verdict: "PASS" | "WARN" | "FAIL" | null;
@@ -74,14 +77,17 @@ export async function createBernoulliReview(
   missionId: string,
   conceptId: string | null = null,
   clientRunId: string | null = null,
+  // A vehicle design review: its bay and the backend design_id reviewed.
+  vehicleDesign?: { designRef: string },
 ): Promise<HangarBernoulliReviewRow> {
   const row: Record<string, unknown> = {
     user_id: userId,
     mission_id: missionId,
     status: "draft",
-    source_bay: conceptId ? "concept" : "mission",
+    source_bay: vehicleDesign ? "vehicle_design" : conceptId ? "concept" : "mission",
     concept_id: conceptId,
   };
+  if (vehicleDesign) row.design_ref = vehicleDesign.designRef;
   // Only sent when the page asked for progress, so a review still works on a
   // database that hasn't had 20261030020000 applied.
   if (clientRunId) row.client_run_id = clientRunId;
@@ -204,13 +210,14 @@ export async function getLatestBernoulliReviewForMission(
   userId: string,
   missionId: string,
   conceptId: string | null = null,
+  sourceBay?: BernoulliSourceBay,
 ): Promise<{ review: HangarBernoulliReviewRow; spec: HangarBernoulliReviewSpecRow } | null> {
   const { data, error } = await scopedListDb
     .from("Hangar_BernoulliReviews")
     .select("*")
     .eq("user_id", userId)
     .eq(conceptId ? "concept_id" : "mission_id", conceptId ?? missionId)
-    .eq("source_bay", conceptId ? "concept" : "mission")
+    .eq("source_bay", sourceBay ?? (conceptId ? "concept" : "mission"))
     .order("created_at", { ascending: false })
     .limit(1);
   if (error) throw new Error(`getLatestBernoulliReviewForMission: ${error.message}`);

@@ -11,7 +11,7 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 // read every caller falls back to DEFAULT_BERNOULLI_RULES, so a review never
 // breaks over the registry.
 
-export type BernoulliRuleBay = "mission" | "concept";
+export type BernoulliRuleBay = "mission" | "concept" | "vehicle_design";
 export type BernoulliRuleKind = "rule" | "llm";
 export type BernoulliRuleCategory = "physics" | "regulatory" | "data_quality" | "consistency";
 export type BernoulliMaxSeverity = "FAIL" | "WARN";
@@ -20,7 +20,7 @@ export const RULE_CATEGORIES: BernoulliRuleCategory[] = ["physics", "regulatory"
 
 // Bays Bernoulli is actually wired into -- rules for any other bay would
 // never run, so the admin page doesn't allow adding them.
-export const WIRED_BERNOULLI_BAYS: BernoulliRuleBay[] = ["mission", "concept"];
+export const WIRED_BERNOULLI_BAYS: BernoulliRuleBay[] = ["mission", "concept", "vehicle_design"];
 
 // Form limits (rule editor spec §1).
 export const RULE_LIMITS = { name: 60, description: 140, instruction: 1500 } as const;
@@ -83,6 +83,15 @@ export const DEFAULT_BERNOULLI_RULES: BernoulliRuleDef[] = [
   builtin("BERN-C02", "concept", "Speed Feasibility per Concept", "Can each concept's vehicle class fly the average speed the mission's range ÷ endurance needs?", "rule", "physics", true, 20),
   builtin("BERN-C03", "concept", "Ranking Coherence", 'Is the ranking consistent with constraint fit, and is any "pass" contradicted by the physics?', "rule", "consistency", false, 30),
   builtin("BERN-C04", "concept", "Physical Feasibility per Concept", "TorqWings AI-judged, grounded in reference ranges: can each concept physically carry the payload for the required endurance?", "llm", "physics", false, 40),
+  builtin("BERN-V01", "vehicle_design", "Mass Closure", "The component masses must add up to the stated MTOW, and the battery mass must agree everywhere it appears.", "rule", "physics", true, 10),
+  builtin("BERN-V02", "vehicle_design", "Balance Closure", "The mass-weighted CG of the components must match the stated CG, with every component inside the airframe.", "rule", "consistency", false, 20),
+  builtin("BERN-V03", "vehicle_design", "Stability & Trim", "CG inside its allowed range, a positive static margin that matches NP and CG, stable in all axes and trimmable.", "rule", "physics", true, 30),
+  builtin("BERN-V04", "vehicle_design", "Lift & Stall Consistency", "Stall speed and cruise lift coefficient recomputed from weight, wing area and CL max must match the stated values.", "rule", "physics", false, 40),
+  builtin("BERN-V05", "vehicle_design", "Energy Budget", "Usable battery energy must cover the mission energy with at least the required reserve, and the budget must add up.", "rule", "physics", true, 50),
+  builtin("BERN-V06", "vehicle_design", "Performance Closure", "Range must follow from cruise speed x endurance, and endurance from usable energy / cruise power.", "rule", "consistency", false, 60),
+  builtin("BERN-V07", "vehicle_design", "Requirements & Limits", "The design must meet every mission requirement and constraint: MTOW and span limits, endurance, range and payload.", "rule", "regulatory", true, 70),
+  builtin("BERN-V08", "vehicle_design", "Electrical Consistency", "Bus voltage must match the battery, and the ESC and battery current ratings must cover the cruise draw with margin.", "rule", "consistency", false, 80),
+  builtin("BERN-V09", "vehicle_design", "Engineering Plausibility", "TorqWings AI-judged, grounded in reference ranges: are the sizing and the selected motor, propeller, ESC and battery realistic for this mission?", "llm", "physics", false, 90),
 ];
 
 type DbResult<T> = Promise<{ data: T; error: { message: string } | null }>;
@@ -156,9 +165,9 @@ export class BernoulliRuleError extends Error {
   }
 }
 
-// Custom rules: BERN-MX01, BERN-CX01, ... -- the plain numbers (M07-M14,
-// C05-C11) are kept for coded checks.
-const CUSTOM_PREFIX: Record<BernoulliRuleBay, string> = { mission: "BERN-MX", concept: "BERN-CX" };
+// Custom rules: BERN-MX01, BERN-CX01, BERN-VX01, ... -- the plain numbers
+// (M07-M14, C05-C11, V10+) are kept for coded checks.
+const CUSTOM_PREFIX: Record<BernoulliRuleBay, string> = { mission: "BERN-MX", concept: "BERN-CX", vehicle_design: "BERN-VX" };
 
 async function nextCustomRuleId(bay: BernoulliRuleBay): Promise<{ ruleId: string; sortOrder: number }> {
   const { rules } = await listBernoulliRules(bay);
