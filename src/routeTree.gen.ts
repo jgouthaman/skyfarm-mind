@@ -19,6 +19,7 @@ import { Route as TheHangarRouteImport } from './routes/the-hangar'
 import { Route as LayoutIndexRouteImport } from './routes/_layout.index'
 import { Route as LayoutAboutRouteImport } from './routes/_layout.about'
 import { Route as LayoutContactRouteImport } from './routes/_layout.contact'
+import { Route as LayoutServicesRouteImport } from './routes/_layout.services'
 import { Route as AcademyIndexRouteImport } from './routes/academy.index'
 import { Route as AcademyDashboardRouteImport } from './routes/academy.dashboard'
 import { Route as MissionHubIndexRouteImport } from './routes/mission-hub.index'
@@ -28,6 +29,7 @@ import { Route as MissionHubContactsRouteImport } from './routes/mission-hub.con
 import { Route as MissionHubDashboardRouteImport } from './routes/mission-hub.dashboard'
 import { Route as MissionHubLoginRouteImport } from './routes/mission-hub.login'
 import { Route as MissionHubResetPasswordRouteImport } from './routes/mission-hub.reset-password'
+import { Route as MissionHubServiceRequestsRouteImport } from './routes/mission-hub.service-requests'
 import { Route as MissionHubSettingsRouteImport } from './routes/mission-hub.settings'
 import { Route as MissionHubUsersRouteImport } from './routes/mission-hub.users'
 import { Route as MissionHubWaitlistRouteImport } from './routes/mission-hub.waitlist'
@@ -83,6 +85,8 @@ import { Route as ApiHangarStructuralsRouteImport } from './routes/api.hangar.st
 import { Route as ApiHangarValidationsRouteImport } from './routes/api.hangar.validations'
 import { Route as ApiHangarVehicleDesignFilesRouteImport } from './routes/api.hangar.vehicle-design-files'
 import { Route as ApiHarnessCallRouteImport } from './routes/api.harness.call'
+import { Route as ApiMissionHubServiceEnquiriesRouteImport } from './routes/api.mission-hub.service-enquiries'
+import { Route as ApiServicesEnquiryRouteImport } from './routes/api.services.enquiry'
 import { Route as MissionHubAgentsBernoulliRouteImport } from './routes/mission-hub.agents.bernoulli'
 import { Route as PilotMissionsIndexRouteImport } from './routes/pilot.missions.index'
 import { Route as PilotMissionsIdRouteImport } from './routes/pilot.missions.$id'
@@ -164,6 +168,11 @@ const LayoutContactRoute = LayoutContactRouteImport.update({
   path: '/contact',
   getParentRoute: () => LayoutRoute,
 } as any)
+const LayoutServicesRoute = LayoutServicesRouteImport.update({
+  id: '/services',
+  path: '/services',
+  getParentRoute: () => LayoutRoute,
+} as any)
 const AcademyIndexRoute = AcademyIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -209,6 +218,12 @@ const MissionHubResetPasswordRoute = MissionHubResetPasswordRouteImport.update({
   path: '/reset-password',
   getParentRoute: () => MissionHubRoute,
 } as any)
+const MissionHubServiceRequestsRoute =
+  MissionHubServiceRequestsRouteImport.update({
+    id: '/service-requests',
+    path: '/service-requests',
+    getParentRoute: () => MissionHubRoute,
+  } as any)
 const MissionHubSettingsRoute = MissionHubSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -490,6 +505,17 @@ const ApiHarnessCallRoute = ApiHarnessCallRouteImport.update({
   path: '/call',
   getParentRoute: () => ApiHarnessRoute,
 } as any)
+const ApiMissionHubServiceEnquiriesRoute =
+  ApiMissionHubServiceEnquiriesRouteImport.update({
+    id: '/api/mission-hub/service-enquiries',
+    path: '/api/mission-hub/service-enquiries',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiServicesEnquiryRoute = ApiServicesEnquiryRouteImport.update({
+  id: '/api/services/enquiry',
+  path: '/api/services/enquiry',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MissionHubAgentsBernoulliRoute =
   MissionHubAgentsBernoulliRouteImport.update({
     id: '/agents/bernoulli',
@@ -684,6 +710,7 @@ export interface FileRoutesByFullPath {
   '/the-hangar': typeof TheHangarRouteWithChildren
   '/about': typeof LayoutAboutRoute
   '/contact': typeof LayoutContactRoute
+  '/services': typeof LayoutServicesRoute
   '/academy/dashboard': typeof AcademyDashboardRoute
   '/mission-hub/academy-users': typeof MissionHubAcademyUsersRoute
   '/mission-hub/ai-providers': typeof MissionHubAiProvidersRoute
@@ -691,6 +718,7 @@ export interface FileRoutesByFullPath {
   '/mission-hub/dashboard': typeof MissionHubDashboardRoute
   '/mission-hub/login': typeof MissionHubLoginRoute
   '/mission-hub/reset-password': typeof MissionHubResetPasswordRoute
+  '/mission-hub/service-requests': typeof MissionHubServiceRequestsRoute
   '/mission-hub/settings': typeof MissionHubSettingsRoute
   '/mission-hub/users': typeof MissionHubUsersRoute
   '/mission-hub/waitlist': typeof MissionHubWaitlistRoute
@@ -748,6 +776,8 @@ export interface FileRoutesByFullPath {
   '/api/hangar/validations': typeof ApiHangarValidationsRoute
   '/api/hangar/vehicle-design-files': typeof ApiHangarVehicleDesignFilesRoute
   '/api/harness/call': typeof ApiHarnessCallRoute
+  '/api/mission-hub/service-enquiries': typeof ApiMissionHubServiceEnquiriesRoute
+  '/api/services/enquiry': typeof ApiServicesEnquiryRoute
   '/mission-hub/agents/bernoulli': typeof MissionHubAgentsBernoulliRoute
   '/pilot/missions/$id': typeof PilotMissionsIdRoute
   '/pilot/missions/': typeof PilotMissionsIndexRoute
@@ -785,6 +815,7 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/about': typeof LayoutAboutRoute
   '/contact': typeof LayoutContactRoute
+  '/services': typeof LayoutServicesRoute
   '/academy/dashboard': typeof AcademyDashboardRoute
   '/mission-hub/academy-users': typeof MissionHubAcademyUsersRoute
   '/mission-hub/ai-providers': typeof MissionHubAiProvidersRoute
@@ -792,6 +823,7 @@ export interface FileRoutesByTo {
   '/mission-hub/dashboard': typeof MissionHubDashboardRoute
   '/mission-hub/login': typeof MissionHubLoginRoute
   '/mission-hub/reset-password': typeof MissionHubResetPasswordRoute
+  '/mission-hub/service-requests': typeof MissionHubServiceRequestsRoute
   '/mission-hub/settings': typeof MissionHubSettingsRoute
   '/mission-hub/users': typeof MissionHubUsersRoute
   '/mission-hub/waitlist': typeof MissionHubWaitlistRoute
@@ -850,6 +882,8 @@ export interface FileRoutesByTo {
   '/api/hangar/validations': typeof ApiHangarValidationsRoute
   '/api/hangar/vehicle-design-files': typeof ApiHangarVehicleDesignFilesRoute
   '/api/harness/call': typeof ApiHarnessCallRoute
+  '/api/mission-hub/service-enquiries': typeof ApiMissionHubServiceEnquiriesRoute
+  '/api/services/enquiry': typeof ApiServicesEnquiryRoute
   '/mission-hub/agents/bernoulli': typeof MissionHubAgentsBernoulliRoute
   '/pilot/missions/$id': typeof PilotMissionsIdRoute
   '/pilot/missions': typeof PilotMissionsIndexRoute
@@ -893,6 +927,7 @@ export interface FileRoutesById {
   '/the-hangar': typeof TheHangarRouteWithChildren
   '/_layout/about': typeof LayoutAboutRoute
   '/_layout/contact': typeof LayoutContactRoute
+  '/_layout/services': typeof LayoutServicesRoute
   '/academy/dashboard': typeof AcademyDashboardRoute
   '/mission-hub/academy-users': typeof MissionHubAcademyUsersRoute
   '/mission-hub/ai-providers': typeof MissionHubAiProvidersRoute
@@ -900,6 +935,7 @@ export interface FileRoutesById {
   '/mission-hub/dashboard': typeof MissionHubDashboardRoute
   '/mission-hub/login': typeof MissionHubLoginRoute
   '/mission-hub/reset-password': typeof MissionHubResetPasswordRoute
+  '/mission-hub/service-requests': typeof MissionHubServiceRequestsRoute
   '/mission-hub/settings': typeof MissionHubSettingsRoute
   '/mission-hub/users': typeof MissionHubUsersRoute
   '/mission-hub/waitlist': typeof MissionHubWaitlistRoute
@@ -958,6 +994,8 @@ export interface FileRoutesById {
   '/api/hangar/validations': typeof ApiHangarValidationsRoute
   '/api/hangar/vehicle-design-files': typeof ApiHangarVehicleDesignFilesRoute
   '/api/harness/call': typeof ApiHarnessCallRoute
+  '/api/mission-hub/service-enquiries': typeof ApiMissionHubServiceEnquiriesRoute
+  '/api/services/enquiry': typeof ApiServicesEnquiryRoute
   '/mission-hub/agents/bernoulli': typeof MissionHubAgentsBernoulliRoute
   '/pilot/missions/$id': typeof PilotMissionsIdRoute
   '/pilot/missions/': typeof PilotMissionsIndexRoute
@@ -1002,6 +1040,7 @@ export interface FileRouteTypes {
     | '/the-hangar'
     | '/about'
     | '/contact'
+    | '/services'
     | '/academy/dashboard'
     | '/mission-hub/academy-users'
     | '/mission-hub/ai-providers'
@@ -1009,6 +1048,7 @@ export interface FileRouteTypes {
     | '/mission-hub/dashboard'
     | '/mission-hub/login'
     | '/mission-hub/reset-password'
+    | '/mission-hub/service-requests'
     | '/mission-hub/settings'
     | '/mission-hub/users'
     | '/mission-hub/waitlist'
@@ -1066,6 +1106,8 @@ export interface FileRouteTypes {
     | '/api/hangar/validations'
     | '/api/hangar/vehicle-design-files'
     | '/api/harness/call'
+    | '/api/mission-hub/service-enquiries'
+    | '/api/services/enquiry'
     | '/mission-hub/agents/bernoulli'
     | '/pilot/missions/$id'
     | '/pilot/missions/'
@@ -1103,6 +1145,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/about'
     | '/contact'
+    | '/services'
     | '/academy/dashboard'
     | '/mission-hub/academy-users'
     | '/mission-hub/ai-providers'
@@ -1110,6 +1153,7 @@ export interface FileRouteTypes {
     | '/mission-hub/dashboard'
     | '/mission-hub/login'
     | '/mission-hub/reset-password'
+    | '/mission-hub/service-requests'
     | '/mission-hub/settings'
     | '/mission-hub/users'
     | '/mission-hub/waitlist'
@@ -1168,6 +1212,8 @@ export interface FileRouteTypes {
     | '/api/hangar/validations'
     | '/api/hangar/vehicle-design-files'
     | '/api/harness/call'
+    | '/api/mission-hub/service-enquiries'
+    | '/api/services/enquiry'
     | '/mission-hub/agents/bernoulli'
     | '/pilot/missions/$id'
     | '/pilot/missions'
@@ -1210,6 +1256,7 @@ export interface FileRouteTypes {
     | '/the-hangar'
     | '/_layout/about'
     | '/_layout/contact'
+    | '/_layout/services'
     | '/academy/dashboard'
     | '/mission-hub/academy-users'
     | '/mission-hub/ai-providers'
@@ -1217,6 +1264,7 @@ export interface FileRouteTypes {
     | '/mission-hub/dashboard'
     | '/mission-hub/login'
     | '/mission-hub/reset-password'
+    | '/mission-hub/service-requests'
     | '/mission-hub/settings'
     | '/mission-hub/users'
     | '/mission-hub/waitlist'
@@ -1275,6 +1323,8 @@ export interface FileRouteTypes {
     | '/api/hangar/validations'
     | '/api/hangar/vehicle-design-files'
     | '/api/harness/call'
+    | '/api/mission-hub/service-enquiries'
+    | '/api/services/enquiry'
     | '/mission-hub/agents/bernoulli'
     | '/pilot/missions/$id'
     | '/pilot/missions/'
@@ -1342,6 +1392,8 @@ export interface RootRouteChildren {
   ApiHangarStructuralsRoute: typeof ApiHangarStructuralsRoute
   ApiHangarValidationsRoute: typeof ApiHangarValidationsRoute
   ApiHangarVehicleDesignFilesRoute: typeof ApiHangarVehicleDesignFilesRoute
+  ApiMissionHubServiceEnquiriesRoute: typeof ApiMissionHubServiceEnquiriesRoute
+  ApiServicesEnquiryRoute: typeof ApiServicesEnquiryRoute
   ApiHangarProcessBernoulliReviewRoute: typeof ApiHangarProcessBernoulliReviewRoute
   ApiHangarProcessCadDesignModelGenerationRoute: typeof ApiHangarProcessCadDesignModelGenerationRoute
   ApiHangarProcessCertificationRegulatoryMappingRoute: typeof ApiHangarProcessCertificationRegulatoryMappingRoute
@@ -1440,6 +1492,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutContactRouteImport
       parentRoute: typeof LayoutRoute
     }
+    '/_layout/services': {
+      id: '/_layout/services'
+      path: '/services'
+      fullPath: '/services'
+      preLoaderRoute: typeof LayoutServicesRouteImport
+      parentRoute: typeof LayoutRoute
+    }
     '/academy/': {
       id: '/academy/'
       path: '/'
@@ -1501,6 +1560,13 @@ declare module '@tanstack/react-router' {
       path: '/reset-password'
       fullPath: '/mission-hub/reset-password'
       preLoaderRoute: typeof MissionHubResetPasswordRouteImport
+      parentRoute: typeof MissionHubRoute
+    }
+    '/mission-hub/service-requests': {
+      id: '/mission-hub/service-requests'
+      path: '/service-requests'
+      fullPath: '/mission-hub/service-requests'
+      preLoaderRoute: typeof MissionHubServiceRequestsRouteImport
       parentRoute: typeof MissionHubRoute
     }
     '/mission-hub/settings': {
@@ -1888,6 +1954,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiHarnessCallRouteImport
       parentRoute: typeof ApiHarnessRoute
     }
+    '/api/mission-hub/service-enquiries': {
+      id: '/api/mission-hub/service-enquiries'
+      path: '/api/mission-hub/service-enquiries'
+      fullPath: '/api/mission-hub/service-enquiries'
+      preLoaderRoute: typeof ApiMissionHubServiceEnquiriesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/services/enquiry': {
+      id: '/api/services/enquiry'
+      path: '/api/services/enquiry'
+      fullPath: '/api/services/enquiry'
+      preLoaderRoute: typeof ApiServicesEnquiryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/mission-hub/agents/bernoulli': {
       id: '/mission-hub/agents/bernoulli'
       path: '/agents/bernoulli'
@@ -2111,6 +2191,7 @@ declare module '@tanstack/react-router' {
 interface LayoutRouteChildren {
   LayoutAboutRoute: typeof LayoutAboutRoute
   LayoutContactRoute: typeof LayoutContactRoute
+  LayoutServicesRoute: typeof LayoutServicesRoute
   LayoutIndexRoute: typeof LayoutIndexRoute
   LayoutAuthCallbackRoute: typeof LayoutAuthCallbackRoute
 }
@@ -2118,6 +2199,7 @@ interface LayoutRouteChildren {
 const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutAboutRoute: LayoutAboutRoute,
   LayoutContactRoute: LayoutContactRoute,
+  LayoutServicesRoute: LayoutServicesRoute,
   LayoutIndexRoute: LayoutIndexRoute,
   LayoutAuthCallbackRoute: LayoutAuthCallbackRoute,
 }
@@ -2155,6 +2237,7 @@ interface MissionHubRouteChildren {
   MissionHubDashboardRoute: typeof MissionHubDashboardRoute
   MissionHubLoginRoute: typeof MissionHubLoginRoute
   MissionHubResetPasswordRoute: typeof MissionHubResetPasswordRoute
+  MissionHubServiceRequestsRoute: typeof MissionHubServiceRequestsRoute
   MissionHubSettingsRoute: typeof MissionHubSettingsRoute
   MissionHubUsersRoute: typeof MissionHubUsersRoute
   MissionHubWaitlistRoute: typeof MissionHubWaitlistRoute
@@ -2169,6 +2252,7 @@ const MissionHubRouteChildren: MissionHubRouteChildren = {
   MissionHubDashboardRoute: MissionHubDashboardRoute,
   MissionHubLoginRoute: MissionHubLoginRoute,
   MissionHubResetPasswordRoute: MissionHubResetPasswordRoute,
+  MissionHubServiceRequestsRoute: MissionHubServiceRequestsRoute,
   MissionHubSettingsRoute: MissionHubSettingsRoute,
   MissionHubUsersRoute: MissionHubUsersRoute,
   MissionHubWaitlistRoute: MissionHubWaitlistRoute,
@@ -2284,6 +2368,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiHangarStructuralsRoute: ApiHangarStructuralsRoute,
   ApiHangarValidationsRoute: ApiHangarValidationsRoute,
   ApiHangarVehicleDesignFilesRoute: ApiHangarVehicleDesignFilesRoute,
+  ApiMissionHubServiceEnquiriesRoute: ApiMissionHubServiceEnquiriesRoute,
+  ApiServicesEnquiryRoute: ApiServicesEnquiryRoute,
   ApiHangarProcessBernoulliReviewRoute: ApiHangarProcessBernoulliReviewRoute,
   ApiHangarProcessCadDesignModelGenerationRoute:
     ApiHangarProcessCadDesignModelGenerationRoute,

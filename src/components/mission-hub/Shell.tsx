@@ -1,7 +1,7 @@
 import { type ReactNode, useEffect, useState } from "react";
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import {
-  Clock, BookUser, GraduationCap, Users, Settings, Bell, Menu, X, LogOut,
+  Clock, BookUser, ClipboardList, GraduationCap, Users, Settings, Bell, Menu, X, LogOut,
   ChevronDown, ChevronRight, Atom, Sparkles,
 } from "lucide-react";
 import { useMissionHubAuth } from "@/lib/mission-hub/context";
@@ -91,7 +91,7 @@ export function MissionHubShell({ title, children }: { title: string; children: 
 type Section = "business" | "agents" | "config";
 
 function getSectionFromPath(path: string, role?: string): Section | null {
-  if (path === "/mission-hub/waitlist" || path === "/mission-hub/contacts" || path === "/mission-hub/academy-users") return "business";
+  if (path === "/mission-hub/waitlist" || path === "/mission-hub/contacts" || path === "/mission-hub/academy-users" || path === "/mission-hub/service-requests") return "business";
   if (path === "/mission-hub/users" || path === "/mission-hub/ai-providers" || path.startsWith("/mission-hub/settings")) return "config";
   if (path.startsWith("/mission-hub/agents")) return "agents";
   return null;
@@ -161,6 +161,7 @@ function Sidebar({
                 <NavLink to="/mission-hub/waitlist" icon={Clock}    active={path === "/mission-hub/waitlist"} onClick={onClose}>The Hangar</NavLink>
                 <NavLink to="/mission-hub/academy-users" icon={GraduationCap} active={path === "/mission-hub/academy-users"} onClick={onClose}>Academy Users</NavLink>
                 <NavLink to="/mission-hub/contacts" icon={BookUser} active={path === "/mission-hub/contacts"} onClick={onClose}>Contacts</NavLink>
+                <NavLink to="/mission-hub/service-requests" icon={ClipboardList} active={path === "/mission-hub/service-requests"} onClick={onClose}>Service Requests</NavLink>
               </>
             )}
 
