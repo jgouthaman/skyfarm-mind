@@ -10,6 +10,5 @@ Disallow: /pilot
 Disallow: /field
 Disallow: /auth/
 Disallow: /api/
-Disallow: /hangar-stage3-manualtest
 
 Sitemap: https://www.torqwings.com/sitemap.xml

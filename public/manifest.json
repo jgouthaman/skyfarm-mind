@@ -2,7 +2,7 @@
   "name": "TorqWings Control Center",
   "short_name": "TorqWings",
   "description": "TorqWings aerial intelligence — Control Center & AgriSky Pilot field app.",
-  "start_url": "/control-center",
+  "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
@@ -14,7 +14,6 @@
     { "src": "/app-icon.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" }
   ],
   "shortcuts": [
-    { "name": "Pilot App", "url": "/pilot", "description": "AgriSky field pilot app" },
-    { "name": "AgriSky Control", "url": "/control-center/agrisky", "description": "AgriSky Control Center" }
+    { "name": "Pilot App", "url": "/pilot", "description": "AgriSky field pilot app" }
   ]
 }
