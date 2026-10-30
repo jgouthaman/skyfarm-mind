@@ -6,10 +6,10 @@ import { SITE_URL } from "@/lib/seo";
 export const Route = createFileRoute("/_layout/about")({
   head: () => ({
     meta: [
-      { title: "About TorqWings — Built by engineers. Flown for India." },
-      { name: "description", content: "TorqWings builds The Hangar — fifteen specialist AI agents that turn a mission brief into a simulation-validated, flyable aerial platform. Gate-then-score, not guesswork." },
-      { property: "og:title", content: "About TorqWings — Built by engineers. Flown for India." },
-      { property: "og:description", content: "TorqWings builds The Hangar — fifteen specialist AI agents that turn a mission brief into a simulation-validated, flyable aerial platform." },
+      { title: "About TorqWings — From mission requirements to validated UAV configurations" },
+      { name: "description", content: "TorqWings automates the conceptual and preliminary design of unmanned aerial systems: fifteen discipline-specific agents for mission analysis, constraint sizing, propulsion, aerodynamics and structures." },
+      { property: "og:title", content: "About TorqWings — From mission requirements to validated UAV configurations" },
+      { property: "og:description", content: "Fifteen discipline-specific agents automate UAV conceptual and preliminary design. Every step is gated by hard constraints and traceable to its governing model." },
       { property: "og:type", content: "website" },
       { property: "og:url", content: `${SITE_URL}/about` },
     ],
@@ -18,57 +18,42 @@ export const Route = createFileRoute("/_layout/about")({
   component: AboutPage,
 });
 
-// Same section wrapper/grid as _layout.contact.tsx, verbatim — no custom
-// padding/minHeight tuning of its own, so the two pages' fold and footer
-// position line up by construction. Content rewritten around The Hangar
-// itself (the platform's own vision, copy and stats — see
-// the-hangar.index.tsx) rather than the old general-company story.
+// Single-column hero. Colors are local to this page: the shared
+// --hp-amber-bright is too pale for large text on white, so the headline's
+// second line uses a darker burnt orange, and the buttons are navy filled /
+// navy outlined rather than the shared amber/ghost pair.
+const ABOUT_NAVY = "#0B1F33";
+const ABOUT_ORANGE = "#B5530F";
+
 function AboutPage() {
   return (
     <section id="about" className="hgr-pub-section" style={{ paddingTop: 128, borderBottom: "none" }}>
       <div className="hgr-pub-wrap">
-        <div className="grid lg:grid-cols-12 gap-10 items-start">
-
-          <div className="lg:col-span-5">
-            <span className="hgr-pub-badge hgr-pub-badge-dark">Our Story</span>
-            <h1 className="hgr-pub-h1">
-              Five engineers. One <span className="hgr-pub-amber">aerospace design engine</span>.
-            </h1>
-            <p className="hgr-pub-lead">
-              We graduated into an industry that still designs autonomous aerial platforms on vendor
-              familiarity, not evidence — so we built The Hangar: fifteen specialist AI agents that turn a
-              mission brief into a simulation-validated, flyable design. Every one does a single job, gates
-              before it scores, and hands off clean data to the next.
-            </p>
-            <div className="hgr-pub-cta">
-              <Link to="/the-hangar" className="hgr-pub-btn hgr-pub-btn-amber">
-                Enter The Hangar <ArrowRight className="h-4 w-4" aria-hidden="true" />
-              </Link>
-            </div>
-          </div>
-
-          <div className="lg:col-span-7 hgr-pub-form-panel">
-            <div className="hgr-pub-grid hgr-pub-grid-2">
-              {[
-                { k: "15", v: "Specialist Agents"      },
-                { k: "9",  v: "Open-Source Tools"       },
-                { k: "0",  v: "Black Boxes"             },
-                { k: "1",  v: "Shared Memory Layer"     },
-              ].map((s) => (
-                <div key={s.v}>
-                  <div className="hgr-pub-stat-k">{s.k}</div>
-                  <div className="hgr-pub-stat-v" style={{ marginTop: 4 }}>{s.v}</div>
-                </div>
-              ))}
-            </div>
-            <p className="hgr-pub-sub" style={{ marginTop: 24, maxWidth: "none" }}>
-              The Hangar never scores a design until it has already survived the hard constraints — payload,
-              endurance, range, weight, cost. What comes out the other side is ranked, not guessed: every
-              recommendation carries a confidence signal, and every step is traceable back to the rule or
-              reference that produced it.
-            </p>
-          </div>
-
+        <span className="hgr-pub-badge hgr-pub-badge-dark" style={{ background: ABOUT_NAVY }}>About TorqWings</span>
+        <h1 className="hgr-pub-h1" style={{ color: ABOUT_NAVY, fontWeight: 700, fontSize: "clamp(36px,6vw,64px)" }}>
+          From mission requirements to <span style={{ color: ABOUT_ORANGE }}>validated UAV configurations.</span>
+        </h1>
+        <p className="hgr-pub-lead" style={{ fontSize: 18, maxWidth: 760, color: "#3D5266" }}>
+          TorqWings automates the conceptual and preliminary design of unmanned aerial systems. Fifteen
+          discipline-specific agents handle mission analysis, constraint sizing, propulsion matching,
+          aerodynamics and structures. Each step is gated by hard constraints and traceable to the governing
+          model or reference data.
+        </p>
+        <div className="hgr-pub-cta">
+          <Link
+            to="/contact"
+            className="hgr-pub-btn"
+            style={{ background: ABOUT_NAVY, color: "#FFFFFF", fontWeight: 600 }}
+          >
+            Request a technical briefing <ArrowRight className="h-4 w-4" aria-hidden="true" />
+          </Link>
+          <Link
+            to="/the-hangar"
+            className="hgr-pub-btn"
+            style={{ background: "#FFFFFF", color: ABOUT_NAVY, borderColor: ABOUT_NAVY, fontWeight: 600 }}
+          >
+            Enter The Hangar
+          </Link>
         </div>
       </div>
     </section>
