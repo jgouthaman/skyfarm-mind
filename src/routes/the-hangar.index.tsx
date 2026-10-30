@@ -3,6 +3,7 @@ import {
   HGR_LANDING_CSS, HangarFooter, HangarNav, FlightDeckModal, useFlightDeck,
   EarlyAccessModal, useEarlyAccess,
 } from "@/components/hangar-landing/HangarChrome";
+import { pageSeo } from "@/lib/seo";
 
 // ─────────────────────────────────────────────────────────────────────────
 // The Hangar — public landing/home page. Was previously one long scrolling
@@ -15,6 +16,13 @@ import {
 // ─────────────────────────────────────────────────────────────────────────
 
 export const Route = createFileRoute("/the-hangar/")({
+  head: () =>
+    pageSeo({
+      path: "/the-hangar",
+      title: "The Hangar — AI aerospace design engine | TorqWings",
+      description:
+        "Fifteen specialist AI agents that turn a mission brief into a simulation-validated, flyable aerial platform. One aerospace design engine from TorqWings.",
+    }),
   component: TheHangarLanding,
 });
 

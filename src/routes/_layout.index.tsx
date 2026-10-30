@@ -3,23 +3,24 @@ import { ArrowRight } from "lucide-react";
 import heroImg from "@/assets/torqwings-hero-hangar.png";
 import { HANGAR_PUBLIC_HEAD_LINKS } from "@/styles/hangarPublicTheme";
 import PlatformSection from "@/components/PlatformSection";
+import { SITE_URL } from "@/lib/seo";
 
 export const Route = createFileRoute("/_layout/")({
   head: () => ({
     meta: [
       { property: "og:title", content: "TorqWings — Aerospace & Drone Intelligence" },
       { property: "og:description", content: "Custom UAV engineering and AI aerial analytics across agriculture, infrastructure, mapping, surveillance and R&D." },
-      { property: "og:image", content: heroImg },
+      { property: "og:image", content: `${SITE_URL}${heroImg}` },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "/" },
+      { property: "og:url", content: `${SITE_URL}/` },
     ],
     links: [
-      { rel: "canonical", href: "/" },
+      { rel: "canonical", href: `${SITE_URL}/` },
       { rel: "preload", as: "image", href: heroImg, fetchpriority: "high" },
       ...HANGAR_PUBLIC_HEAD_LINKS,
     ],
     scripts: [
-      { type: "application/ld+json", children: JSON.stringify({ "@context": "https://schema.org", "@type": "Organization", name: "TorqWings", url: "https://torqwings.com", logo: "https://torqwings.com/app-icon.png", description: "TorqWings builds AI-powered drone systems, custom UAVs, and aerial intelligence solutions." }) },
+      { type: "application/ld+json", children: JSON.stringify({ "@context": "https://schema.org", "@type": "Organization", name: "TorqWings", url: SITE_URL, logo: `${SITE_URL}/app-icon.png`, description: "TorqWings builds AI-powered drone systems, custom UAVs, and aerial intelligence solutions." }) },
       { type: "application/ld+json", children: JSON.stringify({ "@context": "https://schema.org", "@type": "Service", name: "AgriSky", serviceType: "Agriculture Drone Intelligence", provider: { "@type": "Organization", name: "TorqWings" }, areaServed: { "@type": "AdministrativeArea", name: "Tamil Nadu, India" }, description: "Drone agriculture services in Tamil Nadu — crop health monitoring, NDVI mapping, irrigation insights, and precision farming for farms, FPOs and SHGs.", keywords: "drone agriculture Tamil Nadu, AgriSky, crop health drone, precision farming Chennai, agri drone services India" }) },
       { type: "application/ld+json", children: JSON.stringify({ "@context": "https://schema.org", "@type": "Service", name: "GuardSky", serviceType: "Aerial Surveillance & Early Fire Response", provider: { "@type": "Organization", name: "TorqWings" }, areaServed: { "@type": "Country", name: "India" }, description: "Drone-based surveillance, smoke and fire detection, and rapid first-response payload deployment for industrial sites, campuses and remote facilities.", keywords: "aerial surveillance drone India, fire detection drone, GuardSky, perimeter security UAV" }) },
       { type: "application/ld+json", children: JSON.stringify({ "@context": "https://schema.org", "@type": "Service", name: "InfraSky", serviceType: "Infrastructure & Industrial Drone Inspection", provider: { "@type": "Organization", name: "TorqWings" }, areaServed: { "@type": "AdministrativeArea", name: "Tamil Nadu, India" }, description: "UAV inspection in Chennai and across India for bridges, telecom towers, solar farms, roads and industrial assets — high-resolution imagery with AI defect detection.", keywords: "UAV inspection Chennai, drone inspection Tamil Nadu, InfraSky, solar farm drone inspection, telecom tower drone survey, bridge inspection drone India" }) },

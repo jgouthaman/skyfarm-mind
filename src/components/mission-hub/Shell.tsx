@@ -1,19 +1,12 @@
 import { type ReactNode, useEffect, useState } from "react";
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import {
-  Clock, BookUser, Cpu, Sprout, Building2, Map as MapIcon,
-  Shield, FlaskConical, GraduationCap, Users, Settings, Bell, Menu, X, LogOut, BookOpen,
+  Clock, BookUser, GraduationCap, Users, Settings, Bell, Menu, X, LogOut,
   ChevronDown, ChevronRight, Atom, Sparkles,
 } from "lucide-react";
 import { useMissionHubAuth } from "@/lib/mission-hub/context";
-import { VERTICAL_LABELS, type Vertical } from "@/lib/mission-hub/types";
+import { type Vertical } from "@/lib/mission-hub/types";
 import { toast } from "sonner";
-
-const verticalIcon: Record<Vertical, any> = {
-  agrisky: Sprout, infrasky: Building2, geosky: MapIcon,
-  guardsky: Shield, labs: FlaskConical, academy: GraduationCap,
-  "design-studio": Cpu,
-};
 
 // Full mission-hub chrome + content restyled to match the main public
 // site's look (localhost:8080) — same palette/fonts as HANGAR_PUBLIC_CSS
@@ -95,45 +88,13 @@ export function MissionHubShell({ title, children }: { title: string; children: 
   );
 }
 
-type Section = "business" | "agents" | "twbc" | "knowledge" | "config";
+type Section = "business" | "agents" | "config";
 
 function getSectionFromPath(path: string, role?: string): Section | null {
-  if (path === "/mission-hub/twbc-drone-proven-designs") {
-    return role === "super_admin" ? "twbc" : "knowledge";
-  }
   if (path === "/mission-hub/waitlist" || path === "/mission-hub/contacts" || path === "/mission-hub/academy-users") return "business";
-  if (path.startsWith("/mission-hub/twbc-") || path === "/mission-hub/knowledge-uav") return "twbc";
   if (path === "/mission-hub/users" || path === "/mission-hub/ai-providers" || path.startsWith("/mission-hub/settings")) return "config";
   if (path.startsWith("/mission-hub/agents")) return "agents";
   return null;
-}
-
-// Temporary grouping node — bundles Design Studio, Academy, and Design
-// Intelligence under one collapsible "Temp" section in the sidebar. Expand
-// by default when the current path is inside any of the three.
-function getTemOpenFromPath(path: string) {
-  return (
-    path === "/mission-hub/design-studio" ||
-    path === "/mission-hub/verticals/academy" ||
-    path.startsWith("/mission-hub/twbc-") ||
-    path === "/mission-hub/knowledge-uav"
-  );
-}
-
-function getTwbcOpenFromPath(path: string) {
-  const kb = [
-    "/mission-hub/twbc-drone-design-rule",
-    "/mission-hub/twbc-drone-proven-designs",
-    "/mission-hub/twbc-drone-components-library",
-  ].includes(path);
-  const ie = ["/mission-hub/twbc-drone-rule-engine"].includes(path);
-  const er = [
-    "/mission-hub/twbc-drone-design-score",
-    "/mission-hub/twbc-drone-approval",
-    "/mission-hub/twbc-drone-feedback",
-  ].includes(path);
-  const drone = kb || ie || er;
-  return { drone, kb, ie, er };
 }
 
 function Sidebar({
@@ -151,29 +112,6 @@ function Sidebar({
   useEffect(() => {
     setOpenSection(getSectionFromPath(path, role));
   }, [path]);
-
-  useEffect(() => {
-    const derived = getTwbcOpenFromPath(path);
-    if (derived.drone) {
-      setTwbcOpen(s => ({
-        drone: true,
-        kb: s.kb || derived.kb,
-        ie: s.ie || derived.ie,
-        er: s.er || derived.er,
-      }));
-    }
-  }, [path]);
-
-  const [twbcOpen, setTwbcOpen] = useState(() => getTwbcOpenFromPath(path));
-  const toggleTwbc = (k: keyof typeof twbcOpen) => setTwbcOpen(s => ({ ...s, [k]: !s[k] }));
-
-  const [temOpen, setTemOpen] = useState(() => getTemOpenFromPath(path));
-  useEffect(() => {
-    if (getTemOpenFromPath(path)) setTemOpen(true);
-  }, [path]);
-
-  const hasVertical = (v: Vertical) => isAdmin || verticals.includes(v);
-  const hasDesignStudio = hasVertical("design-studio");
 
   const sectionLabelStyle = { color: "var(--mh-dim)" };
 
@@ -243,128 +181,6 @@ function Sidebar({
           </>
         )}
 
-        {/* ── Temporary grouping node — Design Studio, Academy, and Design
-            Intelligence bundled under one collapsible "Temp" section. Remove
-            this wrapper (and restore the three blocks below it to top-level)
-            once it's no longer needed. ── */}
-        <div className="mt-5">
-          <button type="button" onClick={() => setTemOpen(o => !o)}
-            className="mh-mono mb-2 flex w-full items-center px-3 text-[10px] uppercase tracking-wider transition-colors" style={sectionLabelStyle}>
-            <span className="flex-1 text-left">Temp</span>
-            {temOpen ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
-          </button>
-        </div>
-
-        {temOpen && <>
-        {hasDesignStudio && (
-          <div>
-            <NavLink
-              to="/mission-hub/design-studio"
-              icon={verticalIcon["design-studio"]}
-              active={path === "/mission-hub/design-studio"}
-              onClick={onClose}
-            >
-              {VERTICAL_LABELS["design-studio"]}
-            </NavLink>
-          </div>
-        )}
-        {hasVertical("academy") && (
-          <NavLink
-            to="/mission-hub/verticals/academy"
-            icon={verticalIcon.academy}
-            active={path === "/mission-hub/verticals/academy"}
-            onClick={onClose}
-          >
-            {VERTICAL_LABELS.academy}
-          </NavLink>
-        )}
-
-        {isAdmin && (
-          <div className="mt-2 space-y-0.5">
-            <button type="button" onClick={() => toggle("twbc")}
-              className="mh-mono mb-2 flex w-full items-center px-3 text-[10px] uppercase tracking-wider transition-colors" style={sectionLabelStyle}>
-              <span className="flex-1 text-left">Design Intelligence</span>
-              {openSection === "twbc" ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
-            </button>
-
-            {openSection === "twbc" && <>
-            {/* ── Drone (collapsible) ── */}
-            <button type="button" onClick={() => toggleTwbc("drone")}
-              className="flex w-full items-center gap-2.5 px-4 py-2.5 rounded-lg text-[13px] transition-colors hover:bg-[rgba(62,124,166,0.08)]" style={{ color: "var(--mh-paper)" }}>
-              <Cpu className="h-4 w-4 shrink-0" />
-              <span className="flex-1 truncate text-left">Drone</span>
-              {twbcOpen.drone ? <ChevronDown className="h-3.5 w-3.5 opacity-50" /> : <ChevronRight className="h-3.5 w-3.5 opacity-50" />}
-            </button>
-
-            {twbcOpen.drone && (
-              <div className="ml-3 border-l pl-1.5 space-y-0.5" style={{ borderColor: "var(--mh-hairline)" }}>
-
-                {/* Knowledge Base */}
-                <button type="button" onClick={() => toggleTwbc("kb")}
-                  className="flex w-full items-center gap-2 px-3 py-1.5 rounded-md text-[12px] transition-colors hover:bg-[rgba(62,124,166,0.08)]" style={{ color: "var(--mh-dim)" }}>
-                  <span className="flex-1 truncate text-left">Knowledge Base</span>
-                  {twbcOpen.kb ? <ChevronDown className="h-3 w-3 opacity-40" /> : <ChevronRight className="h-3 w-3 opacity-40" />}
-                </button>
-                {twbcOpen.kb && (
-                  <div className="ml-3 border-l pl-1.5 space-y-0.5" style={{ borderColor: "var(--mh-hairline)" }}>
-                    <TwbcLeaf to="/mission-hub/twbc-drone-design-rule" active={path === "/mission-hub/twbc-drone-design-rule"} onClick={onClose}>Design Rules</TwbcLeaf>
-                    <TwbcLeaf to="/mission-hub/twbc-drone-proven-designs" active={path === "/mission-hub/twbc-drone-proven-designs"} onClick={onClose}>Proven Designs</TwbcLeaf>
-                    <TwbcLeaf to="/mission-hub/twbc-drone-components-library" active={path === "/mission-hub/twbc-drone-components-library"} onClick={onClose}>Components</TwbcLeaf>
-                  </div>
-                )}
-
-                {/* Intelligence Engine */}
-                <button type="button" onClick={() => toggleTwbc("ie")}
-                  className="flex w-full items-center gap-2 px-3 py-1.5 rounded-md text-[12px] transition-colors hover:bg-[rgba(62,124,166,0.08)]" style={{ color: "var(--mh-dim)" }}>
-                  <span className="flex-1 truncate text-left">Intelligence Engine</span>
-                  {twbcOpen.ie ? <ChevronDown className="h-3 w-3 opacity-40" /> : <ChevronRight className="h-3 w-3 opacity-40" />}
-                </button>
-                {twbcOpen.ie && (
-                  <div className="ml-3 border-l pl-1.5 space-y-0.5" style={{ borderColor: "var(--mh-hairline)" }}>
-                    <TwbcLeaf to="/mission-hub/twbc-drone-rule-engine" active={path === "/mission-hub/twbc-drone-rule-engine"} onClick={onClose}>Rule Engine</TwbcLeaf>
-                  </div>
-                )}
-
-                {/* Engineer Review */}
-                <button type="button" onClick={() => toggleTwbc("er")}
-                  className="flex w-full items-center gap-2 px-3 py-1.5 rounded-md text-[12px] transition-colors hover:bg-[rgba(62,124,166,0.08)]" style={{ color: "var(--mh-dim)" }}>
-                  <span className="flex-1 truncate text-left">Engineer Review</span>
-                  {twbcOpen.er ? <ChevronDown className="h-3 w-3 opacity-40" /> : <ChevronRight className="h-3 w-3 opacity-40" />}
-                </button>
-                {twbcOpen.er && (
-                  <div className="ml-3 border-l pl-1.5 space-y-0.5" style={{ borderColor: "var(--mh-hairline)" }}>
-                    <TwbcLeaf to="/mission-hub/twbc-drone-design-score" active={path === "/mission-hub/twbc-drone-design-score"} onClick={onClose}>Design Score</TwbcLeaf>
-                    <TwbcLeaf to="/mission-hub/twbc-drone-approval" active={path === "/mission-hub/twbc-drone-approval"} onClick={onClose}>Approval</TwbcLeaf>
-                    <TwbcLeaf to="/mission-hub/twbc-drone-feedback" active={path === "/mission-hub/twbc-drone-feedback"} onClick={onClose}>Feedback</TwbcLeaf>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* ── UAV ── */}
-            <NavLink to="/mission-hub/knowledge-uav" icon={BookOpen} active={path === "/mission-hub/knowledge-uav"} onClick={onClose}>
-              UAV
-            </NavLink>
-            </>}
-          </div>
-        )}
-        </>}
-
-        {hasDesignStudio && role !== "super_admin" && (
-          <div className="mt-5 space-y-0.5">
-            <button type="button" onClick={() => toggle("knowledge")}
-              className="mh-mono mb-2 flex w-full items-center px-3 text-[10px] uppercase tracking-wider transition-colors" style={sectionLabelStyle}>
-              <span className="flex-1 text-left">Knowledge Base</span>
-              {openSection === "knowledge" ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
-            </button>
-            {openSection === "knowledge" && (
-              <NavLink to="/mission-hub/twbc-drone-proven-designs" icon={BookOpen} active={path === "/mission-hub/twbc-drone-proven-designs"} onClick={onClose}>
-                Proven Designs
-              </NavLink>
-            )}
-          </div>
-        )}
-
         <div className="mt-5 space-y-0.5">
           <button type="button" onClick={() => toggle("config")}
             className="mh-mono mb-2 flex w-full items-center px-3 text-[10px] uppercase tracking-wider transition-colors" style={sectionLabelStyle}>
@@ -429,25 +245,6 @@ function NavLink({
     >
       <Icon className="h-4 w-4 flex-shrink-0" />
       <span className="truncate">{children}</span>
-    </Link>
-  );
-}
-
-function TwbcLeaf({ to, active, onClick, children }: { to: string; active: boolean; onClick: () => void; children: ReactNode }) {
-  return (
-    <Link
-      to={to as never}
-      onClick={onClick}
-      className="flex items-center px-3 py-1.5 rounded-md text-[12px] border-l-2 transition-colors"
-      style={
-        active
-          ? { background: "rgba(28,116,184,0.08)", borderColor: "var(--mh-blue)", color: "var(--mh-ink)" }
-          : { borderColor: "transparent", color: "var(--mh-dim)" }
-      }
-      onMouseEnter={(e) => { if (!active) { e.currentTarget.style.background = "rgba(62,124,166,0.06)"; e.currentTarget.style.color = "var(--mh-ink)"; } }}
-      onMouseLeave={(e) => { if (!active) { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--mh-dim)"; } }}
-    >
-      {children}
     </Link>
   );
 }

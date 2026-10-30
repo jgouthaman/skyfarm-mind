@@ -2,11 +2,17 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Phone, Mail } from "lucide-react";
 import { ContactForm } from "@/components/ContactForm";
 import { HANGAR_PUBLIC_HEAD_LINKS } from "@/styles/hangarPublicTheme";
+import { pageSeo } from "@/lib/seo";
 
 export const Route = createFileRoute("/_layout/contact")({
-  head: () => ({
-    links: [...HANGAR_PUBLIC_HEAD_LINKS],
-  }),
+  head: () => {
+    const seo = pageSeo({
+      path: "/contact",
+      title: "Contact TorqWings — Custom UAVs and drone services in India",
+      description: "Talk to TorqWings about custom UAV design, drone agriculture, aerial surveillance and infrastructure inspection. Serving Tamil Nadu and across India.",
+    });
+    return { meta: seo.meta, links: [...seo.links, ...HANGAR_PUBLIC_HEAD_LINKS] };
+  },
   component: ContactPage,
 });
 
