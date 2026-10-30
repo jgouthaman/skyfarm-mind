@@ -11,7 +11,6 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as LayoutRouteImport } from './routes/_layout'
 import { Route as AcademyRouteImport } from './routes/academy'
-import { Route as DestudRouteImport } from './routes/destud'
 import { Route as FieldRouteImport } from './routes/field'
 import { Route as HangarStage3ManualtestRouteImport } from './routes/hangar-stage3-manualtest'
 import { Route as MissionHubRouteImport } from './routes/mission-hub'
@@ -20,39 +19,17 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as TheHangarRouteImport } from './routes/the-hangar'
 import { Route as LayoutIndexRouteImport } from './routes/_layout.index'
 import { Route as LayoutAboutRouteImport } from './routes/_layout.about'
-import { Route as LayoutAgriskyRouteImport } from './routes/_layout.agrisky'
 import { Route as LayoutContactRouteImport } from './routes/_layout.contact'
-import { Route as LayoutGuardskyRouteImport } from './routes/_layout.guardsky'
-import { Route as LayoutIndustriesRouteImport } from './routes/_layout.industries'
-import { Route as LayoutPilotsRouteImport } from './routes/_layout.pilots'
 import { Route as AcademyIndexRouteImport } from './routes/academy.index'
 import { Route as AcademyDashboardRouteImport } from './routes/academy.dashboard'
-import { Route as AcademyLessonDemoRouteImport } from './routes/academy.lesson-demo'
-import { Route as AcademyQuizDemoRouteImport } from './routes/academy.quiz-demo'
-import { Route as DestudIndexRouteImport } from './routes/destud.index'
-import { Route as DestudNewMissionRouteImport } from './routes/destud.new-mission'
 import { Route as MissionHubIndexRouteImport } from './routes/mission-hub.index'
 import { Route as MissionHubAcademyUsersRouteImport } from './routes/mission-hub.academy-users'
 import { Route as MissionHubAiProvidersRouteImport } from './routes/mission-hub.ai-providers'
 import { Route as MissionHubContactsRouteImport } from './routes/mission-hub.contacts'
 import { Route as MissionHubDashboardRouteImport } from './routes/mission-hub.dashboard'
-import { Route as MissionHubDesignStudioRouteImport } from './routes/mission-hub.design-studio'
-import { Route as MissionHubKnowledgeUavRouteImport } from './routes/mission-hub.knowledge-uav'
 import { Route as MissionHubLoginRouteImport } from './routes/mission-hub.login'
 import { Route as MissionHubResetPasswordRouteImport } from './routes/mission-hub.reset-password'
 import { Route as MissionHubSettingsRouteImport } from './routes/mission-hub.settings'
-import { Route as MissionHubTorqwingsDesignStudioRouteImport } from './routes/mission-hub.torqwings-design-studio'
-import { Route as MissionHubTwbcDroneApprovalRouteImport } from './routes/mission-hub.twbc-drone-approval'
-import { Route as MissionHubTwbcDroneComponentsLibraryRouteImport } from './routes/mission-hub.twbc-drone-components-library'
-import { Route as MissionHubTwbcDroneDesignRuleRouteImport } from './routes/mission-hub.twbc-drone-design-rule'
-import { Route as MissionHubTwbcDroneDesignRulesRouteImport } from './routes/mission-hub.twbc-drone-design-rules'
-import { Route as MissionHubTwbcDroneDesignScoreRouteImport } from './routes/mission-hub.twbc-drone-design-score'
-import { Route as MissionHubTwbcDroneFeedbackRouteImport } from './routes/mission-hub.twbc-drone-feedback'
-import { Route as MissionHubTwbcDroneProvenDesignsRouteImport } from './routes/mission-hub.twbc-drone-proven-designs'
-import { Route as MissionHubTwbcDroneReasoningApiRouteImport } from './routes/mission-hub.twbc-drone-reasoning-api'
-import { Route as MissionHubTwbcDroneReferenceDesignsRouteImport } from './routes/mission-hub.twbc-drone-reference-designs'
-import { Route as MissionHubTwbcDroneRuleEngineRouteImport } from './routes/mission-hub.twbc-drone-rule-engine'
-import { Route as MissionHubTwbcDroneSimilaritySearchRouteImport } from './routes/mission-hub.twbc-drone-similarity-search'
 import { Route as MissionHubUsersRouteImport } from './routes/mission-hub.users'
 import { Route as MissionHubWaitlistRouteImport } from './routes/mission-hub.waitlist'
 import { Route as PilotIndexRouteImport } from './routes/pilot.index'
@@ -107,22 +84,7 @@ import { Route as ApiHangarStructuralsRouteImport } from './routes/api.hangar.st
 import { Route as ApiHangarValidationsRouteImport } from './routes/api.hangar.validations'
 import { Route as ApiHangarVehicleDesignFilesRouteImport } from './routes/api.hangar.vehicle-design-files'
 import { Route as ApiHarnessCallRouteImport } from './routes/api.harness.call'
-import { Route as DestudDashboardEngineerRouteImport } from './routes/destud.dashboard.engineer'
-import { Route as DestudDashboardExplorerRouteImport } from './routes/destud.dashboard.explorer'
-import { Route as DestudProjectsProjectIdRouteImport } from './routes/destud.projects.$projectId'
 import { Route as MissionHubAgentsBernoulliRouteImport } from './routes/mission-hub.agents.bernoulli'
-import { Route as MissionHubTorqwingsDesignStudioIndexRouteImport } from './routes/mission-hub.torqwings-design-studio.index'
-import { Route as MissionHubTorqwingsDesignStudioAdvisorRouteImport } from './routes/mission-hub.torqwings-design-studio.advisor'
-import { Route as MissionHubTorqwingsDesignStudioComplianceRouteImport } from './routes/mission-hub.torqwings-design-studio.compliance'
-import { Route as MissionHubTorqwingsDesignStudioComponentsRouteImport } from './routes/mission-hub.torqwings-design-studio.components'
-import { Route as MissionHubTorqwingsDesignStudioDesignRouteImport } from './routes/mission-hub.torqwings-design-studio.design'
-import { Route as MissionHubTorqwingsDesignStudioDesignRuleRouteImport } from './routes/mission-hub.torqwings-design-studio.design-rule'
-import { Route as MissionHubTorqwingsDesignStudioHistoryRouteImport } from './routes/mission-hub.torqwings-design-studio.history'
-import { Route as MissionHubTorqwingsDesignStudioNewRouteImport } from './routes/mission-hub.torqwings-design-studio.new'
-import { Route as MissionHubTorqwingsDesignStudioReportRouteImport } from './routes/mission-hub.torqwings-design-studio.report'
-import { Route as MissionHubTorqwingsDesignStudioRequirementsRouteImport } from './routes/mission-hub.torqwings-design-studio.requirements'
-import { Route as MissionHubTorqwingsDesignStudioSimulationRouteImport } from './routes/mission-hub.torqwings-design-studio.simulation'
-import { Route as MissionHubVerticalsVerticalRouteImport } from './routes/mission-hub.verticals.$vertical'
 import { Route as PilotMissionsIndexRouteImport } from './routes/pilot.missions.index'
 import { Route as PilotMissionsIdRouteImport } from './routes/pilot.missions.$id'
 import { Route as AcademyCoursesSlugLearnRouteImport } from './routes/academy.courses.$slug.learn'
@@ -161,11 +123,6 @@ const LayoutRoute = LayoutRouteImport.update({
 const AcademyRoute = AcademyRouteImport.update({
   id: '/academy',
   path: '/academy',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DestudRoute = DestudRouteImport.update({
-  id: '/destud',
-  path: '/destud',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FieldRoute = FieldRouteImport.update({
@@ -208,29 +165,9 @@ const LayoutAboutRoute = LayoutAboutRouteImport.update({
   path: '/about',
   getParentRoute: () => LayoutRoute,
 } as any)
-const LayoutAgriskyRoute = LayoutAgriskyRouteImport.update({
-  id: '/agrisky',
-  path: '/agrisky',
-  getParentRoute: () => LayoutRoute,
-} as any)
 const LayoutContactRoute = LayoutContactRouteImport.update({
   id: '/contact',
   path: '/contact',
-  getParentRoute: () => LayoutRoute,
-} as any)
-const LayoutGuardskyRoute = LayoutGuardskyRouteImport.update({
-  id: '/guardsky',
-  path: '/guardsky',
-  getParentRoute: () => LayoutRoute,
-} as any)
-const LayoutIndustriesRoute = LayoutIndustriesRouteImport.update({
-  id: '/industries',
-  path: '/industries',
-  getParentRoute: () => LayoutRoute,
-} as any)
-const LayoutPilotsRoute = LayoutPilotsRouteImport.update({
-  id: '/pilots',
-  path: '/pilots',
   getParentRoute: () => LayoutRoute,
 } as any)
 const AcademyIndexRoute = AcademyIndexRouteImport.update({
@@ -242,26 +179,6 @@ const AcademyDashboardRoute = AcademyDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
   getParentRoute: () => AcademyRoute,
-} as any)
-const AcademyLessonDemoRoute = AcademyLessonDemoRouteImport.update({
-  id: '/lesson-demo',
-  path: '/lesson-demo',
-  getParentRoute: () => AcademyRoute,
-} as any)
-const AcademyQuizDemoRoute = AcademyQuizDemoRouteImport.update({
-  id: '/quiz-demo',
-  path: '/quiz-demo',
-  getParentRoute: () => AcademyRoute,
-} as any)
-const DestudIndexRoute = DestudIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => DestudRoute,
-} as any)
-const DestudNewMissionRoute = DestudNewMissionRouteImport.update({
-  id: '/new-mission',
-  path: '/new-mission',
-  getParentRoute: () => DestudRoute,
 } as any)
 const MissionHubIndexRoute = MissionHubIndexRouteImport.update({
   id: '/',
@@ -288,16 +205,6 @@ const MissionHubDashboardRoute = MissionHubDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => MissionHubRoute,
 } as any)
-const MissionHubDesignStudioRoute = MissionHubDesignStudioRouteImport.update({
-  id: '/design-studio',
-  path: '/design-studio',
-  getParentRoute: () => MissionHubRoute,
-} as any)
-const MissionHubKnowledgeUavRoute = MissionHubKnowledgeUavRouteImport.update({
-  id: '/knowledge-uav',
-  path: '/knowledge-uav',
-  getParentRoute: () => MissionHubRoute,
-} as any)
 const MissionHubLoginRoute = MissionHubLoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -313,78 +220,6 @@ const MissionHubSettingsRoute = MissionHubSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => MissionHubRoute,
 } as any)
-const MissionHubTorqwingsDesignStudioRoute =
-  MissionHubTorqwingsDesignStudioRouteImport.update({
-    id: '/torqwings-design-studio',
-    path: '/torqwings-design-studio',
-    getParentRoute: () => MissionHubRoute,
-  } as any)
-const MissionHubTwbcDroneApprovalRoute =
-  MissionHubTwbcDroneApprovalRouteImport.update({
-    id: '/twbc-drone-approval',
-    path: '/twbc-drone-approval',
-    getParentRoute: () => MissionHubRoute,
-  } as any)
-const MissionHubTwbcDroneComponentsLibraryRoute =
-  MissionHubTwbcDroneComponentsLibraryRouteImport.update({
-    id: '/twbc-drone-components-library',
-    path: '/twbc-drone-components-library',
-    getParentRoute: () => MissionHubRoute,
-  } as any)
-const MissionHubTwbcDroneDesignRuleRoute =
-  MissionHubTwbcDroneDesignRuleRouteImport.update({
-    id: '/twbc-drone-design-rule',
-    path: '/twbc-drone-design-rule',
-    getParentRoute: () => MissionHubRoute,
-  } as any)
-const MissionHubTwbcDroneDesignRulesRoute =
-  MissionHubTwbcDroneDesignRulesRouteImport.update({
-    id: '/twbc-drone-design-rules',
-    path: '/twbc-drone-design-rules',
-    getParentRoute: () => MissionHubRoute,
-  } as any)
-const MissionHubTwbcDroneDesignScoreRoute =
-  MissionHubTwbcDroneDesignScoreRouteImport.update({
-    id: '/twbc-drone-design-score',
-    path: '/twbc-drone-design-score',
-    getParentRoute: () => MissionHubRoute,
-  } as any)
-const MissionHubTwbcDroneFeedbackRoute =
-  MissionHubTwbcDroneFeedbackRouteImport.update({
-    id: '/twbc-drone-feedback',
-    path: '/twbc-drone-feedback',
-    getParentRoute: () => MissionHubRoute,
-  } as any)
-const MissionHubTwbcDroneProvenDesignsRoute =
-  MissionHubTwbcDroneProvenDesignsRouteImport.update({
-    id: '/twbc-drone-proven-designs',
-    path: '/twbc-drone-proven-designs',
-    getParentRoute: () => MissionHubRoute,
-  } as any)
-const MissionHubTwbcDroneReasoningApiRoute =
-  MissionHubTwbcDroneReasoningApiRouteImport.update({
-    id: '/twbc-drone-reasoning-api',
-    path: '/twbc-drone-reasoning-api',
-    getParentRoute: () => MissionHubRoute,
-  } as any)
-const MissionHubTwbcDroneReferenceDesignsRoute =
-  MissionHubTwbcDroneReferenceDesignsRouteImport.update({
-    id: '/twbc-drone-reference-designs',
-    path: '/twbc-drone-reference-designs',
-    getParentRoute: () => MissionHubRoute,
-  } as any)
-const MissionHubTwbcDroneRuleEngineRoute =
-  MissionHubTwbcDroneRuleEngineRouteImport.update({
-    id: '/twbc-drone-rule-engine',
-    path: '/twbc-drone-rule-engine',
-    getParentRoute: () => MissionHubRoute,
-  } as any)
-const MissionHubTwbcDroneSimilaritySearchRoute =
-  MissionHubTwbcDroneSimilaritySearchRouteImport.update({
-    id: '/twbc-drone-similarity-search',
-    path: '/twbc-drone-similarity-search',
-    getParentRoute: () => MissionHubRoute,
-  } as any)
 const MissionHubUsersRoute = MissionHubUsersRouteImport.update({
   id: '/users',
   path: '/users',
@@ -661,97 +496,10 @@ const ApiHarnessCallRoute = ApiHarnessCallRouteImport.update({
   path: '/call',
   getParentRoute: () => ApiHarnessRoute,
 } as any)
-const DestudDashboardEngineerRoute = DestudDashboardEngineerRouteImport.update({
-  id: '/dashboard/engineer',
-  path: '/dashboard/engineer',
-  getParentRoute: () => DestudRoute,
-} as any)
-const DestudDashboardExplorerRoute = DestudDashboardExplorerRouteImport.update({
-  id: '/dashboard/explorer',
-  path: '/dashboard/explorer',
-  getParentRoute: () => DestudRoute,
-} as any)
-const DestudProjectsProjectIdRoute = DestudProjectsProjectIdRouteImport.update({
-  id: '/projects/$projectId',
-  path: '/projects/$projectId',
-  getParentRoute: () => DestudRoute,
-} as any)
 const MissionHubAgentsBernoulliRoute =
   MissionHubAgentsBernoulliRouteImport.update({
     id: '/agents/bernoulli',
     path: '/agents/bernoulli',
-    getParentRoute: () => MissionHubRoute,
-  } as any)
-const MissionHubTorqwingsDesignStudioIndexRoute =
-  MissionHubTorqwingsDesignStudioIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () => MissionHubTorqwingsDesignStudioRoute,
-  } as any)
-const MissionHubTorqwingsDesignStudioAdvisorRoute =
-  MissionHubTorqwingsDesignStudioAdvisorRouteImport.update({
-    id: '/advisor',
-    path: '/advisor',
-    getParentRoute: () => MissionHubTorqwingsDesignStudioRoute,
-  } as any)
-const MissionHubTorqwingsDesignStudioComplianceRoute =
-  MissionHubTorqwingsDesignStudioComplianceRouteImport.update({
-    id: '/compliance',
-    path: '/compliance',
-    getParentRoute: () => MissionHubTorqwingsDesignStudioRoute,
-  } as any)
-const MissionHubTorqwingsDesignStudioComponentsRoute =
-  MissionHubTorqwingsDesignStudioComponentsRouteImport.update({
-    id: '/components',
-    path: '/components',
-    getParentRoute: () => MissionHubTorqwingsDesignStudioRoute,
-  } as any)
-const MissionHubTorqwingsDesignStudioDesignRoute =
-  MissionHubTorqwingsDesignStudioDesignRouteImport.update({
-    id: '/design',
-    path: '/design',
-    getParentRoute: () => MissionHubTorqwingsDesignStudioRoute,
-  } as any)
-const MissionHubTorqwingsDesignStudioDesignRuleRoute =
-  MissionHubTorqwingsDesignStudioDesignRuleRouteImport.update({
-    id: '/design-rule',
-    path: '/design-rule',
-    getParentRoute: () => MissionHubTorqwingsDesignStudioRoute,
-  } as any)
-const MissionHubTorqwingsDesignStudioHistoryRoute =
-  MissionHubTorqwingsDesignStudioHistoryRouteImport.update({
-    id: '/history',
-    path: '/history',
-    getParentRoute: () => MissionHubTorqwingsDesignStudioRoute,
-  } as any)
-const MissionHubTorqwingsDesignStudioNewRoute =
-  MissionHubTorqwingsDesignStudioNewRouteImport.update({
-    id: '/new',
-    path: '/new',
-    getParentRoute: () => MissionHubTorqwingsDesignStudioRoute,
-  } as any)
-const MissionHubTorqwingsDesignStudioReportRoute =
-  MissionHubTorqwingsDesignStudioReportRouteImport.update({
-    id: '/report',
-    path: '/report',
-    getParentRoute: () => MissionHubTorqwingsDesignStudioRoute,
-  } as any)
-const MissionHubTorqwingsDesignStudioRequirementsRoute =
-  MissionHubTorqwingsDesignStudioRequirementsRouteImport.update({
-    id: '/requirements',
-    path: '/requirements',
-    getParentRoute: () => MissionHubTorqwingsDesignStudioRoute,
-  } as any)
-const MissionHubTorqwingsDesignStudioSimulationRoute =
-  MissionHubTorqwingsDesignStudioSimulationRouteImport.update({
-    id: '/simulation',
-    path: '/simulation',
-    getParentRoute: () => MissionHubTorqwingsDesignStudioRoute,
-  } as any)
-const MissionHubVerticalsVerticalRoute =
-  MissionHubVerticalsVerticalRouteImport.update({
-    id: '/verticals/$vertical',
-    path: '/verticals/$vertical',
     getParentRoute: () => MissionHubRoute,
   } as any)
 const PilotMissionsIndexRoute = PilotMissionsIndexRouteImport.update({
@@ -935,7 +683,6 @@ const AcademyModuleModuleIdQuizQuizIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof LayoutIndexRoute
   '/academy': typeof AcademyRouteWithChildren
-  '/destud': typeof DestudRouteWithChildren
   '/field': typeof FieldRoute
   '/hangar-stage3-manualtest': typeof HangarStage3ManualtestRoute
   '/mission-hub': typeof MissionHubRouteWithChildren
@@ -943,36 +690,15 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/the-hangar': typeof TheHangarRouteWithChildren
   '/about': typeof LayoutAboutRoute
-  '/agrisky': typeof LayoutAgriskyRoute
   '/contact': typeof LayoutContactRoute
-  '/guardsky': typeof LayoutGuardskyRoute
-  '/industries': typeof LayoutIndustriesRoute
-  '/pilots': typeof LayoutPilotsRoute
   '/academy/dashboard': typeof AcademyDashboardRoute
-  '/academy/lesson-demo': typeof AcademyLessonDemoRoute
-  '/academy/quiz-demo': typeof AcademyQuizDemoRoute
-  '/destud/new-mission': typeof DestudNewMissionRoute
   '/mission-hub/academy-users': typeof MissionHubAcademyUsersRoute
   '/mission-hub/ai-providers': typeof MissionHubAiProvidersRoute
   '/mission-hub/contacts': typeof MissionHubContactsRoute
   '/mission-hub/dashboard': typeof MissionHubDashboardRoute
-  '/mission-hub/design-studio': typeof MissionHubDesignStudioRoute
-  '/mission-hub/knowledge-uav': typeof MissionHubKnowledgeUavRoute
   '/mission-hub/login': typeof MissionHubLoginRoute
   '/mission-hub/reset-password': typeof MissionHubResetPasswordRoute
   '/mission-hub/settings': typeof MissionHubSettingsRoute
-  '/mission-hub/torqwings-design-studio': typeof MissionHubTorqwingsDesignStudioRouteWithChildren
-  '/mission-hub/twbc-drone-approval': typeof MissionHubTwbcDroneApprovalRoute
-  '/mission-hub/twbc-drone-components-library': typeof MissionHubTwbcDroneComponentsLibraryRoute
-  '/mission-hub/twbc-drone-design-rule': typeof MissionHubTwbcDroneDesignRuleRoute
-  '/mission-hub/twbc-drone-design-rules': typeof MissionHubTwbcDroneDesignRulesRoute
-  '/mission-hub/twbc-drone-design-score': typeof MissionHubTwbcDroneDesignScoreRoute
-  '/mission-hub/twbc-drone-feedback': typeof MissionHubTwbcDroneFeedbackRoute
-  '/mission-hub/twbc-drone-proven-designs': typeof MissionHubTwbcDroneProvenDesignsRoute
-  '/mission-hub/twbc-drone-reasoning-api': typeof MissionHubTwbcDroneReasoningApiRoute
-  '/mission-hub/twbc-drone-reference-designs': typeof MissionHubTwbcDroneReferenceDesignsRoute
-  '/mission-hub/twbc-drone-rule-engine': typeof MissionHubTwbcDroneRuleEngineRoute
-  '/mission-hub/twbc-drone-similarity-search': typeof MissionHubTwbcDroneSimilaritySearchRoute
   '/mission-hub/users': typeof MissionHubUsersRoute
   '/mission-hub/waitlist': typeof MissionHubWaitlistRoute
   '/pilot/login': typeof PilotLoginRoute
@@ -999,7 +725,6 @@ export interface FileRoutesByFullPath {
   '/the-hangar/validation': typeof TheHangarValidationRoute
   '/the-hangar/welcome': typeof TheHangarWelcomeRoute
   '/academy/': typeof AcademyIndexRoute
-  '/destud/': typeof DestudIndexRoute
   '/mission-hub/': typeof MissionHubIndexRoute
   '/pilot/': typeof PilotIndexRoute
   '/t-h/': typeof THIndexRoute
@@ -1030,23 +755,8 @@ export interface FileRoutesByFullPath {
   '/api/hangar/validations': typeof ApiHangarValidationsRoute
   '/api/hangar/vehicle-design-files': typeof ApiHangarVehicleDesignFilesRoute
   '/api/harness/call': typeof ApiHarnessCallRoute
-  '/destud/dashboard/engineer': typeof DestudDashboardEngineerRoute
-  '/destud/dashboard/explorer': typeof DestudDashboardExplorerRoute
-  '/destud/projects/$projectId': typeof DestudProjectsProjectIdRoute
   '/mission-hub/agents/bernoulli': typeof MissionHubAgentsBernoulliRoute
-  '/mission-hub/torqwings-design-studio/advisor': typeof MissionHubTorqwingsDesignStudioAdvisorRoute
-  '/mission-hub/torqwings-design-studio/compliance': typeof MissionHubTorqwingsDesignStudioComplianceRoute
-  '/mission-hub/torqwings-design-studio/components': typeof MissionHubTorqwingsDesignStudioComponentsRoute
-  '/mission-hub/torqwings-design-studio/design': typeof MissionHubTorqwingsDesignStudioDesignRoute
-  '/mission-hub/torqwings-design-studio/design-rule': typeof MissionHubTorqwingsDesignStudioDesignRuleRoute
-  '/mission-hub/torqwings-design-studio/history': typeof MissionHubTorqwingsDesignStudioHistoryRoute
-  '/mission-hub/torqwings-design-studio/new': typeof MissionHubTorqwingsDesignStudioNewRoute
-  '/mission-hub/torqwings-design-studio/report': typeof MissionHubTorqwingsDesignStudioReportRoute
-  '/mission-hub/torqwings-design-studio/requirements': typeof MissionHubTorqwingsDesignStudioRequirementsRoute
-  '/mission-hub/torqwings-design-studio/simulation': typeof MissionHubTorqwingsDesignStudioSimulationRoute
-  '/mission-hub/verticals/$vertical': typeof MissionHubVerticalsVerticalRoute
   '/pilot/missions/$id': typeof PilotMissionsIdRoute
-  '/mission-hub/torqwings-design-studio/': typeof MissionHubTorqwingsDesignStudioIndexRoute
   '/pilot/missions/': typeof PilotMissionsIndexRoute
   '/academy/courses/$slug/learn': typeof AcademyCoursesSlugLearnRoute
   '/api/hangar/process-bernoulli/review': typeof ApiHangarProcessBernoulliReviewRoute
@@ -1082,35 +792,15 @@ export interface FileRoutesByTo {
   '/hangar-stage3-manualtest': typeof HangarStage3ManualtestRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/about': typeof LayoutAboutRoute
-  '/agrisky': typeof LayoutAgriskyRoute
   '/contact': typeof LayoutContactRoute
-  '/guardsky': typeof LayoutGuardskyRoute
-  '/industries': typeof LayoutIndustriesRoute
-  '/pilots': typeof LayoutPilotsRoute
   '/academy/dashboard': typeof AcademyDashboardRoute
-  '/academy/lesson-demo': typeof AcademyLessonDemoRoute
-  '/academy/quiz-demo': typeof AcademyQuizDemoRoute
-  '/destud/new-mission': typeof DestudNewMissionRoute
   '/mission-hub/academy-users': typeof MissionHubAcademyUsersRoute
   '/mission-hub/ai-providers': typeof MissionHubAiProvidersRoute
   '/mission-hub/contacts': typeof MissionHubContactsRoute
   '/mission-hub/dashboard': typeof MissionHubDashboardRoute
-  '/mission-hub/design-studio': typeof MissionHubDesignStudioRoute
-  '/mission-hub/knowledge-uav': typeof MissionHubKnowledgeUavRoute
   '/mission-hub/login': typeof MissionHubLoginRoute
   '/mission-hub/reset-password': typeof MissionHubResetPasswordRoute
   '/mission-hub/settings': typeof MissionHubSettingsRoute
-  '/mission-hub/twbc-drone-approval': typeof MissionHubTwbcDroneApprovalRoute
-  '/mission-hub/twbc-drone-components-library': typeof MissionHubTwbcDroneComponentsLibraryRoute
-  '/mission-hub/twbc-drone-design-rule': typeof MissionHubTwbcDroneDesignRuleRoute
-  '/mission-hub/twbc-drone-design-rules': typeof MissionHubTwbcDroneDesignRulesRoute
-  '/mission-hub/twbc-drone-design-score': typeof MissionHubTwbcDroneDesignScoreRoute
-  '/mission-hub/twbc-drone-feedback': typeof MissionHubTwbcDroneFeedbackRoute
-  '/mission-hub/twbc-drone-proven-designs': typeof MissionHubTwbcDroneProvenDesignsRoute
-  '/mission-hub/twbc-drone-reasoning-api': typeof MissionHubTwbcDroneReasoningApiRoute
-  '/mission-hub/twbc-drone-reference-designs': typeof MissionHubTwbcDroneReferenceDesignsRoute
-  '/mission-hub/twbc-drone-rule-engine': typeof MissionHubTwbcDroneRuleEngineRoute
-  '/mission-hub/twbc-drone-similarity-search': typeof MissionHubTwbcDroneSimilaritySearchRoute
   '/mission-hub/users': typeof MissionHubUsersRoute
   '/mission-hub/waitlist': typeof MissionHubWaitlistRoute
   '/pilot/login': typeof PilotLoginRoute
@@ -1138,7 +828,6 @@ export interface FileRoutesByTo {
   '/the-hangar/welcome': typeof TheHangarWelcomeRoute
   '/': typeof LayoutIndexRoute
   '/academy': typeof AcademyIndexRoute
-  '/destud': typeof DestudIndexRoute
   '/mission-hub': typeof MissionHubIndexRoute
   '/pilot': typeof PilotIndexRoute
   '/t-h': typeof THIndexRoute
@@ -1169,23 +858,8 @@ export interface FileRoutesByTo {
   '/api/hangar/validations': typeof ApiHangarValidationsRoute
   '/api/hangar/vehicle-design-files': typeof ApiHangarVehicleDesignFilesRoute
   '/api/harness/call': typeof ApiHarnessCallRoute
-  '/destud/dashboard/engineer': typeof DestudDashboardEngineerRoute
-  '/destud/dashboard/explorer': typeof DestudDashboardExplorerRoute
-  '/destud/projects/$projectId': typeof DestudProjectsProjectIdRoute
   '/mission-hub/agents/bernoulli': typeof MissionHubAgentsBernoulliRoute
-  '/mission-hub/torqwings-design-studio/advisor': typeof MissionHubTorqwingsDesignStudioAdvisorRoute
-  '/mission-hub/torqwings-design-studio/compliance': typeof MissionHubTorqwingsDesignStudioComplianceRoute
-  '/mission-hub/torqwings-design-studio/components': typeof MissionHubTorqwingsDesignStudioComponentsRoute
-  '/mission-hub/torqwings-design-studio/design': typeof MissionHubTorqwingsDesignStudioDesignRoute
-  '/mission-hub/torqwings-design-studio/design-rule': typeof MissionHubTorqwingsDesignStudioDesignRuleRoute
-  '/mission-hub/torqwings-design-studio/history': typeof MissionHubTorqwingsDesignStudioHistoryRoute
-  '/mission-hub/torqwings-design-studio/new': typeof MissionHubTorqwingsDesignStudioNewRoute
-  '/mission-hub/torqwings-design-studio/report': typeof MissionHubTorqwingsDesignStudioReportRoute
-  '/mission-hub/torqwings-design-studio/requirements': typeof MissionHubTorqwingsDesignStudioRequirementsRoute
-  '/mission-hub/torqwings-design-studio/simulation': typeof MissionHubTorqwingsDesignStudioSimulationRoute
-  '/mission-hub/verticals/$vertical': typeof MissionHubVerticalsVerticalRoute
   '/pilot/missions/$id': typeof PilotMissionsIdRoute
-  '/mission-hub/torqwings-design-studio': typeof MissionHubTorqwingsDesignStudioIndexRoute
   '/pilot/missions': typeof PilotMissionsIndexRoute
   '/academy/courses/$slug/learn': typeof AcademyCoursesSlugLearnRoute
   '/api/hangar/process-bernoulli/review': typeof ApiHangarProcessBernoulliReviewRoute
@@ -1220,7 +894,6 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_layout': typeof LayoutRouteWithChildren
   '/academy': typeof AcademyRouteWithChildren
-  '/destud': typeof DestudRouteWithChildren
   '/field': typeof FieldRoute
   '/hangar-stage3-manualtest': typeof HangarStage3ManualtestRoute
   '/mission-hub': typeof MissionHubRouteWithChildren
@@ -1228,36 +901,15 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/the-hangar': typeof TheHangarRouteWithChildren
   '/_layout/about': typeof LayoutAboutRoute
-  '/_layout/agrisky': typeof LayoutAgriskyRoute
   '/_layout/contact': typeof LayoutContactRoute
-  '/_layout/guardsky': typeof LayoutGuardskyRoute
-  '/_layout/industries': typeof LayoutIndustriesRoute
-  '/_layout/pilots': typeof LayoutPilotsRoute
   '/academy/dashboard': typeof AcademyDashboardRoute
-  '/academy/lesson-demo': typeof AcademyLessonDemoRoute
-  '/academy/quiz-demo': typeof AcademyQuizDemoRoute
-  '/destud/new-mission': typeof DestudNewMissionRoute
   '/mission-hub/academy-users': typeof MissionHubAcademyUsersRoute
   '/mission-hub/ai-providers': typeof MissionHubAiProvidersRoute
   '/mission-hub/contacts': typeof MissionHubContactsRoute
   '/mission-hub/dashboard': typeof MissionHubDashboardRoute
-  '/mission-hub/design-studio': typeof MissionHubDesignStudioRoute
-  '/mission-hub/knowledge-uav': typeof MissionHubKnowledgeUavRoute
   '/mission-hub/login': typeof MissionHubLoginRoute
   '/mission-hub/reset-password': typeof MissionHubResetPasswordRoute
   '/mission-hub/settings': typeof MissionHubSettingsRoute
-  '/mission-hub/torqwings-design-studio': typeof MissionHubTorqwingsDesignStudioRouteWithChildren
-  '/mission-hub/twbc-drone-approval': typeof MissionHubTwbcDroneApprovalRoute
-  '/mission-hub/twbc-drone-components-library': typeof MissionHubTwbcDroneComponentsLibraryRoute
-  '/mission-hub/twbc-drone-design-rule': typeof MissionHubTwbcDroneDesignRuleRoute
-  '/mission-hub/twbc-drone-design-rules': typeof MissionHubTwbcDroneDesignRulesRoute
-  '/mission-hub/twbc-drone-design-score': typeof MissionHubTwbcDroneDesignScoreRoute
-  '/mission-hub/twbc-drone-feedback': typeof MissionHubTwbcDroneFeedbackRoute
-  '/mission-hub/twbc-drone-proven-designs': typeof MissionHubTwbcDroneProvenDesignsRoute
-  '/mission-hub/twbc-drone-reasoning-api': typeof MissionHubTwbcDroneReasoningApiRoute
-  '/mission-hub/twbc-drone-reference-designs': typeof MissionHubTwbcDroneReferenceDesignsRoute
-  '/mission-hub/twbc-drone-rule-engine': typeof MissionHubTwbcDroneRuleEngineRoute
-  '/mission-hub/twbc-drone-similarity-search': typeof MissionHubTwbcDroneSimilaritySearchRoute
   '/mission-hub/users': typeof MissionHubUsersRoute
   '/mission-hub/waitlist': typeof MissionHubWaitlistRoute
   '/pilot/login': typeof PilotLoginRoute
@@ -1285,7 +937,6 @@ export interface FileRoutesById {
   '/the-hangar/welcome': typeof TheHangarWelcomeRoute
   '/_layout/': typeof LayoutIndexRoute
   '/academy/': typeof AcademyIndexRoute
-  '/destud/': typeof DestudIndexRoute
   '/mission-hub/': typeof MissionHubIndexRoute
   '/pilot/': typeof PilotIndexRoute
   '/t-h/': typeof THIndexRoute
@@ -1316,23 +967,8 @@ export interface FileRoutesById {
   '/api/hangar/validations': typeof ApiHangarValidationsRoute
   '/api/hangar/vehicle-design-files': typeof ApiHangarVehicleDesignFilesRoute
   '/api/harness/call': typeof ApiHarnessCallRoute
-  '/destud/dashboard/engineer': typeof DestudDashboardEngineerRoute
-  '/destud/dashboard/explorer': typeof DestudDashboardExplorerRoute
-  '/destud/projects/$projectId': typeof DestudProjectsProjectIdRoute
   '/mission-hub/agents/bernoulli': typeof MissionHubAgentsBernoulliRoute
-  '/mission-hub/torqwings-design-studio/advisor': typeof MissionHubTorqwingsDesignStudioAdvisorRoute
-  '/mission-hub/torqwings-design-studio/compliance': typeof MissionHubTorqwingsDesignStudioComplianceRoute
-  '/mission-hub/torqwings-design-studio/components': typeof MissionHubTorqwingsDesignStudioComponentsRoute
-  '/mission-hub/torqwings-design-studio/design': typeof MissionHubTorqwingsDesignStudioDesignRoute
-  '/mission-hub/torqwings-design-studio/design-rule': typeof MissionHubTorqwingsDesignStudioDesignRuleRoute
-  '/mission-hub/torqwings-design-studio/history': typeof MissionHubTorqwingsDesignStudioHistoryRoute
-  '/mission-hub/torqwings-design-studio/new': typeof MissionHubTorqwingsDesignStudioNewRoute
-  '/mission-hub/torqwings-design-studio/report': typeof MissionHubTorqwingsDesignStudioReportRoute
-  '/mission-hub/torqwings-design-studio/requirements': typeof MissionHubTorqwingsDesignStudioRequirementsRoute
-  '/mission-hub/torqwings-design-studio/simulation': typeof MissionHubTorqwingsDesignStudioSimulationRoute
-  '/mission-hub/verticals/$vertical': typeof MissionHubVerticalsVerticalRoute
   '/pilot/missions/$id': typeof PilotMissionsIdRoute
-  '/mission-hub/torqwings-design-studio/': typeof MissionHubTorqwingsDesignStudioIndexRoute
   '/pilot/missions/': typeof PilotMissionsIndexRoute
   '/academy/courses/$slug/learn': typeof AcademyCoursesSlugLearnRoute
   '/api/hangar/process-bernoulli/review': typeof ApiHangarProcessBernoulliReviewRoute
@@ -1368,7 +1004,6 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/academy'
-    | '/destud'
     | '/field'
     | '/hangar-stage3-manualtest'
     | '/mission-hub'
@@ -1376,36 +1011,15 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/the-hangar'
     | '/about'
-    | '/agrisky'
     | '/contact'
-    | '/guardsky'
-    | '/industries'
-    | '/pilots'
     | '/academy/dashboard'
-    | '/academy/lesson-demo'
-    | '/academy/quiz-demo'
-    | '/destud/new-mission'
     | '/mission-hub/academy-users'
     | '/mission-hub/ai-providers'
     | '/mission-hub/contacts'
     | '/mission-hub/dashboard'
-    | '/mission-hub/design-studio'
-    | '/mission-hub/knowledge-uav'
     | '/mission-hub/login'
     | '/mission-hub/reset-password'
     | '/mission-hub/settings'
-    | '/mission-hub/torqwings-design-studio'
-    | '/mission-hub/twbc-drone-approval'
-    | '/mission-hub/twbc-drone-components-library'
-    | '/mission-hub/twbc-drone-design-rule'
-    | '/mission-hub/twbc-drone-design-rules'
-    | '/mission-hub/twbc-drone-design-score'
-    | '/mission-hub/twbc-drone-feedback'
-    | '/mission-hub/twbc-drone-proven-designs'
-    | '/mission-hub/twbc-drone-reasoning-api'
-    | '/mission-hub/twbc-drone-reference-designs'
-    | '/mission-hub/twbc-drone-rule-engine'
-    | '/mission-hub/twbc-drone-similarity-search'
     | '/mission-hub/users'
     | '/mission-hub/waitlist'
     | '/pilot/login'
@@ -1432,7 +1046,6 @@ export interface FileRouteTypes {
     | '/the-hangar/validation'
     | '/the-hangar/welcome'
     | '/academy/'
-    | '/destud/'
     | '/mission-hub/'
     | '/pilot/'
     | '/t-h/'
@@ -1463,23 +1076,8 @@ export interface FileRouteTypes {
     | '/api/hangar/validations'
     | '/api/hangar/vehicle-design-files'
     | '/api/harness/call'
-    | '/destud/dashboard/engineer'
-    | '/destud/dashboard/explorer'
-    | '/destud/projects/$projectId'
     | '/mission-hub/agents/bernoulli'
-    | '/mission-hub/torqwings-design-studio/advisor'
-    | '/mission-hub/torqwings-design-studio/compliance'
-    | '/mission-hub/torqwings-design-studio/components'
-    | '/mission-hub/torqwings-design-studio/design'
-    | '/mission-hub/torqwings-design-studio/design-rule'
-    | '/mission-hub/torqwings-design-studio/history'
-    | '/mission-hub/torqwings-design-studio/new'
-    | '/mission-hub/torqwings-design-studio/report'
-    | '/mission-hub/torqwings-design-studio/requirements'
-    | '/mission-hub/torqwings-design-studio/simulation'
-    | '/mission-hub/verticals/$vertical'
     | '/pilot/missions/$id'
-    | '/mission-hub/torqwings-design-studio/'
     | '/pilot/missions/'
     | '/academy/courses/$slug/learn'
     | '/api/hangar/process-bernoulli/review'
@@ -1515,35 +1113,15 @@ export interface FileRouteTypes {
     | '/hangar-stage3-manualtest'
     | '/sitemap.xml'
     | '/about'
-    | '/agrisky'
     | '/contact'
-    | '/guardsky'
-    | '/industries'
-    | '/pilots'
     | '/academy/dashboard'
-    | '/academy/lesson-demo'
-    | '/academy/quiz-demo'
-    | '/destud/new-mission'
     | '/mission-hub/academy-users'
     | '/mission-hub/ai-providers'
     | '/mission-hub/contacts'
     | '/mission-hub/dashboard'
-    | '/mission-hub/design-studio'
-    | '/mission-hub/knowledge-uav'
     | '/mission-hub/login'
     | '/mission-hub/reset-password'
     | '/mission-hub/settings'
-    | '/mission-hub/twbc-drone-approval'
-    | '/mission-hub/twbc-drone-components-library'
-    | '/mission-hub/twbc-drone-design-rule'
-    | '/mission-hub/twbc-drone-design-rules'
-    | '/mission-hub/twbc-drone-design-score'
-    | '/mission-hub/twbc-drone-feedback'
-    | '/mission-hub/twbc-drone-proven-designs'
-    | '/mission-hub/twbc-drone-reasoning-api'
-    | '/mission-hub/twbc-drone-reference-designs'
-    | '/mission-hub/twbc-drone-rule-engine'
-    | '/mission-hub/twbc-drone-similarity-search'
     | '/mission-hub/users'
     | '/mission-hub/waitlist'
     | '/pilot/login'
@@ -1571,7 +1149,6 @@ export interface FileRouteTypes {
     | '/the-hangar/welcome'
     | '/'
     | '/academy'
-    | '/destud'
     | '/mission-hub'
     | '/pilot'
     | '/t-h'
@@ -1602,23 +1179,8 @@ export interface FileRouteTypes {
     | '/api/hangar/validations'
     | '/api/hangar/vehicle-design-files'
     | '/api/harness/call'
-    | '/destud/dashboard/engineer'
-    | '/destud/dashboard/explorer'
-    | '/destud/projects/$projectId'
     | '/mission-hub/agents/bernoulli'
-    | '/mission-hub/torqwings-design-studio/advisor'
-    | '/mission-hub/torqwings-design-studio/compliance'
-    | '/mission-hub/torqwings-design-studio/components'
-    | '/mission-hub/torqwings-design-studio/design'
-    | '/mission-hub/torqwings-design-studio/design-rule'
-    | '/mission-hub/torqwings-design-studio/history'
-    | '/mission-hub/torqwings-design-studio/new'
-    | '/mission-hub/torqwings-design-studio/report'
-    | '/mission-hub/torqwings-design-studio/requirements'
-    | '/mission-hub/torqwings-design-studio/simulation'
-    | '/mission-hub/verticals/$vertical'
     | '/pilot/missions/$id'
-    | '/mission-hub/torqwings-design-studio'
     | '/pilot/missions'
     | '/academy/courses/$slug/learn'
     | '/api/hangar/process-bernoulli/review'
@@ -1652,7 +1214,6 @@ export interface FileRouteTypes {
     | '__root__'
     | '/_layout'
     | '/academy'
-    | '/destud'
     | '/field'
     | '/hangar-stage3-manualtest'
     | '/mission-hub'
@@ -1660,36 +1221,15 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/the-hangar'
     | '/_layout/about'
-    | '/_layout/agrisky'
     | '/_layout/contact'
-    | '/_layout/guardsky'
-    | '/_layout/industries'
-    | '/_layout/pilots'
     | '/academy/dashboard'
-    | '/academy/lesson-demo'
-    | '/academy/quiz-demo'
-    | '/destud/new-mission'
     | '/mission-hub/academy-users'
     | '/mission-hub/ai-providers'
     | '/mission-hub/contacts'
     | '/mission-hub/dashboard'
-    | '/mission-hub/design-studio'
-    | '/mission-hub/knowledge-uav'
     | '/mission-hub/login'
     | '/mission-hub/reset-password'
     | '/mission-hub/settings'
-    | '/mission-hub/torqwings-design-studio'
-    | '/mission-hub/twbc-drone-approval'
-    | '/mission-hub/twbc-drone-components-library'
-    | '/mission-hub/twbc-drone-design-rule'
-    | '/mission-hub/twbc-drone-design-rules'
-    | '/mission-hub/twbc-drone-design-score'
-    | '/mission-hub/twbc-drone-feedback'
-    | '/mission-hub/twbc-drone-proven-designs'
-    | '/mission-hub/twbc-drone-reasoning-api'
-    | '/mission-hub/twbc-drone-reference-designs'
-    | '/mission-hub/twbc-drone-rule-engine'
-    | '/mission-hub/twbc-drone-similarity-search'
     | '/mission-hub/users'
     | '/mission-hub/waitlist'
     | '/pilot/login'
@@ -1717,7 +1257,6 @@ export interface FileRouteTypes {
     | '/the-hangar/welcome'
     | '/_layout/'
     | '/academy/'
-    | '/destud/'
     | '/mission-hub/'
     | '/pilot/'
     | '/t-h/'
@@ -1748,23 +1287,8 @@ export interface FileRouteTypes {
     | '/api/hangar/validations'
     | '/api/hangar/vehicle-design-files'
     | '/api/harness/call'
-    | '/destud/dashboard/engineer'
-    | '/destud/dashboard/explorer'
-    | '/destud/projects/$projectId'
     | '/mission-hub/agents/bernoulli'
-    | '/mission-hub/torqwings-design-studio/advisor'
-    | '/mission-hub/torqwings-design-studio/compliance'
-    | '/mission-hub/torqwings-design-studio/components'
-    | '/mission-hub/torqwings-design-studio/design'
-    | '/mission-hub/torqwings-design-studio/design-rule'
-    | '/mission-hub/torqwings-design-studio/history'
-    | '/mission-hub/torqwings-design-studio/new'
-    | '/mission-hub/torqwings-design-studio/report'
-    | '/mission-hub/torqwings-design-studio/requirements'
-    | '/mission-hub/torqwings-design-studio/simulation'
-    | '/mission-hub/verticals/$vertical'
     | '/pilot/missions/$id'
-    | '/mission-hub/torqwings-design-studio/'
     | '/pilot/missions/'
     | '/academy/courses/$slug/learn'
     | '/api/hangar/process-bernoulli/review'
@@ -1799,7 +1323,6 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   LayoutRoute: typeof LayoutRouteWithChildren
   AcademyRoute: typeof AcademyRouteWithChildren
-  DestudRoute: typeof DestudRouteWithChildren
   FieldRoute: typeof FieldRoute
   HangarStage3ManualtestRoute: typeof HangarStage3ManualtestRoute
   MissionHubRoute: typeof MissionHubRouteWithChildren
@@ -1874,13 +1397,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AcademyRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/destud': {
-      id: '/destud'
-      path: '/destud'
-      fullPath: '/destud'
-      preLoaderRoute: typeof DestudRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/field': {
       id: '/field'
       path: '/field'
@@ -1937,39 +1453,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutAboutRouteImport
       parentRoute: typeof LayoutRoute
     }
-    '/_layout/agrisky': {
-      id: '/_layout/agrisky'
-      path: '/agrisky'
-      fullPath: '/agrisky'
-      preLoaderRoute: typeof LayoutAgriskyRouteImport
-      parentRoute: typeof LayoutRoute
-    }
     '/_layout/contact': {
       id: '/_layout/contact'
       path: '/contact'
       fullPath: '/contact'
       preLoaderRoute: typeof LayoutContactRouteImport
-      parentRoute: typeof LayoutRoute
-    }
-    '/_layout/guardsky': {
-      id: '/_layout/guardsky'
-      path: '/guardsky'
-      fullPath: '/guardsky'
-      preLoaderRoute: typeof LayoutGuardskyRouteImport
-      parentRoute: typeof LayoutRoute
-    }
-    '/_layout/industries': {
-      id: '/_layout/industries'
-      path: '/industries'
-      fullPath: '/industries'
-      preLoaderRoute: typeof LayoutIndustriesRouteImport
-      parentRoute: typeof LayoutRoute
-    }
-    '/_layout/pilots': {
-      id: '/_layout/pilots'
-      path: '/pilots'
-      fullPath: '/pilots'
-      preLoaderRoute: typeof LayoutPilotsRouteImport
       parentRoute: typeof LayoutRoute
     }
     '/academy/': {
@@ -1985,34 +1473,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/academy/dashboard'
       preLoaderRoute: typeof AcademyDashboardRouteImport
       parentRoute: typeof AcademyRoute
-    }
-    '/academy/lesson-demo': {
-      id: '/academy/lesson-demo'
-      path: '/lesson-demo'
-      fullPath: '/academy/lesson-demo'
-      preLoaderRoute: typeof AcademyLessonDemoRouteImport
-      parentRoute: typeof AcademyRoute
-    }
-    '/academy/quiz-demo': {
-      id: '/academy/quiz-demo'
-      path: '/quiz-demo'
-      fullPath: '/academy/quiz-demo'
-      preLoaderRoute: typeof AcademyQuizDemoRouteImport
-      parentRoute: typeof AcademyRoute
-    }
-    '/destud/': {
-      id: '/destud/'
-      path: '/'
-      fullPath: '/destud/'
-      preLoaderRoute: typeof DestudIndexRouteImport
-      parentRoute: typeof DestudRoute
-    }
-    '/destud/new-mission': {
-      id: '/destud/new-mission'
-      path: '/new-mission'
-      fullPath: '/destud/new-mission'
-      preLoaderRoute: typeof DestudNewMissionRouteImport
-      parentRoute: typeof DestudRoute
     }
     '/mission-hub/': {
       id: '/mission-hub/'
@@ -2049,20 +1509,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MissionHubDashboardRouteImport
       parentRoute: typeof MissionHubRoute
     }
-    '/mission-hub/design-studio': {
-      id: '/mission-hub/design-studio'
-      path: '/design-studio'
-      fullPath: '/mission-hub/design-studio'
-      preLoaderRoute: typeof MissionHubDesignStudioRouteImport
-      parentRoute: typeof MissionHubRoute
-    }
-    '/mission-hub/knowledge-uav': {
-      id: '/mission-hub/knowledge-uav'
-      path: '/knowledge-uav'
-      fullPath: '/mission-hub/knowledge-uav'
-      preLoaderRoute: typeof MissionHubKnowledgeUavRouteImport
-      parentRoute: typeof MissionHubRoute
-    }
     '/mission-hub/login': {
       id: '/mission-hub/login'
       path: '/login'
@@ -2082,90 +1528,6 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/mission-hub/settings'
       preLoaderRoute: typeof MissionHubSettingsRouteImport
-      parentRoute: typeof MissionHubRoute
-    }
-    '/mission-hub/torqwings-design-studio': {
-      id: '/mission-hub/torqwings-design-studio'
-      path: '/torqwings-design-studio'
-      fullPath: '/mission-hub/torqwings-design-studio'
-      preLoaderRoute: typeof MissionHubTorqwingsDesignStudioRouteImport
-      parentRoute: typeof MissionHubRoute
-    }
-    '/mission-hub/twbc-drone-approval': {
-      id: '/mission-hub/twbc-drone-approval'
-      path: '/twbc-drone-approval'
-      fullPath: '/mission-hub/twbc-drone-approval'
-      preLoaderRoute: typeof MissionHubTwbcDroneApprovalRouteImport
-      parentRoute: typeof MissionHubRoute
-    }
-    '/mission-hub/twbc-drone-components-library': {
-      id: '/mission-hub/twbc-drone-components-library'
-      path: '/twbc-drone-components-library'
-      fullPath: '/mission-hub/twbc-drone-components-library'
-      preLoaderRoute: typeof MissionHubTwbcDroneComponentsLibraryRouteImport
-      parentRoute: typeof MissionHubRoute
-    }
-    '/mission-hub/twbc-drone-design-rule': {
-      id: '/mission-hub/twbc-drone-design-rule'
-      path: '/twbc-drone-design-rule'
-      fullPath: '/mission-hub/twbc-drone-design-rule'
-      preLoaderRoute: typeof MissionHubTwbcDroneDesignRuleRouteImport
-      parentRoute: typeof MissionHubRoute
-    }
-    '/mission-hub/twbc-drone-design-rules': {
-      id: '/mission-hub/twbc-drone-design-rules'
-      path: '/twbc-drone-design-rules'
-      fullPath: '/mission-hub/twbc-drone-design-rules'
-      preLoaderRoute: typeof MissionHubTwbcDroneDesignRulesRouteImport
-      parentRoute: typeof MissionHubRoute
-    }
-    '/mission-hub/twbc-drone-design-score': {
-      id: '/mission-hub/twbc-drone-design-score'
-      path: '/twbc-drone-design-score'
-      fullPath: '/mission-hub/twbc-drone-design-score'
-      preLoaderRoute: typeof MissionHubTwbcDroneDesignScoreRouteImport
-      parentRoute: typeof MissionHubRoute
-    }
-    '/mission-hub/twbc-drone-feedback': {
-      id: '/mission-hub/twbc-drone-feedback'
-      path: '/twbc-drone-feedback'
-      fullPath: '/mission-hub/twbc-drone-feedback'
-      preLoaderRoute: typeof MissionHubTwbcDroneFeedbackRouteImport
-      parentRoute: typeof MissionHubRoute
-    }
-    '/mission-hub/twbc-drone-proven-designs': {
-      id: '/mission-hub/twbc-drone-proven-designs'
-      path: '/twbc-drone-proven-designs'
-      fullPath: '/mission-hub/twbc-drone-proven-designs'
-      preLoaderRoute: typeof MissionHubTwbcDroneProvenDesignsRouteImport
-      parentRoute: typeof MissionHubRoute
-    }
-    '/mission-hub/twbc-drone-reasoning-api': {
-      id: '/mission-hub/twbc-drone-reasoning-api'
-      path: '/twbc-drone-reasoning-api'
-      fullPath: '/mission-hub/twbc-drone-reasoning-api'
-      preLoaderRoute: typeof MissionHubTwbcDroneReasoningApiRouteImport
-      parentRoute: typeof MissionHubRoute
-    }
-    '/mission-hub/twbc-drone-reference-designs': {
-      id: '/mission-hub/twbc-drone-reference-designs'
-      path: '/twbc-drone-reference-designs'
-      fullPath: '/mission-hub/twbc-drone-reference-designs'
-      preLoaderRoute: typeof MissionHubTwbcDroneReferenceDesignsRouteImport
-      parentRoute: typeof MissionHubRoute
-    }
-    '/mission-hub/twbc-drone-rule-engine': {
-      id: '/mission-hub/twbc-drone-rule-engine'
-      path: '/twbc-drone-rule-engine'
-      fullPath: '/mission-hub/twbc-drone-rule-engine'
-      preLoaderRoute: typeof MissionHubTwbcDroneRuleEngineRouteImport
-      parentRoute: typeof MissionHubRoute
-    }
-    '/mission-hub/twbc-drone-similarity-search': {
-      id: '/mission-hub/twbc-drone-similarity-search'
-      path: '/twbc-drone-similarity-search'
-      fullPath: '/mission-hub/twbc-drone-similarity-search'
-      preLoaderRoute: typeof MissionHubTwbcDroneSimilaritySearchRouteImport
       parentRoute: typeof MissionHubRoute
     }
     '/mission-hub/users': {
@@ -2546,116 +1908,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiHarnessCallRouteImport
       parentRoute: typeof ApiHarnessRoute
     }
-    '/destud/dashboard/engineer': {
-      id: '/destud/dashboard/engineer'
-      path: '/dashboard/engineer'
-      fullPath: '/destud/dashboard/engineer'
-      preLoaderRoute: typeof DestudDashboardEngineerRouteImport
-      parentRoute: typeof DestudRoute
-    }
-    '/destud/dashboard/explorer': {
-      id: '/destud/dashboard/explorer'
-      path: '/dashboard/explorer'
-      fullPath: '/destud/dashboard/explorer'
-      preLoaderRoute: typeof DestudDashboardExplorerRouteImport
-      parentRoute: typeof DestudRoute
-    }
-    '/destud/projects/$projectId': {
-      id: '/destud/projects/$projectId'
-      path: '/projects/$projectId'
-      fullPath: '/destud/projects/$projectId'
-      preLoaderRoute: typeof DestudProjectsProjectIdRouteImport
-      parentRoute: typeof DestudRoute
-    }
     '/mission-hub/agents/bernoulli': {
       id: '/mission-hub/agents/bernoulli'
       path: '/agents/bernoulli'
       fullPath: '/mission-hub/agents/bernoulli'
       preLoaderRoute: typeof MissionHubAgentsBernoulliRouteImport
-      parentRoute: typeof MissionHubRoute
-    }
-    '/mission-hub/torqwings-design-studio/': {
-      id: '/mission-hub/torqwings-design-studio/'
-      path: '/'
-      fullPath: '/mission-hub/torqwings-design-studio/'
-      preLoaderRoute: typeof MissionHubTorqwingsDesignStudioIndexRouteImport
-      parentRoute: typeof MissionHubTorqwingsDesignStudioRoute
-    }
-    '/mission-hub/torqwings-design-studio/advisor': {
-      id: '/mission-hub/torqwings-design-studio/advisor'
-      path: '/advisor'
-      fullPath: '/mission-hub/torqwings-design-studio/advisor'
-      preLoaderRoute: typeof MissionHubTorqwingsDesignStudioAdvisorRouteImport
-      parentRoute: typeof MissionHubTorqwingsDesignStudioRoute
-    }
-    '/mission-hub/torqwings-design-studio/compliance': {
-      id: '/mission-hub/torqwings-design-studio/compliance'
-      path: '/compliance'
-      fullPath: '/mission-hub/torqwings-design-studio/compliance'
-      preLoaderRoute: typeof MissionHubTorqwingsDesignStudioComplianceRouteImport
-      parentRoute: typeof MissionHubTorqwingsDesignStudioRoute
-    }
-    '/mission-hub/torqwings-design-studio/components': {
-      id: '/mission-hub/torqwings-design-studio/components'
-      path: '/components'
-      fullPath: '/mission-hub/torqwings-design-studio/components'
-      preLoaderRoute: typeof MissionHubTorqwingsDesignStudioComponentsRouteImport
-      parentRoute: typeof MissionHubTorqwingsDesignStudioRoute
-    }
-    '/mission-hub/torqwings-design-studio/design': {
-      id: '/mission-hub/torqwings-design-studio/design'
-      path: '/design'
-      fullPath: '/mission-hub/torqwings-design-studio/design'
-      preLoaderRoute: typeof MissionHubTorqwingsDesignStudioDesignRouteImport
-      parentRoute: typeof MissionHubTorqwingsDesignStudioRoute
-    }
-    '/mission-hub/torqwings-design-studio/design-rule': {
-      id: '/mission-hub/torqwings-design-studio/design-rule'
-      path: '/design-rule'
-      fullPath: '/mission-hub/torqwings-design-studio/design-rule'
-      preLoaderRoute: typeof MissionHubTorqwingsDesignStudioDesignRuleRouteImport
-      parentRoute: typeof MissionHubTorqwingsDesignStudioRoute
-    }
-    '/mission-hub/torqwings-design-studio/history': {
-      id: '/mission-hub/torqwings-design-studio/history'
-      path: '/history'
-      fullPath: '/mission-hub/torqwings-design-studio/history'
-      preLoaderRoute: typeof MissionHubTorqwingsDesignStudioHistoryRouteImport
-      parentRoute: typeof MissionHubTorqwingsDesignStudioRoute
-    }
-    '/mission-hub/torqwings-design-studio/new': {
-      id: '/mission-hub/torqwings-design-studio/new'
-      path: '/new'
-      fullPath: '/mission-hub/torqwings-design-studio/new'
-      preLoaderRoute: typeof MissionHubTorqwingsDesignStudioNewRouteImport
-      parentRoute: typeof MissionHubTorqwingsDesignStudioRoute
-    }
-    '/mission-hub/torqwings-design-studio/report': {
-      id: '/mission-hub/torqwings-design-studio/report'
-      path: '/report'
-      fullPath: '/mission-hub/torqwings-design-studio/report'
-      preLoaderRoute: typeof MissionHubTorqwingsDesignStudioReportRouteImport
-      parentRoute: typeof MissionHubTorqwingsDesignStudioRoute
-    }
-    '/mission-hub/torqwings-design-studio/requirements': {
-      id: '/mission-hub/torqwings-design-studio/requirements'
-      path: '/requirements'
-      fullPath: '/mission-hub/torqwings-design-studio/requirements'
-      preLoaderRoute: typeof MissionHubTorqwingsDesignStudioRequirementsRouteImport
-      parentRoute: typeof MissionHubTorqwingsDesignStudioRoute
-    }
-    '/mission-hub/torqwings-design-studio/simulation': {
-      id: '/mission-hub/torqwings-design-studio/simulation'
-      path: '/simulation'
-      fullPath: '/mission-hub/torqwings-design-studio/simulation'
-      preLoaderRoute: typeof MissionHubTorqwingsDesignStudioSimulationRouteImport
-      parentRoute: typeof MissionHubTorqwingsDesignStudioRoute
-    }
-    '/mission-hub/verticals/$vertical': {
-      id: '/mission-hub/verticals/$vertical'
-      path: '/verticals/$vertical'
-      fullPath: '/mission-hub/verticals/$vertical'
-      preLoaderRoute: typeof MissionHubVerticalsVerticalRouteImport
       parentRoute: typeof MissionHubRoute
     }
     '/pilot/missions/': {
@@ -2873,22 +2130,14 @@ declare module '@tanstack/react-router' {
 
 interface LayoutRouteChildren {
   LayoutAboutRoute: typeof LayoutAboutRoute
-  LayoutAgriskyRoute: typeof LayoutAgriskyRoute
   LayoutContactRoute: typeof LayoutContactRoute
-  LayoutGuardskyRoute: typeof LayoutGuardskyRoute
-  LayoutIndustriesRoute: typeof LayoutIndustriesRoute
-  LayoutPilotsRoute: typeof LayoutPilotsRoute
   LayoutIndexRoute: typeof LayoutIndexRoute
   LayoutAuthCallbackRoute: typeof LayoutAuthCallbackRoute
 }
 
 const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutAboutRoute: LayoutAboutRoute,
-  LayoutAgriskyRoute: LayoutAgriskyRoute,
   LayoutContactRoute: LayoutContactRoute,
-  LayoutGuardskyRoute: LayoutGuardskyRoute,
-  LayoutIndustriesRoute: LayoutIndustriesRoute,
-  LayoutPilotsRoute: LayoutPilotsRoute,
   LayoutIndexRoute: LayoutIndexRoute,
   LayoutAuthCallbackRoute: LayoutAuthCallbackRoute,
 }
@@ -2898,8 +2147,6 @@ const LayoutRouteWithChildren =
 
 interface AcademyRouteChildren {
   AcademyDashboardRoute: typeof AcademyDashboardRoute
-  AcademyLessonDemoRoute: typeof AcademyLessonDemoRoute
-  AcademyQuizDemoRoute: typeof AcademyQuizDemoRoute
   AcademyIndexRoute: typeof AcademyIndexRoute
   AcademyCoursesSlugLearnRoute: typeof AcademyCoursesSlugLearnRoute
   AcademyCoursesSlugModulesModuleIdRoute: typeof AcademyCoursesSlugModulesModuleIdRoute
@@ -2909,8 +2156,6 @@ interface AcademyRouteChildren {
 
 const AcademyRouteChildren: AcademyRouteChildren = {
   AcademyDashboardRoute: AcademyDashboardRoute,
-  AcademyLessonDemoRoute: AcademyLessonDemoRoute,
-  AcademyQuizDemoRoute: AcademyQuizDemoRoute,
   AcademyIndexRoute: AcademyIndexRoute,
   AcademyCoursesSlugLearnRoute: AcademyCoursesSlugLearnRoute,
   AcademyCoursesSlugModulesModuleIdRoute:
@@ -2923,97 +2168,18 @@ const AcademyRouteChildren: AcademyRouteChildren = {
 const AcademyRouteWithChildren =
   AcademyRoute._addFileChildren(AcademyRouteChildren)
 
-interface DestudRouteChildren {
-  DestudNewMissionRoute: typeof DestudNewMissionRoute
-  DestudIndexRoute: typeof DestudIndexRoute
-  DestudDashboardEngineerRoute: typeof DestudDashboardEngineerRoute
-  DestudDashboardExplorerRoute: typeof DestudDashboardExplorerRoute
-  DestudProjectsProjectIdRoute: typeof DestudProjectsProjectIdRoute
-}
-
-const DestudRouteChildren: DestudRouteChildren = {
-  DestudNewMissionRoute: DestudNewMissionRoute,
-  DestudIndexRoute: DestudIndexRoute,
-  DestudDashboardEngineerRoute: DestudDashboardEngineerRoute,
-  DestudDashboardExplorerRoute: DestudDashboardExplorerRoute,
-  DestudProjectsProjectIdRoute: DestudProjectsProjectIdRoute,
-}
-
-const DestudRouteWithChildren =
-  DestudRoute._addFileChildren(DestudRouteChildren)
-
-interface MissionHubTorqwingsDesignStudioRouteChildren {
-  MissionHubTorqwingsDesignStudioAdvisorRoute: typeof MissionHubTorqwingsDesignStudioAdvisorRoute
-  MissionHubTorqwingsDesignStudioComplianceRoute: typeof MissionHubTorqwingsDesignStudioComplianceRoute
-  MissionHubTorqwingsDesignStudioComponentsRoute: typeof MissionHubTorqwingsDesignStudioComponentsRoute
-  MissionHubTorqwingsDesignStudioDesignRoute: typeof MissionHubTorqwingsDesignStudioDesignRoute
-  MissionHubTorqwingsDesignStudioDesignRuleRoute: typeof MissionHubTorqwingsDesignStudioDesignRuleRoute
-  MissionHubTorqwingsDesignStudioHistoryRoute: typeof MissionHubTorqwingsDesignStudioHistoryRoute
-  MissionHubTorqwingsDesignStudioNewRoute: typeof MissionHubTorqwingsDesignStudioNewRoute
-  MissionHubTorqwingsDesignStudioReportRoute: typeof MissionHubTorqwingsDesignStudioReportRoute
-  MissionHubTorqwingsDesignStudioRequirementsRoute: typeof MissionHubTorqwingsDesignStudioRequirementsRoute
-  MissionHubTorqwingsDesignStudioSimulationRoute: typeof MissionHubTorqwingsDesignStudioSimulationRoute
-  MissionHubTorqwingsDesignStudioIndexRoute: typeof MissionHubTorqwingsDesignStudioIndexRoute
-}
-
-const MissionHubTorqwingsDesignStudioRouteChildren: MissionHubTorqwingsDesignStudioRouteChildren =
-  {
-    MissionHubTorqwingsDesignStudioAdvisorRoute:
-      MissionHubTorqwingsDesignStudioAdvisorRoute,
-    MissionHubTorqwingsDesignStudioComplianceRoute:
-      MissionHubTorqwingsDesignStudioComplianceRoute,
-    MissionHubTorqwingsDesignStudioComponentsRoute:
-      MissionHubTorqwingsDesignStudioComponentsRoute,
-    MissionHubTorqwingsDesignStudioDesignRoute:
-      MissionHubTorqwingsDesignStudioDesignRoute,
-    MissionHubTorqwingsDesignStudioDesignRuleRoute:
-      MissionHubTorqwingsDesignStudioDesignRuleRoute,
-    MissionHubTorqwingsDesignStudioHistoryRoute:
-      MissionHubTorqwingsDesignStudioHistoryRoute,
-    MissionHubTorqwingsDesignStudioNewRoute:
-      MissionHubTorqwingsDesignStudioNewRoute,
-    MissionHubTorqwingsDesignStudioReportRoute:
-      MissionHubTorqwingsDesignStudioReportRoute,
-    MissionHubTorqwingsDesignStudioRequirementsRoute:
-      MissionHubTorqwingsDesignStudioRequirementsRoute,
-    MissionHubTorqwingsDesignStudioSimulationRoute:
-      MissionHubTorqwingsDesignStudioSimulationRoute,
-    MissionHubTorqwingsDesignStudioIndexRoute:
-      MissionHubTorqwingsDesignStudioIndexRoute,
-  }
-
-const MissionHubTorqwingsDesignStudioRouteWithChildren =
-  MissionHubTorqwingsDesignStudioRoute._addFileChildren(
-    MissionHubTorqwingsDesignStudioRouteChildren,
-  )
-
 interface MissionHubRouteChildren {
   MissionHubAcademyUsersRoute: typeof MissionHubAcademyUsersRoute
   MissionHubAiProvidersRoute: typeof MissionHubAiProvidersRoute
   MissionHubContactsRoute: typeof MissionHubContactsRoute
   MissionHubDashboardRoute: typeof MissionHubDashboardRoute
-  MissionHubDesignStudioRoute: typeof MissionHubDesignStudioRoute
-  MissionHubKnowledgeUavRoute: typeof MissionHubKnowledgeUavRoute
   MissionHubLoginRoute: typeof MissionHubLoginRoute
   MissionHubResetPasswordRoute: typeof MissionHubResetPasswordRoute
   MissionHubSettingsRoute: typeof MissionHubSettingsRoute
-  MissionHubTorqwingsDesignStudioRoute: typeof MissionHubTorqwingsDesignStudioRouteWithChildren
-  MissionHubTwbcDroneApprovalRoute: typeof MissionHubTwbcDroneApprovalRoute
-  MissionHubTwbcDroneComponentsLibraryRoute: typeof MissionHubTwbcDroneComponentsLibraryRoute
-  MissionHubTwbcDroneDesignRuleRoute: typeof MissionHubTwbcDroneDesignRuleRoute
-  MissionHubTwbcDroneDesignRulesRoute: typeof MissionHubTwbcDroneDesignRulesRoute
-  MissionHubTwbcDroneDesignScoreRoute: typeof MissionHubTwbcDroneDesignScoreRoute
-  MissionHubTwbcDroneFeedbackRoute: typeof MissionHubTwbcDroneFeedbackRoute
-  MissionHubTwbcDroneProvenDesignsRoute: typeof MissionHubTwbcDroneProvenDesignsRoute
-  MissionHubTwbcDroneReasoningApiRoute: typeof MissionHubTwbcDroneReasoningApiRoute
-  MissionHubTwbcDroneReferenceDesignsRoute: typeof MissionHubTwbcDroneReferenceDesignsRoute
-  MissionHubTwbcDroneRuleEngineRoute: typeof MissionHubTwbcDroneRuleEngineRoute
-  MissionHubTwbcDroneSimilaritySearchRoute: typeof MissionHubTwbcDroneSimilaritySearchRoute
   MissionHubUsersRoute: typeof MissionHubUsersRoute
   MissionHubWaitlistRoute: typeof MissionHubWaitlistRoute
   MissionHubIndexRoute: typeof MissionHubIndexRoute
   MissionHubAgentsBernoulliRoute: typeof MissionHubAgentsBernoulliRoute
-  MissionHubVerticalsVerticalRoute: typeof MissionHubVerticalsVerticalRoute
 }
 
 const MissionHubRouteChildren: MissionHubRouteChildren = {
@@ -3021,32 +2187,13 @@ const MissionHubRouteChildren: MissionHubRouteChildren = {
   MissionHubAiProvidersRoute: MissionHubAiProvidersRoute,
   MissionHubContactsRoute: MissionHubContactsRoute,
   MissionHubDashboardRoute: MissionHubDashboardRoute,
-  MissionHubDesignStudioRoute: MissionHubDesignStudioRoute,
-  MissionHubKnowledgeUavRoute: MissionHubKnowledgeUavRoute,
   MissionHubLoginRoute: MissionHubLoginRoute,
   MissionHubResetPasswordRoute: MissionHubResetPasswordRoute,
   MissionHubSettingsRoute: MissionHubSettingsRoute,
-  MissionHubTorqwingsDesignStudioRoute:
-    MissionHubTorqwingsDesignStudioRouteWithChildren,
-  MissionHubTwbcDroneApprovalRoute: MissionHubTwbcDroneApprovalRoute,
-  MissionHubTwbcDroneComponentsLibraryRoute:
-    MissionHubTwbcDroneComponentsLibraryRoute,
-  MissionHubTwbcDroneDesignRuleRoute: MissionHubTwbcDroneDesignRuleRoute,
-  MissionHubTwbcDroneDesignRulesRoute: MissionHubTwbcDroneDesignRulesRoute,
-  MissionHubTwbcDroneDesignScoreRoute: MissionHubTwbcDroneDesignScoreRoute,
-  MissionHubTwbcDroneFeedbackRoute: MissionHubTwbcDroneFeedbackRoute,
-  MissionHubTwbcDroneProvenDesignsRoute: MissionHubTwbcDroneProvenDesignsRoute,
-  MissionHubTwbcDroneReasoningApiRoute: MissionHubTwbcDroneReasoningApiRoute,
-  MissionHubTwbcDroneReferenceDesignsRoute:
-    MissionHubTwbcDroneReferenceDesignsRoute,
-  MissionHubTwbcDroneRuleEngineRoute: MissionHubTwbcDroneRuleEngineRoute,
-  MissionHubTwbcDroneSimilaritySearchRoute:
-    MissionHubTwbcDroneSimilaritySearchRoute,
   MissionHubUsersRoute: MissionHubUsersRoute,
   MissionHubWaitlistRoute: MissionHubWaitlistRoute,
   MissionHubIndexRoute: MissionHubIndexRoute,
   MissionHubAgentsBernoulliRoute: MissionHubAgentsBernoulliRoute,
-  MissionHubVerticalsVerticalRoute: MissionHubVerticalsVerticalRoute,
 }
 
 const MissionHubRouteWithChildren = MissionHubRoute._addFileChildren(
@@ -3126,7 +2273,6 @@ const TheHangarRouteWithChildren = TheHangarRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   LayoutRoute: LayoutRouteWithChildren,
   AcademyRoute: AcademyRouteWithChildren,
-  DestudRoute: DestudRouteWithChildren,
   FieldRoute: FieldRoute,
   HangarStage3ManualtestRoute: HangarStage3ManualtestRoute,
   MissionHubRoute: MissionHubRouteWithChildren,

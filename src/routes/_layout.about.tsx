@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
 import { HANGAR_PUBLIC_HEAD_LINKS } from "@/styles/hangarPublicTheme";
+import { SITE_URL } from "@/lib/seo";
 
 export const Route = createFileRoute("/_layout/about")({
   head: () => ({
@@ -10,9 +11,9 @@ export const Route = createFileRoute("/_layout/about")({
       { property: "og:title", content: "About TorqWings — Built by engineers. Flown for India." },
       { property: "og:description", content: "TorqWings builds The Hangar — fifteen specialist AI agents that turn a mission brief into a simulation-validated, flyable aerial platform." },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "/about" },
+      { property: "og:url", content: `${SITE_URL}/about` },
     ],
-    links: [{ rel: "canonical", href: "/about" }, ...HANGAR_PUBLIC_HEAD_LINKS],
+    links: [{ rel: "canonical", href: `${SITE_URL}/about` }, ...HANGAR_PUBLIC_HEAD_LINKS],
   }),
   component: AboutPage,
 });

@@ -4,7 +4,7 @@ import { Inbox } from "lucide-react";
 import { MissionHubShell, MhCard } from "@/components/mission-hub/Shell";
 import { useMissionHubAuth } from "@/lib/mission-hub/context";
 import { supabase } from "@/integrations/supabase/client";
-import { VERTICAL_LABELS, type Vertical } from "@/lib/mission-hub/types";
+import { type Vertical } from "@/lib/mission-hub/types";
 
 export const Route = createFileRoute("/mission-hub/dashboard")({
   component: DashboardPage,
@@ -80,9 +80,9 @@ function AdminDashboard() {
   );
 }
 
+// The per-vertical workspaces and Design Studio were retired; users now
+// work in The Hangar.
 function UserDashboard({ name, verticals }: { name: string; verticals: Vertical[] }) {
-  const hasDesignStudio = verticals.includes("design-studio" as Vertical);
-  const otherVerticals = verticals.filter((v) => v !== ("design-studio" as Vertical));
   return (
     <div>
       <h2 className="text-2xl" style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 500, color: "var(--mh-ink)" }}>
@@ -96,26 +96,12 @@ function UserDashboard({ name, verticals }: { name: string; verticals: Vertical[
         </div>
       ) : (
         <div className="mt-6 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {hasDesignStudio && (
-            <Link to="/mission-hub/design-studio">
-              <MhCard className="p-5 hover:border-[var(--mh-amber)] transition-colors">
-                <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 500, color: "var(--mh-ink)" }}>
-                  Design Studio
-                </div>
-                <div className="mt-1 text-[12px]" style={{ color: "var(--mh-amber)" }}>Open Studio →</div>
-              </MhCard>
-            </Link>
-          )}
-          {otherVerticals.map((v) => (
-            <Link key={v} to="/mission-hub/verticals/$vertical" params={{ vertical: v }}>
-              <MhCard className="p-5 hover:border-[var(--mh-blue)] transition-colors">
-                <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 500, color: "var(--mh-ink)" }}>
-                  {VERTICAL_LABELS[v]}
-                </div>
-                <div className="mt-1 text-[12px]" style={{ color: "var(--mh-blue)" }}>Open →</div>
-              </MhCard>
-            </Link>
-          ))}
+          <Link to="/the-hangar">
+            <MhCard className="p-5 hover:border-[var(--mh-blue)] transition-colors">
+              <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 500, color: "var(--mh-ink)" }}>The Hangar</div>
+              <div className="mt-1 text-[12px]" style={{ color: "var(--mh-blue)" }}>Open →</div>
+            </MhCard>
+          </Link>
         </div>
       )}
     </div>

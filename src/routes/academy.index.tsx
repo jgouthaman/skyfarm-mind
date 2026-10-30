@@ -2,8 +2,16 @@ import { useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Plane, Lock, User, Mail, ArrowRight, Award, Loader2 } from "lucide-react";
 import { verifyAcademyUser } from "@/lib/academy-auth";
+import { pageSeo } from "@/lib/seo";
 
 export const Route = createFileRoute("/academy/")({
+  head: () =>
+    pageSeo({
+      path: "/academy",
+      title: "TorqWings Academy — UAV design certification",
+      description:
+        "The certification path for engineers who design autonomous aerial platforms — from classical theory to a simulation-validated capstone.",
+    }),
   component: AcademySignInPage,
 });
 
