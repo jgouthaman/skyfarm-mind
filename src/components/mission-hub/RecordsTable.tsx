@@ -11,8 +11,27 @@ export type ColumnDef = {
   render?: (row: any) => React.ReactNode;
 };
 
+export type RecordsQuery = {
+  search: string;
+  filters: Record<string, string>;
+  status: string;
+  dateFrom: string;
+  dateTo: string;
+  page: number;
+  pageSize: number;
+  all?: boolean;
+};
+
+// For tables the browser can't read directly (RLS with no policies): the
+// page supplies a server-backed source instead, and the same UI calls it.
+export type RecordsSource = {
+  list: (q: RecordsQuery) => Promise<{ rows: any[]; count: number }>;
+  updateStatus: (id: string, status: string) => Promise<void>;
+};
+
 type Props = {
-  table: "destud_waitlist" | "destud_users" | "contacts" | "Hangar_early_access";
+  table: "destud_waitlist" | "destud_users" | "contacts" | "Hangar_early_access" | "Site_Service_Enquiries";
+  source?: RecordsSource;
   title?: string;
   searchFields: string[];
   columns: ColumnDef[];
@@ -28,7 +47,7 @@ const PAGE_SIZE = 20;
 const inputStyle = { background: "var(--mh-bg)", borderColor: "var(--mh-hairline)", color: "var(--mh-ink)" } as const;
 
 export function RecordsTable({
-  table, title, searchFields, columns, filters = [], statusOptions = [], showStatus = true, detailFields, csvFilename, initialFilters = {},
+  table, source, title, searchFields, columns, filters = [], statusOptions = [], showStatus = true, detailFields, csvFilename, initialFilters = {},
 }: Props) {
   const [rows, setRows] = useState<any[]>([]);
   const [count, setCount] = useState(0);
@@ -49,8 +68,25 @@ export function RecordsTable({
 
   useEffect(() => { setPage(0); }, [debounced, filterValues, statusFilter, dateFrom, dateTo]);
 
+  function currentQuery(all = false): RecordsQuery {
+    return { search: debounced, filters: filterValues, status: statusFilter, dateFrom, dateTo, page, pageSize: PAGE_SIZE, all };
+  }
+
   async function load() {
     setLoading(true);
+    if (source) {
+      try {
+        const res = await source.list(currentQuery());
+        setRows(res.rows);
+        setCount(res.count);
+      } catch (e) {
+        toast.error(e instanceof Error ? e.message : "Failed to load records");
+        setRows([]);
+        setCount(0);
+      }
+      setLoading(false);
+      return;
+    }
     let q: any = supabase.from(table as any).select("*", { count: "exact" }).order("created_at", { ascending: false });
     if (debounced) {
       const ors = searchFields.map((f) => `${f}.ilike.%${debounced}%`).join(",");
@@ -84,14 +120,23 @@ export function RecordsTable({
       if (selected?.id === id) setSelected(null);
       return;
     }
-    const { error } = await supabase.from(table as any).update({ status: newStatus }).eq("id", id);
-    if (error) { toast.error(error.message); return; }
+    if (source) {
+      try { await source.updateStatus(id, newStatus); }
+      catch (e) { toast.error(e instanceof Error ? e.message : "Failed to save"); return; }
+    } else {
+      const { error } = await supabase.from(table as any).update({ status: newStatus }).eq("id", id);
+      if (error) { toast.error(error.message); return; }
+    }
     toast.success("Saved");
     setRows((r) => r.map((row) => (row.id === id ? { ...row, status: newStatus } : row)));
     if (selected?.id === id) setSelected({ ...selected, status: newStatus });
   }
 
-  async function exportCsv() {
+  async function fetchAllForExport(): Promise<any[] | null> {
+    if (source) {
+      try { return (await source.list(currentQuery(true))).rows; }
+      catch (e) { toast.error(e instanceof Error ? e.message : "Export failed"); return null; }
+    }
     let q: any = supabase.from(table as any).select("*").order("created_at", { ascending: false });
     if (debounced) {
       const ors = searchFields.map((f) => `${f}.ilike.%${debounced}%`).join(",");
@@ -102,8 +147,13 @@ export function RecordsTable({
     if (dateFrom) q = q.gte("created_at", dateFrom);
     if (dateTo) q = q.lte("created_at", `${dateTo}T23:59:59`);
     const { data, error } = await q;
-    if (error) { toast.error(error.message); return; }
-    const allRows = (data as any[]) ?? [];
+    if (error) { toast.error(error.message); return null; }
+    return (data as any[]) ?? [];
+  }
+
+  async function exportCsv() {
+    const allRows = await fetchAllForExport();
+    if (!allRows) return;
     if (!allRows.length) { toast.error("Nothing to export"); return; }
     const headers = Object.keys(allRows[0]);
     const escape = (v: any) => {

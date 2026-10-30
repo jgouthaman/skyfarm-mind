@@ -18,7 +18,7 @@ export function Navbar() {
 
         <nav className="hgr-pub-navbar-links hidden md:flex">
           {NAV_LINKS.map((n) => (
-            <Link key={n.to} to={n.to}>
+            <Link key={n.to} to={n.to} activeProps={{ className: "is-active" }} activeOptions={{ exact: n.to === "/" }}>
               {n.label}
             </Link>
           ))}
@@ -42,6 +42,8 @@ export function Navbar() {
               <Link
                 key={n.to}
                 to={n.to}
+                activeProps={{ className: "is-active" }}
+                activeOptions={{ exact: n.to === "/" }}
                 onClick={() => setOpen(false)}
               >
                 {n.label}
