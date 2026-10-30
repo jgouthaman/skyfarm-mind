@@ -9,7 +9,9 @@ import { systemOf } from "./VehicleDesignCharts";
 // Rotate spins it (and the propeller). Two optional layers: Components (the
 // bays and motor as boxes at their CAD positions, fuselage see-through) and
 // Mass points (every mass-breakdown entry at its CG, sized by mass) -- coloured
-// by system exactly as in Weight by system.
+// by system exactly as in Weight by system. A third layer, Controls (fixed
+// wing only), draws the ailerons, elevator and rudder as hinged plates at
+// their stated areas; Deflect sweeps roll, pitch and yaw to the design limits.
 //
 // Aircraft frame (CAD handover): x aft from the nose, y to the right wingtip,
 // z down. Everything below works in that frame until projection.
@@ -41,6 +43,38 @@ interface MassPoint {
   outside: boolean;
 }
 
+type SurfaceKey = "aileron" | "elevator" | "rudder";
+
+// A control surface as one or more flat plates hinged along a line. Each
+// panel's trailing edge swings in the x-z plane (aileron, elevator) or the
+// x-y plane (rudder); sign makes the ailerons move opposite each other.
+interface ControlSurface {
+  key: SurfaceKey;
+  name: string;
+  panels: { h0: V3; h1: V3; c0: number; c1: number; sign: number }[];
+  swing: "xz" | "xy";
+  maxDeg: number;
+  restDeg: number;
+  label: string;
+  // Size against its reference surface, for the check table.
+  area: number;
+  refName: string;
+  refArea: number;
+  share: [number, number];
+  chordPct: number | null;
+  authorityNm: number | null;
+}
+
+type Deflection = Record<SurfaceKey, number>;
+
+// Deflect cycle: roll, then pitch, then yaw, each swept through ± its limit.
+const DEFLECT_PHASE = 2.2;
+const DEFLECT_ORDER: { key: SurfaceKey; axis: string }[] = [
+  { key: "aileron", axis: "Roll" },
+  { key: "elevator", axis: "Pitch" },
+  { key: "rudder", axis: "Yaw" },
+];
+
 type ViewName = "top" | "side" | "front" | "iso";
 
 // Camera yaw/pitch for each preset (see project()).
@@ -57,6 +91,7 @@ const COLORS = {
   tail: "#BCD4EA",
   prop: "#334A5E",
   disc: "#334A5E",
+  control: "#7B5CC4",
 };
 
 const W = 640;
@@ -72,14 +107,18 @@ export function VehicleModelView({ d }: { d: VehicleDesignOutput }) {
   const [kick, setKick] = useState(0);
   const [showParts, setShowParts] = useState(false);
   const [showMass, setShowMass] = useState(false);
+  const [showCtrl, setShowCtrl] = useState(false);
+  const [deflecting, setDeflecting] = useState(false);
+  const [deflT, setDeflT] = useState(0);
   const camRef = useRef(cam);
   camRef.current = cam;
   const tween = useRef<{ from: { yaw: number; pitch: number }; to: { yaw: number; pitch: number }; start: number } | null>(null);
   const drag = useRef<{ x: number; y: number } | null>(null);
 
-  // One animation loop drives preset tweens, auto-rotate and the propeller.
+  // One animation loop drives preset tweens, auto-rotate, the propeller and
+  // the control-surface sweep.
   useEffect(() => {
-    if (!spinning && !tween.current) return;
+    if (!spinning && !deflecting && !tween.current) return;
     let raf = 0;
     let last = performance.now();
     const tick = (now: number) => {
@@ -95,11 +134,24 @@ export function VehicleModelView({ d }: { d: VehicleDesignOutput }) {
         setCam((c) => ({ ...c, yaw: c.yaw + dt * 0.7 }));
       }
       if (spinning) setPropAngle((a) => a + dt * 14);
-      if (spinning || tween.current) raf = requestAnimationFrame(tick);
+      if (deflecting) setDeflT((s) => s + dt);
+      if (spinning || deflecting || tween.current) raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [spinning, kick]);
+  }, [spinning, deflecting, kick]);
+
+  // Which surface is moving and by how much; at rest the elevator sits at trim.
+  const deflection = useMemo(() => {
+    const out: Deflection = { aileron: 0, elevator: 0, rudder: 0 };
+    for (const s of model.controls) out[s.key] = s.restDeg;
+    if (!deflecting) return { angles: out, active: null as null | { key: SurfaceKey; axis: string } };
+    const phase = Math.floor(deflT / DEFLECT_PHASE) % DEFLECT_ORDER.length;
+    const active = DEFLECT_ORDER[phase];
+    const s = model.controls.find((c) => c.key === active.key);
+    if (s) out[s.key] = s.maxDeg * Math.sin(((deflT % DEFLECT_PHASE) / DEFLECT_PHASE) * Math.PI * 2);
+    return { angles: out, active };
+  }, [model, deflecting, deflT]);
 
   function goTo(name: ViewName) {
     const target = VIEWS[name];
@@ -135,8 +187,8 @@ export function VehicleModelView({ d }: { d: VehicleDesignOutput }) {
   }
 
   const scene = useMemo(
-    () => renderScene(model, cam.yaw, cam.pitch, propAngle, { parts: showParts, mass: showMass }),
-    [model, cam, propAngle, showParts, showMass],
+    () => renderScene(model, cam.yaw, cam.pitch, propAngle, { parts: showParts, mass: showMass, controls: showCtrl ? deflection.angles : null }),
+    [model, cam, propAngle, showParts, showMass, showCtrl, deflection],
   );
   const outside = model.massPoints.filter((m) => m.outside);
 
@@ -158,7 +210,33 @@ export function VehicleModelView({ d }: { d: VehicleDesignOutput }) {
           <button type="button" className={`vmv-btn${showMass ? " vmv-btn-on" : ""}`} aria-pressed={showMass} onClick={() => setShowMass((v) => !v)}>
             Mass points
           </button>
+          {model.controls.length > 0 && (
+            <button
+              type="button"
+              className={`vmv-btn${showCtrl ? " vmv-btn-on" : ""}`}
+              aria-pressed={showCtrl}
+              onClick={() => {
+                setShowCtrl((v) => !v);
+                if (showCtrl) setDeflecting(false);
+              }}
+            >
+              Controls
+            </button>
+          )}
         </div>
+        {showCtrl && (
+          <button
+            type="button"
+            className={`vmv-btn vmv-btn-solo${deflecting ? " vmv-btn-on" : ""}`}
+            aria-pressed={deflecting}
+            onClick={() => {
+              setDeflT(0);
+              setDeflecting((v) => !v);
+            }}
+          >
+            {deflecting ? "❚❚ Stop" : "↕ Deflect"}
+          </button>
+        )}
         <button
           type="button"
           className={`vmv-btn${spinning ? " vmv-btn-on" : ""}`}
@@ -185,6 +263,12 @@ export function VehicleModelView({ d }: { d: VehicleDesignOutput }) {
       >
         {scene.polys.map((p, i) => (
           <polygon key={i} points={p.points} fill={p.fill} stroke={p.stroke} strokeWidth={0.6} strokeLinejoin="round" fillOpacity={p.opacity}>
+            <title>{p.label}</title>
+          </polygon>
+        ))}
+        {/* Control surfaces sit inside the wing/tail skins, so they're drawn on top. */}
+        {scene.ctrl.map((p, i) => (
+          <polygon key={`c${i}`} points={p.points} fill={p.fill} stroke={p.stroke} strokeWidth={1} strokeLinejoin="round" fillOpacity={0.92}>
             <title>{p.label}</title>
           </polygon>
         ))}
@@ -238,6 +322,7 @@ export function VehicleModelView({ d }: { d: VehicleDesignOutput }) {
           )}
         </div>
       )}
+      {showCtrl && <ControlTable surfaces={model.controls} deflection={deflection.angles} active={deflection.active} moving={deflecting} />}
       {showMass && outside.length > 0 && (
         <p className="vmv-outside">
           ⚠ The mass breakdown puts {outside.map((m) => `${m.name} (x ${fmt(m.at[0], 2)} m)`).join(", ")} beyond the {fmt(model.length, 2)} m airframe -- the
@@ -248,10 +333,69 @@ export function VehicleModelView({ d }: { d: VehicleDesignOutput }) {
   );
 }
 
+function ControlTable({
+  surfaces,
+  deflection,
+  active,
+  moving,
+}: {
+  surfaces: ControlSurface[];
+  deflection: Deflection;
+  active: { key: SurfaceKey; axis: string } | null;
+  moving: boolean;
+}) {
+  return (
+    <div className="vmv-cs">
+      <p className="vmv-cs-now">
+        <span className="vmv-swatch" style={{ background: COLORS.control }} />{" "}
+        {moving && active
+          ? `${active.axis}: ${surfaces.find((s) => s.key === active.key)?.name ?? active.key} ${signed(deflection[active.key])}°`
+          : "At rest -- elevator at its cruise trim. Press Deflect to sweep roll, pitch and yaw."}
+      </p>
+      <table className="vmv-cs-table">
+        <thead>
+          <tr>
+            <th>Surface</th>
+            <th className="vmv-num">Area</th>
+            <th className="vmv-num">Share</th>
+            <th className="vmv-num">Chord</th>
+            <th className="vmv-num">Limit</th>
+            <th className="vmv-num">Authority</th>
+            <th>Size</th>
+          </tr>
+        </thead>
+        <tbody>
+          {surfaces.map((s) => {
+            const share = (s.area / s.refArea) * 100;
+            const ok = share >= s.share[0] && share <= s.share[1];
+            return (
+              <tr key={s.key} className={moving && active?.key === s.key ? "vmv-cs-hot" : undefined}>
+                <td>{s.name}</td>
+                <td className="vmv-num">{fmt(s.area, 3)} m²</td>
+                <td className="vmv-num" title={`${fmt(s.area, 3)} of ${fmt(s.refArea, 3)} m² ${s.refName}`}>
+                  {fmt(share, 0)}% of {s.refName}
+                </td>
+                <td className="vmv-num">{s.chordPct === null ? "—" : `${fmt(s.chordPct, 0)}%`}</td>
+                <td className="vmv-num">±{fmt(s.maxDeg, 0)}°</td>
+                <td className="vmv-num">{s.authorityNm === null ? "—" : `${fmt(s.authorityNm, 1)} N·m`}</td>
+                <td className={ok ? "vmv-cs-ok" : "vmv-warn"}>
+                  {ok ? "✓" : "⚠"} {ok ? "typical" : share < s.share[0] ? "small" : "large"} ({s.share[0]}–{s.share[1]}%)
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+      <p className="vmv-cs-note">Chord = surface chord as a share of the local wing or tail chord. Typical ranges are rules of thumb for small fixed-wing UAVs.</p>
+    </div>
+  );
+}
+
 // ── Model ────────────────────────────────────────────────────────────────
 
 interface Model {
   faces: Face[];
+  controls: ControlSurface[];
   boxes: ComponentBox[];
   massPoints: MassPoint[];
   length: number;
@@ -367,6 +511,7 @@ function buildRotorcraft(d: VehicleDesignOutput): Model {
   const mp = d.mass_properties as { cg_x_m: number; cg_y_m?: number; cg_z_m?: number };
   return {
     faces,
+    controls: [],
     boxes,
     massPoints: [],
     length: reach * 2,
@@ -473,6 +618,13 @@ function buildFixedWing(d: VehicleDesignOutput): Model {
   faces.push({ pts: fin.map(([x, , z]) => [x, ft, z] as V3).reverse(), color: COLORS.tail, label: "Vertical fin" });
   faces.push({ pts: [[finTE - finRoot, -ft, finRootZ], [finTE - finTip, -ft, finRootZ - finH], [finTE - finTip, ft, finRootZ - finH], [finTE - finRoot, ft, finRootZ]], color: COLORS.tail, label: "Fin leading edge" });
 
+  const controls = buildControls(d, {
+    wing: { le, sweep, dihedralTan: Math.tan(dihedral), z: wingZ },
+    tail: { x: tailX, z: tailTopZ, sweep: 0.15, gap: halfW * 0.5 },
+    fin: { te: finTE, rootZ: finRootZ, height: finH, area: finArea, rootChord: finRoot, tipChord: finTip },
+    fuselageHalfW: halfW,
+  });
+
   // Propeller just ahead of the nose (tractor), sized from the BOM.
   const propR = (d.propulsion.cruise_propulsion.propeller_diameter_in * 0.0254) / 2;
   const propX = Math.min(0, (mc.cruise_motor?.[0] ?? 0.05) - 0.07);
@@ -517,6 +669,7 @@ function buildFixedWing(d: VehicleDesignOutput): Model {
 
   return {
     faces,
+    controls,
     boxes,
     massPoints: [],
     length,
@@ -527,6 +680,125 @@ function buildFixedWing(d: VehicleDesignOutput): Model {
     np: [d.stability.neutral_point_x_m, 0, 0],
     outsideTest: (p) => p[0] < -0.05 || p[0] > length + 0.02,
   };
+}
+
+// Ailerons, elevator and rudder from the wing/tail control-surface areas
+// (falling back to cad_handover.control_surfaces). Each is laid along the
+// trailing edge with chord = area / span, so the drawn plate has the stated
+// area. A V-tail (ruddervators) isn't drawn.
+function buildControls(
+  d: VehicleDesignOutput,
+  g: {
+    wing: { le: number; sweep: number; dihedralTan: number; z: number };
+    tail: { x: number; z: number; sweep: number; gap: number };
+    fin: { te: number; rootZ: number; height: number; area: number; rootChord: number; tipChord: number };
+    fuselageHalfW: number;
+  },
+): ControlSurface[] {
+  const w = d.geometry.wing;
+  const t = d.geometry.tail;
+  const c = d.controls ?? ({} as VehicleDesignOutput["controls"]);
+  const cs = d.cad_handover.control_surfaces ?? {};
+  const pos = (v: unknown): v is number => typeof v === "number" && Number.isFinite(v) && v > 0;
+  const first = (...vs: unknown[]) => vs.find(pos) as number | undefined;
+  const out: ControlSurface[] = [];
+
+  // Ailerons: the span is read as per wing unless that can't fit, then as both
+  // together; area is the pair's total.
+  const aArea = first(w.aileron_area_m2, cs.ailerons?.area_m2, cs.aileron?.area_m2);
+  const aSpanRaw = first(w.aileron_span_m, cs.ailerons?.span_m, cs.aileron?.span_m);
+  if (aArea) {
+    const half = w.span_m / 2;
+    const room = half * 0.96 - g.fuselageHalfW;
+    let side = aSpanRaw ?? half * 0.4;
+    if (side > room) side = Math.min(room, side / 2);
+    const yo = half * 0.96;
+    const yi = Math.max(g.fuselageHalfW, yo - side);
+    const chordAt = (y: number) => w.root_chord_m + ((w.tip_chord_m - w.root_chord_m) * y) / half;
+    const ca = aArea / 2 / (yo - yi);
+    const panel = (sgn: number) => {
+      const hinge = (y: number): V3 => [g.wing.le + g.wing.sweep * y + chordAt(y) - Math.min(ca, chordAt(y) * 0.5), sgn * y, g.wing.z - g.wing.dihedralTan * y];
+      const cc = (y: number) => Math.min(ca, chordAt(y) * 0.5);
+      return { h0: hinge(yi), h1: hinge(yo), c0: cc(yi), c1: cc(yo), sign: sgn };
+    };
+    out.push({
+      key: "aileron",
+      name: "Ailerons",
+      panels: [panel(1), panel(-1)],
+      swing: "xz",
+      maxDeg: first(c.max_aileron_deflection_deg) ?? 20,
+      restDeg: 0,
+      label: `Ailerons: ${fmt(aArea, 3)} m² for the pair, ${fmt(yo - yi, 2)} m span each side${aSpanRaw && yo - yi < aSpanRaw - 1e-6 ? ` (the stated ${aSpanRaw} m read as both sides)` : ""}, chord ${fmt(ca * 1000, 0)} mm`,
+      area: aArea,
+      refName: "wing",
+      refArea: w.area_m2,
+      share: [5, 15],
+      chordPct: (ca / chordAt((yi + yo) / 2)) * 100,
+      authorityNm: first(c.roll_authority_nm) ?? null,
+    });
+  }
+
+  const vTail = pos(t.ruddervator_area_m2) || /v[-_ ]?tail/i.test(t.tail_type ?? "");
+  const eArea = first(t.elevator_area_m2, cs.elevator?.area_m2);
+  if (eArea && !vTail) {
+    const half = t.span_m / 2;
+    const yi = g.tail.gap;
+    const yo = half * 0.97;
+    const chordAt = (y: number) => t.root_chord_m + ((t.tip_chord_m - t.root_chord_m) * y) / half;
+    const ce = eArea / 2 / (yo - yi);
+    const cc = (y: number) => Math.min(ce, chordAt(y) * 0.6);
+    const panel = (sgn: number) => {
+      const hinge = (y: number): V3 => [g.tail.x + g.tail.sweep * y + chordAt(y) - cc(y), sgn * y, g.tail.z];
+      return { h0: hinge(yi), h1: hinge(yo), c0: cc(yi), c1: cc(yo), sign: 1 };
+    };
+    const tailplane = t.span_m * ((t.root_chord_m + t.tip_chord_m) / 2);
+    out.push({
+      key: "elevator",
+      name: "Elevator",
+      panels: [panel(1), panel(-1)],
+      swing: "xz",
+      maxDeg: first(c.max_elevator_deflection_deg) ?? 25,
+      // Same convention as the plates: negative trim = trailing edge up.
+      restDeg: c.trim_elevator_cruise_deg ?? 0,
+      label: `Elevator: ${fmt(eArea, 3)} m², chord ${fmt(ce * 1000, 0)} mm, trimmed ${signed(c.trim_elevator_cruise_deg ?? 0)}° at cruise`,
+      area: eArea,
+      refName: "tailplane",
+      refArea: tailplane,
+      share: [20, 45],
+      chordPct: (ce / chordAt((yi + yo) / 2)) * 100,
+      authorityNm: first(c.pitch_authority_nm) ?? null,
+    });
+  }
+
+  const rArea = first(t.rudder_area_m2, cs.rudder?.area_m2);
+  if (rArea && !vTail && pos(g.fin.height)) {
+    const h = g.fin.height;
+    const cr = Math.min(rArea / h, g.fin.tipChord * 0.7);
+    out.push({
+      key: "rudder",
+      name: "Rudder",
+      panels: [{ h0: [g.fin.te - cr, 0, g.fin.rootZ], h1: [g.fin.te - cr, 0, g.fin.rootZ - h], c0: cr, c1: cr, sign: 1 }],
+      swing: "xy",
+      maxDeg: first(c.max_rudder_deflection_deg) ?? 25,
+      restDeg: 0,
+      label: `Rudder: ${fmt(rArea, 3)} m², chord ${fmt((rArea / h) * 1000, 0)} mm over a ${fmt(h, 2)} m fin`,
+      area: rArea,
+      refName: "fin",
+      refArea: g.fin.area,
+      share: [20, 50],
+      chordPct: (rArea / h / ((g.fin.rootChord + g.fin.tipChord) / 2)) * 100,
+      authorityNm: first(c.yaw_authority_nm) ?? null,
+    });
+  }
+  return out;
+}
+
+// Plate corners for one panel at a deflection (degrees; + = trailing edge
+// down for x-z surfaces, toward +y for the rudder).
+function deflectPanel(p: ControlSurface["panels"][number], swing: ControlSurface["swing"], deg: number): V3[] {
+  const a = ((deg * p.sign) * Math.PI) / 180;
+  const te = (h: V3, c: number): V3 => (swing === "xz" ? [h[0] + c * Math.cos(a), h[1], h[2] + c * Math.sin(a)] : [h[0] + c * Math.cos(a), h[1] + c * Math.sin(a), h[2]]);
+  return [p.h0, p.h1, te(p.h1, p.c1), te(p.h0, p.c0)];
 }
 
 function pushLiftingSurface(
@@ -586,7 +858,7 @@ interface ScenePoly {
   depth: number;
 }
 
-function renderScene(m: Model, yaw: number, pitch: number, propAngle: number, layers: { parts: boolean; mass: boolean }) {
+function renderScene(m: Model, yaw: number, pitch: number, propAngle: number, layers: { parts: boolean; mass: boolean; controls: Deflection | null }) {
   // Zoom out to keep stray mass points in frame while that layer is on.
   const reach = layers.mass
     ? Math.max(m.radius, ...m.massPoints.map((p) => Math.hypot(p.at[0] - m.center[0], p.at[1] - m.center[1], p.at[2] - m.center[2]) + 0.03))
@@ -660,6 +932,16 @@ function renderScene(m: Model, yaw: number, pitch: number, propAngle: number, la
 
   polys.sort((a, b) => b.depth - a.depth);
 
+  // Control surfaces go in a separate list, drawn over the airframe.
+  const ctrlStart = polys.length;
+  if (layers.controls) {
+    for (const s of m.controls) {
+      const deg = layers.controls[s.key];
+      for (const p of s.panels) add(deflectPanel(p, s.swing, deg), COLORS.control, `${s.label} -- ${signed(deg * p.sign)}° now, limit ±${fmt(s.maxDeg, 0)}°`);
+    }
+  }
+  const ctrl = polys.splice(ctrlStart).sort((a, b) => b.depth - a.depth);
+
   const points = layers.mass
     ? m.massPoints
         .map((p) => {
@@ -679,6 +961,7 @@ function renderScene(m: Model, yaw: number, pitch: number, propAngle: number, la
     : [];
   return {
     polys,
+    ctrl,
     points,
     cg: project(m.cg, m.center, yaw, pitch, scale),
     np: m.np ? project(m.np, m.center, yaw, pitch, scale) : null,
@@ -703,12 +986,18 @@ function fmt(n: number, digits: number) {
   return Number.isFinite(n) ? n.toFixed(digits) : "—";
 }
 
+function signed(n: number) {
+  const r = Math.round(n * 10) / 10;
+  return `${r > 0 ? "+" : ""}${r === 0 ? 0 : r.toFixed(1)}`;
+}
+
 const VMV_CSS = `
 .vmv{ display:flex; flex-direction:column; gap:8px; }
 .vmv-toolbar{ display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; }
 .vmv-views{ display:inline-flex; border:1px solid var(--vdr-line,rgba(62,124,166,.28)); border-radius:2px; overflow:hidden; }
 .vmv-btn{ font-family:'IBM Plex Mono',monospace; font-size:12px; font-weight:700; padding:6px 12px; border:none; background:#FFFFFF; color:var(--vdr-dim,#4F6B80); cursor:pointer; }
 .vmv-views .vmv-btn + .vmv-btn{ border-left:1px solid var(--vdr-line,rgba(62,124,166,.28)); }
+.vmv-btn-solo{ margin-right:auto; }
 .vmv-toolbar > .vmv-btn{ border:1px solid var(--vdr-line,rgba(62,124,166,.28)); border-radius:2px; }
 .vmv-btn:hover{ background:var(--vdr-panel-2,#E4EEF7); }
 .vmv-btn-on{ background:var(--vdr-blue,#1C74B8); color:#FFFFFF; }
@@ -727,5 +1016,14 @@ const VMV_CSS = `
 .vmv-layer-legend{ display:flex; flex-wrap:wrap; gap:6px 16px; font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--vdr-dim,#4F6B80); }
 .vmv-swatch{ display:inline-block; width:10px; height:10px; border-radius:2px; }
 .vmv-warn{ color:#A35F00; }
+.vmv-cs{ display:flex; flex-direction:column; gap:4px; }
+.vmv-cs-now{ margin:0; font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--vdr-ink,#12222F); display:flex; align-items:center; gap:6px; }
+.vmv-cs-table{ width:100%; border-collapse:collapse; font-size:12px; }
+.vmv-cs-table th{ text-align:left; font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.06em; text-transform:uppercase; color:var(--vdr-dim,#4F6B80); padding:4px 6px; border-bottom:1px solid #C3CCD6; }
+.vmv-cs-table td{ padding:4px 6px; border-bottom:1px dashed #E3E8EE; }
+.vmv-num{ text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+.vmv-cs-hot td{ background:#F1ECFA; }
+.vmv-cs-ok{ color:#2E7D4F; }
+.vmv-cs-note{ margin:0; font-size:11px; color:var(--vdr-dim,#4F6B80); }
 .vmv-outside{ margin:0; font-size:12px; color:#A35F00; background:#FCF1E0; border:1px solid #EFD3A6; padding:7px 10px; }
 `;
