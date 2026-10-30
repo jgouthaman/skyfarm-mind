@@ -45,7 +45,23 @@ export interface VehicleDesignOutput {
   aerodynamics: { cl_cruise: number; cl_max: number; cd0: number; cd_cruise: number; k_induced: number; lift_to_drag_cruise: number; lift_to_drag_max: number; stall_speed_clean_mps: number; reynolds_number_cruise: number; trim_alpha_cruise_deg: number };
   assumptions: { air_density_kg_m3: number; gravity_m_s2: number };
   geometry: {
-    wing: { span_m: number; area_m2: number; aspect_ratio: number; root_chord_m: number; tip_chord_m: number; taper_ratio: number; mac_m: number; mac_le_x_m: number; sweep_deg: number; dihedral_deg: number; airfoil_root: string; airfoil_tip: string; spar_locations_chord_pct: number[] };
+    wing: {
+      span_m: number;
+      area_m2: number;
+      aspect_ratio: number;
+      root_chord_m: number;
+      tip_chord_m: number;
+      taper_ratio: number;
+      mac_m: number;
+      mac_le_x_m: number;
+      sweep_deg: number;
+      dihedral_deg: number;
+      airfoil_root: string;
+      airfoil_tip: string;
+      spar_locations_chord_pct: number[];
+      aileron_area_m2?: number | null;
+      aileron_span_m?: number | null;
+    };
     fuselage: {
       length_m: number;
       max_width_m: number;
@@ -55,7 +71,18 @@ export interface VehicleDesignOutput {
       payload_bay_dimensions_m?: Vec3;
       avionics_bay_dimensions_m?: Vec3;
     };
-    tail: { tail_type: string; span_m: number; root_chord_m: number; tip_chord_m: number; airfoil: string; total_area_m2: number; projected_vertical_area_m2?: number };
+    tail: {
+      tail_type: string;
+      span_m: number;
+      root_chord_m: number;
+      tip_chord_m: number;
+      airfoil: string;
+      total_area_m2: number;
+      projected_vertical_area_m2?: number;
+      elevator_area_m2?: number | null;
+      rudder_area_m2?: number | null;
+      ruddervator_area_m2?: number | null;
+    };
     multirotor_frame?: { arm_count?: number; arm_length_m?: number; frame_type?: string; status?: string };
   };
   cad_handover: {
@@ -71,6 +98,7 @@ export interface VehicleDesignOutput {
     }[];
     reference_datum: string;
     coordinate_system: { axis_conventions: string };
+    control_surfaces?: Record<string, { area_m2?: number | null; span_m?: number | null }>;
   };
   propulsion: {
     cruise_propulsion: { motor_model: string; motor_count: number; propeller_model: string; propeller_diameter_in: number; propeller_pitch_in: number; esc_model: string; esc_rating_a: number; cruise_power_electrical_w: number; cruise_thrust_per_motor_n: number; max_thrust_per_motor_n: number };
@@ -93,7 +121,17 @@ export interface VehicleDesignOutput {
   electrical: { main_bus_voltage_v: number; avionics_bus_voltage_v: number; power_module: string };
   performance: { cruise_speed_kmh: number; cruise_speed_mps: number; endurance_min: number; hover_endurance_min?: number; range_km: number; max_speed_kmh: number; stall_speed_kmh: number; climb_rate_max_mps: number; service_ceiling_m: number; cruise_altitude_m: number };
   stability: { neutral_point_x_m: number; neutral_point_mac_pct: number; static_margin_mac_pct: number; c_m_alpha_per_rad: number; c_n_beta_per_rad: number; c_l_beta_per_rad: number; is_longitudinally_stable: boolean; is_directionally_stable: boolean; is_laterally_stable: boolean };
-  controls: { trim_feasible: boolean; trim_elevator_cruise_deg: number; c_m_delta_e_per_rad: number };
+  controls: {
+    trim_feasible: boolean;
+    trim_elevator_cruise_deg: number;
+    c_m_delta_e_per_rad: number;
+    max_aileron_deflection_deg?: number;
+    max_elevator_deflection_deg?: number;
+    max_rudder_deflection_deg?: number;
+    roll_authority_nm?: number;
+    pitch_authority_nm?: number;
+    yaw_authority_nm?: number;
+  };
   commercial_components: { category: string; role: string; manufacturer: string; model: string; part_number: string | null; quantity: number; mass_per_unit_kg: number; total_mass_kg: number; verification_status: string }[];
   avionics: Record<string, string>;
   manufacturing: Record<string, string>;
