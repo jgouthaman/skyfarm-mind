@@ -71,6 +71,7 @@ export const HANGAR_PUBLIC_CSS = `
 .hgr-pub-amber{ color:var(--hp-amber-bright); }
 .hgr-pub-h1{ font-size:clamp(34px,5.2vw,58px); line-height:1.08; }
 .hgr-pub-h2{ font-size:clamp(26px,3.4vw,38px); line-height:1.15; }
+.hgr-pub-subhead{ margin-top:14px; font-family:'Space Grotesk',sans-serif; font-weight:500; font-size:clamp(17px,1.8vw,21px); color:var(--hp-paper-dim); }
 .hgr-pub-lead{ margin-top:20px; color:var(--hp-paper-dim); font-size:16px; line-height:1.65; max-width:560px; }
 .hgr-pub-sub{ color:var(--hp-paper-dim); font-size:14.5px; max-width:680px; margin-top:14px; line-height:1.6; }
 

@@ -8,8 +8,10 @@ import { SITE_URL } from "@/lib/seo";
 export const Route = createFileRoute("/_layout/")({
   head: () => ({
     meta: [
-      { property: "og:title", content: "TorqWings — Aerospace & Drone Intelligence" },
-      { property: "og:description", content: "Custom UAV engineering and AI aerial analytics across agriculture, infrastructure, mapping, surveillance and R&D." },
+      { title: "TorqWings — From mission brief to validated UAV, designed by AI agents" },
+      { name: "description", content: "TorqWings is an agentic AI aerospace design platform: fifteen specialist agents turn a mission brief into a validated fixed-wing, VTOL or multirotor UAV design, in your browser." },
+      { property: "og:title", content: "TorqWings — From mission brief to validated UAV, designed by AI agents" },
+      { property: "og:description", content: "Agentic AI aerospace design platform: fifteen specialist agents take a mission brief through concept, CFD, structures, optimisation and certification." },
       { property: "og:image", content: `${SITE_URL}${heroImg}` },
       { property: "og:type", content: "website" },
       { property: "og:url", content: `${SITE_URL}/` },
@@ -34,7 +36,7 @@ export const Route = createFileRoute("/_layout/")({
 const HERO_STATS = [
   { k: "15", v: "Specialist Agents"                 },
   { k: "4",  v: "Platform Classes"                  },
-  { k: "1",  v: "Mission-to-Certification Pipeline" },
+  { k: "Every stage", v: "Physics-checked by Bernoulli" },
 ];
 
 // Same navy/amber aerospace look as The Hangar (theme shared via
@@ -48,16 +50,17 @@ function HeroPage() {
         <div className="grid lg:grid-cols-2 gap-12 items-center">
 
           <div>
-            <span className="hgr-pub-badge hgr-pub-badge-dark">Aerospace · Autonomous Aerial Platforms · AI</span>
+            <span className="hgr-pub-badge hgr-pub-badge-dark">Agentic AI · Aerospace Design Platform</span>
             <h1 className="hgr-pub-h1">
-              Engineering the future of{" "}
-              <span className="hgr-pub-amber">aerial intelligence</span>
+              From mission brief to validated UAV —{" "}
+              <span className="hgr-pub-amber">designed by AI agents.</span>
             </h1>
+            <p className="hgr-pub-subhead">Engineering the future of aerial intelligence</p>
             <p className="hgr-pub-lead">
               TorqWings turns a mission brief into a validated aircraft design. Fixed‑wing, VTOL,
               multirotor or stealth, it moves through concept, CFD, structures, optimisation and
-              certification in one connected workflow, built for the world's fast-growing drone and
-              defence ecosystem.
+              certification in one connected workflow, in your browser, built for the world's
+              fast-growing drone and defence ecosystem.
             </p>
             <div className="hgr-pub-cta">
               <Link to="/the-hangar" className="hgr-pub-btn hgr-pub-btn-amber">
