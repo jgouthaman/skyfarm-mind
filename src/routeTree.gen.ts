@@ -88,6 +88,9 @@ import { Route as ApiHarnessCallRouteImport } from './routes/api.harness.call'
 import { Route as ApiMissionHubServiceEnquiriesRouteImport } from './routes/api.mission-hub.service-enquiries'
 import { Route as ApiServicesEnquiryRouteImport } from './routes/api.services.enquiry'
 import { Route as MissionHubAgentsBernoulliRouteImport } from './routes/mission-hub.agents.bernoulli'
+import { Route as MissionHubRamanIndexRouteImport } from './routes/mission-hub.raman.index'
+import { Route as MissionHubRamanEngagementIdRouteImport } from './routes/mission-hub.raman.$engagementId'
+import { Route as MissionHubRamanPropellersRouteImport } from './routes/mission-hub.raman.propellers'
 import { Route as PilotMissionsIndexRouteImport } from './routes/pilot.missions.index'
 import { Route as PilotMissionsIdRouteImport } from './routes/pilot.missions.$id'
 import { Route as AcademyCoursesSlugLearnRouteImport } from './routes/academy.courses.$slug.learn'
@@ -113,11 +116,31 @@ import { Route as ApiHangarProcessOptimizationTradeOffOptimizationRouteImport } 
 import { Route as ApiHangarProcessSimulationFlightDynamicsAssessmentRouteImport } from './routes/api.hangar.process-simulation.flight-dynamics-assessment'
 import { Route as ApiHangarProcessStructuralStructuralAssessmentRouteImport } from './routes/api.hangar.process-structural.structural-assessment'
 import { Route as ApiHangarProcessValidationComplianceValidationRouteImport } from './routes/api.hangar.process-validation.compliance-validation'
+import { Route as ApiHangarRamanAiStatusRouteImport } from './routes/api.hangar.raman.ai-status'
+import { Route as ApiHangarRamanCustomersRouteImport } from './routes/api.hangar.raman.customers'
+import { Route as ApiHangarRamanEngagementsRouteImport } from './routes/api.hangar.raman.engagements'
+import { Route as ApiHangarRamanEvaluateRouteImport } from './routes/api.hangar.raman.evaluate'
+import { Route as ApiHangarRamanFixRunsRouteImport } from './routes/api.hangar.raman.fix-runs'
+import { Route as ApiHangarRamanNoiseCheckRouteImport } from './routes/api.hangar.raman.noise-check'
+import { Route as ApiHangarRamanPropellersRouteImport } from './routes/api.hangar.raman.propellers'
+import { Route as ApiHangarRamanVehiclesRouteImport } from './routes/api.hangar.raman.vehicles'
 import { Route as ApiHangarVehicleDesignRunRouteImport } from './routes/api.hangar.vehicle-design.run'
 import { Route as ApiHangarVehicleDesignSaveRouteImport } from './routes/api.hangar.vehicle-design.save'
+import { Route as MissionHubRamanVerifyCodeRouteImport } from './routes/mission-hub.raman.verify.$code'
 import { Route as AcademyCoursesSlugModulesModuleIdRouteImport } from './routes/academy.courses.$slug.modules.$moduleId'
 import { Route as AcademyModuleModuleIdLessonLessonIdRouteImport } from './routes/academy.module.$moduleId.lesson.$lessonId'
 import { Route as AcademyModuleModuleIdQuizQuizIdRouteImport } from './routes/academy.module.$moduleId.quiz.$quizId'
+import { Route as ApiHangarRamanEngagementsIdRouteImport } from './routes/api.hangar.raman.engagements.$id'
+import { Route as ApiHangarRamanLeverRangesEngagementIdRouteImport } from './routes/api.hangar.raman.lever-ranges.$engagementId'
+import { Route as ApiHangarRamanPropellersLoadRouteImport } from './routes/api.hangar.raman.propellers.load'
+import { Route as ApiHangarRamanVerifyCodeRouteImport } from './routes/api.hangar.raman.verify.$code'
+import { Route as ApiHangarRamanEngagementsIdCloseRouteImport } from './routes/api.hangar.raman.engagements.$id.close'
+import { Route as ApiHangarRamanFixRunsIdLockRouteImport } from './routes/api.hangar.raman.fix-runs.$id.lock'
+import { Route as ApiHangarRamanFixRunsIdStepRouteImport } from './routes/api.hangar.raman.fix-runs.$id.step'
+import { Route as ApiHangarRamanFixRunsIdStepsRouteImport } from './routes/api.hangar.raman.fix-runs.$id.steps'
+import { Route as ApiHangarRamanFixRunsIdStopRouteImport } from './routes/api.hangar.raman.fix-runs.$id.stop'
+import { Route as ApiHangarRamanPaymentsEngagementIdStageRouteImport } from './routes/api.hangar.raman.payments.$engagementId.$stage'
+import { Route as ApiHangarRamanReportsEngagementIdTypeRouteImport } from './routes/api.hangar.raman.reports.$engagementId.$type'
 
 const LayoutRoute = LayoutRouteImport.update({
   id: '/_layout',
@@ -522,6 +545,23 @@ const MissionHubAgentsBernoulliRoute =
     path: '/agents/bernoulli',
     getParentRoute: () => MissionHubRoute,
   } as any)
+const MissionHubRamanIndexRoute = MissionHubRamanIndexRouteImport.update({
+  id: '/raman/',
+  path: '/raman/',
+  getParentRoute: () => MissionHubRoute,
+} as any)
+const MissionHubRamanEngagementIdRoute =
+  MissionHubRamanEngagementIdRouteImport.update({
+    id: '/raman/$engagementId',
+    path: '/raman/$engagementId',
+    getParentRoute: () => MissionHubRoute,
+  } as any)
+const MissionHubRamanPropellersRoute =
+  MissionHubRamanPropellersRouteImport.update({
+    id: '/raman/propellers',
+    path: '/raman/propellers',
+    getParentRoute: () => MissionHubRoute,
+  } as any)
 const PilotMissionsIndexRoute = PilotMissionsIndexRouteImport.update({
   id: '/missions/',
   path: '/missions/',
@@ -669,6 +709,49 @@ const ApiHangarProcessValidationComplianceValidationRoute =
     path: '/api/hangar/process-validation/compliance-validation',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiHangarRamanAiStatusRoute = ApiHangarRamanAiStatusRouteImport.update({
+  id: '/api/hangar/raman/ai-status',
+  path: '/api/hangar/raman/ai-status',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiHangarRamanCustomersRoute = ApiHangarRamanCustomersRouteImport.update({
+  id: '/api/hangar/raman/customers',
+  path: '/api/hangar/raman/customers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiHangarRamanEngagementsRoute =
+  ApiHangarRamanEngagementsRouteImport.update({
+    id: '/api/hangar/raman/engagements',
+    path: '/api/hangar/raman/engagements',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiHangarRamanEvaluateRoute = ApiHangarRamanEvaluateRouteImport.update({
+  id: '/api/hangar/raman/evaluate',
+  path: '/api/hangar/raman/evaluate',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiHangarRamanFixRunsRoute = ApiHangarRamanFixRunsRouteImport.update({
+  id: '/api/hangar/raman/fix-runs',
+  path: '/api/hangar/raman/fix-runs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiHangarRamanNoiseCheckRoute =
+  ApiHangarRamanNoiseCheckRouteImport.update({
+    id: '/api/hangar/raman/noise-check',
+    path: '/api/hangar/raman/noise-check',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiHangarRamanPropellersRoute =
+  ApiHangarRamanPropellersRouteImport.update({
+    id: '/api/hangar/raman/propellers',
+    path: '/api/hangar/raman/propellers',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiHangarRamanVehiclesRoute = ApiHangarRamanVehiclesRouteImport.update({
+  id: '/api/hangar/raman/vehicles',
+  path: '/api/hangar/raman/vehicles',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiHangarVehicleDesignRunRoute =
   ApiHangarVehicleDesignRunRouteImport.update({
     id: '/api/hangar/vehicle-design/run',
@@ -680,6 +763,12 @@ const ApiHangarVehicleDesignSaveRoute =
     id: '/api/hangar/vehicle-design/save',
     path: '/api/hangar/vehicle-design/save',
     getParentRoute: () => rootRouteImport,
+  } as any)
+const MissionHubRamanVerifyCodeRoute =
+  MissionHubRamanVerifyCodeRouteImport.update({
+    id: '/raman/verify/$code',
+    path: '/raman/verify/$code',
+    getParentRoute: () => MissionHubRoute,
   } as any)
 const AcademyCoursesSlugModulesModuleIdRoute =
   AcademyCoursesSlugModulesModuleIdRouteImport.update({
@@ -698,6 +787,72 @@ const AcademyModuleModuleIdQuizQuizIdRoute =
     id: '/module/$moduleId/quiz/$quizId',
     path: '/module/$moduleId/quiz/$quizId',
     getParentRoute: () => AcademyRoute,
+  } as any)
+const ApiHangarRamanEngagementsIdRoute =
+  ApiHangarRamanEngagementsIdRouteImport.update({
+    id: '/$id',
+    path: '/$id',
+    getParentRoute: () => ApiHangarRamanEngagementsRoute,
+  } as any)
+const ApiHangarRamanLeverRangesEngagementIdRoute =
+  ApiHangarRamanLeverRangesEngagementIdRouteImport.update({
+    id: '/api/hangar/raman/lever-ranges/$engagementId',
+    path: '/api/hangar/raman/lever-ranges/$engagementId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiHangarRamanPropellersLoadRoute =
+  ApiHangarRamanPropellersLoadRouteImport.update({
+    id: '/load',
+    path: '/load',
+    getParentRoute: () => ApiHangarRamanPropellersRoute,
+  } as any)
+const ApiHangarRamanVerifyCodeRoute =
+  ApiHangarRamanVerifyCodeRouteImport.update({
+    id: '/api/hangar/raman/verify/$code',
+    path: '/api/hangar/raman/verify/$code',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiHangarRamanEngagementsIdCloseRoute =
+  ApiHangarRamanEngagementsIdCloseRouteImport.update({
+    id: '/close',
+    path: '/close',
+    getParentRoute: () => ApiHangarRamanEngagementsIdRoute,
+  } as any)
+const ApiHangarRamanFixRunsIdLockRoute =
+  ApiHangarRamanFixRunsIdLockRouteImport.update({
+    id: '/$id/lock',
+    path: '/$id/lock',
+    getParentRoute: () => ApiHangarRamanFixRunsRoute,
+  } as any)
+const ApiHangarRamanFixRunsIdStepRoute =
+  ApiHangarRamanFixRunsIdStepRouteImport.update({
+    id: '/$id/step',
+    path: '/$id/step',
+    getParentRoute: () => ApiHangarRamanFixRunsRoute,
+  } as any)
+const ApiHangarRamanFixRunsIdStepsRoute =
+  ApiHangarRamanFixRunsIdStepsRouteImport.update({
+    id: '/$id/steps',
+    path: '/$id/steps',
+    getParentRoute: () => ApiHangarRamanFixRunsRoute,
+  } as any)
+const ApiHangarRamanFixRunsIdStopRoute =
+  ApiHangarRamanFixRunsIdStopRouteImport.update({
+    id: '/$id/stop',
+    path: '/$id/stop',
+    getParentRoute: () => ApiHangarRamanFixRunsRoute,
+  } as any)
+const ApiHangarRamanPaymentsEngagementIdStageRoute =
+  ApiHangarRamanPaymentsEngagementIdStageRouteImport.update({
+    id: '/api/hangar/raman/payments/$engagementId/$stage',
+    path: '/api/hangar/raman/payments/$engagementId/$stage',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiHangarRamanReportsEngagementIdTypeRoute =
+  ApiHangarRamanReportsEngagementIdTypeRouteImport.update({
+    id: '/api/hangar/raman/reports/$engagementId/$type',
+    path: '/api/hangar/raman/reports/$engagementId/$type',
+    getParentRoute: () => rootRouteImport,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -779,7 +934,10 @@ export interface FileRoutesByFullPath {
   '/api/mission-hub/service-enquiries': typeof ApiMissionHubServiceEnquiriesRoute
   '/api/services/enquiry': typeof ApiServicesEnquiryRoute
   '/mission-hub/agents/bernoulli': typeof MissionHubAgentsBernoulliRoute
+  '/mission-hub/raman/$engagementId': typeof MissionHubRamanEngagementIdRoute
+  '/mission-hub/raman/propellers': typeof MissionHubRamanPropellersRoute
   '/pilot/missions/$id': typeof PilotMissionsIdRoute
+  '/mission-hub/raman/': typeof MissionHubRamanIndexRoute
   '/pilot/missions/': typeof PilotMissionsIndexRoute
   '/academy/courses/$slug/learn': typeof AcademyCoursesSlugLearnRoute
   '/api/hangar/process-bernoulli/review': typeof ApiHangarProcessBernoulliReviewRoute
@@ -804,11 +962,31 @@ export interface FileRoutesByFullPath {
   '/api/hangar/process-simulation/flight-dynamics-assessment': typeof ApiHangarProcessSimulationFlightDynamicsAssessmentRoute
   '/api/hangar/process-structural/structural-assessment': typeof ApiHangarProcessStructuralStructuralAssessmentRoute
   '/api/hangar/process-validation/compliance-validation': typeof ApiHangarProcessValidationComplianceValidationRoute
+  '/api/hangar/raman/ai-status': typeof ApiHangarRamanAiStatusRoute
+  '/api/hangar/raman/customers': typeof ApiHangarRamanCustomersRoute
+  '/api/hangar/raman/engagements': typeof ApiHangarRamanEngagementsRouteWithChildren
+  '/api/hangar/raman/evaluate': typeof ApiHangarRamanEvaluateRoute
+  '/api/hangar/raman/fix-runs': typeof ApiHangarRamanFixRunsRouteWithChildren
+  '/api/hangar/raman/noise-check': typeof ApiHangarRamanNoiseCheckRoute
+  '/api/hangar/raman/propellers': typeof ApiHangarRamanPropellersRouteWithChildren
+  '/api/hangar/raman/vehicles': typeof ApiHangarRamanVehiclesRoute
   '/api/hangar/vehicle-design/run': typeof ApiHangarVehicleDesignRunRoute
   '/api/hangar/vehicle-design/save': typeof ApiHangarVehicleDesignSaveRoute
+  '/mission-hub/raman/verify/$code': typeof MissionHubRamanVerifyCodeRoute
   '/academy/courses/$slug/modules/$moduleId': typeof AcademyCoursesSlugModulesModuleIdRoute
   '/academy/module/$moduleId/lesson/$lessonId': typeof AcademyModuleModuleIdLessonLessonIdRoute
   '/academy/module/$moduleId/quiz/$quizId': typeof AcademyModuleModuleIdQuizQuizIdRoute
+  '/api/hangar/raman/engagements/$id': typeof ApiHangarRamanEngagementsIdRouteWithChildren
+  '/api/hangar/raman/lever-ranges/$engagementId': typeof ApiHangarRamanLeverRangesEngagementIdRoute
+  '/api/hangar/raman/propellers/load': typeof ApiHangarRamanPropellersLoadRoute
+  '/api/hangar/raman/verify/$code': typeof ApiHangarRamanVerifyCodeRoute
+  '/api/hangar/raman/engagements/$id/close': typeof ApiHangarRamanEngagementsIdCloseRoute
+  '/api/hangar/raman/fix-runs/$id/lock': typeof ApiHangarRamanFixRunsIdLockRoute
+  '/api/hangar/raman/fix-runs/$id/step': typeof ApiHangarRamanFixRunsIdStepRoute
+  '/api/hangar/raman/fix-runs/$id/steps': typeof ApiHangarRamanFixRunsIdStepsRoute
+  '/api/hangar/raman/fix-runs/$id/stop': typeof ApiHangarRamanFixRunsIdStopRoute
+  '/api/hangar/raman/payments/$engagementId/$stage': typeof ApiHangarRamanPaymentsEngagementIdStageRoute
+  '/api/hangar/raman/reports/$engagementId/$type': typeof ApiHangarRamanReportsEngagementIdTypeRoute
 }
 export interface FileRoutesByTo {
   '/field': typeof FieldRoute
@@ -885,7 +1063,10 @@ export interface FileRoutesByTo {
   '/api/mission-hub/service-enquiries': typeof ApiMissionHubServiceEnquiriesRoute
   '/api/services/enquiry': typeof ApiServicesEnquiryRoute
   '/mission-hub/agents/bernoulli': typeof MissionHubAgentsBernoulliRoute
+  '/mission-hub/raman/$engagementId': typeof MissionHubRamanEngagementIdRoute
+  '/mission-hub/raman/propellers': typeof MissionHubRamanPropellersRoute
   '/pilot/missions/$id': typeof PilotMissionsIdRoute
+  '/mission-hub/raman': typeof MissionHubRamanIndexRoute
   '/pilot/missions': typeof PilotMissionsIndexRoute
   '/academy/courses/$slug/learn': typeof AcademyCoursesSlugLearnRoute
   '/api/hangar/process-bernoulli/review': typeof ApiHangarProcessBernoulliReviewRoute
@@ -910,11 +1091,31 @@ export interface FileRoutesByTo {
   '/api/hangar/process-simulation/flight-dynamics-assessment': typeof ApiHangarProcessSimulationFlightDynamicsAssessmentRoute
   '/api/hangar/process-structural/structural-assessment': typeof ApiHangarProcessStructuralStructuralAssessmentRoute
   '/api/hangar/process-validation/compliance-validation': typeof ApiHangarProcessValidationComplianceValidationRoute
+  '/api/hangar/raman/ai-status': typeof ApiHangarRamanAiStatusRoute
+  '/api/hangar/raman/customers': typeof ApiHangarRamanCustomersRoute
+  '/api/hangar/raman/engagements': typeof ApiHangarRamanEngagementsRouteWithChildren
+  '/api/hangar/raman/evaluate': typeof ApiHangarRamanEvaluateRoute
+  '/api/hangar/raman/fix-runs': typeof ApiHangarRamanFixRunsRouteWithChildren
+  '/api/hangar/raman/noise-check': typeof ApiHangarRamanNoiseCheckRoute
+  '/api/hangar/raman/propellers': typeof ApiHangarRamanPropellersRouteWithChildren
+  '/api/hangar/raman/vehicles': typeof ApiHangarRamanVehiclesRoute
   '/api/hangar/vehicle-design/run': typeof ApiHangarVehicleDesignRunRoute
   '/api/hangar/vehicle-design/save': typeof ApiHangarVehicleDesignSaveRoute
+  '/mission-hub/raman/verify/$code': typeof MissionHubRamanVerifyCodeRoute
   '/academy/courses/$slug/modules/$moduleId': typeof AcademyCoursesSlugModulesModuleIdRoute
   '/academy/module/$moduleId/lesson/$lessonId': typeof AcademyModuleModuleIdLessonLessonIdRoute
   '/academy/module/$moduleId/quiz/$quizId': typeof AcademyModuleModuleIdQuizQuizIdRoute
+  '/api/hangar/raman/engagements/$id': typeof ApiHangarRamanEngagementsIdRouteWithChildren
+  '/api/hangar/raman/lever-ranges/$engagementId': typeof ApiHangarRamanLeverRangesEngagementIdRoute
+  '/api/hangar/raman/propellers/load': typeof ApiHangarRamanPropellersLoadRoute
+  '/api/hangar/raman/verify/$code': typeof ApiHangarRamanVerifyCodeRoute
+  '/api/hangar/raman/engagements/$id/close': typeof ApiHangarRamanEngagementsIdCloseRoute
+  '/api/hangar/raman/fix-runs/$id/lock': typeof ApiHangarRamanFixRunsIdLockRoute
+  '/api/hangar/raman/fix-runs/$id/step': typeof ApiHangarRamanFixRunsIdStepRoute
+  '/api/hangar/raman/fix-runs/$id/steps': typeof ApiHangarRamanFixRunsIdStepsRoute
+  '/api/hangar/raman/fix-runs/$id/stop': typeof ApiHangarRamanFixRunsIdStopRoute
+  '/api/hangar/raman/payments/$engagementId/$stage': typeof ApiHangarRamanPaymentsEngagementIdStageRoute
+  '/api/hangar/raman/reports/$engagementId/$type': typeof ApiHangarRamanReportsEngagementIdTypeRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -997,7 +1198,10 @@ export interface FileRoutesById {
   '/api/mission-hub/service-enquiries': typeof ApiMissionHubServiceEnquiriesRoute
   '/api/services/enquiry': typeof ApiServicesEnquiryRoute
   '/mission-hub/agents/bernoulli': typeof MissionHubAgentsBernoulliRoute
+  '/mission-hub/raman/$engagementId': typeof MissionHubRamanEngagementIdRoute
+  '/mission-hub/raman/propellers': typeof MissionHubRamanPropellersRoute
   '/pilot/missions/$id': typeof PilotMissionsIdRoute
+  '/mission-hub/raman/': typeof MissionHubRamanIndexRoute
   '/pilot/missions/': typeof PilotMissionsIndexRoute
   '/academy/courses/$slug/learn': typeof AcademyCoursesSlugLearnRoute
   '/api/hangar/process-bernoulli/review': typeof ApiHangarProcessBernoulliReviewRoute
@@ -1022,11 +1226,31 @@ export interface FileRoutesById {
   '/api/hangar/process-simulation/flight-dynamics-assessment': typeof ApiHangarProcessSimulationFlightDynamicsAssessmentRoute
   '/api/hangar/process-structural/structural-assessment': typeof ApiHangarProcessStructuralStructuralAssessmentRoute
   '/api/hangar/process-validation/compliance-validation': typeof ApiHangarProcessValidationComplianceValidationRoute
+  '/api/hangar/raman/ai-status': typeof ApiHangarRamanAiStatusRoute
+  '/api/hangar/raman/customers': typeof ApiHangarRamanCustomersRoute
+  '/api/hangar/raman/engagements': typeof ApiHangarRamanEngagementsRouteWithChildren
+  '/api/hangar/raman/evaluate': typeof ApiHangarRamanEvaluateRoute
+  '/api/hangar/raman/fix-runs': typeof ApiHangarRamanFixRunsRouteWithChildren
+  '/api/hangar/raman/noise-check': typeof ApiHangarRamanNoiseCheckRoute
+  '/api/hangar/raman/propellers': typeof ApiHangarRamanPropellersRouteWithChildren
+  '/api/hangar/raman/vehicles': typeof ApiHangarRamanVehiclesRoute
   '/api/hangar/vehicle-design/run': typeof ApiHangarVehicleDesignRunRoute
   '/api/hangar/vehicle-design/save': typeof ApiHangarVehicleDesignSaveRoute
+  '/mission-hub/raman/verify/$code': typeof MissionHubRamanVerifyCodeRoute
   '/academy/courses/$slug/modules/$moduleId': typeof AcademyCoursesSlugModulesModuleIdRoute
   '/academy/module/$moduleId/lesson/$lessonId': typeof AcademyModuleModuleIdLessonLessonIdRoute
   '/academy/module/$moduleId/quiz/$quizId': typeof AcademyModuleModuleIdQuizQuizIdRoute
+  '/api/hangar/raman/engagements/$id': typeof ApiHangarRamanEngagementsIdRouteWithChildren
+  '/api/hangar/raman/lever-ranges/$engagementId': typeof ApiHangarRamanLeverRangesEngagementIdRoute
+  '/api/hangar/raman/propellers/load': typeof ApiHangarRamanPropellersLoadRoute
+  '/api/hangar/raman/verify/$code': typeof ApiHangarRamanVerifyCodeRoute
+  '/api/hangar/raman/engagements/$id/close': typeof ApiHangarRamanEngagementsIdCloseRoute
+  '/api/hangar/raman/fix-runs/$id/lock': typeof ApiHangarRamanFixRunsIdLockRoute
+  '/api/hangar/raman/fix-runs/$id/step': typeof ApiHangarRamanFixRunsIdStepRoute
+  '/api/hangar/raman/fix-runs/$id/steps': typeof ApiHangarRamanFixRunsIdStepsRoute
+  '/api/hangar/raman/fix-runs/$id/stop': typeof ApiHangarRamanFixRunsIdStopRoute
+  '/api/hangar/raman/payments/$engagementId/$stage': typeof ApiHangarRamanPaymentsEngagementIdStageRoute
+  '/api/hangar/raman/reports/$engagementId/$type': typeof ApiHangarRamanReportsEngagementIdTypeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -1109,7 +1333,10 @@ export interface FileRouteTypes {
     | '/api/mission-hub/service-enquiries'
     | '/api/services/enquiry'
     | '/mission-hub/agents/bernoulli'
+    | '/mission-hub/raman/$engagementId'
+    | '/mission-hub/raman/propellers'
     | '/pilot/missions/$id'
+    | '/mission-hub/raman/'
     | '/pilot/missions/'
     | '/academy/courses/$slug/learn'
     | '/api/hangar/process-bernoulli/review'
@@ -1134,11 +1361,31 @@ export interface FileRouteTypes {
     | '/api/hangar/process-simulation/flight-dynamics-assessment'
     | '/api/hangar/process-structural/structural-assessment'
     | '/api/hangar/process-validation/compliance-validation'
+    | '/api/hangar/raman/ai-status'
+    | '/api/hangar/raman/customers'
+    | '/api/hangar/raman/engagements'
+    | '/api/hangar/raman/evaluate'
+    | '/api/hangar/raman/fix-runs'
+    | '/api/hangar/raman/noise-check'
+    | '/api/hangar/raman/propellers'
+    | '/api/hangar/raman/vehicles'
     | '/api/hangar/vehicle-design/run'
     | '/api/hangar/vehicle-design/save'
+    | '/mission-hub/raman/verify/$code'
     | '/academy/courses/$slug/modules/$moduleId'
     | '/academy/module/$moduleId/lesson/$lessonId'
     | '/academy/module/$moduleId/quiz/$quizId'
+    | '/api/hangar/raman/engagements/$id'
+    | '/api/hangar/raman/lever-ranges/$engagementId'
+    | '/api/hangar/raman/propellers/load'
+    | '/api/hangar/raman/verify/$code'
+    | '/api/hangar/raman/engagements/$id/close'
+    | '/api/hangar/raman/fix-runs/$id/lock'
+    | '/api/hangar/raman/fix-runs/$id/step'
+    | '/api/hangar/raman/fix-runs/$id/steps'
+    | '/api/hangar/raman/fix-runs/$id/stop'
+    | '/api/hangar/raman/payments/$engagementId/$stage'
+    | '/api/hangar/raman/reports/$engagementId/$type'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/field'
@@ -1215,7 +1462,10 @@ export interface FileRouteTypes {
     | '/api/mission-hub/service-enquiries'
     | '/api/services/enquiry'
     | '/mission-hub/agents/bernoulli'
+    | '/mission-hub/raman/$engagementId'
+    | '/mission-hub/raman/propellers'
     | '/pilot/missions/$id'
+    | '/mission-hub/raman'
     | '/pilot/missions'
     | '/academy/courses/$slug/learn'
     | '/api/hangar/process-bernoulli/review'
@@ -1240,11 +1490,31 @@ export interface FileRouteTypes {
     | '/api/hangar/process-simulation/flight-dynamics-assessment'
     | '/api/hangar/process-structural/structural-assessment'
     | '/api/hangar/process-validation/compliance-validation'
+    | '/api/hangar/raman/ai-status'
+    | '/api/hangar/raman/customers'
+    | '/api/hangar/raman/engagements'
+    | '/api/hangar/raman/evaluate'
+    | '/api/hangar/raman/fix-runs'
+    | '/api/hangar/raman/noise-check'
+    | '/api/hangar/raman/propellers'
+    | '/api/hangar/raman/vehicles'
     | '/api/hangar/vehicle-design/run'
     | '/api/hangar/vehicle-design/save'
+    | '/mission-hub/raman/verify/$code'
     | '/academy/courses/$slug/modules/$moduleId'
     | '/academy/module/$moduleId/lesson/$lessonId'
     | '/academy/module/$moduleId/quiz/$quizId'
+    | '/api/hangar/raman/engagements/$id'
+    | '/api/hangar/raman/lever-ranges/$engagementId'
+    | '/api/hangar/raman/propellers/load'
+    | '/api/hangar/raman/verify/$code'
+    | '/api/hangar/raman/engagements/$id/close'
+    | '/api/hangar/raman/fix-runs/$id/lock'
+    | '/api/hangar/raman/fix-runs/$id/step'
+    | '/api/hangar/raman/fix-runs/$id/steps'
+    | '/api/hangar/raman/fix-runs/$id/stop'
+    | '/api/hangar/raman/payments/$engagementId/$stage'
+    | '/api/hangar/raman/reports/$engagementId/$type'
   id:
     | '__root__'
     | '/_layout'
@@ -1326,7 +1596,10 @@ export interface FileRouteTypes {
     | '/api/mission-hub/service-enquiries'
     | '/api/services/enquiry'
     | '/mission-hub/agents/bernoulli'
+    | '/mission-hub/raman/$engagementId'
+    | '/mission-hub/raman/propellers'
     | '/pilot/missions/$id'
+    | '/mission-hub/raman/'
     | '/pilot/missions/'
     | '/academy/courses/$slug/learn'
     | '/api/hangar/process-bernoulli/review'
@@ -1351,11 +1624,31 @@ export interface FileRouteTypes {
     | '/api/hangar/process-simulation/flight-dynamics-assessment'
     | '/api/hangar/process-structural/structural-assessment'
     | '/api/hangar/process-validation/compliance-validation'
+    | '/api/hangar/raman/ai-status'
+    | '/api/hangar/raman/customers'
+    | '/api/hangar/raman/engagements'
+    | '/api/hangar/raman/evaluate'
+    | '/api/hangar/raman/fix-runs'
+    | '/api/hangar/raman/noise-check'
+    | '/api/hangar/raman/propellers'
+    | '/api/hangar/raman/vehicles'
     | '/api/hangar/vehicle-design/run'
     | '/api/hangar/vehicle-design/save'
+    | '/mission-hub/raman/verify/$code'
     | '/academy/courses/$slug/modules/$moduleId'
     | '/academy/module/$moduleId/lesson/$lessonId'
     | '/academy/module/$moduleId/quiz/$quizId'
+    | '/api/hangar/raman/engagements/$id'
+    | '/api/hangar/raman/lever-ranges/$engagementId'
+    | '/api/hangar/raman/propellers/load'
+    | '/api/hangar/raman/verify/$code'
+    | '/api/hangar/raman/engagements/$id/close'
+    | '/api/hangar/raman/fix-runs/$id/lock'
+    | '/api/hangar/raman/fix-runs/$id/step'
+    | '/api/hangar/raman/fix-runs/$id/steps'
+    | '/api/hangar/raman/fix-runs/$id/stop'
+    | '/api/hangar/raman/payments/$engagementId/$stage'
+    | '/api/hangar/raman/reports/$engagementId/$type'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -1416,8 +1709,20 @@ export interface RootRouteChildren {
   ApiHangarProcessSimulationFlightDynamicsAssessmentRoute: typeof ApiHangarProcessSimulationFlightDynamicsAssessmentRoute
   ApiHangarProcessStructuralStructuralAssessmentRoute: typeof ApiHangarProcessStructuralStructuralAssessmentRoute
   ApiHangarProcessValidationComplianceValidationRoute: typeof ApiHangarProcessValidationComplianceValidationRoute
+  ApiHangarRamanAiStatusRoute: typeof ApiHangarRamanAiStatusRoute
+  ApiHangarRamanCustomersRoute: typeof ApiHangarRamanCustomersRoute
+  ApiHangarRamanEngagementsRoute: typeof ApiHangarRamanEngagementsRouteWithChildren
+  ApiHangarRamanEvaluateRoute: typeof ApiHangarRamanEvaluateRoute
+  ApiHangarRamanFixRunsRoute: typeof ApiHangarRamanFixRunsRouteWithChildren
+  ApiHangarRamanNoiseCheckRoute: typeof ApiHangarRamanNoiseCheckRoute
+  ApiHangarRamanPropellersRoute: typeof ApiHangarRamanPropellersRouteWithChildren
+  ApiHangarRamanVehiclesRoute: typeof ApiHangarRamanVehiclesRoute
   ApiHangarVehicleDesignRunRoute: typeof ApiHangarVehicleDesignRunRoute
   ApiHangarVehicleDesignSaveRoute: typeof ApiHangarVehicleDesignSaveRoute
+  ApiHangarRamanLeverRangesEngagementIdRoute: typeof ApiHangarRamanLeverRangesEngagementIdRoute
+  ApiHangarRamanVerifyCodeRoute: typeof ApiHangarRamanVerifyCodeRoute
+  ApiHangarRamanPaymentsEngagementIdStageRoute: typeof ApiHangarRamanPaymentsEngagementIdStageRoute
+  ApiHangarRamanReportsEngagementIdTypeRoute: typeof ApiHangarRamanReportsEngagementIdTypeRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1975,6 +2280,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MissionHubAgentsBernoulliRouteImport
       parentRoute: typeof MissionHubRoute
     }
+    '/mission-hub/raman/': {
+      id: '/mission-hub/raman/'
+      path: '/raman'
+      fullPath: '/mission-hub/raman/'
+      preLoaderRoute: typeof MissionHubRamanIndexRouteImport
+      parentRoute: typeof MissionHubRoute
+    }
+    '/mission-hub/raman/$engagementId': {
+      id: '/mission-hub/raman/$engagementId'
+      path: '/raman/$engagementId'
+      fullPath: '/mission-hub/raman/$engagementId'
+      preLoaderRoute: typeof MissionHubRamanEngagementIdRouteImport
+      parentRoute: typeof MissionHubRoute
+    }
+    '/mission-hub/raman/propellers': {
+      id: '/mission-hub/raman/propellers'
+      path: '/raman/propellers'
+      fullPath: '/mission-hub/raman/propellers'
+      preLoaderRoute: typeof MissionHubRamanPropellersRouteImport
+      parentRoute: typeof MissionHubRoute
+    }
     '/pilot/missions/': {
       id: '/pilot/missions/'
       path: '/missions'
@@ -2150,6 +2476,62 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiHangarProcessValidationComplianceValidationRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/hangar/raman/ai-status': {
+      id: '/api/hangar/raman/ai-status'
+      path: '/api/hangar/raman/ai-status'
+      fullPath: '/api/hangar/raman/ai-status'
+      preLoaderRoute: typeof ApiHangarRamanAiStatusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/hangar/raman/customers': {
+      id: '/api/hangar/raman/customers'
+      path: '/api/hangar/raman/customers'
+      fullPath: '/api/hangar/raman/customers'
+      preLoaderRoute: typeof ApiHangarRamanCustomersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/hangar/raman/engagements': {
+      id: '/api/hangar/raman/engagements'
+      path: '/api/hangar/raman/engagements'
+      fullPath: '/api/hangar/raman/engagements'
+      preLoaderRoute: typeof ApiHangarRamanEngagementsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/hangar/raman/evaluate': {
+      id: '/api/hangar/raman/evaluate'
+      path: '/api/hangar/raman/evaluate'
+      fullPath: '/api/hangar/raman/evaluate'
+      preLoaderRoute: typeof ApiHangarRamanEvaluateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/hangar/raman/fix-runs': {
+      id: '/api/hangar/raman/fix-runs'
+      path: '/api/hangar/raman/fix-runs'
+      fullPath: '/api/hangar/raman/fix-runs'
+      preLoaderRoute: typeof ApiHangarRamanFixRunsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/hangar/raman/noise-check': {
+      id: '/api/hangar/raman/noise-check'
+      path: '/api/hangar/raman/noise-check'
+      fullPath: '/api/hangar/raman/noise-check'
+      preLoaderRoute: typeof ApiHangarRamanNoiseCheckRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/hangar/raman/propellers': {
+      id: '/api/hangar/raman/propellers'
+      path: '/api/hangar/raman/propellers'
+      fullPath: '/api/hangar/raman/propellers'
+      preLoaderRoute: typeof ApiHangarRamanPropellersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/hangar/raman/vehicles': {
+      id: '/api/hangar/raman/vehicles'
+      path: '/api/hangar/raman/vehicles'
+      fullPath: '/api/hangar/raman/vehicles'
+      preLoaderRoute: typeof ApiHangarRamanVehiclesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/hangar/vehicle-design/run': {
       id: '/api/hangar/vehicle-design/run'
       path: '/api/hangar/vehicle-design/run'
@@ -2163,6 +2545,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/hangar/vehicle-design/save'
       preLoaderRoute: typeof ApiHangarVehicleDesignSaveRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/mission-hub/raman/verify/$code': {
+      id: '/mission-hub/raman/verify/$code'
+      path: '/raman/verify/$code'
+      fullPath: '/mission-hub/raman/verify/$code'
+      preLoaderRoute: typeof MissionHubRamanVerifyCodeRouteImport
+      parentRoute: typeof MissionHubRoute
     }
     '/academy/courses/$slug/modules/$moduleId': {
       id: '/academy/courses/$slug/modules/$moduleId'
@@ -2184,6 +2573,83 @@ declare module '@tanstack/react-router' {
       fullPath: '/academy/module/$moduleId/quiz/$quizId'
       preLoaderRoute: typeof AcademyModuleModuleIdQuizQuizIdRouteImport
       parentRoute: typeof AcademyRoute
+    }
+    '/api/hangar/raman/engagements/$id': {
+      id: '/api/hangar/raman/engagements/$id'
+      path: '/$id'
+      fullPath: '/api/hangar/raman/engagements/$id'
+      preLoaderRoute: typeof ApiHangarRamanEngagementsIdRouteImport
+      parentRoute: typeof ApiHangarRamanEngagementsRoute
+    }
+    '/api/hangar/raman/lever-ranges/$engagementId': {
+      id: '/api/hangar/raman/lever-ranges/$engagementId'
+      path: '/api/hangar/raman/lever-ranges/$engagementId'
+      fullPath: '/api/hangar/raman/lever-ranges/$engagementId'
+      preLoaderRoute: typeof ApiHangarRamanLeverRangesEngagementIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/hangar/raman/propellers/load': {
+      id: '/api/hangar/raman/propellers/load'
+      path: '/load'
+      fullPath: '/api/hangar/raman/propellers/load'
+      preLoaderRoute: typeof ApiHangarRamanPropellersLoadRouteImport
+      parentRoute: typeof ApiHangarRamanPropellersRoute
+    }
+    '/api/hangar/raman/verify/$code': {
+      id: '/api/hangar/raman/verify/$code'
+      path: '/api/hangar/raman/verify/$code'
+      fullPath: '/api/hangar/raman/verify/$code'
+      preLoaderRoute: typeof ApiHangarRamanVerifyCodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/hangar/raman/engagements/$id/close': {
+      id: '/api/hangar/raman/engagements/$id/close'
+      path: '/close'
+      fullPath: '/api/hangar/raman/engagements/$id/close'
+      preLoaderRoute: typeof ApiHangarRamanEngagementsIdCloseRouteImport
+      parentRoute: typeof ApiHangarRamanEngagementsIdRoute
+    }
+    '/api/hangar/raman/fix-runs/$id/lock': {
+      id: '/api/hangar/raman/fix-runs/$id/lock'
+      path: '/$id/lock'
+      fullPath: '/api/hangar/raman/fix-runs/$id/lock'
+      preLoaderRoute: typeof ApiHangarRamanFixRunsIdLockRouteImport
+      parentRoute: typeof ApiHangarRamanFixRunsRoute
+    }
+    '/api/hangar/raman/fix-runs/$id/step': {
+      id: '/api/hangar/raman/fix-runs/$id/step'
+      path: '/$id/step'
+      fullPath: '/api/hangar/raman/fix-runs/$id/step'
+      preLoaderRoute: typeof ApiHangarRamanFixRunsIdStepRouteImport
+      parentRoute: typeof ApiHangarRamanFixRunsRoute
+    }
+    '/api/hangar/raman/fix-runs/$id/steps': {
+      id: '/api/hangar/raman/fix-runs/$id/steps'
+      path: '/$id/steps'
+      fullPath: '/api/hangar/raman/fix-runs/$id/steps'
+      preLoaderRoute: typeof ApiHangarRamanFixRunsIdStepsRouteImport
+      parentRoute: typeof ApiHangarRamanFixRunsRoute
+    }
+    '/api/hangar/raman/fix-runs/$id/stop': {
+      id: '/api/hangar/raman/fix-runs/$id/stop'
+      path: '/$id/stop'
+      fullPath: '/api/hangar/raman/fix-runs/$id/stop'
+      preLoaderRoute: typeof ApiHangarRamanFixRunsIdStopRouteImport
+      parentRoute: typeof ApiHangarRamanFixRunsRoute
+    }
+    '/api/hangar/raman/payments/$engagementId/$stage': {
+      id: '/api/hangar/raman/payments/$engagementId/$stage'
+      path: '/api/hangar/raman/payments/$engagementId/$stage'
+      fullPath: '/api/hangar/raman/payments/$engagementId/$stage'
+      preLoaderRoute: typeof ApiHangarRamanPaymentsEngagementIdStageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/hangar/raman/reports/$engagementId/$type': {
+      id: '/api/hangar/raman/reports/$engagementId/$type'
+      path: '/api/hangar/raman/reports/$engagementId/$type'
+      fullPath: '/api/hangar/raman/reports/$engagementId/$type'
+      preLoaderRoute: typeof ApiHangarRamanReportsEngagementIdTypeRouteImport
+      parentRoute: typeof rootRouteImport
     }
   }
 }
@@ -2243,6 +2709,10 @@ interface MissionHubRouteChildren {
   MissionHubWaitlistRoute: typeof MissionHubWaitlistRoute
   MissionHubIndexRoute: typeof MissionHubIndexRoute
   MissionHubAgentsBernoulliRoute: typeof MissionHubAgentsBernoulliRoute
+  MissionHubRamanEngagementIdRoute: typeof MissionHubRamanEngagementIdRoute
+  MissionHubRamanPropellersRoute: typeof MissionHubRamanPropellersRoute
+  MissionHubRamanIndexRoute: typeof MissionHubRamanIndexRoute
+  MissionHubRamanVerifyCodeRoute: typeof MissionHubRamanVerifyCodeRoute
 }
 
 const MissionHubRouteChildren: MissionHubRouteChildren = {
@@ -2258,6 +2728,10 @@ const MissionHubRouteChildren: MissionHubRouteChildren = {
   MissionHubWaitlistRoute: MissionHubWaitlistRoute,
   MissionHubIndexRoute: MissionHubIndexRoute,
   MissionHubAgentsBernoulliRoute: MissionHubAgentsBernoulliRoute,
+  MissionHubRamanEngagementIdRoute: MissionHubRamanEngagementIdRoute,
+  MissionHubRamanPropellersRoute: MissionHubRamanPropellersRoute,
+  MissionHubRamanIndexRoute: MissionHubRamanIndexRoute,
+  MissionHubRamanVerifyCodeRoute: MissionHubRamanVerifyCodeRoute,
 }
 
 const MissionHubRouteWithChildren = MissionHubRoute._addFileChildren(
@@ -2333,6 +2807,69 @@ const TheHangarRouteChildren: TheHangarRouteChildren = {
 const TheHangarRouteWithChildren = TheHangarRoute._addFileChildren(
   TheHangarRouteChildren,
 )
+
+interface ApiHangarRamanEngagementsIdRouteChildren {
+  ApiHangarRamanEngagementsIdCloseRoute: typeof ApiHangarRamanEngagementsIdCloseRoute
+}
+
+const ApiHangarRamanEngagementsIdRouteChildren: ApiHangarRamanEngagementsIdRouteChildren =
+  {
+    ApiHangarRamanEngagementsIdCloseRoute:
+      ApiHangarRamanEngagementsIdCloseRoute,
+  }
+
+const ApiHangarRamanEngagementsIdRouteWithChildren =
+  ApiHangarRamanEngagementsIdRoute._addFileChildren(
+    ApiHangarRamanEngagementsIdRouteChildren,
+  )
+
+interface ApiHangarRamanEngagementsRouteChildren {
+  ApiHangarRamanEngagementsIdRoute: typeof ApiHangarRamanEngagementsIdRouteWithChildren
+}
+
+const ApiHangarRamanEngagementsRouteChildren: ApiHangarRamanEngagementsRouteChildren =
+  {
+    ApiHangarRamanEngagementsIdRoute:
+      ApiHangarRamanEngagementsIdRouteWithChildren,
+  }
+
+const ApiHangarRamanEngagementsRouteWithChildren =
+  ApiHangarRamanEngagementsRoute._addFileChildren(
+    ApiHangarRamanEngagementsRouteChildren,
+  )
+
+interface ApiHangarRamanFixRunsRouteChildren {
+  ApiHangarRamanFixRunsIdLockRoute: typeof ApiHangarRamanFixRunsIdLockRoute
+  ApiHangarRamanFixRunsIdStepRoute: typeof ApiHangarRamanFixRunsIdStepRoute
+  ApiHangarRamanFixRunsIdStepsRoute: typeof ApiHangarRamanFixRunsIdStepsRoute
+  ApiHangarRamanFixRunsIdStopRoute: typeof ApiHangarRamanFixRunsIdStopRoute
+}
+
+const ApiHangarRamanFixRunsRouteChildren: ApiHangarRamanFixRunsRouteChildren = {
+  ApiHangarRamanFixRunsIdLockRoute: ApiHangarRamanFixRunsIdLockRoute,
+  ApiHangarRamanFixRunsIdStepRoute: ApiHangarRamanFixRunsIdStepRoute,
+  ApiHangarRamanFixRunsIdStepsRoute: ApiHangarRamanFixRunsIdStepsRoute,
+  ApiHangarRamanFixRunsIdStopRoute: ApiHangarRamanFixRunsIdStopRoute,
+}
+
+const ApiHangarRamanFixRunsRouteWithChildren =
+  ApiHangarRamanFixRunsRoute._addFileChildren(
+    ApiHangarRamanFixRunsRouteChildren,
+  )
+
+interface ApiHangarRamanPropellersRouteChildren {
+  ApiHangarRamanPropellersLoadRoute: typeof ApiHangarRamanPropellersLoadRoute
+}
+
+const ApiHangarRamanPropellersRouteChildren: ApiHangarRamanPropellersRouteChildren =
+  {
+    ApiHangarRamanPropellersLoadRoute: ApiHangarRamanPropellersLoadRoute,
+  }
+
+const ApiHangarRamanPropellersRouteWithChildren =
+  ApiHangarRamanPropellersRoute._addFileChildren(
+    ApiHangarRamanPropellersRouteChildren,
+  )
 
 const rootRouteChildren: RootRouteChildren = {
   LayoutRoute: LayoutRouteWithChildren,
@@ -2410,8 +2947,23 @@ const rootRouteChildren: RootRouteChildren = {
     ApiHangarProcessStructuralStructuralAssessmentRoute,
   ApiHangarProcessValidationComplianceValidationRoute:
     ApiHangarProcessValidationComplianceValidationRoute,
+  ApiHangarRamanAiStatusRoute: ApiHangarRamanAiStatusRoute,
+  ApiHangarRamanCustomersRoute: ApiHangarRamanCustomersRoute,
+  ApiHangarRamanEngagementsRoute: ApiHangarRamanEngagementsRouteWithChildren,
+  ApiHangarRamanEvaluateRoute: ApiHangarRamanEvaluateRoute,
+  ApiHangarRamanFixRunsRoute: ApiHangarRamanFixRunsRouteWithChildren,
+  ApiHangarRamanNoiseCheckRoute: ApiHangarRamanNoiseCheckRoute,
+  ApiHangarRamanPropellersRoute: ApiHangarRamanPropellersRouteWithChildren,
+  ApiHangarRamanVehiclesRoute: ApiHangarRamanVehiclesRoute,
   ApiHangarVehicleDesignRunRoute: ApiHangarVehicleDesignRunRoute,
   ApiHangarVehicleDesignSaveRoute: ApiHangarVehicleDesignSaveRoute,
+  ApiHangarRamanLeverRangesEngagementIdRoute:
+    ApiHangarRamanLeverRangesEngagementIdRoute,
+  ApiHangarRamanVerifyCodeRoute: ApiHangarRamanVerifyCodeRoute,
+  ApiHangarRamanPaymentsEngagementIdStageRoute:
+    ApiHangarRamanPaymentsEngagementIdStageRoute,
+  ApiHangarRamanReportsEngagementIdTypeRoute:
+    ApiHangarRamanReportsEngagementIdTypeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
