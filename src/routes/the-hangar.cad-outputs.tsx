@@ -28,6 +28,8 @@ import {
 export const Route = createFileRoute("/the-hangar/cad-outputs")({
   validateSearch: (s: Record<string, unknown>) => ({
     designId: (s.designId as string) || "agile_recon",
+    // The vehicle design code Bay 04 generated from, when it came from there.
+    from: (s.from as string) || "",
   }),
   component: TheHangarCADOutputs,
 });
@@ -41,7 +43,7 @@ type LoadState =
 
 function TheHangarCADOutputs() {
   const ready = useHangarSession();
-  const { designId } = Route.useSearch();
+  const { designId, from } = Route.useSearch();
   const [load, setLoad] = useState<LoadState>({ status: "loading" });
 
   useEffect(() => {
@@ -97,7 +99,7 @@ function TheHangarCADOutputs() {
             {load.message}
           </div>
         )}
-        {load.status === "ready" && <CadOutputs data={load.data} />}
+        {load.status === "ready" && <CadOutputs data={load.data} from={from} />}
       </main>
     </div>
   );
@@ -111,8 +113,10 @@ const TABS: { id: TabId; label: string; ext?: string }[] = [
   { id: "src", label: "STEP header", ext: "raw" },
 ];
 
-function CadOutputs({ data }: { data: CadViewerData }) {
+function CadOutputs({ data, from }: { data: CadViewerData; from: string }) {
   const { summary } = data;
+  // Phase 1: every design opens the one sample STEP output -- say so.
+  const isSample = from !== "" && from.toLowerCase() !== summary.design.id.toLowerCase();
   const [tab, setTab] = useState<TabId>("model");
   const [focus, setFocus] = useState<FocusRequest | null>(null);
   const tabRefs = useRef<Partial<Record<TabId, HTMLButtonElement | null>>>({});
@@ -150,6 +154,14 @@ function CadOutputs({ data }: { data: CadViewerData }) {
           <span className="hgr-cv-file-size">{fmtBytes(summary.source.size_bytes)}</span>
         </div>
       </div>
+
+      {isSample && (
+        <div className="hgr-cv-banner" role="note">
+          CAD model for <b>{from}</b> saved. The STEP converter isn't connected yet, so this view
+          shows the sample STEP output ({summary.design.name}) — per-design STEP files come with the
+          converter.
+        </div>
+      )}
 
       <div className="hgr-cv-kpis">
         <Kpi label="Length" value={fmtNum(e.length)} unit="mm" />
@@ -297,6 +309,8 @@ const HGR_CAD_OUTPUTS_CSS = `
 .hgr-cv-kicker{ font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--hgr-cv-warn); }
 .hgr-cv h1{ font-size:28px; line-height:1.15; margin-top:4px; text-wrap:balance; }
 .hgr-cv-sub{ color:var(--hgr-cv-muted); font-size:13px; margin-top:4px; }
+.hgr-cv-banner{ font-size:13px; color:var(--hgr-cv-fg); background:var(--hgr-cv-sunk); border:1px solid var(--hgr-cv-line); border-left:3px solid var(--hgr-cv-info); padding:9px 14px; }
+.hgr-cv-banner b{ font-family:'IBM Plex Mono',monospace; font-weight:600; }
 .hgr-cv-file{ display:inline-flex; align-items:center; gap:8px; font-family:'IBM Plex Mono',monospace; font-size:12px; background:var(--hgr-cv-panel); border:1px solid var(--hgr-cv-line); border-radius:2px; padding:6px 10px; max-width:100%; min-width:0; }
 .hgr-cv-file-name{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; }
 .hgr-cv-file-size{ color:var(--hgr-cv-muted); white-space:nowrap; font-variant-numeric:tabular-nums; }
