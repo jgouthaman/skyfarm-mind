@@ -103,7 +103,12 @@ export async function listEnquiries(q: EnquiryListQuery): Promise<{ rows: Record
     query = query.or(["name", "organisation", "email"].map((f) => `${f}.ilike.%${search}%`).join(","));
   }
   if (q.status) query = query.eq("status", q.status);
-  if (q.service) query = query.eq("service", q.service);
+  if (q.service) {
+    // Match a study by its code ("S01 — …"), so enquiries saved under an
+    // older title still show after the title is renamed.
+    const code = /^S\d{2}(?= — )/.exec(q.service)?.[0];
+    query = code ? query.like("service", `${code} —%`) : query.eq("service", q.service);
+  }
   if (q.dateFrom && DATE_RE.test(q.dateFrom)) query = query.gte("created_at", q.dateFrom);
   if (q.dateTo && DATE_RE.test(q.dateTo)) query = query.lte("created_at", `${q.dateTo}T23:59:59`);
   if (!q.all) {

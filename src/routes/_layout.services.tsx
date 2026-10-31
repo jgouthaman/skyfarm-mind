@@ -11,7 +11,7 @@ export const Route = createFileRoute("/_layout/services")({
       path: "/services",
       title: "Services — TorqWings",
       description:
-        "Drone noise assessment and reduction, radar signature (RCS) studies and full mission-to-design studies. Our AI agents run the analysis, an engineer reviews it, and you get a report you can act on.",
+        "Vehicle noise assessment and reduction, radar signature (RCS) studies and full mission-to-design studies. Our AI agents run the analysis, an engineer reviews it, and you get a report you can act on.",
     });
     return { meta: seo.meta, links: [...seo.links, ...HANGAR_PUBLIC_HEAD_LINKS] };
   },
@@ -99,7 +99,7 @@ type Service = {
 const ROW_1: Service[] = [
   {
     code: "S01",
-    title: "Drone Noise Assessment",
+    title: "Vehicle Noise Assessment",
     tag: "How loud is it?",
     body: "How loud your drone will be in hover and cruise, and where the noise comes from — before you build it.",
     youGet: "noise levels by distance, source breakdown, report",

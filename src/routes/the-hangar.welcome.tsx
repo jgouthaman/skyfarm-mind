@@ -46,7 +46,7 @@ interface NodeData {
 
 // Bays whose circle is permanently green on the circuit: the fully built
 // and restyled ones. Add a bay here once it's finished.
-const LIVE_BAY_IDS = new Set([1, 2, 3]);
+const LIVE_BAY_IDS = new Set([1, 2, 3, 4, 14]);
 
 const NODES: NodeData[] = [
   {
@@ -238,7 +238,7 @@ const NODES: NodeData[] = [
     bay: "14",
     name: "Bernoulli",
     title: "Bernoulli Agent",
-    status: "design",
+    status: "online",
     href: "/the-hangar/bernoulli",
     hub: true,
     r: 44,
