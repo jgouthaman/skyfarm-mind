@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useHangarSession } from "@/lib/the-hangar/session";
+import { DesignGuidanceFooter } from "@/components/the-hangar/DesignGuidanceFooter";
 import type { CadCheck, CadViewerData } from "@/lib/the-hangar/cadViewerTypes";
 import { fmtBytes, fmtNum, loadCadViewerData, partFlags } from "@/lib/the-hangar/cadViewerData";
 import { CadModelTab, type FocusRequest } from "@/components/the-hangar/CadModelTab";
@@ -29,7 +30,7 @@ export const Route = createFileRoute("/the-hangar/cad-outputs")({
   validateSearch: (s: Record<string, unknown>) => ({
     designId: (s.designId as string) || "agile_recon",
     // The vehicle design code Bay 04 generated from, when it came from there.
-    from: (s.from as string) || "",
+    from: (s.from as string) || undefined,
   }),
   component: TheHangarCADOutputs,
 });
@@ -99,8 +100,10 @@ function TheHangarCADOutputs() {
             {load.message}
           </div>
         )}
-        {load.status === "ready" && <CadOutputs data={load.data} from={from} />}
+        {load.status === "ready" && <CadOutputs data={load.data} from={from ?? ""} />}
       </main>
+
+      <DesignGuidanceFooter />
     </div>
   );
 }
