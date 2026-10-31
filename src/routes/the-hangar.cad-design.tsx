@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useHangarSession } from "@/lib/the-hangar/session";
+import { DesignGuidanceFooter } from "@/components/the-hangar/DesignGuidanceFooter";
 import { supabase } from "@/integrations/supabase/client";
 import type { AircraftDesignListEntry } from "@/lib/the-hangar/aircraftDesignAgentPipeline";
 import type { Stage1Result, CADDesignListEntry } from "@/lib/the-hangar/cadDesignAgentPipeline";
@@ -500,6 +501,8 @@ function TheHangarCADDesign() {
           </div>
         </section>
       </main>
+
+      <DesignGuidanceFooter />
     </div>
   );
 }
