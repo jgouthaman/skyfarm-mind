@@ -4,7 +4,7 @@
 export type ServiceCode = "S01" | "S02" | "S03" | "S04" | "S05";
 
 export const SERVICES: { code: ServiceCode; title: string }[] = [
-  { code: "S01", title: "Drone Noise Assessment" },
+  { code: "S01", title: "Vehicle Noise Assessment" },
   { code: "S02", title: "Noise Reduction Study" },
   { code: "S03", title: "Radar Signature (RCS) Assessment" },
   { code: "S04", title: "Signature Reduction Design" },
