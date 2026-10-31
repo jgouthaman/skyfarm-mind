@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useHangarSession } from "@/lib/the-hangar/session";
 import { supabase } from "@/integrations/supabase/client";
 import type { AircraftDesignListEntry } from "@/lib/the-hangar/aircraftDesignAgentPipeline";
@@ -85,6 +85,7 @@ async function callStageApi<TResult>(
 
 function TheHangarCADDesign() {
   const ready = useHangarSession();
+  const navigate = useNavigate();
 
   const [flow, setFlow] = useState<FlowState>(INITIAL_FLOW_STATE);
   const [currentUserEmail, setCurrentUserEmail] = useState<string | null>(null);
@@ -229,6 +230,13 @@ function TheHangarCADDesign() {
       return;
     }
     setFlow({ status: "complete", result: outcome.data, errorMessage: null });
+    // Straight on to the STEP output viewer. Phase 1 has one sample STEP
+    // output (agile_recon fixtures) until the Cloud Run STEP converter
+    // writes one per design; `from` lets the viewer say it's the sample.
+    navigate({
+      to: "/the-hangar/cad-outputs",
+      search: { designId: "agile_recon", from: selectedAircraftDesign.designCode },
+    });
   }
 
   if (!ready) return null;
