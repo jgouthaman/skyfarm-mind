@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { AircraftDesignListEntry } from "@/lib/the-hangar/aircraftDesignAgentPipeline";
 import type { Stage1Result, CADDesignListEntry } from "@/lib/the-hangar/cadDesignAgentPipeline";
 import type { CADModelFiles, BomEntry, MassProperties } from "@/lib/the-hangar/cadDesignGeneration";
+import { AiStatusNote, type LlmStatusInfo } from "@/components/the-hangar/AiStatusNote";
 
 // ─────────────────────────────────────────────────────────────────────────
 // The Hangar — Bay 04 (CAD Agent) detail page, phase 1. New, self-contained
@@ -104,6 +105,7 @@ function TheHangarCADDesign() {
   const [planExpanded, setPlanExpanded] = useState(false);
   const [llmStatus, setLlmStatus] = useState<"checking" | "live" | "offline">("checking");
   const [llmProvider, setLlmProvider] = useState<"anthropic" | "groq" | null>(null);
+  const [llmInfo, setLlmInfo] = useState<LlmStatusInfo | null>(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -130,6 +132,7 @@ function TheHangarCADDesign() {
         if (!cancelled) {
           setLlmStatus(res.ok && json.live ? "live" : "offline");
           setLlmProvider(res.ok && json.live ? json.provider ?? null : null);
+          setLlmInfo(res.ok && json.message ? { message: json.message, note: json.note } : null);
         }
       } catch {
         if (!cancelled) {
@@ -288,13 +291,14 @@ function TheHangarCADDesign() {
               <span
                 className={`hgr-d-badge hgr-d-badge-ai hgr-d-badge-ai-${llmStatus}`}
                 title={
-                  llmStatus === "checking"
+                  (llmStatus !== "checking" && llmInfo?.message) ||
+                  (llmStatus === "checking"
                     ? "Checking the AI providers…"
                     : llmStatus === "live"
                       ? llmProvider === "groq"
                         ? "Live — answering via Groq (gpt-oss-120b), per the AI Providers order in Mission Hub"
                         : "Live — connected to Anthropic (Claude Sonnet 5)"
-                      : "Offline — not connected to Anthropic or Groq. CAD model generation will fall back to mock output."
+                      : "Offline — not connected to Anthropic or Groq. CAD model generation will fall back to mock output.")
                 }
               >
                 <span className="hgr-d-badge-ai-dot" />
@@ -316,6 +320,7 @@ function TheHangarCADDesign() {
                   </span>
                 )}
               </span>
+              {llmStatus !== "checking" && <AiStatusNote info={llmInfo} />}
             </div>
             <div className="hgr-d-hero-row">
               <h1>CAD Agent</h1>

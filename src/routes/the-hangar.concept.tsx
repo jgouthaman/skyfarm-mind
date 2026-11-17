@@ -23,6 +23,7 @@ import {
   type ConceptExportFormat,
   type ConceptExportInput,
 } from "@/lib/the-hangar/conceptExport";
+import { AiStatusNote, type LlmStatusInfo } from "@/components/the-hangar/AiStatusNote";
 
 // ─────────────────────────────────────────────────────────────────────────
 // The Hangar — Bay 02 (Concept Agent) detail page. New, self-contained page
@@ -398,6 +399,7 @@ function TheHangarConcept() {
   const [currentUserEmail, setCurrentUserEmail] = useState<string | null>(null);
   const [llmStatus, setLlmStatus] = useState<"checking" | "live" | "offline">("checking");
   const [llmProvider, setLlmProvider] = useState<"anthropic" | "groq" | null>(null);
+  const [llmInfo, setLlmInfo] = useState<LlmStatusInfo | null>(null);
   const [savedSpecs, setSavedSpecs] = useState<MissionListEntry[] | null>(null);
   const [savedSpecsStatus, setSavedSpecsStatus] = useState<"idle" | "loading" | "error">("idle");
   const [savedSpecsExpanded, setSavedSpecsExpanded] = useState(false);
@@ -444,6 +446,7 @@ function TheHangarConcept() {
         if (!cancelled) {
           setLlmStatus(res.ok && json.live ? "live" : "offline");
           setLlmProvider(res.ok && json.live ? json.provider ?? null : null);
+          setLlmInfo(res.ok && json.message ? { message: json.message, note: json.note } : null);
         }
       } catch {
         if (!cancelled) {
@@ -786,13 +789,14 @@ function TheHangarConcept() {
               <span
                 className={`hgr-c-badge hgr-c-badge-ai hgr-c-badge-ai-${llmStatus}`}
                 title={
-                  llmStatus === "checking"
+                  (llmStatus !== "checking" && llmInfo?.message) ||
+                  (llmStatus === "checking"
                     ? "Checking the AI providers…"
                     : llmStatus === "live"
                       ? llmProvider === "groq"
                         ? "Live — answering via Groq (gpt-oss-120b), per the AI Providers order in Mission Hub"
                         : "Live — connected to Anthropic (Claude Sonnet 5)"
-                      : "Offline — not connected to Anthropic or Groq. Stage LLM calls will fall back to mock output."
+                      : "Offline — not connected to Anthropic or Groq. Stage LLM calls will fall back to mock output.")
                 }
               >
                 <span className="hgr-c-badge-ai-dot" />
@@ -817,6 +821,7 @@ function TheHangarConcept() {
                   </span>
                 )}
               </span>
+              {llmStatus !== "checking" && <AiStatusNote info={llmInfo} />}
             </div>
             <div className="hgr-c-hero-row">
               <h1>Concept Agent</h1>

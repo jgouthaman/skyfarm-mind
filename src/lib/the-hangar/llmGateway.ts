@@ -18,7 +18,7 @@ import Anthropic from "@anthropic-ai/sdk";
 //
 // Two providers -- Anthropic and Groq (GROQ_API_KEY, an OpenAI-compatible
 // REST API, no SDK dependency) -- tried in the order set in Mission Hub ->
-// Configurations -> AI Providers (default: Anthropic first, Groq fallback).
+// Configurations -> AI Providers (default: Groq first, Claude second).
 // A provider that's unconfigured or fails is skipped; if none answers, the
 // caller falls back to its own mock output. The result says which provider
 // actually answered, and callers that care (the "AI" status badge) surface
@@ -357,20 +357,11 @@ export function modelForProvider(provider: LlmProvider): string {
   return provider === "anthropic" ? RAMAN_CLAUDE_MODEL : RAMAN_GROQ_MODEL;
 }
 
-// Backs Raman's "AI" flag -- same logic as Bay 01's checkLlmLiveStatus:
-// the first provider in the AI Providers order that's genuinely reachable
-// (token-free probe), with the model Raman uses on it and the order itself.
-export async function checkRamanAiStatus(): Promise<{
-  live: boolean;
-  provider: LlmProvider | null;
-  model: string | null;
-  configuredOrder: LlmProvider[];
-}> {
-  const configuredOrder = await providerOrder();
-  for (const provider of configuredOrder) {
-    if (await isProviderLive(provider)) return { live: true, provider, model: modelForProvider(provider), configuredOrder };
-  }
-  return { live: false, provider: null, model: null, configuredOrder };
+// Backs Raman's "AI" flag -- same check as Bay 01's checkLlmLiveStatus,
+// with the model Raman uses on the answering provider.
+export async function checkRamanAiStatus(): Promise<LlmStatusReport & { model: string | null }> {
+  const report = await describeLlmStatus((p) => (p === "anthropic" ? "Claude Opus 5.5" : "gpt-oss-120b"));
+  return { ...report, model: report.provider ? modelForProvider(report.provider) : null };
 }
 
 // All text blocks of a Claude reply, joined.
@@ -385,50 +376,133 @@ export function claudeText(message: Anthropic.Message): string {
 // Order the providers are tried in, from Mission Hub -> Configurations -> AI
 // Providers (llmProviderSettings.ts, cached ~30s). Imported lazily so this
 // module stays free of the database client, and any failure falls back to
-// Anthropic first, Groq second -- the order before the setting existed.
+// the default: Groq first, Claude second.
 async function providerOrder(): Promise<LlmProvider[]> {
   try {
     const { getProviderOrder } = await import("./llmProviderSettings.ts");
     return (await getProviderOrder()).order;
   } catch {
-    return ["anthropic", "groq"];
+    return ["groq", "anthropic"];
   }
 }
 
-async function isProviderLive(provider: LlmProvider): Promise<boolean> {
+// Token-free reachability probe. Returns why a provider isn't usable (no
+// key, rejected key, outage, timeout) rather than a bare false, so the "AI"
+// badges can say so instead of silently switching provider.
+async function probeProvider(provider: LlmProvider): Promise<ProviderProbe> {
   if (provider === "anthropic") {
     const key = process.env.ANTHROPIC_API_KEY;
-    if (!key) return false;
+    if (!key) return { configured: false, live: false, reason: "ANTHROPIC_API_KEY is not set" };
     try {
-      const client = new Anthropic({ apiKey: key });
+      const client = new Anthropic({ apiKey: key, maxRetries: 0 });
       await client.models.list({ limit: 1 }, { signal: AbortSignal.timeout(5000) });
-      return true;
-    } catch {
-      return false;
+      return { configured: true, live: true, reason: null };
+    } catch (err) {
+      return { configured: true, live: false, reason: probeError(err) };
     }
   }
   const key = process.env.GROQ_API_KEY;
-  if (!key) return false;
+  if (!key) return { configured: false, live: false, reason: "GROQ_API_KEY is not set" };
   try {
     const res = await fetch("https://api.groq.com/openai/v1/models", {
       headers: { Authorization: `Bearer ${key}` },
       signal: AbortSignal.timeout(5000),
     });
-    return res.ok;
-  } catch {
-    return false;
+    if (res.ok) return { configured: true, live: true, reason: null };
+    return { configured: true, live: false, reason: httpReason(res.status) };
+  } catch (err) {
+    return { configured: true, live: false, reason: probeError(err) };
   }
 }
 
-// Live-connectivity check for the "AI" status indicator — reports which
-// provider would actually answer the next call: the first live one in the
-// configured order. Token-free probes (models list); AbortSignal.timeout
-// keeps a slow/unreachable API from hanging the indicator in "checking".
-export async function checkLlmLiveStatus(): Promise<{ live: boolean; provider: LlmProvider | null }> {
-  for (const provider of await providerOrder()) {
-    if (await isProviderLive(provider)) return { live: true, provider };
+function httpReason(status: number): string {
+  if (status === 401) return "API key rejected (401: invalid or revoked key)";
+  if (status === 403) return "access denied (403: check the account or workspace)";
+  if (status === 429) return "rate limited (429)";
+  if (status >= 500) return `provider outage (HTTP ${status})`;
+  return `HTTP ${status}`;
+}
+
+function probeError(err: unknown): string {
+  if (err instanceof Anthropic.APIError && typeof err.status === "number") return httpReason(err.status);
+  const name = err instanceof Error ? err.name : "";
+  if (name === "TimeoutError" || name === "AbortError" || err instanceof Anthropic.APIUserAbortError) {
+    return "no answer within 5 s (timeout)";
   }
-  return { live: false, provider: null };
+  return err instanceof Error ? err.message : String(err);
+}
+
+export interface ProviderProbe {
+  configured: boolean;
+  live: boolean;
+  // Why it isn't live; null when it is.
+  reason: string | null;
+}
+
+export const PROVIDER_LABEL: Record<LlmProvider, string> = { anthropic: "Claude", groq: "Groq" };
+
+export interface LlmStatusReport {
+  live: boolean;
+  // Which provider the next call goes to: the first live one in the order.
+  provider: LlmProvider | null;
+  configuredOrder: LlmProvider[];
+  providers: Record<LlmProvider, ProviderProbe>;
+  // A plain-language sentence for the badge tooltip, and a short line shown beside it.
+  message: string;
+  note: string;
+}
+
+// Live-connectivity check for the "AI" status indicators. Probes every
+// provider in the AI Providers order (in parallel, token-free, 5 s cap) and
+// spells out the result: which one is answering, and why any other isn't.
+export async function describeLlmStatus(modelLabel: (p: LlmProvider) => string): Promise<LlmStatusReport> {
+  const configuredOrder = await providerOrder();
+  const probes = await Promise.all(configuredOrder.map((p) => probeProvider(p)));
+  const providers: Record<LlmProvider, ProviderProbe> = {
+    anthropic: { configured: Boolean(process.env.ANTHROPIC_API_KEY), live: false, reason: "not in the AI Providers order" },
+    groq: { configured: Boolean(process.env.GROQ_API_KEY), live: false, reason: "not in the AI Providers order" },
+  };
+  configuredOrder.forEach((p, i) => (providers[p] = probes[i]));
+
+  const rank = (p: LlmProvider) => (configuredOrder.indexOf(p) === 0 ? "primary" : "backup");
+  const provider = configuredOrder.find((p) => providers[p].live) ?? null;
+  const down = configuredOrder
+    .filter((p) => !providers[p].live)
+    .map((p) => `${PROVIDER_LABEL[p]} (${rank(p)}) is unavailable: ${providers[p].reason}.`);
+
+  if (provider === null) {
+    return {
+      live: false,
+      provider,
+      configuredOrder,
+      providers,
+      message: `Offline. No AI provider answered. ${down.join(" ")} Agents fall back to simulated output.`,
+      note: "No AI provider reachable",
+    };
+  }
+  const standby = configuredOrder.filter((p) => p !== provider && providers[p].live);
+  const message = [
+    `Live on ${PROVIDER_LABEL[provider]} (${rank(provider)}, ${modelLabel(provider)}).`,
+    ...down,
+    ...standby.map((p) => `${PROVIDER_LABEL[p]} (${rank(p)}) is ready as backup.`),
+    "The order is set in Mission Hub > Configurations > AI Providers.",
+  ].join(" ");
+  const primary = configuredOrder[0];
+  const backup = configuredOrder[1];
+  const note =
+    provider !== primary
+      ? `Primary ${PROVIDER_LABEL[primary]} unavailable · using backup ${PROVIDER_LABEL[provider]}`
+      : backup && !providers[backup].live
+        ? `${PROVIDER_LABEL[provider]} primary · backup ${PROVIDER_LABEL[backup]} unavailable`
+        : backup
+          ? `${PROVIDER_LABEL[provider]} primary · ${PROVIDER_LABEL[backup]} backup ready`
+          : `${PROVIDER_LABEL[provider]} only`;
+  return { live: true, provider, configuredOrder, providers, message, note };
+}
+
+// Bay pages' badge (their Claude calls use Claude Sonnet 5).
+export function checkLlmLiveStatus(): Promise<LlmStatusReport> {
+  return describeLlmStatus((p) => (p === "anthropic" ? "Claude Sonnet 5" : "gpt-oss-120b"));
 }
 
 // Combines usage from multiple LLM calls within one stage (e.g. Stage 2's
