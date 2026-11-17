@@ -1,4 +1,3 @@
-import { createServerFn } from "@tanstack/react-start";
 import { callLlmGateway, stripJsonFences, type LlmUsage } from "./llmGateway.ts";
 import {
   FALLBACK_INTENT_CATEGORY,
@@ -41,23 +40,27 @@ export interface IntentExtractionResult {
   usage: LlmUsage | null;
 }
 
-export const extractIntentAndEntities = createServerFn({ method: "POST" })
-  .validator((d: IntentExtractionInput) => d)
-  .handler(async ({ data }): Promise<IntentExtractionResult> => {
-    const userContent = `Raw mission text: ${data.rawTextCombined}
+// A plain server-only function, called from missionAgentPipeline.ts (itself
+// only reached from the /api/hangar/process-mission/* routes). It used to be
+// a createServerFn, but server-to-server calls go through TanStack Start's
+// server-function manifest, and a production build only registers the ones
+// the browser references -- so this one failed with "Server function info
+// not found". Same { data } call shape as before.
+export async function extractIntentAndEntities({ data }: { data: IntentExtractionInput }): Promise<IntentExtractionResult> {
+  const userContent = `Raw mission text: ${data.rawTextCombined}
 Structured fields already provided (do not re-derive these): ${JSON.stringify(data.structuredFields ?? {}, null, 2)}
 Grounding context (from imported project / selected regulations / market data, if any): ${JSON.stringify(data.groundingContext ?? {}, null, 2)}
 
 Return:
 { "intent": "string", "intent_category": "one id from the list", "payload_hint": "string | null", "range_hint": "string | null", "endurance_hint": "string | null", "constraint_hints": ["string"] }`;
 
-    const { content, usage } = await callLlmGateway(SYSTEM, userContent, { jsonMode: true });
-    if (!content) return { ...mockExtraction(data), mock: true, usage: null };
+  const { content, usage } = await callLlmGateway(SYSTEM, userContent, { jsonMode: true });
+  if (!content) return { ...mockExtraction(data), mock: true, usage: null };
 
-    const parsed = parseExtractionResponse(content);
-    if (!parsed) return { ...mockExtraction(data), mock: true, usage: null };
-    return { ...parsed, mock: false, usage };
-  });
+  const parsed = parseExtractionResponse(content);
+  if (!parsed) return { ...mockExtraction(data), mock: true, usage: null };
+  return { ...parsed, mock: false, usage };
+}
 
 function parseExtractionResponse(
   raw: string,

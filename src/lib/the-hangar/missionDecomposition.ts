@@ -1,4 +1,3 @@
-import { createServerFn } from "@tanstack/react-start";
 import { callLlmGateway, stripJsonFences, type LlmUsage } from "./llmGateway.ts";
 import type { ParsedMissionInput } from "./types/hangar-mission";
 
@@ -23,22 +22,26 @@ export interface MissionDecompositionResult {
   usage: LlmUsage | null;
 }
 
-export const decomposeMission = createServerFn({ method: "POST" })
-  .validator((d: MissionDecompositionInput) => d)
-  .handler(async ({ data }): Promise<MissionDecompositionResult> => {
-    const userContent = `Mission intent: ${data.detectedIntent}
+// A plain server-only function, called from missionAgentPipeline.ts (itself
+// only reached from the /api/hangar/process-mission/* routes). It used to be
+// a createServerFn, but server-to-server calls go through TanStack Start's
+// server-function manifest, and a production build only registers the ones
+// the browser references -- so this one failed with "Server function info
+// not found". Same { data } call shape as before.
+export async function decomposeMission({ data }: { data: MissionDecompositionInput }): Promise<MissionDecompositionResult> {
+  const userContent = `Mission intent: ${data.detectedIntent}
 Extracted entities: ${JSON.stringify(data.extractedEntities, null, 2)}
 
 Return:
 { "decomposed_elements": ["string", ...] }`;
 
-    const { content, usage } = await callLlmGateway(SYSTEM, userContent, { jsonMode: true });
-    if (!content) return { ...mockDecomposition(data), mock: true, usage: null };
+  const { content, usage } = await callLlmGateway(SYSTEM, userContent, { jsonMode: true });
+  if (!content) return { ...mockDecomposition(data), mock: true, usage: null };
 
-    const parsed = parseDecompositionResponse(content);
-    if (!parsed) return { ...mockDecomposition(data), mock: true, usage: null };
-    return { ...parsed, mock: false, usage };
-  });
+  const parsed = parseDecompositionResponse(content);
+  if (!parsed) return { ...mockDecomposition(data), mock: true, usage: null };
+  return { ...parsed, mock: false, usage };
+}
 
 function parseDecompositionResponse(
   raw: string,

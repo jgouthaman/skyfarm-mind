@@ -1,4 +1,3 @@
-import { createServerFn } from "@tanstack/react-start";
 import { callLlmGateway, stripJsonFences, type LlmUsage } from "./llmGateway.ts";
 import { DOMAIN_RULES, evaluateDomainRules, type DomainRuleContext } from "./domainRules.ts";
 import type { DerivedKpi, IdentifiedConstraint, ParsedMissionInput } from "./types/hangar-mission";
@@ -240,65 +239,69 @@ export function dedupeConstraintHints(
 
 const SYSTEM = `You identify constraints a mission implies but the user never stated explicitly, and derive performance, cost, and safety KPIs for the mission, in one response. Only infer a constraint if it's a reasonable, defensible consequence of the mission elements below — do not speculate broadly. Tag every constraint you return with source "inferred". For any KPI already implied directly by a listed constraint, copy that value — do not re-derive it. Only infer new KPI values where no constraint already states one. Stay within realistic bounds for a small UAS. If you derive a KPI covering payload capacity, operational range, or flight endurance, name it exactly "Payload", "Range", or "Endurance" respectively — no other wording or qualifiers for these three. Every other KPI you derive can be named freely. Return JSON only.`;
 
-export const identifyConstraintsAndKpis = createServerFn({ method: "POST" })
-  .validator((d: ConstraintIdentificationInput) => d)
-  .handler(async ({ data }): Promise<ConstraintAndKpiResult> => {
-    // Step 2a — domain rules (deterministic).
-    const ctx = buildDomainRuleContext(data);
-    const ruleConstraints: TracedConstraint[] = evaluateDomainRules(ctx).map((c) => ({
-      name: c.name,
-      value: c.value,
-      source: c.source,
-      sourceLabel: c.ruleId,
-    }));
+// A plain server-only function, called from missionAgentPipeline.ts (itself
+// only reached from the /api/hangar/process-mission/* routes). It used to be
+// a createServerFn, but server-to-server calls go through TanStack Start's
+// server-function manifest, and a production build only registers the ones
+// the browser references -- so this one failed with "Server function info
+// not found". Same { data } call shape as before.
+export async function identifyConstraintsAndKpis({ data }: { data: ConstraintIdentificationInput }): Promise<ConstraintAndKpiResult> {
+  // Step 2a — domain rules (deterministic).
+  const ctx = buildDomainRuleContext(data);
+  const ruleConstraints: TracedConstraint[] = evaluateDomainRules(ctx).map((c) => ({
+    name: c.name,
+    value: c.value,
+    source: c.source,
+    sourceLabel: c.ruleId,
+  }));
 
-    // Dedup Stage 2.1's hints against the rules that actually fired.
-    const { kept: keptHints } = dedupeConstraintHints(
-      data.extractedEntities.constraintHints,
-      ruleConstraints,
-    );
-    const hintConstraints: TracedConstraint[] = keptHints.map((hint) => ({
-      name: hint,
-      value: "",
-      source: "inferred",
-      sourceLabel: "Stage 2.1 hint",
-    }));
+  // Dedup Stage 2.1's hints against the rules that actually fired.
+  const { kept: keptHints } = dedupeConstraintHints(
+    data.extractedEntities.constraintHints,
+    ruleConstraints,
+  );
+  const hintConstraints: TracedConstraint[] = keptHints.map((hint) => ({
+    name: hint,
+    value: "",
+    source: "inferred",
+    sourceLabel: "Stage 2.1 hint",
+  }));
 
-    const knownConstraints = [...ruleConstraints, ...hintConstraints];
+  const knownConstraints = [...ruleConstraints, ...hintConstraints];
 
-    const userContent = `Decomposed mission elements: ${JSON.stringify(data.decomposedElements, null, 2)}
+  const userContent = `Decomposed mission elements: ${JSON.stringify(data.decomposedElements, null, 2)}
 Constraints already known (do not repeat these): ${JSON.stringify(knownConstraints, null, 2)}
 
 Return:
 { "identified_constraints": [ { "name": "string", "value": "string", "source": "inferred" } ], "derived_kpis": [ { "name": "string", "target": "string", "unit": "string" } ] }`;
 
-    const { content, usage } = await callLlmGateway(SYSTEM, userContent, { jsonMode: true });
-    if (!content) {
-      return {
-        identifiedConstraints: knownConstraints,
-        derivedKpis: applyStructuredKpiOverrides(mockKpis(data), data.structuredFields),
-        mock: true,
-        usage: null,
-      };
-    }
-
-    const parsed = parseConstraintAndKpiResponse(content);
-    if (!parsed) {
-      return {
-        identifiedConstraints: knownConstraints,
-        derivedKpis: applyStructuredKpiOverrides(mockKpis(data), data.structuredFields),
-        mock: true,
-        usage: null,
-      };
-    }
-
+  const { content, usage } = await callLlmGateway(SYSTEM, userContent, { jsonMode: true });
+  if (!content) {
     return {
-      identifiedConstraints: [...knownConstraints, ...parsed.identifiedConstraints],
-      derivedKpis: applyStructuredKpiOverrides(parsed.derivedKpis, data.structuredFields),
-      mock: false,
-      usage,
+      identifiedConstraints: knownConstraints,
+      derivedKpis: applyStructuredKpiOverrides(mockKpis(data), data.structuredFields),
+      mock: true,
+      usage: null,
     };
-  });
+  }
+
+  const parsed = parseConstraintAndKpiResponse(content);
+  if (!parsed) {
+    return {
+      identifiedConstraints: knownConstraints,
+      derivedKpis: applyStructuredKpiOverrides(mockKpis(data), data.structuredFields),
+      mock: true,
+      usage: null,
+    };
+  }
+
+  return {
+    identifiedConstraints: [...knownConstraints, ...parsed.identifiedConstraints],
+    derivedKpis: applyStructuredKpiOverrides(parsed.derivedKpis, data.structuredFields),
+    mock: false,
+    usage,
+  };
+}
 
 function parseConstraintAndKpiResponse(
   raw: string,
