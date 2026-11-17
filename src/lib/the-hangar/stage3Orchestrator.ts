@@ -1,4 +1,3 @@
-import { createServerFn } from "@tanstack/react-start";
 import {
   assembleMissionSpecs,
   finalizeConstraints,
@@ -63,42 +62,46 @@ export interface Stage3Output {
   durationMs: number;
 }
 
-export const runOutputGeneration = createServerFn({ method: "POST" })
-  .validator((d: Stage3Input) => d)
-  .handler(async ({ data }): Promise<Stage3Output> => {
-    // Steps 1-3 — deterministic assembly, computed before Step 4 is even called.
-    const missionSpecs = assembleMissionSpecs({
-      detectedIntent: data.detectedIntent,
-      intentCategory: data.intentCategory,
-      decomposedElements: data.decomposedElements,
-      operatingEnvironment: data.operatingEnvironment,
-    });
-    const constraints = finalizeConstraints(data.identifiedConstraints);
-    const kpis = finalizeKpis(
-      data.derivedKpis,
-      data.prioritizedTradeoffs,
-      data.identifiedConstraints,
-    );
-
-    // Step 4 — summary. Only reachable with 1-3's finished results in hand.
-    const summaryResult = await generateMissionSummary({ missionSpecs, constraints, kpis });
-
-    // Step 5 — confidence score, last, deterministic.
-    const confidenceScore = computeConfidenceScore({
-      sourceTypesUsedCount: data.sourceTypesUsedCount,
-      derivedKpis: data.derivedKpis,
-      validationFlagCount: data.validationFlagCount,
-    });
-
-    return {
-      missionId: data.missionId,
-      missionSpecs,
-      constraints,
-      kpis,
-      summary: summaryResult.summary,
-      confidenceScore,
-      mock: summaryResult.mock,
-      usage: summaryResult.usage,
-      durationMs: 0,
-    };
+// A plain server-only function, called from missionAgentPipeline.ts (itself
+// only reached from the /api/hangar/process-mission/* routes). It used to be
+// a createServerFn, but server-to-server calls go through TanStack Start's
+// server-function manifest, and a production build only registers the ones
+// the browser references -- so this one failed with "Server function info
+// not found". Same { data } call shape as before.
+export async function runOutputGeneration({ data }: { data: Stage3Input }): Promise<Stage3Output> {
+  // Steps 1-3 — deterministic assembly, computed before Step 4 is even called.
+  const missionSpecs = assembleMissionSpecs({
+    detectedIntent: data.detectedIntent,
+    intentCategory: data.intentCategory,
+    decomposedElements: data.decomposedElements,
+    operatingEnvironment: data.operatingEnvironment,
   });
+  const constraints = finalizeConstraints(data.identifiedConstraints);
+  const kpis = finalizeKpis(
+    data.derivedKpis,
+    data.prioritizedTradeoffs,
+    data.identifiedConstraints,
+  );
+
+  // Step 4 — summary. Only reachable with 1-3's finished results in hand.
+  const summaryResult = await generateMissionSummary({ missionSpecs, constraints, kpis });
+
+  // Step 5 — confidence score, last, deterministic.
+  const confidenceScore = computeConfidenceScore({
+    sourceTypesUsedCount: data.sourceTypesUsedCount,
+    derivedKpis: data.derivedKpis,
+    validationFlagCount: data.validationFlagCount,
+  });
+
+  return {
+    missionId: data.missionId,
+    missionSpecs,
+    constraints,
+    kpis,
+    summary: summaryResult.summary,
+    confidenceScore,
+    mock: summaryResult.mock,
+    usage: summaryResult.usage,
+    durationMs: 0,
+  };
+}
