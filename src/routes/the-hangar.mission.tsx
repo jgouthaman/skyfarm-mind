@@ -28,6 +28,7 @@ import {
 } from "@/lib/the-hangar/missionExport";
 import type { SourceType } from "@/lib/the-hangar/types/hangar-mission";
 import type { MarketDataOption, RegulationOption } from "@/lib/the-hangar/sourceCatalogs";
+import { AiStatusNote, type LlmStatusInfo } from "@/components/the-hangar/AiStatusNote";
 
 // ─────────────────────────────────────────────────────────────────────────
 // The Hangar — Bay 01 (Mission Agent) detail page. Faithful port of
@@ -983,6 +984,7 @@ function TheHangarMission() {
   const [currentUserEmail, setCurrentUserEmail] = useState<string | null>(null);
   const [llmStatus, setLlmStatus] = useState<"checking" | "live" | "offline">("checking");
   const [llmProvider, setLlmProvider] = useState<"anthropic" | "groq" | null>(null);
+  const [llmInfo, setLlmInfo] = useState<LlmStatusInfo | null>(null);
   const [missionsList, setMissionsList] = useState<MissionListEntry[] | null>(null);
   // Optional extra context attached to the brief (Section 3, sources 4-6).
   const [catalogs, setCatalogs] = useState<SourceCatalogsState>({
@@ -1060,6 +1062,7 @@ function TheHangarMission() {
         if (!cancelled) {
           setLlmStatus(res.ok && json.live ? "live" : "offline");
           setLlmProvider(res.ok && json.live ? json.provider ?? null : null);
+          setLlmInfo(res.ok && json.message ? { message: json.message, note: json.note } : null);
         }
       } catch {
         if (!cancelled) {
@@ -1769,13 +1772,14 @@ function TheHangarMission() {
               <span
                 className={`hgr-m-badge hgr-m-badge-ai hgr-m-badge-ai-${llmStatus}`}
                 title={
-                  llmStatus === "checking"
+                  (llmStatus !== "checking" && llmInfo?.message) ||
+                  (llmStatus === "checking"
                     ? "Checking the AI providers…"
                     : llmStatus === "live"
                       ? llmProvider === "groq"
                         ? "Live — answering via Groq (gpt-oss-120b), per the AI Providers order in Mission Hub"
                         : "Live — connected to Anthropic (Claude Sonnet 5)"
-                      : "Offline — not connected to Anthropic or Groq. Stage LLM calls will fall back to mock output."
+                      : "Offline — not connected to Anthropic or Groq. Stage LLM calls will fall back to mock output.")
                 }
               >
                 <span className="hgr-m-badge-ai-dot" />
@@ -1806,6 +1810,7 @@ function TheHangarMission() {
                   </span>
                 )}
               </span>
+              {llmStatus !== "checking" && <AiStatusNote info={llmInfo} />}
             </div>
             <div className="hgr-m-hero-row">
               <h1>Mission Agent</h1>

@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { MissionListEntry } from "@/lib/the-hangar/missionAgentPipeline";
 import type { ConceptListEntry } from "@/lib/the-hangar/conceptAgentPipeline";
 import { describeInrCost, formatCostInr } from "@/lib/the-hangar/missionUsage";
+import { AiStatusNote, type LlmStatusInfo } from "@/components/the-hangar/AiStatusNote";
 
 // Local view types mirroring the /api/hangar/process-bernoulli/review
 // response shape (bernoulliAgentPipeline.ts's BernoulliReviewResponse) --
@@ -422,6 +423,7 @@ function TheHangarBernoulli() {
   const [reviewError, setReviewError] = useState<string | null>(null);
   const [llmStatus, setLlmStatus] = useState<"checking" | "live" | "offline">("checking");
   const [llmProvider, setLlmProvider] = useState<"anthropic" | "groq" | null>(null);
+  const [llmInfo, setLlmInfo] = useState<LlmStatusInfo | null>(null);
 
   // "AI" indicator -- same live check Bay 01's header uses, so both bays
   // show the same provider (Claude, or Groq when Anthropic is down).
@@ -439,6 +441,7 @@ function TheHangarBernoulli() {
         if (!cancelled) {
           setLlmStatus(res.ok && json.live ? "live" : "offline");
           setLlmProvider(res.ok && json.live ? json.provider ?? null : null);
+          setLlmInfo(res.ok && json.message ? { message: json.message, note: json.note } : null);
         }
       } catch {
         if (!cancelled) {
@@ -1114,13 +1117,14 @@ function TheHangarBernoulli() {
               <span
                 className={`hgr-ber-badge hgr-ber-badge-ai hgr-ber-badge-ai-${llmStatus}`}
                 title={
-                  llmStatus === "checking"
+                  (llmStatus !== "checking" && llmInfo?.message) ||
+                  (llmStatus === "checking"
                     ? "Checking the AI providers…"
                     : llmStatus === "live"
                       ? llmProvider === "groq"
                         ? "Live — answering via Groq (gpt-oss-120b), per the AI Providers order in Mission Hub"
                         : "Live — connected to Anthropic (Claude Sonnet 5)"
-                      : "Offline — not connected to Anthropic or Groq. BERN-M03/M06 will fall back to mock output."
+                      : "Offline — not connected to Anthropic or Groq. BERN-M03/M06 will fall back to mock output.")
                 }
               >
                 <span className="hgr-ber-badge-ai-dot" />
@@ -1145,6 +1149,7 @@ function TheHangarBernoulli() {
                   </span>
                 )}
               </span>
+              {llmStatus !== "checking" && <AiStatusNote info={llmInfo} />}
             </div>
             <div className="hgr-ber-hero-row">
               <h1>Bernoulli Agent</h1>

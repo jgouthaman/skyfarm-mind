@@ -16,6 +16,7 @@ import type {
 } from "@/lib/the-hangar/aircraftDesignTypes";
 import { VehicleDesignReport, type VehicleDesignOutput } from "@/components/the-hangar/VehicleDesignReport";
 import { DesignGuidanceFooter } from "@/components/the-hangar/DesignGuidanceFooter";
+import { AiStatusNote, type LlmStatusInfo } from "@/components/the-hangar/AiStatusNote";
 
 // ─────────────────────────────────────────────────────────────────────────
 // The Hangar — Bay 03 (Aircraft Design Agent) detail page, phase 1. New,
@@ -115,6 +116,7 @@ function TheHangarAircraftDesign() {
   const [planExpanded, setPlanExpanded] = useState(false);
   const [llmStatus, setLlmStatus] = useState<"checking" | "live" | "offline">("checking");
   const [llmProvider, setLlmProvider] = useState<"anthropic" | "groq" | null>(null);
+  const [llmInfo, setLlmInfo] = useState<LlmStatusInfo | null>(null);
   // Finalized missions, so the source-concept panel can show the mission a
   // concept was built from (code, type, KPIs) without leaving the page.
   const [missions, setMissions] = useState<MissionListEntry[] | null>(null);
@@ -218,6 +220,7 @@ function TheHangarAircraftDesign() {
         if (!cancelled) {
           setLlmStatus(res.ok && json.live ? "live" : "offline");
           setLlmProvider(res.ok && json.live ? json.provider ?? null : null);
+          setLlmInfo(res.ok && json.message ? { message: json.message, note: json.note } : null);
         }
       } catch {
         if (!cancelled) {
@@ -398,13 +401,14 @@ function TheHangarAircraftDesign() {
               <span
                 className={`hgr-a-badge hgr-a-badge-ai hgr-a-badge-ai-${llmStatus}`}
                 title={
-                  llmStatus === "checking"
+                  (llmStatus !== "checking" && llmInfo?.message) ||
+                  (llmStatus === "checking"
                     ? "Checking the AI providers…"
                     : llmStatus === "live"
                       ? llmProvider === "groq"
                         ? "Live — answering via Groq (gpt-oss-120b), per the AI Providers order in Mission Hub"
                         : "Live — connected to Anthropic (Claude Sonnet 5)"
-                      : "Offline — not connected to Anthropic or Groq. Geometry generation will fall back to mock output."
+                      : "Offline — not connected to Anthropic or Groq. Geometry generation will fall back to mock output.")
                 }
               >
                 <span className="hgr-a-badge-ai-dot" />
@@ -426,6 +430,7 @@ function TheHangarAircraftDesign() {
                   </span>
                 )}
               </span>
+              {llmStatus !== "checking" && <AiStatusNote info={llmInfo} />}
             </div>
             <div className="hgr-a-hero-row">
               <h1>Vehicle Design Agent</h1>
