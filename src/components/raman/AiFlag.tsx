@@ -59,14 +59,20 @@ export function AiFlag() {
   const model = info?.model ? (MODEL_LABEL[info.model] ?? info.model) : "";
   const onSecondary = provider !== null && order[0] !== provider;
   const orderText = order.map((p, i) => `${i === 0 ? "primary" : "secondary"} ${PROVIDER_NAME[p]}`).join(", ");
+  const offlineText =
+    "Noise Fix runs use the rule-based fallback planner (not agentic) and Noise Check summaries fall back to engine text.";
   const title =
     status === "checking"
       ? "Checking the AI providers…"
-      : provider === "groq"
-        ? `Live — answering via Groq (${model}), per the AI Providers order in Mission Hub (${orderText}).`
-        : provider === "anthropic"
-          ? `Live — connected to Anthropic (${model}), per the AI Providers order in Mission Hub (${orderText}).`
-          : "Offline — no AI provider answered. Noise Fix runs use the rule-based fallback planner (not agentic) and Noise Check summaries fall back to engine text.";
+      : info?.message
+        ? status === "offline"
+          ? `${info.message} ${offlineText}`
+          : info.message
+        : provider === "groq"
+          ? `Live — answering via Groq (${model}), per the AI Providers order in Mission Hub (${orderText}).`
+          : provider === "anthropic"
+            ? `Live — connected to Anthropic (${model}), per the AI Providers order in Mission Hub (${orderText}).`
+            : `Offline — no AI provider answered. ${offlineText}`;
 
   return (
     <span className="inline-flex flex-wrap items-center gap-2">
@@ -94,8 +100,10 @@ export function AiFlag() {
         {status === "offline" && <span className="rmn-ai-model">Fallback planner</span>}
       </span>
       {order.length > 0 && status !== "checking" && (
-        <span className="rmn-ai-note">
-          {onSecondary
+        <span className="rmn-ai-note" title={title}>
+          {info?.note
+            ? info.note
+            : onSecondary
             ? `Primary ${PROVIDER_NAME[order[0]]} unavailable · using secondary ${PROVIDER_NAME[provider!]}`
             : `Order: ${order.map((p) => PROVIDER_NAME[p]).join(" → ")}`}
         </span>

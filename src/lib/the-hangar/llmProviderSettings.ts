@@ -10,7 +10,8 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 export type ProviderId = "anthropic" | "groq";
 export const ALL_PROVIDERS: ProviderId[] = ["anthropic", "groq"];
-export const DEFAULT_PROVIDER_ORDER: ProviderId[] = ["anthropic", "groq"];
+// Groq first, Claude second until an order is saved in Mission Hub.
+export const DEFAULT_PROVIDER_ORDER: ProviderId[] = ["groq", "anthropic"];
 
 const TABLE = "Hangar_LlmSettings";
 const CACHE_MS = 30_000;

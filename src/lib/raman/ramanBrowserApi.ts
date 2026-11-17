@@ -98,6 +98,9 @@ export interface RamanAiStatus {
   provider: "anthropic" | "groq" | null;
   model: string | null;
   configuredOrder: ("anthropic" | "groq")[];
+  // Plain-language status, and the short line shown beside the flag.
+  message: string;
+  note: string;
 }
 
 export const ramanApi = {

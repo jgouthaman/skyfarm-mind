@@ -28,6 +28,14 @@ const PROVIDER_INFO: Record<ProviderId, { label: string; model: string; note: st
   },
 };
 
+// /api/hangar/llm-status: a live probe of each provider, with the reason
+// any of them isn't answering.
+interface LiveStatus {
+  provider: ProviderId | null;
+  message: string;
+  providers: Record<ProviderId, { configured: boolean; live: boolean; reason: string | null }>;
+}
+
 interface SettingsView {
   order: ProviderId[];
   fromSettings: boolean;
@@ -56,8 +64,9 @@ function AiProvidersPage() {
 
   const [settings, setSettings] = useState<SettingsView | null>(null);
   const [status, setStatus] = useState<"loading" | "idle" | "error">("loading");
-  const [primary, setPrimary] = useState<ProviderId>("anthropic");
-  const [secondary, setSecondary] = useState<ProviderId | "none">("groq");
+  const [primary, setPrimary] = useState<ProviderId>("groq");
+  const [secondary, setSecondary] = useState<ProviderId | "none">("anthropic");
+  const [live, setLive] = useState<LiveStatus | null>(null);
   const [saving, setSaving] = useState(false);
 
   async function load() {
@@ -70,6 +79,16 @@ function AiProvidersPage() {
       setStatus("idle");
     } catch {
       setStatus("error");
+    }
+    void checkLive();
+  }
+
+  async function checkLive() {
+    setLive(null);
+    try {
+      setLive(await authedFetch("/api/hangar/llm-status"));
+    } catch {
+      setLive(null);
     }
   }
 
@@ -96,6 +115,7 @@ function AiProvidersPage() {
       });
       setSettings((cur) => (cur ? { ...cur, order: json.order, fromSettings: true } : cur));
       toast.success("AI provider order saved -- live within about 30 seconds.");
+      setTimeout(() => void checkLive(), 31_000);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Couldn't save the provider order.");
     } finally {
@@ -128,7 +148,7 @@ function AiProvidersPage() {
             <>
               {!settings.fromSettings && (
                 <div className="ap-warn">
-                  Using the built-in default (Anthropic first, Groq second) -- the settings table isn't set up yet.
+                  Using the built-in default (Groq first, Claude second) -- the settings table isn't set up yet.
                   Run <code>20261030010000_hangar_llm_provider_order.sql</code> in the Supabase SQL editor before
                   saving a different order.
                 </div>
@@ -143,6 +163,33 @@ function AiProvidersPage() {
                   </span>
                 ))}
                 {settings.order.length === 1 && <span className="ap-arrow"> only, no fallback</span>}
+              </div>
+
+              <div className="ap-live">
+                <div className="ap-live-head">
+                  Right now
+                  <button type="button" className="ap-link" onClick={() => void checkLive()}>
+                    Re-check
+                  </button>
+                </div>
+                {live ? (
+                  <>
+                    <ul className="ap-live-list">
+                      {settings.order.map((p, i) => {
+                        const s = live.providers[p];
+                        return (
+                          <li key={p} className={s.live ? "ap-ok" : "ap-down"}>
+                            <b>{PROVIDER_INFO[p].label}</b> ({i === 0 ? "primary" : "backup"}):{" "}
+                            {s.live ? (live.provider === p ? "answering" : "reachable, standing by") : `unavailable -- ${s.reason}`}
+                          </li>
+                        );
+                      })}
+                    </ul>
+                    <p className="ap-live-msg">{live.message}</p>
+                  </>
+                ) : (
+                  <p className="ap-live-msg">Checking each provider…</p>
+                )}
               </div>
 
               <div className="ap-slots">
@@ -224,6 +271,13 @@ const AP_CSS = `
 .ap-warn code{ font-family:'IBM Plex Mono',monospace; font-size:11.5px; }
 .ap-current{ margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid var(--mh-blue-line); font-size:13.5px; color:var(--mh-paper); }
 .ap-current b{ color:var(--mh-ink); }
+.ap-live{ margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid var(--mh-blue-line); font-size:13px; color:var(--mh-paper); }
+.ap-live-head{ display:flex; align-items:center; gap:12px; margin-bottom:6px; font-weight:600; color:var(--mh-ink); }
+.ap-live-list{ margin:0 0 6px; padding-left:18px; line-height:1.7; }
+.ap-live-list b{ color:var(--mh-ink); }
+.ap-ok::marker{ color:#16A34A; }
+.ap-down{ color:#B4690E; }
+.ap-live-msg{ margin:0; font-size:12px; line-height:1.6; opacity:.8; }
 .ap-arrow{ color:var(--mh-dim); }
 .ap-slots{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
 @media(max-width:760px){ .ap-slots{ grid-template-columns:1fr; } }
